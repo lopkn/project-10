@@ -6,7 +6,7 @@ class Player{
     this.y = 0
     this.chunk = {"x":0,"y":0}
     this.selectedSlot = 0
-    this.Inventory = ["B1-50","B2-40"]
+    this.Inventory = ["B1-50","B2-40","U1-100"]
   }
 }
 
@@ -14,7 +14,7 @@ class Player{
 var walker = {"x":20,"y":20}
 var ActionPrint = []
 
-
+document.body.style.webkitTransform =  "scale(1)"; 
 var mouseStatus = "canvas"
 var player;
 var currentlyPressedKeys = []
@@ -24,12 +24,13 @@ var mouseX = 0
 var mouseY = 0
 var ActionStore = []
 var AActionStore = []
+var ChatBox = ""
 
         var inv = document.getElementById("Inventory");
-        var render = inv.getContext("2d");
+        var invctx = inv.getContext("2d");
         inv.width = 820;
         inv.height = 50;
-        inv.style.left = "0px";
+        inv.style.left = "5px";
         inv.style.top = "825px";
         inv.style.position = "absolute";
         var timer = document.getElementById("Timer");
@@ -40,6 +41,26 @@ var AActionStore = []
         timerctx.lineCap = "round"
         timerctx.lineWidth = "20"
 
+        var laser = document.getElementById("GIF");
+        // var laserctx = laser.getContext("2d")
+        laser.style.top = "385px";
+        laser.style.left = "395px";
+        laser.style.display = "none"
+        laser.style.position = "absolute";
+        laser.style.width = "40px"
+        laser.style.height = "40px"
+
+
+        var LASER = 0
+        function laserToggle(){
+          if(LASER == 0){
+            LASER = 1
+            laser.style.display = "block"
+          } else {
+            LASER = 0
+            laser.style.display = "none"
+          }
+        }
 
         // var disp = document.getElementById("Display");
         // var render2 = disp.getContext("2d");
@@ -60,12 +81,16 @@ socket.on('mapUpdate',updateMap)
 socket.on('invrelay',updateInv)
 socket.on('TIME',timeUpdate)
 socket.on('TICK',tick)
+socket.on('PING',returnPing)
+socket.on("chat",chatProcess)
 // socket.on('playersRelay',playersUpdate)
 
 // socket.on('players',drawPlayers)
-
+function returnPing(){
+  socket.emit('returnPing')
+}
 function timeUpdate(e){
-  text(e)
+  text(e + "<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>"+ChatBox)
   timerUpdate(e)
 }
 
@@ -87,19 +112,18 @@ function joinSuccess(m){
 
 
 
-onmousemove = function(e){mouseX = e.clientX -2 ; mouseY = e.clientY -2}
+onmousemove = function(e){mouseX = e.clientX - 5 ; mouseY = e.clientY -2 + scrollY}
 ondrag = function(e){}
 
 
 
-var tempp = 0
 var img = new Image();
+img.src = 'ItemMap.png';
+// img.onload = function() {
+//     ctx.drawImage(img.image, 400, 400);
+//     tempp = 1
+// };
 
-img.onload = function() {
-    ctx.drawImage(img, 400, 400);
-    tempp = 1
-};
-img.src = 'https://i.gifer.com/33HU.gif';
 
 
 
@@ -125,13 +149,13 @@ function textO(str,x,y){
 }
 
 function rectI(x,y,x2,y2){
-  render.fillRect(x,y,x2,y2)
+  invctx.fillRect(x,y,x2,y2)
 }
 function fillI(i){
-  render.fillStyle = i
+  invctx.fillStyle = i
 }
 function textI(str,x,y){
-  render.fillText(str,x,y)
+  invctx.fillText(str,x,y)
 }
 
 ////////////////////////////////////////////////////
@@ -155,50 +179,112 @@ function inListR(inp,arr){
   } return(false)
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function commandingPush(e){
+  if(e != "Backspace" && e != "Enter"){
+  ActionStore[ActionStore.length-1] += e
+  AActionStore[AActionStore.length-1] += e
+  } else if(e == "Backspace") {
+    if(ActionStore[ActionStore.length-1].length > 0){
+      ActionStore[ActionStore.length-1] = ActionStore[ActionStore.length-1].substring(0,ActionStore[ActionStore.length-1].length - 1)
+      AActionStore[AActionStore.length-1] = AActionStore[AActionStore.length-1].substring(0,AActionStore[AActionStore.length-1].length - 1)
+    } else {
+      commanding = 0
+      ActionStore.splice(ActionStore.length - 1)
+      AActionStore.splice(AActionStore.length -1)
+    }
+  } else if(e == "Enter"){
+    commanding = 0
+  }
+}
+
+
+
+let commanding = 0
 KeyboardEvent.repeat = false
 document.addEventListener('keydown', (event) => {
   var name = event.key;
-  ActionStore.push(name)
-  AActionStore.push(name)
 
-  if(name == "w"){
-    walker.y -= 1
-    ActionPrint.push([walker.x,walker.y,"rgba(0,0,0,0.3)"])
-  } else if(name == "s"){
-    walker.y += 1
-    ActionPrint.push([walker.x,walker.y,"rgba(0,0,0,0.3)"])
-  } else if(name == "d"){
-    walker.x += 1
-    ActionPrint.push([walker.x,walker.y,"rgba(0,0,0,0.3)"])
-  } else if(name == "a"){
-    walker.x -= 1
-    ActionPrint.push([walker.x,walker.y,"rgba(0,0,0,0.3)"])
+  if(name != "Backspace" && name != "/" && commanding == 0){
+    ActionStore.push(name)
+    AActionStore.push(name)
+
+    if(name == "w"){
+      walker.y -= 1
+      ActionPrint.push([walker.x,walker.y,"rgba(200,0,0,0.3)"])
+    } else if(name == "s"){
+      walker.y += 1
+      ActionPrint.push([walker.x,walker.y,"rgba(200,0,0,0.3)"])
+    } else if(name == "d"){
+      walker.x += 1
+      ActionPrint.push([walker.x,walker.y,"rgba(200,0,0,0.3)"])
+    } else if(name == "a"){
+      walker.x -= 1
+      ActionPrint.push([walker.x,walker.y,"rgba(200,0,0,0.3)"])
+    }
+
+  } else if(name == "/"){
+    if(commanding == 0){
+      commanding = 1
+      ActionStore.push("/")
+      AActionStore.push("/")
+    } else {
+      // commandingPush("/")
+      commanding = 0
+    }
+
+
+
+
+
+  } else if(commanding == 1 && (name.length == 1 || name == "Backspace" || name == "Enter")){
+    commandingPush(name)
+  } else if(name == "Backspace"){
+    let ee = ActionStore.splice(ActionStore.length-1,1)
+    AActionStore.splice(AActionStore.length-1,1)
+    ActionPrint.splice(ActionPrint.length-1,1)
+        if(ee == "w"){
+      walker.y += 1
+    } else if(ee == "s"){
+      walker.y -= 1
+    } else if(ee == "d"){
+      walker.x -= 1
+    } else if(ee == "a"){
+      walker.x += 1
+    }
   }
 
-  // if(inListR(name,currentlyPressedKeys)===false){
-    // currentlyPressedKeys.push(name)
-    // console.log(name,currentlyPressedKeys)
-    // socket.emit('key',[player.id,name])
-
-  // }
 
 }, false);
-// document.addEventListener('keyup', (event) => {
-//   var name = event.key;
-//   currentlyPressedKeys.splice(inListR(name,currentlyPressedKeys),1)
-// }, false);
 
-reloaded = true
+
+
+
+
+
 
 document.addEventListener('mousedown', (event) => {
   console.log(mouseX,mouseY,mouseCoords)
   if(inRect(mouseX,mouseY,0,825,820,50)){
   if(player.selectedSlot == Math.floor(mouseX/50)){
     player.selectedSlot = -1
-    socket.emit('selectInventorySlot',[player.id,-1])
+    // socket.emit('selectInventorySlot',[player.id,-1])
   } else {
   player.selectedSlot = Math.floor(mouseX/50)}
-  ActionStore.push("select:",player.selectedSlot)
+  ActionStore.push("select:"+player.selectedSlot)
   AActionStore.push(["sel",player.selectedSlot])
   ActionPrint.push([200,200,"#FF00FF"])
   // socket.emit('selectInventorySlot',[player.id,player.selectedSlot])
@@ -232,72 +318,102 @@ function debugRect(x,y){
 }
 
 
-
+var scrollTop = 0
 var mouseCoords = []
+
+let maxSteps = 10000
+
 function repeat(){
   try{updateMap([map,players])}catch(err){}
   // drawTree(25,25,"#FFFFFF",5)
+
   InvDraw()
   fill("white")
   rectAtCoords(20,20)
 
+
+
+
   if(inRect(mouseX,mouseY,0,0,820,820)){
   mouseStatus = "canvas"
+  scrollTop = window.scrollY
   mouseCoords = [Math.floor(mouseX/20)-20+player.x,Math.floor(mouseY/20)-20+player.y]
-  }else if(inRect(mouseX,mouseY,0,825,820,50)){
+  } else if(inRect(mouseX,mouseY,0,825,820,50)){
   mouseCoords = [Math.floor(mouseX/50)]
   mouseStatus = "inventory"
   } else {
     mouseStatus = "outside"
   }
+
+
+
   let l = JSON.stringify(ActionStore)
-    if(mouseStatus == "canvas"){
-      // console.log("hi")
-  fill("rgba(200,0,255,0.3)")
-  rectAtCoords(Math.floor(mouseX/20),Math.floor(mouseY/20))
-} else if(mouseStatus == "inventory"){
-  fillI("rgba(200,0,255,0.5)")
-  rectI(Math.floor(mouseX/50)*50,0,50,50)
-}
+  if(mouseStatus == "canvas"){
+        // console.log("hi")
+    fill("rgba(200,0,255,0.3)")
+    rectAtCoords(Math.floor(mouseX/20),Math.floor(mouseY/20))
+  } else if(mouseStatus == "inventory"){
+    fillI("rgba(200,0,255,0.5)")
+    rectI(Math.floor(mouseX/50)*50,0,50,50)
+  }
 
 
-for(let i = 0; i < ActionPrint.length; i++){
-  fill(ActionPrint[i][2])
-  rectAtCoords(ActionPrint[i][0],ActionPrint[i][1])
+  for(let i = 0; i < ActionPrint.length; i++){
+    fill(ActionPrint[i][2])
+    rect(ActionPrint[i][0]*20+5,ActionPrint[i][1]*20+5,10,10)
 
 
 
 
 
-}
+  }
 
+
+
+  if(AActionStore.length > maxSteps){
+    ActionStore.splice(maxSteps,1)
+    ActionPrint.splice(maxSteps,1)
+    AActionStore.splice(maxSteps,1)
+  }
 
 
 
   fill("rgba(255,0,200,0.5)")
   textO(l,400-(l.length-2)*6.25 ,370)
-    if(tempp == 1){
-    ctx.drawImage(img, 400-20, 400-20,40,40);
-  }
 }
 
 
 
 
 function tick(){
-  ActionStore = []
-  ActionPrint = []
-  walker = {"x":20,"y":20}
-  AActionStore.splice(0,0,player.id)
-  socket.emit('AT',AActionStore)
-  AActionStore = []
+  if(commanding  == 0){
+    ActionStore = []
+    ActionPrint = []
+    walker = {"x":20,"y":20}
+    AActionStore.splice(0,0,player.id)
+    socket.emit('AT',AActionStore)
+    AActionStore = []
+  } else {
+    ActionStore = [ActionStore[ActionStore.length-1]]
+    ActionPrint = []
+    walker = {"x":20,"y":20}
+    let back = AActionStore.splice(AActionStore.length-1,1) 
+    AActionStore.splice(0,0,player.id)
+    socket.emit('AT',AActionStore)
+    AActionStore = [back[0]]
+  }
 }
 
 
 
 
 
-
+function chatProcess(e){
+  ChatBox = e[0] + ": " + e[1] + "</br>" + ChatBox
+  if(ChatBox.length > 500){
+    ChatBox = ChatBox.substring(0,500)
+  }
+}
 
 
 
@@ -306,10 +422,16 @@ function InvDraw(){
   try{
   fillI("#000000")
   rectI(0,0,820,50)
+
+  for(let i = 0; i < player.Inventory.length; i++){
+    drawItemMapSprite(player.Inventory[i],i)
+  }
+
   fillI("rgba(255,255,0,0.4)")
   rectI(player.selectedSlot*50,0,50,50)
   let e = amountOfItems()
   if(e != "none"){
+  fillI("#FFFFFF")
   textI(e,35+player.selectedSlot*50,45)}}catch(err){}
 }
 
@@ -542,9 +664,9 @@ function deparseTileToColor(str){
   }
 
 }
-var ColorBlockReferenceDict = {"1":"#B96A04"}
-var NameBlockReferenceDict = {"1":"Oak Wood"}
-var DurabilityMap = {"1":100}
+// var ColorBlockReferenceDict = {"1":"#B96A04"}
+// var NameBlockReferenceDict = {"1":"Oak Wood"}
+// var DurabilityMap = {"1":100}
 var BLOCKSALL = {"1":["#B96A04","Oak Wood",100],"2":["#8C8C8C","Stone",400],"3":["#A95A00","Oak Tree Wood",400]}
 var HeightMap = ["B","G"]
 
@@ -591,3 +713,27 @@ function updateInv(e){
   player.Inventory = e
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+function drawItemMapSprite(itemID,Slot){
+  let a = ATTRIBUTEOF(itemID,"B")
+  if(a != "NONE"){
+    invctx.drawImage(img,20*(parseInt(a)-1),0,21,21,50*Slot,0,50,50)
+  }
+  let b = ATTRIBUTEOF(itemID,"U")
+  if(b !="NONE"){
+    invctx.drawImage(img,20*(parseInt(b)-1),20,21,21,50*Slot,0,50,50)
+  }
+  
+}
