@@ -90,8 +90,8 @@ function returnPing(){
   socket.emit('returnPing')
 }
 function timeUpdate(e){
-  text(e + "<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>"+ChatBox)
   timerUpdate(e)
+  text(e + "<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>"+ChatBox)
 }
 
 
@@ -129,6 +129,7 @@ img.src = 'ItemMap.png';
 
 
 function text(str){
+  display.style.color = "green"
   display.innerHTML = str
 }
 function line(x,y,w,h){
@@ -194,7 +195,7 @@ function inListR(inp,arr){
 
 
 function commandingPush(e){
-  if(e != "Backspace" && e != "Enter"){
+  if(e != "Backspace" && e != "Enter" && e != "<" && e != ">"){
   ActionStore[ActionStore.length-1] += e
   AActionStore[AActionStore.length-1] += e
   } else if(e == "Backspace") {
@@ -208,6 +209,7 @@ function commandingPush(e){
     }
   } else if(e == "Enter"){
     commanding = 0
+    AActionStore[AActionStore.length -1] = "$" + AActionStore[AActionStore.length -1]
   }
 }
 
@@ -218,20 +220,20 @@ KeyboardEvent.repeat = false
 document.addEventListener('keydown', (event) => {
   var name = event.key;
 
-  if(name != "Backspace" && name != "/" && commanding == 0){
+  if(name != "Shift" && name != "Backspace" && name != "/" && commanding == 0){
     ActionStore.push(name)
     AActionStore.push(name)
 
-    if(name == "w"){
+    if(name == "w" && AActionStore.length <= maxSteps){
       walker.y -= 1
       ActionPrint.push([walker.x,walker.y,"rgba(200,0,0,0.3)"])
-    } else if(name == "s"){
+    } else if(name == "s"&& AActionStore.length <= maxSteps){
       walker.y += 1
       ActionPrint.push([walker.x,walker.y,"rgba(200,0,0,0.3)"])
-    } else if(name == "d"){
+    } else if(name == "d"&& AActionStore.length <= maxSteps){
       walker.x += 1
       ActionPrint.push([walker.x,walker.y,"rgba(200,0,0,0.3)"])
-    } else if(name == "a"){
+    } else if(name == "a"&& AActionStore.length <= maxSteps){
       walker.x -= 1
       ActionPrint.push([walker.x,walker.y,"rgba(200,0,0,0.3)"])
     }
@@ -244,6 +246,7 @@ document.addEventListener('keydown', (event) => {
     } else {
       // commandingPush("/")
       commanding = 0
+      AActionStore[AActionStore.length -1] = "$" + AActionStore[AActionStore.length -1]
     }
 
 
@@ -321,7 +324,7 @@ function debugRect(x,y){
 var scrollTop = 0
 var mouseCoords = []
 
-let maxSteps = 10000
+let maxSteps = 20
 
 function repeat(){
   try{updateMap([map,players])}catch(err){}
@@ -337,7 +340,9 @@ function repeat(){
   if(inRect(mouseX,mouseY,0,0,820,820)){
   mouseStatus = "canvas"
   scrollTop = window.scrollY
-  mouseCoords = [Math.floor(mouseX/20)-20+player.x,Math.floor(mouseY/20)-20+player.y]
+  try{
+    mouseCoords = [Math.floor(mouseX/20)-20+player.x,Math.floor(mouseY/20)-20+player.y]
+  } catch{}
   } else if(inRect(mouseX,mouseY,0,825,820,50)){
   mouseCoords = [Math.floor(mouseX/50)]
   mouseStatus = "inventory"
@@ -380,6 +385,10 @@ function repeat(){
 
   fill("rgba(255,0,200,0.5)")
   textO(l,400-(l.length-2)*6.25 ,370)
+  if(commanding == 1){
+    fill("#FF4F00")
+    textO("Input mode: text",310,340)
+  }
 }
 
 
@@ -409,9 +418,13 @@ function tick(){
 
 
 function chatProcess(e){
-  ChatBox = e[0] + ": " + e[1] + "</br>" + ChatBox
-  if(ChatBox.length > 500){
-    ChatBox = ChatBox.substring(0,500)
+  if(e[0] != ">"){
+    ChatBox = e[0] + ": " + e[1] + "</br>" + ChatBox
+  } else {
+    ChatBox = "<span style='font-weight:900'>></span>" + e[1] + "</br>" + ChatBox
+  }
+  if(ChatBox.length > 1000){
+    ChatBox = ChatBox.substring(0,1000)
   }
 }
 

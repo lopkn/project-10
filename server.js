@@ -35,19 +35,25 @@ class player{
 		this.y = 0
 		this.chunk = {"x":0,"y":0}
 		this.selectedSlot = 0
-		this.Inventory = ["B1-50","B2-40","U1-100",""]
+		this.Inventory = ["B1-50","B2-40","U2-100",""]
 
 
 	}
 	say(e){
 		for(let i = 0; i < players.length; i++){
 			if(distance(players[i].x,players[i].y,this.x,this.y) < 33){
-				io.to(players[i].id).emit("chat",[this.id,e,"",this.x,this.y])
+				io.to(players[i].id).emit("chat",[this.id,e,this.x,this.y])
 			}
 
 
 		}
 	}
+
+	log(e,c){
+		let pe = "<span style='color:"+c+";'>" + e + "</span>"
+		io.to(this.id).emit("chat",[">",pe,0,0])
+	}
+
 
 	update(){
 		this.chunk = CoordToChunk(this.x,this.y)
@@ -142,7 +148,7 @@ function newConnection(socket){
 	socket.on("returnPing",STOPPING)
 	console.log(socket.id + " has joined at " + Date())
 	players.push(new player(socket.id))
-	
+	players[findPlayerInArr(socket.id)].log(CURRENTCONFIGS.ConsoleResponses.Help1,"#A000FF")
 	io.to(socket.id).emit('sendWhenJoin', socket.id)
 	players[players.length-1].relay()
 	    socket.on('disconnect', function () {
@@ -266,8 +272,8 @@ function CompleteActionStep(p,s){
 	if(typeof(s) == "string" && s.length == 1){
 		//if action is key
 		processKey([p,s])
-	} else if(typeof(s) == "string" && (s[0] == "/" || s.length > 1)){
-
+	} else if(typeof(s) == "string" && s[0] == "$"){
+		s = s.substring(1)
 		processCommand(r,s)
 
 
@@ -296,13 +302,17 @@ if(st[0] == "/"){
 	let str = st.substring(1)
 	let strsplit = str.split(" ")
 	//command say
-	if(str[0] == "S"){
+	if(str[0] == "S" || str[0] == "s"){
 		let fstr = str
 		if(str[1] == " "){
 			fstr = fstr.substring(2)
 		} else {fstr = fstr.substring(1)}
 
 		players[p].say(fstr)
+	} 
+	//help command
+	else if(str[0] == "H" || str[0] == "h"){
+		helpCommand(strsplit,p)
 	}
 	//setblock command
 	else if(strsplit[0] == "set" && strsplit[1] == consoleKey){
@@ -363,6 +373,27 @@ function processClick(e){
 		}
 	}
 }
+
+
+
+
+
+
+
+function helpCommand(e,p){
+	if(e[1] == "1" || e[1] == undefined){
+		players[p].log(CURRENTCONFIGS.ConsoleResponses.Help1,"#A000FF")
+	} else if(e[1] == "2" || e[1] == "list" || e[1] == "content"){
+		players[p].log(CURRENTCONFIGS.ConsoleResponses.Help2,"#FFFF00")
+	}
+}
+
+
+
+
+
+
+
 
 
 
