@@ -25,6 +25,7 @@ var mouseY = 0
 var ActionStore = []
 var AActionStore = []
 var ChatBox = ""
+var flash = 0
 
         var inv = document.getElementById("Inventory");
         var invctx = inv.getContext("2d");
@@ -96,7 +97,13 @@ socket.on("chat",chatProcess)
 function returnPing(){
   socket.emit('returnPing')
 }
+
+let flashpoint = 10
 function timeUpdate(e){
+  if(e%(flashpoint*2) < flashpoint){
+  flash = (e%flashpoint )/ 100} else{
+    flash = (flashpoint - (e% flashpoint))/ 100
+  }
   text("<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>"+ChatBox)
   timerUpdate(e)
 
@@ -408,8 +415,27 @@ function repeat(){
     ctx.font = "15px Arial"
     ctx.fillText("press enter to complete",330,315)
   }
-}
 
+
+  if(ATTRIBUTEOF(player.Inventory[player.selectedSlot],"B") != "NONE"){
+    for(let i = 0; i < 41; i++){
+      for(let j = 0; j < 41; j++){
+        if(distance(j,i,20,20) > 7){
+          fill("rgba(255,0,0,"+flash+")")
+          rectAtCoords(j,i)
+
+
+        }
+
+
+      }
+    }
+  }
+
+
+
+}
+//repeat end
 
 
 
@@ -437,8 +463,10 @@ function tick(){
 
 
 function chatProcess(e){
-  if(e[0] != ">"){
-    ChatBox = e[0] + ": " + e[1] + "</br>" + ChatBox
+  if(e[0] != ">" && e[0].length <= 11){
+    ChatBox = "<span style='color:#F0E5FF'>" + e[0] + ": " + e[1] + "</span></br>" + ChatBox
+  } else if(e[0].length > 11){
+    ChatBox = "Guest: " + e[1] + "</br>" + ChatBox
   } else {
     ChatBox = "<span style='font-weight:bold'>R></span>" + e[1] + "</br>" + ChatBox
   }

@@ -1,3 +1,32 @@
+/*
+TO DO LIST
+
+
+-chunk saves (low priority)
+-terrain randomness
+-biomes
+-rivers
+-slow at different terrain
+-slab tiles
+-actual structure generation
+-ore and crafting
+-pathfinding AI
+-player combat
+--player health & moves
+-chests and inventory
+
+
+-Lighting
+-Music
+
+
+
+
+
+*/
+/////////////////////////////////////////
+
+
 var players = []
 var map = []
 var generatedChunks = {}
@@ -11,6 +40,10 @@ var ticktoggle = 0
 // fs.writeFile('./memory.json',inp, function writeJSON(err){if(err)return console.log(err)})
 
 var CURRENTCONFIGS = require("./config")
+var playerList = require("./playerList")
+
+var cmdc = {"success":"#00C000","error":"#FF0000","small_error":"#FFCFCF","item":"#FFFF00"}
+
 var promiseChunks = {}
 
 var consoleKey = "216"
@@ -42,11 +75,70 @@ class player{
 	say(e){
 		for(let i = 0; i < players.length; i++){
 			if(distance(players[i].x,players[i].y,this.x,this.y) < 33){
-				io.to(players[i].id).emit("chat",[this.id,e,this.x,this.y])
+				io.to(players[i].id).emit("chat",[(this.name ? this.name : this.id),e,this.x,this.y])
 			}
 
 
 		}
+	}
+
+
+	save(){
+		if(this.name != undefined){
+			let n = this.name
+			playerList[n].x = this.x
+			playerList[n].y = this.y
+			playerList[n].chunk = this.chunk
+			playerList[n].selectedSlot = this.selectedSlot
+			playerList[n].Inventory = this.Inventory
+		}
+	}
+
+
+
+
+
+	login(n,p){
+		if(n.length > 10){
+			this.log(CURRENTCONFIGS.ConsoleResponses.IGNLong,cmdc.error)
+			return;
+		}
+		if(p.length > 3){
+			this.log(CURRENTCONFIGS.ConsoleResponses.PsswdLong,cmdc.error)
+			return;
+		}
+		if(playerList[n] == undefined){
+				if(this.name == undefined){
+				playerList[n] = {"psswd":p}
+				playerList[n].x = this.x
+				playerList[n].y = this.y
+				playerList[n].chunk = this.chunk
+				playerList[n].selectedSlot = this.selectedSlot
+				playerList[n].Inventory = this.Inventory
+				this.name = n
+				this.log("successfully created account named "+n,cmdc.success)
+			} else {
+				this.log(CURRENTCONFIGS.ConsoleResponses.AlreadyLoggedIn,cmdc.error)
+			}
+		} else {
+			if(playerList[n].psswd == p){
+				this.x = playerList[n].x
+				this.y = playerList[n].y
+				this.chunk = playerList[n].chunk
+				this.selectedSlot = playerList[n].selectedSlot
+				this.Inventory = playerList[n].Inventory
+				this.name = n
+				this.log("successfully logged in as "+n,cmdc.success)
+				this.invrelay()
+			} else {
+				if(this.name == undefined){
+					this.log("account is already taken/incorrect password for account "+n,cmdc.error)
+				} else {
+					this.log("wrong password",cmdc.small_error)
+				}
+			}
+		}
+
 	}
 
 	log(e,c){
@@ -124,7 +216,7 @@ console.log(perSeed.noise2D(0.2,0,0))
 
 
 
-// console.log(W)
+
 
 
 var socket = require('socket.io');
@@ -174,7 +266,6 @@ function allPlayersGenerateChunks(){
 			try{
 			if(generatedChunks[(ps[p].chunk.x+j)+","+(ps[p].chunk.y+i)] == undefined){
 				GenerateChunk(ps[p].chunk.x+j,ps[p].chunk.y+i)
-				// console.log(generatedChunks)
 			}}
 			catch(err){
 				console.log(ps,err)
@@ -208,6 +299,9 @@ function doSomething(){
 		allPlayersGenerateChunks()
 	}else if(TIME == 0){
 		ProcessStep = 1
+		for(let i = 0; i < players.length; i++){
+			players[i].save()
+		}
 		playersCollectiveActions = []
 	}
 	
@@ -252,9 +346,20 @@ function processPlayersActions(){
 
 function getLongestPlayerAction(){
 		let mx = 0
-	for(let i = 0; i < playersCollectiveActions.length; i++){
-		if(playersCollectiveActions[i][1] != undefined && playersCollectiveActions[i].length - 1 > mx){
-			mx = playersCollectiveActions[i].length - 1
+		let pca = playersCollectiveActions
+	for(let i = 0; i < pca.length; i++){
+		if(pca[i][1] != undefined && pca[i].length - 1 > mx){
+
+		if(pca[i].length > 20){
+			playersCollectiveActions[i] = pca[i].splice(0,21)
+		}
+
+		if(pca[i].length >= 20){
+			mx = 20
+			break
+		}
+		
+		mx = pca[i].length
 		}
 	}
 	return(mx)
@@ -327,6 +432,13 @@ if(st[0] == "/"){
 	// 	give(p,parseInt(strsplit[2]),strsplit[3])
 	// }
 
+
+	//login command
+
+		else if(strsplit[0] == "login"){
+		players[p].login(strsplit[1],strsplit[2])
+		updatePlayerFile()
+	}
 	//unrecognized command
 	else{
 		players[p].log("Invalid command.</br> If you think this should be a command, tell me your idea in discord. (lopkn#0019)","#FF0000")
@@ -345,6 +457,9 @@ if(st[0] == "/"){
 
 }
 
+function updatePlayerFile(){
+fs.writeFile('./playerList.json',JSON.stringify(playerList,null,4), function writeJSON(err){if(err)return console.log(err)})
+}
 
 function processKey(e){
 	let i = findPlayerInArr(e[0])
@@ -364,10 +479,17 @@ function processClick(e){
 
 
 	if(att != "NONE" && a > 0){
-	if(!alreadyHasBlock(map[chunkPos][e[2]][2])){
-		map[chunkPos][e[2]][2] += "-B" + att
-		removeItemFromSelected(e[0],1)
-	}} else {
+		if(!alreadyHasBlock(map[chunkPos][e[2]][2])){
+			let decodedXY = rCoordToChunk(e[1])
+			if(distance(decodedXY.x,decodedXY.y,players[r].x,players[r].y) <= 7){
+				map[chunkPos][e[2]][2] += "-B" + att
+				removeItemFromSelected(e[0],1)
+			} else {
+				players[r].log("you are too far away to place a block there!",cmdc.small_error)
+			}
+
+		}
+	} else {
 		if(alreadyHasBlock(map[chunkPos][e[2]][2]) && ATTRIBUTEOF(item,"U") != "NONE"){
 			// 
 			let seeBreak = breakBlockBy(map[chunkPos][e[2]][2],25+Math.floor(Math.random()*10-5))
@@ -388,7 +510,7 @@ function processClick(e){
 
 
 function helpCommand(e,p){
-	console.log(e[1])
+	
 	if(e[1] != undefined){
 		e[1] = e[1].toLowerCase()
 	}
@@ -418,7 +540,7 @@ function helpCommand(e,p){
 
 
 function breakBlockBy(str,a){
-	console.log(a)
+
   let split = str.split("-")
   let e = -1
   let ee = 0
@@ -522,7 +644,15 @@ function GenerateChunk(x,y){
 
 ///put in coordinates to find the coordinate's chunk. returns in Dict
 function CoordToChunk(x,y){
-	return({"x":Math.floor(x/chunkSize),"y":Math.floor(y/chunkSize),"icx":x%chunkSize,"icy":y%chunkSize})
+	return({"x":Math.floor(x/chunkSize),"y":Math.floor(y/chunkSize),"cx":x%chunkSize,"cy":y%chunkSize})
+}
+
+function rCoordToChunk(i){
+	let a = i.x * chunkSize + i.cx
+	let b = i.y * chunkSize + i.cy
+
+
+	return{"x":a,"y":b}
 }
 
 
@@ -798,8 +928,13 @@ function alreadyHasBlock(str){
 }
 
 
+function removeAcc(Acc){
+	delete playerList[Acc]
+	updatePlayerFile()
+}
+
+
 function generateTileFromNumber(input,e){
-	// console.log(input,e)
 	if(e == 0){
 		let tile = "G"
 		if(input < 70){
