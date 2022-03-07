@@ -74,6 +74,13 @@ display.style.position = "absolute";
 display.style.top = "0px"
 display.style.left = "850px"
 
+var display2 = document.getElementById("text2")
+display2.innerHTML = "DISPLAY"
+display2.style.position = "absolute";
+display2.style.top = "0px"
+display2.style.left = "850px"
+
+
 socket = io.connect('/');
 socket.on('sendWhenJoin',joinSuccess)
 socket.on('relay',relayPlayer)
@@ -90,19 +97,24 @@ function returnPing(){
   socket.emit('returnPing')
 }
 function timeUpdate(e){
+  text("<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>"+ChatBox)
   timerUpdate(e)
-  text(e + "<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>"+ChatBox)
+
+  
 }
 
 
 function timerUpdate(e){
-
-  timerctx.clearRect(0, 0, 140, 140)
+  timerctx.fillStyle = "#000000"
+  timerctx.fillRect(0, 0, 140, 140)
   let a = "rgb("+(255 * e / 80)+","+(255 - 255 * e / 80)+",120)"
   timerctx.strokeStyle = a
   timerctx.beginPath();
   timerctx.arc(70, 70, 50, Math.PI * 2 * e/80, 2 * Math.PI);
   timerctx.stroke();
+  timerctx.font = "20px Arial"
+  timerctx.fillStyle = "#00FF00"
+  timerctx.fillText(e,0,20)
 }
 
 function joinSuccess(m){
@@ -129,7 +141,7 @@ img.src = 'ItemMap.png';
 
 
 function text(str){
-  display.style.color = "green"
+  display.style.color = "#00FF00"
   display.innerHTML = str
 }
 function line(x,y,w,h){
@@ -244,10 +256,15 @@ document.addEventListener('keydown', (event) => {
       ActionStore.push("/")
       AActionStore.push("/")
     } else {
-      // commandingPush("/")
-      commanding = 0
-      AActionStore[AActionStore.length -1] = "$" + AActionStore[AActionStore.length -1]
+      commandingPush("/")
     }
+
+
+    //  else {
+    //   // commandingPush("/")
+    //   commanding = 0
+    //   AActionStore[AActionStore.length -1] = "$" + AActionStore[AActionStore.length -1]
+    // }
 
 
 
@@ -324,7 +341,7 @@ function debugRect(x,y){
 var scrollTop = 0
 var mouseCoords = []
 
-let maxSteps = 20
+let maxSteps = 2000000
 
 function repeat(){
   try{updateMap([map,players])}catch(err){}
@@ -388,6 +405,8 @@ function repeat(){
   if(commanding == 1){
     fill("#FF4F00")
     textO("Input mode: text",310,340)
+    ctx.font = "15px Arial"
+    ctx.fillText("press enter to complete",330,315)
   }
 }
 
@@ -421,10 +440,10 @@ function chatProcess(e){
   if(e[0] != ">"){
     ChatBox = e[0] + ": " + e[1] + "</br>" + ChatBox
   } else {
-    ChatBox = "<span style='font-weight:900'>></span>" + e[1] + "</br>" + ChatBox
+    ChatBox = "<span style='font-weight:bold'>R></span>" + e[1] + "</br>" + ChatBox
   }
-  if(ChatBox.length > 1000){
-    ChatBox = ChatBox.substring(0,1000)
+  if(ChatBox.length > 3000){
+    ChatBox = ChatBox.substring(0,3000)
   }
 }
 
@@ -529,7 +548,7 @@ function updateMap(input){
       if(ATTRIBUTEOF(map2[i][2],"T") != "NONE"){
         if(ccx > -5 && ccy > -5 && ccx < 46 && ccy < 46){
         // console.log(ccx,ccy,"rgba(30,95,30,0.7)",parseInt(ATTRIBUTEOF(map2[i][2],"S")))
-        trees.push([ccx,ccy,"rgba(10,65,10,0.5)",parseInt(ATTRIBUTEOF(map2[i][2],"S"))])}
+        trees.push([ccx,ccy,"rgba(10,65,10,0.7)",parseInt(ATTRIBUTEOF(map2[i][2],"S"))])}
       }
             if(a != "full"){
         ctx.lineWidth = a * 5

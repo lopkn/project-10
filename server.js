@@ -322,9 +322,16 @@ if(st[0] == "/"){
 	//give command
 		else if(strsplit[0] == "give" && strsplit[1] == consoleKey){
 		give(p,parseInt(strsplit[2]),strsplit[3])
-	} else if(strsplit[0] == "h" || strsplit[0] == "H"){
-		give(p,parseInt(strsplit[2]),strsplit[3])
 	}
+	//  else if(strsplit[0] == "h" || strsplit[0] == "H"){
+	// 	give(p,parseInt(strsplit[2]),strsplit[3])
+	// }
+
+	//unrecognized command
+	else{
+		players[p].log("Invalid command.</br> If you think this should be a command, tell me your idea in discord. (lopkn#0019)","#FF0000")
+	}
+
 
 } else {
 	//normal say
@@ -381,10 +388,22 @@ function processClick(e){
 
 
 function helpCommand(e,p){
-	if(e[1] == "1" || e[1] == undefined){
+	console.log(e[1])
+	if(e[1] != undefined){
+		e[1] = e[1].toLowerCase()
+	}
+	if(e[1] == "1" || e[1] == undefined || e[1] == "game" || e[1] == "general"){
 		players[p].log(CURRENTCONFIGS.ConsoleResponses.Help1,"#A000FF")
 	} else if(e[1] == "2" || e[1] == "list" || e[1] == "content"){
 		players[p].log(CURRENTCONFIGS.ConsoleResponses.Help2,"#FFFF00")
+	} else if(e[1] == "3" || e[1] == "buffer"){
+		players[p].log(CURRENTCONFIGS.ConsoleResponses.Help3,"#FFFF00")
+	} else if(e[1] == "4" || e[1] == "tick" || e[1] == "ticks" || e[1] == "movement" || e[1] == "move"){
+		players[p].log(CURRENTCONFIGS.ConsoleResponses.Help4,"#FFFF00")
+	} else if(e[1] == "5" || e[1] == "text" || e[1] == "input"){
+		players[p].log(CURRENTCONFIGS.ConsoleResponses.Help5,"#FFFF00")
+	} else {
+		players[p].log("Invalid help option.</br> If you think players would need help with this, tell me your idea in discord. (lopkn#0019)","#FF0000")
 	}
 }
 
