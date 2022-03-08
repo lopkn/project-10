@@ -86,6 +86,7 @@ socket = io.connect('/');
 socket.on('sendWhenJoin',joinSuccess)
 socket.on('relay',relayPlayer)
 socket.on('mapUpdate',updateMap)
+socket.on('mapUpdate2',UPDATEMAP)
 socket.on('invrelay',updateInv)
 socket.on('TIME',timeUpdate)
 socket.on('TICK',tick)
@@ -351,7 +352,7 @@ var mouseCoords = []
 let maxSteps = 2000000
 
 function repeat(){
-  try{updateMap([map,players])}catch(err){}
+  try{UPDATEMAP([NEWmap,players,map])}catch(err){}
   // drawTree(25,25,"#FFFFFF",5)
 
   InvDraw()
@@ -530,8 +531,9 @@ function clearCanvas(){
 }
 
 
-var map = []
+var map = {}
 var players = []
+var NEWmap = []
 
 
 
@@ -539,8 +541,55 @@ var players = []
 
 
 
+function UPDATEMAP(input){
+  // console.log(input[0])
+  try{
+  NEWmap = input[0]
+  players = input[1]
+  map = input[2]
+  clearCanvas()
+  let trees = []
+  let shades = []
 
 
+
+  for(let i = 0; i < input[0].length; i++){
+     let tblock = map[input[0][i]]
+     // console.log(input[0][0]+","+input[0][1])
+      let deparsed = MasterTileDeparser(tblock) 
+      let a = 1 - deparseDurability(tblock)
+      let bb = input[0][i].split(",")
+      let ccx = parseInt(bb[0])+20-player.x
+      let ccy = parseInt(bb[1])+20-player.y
+      fill(deparsed[0])
+      rectAtCoords(ccx,ccy)
+      if(ATTRIBUTEOF(tblock,"$") != "NONE"){
+        shades.push([ccx,ccy,parseInt(ATTRIBUTEOF(tblock,"$"))*0.2])
+      }
+      if(ATTRIBUTEOF(tblock,"T") != "NONE"){
+        if(ccx > -5 && ccy > -5 && ccx < 46 && ccy < 46){
+        // console.log(ccx,ccy,"rgba(30,95,30,0.7)",parseInt(ATTRIBUTEOF(tblock,"S")))
+        trees.push([ccx,ccy,"rgba(10,65,10,0.7)",parseInt(ATTRIBUTEOF(tblock,"S"))])}
+      }
+            if(a != "full"){
+        ctx.lineWidth = a * 5
+        line(ccx*20+10-a*9,ccy*20+10-a*9,a*18,a*18)
+        line(ccx*20+10-a*9,ccy*20+10+a*9,a*18,-a*18)
+      
+      }
+  }
+
+    playersUpdate(input[1])
+  for(let i = 0; i < trees.length; i++){
+    let a = trees[i]
+    drawTree(a[0],a[1],a[2],a[3])
+  }
+  for(let i = 0; i < shades.length; i++){
+    fill("rgba(0,0,0,"+shades[i][2]+")")
+    rectAtCoords(shades[i][0],shades[i][1])
+  }
+} catch(err){ console.log(err)}
+}
 
 
 
@@ -648,6 +697,43 @@ function drawTree(x,y,l,s){
 
 
 
+
+// function SHADELINE(arr,slope,x,y,xe,ye){
+//   let outarr = []
+//   let distx = xe - x
+//   let blocked = 0
+//   for(let i = 0; i < 10; i++){
+//     nx = x + distx * i / 10
+//     ny = y + nx * slope
+
+//     for(let j = 0; j < arr.length; j++){
+//       if(arr[j][0] == Math.floor(nx) && arr[j][1] == Math.flor(ny)){
+//         outarr.push(arr[j])
+//         if(ATTRIBUTEOF(arr[j][2],"B") != "NONE"){
+//           break;
+//         }
+//       }
+//     }
+
+
+
+
+//     return(outarr)
+//   }
+
+
+// }
+
+
+
+
+
+
+
+
+
+
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -728,13 +814,13 @@ function deparseTileToColor(str){
 // var NameBlockReferenceDict = {"1":"Oak Wood"}
 // var DurabilityMap = {"1":100}
 var BLOCKSALL = {"1":["#B96A04","Oak Wood",100],"2":["#8C8C8C","Stone",400],"3":["#A95A00","Oak Tree Wood",400]}
-var HeightMap = ["B","G"]
+var HeightMap = ["$","B","G"]
 
 
-var TILESALL = {"0":["#FF00FF","Abyss"],"1":["#04399F","Deep Sea"],"2":["#0078FF","Sea"],"3":["#1FB1FF","Shallow Waters"],"4":["#D9DC00","Sand"],"5":["#20A020","Plains"],"6":["#207020","Forest"],"7":["#205020","Dense Forest"],"8":["#707070","Mountains"],"9":["#F0F0F0","Snowy Mountain Peaks"]}
+var TILESALL = {"0":["#000000","Abyss"],"1":["#04399F","Deep Sea"],"2":["#0078FF","Sea"],"3":["#1FB1FF","Shallow Waters"],"4":["#D9DC00","Sand"],"5":["#20A020","Plains"],"6":["#207020","Forest"],"7":["#205020","Dense Forest"],"8":["#707070","Mountains"],"9":["#F0F0F0","Snowy Mountain Peaks"]}
 
 
-var ColorTileReferenceDict = {"0":"#FF00FF","1":"#04399F","2":"#0078FF","3":"#1FB1FF","4":"#D9DC00","5":"#20A020","6":"#207020","7":"#205020","8":"#707070","9":"#F0F0F0"}
+var ColorTileReferenceDict = {"0":"#000000","1":"#04399F","2":"#0078FF","3":"#1FB1FF","4":"#D9DC00","5":"#20A020","6":"#207020","7":"#205020","8":"#707070","9":"#F0F0F0"}
 var NameTileReferenceDict = {"0":"Abyss","1":"Deep Sea","2":"Sea","3":"Shallow Waters","4":"Sand","5":"Plains","6":"Forest","7":"Dense Forest","8":"Mountains","9":"Snowy Mountain Peaks"}
 function deparseTileToName(str){
   let split = str.split('-')

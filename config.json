@@ -11,7 +11,7 @@
 
 
 	"TILESALL":{
-		"0":["#FF00FF","Abyss"],
+		"0":["#000000","Abyss"],
 		"1":["#04399F","Deep Sea"],
 		"2":["#0078FF","Sea"],
 		"3":["#1FB1FF","Shallow Waters"],
@@ -25,7 +25,7 @@
 
 
 	"ColorTileReferenceDict" : {
-		"0":"#FF00FF",
+		"0":"#000000",
 		"1":"#04399F",
 		"2":"#0078FF",
 		"3":"#1FB1FF",

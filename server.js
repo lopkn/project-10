@@ -1,11 +1,19 @@
 /*
+DONE (after creation of tdl)
+-Logins and accounts
+-Lighting & effect tables
+
+
 TO DO LIST
+
+
 
 
 -chunk saves (low priority)
 -terrain randomness
 -biomes
 -rivers
+-dependancy of config from server
 -slow at different terrain
 -slab tiles
 -actual structure generation
@@ -16,7 +24,7 @@ TO DO LIST
 -chests and inventory
 
 
--Lighting
+
 -Music
 
 
@@ -69,7 +77,7 @@ class player{
 		this.chunk = {"x":0,"y":0}
 		this.selectedSlot = 0
 		this.Inventory = ["B1-50","B2-40","U2-100",""]
-
+		this.effects = []
 
 	}
 	say(e){
@@ -121,6 +129,12 @@ class player{
 				this.log(CURRENTCONFIGS.ConsoleResponses.AlreadyLoggedIn,cmdc.error)
 			}
 		} else {
+			for(let i = 0; i < players.length; i++){
+				if(players[i].name == n){
+					this.log("Player with this account is online right now!",cmdc.error)
+					return;
+				}
+			}
 			if(playerList[n].psswd == p){
 				this.x = playerList[n].x
 				this.y = playerList[n].y
@@ -190,10 +204,156 @@ class player{
 
 
 	}
+	relay2(){
+		io.to(this.id).emit('relay',[this.x,this.y,this.chunk])
+		let tmap = [];
+		let tmap2 = {}
+		for(let i = 0; i < map.length; i++){
+			if(distance(map[i][0]*20+10,map[i][1]*20+10,this.x,this.y)<49){
+				let sS = [map[i][0],map[i][1],map[i][2]]
+				for(let j = 3; j < map[i].length; j ++){
+					
+					let xx = map[i][j][0] + sS[0]*chunkSize
+					let yy = map[i][j][1] + sS[1]*chunkSize
+					if(inRect(xx,yy,this.x-27,this.y-27,53,53)){
+						tmap.push(xx+","+yy)
+						tmap2[xx+","+yy] = map[i][j][2]
+					}
+
+
+				}
+			}
+		}
+
+if(inEffectArr("blind1",this.effects)){
+	for(let axx = -20; axx < 21; axx++){
+			let ret = retInsideLine(this.x,this.y,this.x+20,this.y+axx)
+			let yet = 0
+			for(let i = 0; i < ret.length; i++){
+				if(yet >0){
+									if(ATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"$") == "NONE"){
+					tmap2[ret[i][0]+","+ret[i][1]] += "-$" + yet} else {
+						let tempeee = parseInt(ATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"$")) + yet
+						tmap2[ret[i][0]+","+ret[i][1]] = removeFromTile(tmap2[ret[i][0]+","+ret[i][1]],"$")
+						tmap2[ret[i][0]+","+ret[i][1]] += "-$" + tempeee
+					}
+				} if(ATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"B") != "NONE"){
+					yet += 1
+				}
+			}
+		}
+	for(let axx = -20; axx < 21; axx++){
+			let ret = retInsideLine(this.x,this.y,this.x+axx,this.y+20)
+			let yet = 0
+			for(let i = 0; i < ret.length; i++){
+				if(yet > 0){
+									if(ATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"$") == "NONE"){
+					tmap2[ret[i][0]+","+ret[i][1]] += "-$" + yet} else {
+						let tempeee = parseInt(ATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"$")) + yet
+						tmap2[ret[i][0]+","+ret[i][1]] = removeFromTile(tmap2[ret[i][0]+","+ret[i][1]],"$")
+						tmap2[ret[i][0]+","+ret[i][1]] += "-$" + tempeee
+					}
+				}  if(ATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"B") != "NONE"){
+					yet += 1
+				}
+			}
+		}
+	for(let axx = -20; axx < 21; axx++){
+			let ret = retInsideLine(this.x,this.y,this.x-20,this.y+axx)
+			let yet = 0
+			for(let i = 0; i < ret.length; i++){
+				if(yet > 0){
+									if(ATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"$") == "NONE"){
+					tmap2[ret[i][0]+","+ret[i][1]] += "-$"+yet} else {
+						let tempeee = parseInt(ATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"$")) + yet
+						tmap2[ret[i][0]+","+ret[i][1]] = removeFromTile(tmap2[ret[i][0]+","+ret[i][1]],"$")
+						tmap2[ret[i][0]+","+ret[i][1]] += "-$" + tempeee
+					}
+				} if(ATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"B") != "NONE"){
+					yet += 1
+				}
+			}
+		}
+	for(let axx = -20; axx < 21; axx++){
+			let ret = retInsideLine(this.x,this.y,this.x+axx,this.y-20)
+			let yet = 0
+			for(let i = 0; i < ret.length; i++){
+				if(yet > 0){
+					if(ATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"$") == "NONE"){
+					tmap2[ret[i][0]+","+ret[i][1]] += "-$" + yet} else {
+						let tempeee = parseInt(ATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"$")) + yet
+						tmap2[ret[i][0]+","+ret[i][1]] = removeFromTile(tmap2[ret[i][0]+","+ret[i][1]],"$")
+						tmap2[ret[i][0]+","+ret[i][1]] += "-$" + tempeee
+					}
+				}  if(ATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"B") != "NONE"){
+					yet += 1
+				}
+			}
+		}
+	}
+
+
+
+		let t = []
+		for(let i = 0; i < players.length; i++){
+			if(distance(players[i].x,players[i].y,this.x,this.y) < 33 && players[i].id != this.id){
+				t.push([players[i].x,players[i].y])
+			}
+		}
+		io.to(this.id).emit('mapUpdate2',[tmap,t,tmap2])
+
+	}
+
+
+
+
+
 	invrelay(){
 		io.to(this.id).emit('invrelay',this.Inventory)
 	}
 }
+
+
+
+
+
+
+
+
+function inRect(x,y,rx,ry,w,h){
+	if(x >= rx && y >= ry && x <= rx+w && y <= ry + h){
+		return(true)
+	}
+	return(false)
+}
+
+
+
+
+function retInsideLine(x,y,x1,y1){
+	let fout = []
+	let dx = x1 - x
+	if(dx != 0){
+	let slope = (y1-y)/(dx)
+	let dist = distance(x,y,x1,y1)
+
+	for(let i = 1; i < 21; i++){
+		let e = x+i*dx/20
+		fout.push([Math.round(e),Math.round(y + (e-x)*slope)])
+	}
+
+
+	} else {
+		slope = y1 > y ? 1 : -1
+		for(let i = 1; i < 21; i++){
+		fout.push([x,y + i*slope])
+		}
+	}
+
+	return(fout)
+
+}
+
 
 
 
@@ -242,7 +402,7 @@ function newConnection(socket){
 	players.push(new player(socket.id))
 	players[findPlayerInArr(socket.id)].log(CURRENTCONFIGS.ConsoleResponses.Help1,"#A000FF")
 	io.to(socket.id).emit('sendWhenJoin', socket.id)
-	players[players.length-1].relay()
+	players[players.length-1].relay2()
 	    socket.on('disconnect', function () {
         console.log(socket.id + " has disconnected");
         for(let i = 0; i < players.length; i++){
@@ -274,7 +434,7 @@ function allPlayersGenerateChunks(){
 		}	
 	}
 
-		players[p].relay()
+		players[p].relay2()
 }
 }
 var TIME = 60
@@ -287,7 +447,8 @@ function doSomething(){
 		TIME += 1
 		io.emit('TICK')
 		if(ticktoggle == 1){
-		console.log("tick")}
+		console.log("tick")
+	}
 	} else if(TIME < 90){
 		TIME += 1
 	} else if(TIME == 90){
@@ -303,6 +464,11 @@ function doSomething(){
 			players[i].save()
 		}
 		playersCollectiveActions = []
+
+		allEffectTick()
+
+
+
 	}
 	
 }
@@ -326,6 +492,28 @@ function tellPerlin(x,y){
 
 /////////////////////////////////////////////////////////////
 //game functions//===================================================================================
+
+
+
+function allEffectTick(){
+	for(let i = 0; i < players.length; i++){
+		for(let j = players[i].effects.length-1; j > -1 ; j--){
+			players[i].effects[j][1] -= 1
+			if(players[i].effects[j][1] < 1){
+				players[i].effects.splice(j,1)
+			}
+		}
+	}
+}
+
+
+
+
+
+
+
+
+
 
 var playersCollectiveActions = []
 function ACTIONPROCESS(e){
@@ -441,6 +629,7 @@ if(st[0] == "/"){
 	}
 	//unrecognized command
 	else{
+		console.log(strsplit)
 		players[p].log("Invalid command.</br> If you think this should be a command, tell me your idea in discord. (lopkn#0019)","#FF0000")
 	}
 
@@ -743,6 +932,17 @@ function inListR(inp,arr){
     }
   } return(false)
 }
+
+//for effects
+function inEffectArr(effect,arr){
+	for(let i = 0; i < arr.length; i++){
+		if(arr[i][0] == effect){
+			return(true)
+		}
+	}
+	return(false)
+}
+
 
 ///input a player id to get its position in the array 
 function findPlayerInArr(inp){
