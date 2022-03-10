@@ -22,7 +22,8 @@ TO DO LIST
 -player combat
 --player health & moves
 -chests and inventory
-
+-item name and descriptions
+-refactor MasterTileDeparser
 
 
 -Music
@@ -309,7 +310,7 @@ if(inEffectArr("blind1",this.effects)){
 
 
 	invrelay(){
-		io.to(this.id).emit('invrelay',this.Inventory)
+		io.to(this.id).emit('invrelay',[this.Inventory,this.selectedSlot])
 	}
 }
 
@@ -670,7 +671,7 @@ function processClick(e){
 	if(att != "NONE" && a > 0){
 		if(!alreadyHasBlock(map[chunkPos][e[2]][2])){
 			let decodedXY = rCoordToChunk(e[1])
-			if(distance(decodedXY.x,decodedXY.y,players[r].x,players[r].y) <= 7){
+			if(distance(decodedXY.x,decodedXY.y,players[r].x,players[r].y) <= 12){
 				map[chunkPos][e[2]][2] += "-B" + att
 				removeItemFromSelected(e[0],1)
 			} else {
@@ -1187,5 +1188,55 @@ function amountOfItems(p){
     return(e[1])
   } else {return("none")}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+let allCombatInstances = []
+
+class combatInstance{
+	constructor(p1,p2){
+		this.p1 = p1
+		this.p2 = p2
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 //game functions end//===============================================================================

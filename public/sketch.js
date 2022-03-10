@@ -34,6 +34,7 @@ var flash = 0
         inv.style.left = "5px";
         inv.style.top = "825px";
         inv.style.position = "absolute";
+
         var timer = document.getElementById("Timer");
         var timerctx = timer.getContext("2d");
         timer.style.top = "0px";
@@ -41,6 +42,11 @@ var flash = 0
         timer.style.position = "absolute";
         timerctx.lineCap = "round"
         timerctx.lineWidth = "20"
+
+
+        var combat = document.getElementById("CombatMenu");
+        var combatctx = combat.getContext("2d");
+
 
         var laser = document.getElementById("GIF");
         // var laserctx = laser.getContext("2d")
@@ -139,14 +145,81 @@ ondrag = function(e){}
 
 var img = new Image();
 img.src = 'ItemMap.png';
+
+var playerSprites = new Image();
+playerSprites.src = 'playerSprites.png'
+
 // img.onload = function() {
 //     ctx.drawImage(img.image, 400, 400);
 //     tempp = 1
 // };
 
+/////////////////////////////////////////////////////
+
+//combatctx
+
+ function COMrect(x,y,x2,y2){
+    combatctx.fillRect(x,y,x2,y2)
+  }
+ function COMfill(i){
+    combatctx.fillStyle = i
+  }
+class Combat{
+  constructor(){
+    this.screenActive = 0
+    this.frame = 0
+    this.started = 0
+    this.party1 = [1]
+    this.party2 = [1]
+  }
+ 
+
+
+  startAnimation(){
+    COMfill("#000000")
+    COMrect(0,0,450,400)
+    if(this.frame < 15){
+      COMfill("rgb(0,100,255)")
+      COMrect(215,195-this.frame*14,20,10+this.frame*28)
+    } else if(this.frame < 81){
+      COMfill("rgb(0,100,255)")
+      COMrect(215,0,20,400)
+    } else if(this.frame < 160){
+      COMfill("rgba(0,100,255,"+(1-((this.frame - 80)/110))+")")
+      COMrect(215-(this.frame-80)*3,0,20+(this.frame-80)*6,400)
+   } else {
+      COMfill("rgb(0,27,69)")
+      COMrect(0,0,450,400)
+      this.started = 1
+    }
+
+    this.frame ++
+  }
+
+
+  inCombat(){
+    COMfill("rgb(0,27,69)")
+    COMrect(0,0,450,400)
+
+    for(let i = 0; i < this.party1.length; i++){
+      COMfill("#FFFFFF")
+      COMrect(50,100,50,50)
+    }
+    for(let i = 0; i < this.party2.length; i++){
+      COMfill("#FFFFFF")
+      COMrect(350,100,50,50)
+    }
+
+
+  }
 
 
 
+}
+
+var combatScreen = new Combat()
+
+/////////////////////////////////////////////////////
 
 function text(str){
   display.style.color = "#00FF00"
@@ -351,6 +424,9 @@ var mouseCoords = []
 
 let maxSteps = 2000000
 
+// main loop
+// ==================================================================================================================
+
 function repeat(){
   try{UPDATEMAP([NEWmap,players,map])}catch(err){}
   // drawTree(25,25,"#FFFFFF",5)
@@ -421,8 +497,8 @@ function repeat(){
   if(ATTRIBUTEOF(player.Inventory[player.selectedSlot],"B") != "NONE"){
     for(let i = 0; i < 41; i++){
       for(let j = 0; j < 41; j++){
-        if(distance(j,i,20,20) > 7){
-          fill("rgba(255,0,0,"+flash+")")
+        if(distance(j,i,20,20) <= 12){
+          fill("rgba(100,255,100,"+flash+")")
           rectAtCoords(j,i)
 
 
@@ -433,10 +509,21 @@ function repeat(){
     }
   }
 
+  if(combatScreen.screenActive == 1){
+    if(combatScreen.started == 0){
+      combatScreen.startAnimation()
+    } else {
 
+      combatScreen.inCombat()
+
+
+
+    }
+
+  }
 
 }
-//repeat end
+//repeat end =-=========================-================================-================================-=
 
 
 
@@ -856,7 +943,8 @@ function CoordToChunk(x,y){
 
 
 function updateInv(e){
-  player.Inventory = e
+  player.Inventory = e[0]
+  player.selectedSlot = e[1]
 }
 
 
