@@ -99,7 +99,7 @@ socket.on('TIME',timeUpdate)
 socket.on('TICK',tick)
 socket.on('PING',returnPing)
 socket.on("chat",chatProcess)
-socket.on("comrelay",hpProcess)
+socket.on("comrelay",combatProcess)
 // socket.on('playersRelay',playersUpdate)
 
 // socket.on('players',drawPlayers)
@@ -238,6 +238,13 @@ class Combat{
     this.frame ++
   }
 
+  stopscreen(){
+    this.screenActive = 0
+    this.frame = 0
+    this.started = 0
+    COMfill("#000000")
+    COMrect(0,0,450,400)
+  }
 
   inCombat(){
     COMfill("rgb(0,27,69)")
@@ -670,8 +677,18 @@ function tick(){
 
 
 
-function hpProcess(e){
-  player.hp = e
+function combatProcess(e){
+  player.hp = e[0]
+  if(e[1] != undefined){
+    if(e[1]){
+      combatScreen.restart()
+    }
+    if(!e[1]){
+      combatScreen.stopscreen()
+    }
+
+
+  }
 }
 
 

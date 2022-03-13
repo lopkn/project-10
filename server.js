@@ -273,8 +273,8 @@ if(inEffectArr("blind1",this.effects)){
 
 
 
-	combatRelay(){
-		io.to(this.id).emit('comrelay',this.hp)
+	combatRelay(close){
+		io.to(this.id).emit('comrelay',[this.hp,close])
 	}
 
 	invrelay(){
@@ -643,7 +643,8 @@ function processClick(e){
 		if(i != r && decodedXY.x == players[i].x && decodedXY.y == players[i].y && !players[i].inCombat && !players[r].inCombat){
 			allCombatInstances[JSON.stringify(combatIdCounter)] = new combatInstance(players[r].id,players[i].id)
 			console.log("new conbat instance: " +players[r].id+","+players[i].id)
-
+			players[r].combatRelay(true)
+			players[i].combatRelay(true)
 		}
 
 
@@ -1230,6 +1231,17 @@ class combatInstance{
 
 	}
 
+
+	end(){
+		if(players[this.p1n] != undefined){
+		players[this.p1n].inCombat = false
+		players[this.p1n].combatRelay(false)}
+		players[this.p2n].inCombat = false
+		players[this.p2n].combatRelay(false)
+
+
+	}
+
 }
 
 function combatProcess(p,str){
@@ -1252,7 +1264,21 @@ function CompleteCombatSimul(){
 
 
 
+function endCombatInstance(str){
+	allCombatInstances[str].end()
 
+
+	for(let i = allCombatInstancesA.length - 1; i > -1; i--){
+		if(allCombatInstancesA[i] == str){
+			allCombatInstancesA.splice(i,1)
+			break;
+		}
+	}
+
+	delete allCombatInstances[str]
+
+
+}
 
 
 
