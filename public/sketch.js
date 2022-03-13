@@ -4,6 +4,7 @@ class Player{
     this.id = id
     this.x = 0
     this.y = 0
+    this.hp = 100
     this.chunk = {"x":0,"y":0}
     this.selectedSlot = 0
     this.Inventory = ["B1-50","B2-40","U1-100"]
@@ -46,7 +47,7 @@ var flash = 0
 
         var combat = document.getElementById("CombatMenu");
         var combatctx = combat.getContext("2d");
-
+        combatctx.font = "20px Courier New"
 
         var laser = document.getElementById("GIF");
         // var laserctx = laser.getContext("2d")
@@ -98,6 +99,7 @@ socket.on('TIME',timeUpdate)
 socket.on('TICK',tick)
 socket.on('PING',returnPing)
 socket.on("chat",chatProcess)
+socket.on("comrelay",hpProcess)
 // socket.on('playersRelay',playersUpdate)
 
 // socket.on('players',drawPlayers)
@@ -171,13 +173,53 @@ class Combat{
     this.started = 0
     this.party1 = [1]
     this.party2 = [1]
-  }
+    this.choicePath = ""
+    this.currentMenu = ["attack","defense","item","help"]
+    this.allmenu = {
+
+
+
+
+  "":["attack","defense","item","help"],
+  "0":["physical","spells","staffs",""],
+  "1":["block","dodge","",""],
+  "2":function(){chatProcess([">"," you have no items"])},
+  "3":function(){chatProcess([">"," for help use /h combat"])},
+
+
+  "00":["swing item","punch","jab","kick"],
+  "000":"return",
+  "001":"return",
+  "002":"return",
+  "003":"return",
+  "10":"return",
+  "11":"return"
+
+
+}
+
+      }
  
+
+
+
+  restart(){
+    this.screenActive = 1
+    this.frame = 0
+    this.started = 0
+    this.party1 = [1]
+    this.party2 = [1]
+  }
+
 
 
   startAnimation(){
     COMfill("#000000")
     COMrect(0,0,450,400)
+    if(this.frame < 160){
+      COMfill("rgb(0,0,50)")
+      COMrect(0,270,this.frame*2.4,130)
+    }
     if(this.frame < 15){
       COMfill("rgb(0,100,255)")
       COMrect(215,195-this.frame*14,20,10+this.frame*28)
@@ -200,6 +242,10 @@ class Combat{
   inCombat(){
     COMfill("rgb(0,27,69)")
     COMrect(0,0,450,400)
+    COMfill("rgb(0,27,91)")
+    COMrect(0,270,380,130)
+    COMrect(300,237.5,80,32.5)
+
 
     for(let i = 0; i < this.party1.length; i++){
       COMfill("#FFFFFF")
@@ -211,7 +257,67 @@ class Combat{
     }
 
 
+    if(inRect(mouseX,mouseY,850,675,380,130)){
+      COMfill("rgba(0,255,0,"+flash+")")
+      COMrect(0,270,380,130)
+
+      COMfill("rgba(255,255,255,0.3)")
+      COMrect(0,270+32.5*Math.floor((mouseY-675)/32.5),380,32.5)
+  
+    }
+    if(inRect(mouseX,mouseY,1150,642.5,80,32.5)){
+      COMfill("rgba(255,255,255,0.3)")
+      COMrect(300,237.5,80,32.5)
+      
+    }
+
+
+    for(let i = 0; i < 4; i++){
+      COMfill("rgb(255,255,255)")
+      combatctx.fillText(this.currentMenu[i],0,295.5+32.5*i)
+    }
+    combatctx.fillText("back",315,263)
+  
   }
+
+
+  optionClick(num){
+    if(num < 4){
+      this.choicePath = this.choicePath + num
+    }
+    else{
+      this.choicePath = this.choicePath.substring(0,this.choicePath.length-1)
+    }
+    this.combatMenuPath1()
+  }
+  
+
+
+   combatMenuPath1(){
+    if(this.allmenu[this.choicePath] == "return"){
+
+      ActionStore.push(this.choicePath)
+      AActionStore.push(["com",this.choicePath])
+      ActionPrint.push([200,200,"#FF00FF"])
+
+
+      this.choicePath = ""
+      this.combatMenuPath1()
+    } else if(typeof(this.allmenu[this.choicePath]) != "function"){
+      this.currentMenu = this.allmenu[this.choicePath]
+      
+
+    } else {
+      this.allmenu[this.choicePath]()
+      this.choicePath = ""
+    }
+
+  }
+
+    choice4(n,arr){
+      return(arr[n])
+    }
+
 
 
 
@@ -378,7 +484,7 @@ document.addEventListener('keydown', (event) => {
 
 
 document.addEventListener('mousedown', (event) => {
-  console.log(mouseX,mouseY,mouseCoords)
+  // console.log(mouseX,mouseY,mouseCoords)
   if(inRect(mouseX,mouseY,0,825,820,50)){
   if(player.selectedSlot == Math.floor(mouseX/50)){
     player.selectedSlot = -1
@@ -393,7 +499,7 @@ document.addEventListener('mousedown', (event) => {
 
 
 
-  if(inRect(mouseX,mouseY,0,0,820,820)){
+  if(mouseStatus == "canvas"){
     let a = CoordToChunk(mouseCoords[0],mouseCoords[1])
     let b = a.cx + a.cy*chunkSize+3
     // console.log([player.id,a,b])
@@ -403,6 +509,19 @@ document.addEventListener('mousedown', (event) => {
     ActionPrint.push([Math.floor(mouseX/20),Math.floor(mouseY/20),"rgba(255,0,0,0.3)"])
     // socket.emit('click',[player.id,a,b])
   }
+
+  if(inRect(mouseX,mouseY,850,675,380,130)){
+
+    let temp = Math.floor((mouseY-675)/32.5)
+
+
+    combatScreen.optionClick(temp)
+  }
+  if(inRect(mouseX,mouseY,1150,642.5,80,32.5)){
+    combatScreen.optionClick(4)
+  }
+
+
 })
 
 
@@ -447,6 +566,8 @@ function repeat(){
   } else if(inRect(mouseX,mouseY,0,825,820,50)){
   mouseCoords = [Math.floor(mouseX/50)]
   mouseStatus = "inventory"
+  } else if(inRect(mouseX,mouseY,850,675,380,130)){
+    mouseStatus = "combatoptions"
   } else {
     mouseStatus = "outside"
   }
@@ -548,6 +669,10 @@ function tick(){
 
 
 
+
+function hpProcess(e){
+  player.hp = e
+}
 
 
 function chatProcess(e){
@@ -944,7 +1069,7 @@ function CoordToChunk(x,y){
 
 function updateInv(e){
   player.Inventory = e[0]
-  player.selectedSlot = e[1]
+  // player.selectedSlot = e[1]
 }
 
 

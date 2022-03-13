@@ -1,39 +1,3 @@
-/*
-DONE (after creation of tdl)
--Logins and accounts
--Lighting & effect tables
-
-
-TO DO LIST
-
-
-
-
--chunk saves (low priority)
--terrain randomness
--biomes
--rivers
--dependancy of config from server
--slow at different terrain
--slab tiles
--actual structure generation
--ore and crafting
--pathfinding AI
--player combat
---player health & moves
--chests and inventory
--item name and descriptions
--refactor MasterTileDeparser
-
-
--Music
-
-
-
-
-
-*/
-/////////////////////////////////////////
 
 
 var players = []
@@ -79,6 +43,8 @@ class player{
 		this.selectedSlot = 0
 		this.Inventory = ["B1-50","B2-40","U2-100",""]
 		this.effects = []
+		this.inCombat = false
+		this.hp = 100
 
 	}
 	say(e){
@@ -307,10 +273,12 @@ if(inEffectArr("blind1",this.effects)){
 
 
 
-
+	combatRelay(){
+		io.to(this.id).emit('comrelay',this.hp)
+	}
 
 	invrelay(){
-		io.to(this.id).emit('invrelay',[this.Inventory,this.selectedSlot])
+		io.to(this.id).emit('invrelay',[this.Inventory])
 	}
 }
 
@@ -527,6 +495,7 @@ function processPlayersActions(){
 		if(playersCollectiveActions[i][ProcessStep] != undefined){
 			let STEP = playersCollectiveActions[i][ProcessStep]
 			CompleteActionStep(playersCollectiveActions[i][0],STEP)
+			CompleteCombatSimul()
 		}
 	}
 	ProcessStep += 1
@@ -579,6 +548,8 @@ function CompleteActionStep(p,s){
 		} else if(s[0] == "sel"){
 			//if action is select
 			selectSlot([p,s[1]])
+		} else if(s[0] == "com"){
+			combatProcess(p,s[1])
 		}
 	}
 }
@@ -666,11 +637,24 @@ function processClick(e){
 	let a = parseInt(amountOfItems(e[0]))
 	let att = ATTRIBUTEOF(item,"B")
 
+	let decodedXY = rCoordToChunk(e[1])
+	
+	for(let i = 0; i < players.length; i++){
+		if(i != r && decodedXY.x == players[i].x && decodedXY.y == players[i].y && !players[i].inCombat && !players[r].inCombat){
+			allCombatInstances[JSON.stringify(combatIdCounter)] = new combatInstance(players[r].id,players[i].id)
+			console.log("new conbat instance: " +players[r].id+","+players[i].id)
+
+		}
+
+
+	}
+
+
 
 
 	if(att != "NONE" && a > 0){
 		if(!alreadyHasBlock(map[chunkPos][e[2]][2])){
-			let decodedXY = rCoordToChunk(e[1])
+			
 			if(distance(decodedXY.x,decodedXY.y,players[r].x,players[r].y) <= 12){
 				map[chunkPos][e[2]][2] += "-B" + att
 				removeItemFromSelected(e[0],1)
@@ -1201,19 +1185,70 @@ function amountOfItems(p){
 
 
 
+let allCombatInstancesA = []
+let allCombatInstances = {}
 
-let allCombatInstances = []
+let combatIdCounter = 1
 
 class combatInstance{
 	constructor(p1,p2){
 		this.p1 = p1
 		this.p2 = p2
+		this.p1d = 0
+		this.p2d = 0
+
+		this.p1n = findPlayerInArr(p1)
+		this.p2n = findPlayerInArr(p2)
+		allCombatInstancesA.push(JSON.stringify(combatIdCounter))
+		// this.comId = combatIdCounter
+		players[this.p1n].inCombat = JSON.stringify(combatIdCounter)
+		players[this.p2n].inCombat = JSON.stringify(combatIdCounter)
+		combatIdCounter += 1
+	}
+
+	process(p,str){
+		console.log(p,str)
+		if(p == this.p1){
+			if(str == "000"){
+				this.p2d += 30
+			}
+		}
+		if(p == this.p2){
+			if(str == "000"){
+				this.p1d += 30
+			}
+
+		}
+	}
+
+	simul(){
+		players[this.p1n].hp -= this.p1d
+		players[this.p2n].hp -= this.p2d
+
+		players[this.p1n].combatRelay()
+		players[this.p2n].combatRelay()
+
+	}
+
+}
+
+function combatProcess(p,str){
+
+	let r = findPlayerInArr(p)
+	if(r && players[r].inCombat){
+
+		allCombatInstances[players[r].inCombat].process(p,str)
+
 	}
 }
 
 
 
-
+function CompleteCombatSimul(){
+	for(let i = 0; i < allCombatInstancesA.length; i++){
+		allCombatInstances[allCombatInstancesA[i]].simul()
+	}
+}
 
 
 

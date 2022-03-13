@@ -22,6 +22,7 @@ TO DO LIST
 - pathfinding AI
 - player combat
 - player health & moves
+- player password change
 - chests and inventory
 - item name and descriptions
 - refactor MasterTileDeparser
