@@ -92,6 +92,7 @@ class player{
 				playerList[n].Inventory = this.Inventory
 				this.name = n
 				this.log("successfully created account named "+n,cmdc.success)
+				// broadcast("--"+this.id + " has created account "+n,cmdc.item)
 			} else {
 				this.log(CURRENTCONFIGS.ConsoleResponses.AlreadyLoggedIn,cmdc.error)
 			}
@@ -110,6 +111,7 @@ class player{
 				this.Inventory = playerList[n].Inventory
 				this.name = n
 				this.log("successfully logged in as "+n,cmdc.success)
+				// broadcast("--"+this.id + " has logged in as "+n,cmdc.item)
 				this.invrelay()
 			} else {
 				if(this.name == undefined){
@@ -368,14 +370,14 @@ function newConnection(socket){
 	socket.on('AT',ACTIONPROCESS)
 	socket.on("returnPing",STOPPING)
 	console.log(socket.id + " has joined at " + Date())
-	broadcast(socket.id+" has joined!",cmdc.item)
+	broadcast("--"+socket.id+" has joined!",cmdc.item)
 	players.push(new player(socket.id))
 	players[findPlayerInArr(socket.id)].log(CURRENTCONFIGS.ConsoleResponses.Help1,"#A000FF")
 	io.to(socket.id).emit('sendWhenJoin', socket.id)
 	players[players.length-1].relay2()
 	    socket.on('disconnect', function () {
         console.log(socket.id + " has disconnected");
-        broadcast(socket.id+" has left!",cmdc.small_error)
+        broadcast("--"+socket.id+" has left!",cmdc.small_error)
         for(let i = 0; i < players.length; i++){
         	if(players[i].id == socket.id){
         		players.splice(i,1)
@@ -493,15 +495,62 @@ function ACTIONPROCESS(e){
 
 var ProcessStep = 1
 
+var processees = {
+	"click":[],
+	"select":[],
+	"command":[],
+	"key":[],
+	"combat":[]
+}
+var processeeOrders = ["click","combat","key","command","select"]
+
 function processPlayersActions(){
 	let mx = 0
 	for(let i = 0; i < playersCollectiveActions.length; i++){
 		if(playersCollectiveActions[i][ProcessStep] != undefined){
-			let STEP = playersCollectiveActions[i][ProcessStep]
-			CompleteActionStep(playersCollectiveActions[i][0],STEP)
-			CompleteCombatSimul()
+			let s = playersCollectiveActions[i][ProcessStep]
+			let q = playersCollectiveActions[i][0]
+
+
+	if(typeof(s) == "string" && s.length == 1){
+		processees["key"].push([q,s])
+	} else if(typeof(s) == "string" && s[0] == "$"){
+		processees["command"].push([q,s])
+
+
+
+	} else {
+		if(s[0] == "click"){
+			//if action is click
+			processees["click"].push([q,s])
+		} else if(s[0] == "sel"){
+			//if action is select
+			processees["select"].push([q,s])
+		} else if(s[0] == "com"){
+			processees["combat"].push([q,s])
 		}
 	}
+
+
+
+			
+		}
+	}
+	CompleteCombatSimul()
+	for(let i = 0; i < processeeOrders.length; i++){
+		for(let j = 0; j < processees[processeeOrders[i]].length; j++){
+			CompleteActionStep(processees[processeeOrders[i]][j][0],processees[processeeOrders[i]][j][1])
+
+		}
+
+	}
+	processees = {
+	"click":[],
+	"select":[],
+	"command":[],
+	"key":[],
+	"combat":[]
+}
 	ProcessStep += 1
 }
 // [["ID",stuff,stuff] []]
@@ -934,10 +983,18 @@ function tp(r,i1,i2){
 		}
 
 
-	} else if(parseInt(i1) != NaN && parseInt(i2) != NaN){
+	} else if(!isNaN(parseInt(i1))&& !isNaN(parseInt(i2))){
 		players[r].x = parseInt(i1)
 		players[r].y = parseInt(i2)
 		players[r].log("successfully teleported to "+i1+","+i2,cmdc.success)
+	} else if(i1[0] == "=" && i2[0] == "="){
+		let ar = parseInt(i1.split("=")[1])
+		let ae = parseInt(i2.split("=")[1])
+		if(!isNaN(ar) && !isNaN(ae)){
+			players[r].x += ar
+			players[r].y += ae
+			players[r].log("successfully teleported to "+i1+","+i2,cmdc.success)
+		}
 	}
 
 }
@@ -1290,6 +1347,7 @@ class combatInstance{
 		// this.comId = combatIdCounter
 		players[this.p1n].inCombat = JSON.stringify(combatIdCounter)
 		players[this.p2n].inCombat = JSON.stringify(combatIdCounter)
+		this.comid = JSON.stringify(combatIdCounter)
 		combatIdCounter += 1
 	}
 
@@ -1298,8 +1356,8 @@ class combatInstance{
 		if(p == this.p1){
 			console.log(p,str,1)
 			let temp = this.process2(this.p1m,this.p2m,this.p1d,this.p2d,str)
-			this.p1m = temp[0]
-			this.p2m = temp[1]
+			this.p1m *= temp[0]
+			this.p2m *= temp[1]
 			this.p1d = temp[2]
 			this.p2d = temp[3]
 
@@ -1308,8 +1366,8 @@ class combatInstance{
 		if(p == this.p2){
 			console.log(p,str,2)
 			let temp = this.process2(this.p2m,this.p1m,this.p2d,this.p1d,str)
-			this.p2m = temp[0]
-			this.p1m = temp[1]
+			this.p2m *= temp[0]
+			this.p1m *= temp[1]
 			this.p2d = temp[2]
 			this.p1d = temp[3]
 
@@ -1335,7 +1393,16 @@ class combatInstance{
 		}
 //block
 	if(str == "10"){
-		atkr -= 0.3
+		atkr = 0.7
+	}
+//dodge
+	if(str == "11"){
+		if(Math.random() > 0.5){
+			atkr = 0
+			console.log("dodge")
+		}
+
+
 	}
 
 
@@ -1348,6 +1415,13 @@ class combatInstance{
 
 
 	simul(){
+
+		this.p1n = findPlayerInArr(this.p1)
+		this.p2n = findPlayerInArr(this.p2)
+		//maybe a bit of redundancy
+
+
+
 		players[this.p1n].hp -= (this.p1d * this.p1m)
 		players[this.p2n].hp -= (this.p2d * this.p2m)
 
@@ -1359,6 +1433,12 @@ class combatInstance{
 
 		this.p1m = 1
 		this.p2m = 1
+
+		if(distance(players[this.p1n].x,players[this.p1n].y,players[this.p2n].x,players[this.p2n].y) > 13){
+			endCombatInstance(this.comid)
+		}
+
+
 	}
 
 

@@ -26,6 +26,7 @@ TO DO LIST
 - chests and inventory
 - item name and descriptions
 - refactor MasterTileDeparser
+- player disconnect timer
 
 
 - Music
