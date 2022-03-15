@@ -192,8 +192,17 @@ class Combat{
   "001":"return",
   "002":"return",
   "003":"return",
+
+  "01":"return",
+  "02":"return",
+  "03":"do nothing",
+
+
+
   "10":"return",
-  "11":"return"
+  "11":"return",
+  "12":"do nothing",
+  "13":"do nothing"
 
 
 }
@@ -252,6 +261,8 @@ class Combat{
     COMfill("rgb(0,27,91)")
     COMrect(0,270,380,130)
     COMrect(300,237.5,80,32.5)
+    COMfill("#00FF00")
+    COMrect(5,5,player.hp*2,10)
 
 
     for(let i = 0; i < this.party1.length; i++){
@@ -310,7 +321,9 @@ class Combat{
 
       this.choicePath = ""
       this.combatMenuPath1()
-    } else if(typeof(this.allmenu[this.choicePath]) != "function"){
+    } else if(this.allmenu[this.choicePath] == "do nothing"){
+
+    }else if(typeof(this.allmenu[this.choicePath]) != "function"){
       this.currentMenu = this.allmenu[this.choicePath]
       
 

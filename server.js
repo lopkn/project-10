@@ -15,7 +15,7 @@ var ticktoggle = 0
 var CURRENTCONFIGS = require("./config")
 var playerList = require("./playerList")
 
-var cmdc = {"success":"#00C000","error":"#FF0000","small_error":"#FFCFCF","item":"#FFFF00"}
+var cmdc = {"success":"#00C000","error":"#FF0000","small_error":"#FFCFCF","item":"#FFFF00","combat":"#FF8800"}
 
 var promiseChunks = {}
 
@@ -37,15 +37,15 @@ perSeed = new perlin(164.44)
 class player{
 	constructor(id){
 		this.id = id
-		this.x = 0
-		this.y = 0
+		this.x = Math.floor(Math.random()*7)
+		this.y = Math.floor(Math.random()*7)
 		this.chunk = {"x":0,"y":0}
 		this.selectedSlot = 0
 		this.Inventory = ["B1-50","B2-40","U2-100",""]
 		this.effects = []
 		this.inCombat = false
 		this.hp = 100
-
+		
 	}
 	say(e){
 		for(let i = 0; i < players.length; i++){
@@ -368,12 +368,14 @@ function newConnection(socket){
 	socket.on('AT',ACTIONPROCESS)
 	socket.on("returnPing",STOPPING)
 	console.log(socket.id + " has joined at " + Date())
+	broadcast(socket.id+" has joined!",cmdc.item)
 	players.push(new player(socket.id))
 	players[findPlayerInArr(socket.id)].log(CURRENTCONFIGS.ConsoleResponses.Help1,"#A000FF")
 	io.to(socket.id).emit('sendWhenJoin', socket.id)
 	players[players.length-1].relay2()
 	    socket.on('disconnect', function () {
         console.log(socket.id + " has disconnected");
+        broadcast(socket.id+" has left!",cmdc.small_error)
         for(let i = 0; i < players.length; i++){
         	if(players[i].id == socket.id){
         		players.splice(i,1)
@@ -488,7 +490,9 @@ var playersCollectiveActions = []
 function ACTIONPROCESS(e){
 	playersCollectiveActions.push(e)
 }
+
 var ProcessStep = 1
+
 function processPlayersActions(){
 	let mx = 0
 	for(let i = 0; i < playersCollectiveActions.length; i++){
@@ -580,18 +584,22 @@ if(st[0] == "/"){
 		helpCommand(strsplit,p)
 	}
 	//setblock command
-	else if(strsplit[0] == "set" && strsplit[1] == consoleKey){
-		setblock(parseInt(strsplit[2]),parseInt(strsplit[3]),strsplit[4])
+	else if(strsplit[0] == "set" && players[p].keyholder == true){
+		setblock(parseInt(strsplit[1]),parseInt(strsplit[2]),strsplit[3])
 	}
 
 	//give command
-		else if(strsplit[0] == "give" && strsplit[1] == consoleKey){
-		give(p,parseInt(strsplit[2]),strsplit[3])
+		else if(strsplit[0] == "give" && players[p].keyholder == true){
+		give(p,parseInt(strsplit[1]),strsplit[2])
 	}
-	//  else if(strsplit[0] == "h" || strsplit[0] == "H"){
-	// 	give(p,parseInt(strsplit[2]),strsplit[3])
-	// }
-
+	//tp command
+		else if(strsplit[0] == "tp" && players[p].keyholder == true){
+		tp(p,strsplit[1],strsplit[2])
+	}
+	//playerno command
+		else if(strsplit[0] == "pno"){
+		ArrLoc(p)
+	}
 
 	//login command
 
@@ -599,6 +607,17 @@ if(st[0] == "/"){
 		players[p].login(strsplit[1],strsplit[2])
 		updatePlayerFile()
 	}
+	//permissions command
+		else if(strsplit[0] == "keyholder"){
+			if(strsplit[1] == consoleKey){
+				players[p].keyholder = true
+				players[p].log("you are now a keyholder",cmdc.success)
+			} else {
+				players[p].log("wrong key!",cmdc.error)
+			}
+	}
+
+
 	//unrecognized command
 	else{
 		console.log(strsplit)
@@ -642,9 +661,12 @@ function processClick(e){
 	for(let i = 0; i < players.length; i++){
 		if(i != r && decodedXY.x == players[i].x && decodedXY.y == players[i].y && !players[i].inCombat && !players[r].inCombat){
 			allCombatInstances[JSON.stringify(combatIdCounter)] = new combatInstance(players[r].id,players[i].id)
-			console.log("new conbat instance: " +players[r].id+","+players[i].id)
+			console.log("new combat instance: " +players[r].id+","+players[i].id)
 			players[r].combatRelay(true)
 			players[i].combatRelay(true)
+			players[r].log((players[i].name ? players[i].name : players[i].id)+" has entered combat with you!",cmdc.combat)
+			players[i].log((players[r].name ? players[r].name : players[r].id)+" has entered combat with you!",cmdc.combat)
+
 		}
 
 
@@ -745,7 +767,11 @@ function breakBlockBy(str,a){
 
 
 
-
+function broadcast(s,e){
+	for(let i = 0; i < players.length; i++){
+		players[i].log(s,e)
+	}
+}
 
 
 
@@ -892,6 +918,36 @@ function give(p,amount,item){
 	}
 }
 
+function ArrLoc(p){
+	players[p].log("you are player "+p,cmdc.success)
+}
+
+function tp(r,i1,i2){
+	if(i2 == undefined){
+		let temp = findPlayerString(i1)
+		if(temp !== false){
+			players[r].x = players[temp].x
+			players[r].y = players[temp].y
+			players[r].log("successfully teleported to P:"+temp,cmdc.success)
+		} else {
+			players[r].log("cannot teleport to P:"+i1,cmdc.error)
+		}
+
+
+	} else if(parseInt(i1) != NaN && parseInt(i2) != NaN){
+		players[r].x = parseInt(i1)
+		players[r].y = parseInt(i2)
+		players[r].log("successfully teleported to "+i1+","+i2,cmdc.success)
+	}
+
+}
+
+
+
+
+
+
+
 
 
 function addToItem(str,amount){
@@ -908,6 +964,23 @@ function addToItem(str,amount){
 
 
 
+
+function findPlayerString(e){
+	if(e.length == 1 && parseInt(e) != NaN){
+		return(parseInt(e))
+	}
+	if(findPlayerInArr(e) !== false){
+		return(findPlayerInArr(e))
+	}
+	for(let i = 0; i < players.length; i++){
+		if(players[i].name == e){
+			return(i)
+		}
+	}
+	return(false)
+
+
+}
 
 
 ///inputs an array and an item, returns index of item in array, returns false if not in array
@@ -1186,6 +1259,14 @@ function amountOfItems(p){
 
 
 
+
+
+
+
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+
 let allCombatInstancesA = []
 let allCombatInstances = {}
 
@@ -1198,6 +1279,11 @@ class combatInstance{
 		this.p1d = 0
 		this.p2d = 0
 
+		this.p1m = 1
+		this.p2m = 1
+
+
+
 		this.p1n = findPlayerInArr(p1)
 		this.p2n = findPlayerInArr(p2)
 		allCombatInstancesA.push(JSON.stringify(combatIdCounter))
@@ -1208,27 +1294,71 @@ class combatInstance{
 	}
 
 	process(p,str){
-		console.log(p,str)
+
 		if(p == this.p1){
-			if(str == "000"){
-				this.p2d += 30
-			}
+			console.log(p,str,1)
+			let temp = this.process2(this.p1m,this.p2m,this.p1d,this.p2d,str)
+			this.p1m = temp[0]
+			this.p2m = temp[1]
+			this.p1d = temp[2]
+			this.p2d = temp[3]
+
+
 		}
 		if(p == this.p2){
-			if(str == "000"){
-				this.p1d += 30
-			}
+			console.log(p,str,2)
+			let temp = this.process2(this.p2m,this.p1m,this.p2d,this.p1d,str)
+			this.p2m = temp[0]
+			this.p1m = temp[1]
+			this.p2d = temp[2]
+			this.p1d = temp[3]
+
+
 
 		}
 	}
 
+
+	process2(atkr,dfer,atkrn,dfern,str){
+		console.log(str)
+//punch
+		if(str == "001"){
+			dfern += 30
+		}
+//jab
+		if(str == "002"){
+			dfern += 30
+		}
+//kick
+		if(str == "003"){
+			dfern += 40
+		}
+//block
+	if(str == "10"){
+		atkr -= 0.3
+	}
+
+
+		return([atkr,dfer,atkrn,dfern,str])
+
+	}
+
+
+
+
+
 	simul(){
-		players[this.p1n].hp -= this.p1d
-		players[this.p2n].hp -= this.p2d
+		players[this.p1n].hp -= (this.p1d * this.p1m)
+		players[this.p2n].hp -= (this.p2d * this.p2m)
 
 		players[this.p1n].combatRelay()
 		players[this.p2n].combatRelay()
 
+		this.p1d = 0
+		this.p2d = 0
+
+		this.p1m = 1
+		this.p2m = 1
 	}
 
 
@@ -1244,10 +1374,25 @@ class combatInstance{
 
 }
 
+
+
+
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+
+
+
+
+
+
+
+
+
 function combatProcess(p,str){
 
 	let r = findPlayerInArr(p)
-	if(r && players[r].inCombat){
+	if(r !== false && players[r].inCombat){
 
 		allCombatInstances[players[r].inCombat].process(p,str)
 
