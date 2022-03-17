@@ -11,6 +11,9 @@ class Player{
   }
 }
 
+var fps = 10
+
+
 
 var walker = {"x":20,"y":20}
 var ActionPrint = []
@@ -99,7 +102,7 @@ display2.style.left = "850px"
 socket = io.connect('/');
 socket.on('sendWhenJoin',joinSuccess)
 socket.on('relay',relayPlayer)
-socket.on('mapUpdate',updateMap)
+// socket.on('mapUpdate',updateMap)
 socket.on('mapUpdate2',UPDATEMAP)
 socket.on('invrelay',updateInv)
 socket.on('TIME',timeUpdate)
@@ -592,7 +595,25 @@ function commandingPush(e){
     }
   } else if(e == "Enter"){
     commanding = 0
-    AActionStore[AActionStore.length -1] = "$" + AActionStore[AActionStore.length -1]
+    let temp = AActionStore[AActionStore.length -1]
+    let temp2 = parseInt(temp.split(" ")[1])
+    console.log(temp,temp2)
+    if(temp.split(" ")[0] == "/fps" && isNaN(temp2)==false){
+      fps = temp2
+      clearInterval(canvasAnimation)
+      canvasAnimation = setInterval(function(){ 
+        repeat()
+      }, 100/(fps/10));
+
+      delete AActionStore[AActionStore.length -1]
+
+    } else {
+
+    AActionStore[AActionStore.length -1] = "$" + temp
+    }
+
+
+
   }
 }
 
@@ -669,6 +690,7 @@ document.addEventListener('keydown', (event) => {
 
 document.addEventListener('mousedown', (event) => {
   // console.log(mouseX,mouseY,mouseCoords)
+
   if(inRect(mouseX,mouseY,0,825,820,50)){
   if(player.selectedSlot == Math.floor(mouseX/50)){
     player.selectedSlot = -1
@@ -730,9 +752,11 @@ let maxSteps = 2000000
 // main loop
 // ==================================================================================================================
 
+
+var circleSIGH = [[20,8],[13,11],[11,13],[8,20],[11,27],[13,29],[20,32],[27,29],[29,27],[32,20],[29,13],[27,11]]
 function repeat(){
-// try{UPDATEMAP([NEWmap,players,map])}catch(err){}
-  // drawTree(25,25,"#FFFFFF",5)
+
+
   clearCanvas()
   InvDraw()
   fill("white")
@@ -765,7 +789,7 @@ function repeat(){
   let l = JSON.stringify(ActionStore)
   if(mouseStatus == "canvas"){
 
-        // console.log("hi")
+
     fill("rgba(200,0,255,0.3)")
     rectAtCoords(Math.floor(mouseX/20),Math.floor(mouseY/20))
   } else if(mouseStatus == "inventory"){
@@ -786,11 +810,11 @@ function repeat(){
 
 
 
-  if(AActionStore.length > maxSteps){
-    ActionStore.splice(maxSteps,1)
-    ActionPrint.splice(maxSteps,1)
-    AActionStore.splice(maxSteps,1)
-  }
+  // if(AActionStore.length > maxSteps){
+  //   ActionStore.splice(maxSteps,1)
+  //   ActionPrint.splice(maxSteps,1)
+  //   AActionStore.splice(maxSteps,1)
+  // }
 
 
 
@@ -805,18 +829,38 @@ function repeat(){
 
 
   if(ATTRIBUTEOF(player.Inventory[player.selectedSlot],"B") != "NONE"){
-    for(let i = 0; i < 41; i++){
-      for(let j = 0; j < 41; j++){
-        if(distance(j,i,20,20) <= 12){
-          fill("rgba(100,255,100,"+flash+")")
-          rectAtCoords(j,i)
+    fill("rgba(100,255,100,"+flash+")")
+    // for(let i = 0; i < 41; i++){
+    //   for(let j = 0; j < 41; j++){
+    //     if(distance(j,i,20,20) <= 12){
+          
+    //       rectAtCoords(j,i)
 
 
-        }
+    //     }
 
 
-      }
+    //   }
+    // }
+
+    for(let i = 0; i < circleSIGH.length; i++){
+      rectAtCoords(circleSIGH[i][0],circleSIGH[i][1])
     }
+    rect(240,240,340,340)
+    rect(320,180,180,60)
+    rect(320,580,180,60)
+    rect(180,320,60,180)
+    rect(580,320,60,180)
+
+    rect(280,200,40,40)
+    rect(500,200,40,40)
+    rect(280,580,40,40)
+    rect(500,580,40,40)
+
+    rect(200,280,40,40)
+    rect(580,280,40,40)
+    rect(200,500,40,40)
+    rect(580,500,40,40)
   }
 
   if(combatScreen.screenActive == 1){
@@ -925,11 +969,15 @@ function amountOfItems(){
 
 
 
-function myFunction() {
-   requestAnimationFrame(myFunction);
-   repeat()
-}
-requestAnimationFrame(myFunction);
+// function myFunction() {
+//    requestAnimationFrame(myFunction);
+//    repeat()
+// }
+// requestAnimationFrame(myFunction);
+
+canvasAnimation = setInterval(function(){ 
+    repeat()
+}, 100/(fps/10));
 
 
 function rectAtCoords(x,y){
@@ -962,7 +1010,7 @@ function UPDATEMAP(input){
   NEWmap = input[0]
   players = input[1]
   map = input[2]
-  clearCanvas()
+  // clearCanvas()interva
   let trees = []
   let shades = []
 
@@ -1011,51 +1059,6 @@ function UPDATEMAP(input){
 
 
 
-
-
-
-function updateMap(input){
-  // console.log(input)
-  map = input[0]
-  players = input[1]
-  clearCanvas()
-  let trees = []
-  for(let ch = 0; ch < map.length; ch++){
-    let map2 = map[ch]
-    let importantChunkInformation = [map2[0],map2[1],map2[2]]
-    // map[ch].splice(0,3)
-
-    //draw
-    for(let i = 3; i < map2.length; i++){
-      let deparsed = MasterTileDeparser(map2[i][2]) 
-
-      
-      let ccx = importantChunkInformation[0]*20+map2[i][0]+20-player.x
-      let ccy = importantChunkInformation[1]*20+map2[i][1]+20-player.y
-      let a = 1 - deparseDurability(map2[i][2])
-
-      fill(deparsed[0])
-      rectAtCoords(ccx,ccy)
-
-      if(ATTRIBUTEOF(map2[i][2],"T") != "NONE"){
-        if(ccx > -5 && ccy > -5 && ccx < 46 && ccy < 46){
-        // console.log(ccx,ccy,"rgba(30,95,30,0.7)",parseInt(ATTRIBUTEOF(map2[i][2],"S")))
-        trees.push([ccx,ccy,"rgba(10,65,10,0.7)",parseInt(ATTRIBUTEOF(map2[i][2],"S"))])}
-      }
-            if(a != "full"){
-        ctx.lineWidth = a * 5
-        line(ccx*20+10-a*9,ccy*20+10-a*9,a*18,a*18)
-        line(ccx*20+10-a*9,ccy*20+10+a*9,a*18,-a*18)
-      
-      }
-    }
-  }
-  playersUpdate(input[1])
-  for(let i = 0; i < trees.length; i++){
-    let a = trees[i]
-    drawTree(a[0],a[1],a[2],a[3])
-  }
-}
 
 
 
