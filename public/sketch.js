@@ -1080,8 +1080,8 @@ function UPDATEMAP(input){
 
 
 function drawAtCoords(x,y,col){
-  fill(col)
-  rectAtCoords(x+20-player.x,y+20-player.y)
+  fillM(col)
+  rectAtCoordsM(x+20-player.x,y+20-player.y)
 }
 
 function playersUpdate(e){
