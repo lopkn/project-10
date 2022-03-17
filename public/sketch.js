@@ -28,6 +28,12 @@ var AActionStore = []
 var ChatBox = ""
 var flash = 0
 
+
+
+var cm = document.getElementById("mapCanvas");
+var ctxm = cm.getContext("2d");
+
+
         var inv = document.getElementById("Inventory");
         var invctx = inv.getContext("2d");
         inv.width = 820;
@@ -48,6 +54,7 @@ var flash = 0
         var combat = document.getElementById("CombatMenu");
         var combatctx = combat.getContext("2d");
         combatctx.font = "20px Courier New"
+        combatctx.textAlign = "center"
 
         var laser = document.getElementById("GIF");
         // var laserctx = laser.getContext("2d")
@@ -100,6 +107,7 @@ socket.on('TICK',tick)
 socket.on('PING',returnPing)
 socket.on("chat",chatProcess)
 socket.on("comrelay",combatProcess)
+socket.on("combatText",combatText)
 // socket.on('playersRelay',playersUpdate)
 
 // socket.on('players',drawPlayers)
@@ -166,6 +174,91 @@ playerSprites.src = 'playerSprites.png'
  function COMfill(i){
     combatctx.fillStyle = i
   }
+
+function COMtext(i,x,y){
+  combatctx.fillText(i,x,y)
+}
+
+class textPhysicsPiece{
+  constructor(text,x,y,color,vx,vy,g,t,e){
+    this.text = text
+    this.x = x
+    this.y = y
+    this.color = color
+    this.vx = vx
+    this.vy = vy
+    this.g = g
+    this.t = (t == undefined ? 0 : t)
+    this.life = 500 + this.t
+    this.e = e
+    if(e != undefined){
+      this.an = 5
+    } else {
+      this.an = 0
+    }
+
+
+  }
+
+  draw(){
+    COMfill(this.color)
+    combatctx.strokeStyle = "black"
+    if(this.an > 0){
+      combatctx.font = "bold "+(20 + 5 * this.an )+"px Arial"
+    } else {
+
+      if(this.e == undefined){
+        combatctx.font = "20px Arial"
+      } else {
+        combatctx.font = "bold 20px Arial"
+      }
+    }
+
+    if(isNaN(parseInt(this.text)) == true){
+      combatctx.lineWidth = 3
+      combatctx.strokeText(this.text,this.x,this.y)
+      // combatctx.stroke()
+    }
+
+    COMtext(this.text,this.x,this.y)
+  }
+  update(){
+
+    if(this.an == 0 && this.e != undefined){
+      combatScreen.ctext.push(this.e)
+    }
+
+
+    if(this.life < 500){
+
+      if(this.life < 70){
+        this.vx -= 0.5
+      }
+
+
+      this.vy += this.g
+
+      if(this.y > 400){
+        this.y = 400
+        this.vy *= -0.8
+      }
+
+      this.y += this.vy
+
+      this.x += this.vx
+    }
+    
+    this.life -= 1
+    this.an -= 1
+
+
+
+  }
+
+
+}
+
+
 class Combat{
   constructor(){
     this.screenActive = 0
@@ -218,6 +311,7 @@ class Combat{
     this.started = 0
     this.party1 = [1]
     this.party2 = [1]
+    this.ctext = []
   }
 
 
@@ -292,10 +386,49 @@ class Combat{
 
     for(let i = 0; i < 4; i++){
       COMfill("rgb(255,255,255)")
-      combatctx.fillText(this.currentMenu[i],0,295.5+32.5*i)
+      combatctx.font = "bold 20px Courier New"
+      COMtext(this.currentMenu[i],190,295.5+32.5*i)
     }
-    combatctx.fillText("back",315,263)
+    COMtext("back",340,263)
+
+
+    // COMfill("#FF00FF")
+    // let tempt = this.ctext[0][0] == player.id ? 0 : 1
+    // let tempb = tempt == 0 ? 1 : 0
+    // COMtext(this.ctext[tempt][1],50,50)
+    // COMtext(this.ctext[tempb][1],400,50)
+    // COMtext(this.ctext[tempt][2],400,70)
+    // COMtext(this.ctext[tempb][2],50,70)
+    
+
+    for(let i = 0; i < this.ctext.length; i++){
+      this.ctext[i].draw()
+      this.ctext[i].update()
+    }
+
+    for(let i = this.ctext.length-1; i > -1; i--){
+      if(this.ctext[i].life < 0){
+        this.ctext.splice(i,1)
+      }
+    }
+
+
   
+  }
+
+
+  combattext(e){
+    // this.ctext = e
+    console.log(e)
+    let tempt = e[0][0] == player.id ? 0 : 1
+    let tempb = tempt == 0 ? 1 : 0
+
+    let f1 = new textPhysicsPiece(e[tempb][2],375,100,"#FF0000",Math.random()*2-1,Math.random()*2-1,0.07)
+    let f2 = new textPhysicsPiece(e[tempt][2],75,100,"#FF0000",Math.random()*2-1,Math.random()*2-1,0.07)
+
+    this.ctext.push(new textPhysicsPiece(e[tempt][1],75,70,"#FF00FF",Math.random()*1-0.5,Math.random(),0.02,50,f1))
+    this.ctext.push(new textPhysicsPiece(e[tempb][1],375,70,"#FF00FF",Math.random()*1-0.5,Math.random(),0.02,50,f2))
+
   }
 
 
@@ -343,6 +476,21 @@ class Combat{
 
 }
 
+
+
+
+
+function combatText(e){
+  combatScreen.combattext(e)
+}
+
+
+
+
+
+
+
+
 var combatScreen = new Combat()
 
 /////////////////////////////////////////////////////
@@ -363,6 +511,22 @@ function rect(x,y,x2,y2){
 function fill(i){
   ctx.fillStyle = i
 }
+
+
+function lineM(x,y,w,h){
+  ctxm.beginPath();
+  ctxm.moveTo(x,y);
+  ctxm.lineTo(w+x, h+y);
+  ctxm.stroke();
+}
+function rectM(x,y,x2,y2){
+  ctxm.fillRect(x,y,x2,y2)
+}
+function fillM(i){
+  ctxm.fillStyle = i
+}
+
+
 function textO(str,x,y){
   ctx.font = "30px Arial"
   ctx.fillText(str,x,y)
@@ -567,9 +731,9 @@ let maxSteps = 2000000
 // ==================================================================================================================
 
 function repeat(){
-  try{UPDATEMAP([NEWmap,players,map])}catch(err){}
+// try{UPDATEMAP([NEWmap,players,map])}catch(err){}
   // drawTree(25,25,"#FFFFFF",5)
-
+  clearCanvas()
   InvDraw()
   fill("white")
   rectAtCoords(20,20)
@@ -594,8 +758,13 @@ function repeat(){
 
 
 
+
+
+
+
   let l = JSON.stringify(ActionStore)
   if(mouseStatus == "canvas"){
+
         // console.log("hi")
     fill("rgba(200,0,255,0.3)")
     rectAtCoords(Math.floor(mouseX/20),Math.floor(mouseY/20))
@@ -767,9 +936,13 @@ function rectAtCoords(x,y){
   rect(x*20,y*20,20,20)
 }
 
+function rectAtCoordsM(x,y){
+  rectM(x*20,y*20,20,20)
+}
+
 function clearCanvas(){
   fill("#000000")
-  rect(0,0,820,820)
+  ctx.clearRect(0, 0, 820, 820)
 }
 
 
@@ -785,7 +958,7 @@ var NEWmap = []
 
 function UPDATEMAP(input){
   // console.log(input[0])
-  try{
+
   NEWmap = input[0]
   players = input[1]
   map = input[2]
@@ -803,8 +976,8 @@ function UPDATEMAP(input){
       let bb = input[0][i].split(",")
       let ccx = parseInt(bb[0])+20-player.x
       let ccy = parseInt(bb[1])+20-player.y
-      fill(deparsed[0])
-      rectAtCoords(ccx,ccy)
+      fillM(deparsed[0])
+      rectAtCoordsM(ccx,ccy)
       if(ATTRIBUTEOF(tblock,"$") != "NONE"){
         shades.push([ccx,ccy,parseInt(ATTRIBUTEOF(tblock,"$"))*0.2])
       }
@@ -814,9 +987,9 @@ function UPDATEMAP(input){
         trees.push([ccx,ccy,"rgba(10,65,10,0.7)",parseInt(ATTRIBUTEOF(tblock,"S"))])}
       }
             if(a != "full"){
-        ctx.lineWidth = a * 5
-        line(ccx*20+10-a*9,ccy*20+10-a*9,a*18,a*18)
-        line(ccx*20+10-a*9,ccy*20+10+a*9,a*18,-a*18)
+        ctxm.lineWidth = a * 5
+        lineM(ccx*20+10-a*9,ccy*20+10-a*9,a*18,a*18)
+        lineM(ccx*20+10-a*9,ccy*20+10+a*9,a*18,-a*18)
       
       }
   }
@@ -827,10 +1000,10 @@ function UPDATEMAP(input){
     drawTree(a[0],a[1],a[2],a[3])
   }
   for(let i = 0; i < shades.length; i++){
-    fill("rgba(0,0,0,"+shades[i][2]+")")
-    rectAtCoords(shades[i][0],shades[i][1])
+    fillM("rgba(0,0,0,"+shades[i][2]+")")
+    rectAtCoordsM(shades[i][0],shades[i][1])
   }
-} catch(err){ console.log(err)}
+
 }
 
 
@@ -926,8 +1099,8 @@ function drawTree(x,y,l,s){
   for(let i = -7; i < 8; i++){
     for(let j = -7; j < 8; j++){
       if(distance(x+j,y+i,x,y) <= s){
-        fill(l)
-        rectAtCoords(x+j,y+i)
+        fillM(l)
+        rectAtCoordsM(x+j,y+i)
       }
     }
   }

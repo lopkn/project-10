@@ -375,17 +375,27 @@ function newConnection(socket){
 	players[findPlayerInArr(socket.id)].log(CURRENTCONFIGS.ConsoleResponses.Help1,"#A000FF")
 	io.to(socket.id).emit('sendWhenJoin', socket.id)
 	players[players.length-1].relay2()
-	    socket.on('disconnect', function () {
+	    socket.on('disconnect',function(){disconnect(socket)});
+}
+
+
+ function disconnect(socket) {
         console.log(socket.id + " has disconnected");
         broadcast("--"+socket.id+" has left!",cmdc.small_error)
         for(let i = 0; i < players.length; i++){
         	if(players[i].id == socket.id){
+        		if(players[i].inCombat !== false){
+        			endCombatInstance(players[i].inCombat)
+        		}
+
+
+
+
         		players.splice(i,1)
         		break
         	}
         }
-    });
-}
+    }
 
 
 function allPlayersGenerateChunks(){
@@ -426,9 +436,9 @@ function doSomething(){
 		TIME += 1
 	} else if(TIME == 90){
 
-		TIME = getLongestPlayerAction() * -1
+		TIME = getLongestPlayerAction() * -5
 	}
-	if(TIME < 0 && TIME % 1 === 0){
+	if(TIME < 0 && TIME % 5 === 0){
 		processPlayersActions()
 		allPlayersGenerateChunks()
 	}else if(TIME == 0){
@@ -536,7 +546,7 @@ function processPlayersActions(){
 			
 		}
 	}
-	CompleteCombatSimul()
+
 	for(let i = 0; i < processeeOrders.length; i++){
 		for(let j = 0; j < processees[processeeOrders[i]].length; j++){
 			CompleteActionStep(processees[processeeOrders[i]][j][0],processees[processeeOrders[i]][j][1])
@@ -544,6 +554,8 @@ function processPlayersActions(){
 		}
 
 	}
+
+	CompleteCombatSimul()
 	processees = {
 	"click":[],
 	"select":[],
@@ -583,7 +595,6 @@ function getLongestPlayerAction(){
 
 function CompleteActionStep(p,s){
 	let r = findPlayerInArr(p)
-
 
 	if(typeof(s) == "string" && s.length == 1){
 		//if action is key
@@ -1338,7 +1349,7 @@ class combatInstance{
 
 		this.p1m = 1
 		this.p2m = 1
-
+		this.textarr = [[this.p1,"",""],[this.p2,"",""]]
 
 
 		this.p1n = findPlayerInArr(p1)
@@ -1355,7 +1366,7 @@ class combatInstance{
 
 		if(p == this.p1){
 			console.log(p,str,1)
-			let temp = this.process2(this.p1m,this.p2m,this.p1d,this.p2d,str)
+			let temp = this.process2(this.p1m,this.p2m,this.p1d,this.p2d,str,0)
 			this.p1m *= temp[0]
 			this.p2m *= temp[1]
 			this.p1d = temp[2]
@@ -1365,7 +1376,7 @@ class combatInstance{
 		}
 		if(p == this.p2){
 			console.log(p,str,2)
-			let temp = this.process2(this.p2m,this.p1m,this.p2d,this.p1d,str)
+			let temp = this.process2(this.p2m,this.p1m,this.p2d,this.p1d,str,1)
 			this.p2m *= temp[0]
 			this.p1m *= temp[1]
 			this.p2d = temp[2]
@@ -1377,29 +1388,34 @@ class combatInstance{
 	}
 
 
-	process2(atkr,dfer,atkrn,dfern,str){
-		console.log(str)
+	process2(atkr,dfer,atkrn,dfern,str,a){
+
+		let b = (a == 0 ? 1 : 0)
 //punch
 		if(str == "001"){
-			dfern += 30
+			dfern += 3
+			this.textarr[a][1] += "punch"
 		}
 //jab
 		if(str == "002"){
-			dfern += 30
+			dfern += 3
+			this.textarr[a][1] += "jab"
 		}
 //kick
 		if(str == "003"){
-			dfern += 40
+			dfern += 4
+			this.textarr[a][1] += "kick"
 		}
 //block
 	if(str == "10"){
 		atkr = 0.7
+		this.textarr[a][2] += "block"
 	}
 //dodge
 	if(str == "11"){
 		if(Math.random() > 0.5){
 			atkr = 0
-			console.log("dodge")
+			this.textarr[a][2] += "dodge"
 		}
 
 
@@ -1418,15 +1434,37 @@ class combatInstance{
 
 		this.p1n = findPlayerInArr(this.p1)
 		this.p2n = findPlayerInArr(this.p2)
+		if(this.p1n === false || this.p2n === false){
+			endCombatInstance(this.comid)
+		}
+
+
+
 		//maybe a bit of redundancy
 
+		let a = (this.p1d * this.p1m)
+		let b = (this.p2d * this.p2m)
+
+		if(this.textarr[0][2] == "" && a != 0){
+			this.textarr[0][2] = a
+		}
+		if(this.textarr[1][2] == "" && b != 0){
+			this.textarr[1][2] = b
+		}
 
 
-		players[this.p1n].hp -= (this.p1d * this.p1m)
-		players[this.p2n].hp -= (this.p2d * this.p2m)
+
+
+
+		players[this.p1n].hp -= a
+		players[this.p2n].hp -= b
 
 		players[this.p1n].combatRelay()
 		players[this.p2n].combatRelay()
+
+
+		io.to(players[this.p1n].id).emit("combatText",this.textarr)
+		io.to(players[this.p2n].id).emit("combatText",this.textarr)
 
 		this.p1d = 0
 		this.p2d = 0
@@ -1437,7 +1475,14 @@ class combatInstance{
 		if(distance(players[this.p1n].x,players[this.p1n].y,players[this.p2n].x,players[this.p2n].y) > 13){
 			endCombatInstance(this.comid)
 		}
+		if(players[this.p1n].hp <= 0 || players[this.p2n].hp <= 0){
+			endCombatInstance(this.comid)
+		}
 
+
+
+
+		this.textarr = [[this.p1,"",""],[this.p2,"",""]]
 
 	}
 
