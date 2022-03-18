@@ -45,6 +45,14 @@ class player{
 		this.effects = []
 		this.inCombat = false
 		this.hp = 100
+
+		this.playerStats = {
+			"strength" : 1,
+			"agility" : 1,
+			"mana" : 1,
+			"magic" : 1
+
+		}
 		
 	}
 	say(e){
@@ -1391,19 +1399,25 @@ class combatInstance{
 	process2(atkr,dfer,atkrn,dfern,str,a){
 
 		let b = (a == 0 ? 1 : 0)
+		let pno = (a == 0 ? this.p1n : this.p2n)
 //punch
 		if(str == "001"){
-			dfern += 3
+			let ts = getstats(pno,"strength")
+			console.log(ts)
+			dfern += 3 + ts*0.3 + ts*Math.random()*2
 			this.textarr[a][1] += "punch"
 		}
 //jab
 		if(str == "002"){
+			let ts = getstats(pno,"strength")
+			dfern += 3 + ts*0.3 + ts*Math.random()*2
 			dfern += 3
 			this.textarr[a][1] += "jab"
 		}
 //kick
 		if(str == "003"){
-			dfern += 4
+			let ts = getstats(pno,"agility")
+			dfern += 3 + ts*0.5 + ts*Math.random()*1
 			this.textarr[a][1] += "kick"
 		}
 //block
@@ -1413,7 +1427,9 @@ class combatInstance{
 	}
 //dodge
 	if(str == "11"){
-		if(Math.random() > 0.5){
+		let ts = getstats(pno,"agility")
+		
+		if(Math.random() < 0.4 + Math.sqrt(ts,2) ){
 			atkr = 0
 			this.textarr[a][2] += "dodge"
 		}
@@ -1442,8 +1458,8 @@ class combatInstance{
 
 		//maybe a bit of redundancy
 
-		let a = (this.p1d * this.p1m)
-		let b = (this.p2d * this.p2m)
+		let a = Math.round(this.p1d * this.p1m)
+		let b = Math.round(this.p2d * this.p2m)
 
 		if(this.textarr[0][2] == "" && a != 0){
 			this.textarr[0][2] = a
@@ -1451,8 +1467,12 @@ class combatInstance{
 		if(this.textarr[1][2] == "" && b != 0){
 			this.textarr[1][2] = b
 		}
-
-
+		if(this.textarr[0][2] == "block" && a != 0){
+			this.textarr[0][2] = "b-" + a
+		}
+		if(this.textarr[1][2] == "block" && b != 0){
+			this.textarr[1][2] = "b-" + b
+		}
 
 
 
@@ -1510,7 +1530,9 @@ class combatInstance{
 
 
 
-
+function getstats(p,str){
+	return(players[p].playerStats[str])
+}
 
 
 

@@ -7,7 +7,7 @@ class Player{
     this.hp = 100
     this.chunk = {"x":0,"y":0}
     this.selectedSlot = 0
-    this.Inventory = ["B1-50","B2-40","U1-100"]
+    this.Inventory = ["B1-50","B2-40","U2-100"]
   }
 }
 
@@ -246,9 +246,9 @@ class textPhysicsPiece{
         this.vy *= -0.8
       }
 
-      this.y += this.vy
+      this.y += this.vy*3
 
-      this.x += this.vx
+      this.x += this.vx*3
     }
     
     this.life -= 1
@@ -358,7 +358,7 @@ class Combat{
     COMfill("rgb(0,27,91)")
     COMrect(0,270,380,130)
     COMrect(300,237.5,80,32.5)
-    COMfill("#00FF00")
+    COMfill("rgb("+(255-2.55*player.hp)+","+(2.55*player.hp)+",0)")
     COMrect(5,5,player.hp*2,10)
 
 
@@ -426,11 +426,55 @@ class Combat{
     let tempt = e[0][0] == player.id ? 0 : 1
     let tempb = tempt == 0 ? 1 : 0
 
-    let f1 = new textPhysicsPiece(e[tempb][2],375,100,"#FF0000",Math.random()*2-1,Math.random()*2-1,0.07)
-    let f2 = new textPhysicsPiece(e[tempt][2],75,100,"#FF0000",Math.random()*2-1,Math.random()*2-1,0.07)
+    let et = e[tempt][2]
+    let eb = e[tempb][2]
 
-    this.ctext.push(new textPhysicsPiece(e[tempt][1],75,70,"#FF00FF",Math.random()*1-0.5,Math.random(),0.02,50,f1))
-    this.ctext.push(new textPhysicsPiece(e[tempb][1],375,70,"#FF00FF",Math.random()*1-0.5,Math.random(),0.02,50,f2))
+let splitt;
+let splitb;
+
+    try{
+    splitt = et.split("-")
+  } catch {splitt = []}
+
+
+    try{
+    splitb = eb.split("-")
+  } catch {splitb = []}
+
+    let tb;
+    let tt ;
+
+    if(isNaN(parseInt(eb)) == false){
+      tb = "rgb(255,0,0)" 
+    } else {
+      tb = "rgb(255,255,0)"
+    }
+
+    if(isNaN(parseInt(et)) == false){
+      tt =  "rgb(255,0,0)" 
+    } else {
+      tt = "rgb(255,255,0)"
+    }
+
+
+    if(splitt[0] == "b"){
+      tt = "rgb(255,255,0)"
+      et = splitt[1]
+    }
+
+    if(splitb[0] == "b"){
+      tb = "rgb(255,255,0)"
+      eb = splitb[1]
+    }
+
+
+
+
+    let f1 = new textPhysicsPiece(eb,375,100,tb,Math.random()*2-1,Math.random()*2-1,0.07)
+    let f2 = new textPhysicsPiece(et,75,100,tt,Math.random()*2-1,Math.random()*2-1,0.07)
+
+    this.ctext.push(new textPhysicsPiece(e[tempt][1],75,70,"rgb(255,0,255)",Math.random()*1-0.5,Math.random(),0.02,50,f1))
+    this.ctext.push(new textPhysicsPiece(e[tempb][1],375,70,"rgb(255,0,255)",Math.random()*1-0.5,Math.random(),0.02,50,f2))
 
   }
 
@@ -628,16 +672,16 @@ document.addEventListener('keydown', (event) => {
     ActionStore.push(name)
     AActionStore.push(name)
 
-    if(name == "w" && AActionStore.length <= maxSteps){
+    if(name == "w" && AActionStore.length <= 2000){
       walker.y -= 1
       ActionPrint.push([walker.x,walker.y,"rgba(200,0,0,0.3)"])
-    } else if(name == "s"&& AActionStore.length <= maxSteps){
+    } else if(name == "s"&& AActionStore.length <= 2000){
       walker.y += 1
       ActionPrint.push([walker.x,walker.y,"rgba(200,0,0,0.3)"])
-    } else if(name == "d"&& AActionStore.length <= maxSteps){
+    } else if(name == "d"&& AActionStore.length <= 2000){
       walker.x += 1
       ActionPrint.push([walker.x,walker.y,"rgba(200,0,0,0.3)"])
-    } else if(name == "a"&& AActionStore.length <= maxSteps){
+    } else if(name == "a"&& AActionStore.length <= 2000){
       walker.x -= 1
       ActionPrint.push([walker.x,walker.y,"rgba(200,0,0,0.3)"])
     }
@@ -747,15 +791,14 @@ function debugRect(x,y){
 var scrollTop = 0
 var mouseCoords = []
 
-let maxSteps = 2000000
+var circleSIGH = [[20,8],[13,11],[11,13],[8,20],[11,27],[13,29],[20,32],[27,29],[29,27],[32,20],[29,13],[27,11]]
+// let maxSteps = 2000000
 
 // main loop
 // ==================================================================================================================
 
 
-var circleSIGH = [[20,8],[13,11],[11,13],[8,20],[11,27],[13,29],[20,32],[27,29],[29,27],[32,20],[29,13],[27,11]]
 function repeat(){
-
 
   clearCanvas()
   InvDraw()
@@ -766,14 +809,24 @@ function repeat(){
 
 
   if(inRect(mouseX,mouseY,0,0,820,820)){
-  mouseStatus = "canvas"
-  scrollTop = window.scrollY
-  try{
-    mouseCoords = [Math.floor(mouseX/20)-20+player.x,Math.floor(mouseY/20)-20+player.y]
-  } catch{}
+    mouseStatus = "canvas"
+    scrollTop = window.scrollY
+    try{
+      mouseCoords = [Math.floor(mouseX/20)-20+player.x,Math.floor(mouseY/20)-20+player.y]
+    } catch{}
+  
+    fill("rgba(200,0,255,0.3)")
+    rectAtCoords(Math.floor(mouseX/20),Math.floor(mouseY/20))
+
+
+
   } else if(inRect(mouseX,mouseY,0,825,820,50)){
-  mouseCoords = [Math.floor(mouseX/50)]
-  mouseStatus = "inventory"
+    mouseCoords = [Math.floor(mouseX/50)]
+    mouseStatus = "inventory" 
+
+    fillI("rgba(200,0,255,0.5)")
+    rectI(Math.floor(mouseX/50)*50,0,50,50)
+  
   } else if(inRect(mouseX,mouseY,850,675,380,130)){
     mouseStatus = "combatoptions"
   } else {
@@ -786,16 +839,7 @@ function repeat(){
 
 
 
-  let l = JSON.stringify(ActionStore)
-  if(mouseStatus == "canvas"){
 
-
-    fill("rgba(200,0,255,0.3)")
-    rectAtCoords(Math.floor(mouseX/20),Math.floor(mouseY/20))
-  } else if(mouseStatus == "inventory"){
-    fillI("rgba(200,0,255,0.5)")
-    rectI(Math.floor(mouseX/50)*50,0,50,50)
-  }
 
 
   for(let i = 0; i < ActionPrint.length; i++){
@@ -810,13 +854,10 @@ function repeat(){
 
 
 
-  // if(AActionStore.length > maxSteps){
-  //   ActionStore.splice(maxSteps,1)
-  //   ActionPrint.splice(maxSteps,1)
-  //   AActionStore.splice(maxSteps,1)
-  // }
 
 
+
+  let l = JSON.stringify(ActionStore)
 
   fill("rgba(255,0,200,0.5)")
   textO(l,400-(l.length-2)*6.25 ,370)
@@ -830,18 +871,7 @@ function repeat(){
 
   if(ATTRIBUTEOF(player.Inventory[player.selectedSlot],"B") != "NONE"){
     fill("rgba(100,255,100,"+flash+")")
-    // for(let i = 0; i < 41; i++){
-    //   for(let j = 0; j < 41; j++){
-    //     if(distance(j,i,20,20) <= 12){
-          
-    //       rectAtCoords(j,i)
 
-
-    //     }
-
-
-    //   }
-    // }
 
     for(let i = 0; i < circleSIGH.length; i++){
       rectAtCoords(circleSIGH[i][0],circleSIGH[i][1])
@@ -863,7 +893,13 @@ function repeat(){
     rect(580,500,40,40)
   }
 
-  if(combatScreen.screenActive == 1){
+
+
+}
+
+
+function repeatCombat(){
+    if(combatScreen.screenActive == 1){
     if(combatScreen.started == 0){
       combatScreen.startAnimation()
     } else {
@@ -877,6 +913,8 @@ function repeat(){
   }
 
 }
+
+
 //repeat end =-=========================-================================-================================-=
 
 
@@ -978,6 +1016,12 @@ function amountOfItems(){
 canvasAnimation = setInterval(function(){ 
     repeat()
 }, 100/(fps/10));
+
+CombatAnimation = setInterval(function(){
+    repeatCombat()
+},41)
+
+
 
 
 function rectAtCoords(x,y){
