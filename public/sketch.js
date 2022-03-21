@@ -657,12 +657,13 @@ function inListR(inp,arr){
 
 
 
-
-
+var textStore = []
+var textStoreIndex = -1
 
 
 function commandingPush(e){
-  if(e != "Backspace" && e != "Enter" && e != "<" && e != ">"){
+
+  if(e != "ArrowUp" && e != "ArrowDown" && e != "Backspace" && e != "Enter" && e != "<" && e != ">"){
   ActionStore[ActionStore.length-1] += e
   AActionStore[AActionStore.length-1] += e
   } else if(e == "Backspace") {
@@ -676,9 +677,11 @@ function commandingPush(e){
     }
   } else if(e == "Enter"){
     commanding = 0
+    textStoreIndex = -1
+    textStore.splice(0,0,ActionStore[ActionStore.length-1])
     let temp = AActionStore[AActionStore.length -1]
     let temp2 = parseInt(temp.split(" ")[1])
-    console.log(temp,temp2)
+
     if(temp.split(" ")[0] == "/fps" && isNaN(temp2)==false){
       fps = temp2
       clearInterval(canvasAnimation)
@@ -694,8 +697,38 @@ function commandingPush(e){
 
 
 
+  } else if(e == "ArrowUp"){
+    commandingArrow("up")
+
+  } else if(e == "ArrowDown"){
+    commandingArrow("down")
   }
 }
+
+
+
+function commandingArrow(e){
+  let a = ''
+  if(e == "up"){
+    if(textStoreIndex < textStore.length-1){
+    textStoreIndex += 1}
+    if(textStoreIndex > -1){
+    a = textStore[textStoreIndex]
+    }
+  } else {
+    if(textStoreIndex > -1){
+    textStoreIndex -= 1}
+    if(textStoreIndex > -1){
+    a = textStore[textStoreIndex]
+    }
+  }
+
+  ActionStore[ActionStore.length-1] = a
+  AActionStore[AActionStore.length-1] = a
+
+}
+
+
 
 
 
@@ -704,7 +737,7 @@ KeyboardEvent.repeat = false
 document.addEventListener('keydown', (event) => {
   var name = event.key;
 
-  if(name != "Shift" && name != "Backspace" && name != "/" && commanding == 0){
+  if(name.length < 1 && name != "Shift" && name != "Backspace" && name != "/" && commanding == 0){
     ActionStore.push(name)
     AActionStore.push(name)
 
@@ -727,7 +760,7 @@ document.addEventListener('keydown', (event) => {
       commanding = 1
       ActionStore.push("/")
       AActionStore.push("/")
-    } else {
+    } else if(name == "/"){
       commandingPush("/")
     }
 
@@ -742,7 +775,12 @@ document.addEventListener('keydown', (event) => {
 
 
 
-  } else if(commanding == 1 && (name.length == 1 || name == "Backspace" || name == "Enter")){
+  } else if(commanding == 0 &&(name == "ArrowDown"|| name == "ArrowUp")){
+    commanding = 1
+    ActionStore.push("/")
+    AActionStore.push("/")
+    commandingPush(name)
+  } else if(commanding == 1 && (name.length == 1 || name == "Backspace" || name == "Enter"|| name == "ArrowDown"|| name == "ArrowUp")){
     commandingPush(name)
   } else if(name == "Backspace"){
     let ee = ActionStore.splice(ActionStore.length-1,1)
