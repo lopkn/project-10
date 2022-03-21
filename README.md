@@ -3,7 +3,7 @@
 DONE (after creation of tdl)
 - Logins and accounts
 - Lighting & effect tables
-
+- dependancy of config from server
 
 TO DO LIST
 
@@ -14,12 +14,12 @@ TO DO LIST
 - terrain randomness
 - biomes
 - rivers
-- dependancy of config from server
 - slow at different terrain
 - slab tiles
 - actual structure generation
 - ore and crafting
 - pathfinding AI
+- ping compensation
 - player combat
 - player health & moves
 - player password change

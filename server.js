@@ -381,10 +381,23 @@ function newConnection(socket){
 	broadcast("--"+socket.id+" has joined!",cmdc.item)
 	players.push(new player(socket.id))
 	players[findPlayerInArr(socket.id)].log(CURRENTCONFIGS.ConsoleResponses.Help1,"#A000FF")
+	joined(socket.id)
+
+
 	io.to(socket.id).emit('sendWhenJoin', socket.id)
 	players[players.length-1].relay2()
+	
 	    socket.on('disconnect',function(){disconnect(socket)});
 }
+
+
+
+	function joined(e){
+
+		let a = [CURRENTCONFIGS.BLOCKSALL,CURRENTCONFIGS.HeightMap,CURRENTCONFIGS.TILESALL]
+
+		io.to(e).emit("config",a)
+	}
 
 
  function disconnect(socket) {
@@ -453,10 +466,12 @@ function doSomething(){
 		ProcessStep = 1
 		for(let i = 0; i < players.length; i++){
 			players[i].save()
+			io.to(players[i].id).emit('chatUpdate')
 		}
 		playersCollectiveActions = []
-
+		combatMoveTracker = {}
 		allEffectTick()
+
 
 
 
@@ -513,6 +528,21 @@ function ACTIONPROCESS(e){
 
 var ProcessStep = 1
 
+var combatMoveTracker = {}
+
+
+
+function CombatMoveUpdate(e){
+	if(combatMoveTracker[e] == undefined){
+		combatMoveTracker[e] = 1
+		return(true)
+	} else {
+		combatMoveTracker[e] += 1
+		return((combatMoveTracker[e]<5))
+	}
+}
+
+
 var processees = {
 	"click":[],
 	"select":[],
@@ -544,7 +574,7 @@ function processPlayersActions(){
 		} else if(s[0] == "sel"){
 			//if action is select
 			processees["select"].push([q,s])
-		} else if(s[0] == "com"){
+		} else if(s[0] == "com" && CombatMoveUpdate(q)){
 			processees["combat"].push([q,s])
 		}
 	}
@@ -1224,6 +1254,7 @@ var NameTileReferenceDict = CURRENTCONFIGS.NameTileReferenceDict
 //-------------------------------------------
 function selectedSlotItems(p){
 	let r = findPlayerInArr(p)
+	if(r !== false){
 	let e = players[r].selectedSlot
 	if(players[r].Inventory[e] != undefined){
 		let split = players[r].Inventory[e].split('-')
@@ -1234,6 +1265,8 @@ function selectedSlotItems(p){
 
 		return(split[0])
 	
+	}} else {
+		console.log(p,"error")
 	}
 }
 

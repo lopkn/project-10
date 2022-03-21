@@ -102,7 +102,7 @@ display2.style.left = "850px"
 socket = io.connect('/');
 socket.on('sendWhenJoin',joinSuccess)
 socket.on('relay',relayPlayer)
-// socket.on('mapUpdate',updateMap)
+socket.on('chatUpdate',updateChat)
 socket.on('mapUpdate2',UPDATEMAP)
 socket.on('invrelay',updateInv)
 socket.on('TIME',timeUpdate)
@@ -111,7 +111,35 @@ socket.on('PING',returnPing)
 socket.on("chat",chatProcess)
 socket.on("comrelay",combatProcess)
 socket.on("combatText",combatText)
+socket.on("config",configure)
+
+
 // socket.on('playersRelay',playersUpdate)
+
+
+
+  var BLOCKSALL
+  var HeightMap
+  var TILESALL
+
+
+function configure(e){
+   BLOCKSALL = e[0]
+   HeightMap = e[1]
+   TILESALL = e[2]
+  // var ColorTileReferenceDict = e[3]
+  // var NameTileReferenceDict = e[4]
+
+
+
+
+
+  var canvasAnimation = setInterval(function(){ 
+        repeat()
+      }, 100/(fps/10));
+
+}
+
 
 // socket.on('players',drawPlayers)
 function returnPing(){
@@ -119,12 +147,17 @@ function returnPing(){
 }
 
 let flashpoint = 10
+
+function updateChat(){
+  text("<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>"+ChatBox)
+}
+
 function timeUpdate(e){
   if(e%(flashpoint*2) < flashpoint){
   flash = (e%flashpoint )/ 100} else{
     flash = (flashpoint - (e% flashpoint))/ 100
   }
-  text("<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>"+ChatBox)
+  
   timerUpdate(e)
 
   
@@ -499,8 +532,12 @@ let splitb;
       ActionPrint.push([200,200,"#FF00FF"])
 
 
-      this.choicePath = ""
-      this.combatMenuPath1()
+      this.choicePath = this.choicePath.substring(0,this.choicePath.length-1)
+      // this.combatMenuPath1()
+
+
+
+
     } else if(this.allmenu[this.choicePath] == "do nothing"){
 
     }else if(typeof(this.allmenu[this.choicePath]) != "function"){
@@ -645,9 +682,8 @@ function commandingPush(e){
     if(temp.split(" ")[0] == "/fps" && isNaN(temp2)==false){
       fps = temp2
       clearInterval(canvasAnimation)
-      canvasAnimation = setInterval(function(){ 
-        repeat()
-      }, 100/(fps/10));
+
+
 
       delete AActionStore[AActionStore.length -1]
 
@@ -967,6 +1003,10 @@ function chatProcess(e){
   if(ChatBox.length > 3000){
     ChatBox = ChatBox.substring(0,3000)
   }
+
+  updateChat()
+
+
 }
 
 
@@ -1049,7 +1089,7 @@ var NEWmap = []
 
 
 function UPDATEMAP(input){
-  // console.log(input[0])
+
 
   NEWmap = input[0]
   players = input[1]
@@ -1255,7 +1295,7 @@ function deparseTileToColor(str){
     //case ground
     if(split[i][0] == "G"){
       let read = split[i][1]
-      fin += ("-G"+ColorTileReferenceDict[read])
+      fin += ("-G"+TILESALL[read][0])
     } else if(split[i][0] == "B"){
       let read = split[i][1]
       fin += ("-B"+BLOCKSALL[read][0])
@@ -1275,15 +1315,12 @@ function deparseTileToColor(str){
 // var ColorBlockReferenceDict = {"1":"#B96A04"}
 // var NameBlockReferenceDict = {"1":"Oak Wood"}
 // var DurabilityMap = {"1":100}
-var BLOCKSALL = {"1":["#B96A04","Oak Wood",100],"2":["#8C8C8C","Stone",400],"3":["#A95A00","Oak Tree Wood",400]}
-var HeightMap = ["$","B","G"]
+// var BLOCKSALL = {"1":["#B96A04","Oak Wood",100],"2":["#8C8C8C","Stone",400],"3":["#A95A00","Oak Tree Wood",400]}
+// var HeightMap = ["$","B","G"]
+// var TILESALL = {"0":["#000000","Abyss"],"1":["#04399F","Deep Sea"],"2":["#0078FF","Sea"],"3":["#1FB1FF","Shallow Waters"],"4":["#D9DC00","Sand"],"5":["#20A020","Plains"],"6":["#207020","Forest"],"7":["#205020","Dense Forest"],"8":["#707070","Mountains"],"9":["#F0F0F0","Snowy Mountain Peaks"]}
+// var ColorTileReferenceDict = {"0":"#000000","1":"#04399F","2":"#0078FF","3":"#1FB1FF","4":"#D9DC00","5":"#20A020","6":"#207020","7":"#205020","8":"#707070","9":"#F0F0F0"}
+// var NameTileReferenceDict = {"0":"Abyss","1":"Deep Sea","2":"Sea","3":"Shallow Waters","4":"Sand","5":"Plains","6":"Forest","7":"Dense Forest","8":"Mountains","9":"Snowy Mountain Peaks"}
 
-
-var TILESALL = {"0":["#000000","Abyss"],"1":["#04399F","Deep Sea"],"2":["#0078FF","Sea"],"3":["#1FB1FF","Shallow Waters"],"4":["#D9DC00","Sand"],"5":["#20A020","Plains"],"6":["#207020","Forest"],"7":["#205020","Dense Forest"],"8":["#707070","Mountains"],"9":["#F0F0F0","Snowy Mountain Peaks"]}
-
-
-var ColorTileReferenceDict = {"0":"#000000","1":"#04399F","2":"#0078FF","3":"#1FB1FF","4":"#D9DC00","5":"#20A020","6":"#207020","7":"#205020","8":"#707070","9":"#F0F0F0"}
-var NameTileReferenceDict = {"0":"Abyss","1":"Deep Sea","2":"Sea","3":"Shallow Waters","4":"Sand","5":"Plains","6":"Forest","7":"Dense Forest","8":"Mountains","9":"Snowy Mountain Peaks"}
 function deparseTileToName(str){
   let split = str.split('-')
   let fin = ""
@@ -1291,7 +1328,7 @@ function deparseTileToName(str){
     //case ground
     if(split[i][0] == "G"){
       let read = split[i][1]
-      fin += ("-G"+NameTileReferenceDict[read])
+      fin += ("-G"+TILESALL[read][1])
     } else if(split[i][0] == "B"){
       let read = split[i][1]
       fin += ("-B"+BLOCKSALL[read][1])
