@@ -3,6 +3,7 @@
 DONE (after creation of tdl)
 - Logins and accounts
 - Lighting & effect tables
+- player password change
 - dependancy of config from server
 
 TO DO LIST
@@ -22,7 +23,6 @@ TO DO LIST
 - ping compensation
 - player combat
 - player health & moves
-- player password change
 - chests and inventory
 - item name and descriptions
 - refactor MasterTileDeparser

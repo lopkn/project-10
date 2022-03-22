@@ -225,7 +225,7 @@ class textPhysicsPiece{
     this.vy = vy
     this.g = g
     this.t = (t == undefined ? 0 : t)
-    this.life = 500 + this.t
+    this.life = 400 + this.t
     this.e = e
     if(e != undefined){
       this.an = 5
@@ -265,7 +265,7 @@ class textPhysicsPiece{
     }
 
 
-    if(this.life < 500){
+    if(this.life < 400){
 
       if(this.life < 70){
         this.vx -= 0.5
@@ -1326,30 +1326,32 @@ function deparseDurability(str){
   }
   if(e == -1 || ee == e){return("full")} else {return(e/ee)}
 }
-function deparseTileToColor(str){
-  let split = str.split('-')
-  let fin = ""
-  for(let i = 0; i < split.length; i ++){
-    //case ground
-    if(split[i][0] == "G"){
-      let read = split[i][1]
-      fin += ("-G"+TILESALL[read][0])
-    } else if(split[i][0] == "B"){
-      let read = split[i][1]
-      fin += ("-B"+BLOCKSALL[read][0])
-    }
-  }
-  let finSplit = fin.split("-")
-  for(let i = 0; i < HeightMap.length; i++){
-    for(let j = 0; j < finSplit.length; j++){
-      if(finSplit[j][0] == HeightMap[i]){
-        return(finSplit[j].substring(1))
-      }
 
-    }
-  }
 
-}
+// function deparseTileToColor(str){
+//   let split = str.split('-')
+//   let fin = ""
+//   for(let i = 0; i < split.length; i ++){
+//     //case ground
+//     if(split[i][0] == "G"){
+//       let read = split[i][1]
+//       fin += ("-G"+TILESALL[read][0])
+//     } else if(split[i][0] == "B"){
+//       let read = split[i][1]
+//       fin += ("-B"+BLOCKSALL[read][0])
+//     }
+//   }
+//   let finSplit = fin.split("-")
+//   for(let i = 0; i < HeightMap.length; i++){
+//     for(let j = 0; j < finSplit.length; j++){
+//       if(finSplit[j][0] == HeightMap[i]){
+//         return(finSplit[j].substring(1))
+//       }
+
+//     }
+//   }
+
+// }
 // var ColorBlockReferenceDict = {"1":"#B96A04"}
 // var NameBlockReferenceDict = {"1":"Oak Wood"}
 // var DurabilityMap = {"1":100}
@@ -1359,29 +1361,29 @@ function deparseTileToColor(str){
 // var ColorTileReferenceDict = {"0":"#000000","1":"#04399F","2":"#0078FF","3":"#1FB1FF","4":"#D9DC00","5":"#20A020","6":"#207020","7":"#205020","8":"#707070","9":"#F0F0F0"}
 // var NameTileReferenceDict = {"0":"Abyss","1":"Deep Sea","2":"Sea","3":"Shallow Waters","4":"Sand","5":"Plains","6":"Forest","7":"Dense Forest","8":"Mountains","9":"Snowy Mountain Peaks"}
 
-function deparseTileToName(str){
-  let split = str.split('-')
-  let fin = ""
-  for(let i = 0; i < split.length; i ++){
-    //case ground
-    if(split[i][0] == "G"){
-      let read = split[i][1]
-      fin += ("-G"+TILESALL[read][1])
-    } else if(split[i][0] == "B"){
-      let read = split[i][1]
-      fin += ("-B"+BLOCKSALL[read][1])
-    }
-  }
-  let finSplit = fin.split("-")
-  for(let i = 0; i < HeightMap.length; i++){
-    for(let j = 0; j < finSplit.length; j++){
-      if(finSplit[j][0] == HeightMap[i]){
-        return(finSplit[j].substring(1))
-      }
+// function deparseTileToName(str){
+//   let split = str.split('-')
+//   let fin = ""
+//   for(let i = 0; i < split.length; i ++){
+//     //case ground
+//     if(split[i][0] == "G"){
+//       let read = split[i][1]
+//       fin += ("-G"+TILESALL[read][1])
+//     } else if(split[i][0] == "B"){
+//       let read = split[i][1]
+//       fin += ("-B"+BLOCKSALL[read][1])
+//     }
+//   }
+//   let finSplit = fin.split("-")
+//   for(let i = 0; i < HeightMap.length; i++){
+//     for(let j = 0; j < finSplit.length; j++){
+//       if(finSplit[j][0] == HeightMap[i]){
+//         return(finSplit[j].substring(1))
+//       }
 
-    }
-  }
-}
+//     }
+//   }
+// }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 
