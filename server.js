@@ -822,6 +822,10 @@ function helpCommand(e,p){
 		players[p].log(CURRENTCONFIGS.ConsoleResponses.Help4,"#FFFF00")
 	} else if(e[1] == "5" || e[1] == "text" || e[1] == "input"){
 		players[p].log(CURRENTCONFIGS.ConsoleResponses.Help5,"#FFFF00")
+	} else if(e[1] == "6" || e[1] == "command" || e[1] == "commands"){
+		players[p].log(CURRENTCONFIGS.ConsoleResponses.Help6,"#FFFF00")
+	} else if(e[1] == "7" || e[1] == "combat" || e[1] == "battle"){
+		players[p].log(CURRENTCONFIGS.ConsoleResponses.Help7,"#FFFF00")
 	} else {
 		players[p].log("Invalid help option.</br> If you think players would need help with this, tell me your idea in discord. (lopkn#0019)","#FF0000")
 	}

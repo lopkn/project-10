@@ -737,7 +737,7 @@ KeyboardEvent.repeat = false
 document.addEventListener('keydown', (event) => {
   var name = event.key;
 
-  if(name.length < 1 && name != "Shift" && name != "Backspace" && name != "/" && commanding == 0){
+  if(name.length < 2 && name != "Shift" && name != "Backspace" && name != "/" && commanding == 0){
     ActionStore.push(name)
     AActionStore.push(name)
 

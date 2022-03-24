@@ -66,8 +66,8 @@
 		"Help3":"    ===HELP CONTENTS===</br> buffer page.",
 		"Help4":"     --Ticks and movement--</br> When the clock on the top right of your screen runs out,</br> everyone's moves gets processed. This is called a tick.</br> Before each tick, everyone can choose and edit their actions.</br> You can move using keys W A S D. You can also click on blocks on the map,</br> The action will be different depending on what item you are using.</br> Most actions like moving, selecting an item, placing and destroying blocks count as a move.</br> All players can only have a maximum of 20 moves, so plan strategically!",
 		"Help5":"     --Text input mode--</br>",
-		"Help6":"",
-		"Help7":"     --Combat--</br>",
+		"Help6":"     ==Commands==</br> /pno : lets the player know thier player number.</br> /login [name] [password] : login, create account, change password.</br> /fps [number] : sets your fps immediately (no tick wait needed)</br> /keyholder [password] : grants admin powers. </br> the following commands will need admin powers! </br> /tp [player/x] {y} : use one perameter only to teleport to a player, use 2 parameters to teleport to a coordinate. use equal sign to specify coordinate relative to you.</br> /give [item] [amount] : gives you an item with that amount/durability.</br> /set [block] [x] [y] : sets a block type at that coordinate.",
+		"Help7":"     --Combat--</br> If you want to enter combat, click on the player/mob. </br> the combat screen will show up the next tick.</br> while in combat, you can chose moves to defend yourself or attack the enemy.</br> each action made in combat counts as one move.</br> but you can only have 4 combat actions each tick.",
 		"PsswdLong":"there is currently a limit (3 characters) for each account's password.</br> this is to ensure people are not using their real passwords for this game.",
 		"IGNLong":"That name is too long! names can only have a maximum of 10 character length.",
 		"AlreadyLoggedIn":"The login command can only create new accounts if you arent already using one!"
