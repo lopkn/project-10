@@ -7,7 +7,7 @@ class Player{
     this.hp = 100
     this.chunk = {"x":0,"y":0}
     this.selectedSlot = 0
-    this.Inventory = ["B:1-A:50","B:2-A:40","U:2-A:100",""]
+    this.Inventory = ["B1-50","B2-40","U2-100"]
   }
 }
 
@@ -943,7 +943,7 @@ function repeat(){
   }
 
 
-  if(TNEWATTRIBUTEOF(player.Inventory[player.selectedSlot],"B") != "NONE"){
+  if(ATTRIBUTEOF(player.Inventory[player.selectedSlot],"B") != "NONE"){
     fill("rgba(100,255,100,"+flash+")")
 
 
@@ -1074,8 +1074,8 @@ function InvDraw(){
 
 function amountOfItems(){
   if(player.Inventory[player.selectedSlot] != undefined && player.Inventory[player.selectedSlot] != "empty"){
-    let e = TNEWATTRIBUTEOF(player.Inventory[player.selectedSlot],"A")
-    return(e)
+    let e = player.Inventory[player.selectedSlot].split("-")
+    return(e[1])
   } else {return("none")}
 }
 
@@ -1141,20 +1141,20 @@ function UPDATEMAP(input){
   for(let i = 0; i < input[0].length; i++){
      let tblock = map[input[0][i]]
      // console.log(input[0][0]+","+input[0][1])
-      let deparsed = TNEWMasterTileDeparser(tblock) 
-      let a = 1 - TNEWdeparseDurability(tblock)
+      let deparsed = MasterTileDeparser(tblock) 
+      let a = 1 - deparseDurability(tblock)
       let bb = input[0][i].split(",")
       let ccx = parseInt(bb[0])+20-player.x
       let ccy = parseInt(bb[1])+20-player.y
       fillM(deparsed[0])
       rectAtCoordsM(ccx,ccy)
-      if(TNEWATTRIBUTEOF(tblock,"$") != "NONE"){
-        shades.push([ccx,ccy,parseInt(TNEWATTRIBUTEOF(tblock,"$"))*0.2])
+      if(ATTRIBUTEOF(tblock,"$") != "NONE"){
+        shades.push([ccx,ccy,parseInt(ATTRIBUTEOF(tblock,"$"))*0.2])
       }
-      if(TNEWATTRIBUTEOF(tblock,"T") != "NONE"){
+      if(ATTRIBUTEOF(tblock,"T") != "NONE"){
         if(ccx > -5 && ccy > -5 && ccx < 46 && ccy < 46){
-        // console.log(ccx,ccy,"rgba(30,95,30,0.7)",parseInt(TNEWATTRIBUTEOF(tblock,"S")))
-        trees.push([ccx,ccy,"rgba(10,65,10,0.7)",parseInt(TNEWATTRIBUTEOF(tblock,"S"))])}
+        // console.log(ccx,ccy,"rgba(30,95,30,0.7)",parseInt(ATTRIBUTEOF(tblock,"S")))
+        trees.push([ccx,ccy,"rgba(10,65,10,0.7)",parseInt(ATTRIBUTEOF(tblock,"S"))])}
       }
             if(a != "full"){
         ctxm.lineWidth = a * 5
@@ -1249,7 +1249,7 @@ function drawTree(x,y,l,s){
 //     for(let j = 0; j < arr.length; j++){
 //       if(arr[j][0] == Math.floor(nx) && arr[j][1] == Math.flor(ny)){
 //         outarr.push(arr[j])
-//         if(TNEWATTRIBUTEOF(arr[j][2],"B") != "NONE"){
+//         if(ATTRIBUTEOF(arr[j][2],"B") != "NONE"){
 //           break;
 //         }
 //       }
@@ -1464,11 +1464,11 @@ function updateInv(e){
 
 
 function drawItemMapSprite(itemID,Slot){
-  let a = TNEWATTRIBUTEOF(itemID,"B")
+  let a = ATTRIBUTEOF(itemID,"B")
   if(a != "NONE"){
     invctx.drawImage(img,20*(parseInt(a)-1),0,21,21,50*Slot,0,50,50)
   }
-  let b = TNEWATTRIBUTEOF(itemID,"U")
+  let b = ATTRIBUTEOF(itemID,"U")
   if(b !="NONE"){
     invctx.drawImage(img,20*(parseInt(b)-1),20,21,21,50*Slot,0,50,50)
   }

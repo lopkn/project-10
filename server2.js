@@ -41,7 +41,7 @@ class player{
 		this.y = Math.floor(Math.random()*7)
 		this.chunk = {"x":0,"y":0}
 		this.selectedSlot = 0
-		this.Inventory = ["B:1-A:50","B:2-A:40","U:2-A:100",""]
+		this.Inventory = ["B1-50","B2-40","U2-100",""]
 		this.effects = []
 		this.inCombat = false
 		this.hp = 100
@@ -211,13 +211,13 @@ if(inEffectArr("blind1",this.effects)){
 			let yet = 0
 			for(let i = 0; i < ret.length; i++){
 				if(yet >0){
-									if(TNEWATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"$") == "NONE"){
+									if(ATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"$") == "NONE"){
 					tmap2[ret[i][0]+","+ret[i][1]] += "-$" + yet} else {
-						let tempeee = parseInt(TNEWATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"$")) + yet
-						tmap2[ret[i][0]+","+ret[i][1]] = TNEWremoveFromTile(tmap2[ret[i][0]+","+ret[i][1]],"$")
+						let tempeee = parseInt(ATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"$")) + yet
+						tmap2[ret[i][0]+","+ret[i][1]] = removeFromTile(tmap2[ret[i][0]+","+ret[i][1]],"$")
 						tmap2[ret[i][0]+","+ret[i][1]] += "-$" + tempeee
 					}
-				} if(TNEWATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"B") != "NONE"){
+				} if(ATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"B") != "NONE"){
 					yet += 1
 				}
 			}
@@ -227,13 +227,13 @@ if(inEffectArr("blind1",this.effects)){
 			let yet = 0
 			for(let i = 0; i < ret.length; i++){
 				if(yet > 0){
-									if(TNEWATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"$") == "NONE"){
+									if(ATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"$") == "NONE"){
 					tmap2[ret[i][0]+","+ret[i][1]] += "-$" + yet} else {
-						let tempeee = parseInt(TNEWATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"$")) + yet
-						tmap2[ret[i][0]+","+ret[i][1]] = TNEWremoveFromTile(tmap2[ret[i][0]+","+ret[i][1]],"$")
+						let tempeee = parseInt(ATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"$")) + yet
+						tmap2[ret[i][0]+","+ret[i][1]] = removeFromTile(tmap2[ret[i][0]+","+ret[i][1]],"$")
 						tmap2[ret[i][0]+","+ret[i][1]] += "-$" + tempeee
 					}
-				}  if(TNEWATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"B") != "NONE"){
+				}  if(ATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"B") != "NONE"){
 					yet += 1
 				}
 			}
@@ -243,13 +243,13 @@ if(inEffectArr("blind1",this.effects)){
 			let yet = 0
 			for(let i = 0; i < ret.length; i++){
 				if(yet > 0){
-									if(TNEWATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"$") == "NONE"){
+									if(ATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"$") == "NONE"){
 					tmap2[ret[i][0]+","+ret[i][1]] += "-$"+yet} else {
-						let tempeee = parseInt(TNEWATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"$")) + yet
-						tmap2[ret[i][0]+","+ret[i][1]] = TNEWremoveFromTile(tmap2[ret[i][0]+","+ret[i][1]],"$")
+						let tempeee = parseInt(ATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"$")) + yet
+						tmap2[ret[i][0]+","+ret[i][1]] = removeFromTile(tmap2[ret[i][0]+","+ret[i][1]],"$")
 						tmap2[ret[i][0]+","+ret[i][1]] += "-$" + tempeee
 					}
-				} if(TNEWATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"B") != "NONE"){
+				} if(ATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"B") != "NONE"){
 					yet += 1
 				}
 			}
@@ -259,13 +259,13 @@ if(inEffectArr("blind1",this.effects)){
 			let yet = 0
 			for(let i = 0; i < ret.length; i++){
 				if(yet > 0){
-					if(TNEWATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"$") == "NONE"){
+					if(ATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"$") == "NONE"){
 					tmap2[ret[i][0]+","+ret[i][1]] += "-$" + yet} else {
-						let tempeee = parseInt(TNEWATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"$")) + yet
-						tmap2[ret[i][0]+","+ret[i][1]] = TNEWremoveFromTile(tmap2[ret[i][0]+","+ret[i][1]],"$")
+						let tempeee = parseInt(ATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"$")) + yet
+						tmap2[ret[i][0]+","+ret[i][1]] = removeFromTile(tmap2[ret[i][0]+","+ret[i][1]],"$")
 						tmap2[ret[i][0]+","+ret[i][1]] += "-$" + tempeee
 					}
-				}  if(TNEWATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"B") != "NONE"){
+				}  if(ATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"B") != "NONE"){
 					yet += 1
 				}
 			}
@@ -751,16 +751,11 @@ function processKey(e){
 	}
 }
 function processClick(e){
-
 	let r = findPlayerInArr(e[0])
-
 	let chunkPos = generatedChunks[e[1].x + "," + e[1].y]
-
 	let item = selectedSlotItems(e[0])
-
 	let a = parseInt(amountOfItems(e[0]))
-
-	let att = TNEWATTRIBUTEOF(item,"B")
+	let att = ATTRIBUTEOF(item,"B")
 
 	let decodedXY = rCoordToChunk(e[1])
 	
@@ -788,7 +783,7 @@ function processClick(e){
 		if(!alreadyHasBlock(map[chunkPos][e[2]][2])){
 			
 			if(distance(decodedXY.x,decodedXY.y,players[r].x,players[r].y) <= 12){
-				map[chunkPos][e[2]][2] += "-B:" + att
+				map[chunkPos][e[2]][2] += "-B" + att
 				removeItemFromSelected(e[0],1)
 			} else {
 				players[r].log("you are too far away to place a block there!",cmdc.small_error)
@@ -796,12 +791,12 @@ function processClick(e){
 
 		} //util break
 	} else {
-		if(alreadyHasBlock(map[chunkPos][e[2]][2]) && TNEWATTRIBUTEOF(item,"U") != "NONE"){
+		if(alreadyHasBlock(map[chunkPos][e[2]][2]) && ATTRIBUTEOF(item,"U") != "NONE"){
 			// 
 			let seeBreak = breakBlockBy(map[chunkPos][e[2]][2],25+Math.floor(Math.random()*10-5))
 			if(seeBreak == "remove"){
-				give(r,1,"B:"+TNEWATTRIBUTEOF(map[chunkPos][e[2]][2],"B"))
-				map[chunkPos][e[2]][2] = TNEWremoveFromTile(TNEWremoveFromTile(TNEWremoveFromTile(map[chunkPos][e[2]][2],"B"),"D"),"T")
+				give(r,1,"B"+ATTRIBUTEOF(map[chunkPos][e[2]][2],"B"))
+				map[chunkPos][e[2]][2] = removeFromTile(removeFromTile(removeFromTile(map[chunkPos][e[2]][2],"B"),"D"),"T")
 			} else {
 				map[chunkPos][e[2]][2] = seeBreak
 			}
@@ -884,11 +879,10 @@ function breakBlockBy(str,a){
   let ee = 0
   let fin = ""
   for(let i = 0; i < split.length; i++){
-  	let spl2 = split[i].split(":")
-    if(spl2[0] == "D"){
-      e = parseInt(spl2[1])
-    }else if(spl2[0] == "B"){
-      ee = BLOCKSALL[spl2[1]][2]
+    if(split[i][0] == "D"){
+      e = parseInt(split[i].substring(1))
+    }else if(split[i][0] == "B"){
+      ee = BLOCKSALL[split[i].substring(1)][2]
       fin += "-" + split[i]
     } else {
     	fin += "-" + split[i]
@@ -900,7 +894,7 @@ function breakBlockBy(str,a){
   let durability = e - a
 
   if(durability > 0){
-  fin += ("-D:"+durability)
+  fin += ("-D"+durability)
   return(fin.substring(1))
 	} else{
 		return("remove")
@@ -922,8 +916,8 @@ function removeItemFromSelected(p,a){
 	let player = players[e]
 	let original = player.Inventory[player.selectedSlot]
 	let split = original.split("-")
-	let aa = (parseInt(TNEWATTRIBUTEOF(original,"A"))-a)
-	if(aa > 0){	players[e].Inventory[player.selectedSlot] = split[0]+"-A:"+aa}else{
+	let aa = (parseInt(split[1])-a)
+	if(aa > 0){	players[e].Inventory[player.selectedSlot] = split[0]+"-"+aa}else{
 		players[e].Inventory[player.selectedSlot] = "empty"
 	}
 	players[e].invrelay()
@@ -990,7 +984,7 @@ function GenerateChunk(x,y){
 	for(let i = 0; i < chunkSize; i++){
 		for(let j = 0; j < chunkSize; j++){
 			let value =200+perSeed.noise2D((0.2+j+x*chunkSize)/199.7,(0.2+i+y*chunkSize)/199.7)*200
-			t.push([j,i,TNEWgenerateTileFromNumber(value,0)])
+			t.push([j,i,generateTileFromNumber(value,0)])
 		}
 	}
 	map.push(t)
@@ -1040,7 +1034,7 @@ function setBlock(x,y,block){
 	let ctm = CoordToMap(x,y)
 
 	if(ctm[0] != undefined){
-		map[ctm[0]][ctm[1]][2] = TNEWkeepOnlyTile(map[ctm[0]][ctm[1]][2],"G")
+		map[ctm[0]][ctm[1]][2] = keepOnlyTile(map[ctm[0]][ctm[1]][2],"G")
 			if(block != ""){
 				map[ctm[0]][ctm[1]][2] += "-" + block
 			}
@@ -1074,7 +1068,7 @@ function give(p,amount,item){
 	}
 	for(let i = 0; i < players[p].Inventory.length; i++){
 		if(players[p].Inventory[i] == "" || players[p].Inventory[i] == undefined){
-			players[p].Inventory[i] = (item + "-A:" + amount)
+			players[p].Inventory[i] = (item + "-" + amount)
 			players[p].invrelay()
 			return("2")
 		}
@@ -1124,16 +1118,11 @@ function tp(r,i1,i2){
 function addToItem(str,amount){
 	let split = str.split("-")
 	let fout = ''
-	let a;
-	for(let i = 0 ; i < split.length; i++){
-		if(TNEWATTRIBUTEOF(split[i],"A")!="NONE"){
-			a = parseInt(split[i].split(":")[1])+amount
-		} else {
-			fout += "-"+split[i]
-		}
+	let a = parseInt(split[split.length-1])+amount
+	for(let i = 0; i < split.length -1; i++){
+		fout += ("-" + split[i])
 	}
-
-	fout += ("-A:" + a )
+	fout += ("-" + a )
 	return(fout.substring(1))
 }
 
@@ -1466,8 +1455,8 @@ function amountOfItems(p){
 	let r = findPlayerInArr(p)
 	let player = players[r]
   if(player.Inventory[player.selectedSlot] != undefined){
-    let e = TNEWATTRIBUTEOF(player.Inventory[player.selectedSlot],"A")
-    return(e)
+    let e = player.Inventory[player.selectedSlot].split("-")
+    return(e[1])
   } else {return("none")}
 }
 
