@@ -5,6 +5,7 @@ DONE (after creation of tdl)
 - Lighting & effect tables
 - player password change
 - dependancy of config from server
+- refactor MasterTileDeparser
 
 TO DO LIST
 
@@ -25,7 +26,7 @@ TO DO LIST
 - player health & moves
 - chests and inventory
 - item name and descriptions
-- refactor MasterTileDeparser
+
 - player disconnect timer
 
 

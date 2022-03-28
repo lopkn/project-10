@@ -1141,7 +1141,7 @@ function UPDATEMAP(input){
   for(let i = 0; i < input[0].length; i++){
      let tblock = map[input[0][i]]
      // console.log(input[0][0]+","+input[0][1])
-      let deparsed = TNEWMasterTileDeparser(tblock) 
+      let deparsed = RFMasterTileDeparser(tblock)[0] 
       let a = 1 - TNEWdeparseDurability(tblock)
       let bb = input[0][i].split(",")
       let ccx = parseInt(bb[0])+20-player.x
@@ -1169,6 +1169,7 @@ function UPDATEMAP(input){
     let a = trees[i]
     drawTree(a[0],a[1],a[2],a[3])
   }
+
   for(let i = 0; i < shades.length; i++){
     fillM("rgba(0,0,0,"+shades[i][2]+")")
     rectAtCoordsM(shades[i][0],shades[i][1])
@@ -1301,17 +1302,45 @@ function TNEWATTRIBUTEOF(str,e){
 }
 
 
-function MasterTileDeparser(str){
+// function MasterTileDeparser(str){
+//   let split = str.split('-')
+//   for(let i = 0; i < HeightMap.length; i++){
+//     for(let j = 0; j < split.length; j++){
+//       if(split[j][0]==HeightMap[i]){
+//         let key = split[j].substring(1)
+//         if(HeightMap[i] == "B"){
+//           return(BLOCKSALL[key])
+//         }
+//         else if(HeightMap[i] == "G"){
+//           return(TILESALL[key])
+//         }
+
+
+//       }
+//     }
+
+
+//   }
+// }
+function RFMasterTileDeparser(str){
   let split = str.split('-')
+  let outarr = []
+  loop1:
   for(let i = 0; i < HeightMap.length; i++){
+    loop2:
     for(let j = 0; j < split.length; j++){
-      if(split[j][0]==HeightMap[i]){
-        let key = split[j].substring(1)
+
+
+      let key = split[j].split(":")
+      if(key[0]==HeightMap[i]){
+        
         if(HeightMap[i] == "B"){
-          return(BLOCKSALL[key])
+          outarr.push(BLOCKSALL[key[1]])
+          break loop1
         }
         else if(HeightMap[i] == "G"){
-          return(TILESALL[key])
+          outarr.push(TILESALL[key[1]])
+          break loop1
         }
 
 
@@ -1320,8 +1349,10 @@ function MasterTileDeparser(str){
 
 
   }
-}
 
+  return(outarr)
+
+}
 
 
 function TNEWMasterTileDeparser(str){

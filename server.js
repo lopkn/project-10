@@ -212,10 +212,10 @@ if(inEffectArr("blind1",this.effects)){
 			for(let i = 0; i < ret.length; i++){
 				if(yet >0){
 									if(TNEWATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"$") == "NONE"){
-					tmap2[ret[i][0]+","+ret[i][1]] += "-$" + yet} else {
+					tmap2[ret[i][0]+","+ret[i][1]] += "-$:" + yet} else {
 						let tempeee = parseInt(TNEWATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"$")) + yet
 						tmap2[ret[i][0]+","+ret[i][1]] = TNEWremoveFromTile(tmap2[ret[i][0]+","+ret[i][1]],"$")
-						tmap2[ret[i][0]+","+ret[i][1]] += "-$" + tempeee
+						tmap2[ret[i][0]+","+ret[i][1]] += "-$:" + tempeee
 					}
 				} if(TNEWATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"B") != "NONE"){
 					yet += 1
@@ -228,10 +228,10 @@ if(inEffectArr("blind1",this.effects)){
 			for(let i = 0; i < ret.length; i++){
 				if(yet > 0){
 									if(TNEWATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"$") == "NONE"){
-					tmap2[ret[i][0]+","+ret[i][1]] += "-$" + yet} else {
+					tmap2[ret[i][0]+","+ret[i][1]] += "-$:" + yet} else {
 						let tempeee = parseInt(TNEWATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"$")) + yet
 						tmap2[ret[i][0]+","+ret[i][1]] = TNEWremoveFromTile(tmap2[ret[i][0]+","+ret[i][1]],"$")
-						tmap2[ret[i][0]+","+ret[i][1]] += "-$" + tempeee
+						tmap2[ret[i][0]+","+ret[i][1]] += "-$:" + tempeee
 					}
 				}  if(TNEWATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"B") != "NONE"){
 					yet += 1
@@ -244,10 +244,10 @@ if(inEffectArr("blind1",this.effects)){
 			for(let i = 0; i < ret.length; i++){
 				if(yet > 0){
 									if(TNEWATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"$") == "NONE"){
-					tmap2[ret[i][0]+","+ret[i][1]] += "-$"+yet} else {
+					tmap2[ret[i][0]+","+ret[i][1]] += "-$:"+yet} else {
 						let tempeee = parseInt(TNEWATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"$")) + yet
 						tmap2[ret[i][0]+","+ret[i][1]] = TNEWremoveFromTile(tmap2[ret[i][0]+","+ret[i][1]],"$")
-						tmap2[ret[i][0]+","+ret[i][1]] += "-$" + tempeee
+						tmap2[ret[i][0]+","+ret[i][1]] += "-$:" + tempeee
 					}
 				} if(TNEWATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"B") != "NONE"){
 					yet += 1
@@ -260,10 +260,10 @@ if(inEffectArr("blind1",this.effects)){
 			for(let i = 0; i < ret.length; i++){
 				if(yet > 0){
 					if(TNEWATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"$") == "NONE"){
-					tmap2[ret[i][0]+","+ret[i][1]] += "-$" + yet} else {
+					tmap2[ret[i][0]+","+ret[i][1]] += "-$:" + yet} else {
 						let tempeee = parseInt(TNEWATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"$")) + yet
 						tmap2[ret[i][0]+","+ret[i][1]] = TNEWremoveFromTile(tmap2[ret[i][0]+","+ret[i][1]],"$")
-						tmap2[ret[i][0]+","+ret[i][1]] += "-$" + tempeee
+						tmap2[ret[i][0]+","+ret[i][1]] += "-$:" + tempeee
 					}
 				}  if(TNEWATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"B") != "NONE"){
 					yet += 1
