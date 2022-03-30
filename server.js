@@ -41,7 +41,7 @@ class player{
 		this.y = Math.floor(Math.random()*7)
 		this.chunk = {"x":0,"y":0}
 		this.selectedSlot = 0
-		this.Inventory = ["B:1-A:50","B:2-A:40","U:2-A:100",""]
+		this.Inventory = ["B:1-A:50","B:2-A:40","U:2-A:100","Sl:0-A:30",""]
 		this.effects = []
 		this.inCombat = false
 		this.hp = 100
@@ -397,7 +397,7 @@ function newConnection(socket){
 
 	function joined(e){
 
-		let a = [CURRENTCONFIGS.BLOCKSALL,CURRENTCONFIGS.HeightMap,CURRENTCONFIGS.TILESALL]
+		let a = [CURRENTCONFIGS.BLOCKSALL,CURRENTCONFIGS.HeightMap,CURRENTCONFIGS.TILESALL,CURRENTCONFIGS.SLABSALL]
 
 		io.to(e).emit("config",a)
 	}
@@ -761,6 +761,7 @@ function processClick(e){
 	let a = parseInt(amountOfItems(e[0]))
 
 	let att = TNEWATTRIBUTEOF(item,"B")
+	let att2 = TNEWATTRIBUTEOF(item,"Sl")
 
 	let decodedXY = rCoordToChunk(e[1])
 	
@@ -795,6 +796,17 @@ function processClick(e){
 			}
 
 		} //util break
+	}else	if(att2 != "NONE" && a > 0){
+		if(!alreadyHasBlockATT(map[chunkPos][e[2]][2],"Sl")){
+			
+			if(distance(decodedXY.x,decodedXY.y,players[r].x,players[r].y) <= 12){
+				map[chunkPos][e[2]][2] += "-Sl:" + att2
+				removeItemFromSelected(e[0],1)
+			} else {
+				players[r].log("you are too far away to place a slab there!",cmdc.small_error)
+			}
+
+		} //util break
 	} else {
 		if(alreadyHasBlock(map[chunkPos][e[2]][2]) && TNEWATTRIBUTEOF(item,"U") != "NONE"){
 			// 
@@ -806,6 +818,9 @@ function processClick(e){
 				map[chunkPos][e[2]][2] = seeBreak
 			}
 		}
+
+
+
 	}
 }
 
@@ -1368,7 +1383,16 @@ function STOPPING(){
 function alreadyHasBlock(str){
   let split = str.split("-")
   for(let i = 0; i < split.length; i++){
-    if(split[i][0] == "B"){
+    if(split[i].split(":")[0] == "B"){
+      return(true)
+    }
+  }
+  return(false)
+}
+function alreadyHasBlockATT(str,att){
+  let split = str.split("-")
+  for(let i = 0; i < split.length; i++){
+    if(split[i].split(":")[0] == att){
       return(true)
     }
   }

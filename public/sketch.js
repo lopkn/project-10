@@ -7,7 +7,7 @@ class Player{
     this.hp = 100
     this.chunk = {"x":0,"y":0}
     this.selectedSlot = 0
-    this.Inventory = ["B:1-A:50","B:2-A:40","U:2-A:100",""]
+    this.Inventory = ["B:1-A:50","B:2-A:40","U:2-A:100","Sl:0-A:30",""]
   }
 }
 
@@ -121,12 +121,14 @@ socket.on("config",configure)
   var BLOCKSALL
   var HeightMap
   var TILESALL
+  var SLABSALL
 
 
 function configure(e){
    BLOCKSALL = e[0]
    HeightMap = e[1]
    TILESALL = e[2]
+   SLABSALL = e[3]
   // var ColorTileReferenceDict = e[3]
   // var NameTileReferenceDict = e[4]
 
@@ -1336,6 +1338,10 @@ function RFMasterTileDeparser(str){
         
         if(HeightMap[i] == "B"){
           outarr.push(BLOCKSALL[key[1]])
+          break loop1
+        }
+        else if(HeightMap[i] == "Sl"){
+          outarr.push(SLABSALL[key[1]])
           break loop1
         }
         else if(HeightMap[i] == "G"){
