@@ -1726,7 +1726,22 @@ function endCombatInstance(str){
 
 
 
+function randomStructure(List){
+	let sum = 0
+	for(let i = 1; i < List.length; i+=2){
+		sum += List[i]
+	}
+	let value = Math.random()*sum
+	let tempvalue = 0
+	for(let i = 1; i < List.length; i+=2){
+	tempvalue += List[i]
+	if(value < tempvalue){
+		return(List[i-1])
+		}
+	}
 
+
+}
 
 
 

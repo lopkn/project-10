@@ -11,9 +11,13 @@ DONE (after creation of tdl)
 TO DO LIST
 
 
+- player combat
+- player health & moves
 
+- rendering Dimensions
 
-- chunk saves (low priority)
+- item name and descriptions
+
 - terrain randomness
 - biomes
 - rivers
@@ -23,13 +27,12 @@ TO DO LIST
 - ore and crafting
 - pathfinding AI
 - ping compensation
-- player combat
-- player health & moves
+
 - chests and inventory
-- item name and descriptions
+
 
 - player disconnect timer
-
+- chunk saves (low priority)
 
 - Music
 
