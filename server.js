@@ -41,7 +41,7 @@ class player{
 		this.y = Math.floor(Math.random()*7)
 		this.chunk = {"x":0,"y":0}
 		this.selectedSlot = 0
-		this.Inventory = ["B:1-A:50","B:2-A:40","U:2-A:100","Sl:0-A:30",""]
+		this.Inventory = ["B:1-A:50","B:2-A:40","U:2-A:100","Sl:1-A:30",""]
 		this.effects = []
 		this.inCombat = false
 		this.hp = 100
@@ -1006,6 +1006,7 @@ function GenerateChunk(x,y){
 		for(let j = 0; j < chunkSize; j++){
 			let value =200+perSeed.noise2D((0.2+j+x*chunkSize)/199.7,(0.2+i+y*chunkSize)/199.7)*200
 			t.push([j,i,TNEWgenerateTileFromNumber(value,0)])
+			generateStructureFromNumber(value,x*chunkSize+j,y*chunkSize+i)
 		}
 	}
 	map.push(t)
@@ -1406,40 +1407,14 @@ function removeAcc(Acc){
 }
 
 
-function generateTileFromNumber(input,e){
-	if(e == 0){
-		let tile = "G"
-		if(input < 70){
-			tile += "1"
-		} else if(input < 120){
-			tile += "2"
-		} else if(input < 140){
-			tile += "3"
-		} else if(input < 150){
-			tile += "4"
-		} else if(input < 210){
-			tile += "5"
-		} else if(input < 260){
-			tile += "6"
-		} else if(input < 310){
-			tile += "7"
-		} else if(input < 335){
-			tile += "8"
-		} else if(input >= 335){
-			tile += "9"
-		}
-		if(input >= 150 && input < 300){
-			if(Math.random() > 1-input/30000){
-				tile += "-B3-T1-S" + (Math.floor(Math.random()*3)+4)
+function generateStructureFromNumber(input,x,y){
+			if(input > 310 && input < 335){
+			if(Math.random() > 0.995){
+				generateStructure("gold ore vein",x,y)
 			}
 		}
 
-
-			return(tile)
-	}
 }
-
-
 
 function TNEWgenerateTileFromNumber(input,e){
 	if(e == 0){
@@ -1468,6 +1443,8 @@ function TNEWgenerateTileFromNumber(input,e){
 				tile += "-B:3-T:1-S:" + (Math.floor(Math.random()*3)+4)
 			}
 		}
+
+		
 
 
 			return(tile)

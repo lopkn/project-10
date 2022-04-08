@@ -6,6 +6,7 @@ DONE (after creation of tdl)
 - player password change
 - dependancy of config from server
 - refactor MasterTileDeparser
+- slab tiles
 
 TO DO LIST
 
@@ -17,7 +18,7 @@ TO DO LIST
 - biomes
 - rivers
 - slow at different terrain
-- slab tiles
+
 - actual structure generation
 - ore and crafting
 - pathfinding AI

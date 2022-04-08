@@ -7,7 +7,7 @@ class Player{
     this.hp = 100
     this.chunk = {"x":0,"y":0}
     this.selectedSlot = 0
-    this.Inventory = ["B:1-A:50","B:2-A:40","U:2-A:100","Sl:0-A:30",""]
+    this.Inventory = ["B:1-A:50","B:2-A:40","U:2-A:100","Sl:1-A:30",""]
   }
 }
 
@@ -1508,6 +1508,11 @@ function drawItemMapSprite(itemID,Slot){
   let b = TNEWATTRIBUTEOF(itemID,"U")
   if(b !="NONE"){
     invctx.drawImage(img,20*(parseInt(b)-1),20,21,21,50*Slot,0,50,50)
+  }
+    let c = TNEWATTRIBUTEOF(itemID,"Sl")
+  if(c !="NONE"){
+    // console.log("eee")
+    invctx.drawImage(img,20*(parseInt(c)-1),40,21,21,50*Slot,0,50,50)
   }
   
 }
