@@ -363,6 +363,9 @@ console.log(perSeed.noise2D(0.2,0,0))
 
 var socket = require('socket.io');
 
+var ranStrucLists = {"GoldOre":["gold ore vein1",1,"gold ore vein2",1,"gold ore vein3",1,"gold ore vein4",1]}
+
+
 var io = socket(server);
 
 // socket = io("https://home.unsown.top")
@@ -1410,7 +1413,7 @@ function removeAcc(Acc){
 function generateStructureFromNumber(input,x,y){
 			if(input > 310 && input < 335){
 			if(Math.random() > 0.995){
-				generateStructure("gold ore vein",x,y)
+				generateStructure(randomStructure(ranStrucLists.GoldOre),x,y)
 			}
 		}
 

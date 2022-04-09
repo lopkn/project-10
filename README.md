@@ -15,7 +15,7 @@ TO DO LIST
 - player health & moves
 
 - rendering Dimensions
-
+- explosives!
 - item name and descriptions
 
 - terrain randomness
