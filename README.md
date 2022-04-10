@@ -20,9 +20,10 @@ TO DO LIST
 - item name and descriptions
 
 - terrain randomness
+- death screen
 - biomes
 - rivers
-- slow at different terrain
+- movement terrain turn management
 
 - actual structure generation
 - ore and crafting

@@ -1061,7 +1061,23 @@ function rotateStructure(arr,rotate){
 
 		}
 	} else if(rotate == 2 || rotate == "180"){
+		
 		newArr[0] = arr[0]
+		for(let i = arr.length-1; i > 0; i--){
+			newArr.push(arr[i])
+		}
+
+	} else if(rotate == 3 || rotate == "right"){
+		let newBorder = (arr.length-1)/arr[0]
+		newArr[0] = newBorder
+		for(let i = 0; i < newBorder; i++){
+			for(let j = arr[0]; j > 0; j--){
+			
+				newArr.push(arr[j+i*arr[0]])
+			}
+
+		}
+
 
 
 	}
