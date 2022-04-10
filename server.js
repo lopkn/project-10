@@ -1103,8 +1103,30 @@ function rotateStructure(arr,rotate,mirror){
 
 
 
-function generateStructure(st,x,y){
+function generateStructure(st,x,y,options){
 	let structure = CURRENTCONFIGS.Structures[st]
+	if(options != undefined){
+		let rotate = 0
+		let mirror = 0
+		if(options.rotate != undefined){
+			if(options.rotate == "random" || options.rotate == "rand"){
+				rotate = Math.floor(Math.random()*4)
+			} else {
+				rotate = options.rotate
+			}
+		}
+
+		if(options.mirror == "random" || options.mirror == "rand"){
+			mirror = Math.floor(Math.random()*2)
+		} else {
+			mirror = options.mirror
+		}
+
+		structure = rotateStructure(structure,rotate,mirror)
+	}
+
+
+
 	let ctm = CoordToMap(x,y)
 	let a = structure[0]
 	for(let i = 1; i < structure.length; i++){
