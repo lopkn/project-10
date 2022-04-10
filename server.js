@@ -1040,7 +1040,7 @@ function rCoordToChunk(i){
 
 
 
-function rotateStructure(arr,rotate){
+function rotateStructure(arr,rotate,mirror){
 	let newArr = []
 
 		//fill in the spaces undefined
@@ -1079,7 +1079,23 @@ function rotateStructure(arr,rotate){
 
 
 
+	} else {
+		newArr = arr
 	}
+
+	if(mirror == 1){
+		let newBorder2 = (newArr.length-1)/newArr[0]
+		let half = Math.floor(newArr[0]/2) + 1
+		let na0 = newArr[0]
+		for(let i = 1; i < half; i++){
+			for(let j = 0; j < newBorder2; j++){
+				let Swap_temp = newArr[i+j*na0]
+				newArr[i+j*na0] = newArr[(na0-i+1)+j*na0]
+				newArr[(na0-i+1)+j*na0] = Swap_temp
+			}
+		}
+	}
+
 
 
 	return(newArr)
