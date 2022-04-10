@@ -1070,9 +1070,8 @@ function rotateStructure(arr,rotate){
 	} else if(rotate == 3 || rotate == "right"){
 		let newBorder = (arr.length-1)/arr[0]
 		newArr[0] = newBorder
-		for(let i = 0; i < newBorder; i++){
-			for(let j = arr[0]; j > 0; j--){
-			
+		for(let j = 1; j <= arr[0]; j++){
+			for(let i = newBorder -1; i > -1; i--){
 				newArr.push(arr[j+i*arr[0]])
 			}
 
