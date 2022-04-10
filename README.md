@@ -7,13 +7,14 @@ DONE (after creation of tdl)
 - dependancy of config from server
 - refactor MasterTileDeparser
 - slab tiles
+- rotatable structures
 
 TO DO LIST
 
 
 - player combat
 - player health & moves
-
+- structure array compression
 - rendering Dimensions
 - explosives!
 - item name and descriptions

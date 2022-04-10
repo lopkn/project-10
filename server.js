@@ -1042,22 +1042,32 @@ function rCoordToChunk(i){
 
 function rotateStructure(arr,rotate){
 	let newArr = []
-	if(rotate == 1 || rotate == "left"){
+
+		//fill in the spaces undefined
 		while(((arr.length-1)/arr[0])%1 != 0){
 			arr.push("")
 		}
+
+
+
+	if(rotate == 1 || rotate == "left"){
+
 		let newBorder = (arr.length-1)/arr[0]
 		newArr[0] = newBorder
-		for(let i = 0; i < newBorder.length; i++){
-			for(let j = arr[0]-1; j > -1; j--){
+		for(let j = arr[0]; j > 0; j--){
+			for(let i = 0; i < newBorder; i++){
 				newArr.push(arr[j+i*arr[0]])
 			}
 
 		}
+	} else if(rotate == 2 || rotate == "180"){
+		newArr[0] = arr[0]
+
+
 	}
 
 
-
+	return(newArr)
 }
 
 
