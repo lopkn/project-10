@@ -1497,7 +1497,7 @@ function removeAcc(Acc){
 function generateStructureFromNumber(input,x,y){
 			if(input > 310 && input < 335){
 			if(Math.random() > 0.995){
-				generateStructure(randomItem(ranStrucLists.GoldOre),x,y)
+				generateStructure(randomItem(ranStrucLists.GoldOre),x,y,{"mirror":"random","rotate":"random"})
 			}
 		}
 
