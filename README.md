@@ -18,7 +18,7 @@ TO DO LIST
 - rendering Dimensions
 - explosives!
 - item name and descriptions
-
+- block rendering images
 - terrain randomness
 - death screen
 - biomes
