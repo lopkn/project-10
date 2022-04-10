@@ -1040,6 +1040,27 @@ function rCoordToChunk(i){
 
 
 
+function rotateStructure(arr,rotate){
+	let newArr = []
+	if(rotate == 1 || rotate == "left"){
+		while(((arr.length-1)/arr[0])%1 != 0){
+			arr.push("")
+		}
+		let newBorder = (arr.length-1)/arr[0]
+		newArr[0] = newBorder
+		for(let i = 0; i < newBorder.length; i++){
+			for(let j = arr[0]-1; j > -1; j--){
+				newArr.push(arr[j+i*arr[0]])
+			}
+
+		}
+	}
+
+
+
+}
+
+
 
 function generateStructure(st,x,y){
 	let structure = CURRENTCONFIGS.Structures[st]
@@ -1413,7 +1434,7 @@ function removeAcc(Acc){
 function generateStructureFromNumber(input,x,y){
 			if(input > 310 && input < 335){
 			if(Math.random() > 0.995){
-				generateStructure(randomStructure(ranStrucLists.GoldOre),x,y)
+				generateStructure(randomItem(ranStrucLists.GoldOre),x,y)
 			}
 		}
 
@@ -1729,7 +1750,7 @@ function endCombatInstance(str){
 
 
 
-function randomStructure(List){
+function randomItem(List){
 	let sum = 0
 	for(let i = 1; i < List.length; i+=2){
 		sum += List[i]
