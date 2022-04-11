@@ -13,6 +13,7 @@ var ticktoggle = 0
 // fs.writeFile('./memory.json',inp, function writeJSON(err){if(err)return console.log(err)})
 
 var CURRENTCONFIGS = require("./config")
+var changingConfig = require("./changingConfig")
 var playerList = require("./playerList")
 
 var cmdc = {"success":"#00C000","error":"#FF0000","small_error":"#FFCFCF","item":"#FFFF00","combat":"#FF8800"}
@@ -371,9 +372,10 @@ var io = socket(server);
 // socket = io("https://home.unsown.top")
 
 io.sockets.on('connection', newConnection)
+changingConfig.SubVersion += 1
+fs.writeFile('./changingConfig.json',JSON.stringify(changingConfig), function writeJSON(err){if(err)return console.log(err)})
 
-
-
+var MainHelpMenu = CURRENTCONFIGS.ConsoleResponses["Help1-1"] + changingConfig.SubVersion + CURRENTCONFIGS.ConsoleResponses["Help1-2"]
 
 
 function newConnection(socket){
@@ -386,7 +388,7 @@ function newConnection(socket){
 	console.log(socket.id + " has joined at " + Date())
 	broadcast("--"+socket.id+" has joined!",cmdc.item)
 	players.push(new player(socket.id))
-	players[findPlayerInArr(socket.id)].log(CURRENTCONFIGS.ConsoleResponses.Help1,"#A000FF")
+	players[findPlayerInArr(socket.id)].log(MainHelpMenu,"#A000FF")
 	joined(socket.id)
 
 
@@ -400,7 +402,7 @@ function newConnection(socket){
 
 	function joined(e){
 
-		let a = [CURRENTCONFIGS.BLOCKSALL,CURRENTCONFIGS.HeightMap,CURRENTCONFIGS.TILESALL,CURRENTCONFIGS.SLABSALL]
+		let a = [CURRENTCONFIGS.BLOCKSALL,CURRENTCONFIGS.HeightMap,CURRENTCONFIGS.TILESALL,CURRENTCONFIGS.SLABSALL,CURRENTCONFIGS.TileImageReferenceDict]
 
 		io.to(e).emit("config",a)
 	}
@@ -839,7 +841,7 @@ function helpCommand(e,p){
 		e[1] = e[1].toLowerCase()
 	}
 	if(e[1] == "1" || e[1] == undefined || e[1] == "game" || e[1] == "general"){
-		players[p].log(CURRENTCONFIGS.ConsoleResponses.Help1,"#A000FF")
+		players[p].log(MainHelpMenu,"#A000FF")
 	} else if(e[1] == "2" || e[1] == "list" || e[1] == "content"){
 		players[p].log(CURRENTCONFIGS.ConsoleResponses.Help2,"#FFFF00")
 	} else if(e[1] == "3" || e[1] == "buffer"){

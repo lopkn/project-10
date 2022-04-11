@@ -122,6 +122,7 @@ socket.on("config",configure)
   var HeightMap
   var TILESALL
   var SLABSALL
+  var ImgReferenceDict
 
 
 function configure(e){
@@ -129,6 +130,7 @@ function configure(e){
    HeightMap = e[1]
    TILESALL = e[2]
    SLABSALL = e[3]
+   ImgReferenceDict = e[4]
   // var ColorTileReferenceDict = e[3]
   // var NameTileReferenceDict = e[4]
 
@@ -192,6 +194,11 @@ ondrag = function(e){}
 
 
 var img = new Image();
+var tileMapImg = new Image();
+
+
+
+tileMapImg.src = 'tilesMap.png'
 img.src = 'ItemMap.png';
 
 var playerSprites = new Image();
@@ -1148,8 +1155,16 @@ function UPDATEMAP(input){
       let bb = input[0][i].split(",")
       let ccx = parseInt(bb[0])+20-player.x
       let ccy = parseInt(bb[1])+20-player.y
+
+      if(deparsed[0][0] == "#"){
       fillM(deparsed[0])
-      rectAtCoordsM(ccx,ccy)
+      rectAtCoordsM(ccx,ccy)} else{
+        // fillM("#000000")
+      // rectAtCoordsM(ccx,ccy)
+        drawTilesMapSprite(deparsed[0],ccx,ccy)
+      }
+
+
       if(TNEWATTRIBUTEOF(tblock,"$") != "NONE"){
         shades.push([ccx,ccy,parseInt(TNEWATTRIBUTEOF(tblock,"$"))*0.2])
       }
@@ -1493,7 +1508,16 @@ function updateInv(e){
 
 
 
+function drawTilesMapSprite(tileName,x,y){
+  // let a = TNEWATTRIBUTEOF(itemID,"B")
+  // if(a != "NONE"){
 
+    let a = ImgReferenceDict[tileName]
+
+    ctxm.drawImage(tileMapImg,30*(a)+1,1,29,29,x*20,y*20,20,20)
+  // }
+  
+}
 
 
 
