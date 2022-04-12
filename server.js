@@ -944,7 +944,7 @@ function removeItemFromSelected(p,a){
 	let split = original.split("-")
 	let aa = (parseInt(TNEWATTRIBUTEOF(original,"A"))-a)
 	if(aa > 0){	players[e].Inventory[player.selectedSlot] = split[0]+"-A:"+aa}else{
-		players[e].Inventory[player.selectedSlot] = "empty"
+		players[e].Inventory[player.selectedSlot] = ""
 	}
 	players[e].invrelay()
 }

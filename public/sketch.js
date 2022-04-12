@@ -1061,7 +1061,7 @@ function chatProcess(e){
 
 function InvDraw(){
   try{
-  fillI("#000000")
+  fillI("#00002F")
   rectI(0,0,820,50)
 
   for(let i = 0; i < player.Inventory.length; i++){
@@ -1514,7 +1514,7 @@ function drawTilesMapSprite(tileName,x,y){
 
     let a = ImgReferenceDict[tileName]
 
-    ctxm.drawImage(tileMapImg,30*(a)+1,1,29,29,x*20,y*20,20,20)
+    ctxm.drawImage(tileMapImg,21*(a)+1,1,20,20,x*20,y*20,20,20)
   // }
   
 }
@@ -1527,7 +1527,7 @@ function drawTilesMapSprite(tileName,x,y){
 function drawItemMapSprite(itemID,Slot){
   let a = TNEWATTRIBUTEOF(itemID,"B")
   if(a != "NONE"){
-    invctx.drawImage(img,20*(parseInt(a)-1),0,21,21,50*Slot,0,50,50)
+    invctx.drawImage(img,20*(parseInt(a)-1),0,20,20,50*Slot,0,50,50)
   }
   let b = TNEWATTRIBUTEOF(itemID,"U")
   if(b !="NONE"){
