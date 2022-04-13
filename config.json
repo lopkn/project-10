@@ -6,12 +6,14 @@
 		"3":["#A95A00","Oak Tree Wood",400],
 		"4":["Gold Ore","Gold Ore",400],
 		"5":["#00FFFF","Diamond Block",800],
-		"6":["Diamond Ore","Diamond Ore",200]
+		"6":["Diamond Ore","Diamond Ore",200],
+		"7":["Glass Block","Glass Block",50]
 	},
 
 	"TileImageReferenceDict":{
 		"Gold Ore":0,
-		"Diamond Ore":1
+		"Diamond Ore":1,
+		"Glass Block":2
 	},
 
 

@@ -42,7 +42,7 @@ class player{
 		this.y = Math.floor(Math.random()*7)
 		this.chunk = {"x":0,"y":0}
 		this.selectedSlot = 0
-		this.Inventory = ["B:1-A:50","B:2-A:40","U:2-A:100","Sl:1-A:30",""]
+		this.Inventory = ["B:7-A:50","B:2-A:40","U:2-A:100","Sl:1-A:30",""]
 		this.effects = []
 		this.inCombat = false
 		this.hp = 100
@@ -449,21 +449,21 @@ function allPlayersGenerateChunks(){
 		players[p].relay2()
 }
 }
-var TIME = 60
+var TIME = 40
 function doSomething(){
-	if(TIME < 80){
+	if(TIME < 60){
 		TIME += 1
 		io.emit('TIME',TIME)
-	} else if(TIME == 80){
+	} else if(TIME == 60){
 		allPlayersGenerateChunks()
 		TIME += 1
 		io.emit('TICK')
 		if(ticktoggle == 1){
 		console.log("tick")
 	}
-	} else if(TIME < 90){
+	} else if(TIME < 70){
 		TIME += 1
-	} else if(TIME == 90){
+	} else if(TIME == 70){
 
 		TIME = getLongestPlayerAction() * -5
 	}

@@ -171,10 +171,10 @@ function timeUpdate(e){
 function timerUpdate(e){
   timerctx.fillStyle = "#000000"
   timerctx.fillRect(0, 0, 140, 140)
-  let a = "rgb("+(255 * e / 80)+","+(255 - 255 * e / 80)+",120)"
+  let a = "rgb("+(255 * e / 60)+","+(255 - 255 * e / 60)+",120)"
   timerctx.strokeStyle = a
   timerctx.beginPath();
-  timerctx.arc(70, 70, 50, Math.PI * 2 * e/80, 2 * Math.PI);
+  timerctx.arc(70, 70, 50, Math.PI * 2 * e/60, 2 * Math.PI);
   timerctx.stroke();
   timerctx.font = "20px Arial"
   timerctx.fillStyle = "#00FF00"
@@ -188,7 +188,7 @@ function joinSuccess(m){
 
 
 
-onmousemove = function(e){mouseX = e.clientX - 5 ; mouseY = e.clientY -2 + scrollY}
+onmousemove = function(e){mouseX = e.clientX - 5 +scrollX; mouseY = e.clientY -2 + scrollY}
 ondrag = function(e){}
 
 
@@ -872,6 +872,7 @@ function debugRect(x,y){
 
 
 var scrollTop = 0
+var scrollHorizontal = 0
 var mouseCoords = []
 
 var circleSIGH = [[20,8],[13,11],[11,13],[8,20],[11,27],[13,29],[20,32],[27,29],[29,27],[32,20],[29,13],[27,11]]
@@ -894,6 +895,7 @@ function repeat(){
   if(inRect(mouseX,mouseY,0,0,820,820)){
     mouseStatus = "canvas"
     scrollTop = window.scrollY
+    scrollHorizontal = window.scrollX
     try{
       mouseCoords = [Math.floor(mouseX/20)-20+player.x,Math.floor(mouseY/20)-20+player.y]
     } catch{}
@@ -1127,7 +1129,6 @@ function clearCanvas(){
 
 var map = {}
 var players = []
-var NEWmap = []
 
 
 
@@ -1136,10 +1137,9 @@ var NEWmap = []
 function UPDATEMAP(input){
 
   let constructedMap = []
-  NEWmap = input[0]
   players = input[1]
   map = input[2]
-  // clearCanvas()interva
+
   let trees = []
   let shades = []
 
@@ -1153,7 +1153,7 @@ function UPDATEMAP(input){
   }
   for(let i = 0; i < constructedMap.length; i++){
      let tblock = map[constructedMap[i]]
-     // console.log(input[0][0]+","+input[0][1])
+
       let deparsed = RFMasterTileDeparser(tblock)[0] 
       let a = 1 - TNEWdeparseDurability(tblock)
       let bb = constructedMap[i].split(",")
@@ -1163,8 +1163,7 @@ function UPDATEMAP(input){
       if(deparsed[0][0] == "#"){
       fillM(deparsed[0])
       rectAtCoordsM(ccx,ccy)} else{
-        // fillM("#000000")
-      // rectAtCoordsM(ccx,ccy)
+        //render image
         drawTilesMapSprite(deparsed[0],ccx,ccy)
       }
 
@@ -1198,70 +1197,6 @@ function UPDATEMAP(input){
 
 }
 
-
-function UPDATEMAP0ld(input){
-
-  let constructedMap = []
-  NEWmap = input[0]
-  players = input[1]
-  map = input[2]
-  // clearCanvas()interva
-  let trees = []
-  let shades = []
-
-
-  for(let i = player.x - 27; i < player.x + 28;i++){
-    for(let j = player.y - 27; j < player.y + 28; j++){
-      constructedMap.push[i+","+j]
-    }
-
-  }
-  for(let i = 0; i < input[0].length; i++){
-     let tblock = map[input[0][i]]
-     // console.log(input[0][0]+","+input[0][1])
-      let deparsed = RFMasterTileDeparser(tblock)[0] 
-      let a = 1 - TNEWdeparseDurability(tblock)
-      let bb = input[0][i].split(",")
-      let ccx = parseInt(bb[0])+20-player.x
-      let ccy = parseInt(bb[1])+20-player.y
-
-      if(deparsed[0][0] == "#"){
-      fillM(deparsed[0])
-      rectAtCoordsM(ccx,ccy)} else{
-        // fillM("#000000")
-      // rectAtCoordsM(ccx,ccy)
-        drawTilesMapSprite(deparsed[0],ccx,ccy)
-      }
-
-
-      if(TNEWATTRIBUTEOF(tblock,"$") != "NONE"){
-        shades.push([ccx,ccy,parseInt(TNEWATTRIBUTEOF(tblock,"$"))*0.2])
-      }
-      if(TNEWATTRIBUTEOF(tblock,"T") != "NONE"){
-        if(ccx > -5 && ccy > -5 && ccx < 46 && ccy < 46){
-        // console.log(ccx,ccy,"rgba(30,95,30,0.7)",parseInt(TNEWATTRIBUTEOF(tblock,"S")))
-        trees.push([ccx,ccy,"rgba(10,65,10,0.7)",parseInt(TNEWATTRIBUTEOF(tblock,"S"))])}
-      }
-            if(a != "full"){
-        ctxm.lineWidth = a * 5
-        lineM(ccx*20+10-a*9,ccy*20+10-a*9,a*18,a*18)
-        lineM(ccx*20+10-a*9,ccy*20+10+a*9,a*18,-a*18)
-      
-      }
-  }
-
-    playersUpdate(input[1])
-  for(let i = 0; i < trees.length; i++){
-    let a = trees[i]
-    drawTree(a[0],a[1],a[2],a[3])
-  }
-
-  for(let i = 0; i < shades.length; i++){
-    fillM("rgba(0,0,0,"+shades[i][2]+")")
-    rectAtCoordsM(shades[i][0],shades[i][1])
-  }
-
-}
 
 
 
