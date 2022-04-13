@@ -281,7 +281,7 @@ if(inEffectArr("blind1",this.effects)){
 				t.push([players[i].x,players[i].y])
 			}
 		}
-		io.to(this.id).emit('mapUpdate2',[tmap,t,tmap2])
+		io.to(this.id).emit('mapUpdate2',[/*tmap*/"",t,tmap2])
 
 	}
 
@@ -372,10 +372,10 @@ var io = socket(server);
 // socket = io("https://home.unsown.top")
 
 io.sockets.on('connection', newConnection)
-changingConfig.SubVersion += 1
+changingConfig.Build += 1
 fs.writeFile('./changingConfig.json',JSON.stringify(changingConfig), function writeJSON(err){if(err)return console.log(err)})
 
-var MainHelpMenu = CURRENTCONFIGS.ConsoleResponses["Help1-1"] + changingConfig.SubVersion + CURRENTCONFIGS.ConsoleResponses["Help1-2"]
+var MainHelpMenu = CURRENTCONFIGS.ConsoleResponses["Help1-1"] + changingConfig.Build + CURRENTCONFIGS.ConsoleResponses["Help1-2"]
 
 
 function newConnection(socket){

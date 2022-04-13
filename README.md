@@ -8,6 +8,7 @@ DONE (after creation of tdl)
 - refactor MasterTileDeparser
 - slab tiles
 - rotatable structures
+- block rendering images
 
 TO DO LIST
 
@@ -18,7 +19,7 @@ TO DO LIST
 - rendering Dimensions
 - explosives!
 - item name and descriptions
-- block rendering images
+
 - terrain randomness
 - death screen
 - biomes
