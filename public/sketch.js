@@ -1019,6 +1019,7 @@ function tick(){
     let back = AActionStore.splice(AActionStore.length-1,1) 
     AActionStore.splice(0,0,player.id)
     socket.emit('AT',AActionStore)
+    console.log(AActionStore)
     AActionStore = [back[0]]
   }
 }

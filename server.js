@@ -55,10 +55,45 @@ class mob{
 		}
 	}
 	say(){}
+	nonPlayerActions(){
+		let myAction = []
+		myAction.push(this.id)
+		let moveAmount = Math.random()*20
+		for(let i = 0; i < moveAmount; i++){
+			let tr = randomItem(["w",1,"a",1,"s",1,"d",1,["com","001"],1,["com","002"],1,"",5])
+			myAction.push(tr)
+
+		}
+
+
+		ACTIONPROCESS(myAction)
+	}
 	relay2(){}
 	combatRelay(){}
 	invrelay(){}
 	save(){}
+		pressed(i){
+		if(i == "w"){
+			let t = CoordToMap(this.x,this.y-1)
+			if(!alreadyHasBlock(map[t[0]][t[1]][2])){
+			this.y -= 1}
+		}
+		if(i == "s"){
+			let t = CoordToMap(this.x,this.y+1)
+			if(!alreadyHasBlock(map[t[0]][t[1]][2])){
+			this.y += 1}
+		}
+		if(i == "a"){
+			let t = CoordToMap(this.x-1,this.y)
+			if(!alreadyHasBlock(map[t[0]][t[1]][2])){
+			this.x -= 1}
+		}
+		if(i == "d"){
+			let t = CoordToMap(this.x+1,this.y)
+			if(!alreadyHasBlock(map[t[0]][t[1]][2])){
+			this.x += 1}
+		}
+	}
 	log(){}
 	update(){this.chunk = CoordToChunk(this.x,this.y)}
 }
@@ -479,6 +514,14 @@ function doSomething(){
 		if(ticktoggle == 1){
 		console.log("tick")
 	}
+
+		for(let i = 0; i < entities.length; i++){
+			if(entities[i].entityType!="player"){
+				entities[i].nonPlayerActions()
+			}
+		}
+
+
 	} else if(TIME < 70){
 		TIME += 1
 	} else if(TIME == 70){
