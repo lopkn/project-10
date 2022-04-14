@@ -124,6 +124,7 @@ socket.on("config",configure)
   var TILESALL
   var SLABSALL
   var ImgReferenceDict
+  var EntityReferenceDict
 
 
 function configure(e){
@@ -132,6 +133,7 @@ function configure(e){
    TILESALL = e[2]
    SLABSALL = e[3]
    ImgReferenceDict = e[4]
+   EntityReferenceDict = e[5]
   // var ColorTileReferenceDict = e[3]
   // var NameTileReferenceDict = e[4]
 
@@ -196,9 +198,10 @@ ondrag = function(e){}
 
 var img = new Image();
 var tileMapImg = new Image();
+var entityMapImg = new Image();
 
 
-
+entityMapImg.src = 'entitiesMap.png'
 tileMapImg.src = 'tilesMap.png'
 img.src = 'ItemMap.png';
 
@@ -1241,10 +1244,7 @@ function drawAtCoords(x,y,col){
 
 function playersUpdate(e){
   for(let i = 0; i < e.length; i++){
-    if(e[i][2] == "player"){
-    drawAtCoords(e[i][0],e[i][1],"#FFFFFF")} else {
-      drawAtCoords(e[i][0],e[i][1],"#002000")
-    }
+    drawEntitiesMapSprite(e[i][2],e[i][0],e[i][1])
   }
 }
 
@@ -1533,6 +1533,16 @@ function drawTilesMapSprite(tileName,x,y){
     let a = ImgReferenceDict[tileName]
 
     ctxm.drawImage(tileMapImg,21*(a)+1,1,20,20,x*20,y*20,20,20)
+  // }
+  
+}
+function drawEntitiesMapSprite(entityName,x,y){
+  // let a = TNEWATTRIBUTEOF(itemID,"B")
+  // if(a != "NONE"){
+
+    let a = EntityReferenceDict[entityName]
+
+    ctxm.drawImage(entityMapImg,21*(a)+1,1,20,20,(x+20-player.x)*20,(y+20-player.y)*20,20,20)
   // }
   
 }

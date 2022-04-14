@@ -15,6 +15,13 @@
 		"Diamond Ore":1,
 		"Glass Block":2
 	},
+	"EntityImageReferenceDict":{
+		"player":0,
+		"zombie":1,
+		"rampant":2,
+		"preponderant":3
+
+	},
 
 
 

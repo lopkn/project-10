@@ -43,18 +43,9 @@ class mob{
 		this.y = y
 		this.chunk = {"x":0,"y":0}
 		this.selectedSlot = 0
-		this.Inventory = ["B:7-A:50","B:2-A:40","U:2-A:100","Sl:1-A:30",""]
+		this.Inventory = ["","B:2-A:40","U:2-A:100","Sl:1-A:30",""]
 		this.effects = []
 		this.inCombat = false
-
-		if(type == "zombie"){
-			this.hp = 30
-		} else {
-			this.hp = 100
-		}
-
-
-
 		this.entityStats = {
 			"strength" : 1,
 			"agility" : 1,
@@ -62,6 +53,21 @@ class mob{
 			"magic" : 1
 
 		}
+
+		if(type == "zombie"){
+			this.hp = 60
+		}else if(type == "rampant"){
+			this.hp = 30
+		}else if(type == "preponderant"){
+			this.hp = 50
+			this.entityStats.strength += 2
+		} else {
+			this.hp = 100
+		}
+
+
+
+
 	}
 	say(){}
 	nonPlayerActions(){
@@ -71,11 +77,68 @@ class mob{
 		if(this.entityType == "zombie"){
 			let moveAmount = Math.random()*20
 			for(let i = 0; i < moveAmount; i++){
-				let tr = randomItem(["w",1,"a",1,"s",1,"d",1,["com","001"],1,["com","002"],1,"",5])
+				let tr = randomItem(["w",2,"a",2,"s",2,"d",2,["com","001"],1,["com","002"],1,"",10])
 				myAction.push(tr)
 
 			}
+		} else if(this.entityType == "rampant"){
+			let moveAmount = Math.random()*5 + 14
+			for(let i = 0; i < moveAmount; i++){
+				let tr = randomItem(["w",6,"a",6,"s",6,"d",6,["com","003"],1,["com","002"],1])
+				myAction.push(tr)
+
+			}
+		} else if(this.entityType == "verdant"){
+
+			if(Math.random() > 0.6 && this.inCombat == false){
+				for(let i = 0; i < entities.length; i++){
+					if(entities[i].entityType == "player" && distance(this.x,this.y,entity[i].x,entity[i].y) < 5){
+						let a = coordToChunk(entities[i].x,entities[i].y)
+						myAction.push(["click",a,a.cx + a.cy*chunkSize+3])
+
+					}
+				}
+
+
+			}
+
+			let moveAmount = Math.random()*19
+			for(let i = 0; i < moveAmount; i++){
+				let tr = randomItem(["w",1,"a",1,"s",1,"d",1,"",10])
+				myAction.push(tr)
+
+			}
+		} else if(this.entityType == "preponderant"){
+
+			if(Math.random() > 0.1 && this.inCombat == false){
+				for(let i = 0; i < entities.length; i++){
+					if(entities[i].entityType == "player" && distance(this.x,this.y,entity[i].x,entity[i].y) <= 3){
+						let a = coordToChunk(entities[i].x,entities[i].y)
+						myAction.push(["click",a,a.cx + a.cy*chunkSize+3])
+
+					}
+				}
+
+
+			}
+
+			if(this.inCombat == false){
+			let moveAmount = Math.random()*12
+			for(let i = 0; i < moveAmount; i++){
+				let tr = randomItem(["w",1,"a",1,"s",1,"d",1,["com","003"],2,["com","002"],2,"",30])
+				myAction.push(tr)
+
+			}
+			} else {
+				let moveAmount = Math.random()*2 + 17
+				for(let i = 0; i < moveAmount; i++){
+					let tr = randomItem(["w",2,"a",2,"s",2,"d",2,["com","003"],1,["com","002"],1,["com","003"],1])
+					myAction.push(tr)
+
+				}
+			}
 		}
+
 
 
 		ACTIONPROCESS(myAction)
@@ -500,7 +563,14 @@ function newConnection(socket){
 
 	function joined(e){
 
-		let a = [CURRENTCONFIGS.BLOCKSALL,CURRENTCONFIGS.HeightMap,CURRENTCONFIGS.TILESALL,CURRENTCONFIGS.SLABSALL,CURRENTCONFIGS.TileImageReferenceDict]
+		let a = [
+			CURRENTCONFIGS.BLOCKSALL,
+			CURRENTCONFIGS.HeightMap,
+			CURRENTCONFIGS.TILESALL,
+			CURRENTCONFIGS.SLABSALL,
+			CURRENTCONFIGS.TileImageReferenceDict,
+			CURRENTCONFIGS.EntityImageReferenceDict
+		]
 
 		io.to(e).emit("config",a)
 	}
@@ -1271,13 +1341,23 @@ function getRelativity(p,x,y){
 	let outx = 0
 	let outy = 0
 	if(x[0] == "="){
-		outx = entities[p].x + parseInt(x.substring(1))
+		if(x[1] != undefined){
+			outx = entities[p].x + parseInt(x.substring(1))
+		} else {
+			outx = entities[p].x
+		}
+
 	} else {
-		outx = parseInt(x)
+			outx = parseInt(x)
 	}
 	if(y[0] == "="){
-		outy = entities[p].x + parseInt(x.substring(1))
-		outy = parseint(y)
+		if(y[1] != undefined){
+			outy = entities[p].y + parseInt(y.substring(1))
+		} else {
+			outy = entities[p].y
+		}
+	} else {
+		outy = parseInt(y)
 	}
 
 	return([outx,outy])
@@ -1331,6 +1411,9 @@ function summonNewMob(name,x,y,id){
 	
 	usedIDs[id] = true
 	entities.push(new mob(name,x,y,id))
+
+
+
 }
 
 
