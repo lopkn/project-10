@@ -5,7 +5,7 @@ var map = []
 var generatedChunks = {}
 var chunkSize = 20
 const fs = require('fs');
-// const uuidv4 = require("uuid/v4")
+// const uuidv4 = require("uuid/dist/v4")
 var perlin2 = require('./perlin')
 var perlin = require('simplex-noise')
 var ticktoggle = 0
@@ -833,7 +833,7 @@ function processClick(e){
 	} else {
 		if(alreadyHasBlock(map[chunkPos][e[2]][2]) && TNEWATTRIBUTEOF(item,"U") != "NONE"){
 			// 
-			let seeBreak = breakBlockBy(map[chunkPos][e[2]][2],25+Math.floor(Math.random()*10-5))
+			let seeBreak = TNEWbreakBlockBy(map[chunkPos][e[2]][2],25+Math.floor(Math.random()*10-5))
 			if(seeBreak == "remove"){
 				give(r,1,"B:"+TNEWATTRIBUTEOF(map[chunkPos][e[2]][2],"B"))
 				map[chunkPos][e[2]][2] = TNEWremoveFromTile(TNEWremoveFromTile(TNEWremoveFromTile(map[chunkPos][e[2]][2],"B"),"D"),"T")
@@ -915,35 +915,7 @@ function TNEWbreakBlockBy(str,a){
 
 
 
-function breakBlockBy(str,a){
 
-  let split = str.split("-")
-  let e = -1
-  let ee = 0
-  let fin = ""
-  for(let i = 0; i < split.length; i++){
-  	let spl2 = split[i].split(":")
-    if(spl2[0] == "D"){
-      e = parseInt(spl2[1])
-    }else if(spl2[0] == "B"){
-      ee = BLOCKSALL[spl2[1]][2]
-      fin += "-" + split[i]
-    } else {
-    	fin += "-" + split[i]
-    }
-  }
-  if(e == -1 || ee == e){
-  	e = ee
-  }
-  let durability = e - a
-
-  if(durability > 0){
-  fin += ("-D:"+durability)
-  return(fin.substring(1))
-	} else{
-		return("remove")
-	}
-}
 
 
 
@@ -978,17 +950,6 @@ function selectSlot(e){
 }
 
 
-function removeFromTile(str,type){
-	let split = str.split("-")
-	let fin = ""
-	for(let i = 0; i < split.length; i++){
-		if(split[i][0] != type){
-			fin += "-" + split[i]
-		}
-	}
-	return(fin.substring(1))
-}
-
 function TNEWremoveFromTile(str,type){
 	let split = str.split("-")
 	let fin = ""
@@ -1000,16 +961,6 @@ function TNEWremoveFromTile(str,type){
 	return(fin.substring(1))
 }
 
-function keepOnlyTile(str,type){
-	let split = str.split("-")
-	let fin = ""
-	for(let i = 0; i < split.length; i++){
-		if(split[i][0] == type){
-			fin += "-" + split[i]
-		}
-	}
-	return(fin.substring(1))
-}
 
 function TNEWkeepOnlyTile(str,type){
 	let split = str.split("-")
@@ -1329,17 +1280,7 @@ function inListRS(inp,arr){
 
 
 ///input a attribute string and an attribute to find the value of the attribute
-function ATTRIBUTEOF(str,e){
-  if(str == undefined){return("NONE")}
-  let split = str.split("-")
-  for(let i = 0; i < split.length; i++){
-    if(split[i][0] == e){
-      return(split[i].substring(1))
 
-    }
-  }
-  return("NONE")
-}
 function TNEWATTRIBUTEOF(str,e){
   if(str == undefined){return("NONE")}
   let split = str.split("-")
@@ -1373,78 +1314,12 @@ function MasterTileDeparser(str){
   }
 }
 
-///finds the durability of an attribute string, returns "full" if full
-function deparseDurability(str){
-  let split = str.split("-")
-  let e = -1
-  let ee = 0
-  for(let i = 0; i < split.length; i++){
-    if(split[i][0] == "D"){
-      e = parseInt(split[i].substring(1))
-    }
-    if(split[i][0] == "B"){
-      ee = BLOCKSALL[split[i].substring(1)][2]
-    }
-  }
-  if(e == -1 || ee == e){return("full")} else {return(e/ee)}
-}
 
 
 
 
 
 
-// function deparseTileToColor(str){
-//   let split = str.split('-')
-//   let fin = ""
-//   for(let i = 0; i < split.length; i ++){
-//     //case ground
-//     if(split[i][0] == "G"){
-//       let read = split[i][1]
-//       fin += ("-G"+ColorTileReferenceDict[read])
-//     } else if(split[i][0] == "B"){
-//       let read = split[i][1]
-//       fin += ("-B"+BLOCKSALL[read][0])
-//     }
-//   }
-//   let finSplit = fin.split("-")
-//   for(let i = 0; i < HeightMap.length; i++){
-//     for(let j = 0; j < finSplit.length; j++){
-//       if(finSplit[j][0] == HeightMap[i]){
-//         return(finSplit[j].substring(1))
-//       }
-
-//     }
-//   }
-
-// }
-
-
-
-
-// function deparseTileToName(str){
-//   let split = str.split('-')
-//   let fin = ""
-//   for(let i = 0; i < split.length; i ++){
-//     //case ground
-//     if(split[i][0] == "G"){
-//       let read = split[i][1]
-//       fin += ("-G"+NameTileReferenceDict[read])
-//     } else if(split[i][0] == "B"){
-//       let read = split[i][1]
-//       fin += ("-B"+BLOCKSALL[read][1])
-//     }
-//   }
-//   let finSplit = fin.split("-")
-//   for(let i = 0; i < HeightMap.length; i++){
-//     for(let j = 0; j < finSplit.length; j++){
-//       if(finSplit[j][0] == HeightMap[i]){
-//         return(finSplit[j].substring(1))
-//       }
-
-//     }
-//   }
-// }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 var BLOCKSALL = CURRENTCONFIGS.BLOCKSALL
