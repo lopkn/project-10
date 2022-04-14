@@ -1137,6 +1137,7 @@ var players = []
 function UPDATEMAP(input){
 
   let constructedMap = []
+  // NPEs = input[0]
   players = input[1]
   map = input[2]
 
@@ -1185,6 +1186,9 @@ function UPDATEMAP(input){
   }
 
     playersUpdate(input[1])
+    // NPEsUpdate(input[0])
+
+
   for(let i = 0; i < trees.length; i++){
     let a = trees[i]
     drawTree(a[0],a[1],a[2],a[3])
@@ -1230,7 +1234,10 @@ function drawAtCoords(x,y,col){
 
 function playersUpdate(e){
   for(let i = 0; i < e.length; i++){
-    drawAtCoords(e[i][0],e[i][1],"#FFFFFF")
+    if(e[i][2] == "player"){
+    drawAtCoords(e[i][0],e[i][1],"#FFFFFF")} else {
+      drawAtCoords(e[i][0],e[i][1],"#002000")
+    }
   }
 }
 

@@ -1,10 +1,11 @@
 
 
-var players = []
+var entities = []
 var map = []
 var generatedChunks = {}
 var chunkSize = 20
 const fs = require('fs');
+// const uuidv4 = require("uuid/v4")
 var perlin2 = require('./perlin')
 var perlin = require('simplex-noise')
 var ticktoggle = 0
@@ -28,15 +29,43 @@ var startPing = 0
 
 
 function ping(e){
-	io.to(players[e].id).emit('PING')
+	io.to(entities[e].id).emit('PING')
 	startPing = 1
 }
 
 perSeed = new perlin(164.44)
+class mob{
+	constructor(id,x,y){
+		this.entityType = "mob"
+		this.id = id
+		this.x = x+Math.floor(Math.random()*2)
+		this.y = y+Math.floor(Math.random()*2)
+		this.chunk = {"x":0,"y":0}
+		this.selectedSlot = 0
+		this.Inventory = ["B:7-A:50","B:2-A:40","U:2-A:100","Sl:1-A:30",""]
+		this.effects = []
+		this.inCombat = false
+		this.hp = 100
+		this.entityStats = {
+			"strength" : 1,
+			"agility" : 1,
+			"mana" : 1,
+			"magic" : 1
 
+		}
+	}
+	say(){}
+	relay2(){}
+	combatRelay(){}
+	invrelay(){}
+	save(){}
+	log(){}
+	update(){this.chunk = CoordToChunk(this.x,this.y)}
+}
 
 class player{
 	constructor(id){
+		this.entityType = "player"
 		this.id = id
 		this.x = Math.floor(Math.random()*7)
 		this.y = Math.floor(Math.random()*7)
@@ -47,7 +76,7 @@ class player{
 		this.inCombat = false
 		this.hp = 100
 
-		this.playerStats = {
+		this.entityStats = {
 			"strength" : 1,
 			"agility" : 1,
 			"mana" : 1,
@@ -57,9 +86,9 @@ class player{
 		
 	}
 	say(e){
-		for(let i = 0; i < players.length; i++){
-			if(distance(players[i].x,players[i].y,this.x,this.y) < 33){
-				io.to(players[i].id).emit("chat",[(this.name ? this.name : this.id),e,this.x,this.y])
+		for(let i = 0; i < entities.length; i++){
+			if(distance(entities[i].x,entities[i].y,this.x,this.y) < 33){
+				io.to(entities[i].id).emit("chat",[(this.name ? this.name : this.id),e,this.x,this.y])
 			}
 
 
@@ -106,8 +135,8 @@ class player{
 				this.log(CURRENTCONFIGS.ConsoleResponses.AlreadyLoggedIn,cmdc.error)
 			}
 		} else {
-			for(let i = 0; i < players.length; i++){
-				if(players[i].name == n && players[i].name != this.name){
+			for(let i = 0; i < entities.length; i++){
+				if(entities[i].name == n && entities[i].name != this.name){
 					this.log("Player with this account is online right now!",cmdc.error)
 					return;
 				}
@@ -167,27 +196,10 @@ class player{
 			this.x += 1}
 		}
 	}
-	relay(){
-		io.to(this.id).emit('relay',[this.x,this.y,this.chunk])
-		let tmap = [];
-		for(let i = 0; i < map.length; i++){
-			if(distance(map[i][0]*20+10,map[i][1]*20+10,this.x,this.y)<49){
-				tmap.push(map[i])
-			}
-		}
-		let t = []
-		for(let i = 0; i < players.length; i++){
-			if(distance(players[i].x,players[i].y,this.x,this.y) < 33 && players[i].id != this.id){
-				t.push([players[i].x,players[i].y])
-			}
-		}
-		io.to(this.id).emit('mapUpdate',[tmap,t])
 
-
-	}
 	relay2(){
 		io.to(this.id).emit('relay',[this.x,this.y,this.chunk])
-		let tmap = [];
+		let tnpe = [];
 		let tmap2 = {}
 		for(let i = 0; i < map.length; i++){
 			if(distance(map[i][0]*20+10,map[i][1]*20+10,this.x,this.y)<49){
@@ -197,7 +209,6 @@ class player{
 					let xx = map[i][j][0] + sS[0]*chunkSize
 					let yy = map[i][j][1] + sS[1]*chunkSize
 					if(inRect(xx,yy,this.x-27,this.y-27,53,53)){
-						tmap.push(xx+","+yy)
 						tmap2[xx+","+yy] = map[i][j][2]
 					}
 
@@ -276,12 +287,15 @@ if(inEffectArr("blind1",this.effects)){
 
 
 		let t = []
-		for(let i = 0; i < players.length; i++){
-			if(distance(players[i].x,players[i].y,this.x,this.y) < 33 && players[i].id != this.id){
-				t.push([players[i].x,players[i].y])
+		for(let i = 0; i < entities.length; i++){
+			if(distance(entities[i].x,entities[i].y,this.x,this.y) < 33 && entities[i].id != this.id){
+				t.push([entities[i].x,entities[i].y,entities[i].entityType])
 			}
 		}
-		io.to(this.id).emit('mapUpdate2',[/*tmap*/"",t,tmap2])
+
+
+
+		io.to(this.id).emit('mapUpdate2',["",t,tmap2])
 
 	}
 
@@ -387,13 +401,13 @@ function newConnection(socket){
 	socket.on("returnPing",STOPPING)
 	console.log(socket.id + " has joined at " + Date())
 	broadcast("--"+socket.id+" has joined!",cmdc.item)
-	players.push(new player(socket.id))
-	players[findPlayerInArr(socket.id)].log(MainHelpMenu,"#A000FF")
+	entities.push(new player(socket.id))
+	entities[findPlayerInArr(socket.id)].log(MainHelpMenu,"#A000FF")
 	joined(socket.id)
 
 
 	io.to(socket.id).emit('sendWhenJoin', socket.id)
-	players[players.length-1].relay2()
+	entities[entities.length-1].relay2()
 	
 	    socket.on('disconnect',function(){disconnect(socket)});
 }
@@ -411,16 +425,16 @@ function newConnection(socket){
  function disconnect(socket) {
         console.log(socket.id + " has disconnected");
         broadcast("--"+socket.id+" has left!",cmdc.small_error)
-        for(let i = 0; i < players.length; i++){
-        	if(players[i].id == socket.id){
-        		if(players[i].inCombat !== false){
-        			endCombatInstance(players[i].inCombat)
+        for(let i = 0; i < entities.length; i++){
+        	if(entities[i].id == socket.id){
+        		if(entities[i].inCombat !== false){
+        			endCombatInstance(entities[i].inCombat)
         		}
 
 
 
 
-        		players.splice(i,1)
+        		entities.splice(i,1)
         		break
         	}
         }
@@ -428,11 +442,13 @@ function newConnection(socket){
 
 
 function allPlayersGenerateChunks(){
-		let ps = players
+		let ps = entities
 	for(let p = 0; p < ps.length; p++){
+		entities[p].update()
+		if(entities[p].entityType == "player"){
 
 
-			players[p].update()
+			
 	for(let i = -1; i < 2; i++){
 		for(let j = -1; j < 2; j++){
 			try{
@@ -446,7 +462,9 @@ function allPlayersGenerateChunks(){
 		}	
 	}
 
-		players[p].relay2()
+		entities[p].relay2()
+
+	}
 }
 }
 var TIME = 40
@@ -472,11 +490,11 @@ function doSomething(){
 		allPlayersGenerateChunks()
 	}else if(TIME == 0){
 		ProcessStep = 1
-		for(let i = 0; i < players.length; i++){
-			players[i].save()
-			io.to(players[i].id).emit('chatUpdate')
+		for(let i = 0; i < entities.length; i++){
+			entities[i].save()
+			io.to(entities[i].id).emit('chatUpdate')
 		}
-		playersCollectiveActions = []
+		entitiesCollectiveActions = []
 		combatMoveTracker = {}
 		allEffectTick()
 
@@ -510,11 +528,11 @@ function tellPerlin(x,y){
 
 
 function allEffectTick(){
-	for(let i = 0; i < players.length; i++){
-		for(let j = players[i].effects.length-1; j > -1 ; j--){
-			players[i].effects[j][1] -= 1
-			if(players[i].effects[j][1] < 1){
-				players[i].effects.splice(j,1)
+	for(let i = 0; i < entities.length; i++){
+		for(let j = entities[i].effects.length-1; j > -1 ; j--){
+			entities[i].effects[j][1] -= 1
+			if(entities[i].effects[j][1] < 1){
+				entities[i].effects.splice(j,1)
 			}
 		}
 	}
@@ -529,9 +547,9 @@ function allEffectTick(){
 
 
 
-var playersCollectiveActions = []
+var entitiesCollectiveActions = []
 function ACTIONPROCESS(e){
-	playersCollectiveActions.push(e)
+	entitiesCollectiveActions.push(e)
 }
 
 var ProcessStep = 1
@@ -562,10 +580,10 @@ var processeeOrders = ["click","combat","key","command","select"]
 
 function processPlayersActions(){
 	let mx = 0
-	for(let i = 0; i < playersCollectiveActions.length; i++){
-		if(playersCollectiveActions[i][ProcessStep] != undefined){
-			let s = playersCollectiveActions[i][ProcessStep]
-			let q = playersCollectiveActions[i][0]
+	for(let i = 0; i < entitiesCollectiveActions.length; i++){
+		if(entitiesCollectiveActions[i][ProcessStep] != undefined){
+			let s = entitiesCollectiveActions[i][ProcessStep]
+			let q = entitiesCollectiveActions[i][0]
 
 
 	if(typeof(s) == "string" && s.length == 1){
@@ -615,12 +633,12 @@ function processPlayersActions(){
 
 function getLongestPlayerAction(){
 		let mx = 0
-		let pca = playersCollectiveActions
+		let pca = entitiesCollectiveActions
 	for(let i = 0; i < pca.length; i++){
 		if(pca[i][1] != undefined && pca[i].length - 1 > mx){
 
 		if(pca[i].length > 20){
-			playersCollectiveActions[i] = pca[i].splice(0,21)
+			entitiesCollectiveActions[i] = pca[i].splice(0,21)
 		}
 
 		if(pca[i].length >= 20){
@@ -683,23 +701,23 @@ if(st[0] == "/"){
 			fstr = fstr.substring(2)
 		} else {fstr = fstr.substring(1)}
 
-		players[p].say(fstr)
+		entities[p].say(fstr)
 	} 
 	//help command
 	else if(str[0] == "H" || str[0] == "h"){
 		helpCommand(strsplit,p)
 	}
 	//setblock command
-	else if(strsplit[0] == "set" && players[p].keyholder == true){
+	else if(strsplit[0] == "set" && entities[p].keyholder == true){
 		setblock(parseInt(strsplit[1]),parseInt(strsplit[2]),strsplit[3])
 	}
 
 	//give command
-		else if(strsplit[0] == "give" && players[p].keyholder == true){
+		else if(strsplit[0] == "give" && entities[p].keyholder == true){
 		give(p,parseInt(strsplit[1]),strsplit[2])
 	}
 	//tp command
-		else if(strsplit[0] == "tp" && players[p].keyholder == true){
+		else if(strsplit[0] == "tp" && entities[p].keyholder == true){
 		tp(p,strsplit[1],strsplit[2])
 	}
 	//playerno command
@@ -710,16 +728,16 @@ if(st[0] == "/"){
 	//login command
 
 		else if(strsplit[0] == "login"){
-		players[p].login(strsplit[1],strsplit[2])
+		entities[p].login(strsplit[1],strsplit[2])
 		updatePlayerFile()
 	}
 	//permissions command
 		else if(strsplit[0] == "keyholder"){
 			if(strsplit[1] == consoleKey){
-				players[p].keyholder = true
-				players[p].log("you are now a keyholder",cmdc.success)
+				entities[p].keyholder = true
+				entities[p].log("you are now a keyholder",cmdc.success)
 			} else {
-				players[p].log("wrong key!",cmdc.error)
+				entities[p].log("wrong key!",cmdc.error)
 			}
 	}
 
@@ -727,7 +745,7 @@ if(st[0] == "/"){
 	//unrecognized command
 	else{
 		console.log(strsplit)
-		players[p].log("Invalid command.</br> If you think this should be a command, tell me your idea in discord. (lopkn#0019)","#FF0000")
+		entities[p].log("Invalid command.</br> If you think this should be a command, tell me your idea in discord. (lopkn#0019)","#FF0000")
 	}
 
 
@@ -736,7 +754,7 @@ if(st[0] == "/"){
 	if(st[0] == " "){
 		st = st.substring(1)
 	}
-	players[p].say(st)
+	entities[p].say(st)
 
 }
 
@@ -752,7 +770,7 @@ function processKey(e){
 	if(i === false){
 		console.log(i)
 	} else {
-		players[i].pressed(e[1])
+		entities[i].pressed(e[1])
 	}
 }
 function processClick(e){
@@ -773,14 +791,14 @@ function processClick(e){
 
 	//click player
 
-	for(let i = 0; i < players.length; i++){
-		if(i != r && decodedXY.x == players[i].x && decodedXY.y == players[i].y && !players[i].inCombat && !players[r].inCombat){
-			allCombatInstances[JSON.stringify(combatIdCounter)] = new combatInstance(players[r].id,players[i].id)
-			console.log("new combat instance: " +players[r].id+","+players[i].id)
-			players[r].combatRelay(true)
-			players[i].combatRelay(true)
-			players[r].log((players[i].name ? players[i].name : players[i].id)+" has entered combat with you!",cmdc.combat)
-			players[i].log((players[r].name ? players[r].name : players[r].id)+" has entered combat with you!",cmdc.combat)
+	for(let i = 0; i < entities.length; i++){
+		if(i != r && decodedXY.x == entities[i].x && decodedXY.y == entities[i].y && !entities[i].inCombat && !entities[r].inCombat){
+			allCombatInstances[JSON.stringify(combatIdCounter)] = new combatInstance(entities[r].id,entities[i].id)
+			console.log("new combat instance: " +entities[r].id+","+entities[i].id)
+			entities[r].combatRelay(true)
+			entities[i].combatRelay(true)
+			entities[r].log((entities[i].name ? entities[i].name : entities[i].id)+" has entered combat with you!",cmdc.combat)
+			entities[i].log((entities[r].name ? entities[r].name : entities[r].id)+" has entered combat with you!",cmdc.combat)
 
 		}
 
@@ -793,22 +811,22 @@ function processClick(e){
 	if(att != "NONE" && a > 0){
 		if(!alreadyHasBlock(map[chunkPos][e[2]][2])){
 			
-			if(distance(decodedXY.x,decodedXY.y,players[r].x,players[r].y) <= 12){
+			if(distance(decodedXY.x,decodedXY.y,entities[r].x,entities[r].y) <= 12){
 				map[chunkPos][e[2]][2] += "-B:" + att
 				removeItemFromSelected(e[0],1)
 			} else {
-				players[r].log("you are too far away to place a block there!",cmdc.small_error)
+				entities[r].log("you are too far away to place a block there!",cmdc.small_error)
 			}
 
 		} //util break
 	}else	if(att2 != "NONE" && a > 0){
 		if(!alreadyHasBlockATT(map[chunkPos][e[2]][2],"Sl")){
 			
-			if(distance(decodedXY.x,decodedXY.y,players[r].x,players[r].y) <= 12){
+			if(distance(decodedXY.x,decodedXY.y,entities[r].x,entities[r].y) <= 12){
 				map[chunkPos][e[2]][2] += "-Sl:" + att2
 				removeItemFromSelected(e[0],1)
 			} else {
-				players[r].log("you are too far away to place a slab there!",cmdc.small_error)
+				entities[r].log("you are too far away to place a slab there!",cmdc.small_error)
 			}
 
 		} //util break
@@ -841,21 +859,21 @@ function helpCommand(e,p){
 		e[1] = e[1].toLowerCase()
 	}
 	if(e[1] == "1" || e[1] == undefined || e[1] == "game" || e[1] == "general"){
-		players[p].log(MainHelpMenu,"#A000FF")
+		entities[p].log(MainHelpMenu,"#A000FF")
 	} else if(e[1] == "2" || e[1] == "list" || e[1] == "content"){
-		players[p].log(CURRENTCONFIGS.ConsoleResponses.Help2,"#FFFF00")
+		entities[p].log(CURRENTCONFIGS.ConsoleResponses.Help2,"#FFFF00")
 	} else if(e[1] == "3" || e[1] == "buffer"){
-		players[p].log(CURRENTCONFIGS.ConsoleResponses.Help3,"#FFFF00")
+		entities[p].log(CURRENTCONFIGS.ConsoleResponses.Help3,"#FFFF00")
 	} else if(e[1] == "4" || e[1] == "tick" || e[1] == "ticks" || e[1] == "movement" || e[1] == "move"){
-		players[p].log(CURRENTCONFIGS.ConsoleResponses.Help4,"#FFFF00")
+		entities[p].log(CURRENTCONFIGS.ConsoleResponses.Help4,"#FFFF00")
 	} else if(e[1] == "5" || e[1] == "text" || e[1] == "input"){
-		players[p].log(CURRENTCONFIGS.ConsoleResponses.Help5,"#FFFF00")
+		entities[p].log(CURRENTCONFIGS.ConsoleResponses.Help5,"#FFFF00")
 	} else if(e[1] == "6" || e[1] == "command" || e[1] == "commands"){
-		players[p].log(CURRENTCONFIGS.ConsoleResponses.Help6,"#FFFF00")
+		entities[p].log(CURRENTCONFIGS.ConsoleResponses.Help6,"#FFFF00")
 	} else if(e[1] == "7" || e[1] == "combat" || e[1] == "battle"){
-		players[p].log(CURRENTCONFIGS.ConsoleResponses.Help7,"#FFFF00")
+		entities[p].log(CURRENTCONFIGS.ConsoleResponses.Help7,"#FFFF00")
 	} else {
-		players[p].log("Invalid help option.</br> If you think players would need help with this, tell me your idea in discord. (lopkn#0019)","#FF0000")
+		entities[p].log("Invalid help option.</br> If you think entities would need help with this, tell me your idea in discord. (lopkn#0019)","#FF0000")
 	}
 }
 
@@ -930,8 +948,8 @@ function breakBlockBy(str,a){
 
 
 function broadcast(s,e){
-	for(let i = 0; i < players.length; i++){
-		players[i].log(s,e)
+	for(let i = 0; i < entities.length; i++){
+		entities[i].log(s,e)
 	}
 }
 
@@ -939,14 +957,14 @@ function broadcast(s,e){
 
 function removeItemFromSelected(p,a){
 	let e = findPlayerInArr(p)
-	let player = players[e]
+	let player = entities[e]
 	let original = player.Inventory[player.selectedSlot]
 	let split = original.split("-")
 	let aa = (parseInt(TNEWATTRIBUTEOF(original,"A"))-a)
-	if(aa > 0){	players[e].Inventory[player.selectedSlot] = split[0]+"-A:"+aa}else{
-		players[e].Inventory[player.selectedSlot] = ""
+	if(aa > 0){	entities[e].Inventory[player.selectedSlot] = split[0]+"-A:"+aa}else{
+		entities[e].Inventory[player.selectedSlot] = ""
 	}
-	players[e].invrelay()
+	entities[e].invrelay()
 }
 
 
@@ -955,7 +973,7 @@ function selectSlot(e){
 	if(i === false){
 		console.log(i)
 	} else {
-		players[i].selectedSlot = (e[1])
+		entities[i].selectedSlot = (e[1])
 	}
 }
 
@@ -1169,50 +1187,50 @@ function setblock(x,y,block){
 
 
 function give(p,amount,item){
-	for(let i = 0; i < players[p].Inventory.length; i++){
-		let t = players[p].Inventory[i].split("-")
+	for(let i = 0; i < entities[p].Inventory.length; i++){
+		let t = entities[p].Inventory[i].split("-")
 		if(t[0] == item){
-			players[p].Inventory[i] = addToItem(players[p].Inventory[i],amount)
-			players[p].invrelay()
+			entities[p].Inventory[i] = addToItem(entities[p].Inventory[i],amount)
+			entities[p].invrelay()
 			return("1")
 		}
 	}
-	for(let i = 0; i < players[p].Inventory.length; i++){
-		if(players[p].Inventory[i] == "" || players[p].Inventory[i] == undefined){
-			players[p].Inventory[i] = (item + "-A:" + amount)
-			players[p].invrelay()
+	for(let i = 0; i < entities[p].Inventory.length; i++){
+		if(entities[p].Inventory[i] == "" || entities[p].Inventory[i] == undefined){
+			entities[p].Inventory[i] = (item + "-A:" + amount)
+			entities[p].invrelay()
 			return("2")
 		}
 	}
 }
 
 function ArrLoc(p){
-	players[p].log("you are player "+p,cmdc.success)
+	entities[p].log("you are player "+p,cmdc.success)
 }
 
 function tp(r,i1,i2){
 	if(i2 == undefined){
 		let temp = findPlayerString(i1)
 		if(temp !== false){
-			players[r].x = players[temp].x
-			players[r].y = players[temp].y
-			players[r].log("successfully teleported to P:"+temp,cmdc.success)
+			entities[r].x = entities[temp].x
+			entities[r].y = entities[temp].y
+			entities[r].log("successfully teleported to P:"+temp,cmdc.success)
 		} else {
-			players[r].log("cannot teleport to P:"+i1,cmdc.error)
+			entities[r].log("cannot teleport to P:"+i1,cmdc.error)
 		}
 
 
 	} else if(!isNaN(parseInt(i1))&& !isNaN(parseInt(i2))){
-		players[r].x = parseInt(i1)
-		players[r].y = parseInt(i2)
-		players[r].log("successfully teleported to "+i1+","+i2,cmdc.success)
+		entities[r].x = parseInt(i1)
+		entities[r].y = parseInt(i2)
+		entities[r].log("successfully teleported to "+i1+","+i2,cmdc.success)
 	} else if(i1[0] == "=" && i2[0] == "="){
 		let ar = parseInt(i1.split("=")[1])
 		let ae = parseInt(i2.split("=")[1])
 		if(!isNaN(ar) && !isNaN(ae)){
-			players[r].x += ar
-			players[r].y += ae
-			players[r].log("successfully teleported to "+i1+","+i2,cmdc.success)
+			entities[r].x += ar
+			entities[r].y += ae
+			entities[r].log("successfully teleported to "+i1+","+i2,cmdc.success)
 		}
 	}
 
@@ -1220,6 +1238,11 @@ function tp(r,i1,i2){
 
 
 
+
+function summonNewMob(){
+	let tempid = Math.random
+	NPEs.push(new mob(tempid))
+}
 
 
 
@@ -1253,8 +1276,8 @@ function findPlayerString(e){
 	if(findPlayerInArr(e) !== false){
 		return(findPlayerInArr(e))
 	}
-	for(let i = 0; i < players.length; i++){
-		if(players[i].name == e){
+	for(let i = 0; i < entities.length; i++){
+		if(entities[i].name == e){
 			return(i)
 		}
 	}
@@ -1286,8 +1309,8 @@ function inEffectArr(effect,arr){
 
 ///input a player id to get its position in the array 
 function findPlayerInArr(inp){
-  for(let i = 0; i < players.length; i++){
-    if(inp == players[i].id){
+  for(let i = 0; i < entities.length; i++){
+    if(inp == entities[i].id){
       return(i)
     }
   } return(false)
@@ -1440,9 +1463,9 @@ var NameTileReferenceDict = CURRENTCONFIGS.NameTileReferenceDict
 function selectedSlotItems(p){
 	let r = findPlayerInArr(p)
 	if(r !== false){
-	let e = players[r].selectedSlot
-	if(players[r].Inventory[e] != undefined){
-		let split = players[r].Inventory[e].split('-')
+	let e = entities[r].selectedSlot
+	if(entities[r].Inventory[e] != undefined){
+		let split = entities[r].Inventory[e].split('-')
 
 		// if(itemType(split[0])=="block"){
 
@@ -1554,7 +1577,7 @@ function CoordToMap(x,y){
 
 function amountOfItems(p){
 	let r = findPlayerInArr(p)
-	let player = players[r]
+	let player = entities[r]
   if(player.Inventory[player.selectedSlot] != undefined){
     let e = TNEWATTRIBUTEOF(player.Inventory[player.selectedSlot],"A")
     return(e)
@@ -1602,8 +1625,8 @@ class combatInstance{
 		this.p2n = findPlayerInArr(p2)
 		allCombatInstancesA.push(JSON.stringify(combatIdCounter))
 		// this.comId = combatIdCounter
-		players[this.p1n].inCombat = JSON.stringify(combatIdCounter)
-		players[this.p2n].inCombat = JSON.stringify(combatIdCounter)
+		entities[this.p1n].inCombat = JSON.stringify(combatIdCounter)
+		entities[this.p2n].inCombat = JSON.stringify(combatIdCounter)
 		this.comid = JSON.stringify(combatIdCounter)
 		combatIdCounter += 1
 	}
@@ -1714,15 +1737,15 @@ class combatInstance{
 
 
 
-		players[this.p1n].hp -= a
-		players[this.p2n].hp -= b
+		entities[this.p1n].hp -= a
+		entities[this.p2n].hp -= b
 
-		players[this.p1n].combatRelay()
-		players[this.p2n].combatRelay()
+		entities[this.p1n].combatRelay()
+		entities[this.p2n].combatRelay()
 
 
-		io.to(players[this.p1n].id).emit("combatText",this.textarr)
-		io.to(players[this.p2n].id).emit("combatText",this.textarr)
+		io.to(entities[this.p1n].id).emit("combatText",this.textarr)
+		io.to(entities[this.p2n].id).emit("combatText",this.textarr)
 
 		this.p1d = 0
 		this.p2d = 0
@@ -1730,10 +1753,10 @@ class combatInstance{
 		this.p1m = 1
 		this.p2m = 1
 
-		if(distance(players[this.p1n].x,players[this.p1n].y,players[this.p2n].x,players[this.p2n].y) > 13){
+		if(distance(entities[this.p1n].x,entities[this.p1n].y,entities[this.p2n].x,entities[this.p2n].y) > 13){
 			endCombatInstance(this.comid)
 		}
-		if(players[this.p1n].hp <= 0 || players[this.p2n].hp <= 0){
+		if(entities[this.p1n].hp <= 0 || entities[this.p2n].hp <= 0){
 			endCombatInstance(this.comid)
 		}
 
@@ -1746,11 +1769,11 @@ class combatInstance{
 
 
 	end(){
-		if(players[this.p1n] != undefined){
-		players[this.p1n].inCombat = false
-		players[this.p1n].combatRelay(false)}
-		players[this.p2n].inCombat = false
-		players[this.p2n].combatRelay(false)
+		if(entities[this.p1n] != undefined){
+		entities[this.p1n].inCombat = false
+		entities[this.p1n].combatRelay(false)}
+		entities[this.p2n].inCombat = false
+		entities[this.p2n].combatRelay(false)
 
 
 	}
@@ -1769,7 +1792,7 @@ class combatInstance{
 
 
 function getstats(p,str){
-	return(players[p].playerStats[str])
+	return(entities[p].entityStats[str])
 }
 
 
@@ -1777,9 +1800,9 @@ function getstats(p,str){
 function combatProcess(p,str){
 
 	let r = findPlayerInArr(p)
-	if(r !== false && players[r].inCombat){
+	if(r !== false && entities[r].inCombat){
 
-		allCombatInstances[players[r].inCombat].process(p,str)
+		allCombatInstances[entities[r].inCombat].process(p,str)
 
 	}
 }
