@@ -2,6 +2,7 @@
 
 var entities = []
 var map = []
+var usedIDs = {}
 var generatedChunks = {}
 var chunkSize = 20
 const fs = require('fs');
@@ -35,11 +36,11 @@ function ping(e){
 
 perSeed = new perlin(164.44)
 class mob{
-	constructor(id,x,y){
-		this.entityType = "mob"
+	constructor(type,x,y,id){
+		this.entityType = type
 		this.id = id
-		this.x = x+Math.floor(Math.random()*2)
-		this.y = y+Math.floor(Math.random()*2)
+		this.x = x
+		this.y = y
 		this.chunk = {"x":0,"y":0}
 		this.selectedSlot = 0
 		this.Inventory = ["B:7-A:50","B:2-A:40","U:2-A:100","Sl:1-A:30",""]
@@ -58,11 +59,14 @@ class mob{
 	nonPlayerActions(){
 		let myAction = []
 		myAction.push(this.id)
-		let moveAmount = Math.random()*20
-		for(let i = 0; i < moveAmount; i++){
-			let tr = randomItem(["w",1,"a",1,"s",1,"d",1,["com","001"],1,["com","002"],1,"",5])
-			myAction.push(tr)
 
+		if(this.id == "zombie"){
+			let moveAmount = Math.random()*20
+			for(let i = 0; i < moveAmount; i++){
+				let tr = randomItem(["w",1,"a",1,"s",1,"d",1,["com","001"],1,["com","002"],1,"",5])
+				myAction.push(tr)
+
+			}
 		}
 
 
@@ -102,6 +106,7 @@ class player{
 	constructor(id){
 		this.entityType = "player"
 		this.id = id
+		usedIDs[id] = true
 		this.x = Math.floor(Math.random()*7)
 		this.y = Math.floor(Math.random()*7)
 		this.chunk = {"x":0,"y":0}
@@ -763,6 +768,16 @@ if(st[0] == "/"){
 		else if(strsplit[0] == "tp" && entities[p].keyholder == true){
 		tp(p,strsplit[1],strsplit[2])
 	}
+	//summon command
+		else if(strsplit[0] == "summon" && entities[p].keyholder == true){
+		let tempFstore = summonNewMob(p,strsplit[1],strsplit[2],strsplit[3],strsplit[4])
+		if(tempFstore == undefined){
+			entities[p].log("summoned successfully",cmdc.success)
+		} else {
+			entities[p].log("Cannot summon, Possible overlapping ID",cmdc.error)
+		}
+
+	}
 	//playerno command
 		else if(strsplit[0] == "pno"){
 		ArrLoc(p)
@@ -842,7 +857,7 @@ function processClick(e){
 			entities[i].combatRelay(true)
 			entities[r].log((entities[i].name ? entities[i].name : entities[i].id)+" has entered combat with you!",cmdc.combat)
 			entities[i].log((entities[r].name ? entities[r].name : entities[r].id)+" has entered combat with you!",cmdc.combat)
-
+			break;
 		}
 
 
@@ -1233,9 +1248,18 @@ function tp(r,i1,i2){
 
 
 
-function summonNewMob(){
-	let tempid = Math.random
-	NPEs.push(new mob(tempid))
+function summonNewMob(id,x,y){
+
+	if(id == undefined){
+		id = Math.floor(Math.random()*10000)
+	}
+
+		if(usedIDs[id] == true){
+			return("id exists already!")
+		}
+	
+	usedIDs[id] = true
+	NPEs.push(new mob(id,x,y))
 }
 
 
