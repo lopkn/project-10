@@ -46,7 +46,15 @@ class mob{
 		this.Inventory = ["B:7-A:50","B:2-A:40","U:2-A:100","Sl:1-A:30",""]
 		this.effects = []
 		this.inCombat = false
-		this.hp = 100
+
+		if(type == "zombie"){
+			this.hp = 30
+		} else {
+			this.hp = 100
+		}
+
+
+
 		this.entityStats = {
 			"strength" : 1,
 			"agility" : 1,
@@ -60,7 +68,7 @@ class mob{
 		let myAction = []
 		myAction.push(this.id)
 
-		if(this.id == "zombie"){
+		if(this.entityType == "zombie"){
 			let moveAmount = Math.random()*20
 			for(let i = 0; i < moveAmount; i++){
 				let tr = randomItem(["w",1,"a",1,"s",1,"d",1,["com","001"],1,["com","002"],1,"",5])
@@ -72,11 +80,39 @@ class mob{
 
 		ACTIONPROCESS(myAction)
 	}
-	relay2(){}
+	relay2(){
+
+
+
+	}
 	combatRelay(){}
 	invrelay(){}
-	save(){}
-		pressed(i){
+	removeSelf(){
+		for(let i = entities.length - 1; i > -1; i--){
+			if(entities[i].id == this.id){
+				entities.splice(i,1)
+			}
+		}
+	}
+
+	kill(){				
+		
+		if(this.hp <= 0 ){
+			this.removeSelf()
+		}
+}
+	save(){
+
+
+	}
+	pressed(i){
+
+		if(this.hp <= 0 ){
+			this.removeSelf()
+			return;
+		}
+
+
 		if(i == "w"){
 			let t = CoordToMap(this.x,this.y-1)
 			if(!alreadyHasBlock(map[t[0]][t[1]][2])){
@@ -99,7 +135,9 @@ class mob{
 		}
 	}
 	log(){}
-	update(){this.chunk = CoordToChunk(this.x,this.y)}
+	update(){
+this.chunk = CoordToChunk(this.x,this.y)
+	}
 }
 
 class player{
@@ -135,7 +173,13 @@ class player{
 		}
 	}
 
+	kill(){
 
+		if(this.hp <= 0 ){
+			io.to(this.id).emit("DeathScreen")
+		}
+
+	}
 	save(){
 		if(this.name != undefined){
 			let n = this.name
@@ -538,12 +582,17 @@ function doSomething(){
 		allPlayersGenerateChunks()
 	}else if(TIME == 0){
 		ProcessStep = 1
-		for(let i = 0; i < entities.length; i++){
+		for(let i = entities.length -1; i > -1; i--){
 			entities[i].save()
-			io.to(entities[i].id).emit('chatUpdate')
+			if(entities[i].entityType=="player"){
+			io.to(entities[i].id).emit('chatUpdate')}
+			entities[i].kill()
 		}
 		entitiesCollectiveActions = []
 		combatMoveTracker = {}
+
+
+
 		allEffectTick()
 
 
@@ -743,7 +792,7 @@ if(st[0] == "/"){
 	let str = st.substring(1)
 	let strsplit = str.split(" ")
 	//command say
-	if(str[0] == "S" || str[0] == "s"){
+	if(strsplit[0] == "S" || strsplit[0] == "s"){
 		let fstr = str
 		if(str[1] == " "){
 			fstr = fstr.substring(2)
@@ -752,7 +801,7 @@ if(st[0] == "/"){
 		entities[p].say(fstr)
 	} 
 	//help command
-	else if(str[0] == "H" || str[0] == "h"){
+	else if(strsplit[0] == "H" || strsplit[0] == "h"){
 		helpCommand(strsplit,p)
 	}
 	//setblock command
@@ -770,7 +819,7 @@ if(st[0] == "/"){
 	}
 	//summon command
 		else if(strsplit[0] == "summon" && entities[p].keyholder == true){
-		let tempFstore = summonNewMob(p,strsplit[1],strsplit[2],strsplit[3],strsplit[4])
+		let tempFstore = summonCmd(p,strsplit[1],strsplit[2],strsplit[3],strsplit[4])
 		if(tempFstore == undefined){
 			entities[p].log("summoned successfully",cmdc.success)
 		} else {
@@ -790,7 +839,7 @@ if(st[0] == "/"){
 		updatePlayerFile()
 	}
 	//permissions command
-		else if(strsplit[0] == "keyholder"){
+		else if(strsplit[0] == "keyholder" || strsplit[0] == "kh"){
 			if(strsplit[1] == consoleKey){
 				entities[p].keyholder = true
 				entities[p].log("you are now a keyholder",cmdc.success)
@@ -1217,6 +1266,24 @@ function ArrLoc(p){
 	entities[p].log("you are player "+p,cmdc.success)
 }
 
+
+function getRelativity(p,x,y){
+	let outx = 0
+	let outy = 0
+	if(x[0] == "="){
+		outx = entities[p].x + parseInt(x.substring(1))
+	} else {
+		outx = parseInt(x)
+	}
+	if(y[0] == "="){
+		outy = entities[p].x + parseInt(x.substring(1))
+		outy = parseint(y)
+	}
+
+	return([outx,outy])
+}
+
+
 function tp(r,i1,i2){
 	if(i2 == undefined){
 		let temp = findPlayerString(i1)
@@ -1246,9 +1313,13 @@ function tp(r,i1,i2){
 }
 
 
+function summonCmd(p,name,x,y,id){
+	let r = getRelativity(p,x,y)
+	summonNewMob(name,r[0],r[1],id)
 
+}
 
-function summonNewMob(id,x,y){
+function summonNewMob(name,x,y,id){
 
 	if(id == undefined){
 		id = Math.floor(Math.random()*10000)
@@ -1259,7 +1330,7 @@ function summonNewMob(id,x,y){
 		}
 	
 	usedIDs[id] = true
-	NPEs.push(new mob(id,x,y))
+	entities.push(new mob(name,x,y,id))
 }
 
 

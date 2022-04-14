@@ -107,6 +107,7 @@ socket.on('mapUpdate2',UPDATEMAP)
 socket.on('invrelay',updateInv)
 socket.on('TIME',timeUpdate)
 socket.on('TICK',tick)
+socket.on("DeathScreen",deathScreen)
 socket.on('PING',returnPing)
 socket.on("chat",chatProcess)
 socket.on("comrelay",combatProcess)
@@ -210,6 +211,18 @@ playerSprites.src = 'playerSprites.png'
 // };
 
 /////////////////////////////////////////////////////
+
+
+  function deathScreen(){
+    clearInterval(canvasAnimation)
+
+    fill("#005000")
+    rect(0,0,900,900)
+    fill("#00FF00")
+    textO("you died")
+
+
+  }
 
 //combatctx
 
@@ -437,14 +450,7 @@ class Combat{
     COMtext("back",340,263)
 
 
-    // COMfill("#FF00FF")
-    // let tempt = this.ctext[0][0] == player.id ? 0 : 1
-    // let tempb = tempt == 0 ? 1 : 0
-    // COMtext(this.ctext[tempt][1],50,50)
-    // COMtext(this.ctext[tempb][1],400,50)
-    // COMtext(this.ctext[tempt][2],400,70)
-    // COMtext(this.ctext[tempb][2],50,70)
-    
+
 
     for(let i = 0; i < this.ctext.length; i++){
       this.ctext[i].draw()
