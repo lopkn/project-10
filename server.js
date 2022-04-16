@@ -61,6 +61,8 @@ class mob{
 		}else if(type == "preponderant"){
 			this.hp = 50
 			this.entityStats.strength += 2
+		}else if(type == "verdant"){
+			this.hp = 170
 		} else {
 			this.hp = 100
 		}
@@ -92,8 +94,8 @@ class mob{
 
 			if(Math.random() > 0.6 && this.inCombat == false){
 				for(let i = 0; i < entities.length; i++){
-					if(entities[i].entityType == "player" && distance(this.x,this.y,entity[i].x,entity[i].y) < 5){
-						let a = coordToChunk(entities[i].x,entities[i].y)
+					if(entities[i].entityType == "player" && distance(this.x,this.y,entities[i].x,entities[i].y) < 5){
+						let a = CoordToChunk(entities[i].x,entities[i].y)
 						myAction.push(["click",a,a.cx + a.cy*chunkSize+3])
 
 					}
@@ -104,16 +106,16 @@ class mob{
 
 			let moveAmount = Math.random()*19
 			for(let i = 0; i < moveAmount; i++){
-				let tr = randomItem(["w",1,"a",1,"s",1,"d",1,"",10])
+				let tr = randomItem(["w",1,"a",1,"s",1,"d",1,["com","002"],1,"",17])
 				myAction.push(tr)
 
 			}
 		} else if(this.entityType == "preponderant"){
 
-			if(Math.random() > 0.1 && this.inCombat == false){
+			if(Math.random() > 0.9 && this.inCombat == false){
 				for(let i = 0; i < entities.length; i++){
-					if(entities[i].entityType == "player" && distance(this.x,this.y,entity[i].x,entity[i].y) <= 3){
-						let a = coordToChunk(entities[i].x,entities[i].y)
+					if(entities[i].entityType == "player" && distance(this.x,this.y,entities[i].x,entities[i].y) <= 3){
+						let a = CoordToChunk(entities[i].x,entities[i].y)
 						myAction.push(["click",a,a.cx + a.cy*chunkSize+3])
 
 					}
@@ -974,9 +976,9 @@ function processClick(e){
 			console.log("new combat instance: " +entities[r].id+","+entities[i].id)
 			entities[r].combatRelay(true)
 			entities[i].combatRelay(true)
-			entities[r].log((entities[i].name ? entities[i].name : entities[i].id)+" has entered combat with you!",cmdc.combat)
-			entities[i].log((entities[r].name ? entities[r].name : entities[r].id)+" has entered combat with you!",cmdc.combat)
-			break;
+			entities[r].log((entities[i].name ? entities[i].name : ((entities[i].entityType == "player") ? entities[i].id : entities[i].entityType))+" has entered combat with you!",cmdc.combat)
+			entities[i].log((entities[r].name ? entities[r].name : ((entities[r].entityType == "player") ? entities[r].id : entities[r].entityType))+" has entered combat with you!",cmdc.combat)
+			return;
 		}
 
 

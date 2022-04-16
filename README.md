@@ -9,6 +9,7 @@ DONE (after creation of tdl)
 - slab tiles
 - rotatable structures
 - block rendering images
+- mobs and entities
 
 TO DO LIST
 
@@ -28,7 +29,7 @@ TO DO LIST
 
 - actual structure generation
 - ore and crafting
-- pathfinding AI
+
 - ping compensation
 
 - chests and inventory
