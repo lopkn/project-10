@@ -10,6 +10,9 @@ DONE (after creation of tdl)
 - rotatable structures
 - block rendering images
 - mobs and entities
+- death screen
+- custom fps and improved timer
+
 
 TO DO LIST
 
@@ -22,7 +25,7 @@ TO DO LIST
 - item name and descriptions
 
 - terrain randomness
-- death screen
+
 - biomes
 - rivers
 - movement terrain turn management

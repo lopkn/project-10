@@ -179,6 +179,18 @@ function timerUpdate(e){
   timerctx.beginPath();
   timerctx.arc(70, 70, 50, Math.PI * 2 * e/60, 2 * Math.PI);
   timerctx.stroke();
+
+
+  if(e < 0){
+    timerctx.lineWidth = 5
+  timerctx.strokeStyle = "#FFFF00"
+  timerctx.beginPath();
+  timerctx.arc(70, 70, 30,0, 2 * Math.PI * (e/-100));
+  timerctx.stroke();
+  timerctx.lineWidth = 20
+  }
+
+
   timerctx.font = "20px Arial"
   timerctx.fillStyle = "#00FF00"
   timerctx.fillText(e,0,20)
@@ -704,7 +716,9 @@ function commandingPush(e){
     if(temp.split(" ")[0] == "/fps" && isNaN(temp2)==false){
       fps = temp2
       clearInterval(canvasAnimation)
-
+        canvasAnimation = setInterval(function(){ 
+        repeat()
+      }, 100/(fps/10));
 
 
       delete AActionStore[AActionStore.length -1]
