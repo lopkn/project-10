@@ -125,7 +125,7 @@ socket.on("config",configure)
   var SLABSALL
   var ImgReferenceDict
   var EntityReferenceDict
-
+  var canvasAnimation
 
 function configure(e){
    BLOCKSALL = e[0]
@@ -139,11 +139,11 @@ function configure(e){
 
 
 
-
-
-  var canvasAnimation = setInterval(function(){ 
+  canvasAnimation = setInterval(function(){ 
         repeat()
       }, 100/(fps/10));
+
+
 
 }
 
@@ -218,12 +218,13 @@ playerSprites.src = 'playerSprites.png'
 
   function deathScreen(){
     clearInterval(canvasAnimation)
-
-    fill("#005000")
+    console.log(canvasAnimation)
+    fill("#500000")
     rect(0,0,900,900)
-    fill("#00FF00")
-    textO("you died")
-
+    fill("#FF0000")
+    textO("[YOU DIED]",350,400)
+    player = 0
+    timerUpdate = function(){}
 
   }
 
@@ -783,11 +784,7 @@ document.addEventListener('keydown', (event) => {
     }
 
 
-    //  else {
-    //   // commandingPush("/")
-    //   commanding = 0
-    //   AActionStore[AActionStore.length -1] = "$" + AActionStore[AActionStore.length -1]
-    // }
+
 
 
 
@@ -1106,15 +1103,9 @@ function amountOfItems(){
 
 
 
-// function myFunction() {
-//    requestAnimationFrame(myFunction);
-//    repeat()
-// }
-// requestAnimationFrame(myFunction);
-
-canvasAnimation = setInterval(function(){ 
-    repeat()
-}, 100/(fps/10));
+// canvasAnimation = setInterval(function(){ 
+//     repeat()
+// }, 100/(fps/10));
 
 CombatAnimation = setInterval(function(){
     repeatCombat()
@@ -1274,34 +1265,6 @@ function drawTree(x,y,l,s){
 
 
 
-// function SHADELINE(arr,slope,x,y,xe,ye){
-//   let outarr = []
-//   let distx = xe - x
-//   let blocked = 0
-//   for(let i = 0; i < 10; i++){
-//     nx = x + distx * i / 10
-//     ny = y + nx * slope
-
-//     for(let j = 0; j < arr.length; j++){
-//       if(arr[j][0] == Math.floor(nx) && arr[j][1] == Math.flor(ny)){
-//         outarr.push(arr[j])
-//         if(TNEWATTRIBUTEOF(arr[j][2],"B") != "NONE"){
-//           break;
-//         }
-//       }
-//     }
-
-
-
-
-//     return(outarr)
-//   }
-
-
-// }
-
-
-
 
 
 
@@ -1337,26 +1300,7 @@ function TNEWATTRIBUTEOF(str,e){
 }
 
 
-// function MasterTileDeparser(str){
-//   let split = str.split('-')
-//   for(let i = 0; i < HeightMap.length; i++){
-//     for(let j = 0; j < split.length; j++){
-//       if(split[j][0]==HeightMap[i]){
-//         let key = split[j].substring(1)
-//         if(HeightMap[i] == "B"){
-//           return(BLOCKSALL[key])
-//         }
-//         else if(HeightMap[i] == "G"){
-//           return(TILESALL[key])
-//         }
 
-
-//       }
-//     }
-
-
-//   }
-// }
 function RFMasterTileDeparser(str){
   let split = str.split('-')
   let outarr = []
@@ -1449,63 +1393,7 @@ function deparseDurability(str){
 }
 
 
-// function deparseTileToColor(str){
-//   let split = str.split('-')
-//   let fin = ""
-//   for(let i = 0; i < split.length; i ++){
-//     //case ground
-//     if(split[i][0] == "G"){
-//       let read = split[i][1]
-//       fin += ("-G"+TILESALL[read][0])
-//     } else if(split[i][0] == "B"){
-//       let read = split[i][1]
-//       fin += ("-B"+BLOCKSALL[read][0])
-//     }
-//   }
-//   let finSplit = fin.split("-")
-//   for(let i = 0; i < HeightMap.length; i++){
-//     for(let j = 0; j < finSplit.length; j++){
-//       if(finSplit[j][0] == HeightMap[i]){
-//         return(finSplit[j].substring(1))
-//       }
-
-//     }
-//   }
-
-// }
-// var ColorBlockReferenceDict = {"1":"#B96A04"}
-// var NameBlockReferenceDict = {"1":"Oak Wood"}
-// var DurabilityMap = {"1":100}
-// var BLOCKSALL = {"1":["#B96A04","Oak Wood",100],"2":["#8C8C8C","Stone",400],"3":["#A95A00","Oak Tree Wood",400]}
-// var HeightMap = ["$","B","G"]
-// var TILESALL = {"0":["#000000","Abyss"],"1":["#04399F","Deep Sea"],"2":["#0078FF","Sea"],"3":["#1FB1FF","Shallow Waters"],"4":["#D9DC00","Sand"],"5":["#20A020","Plains"],"6":["#207020","Forest"],"7":["#205020","Dense Forest"],"8":["#707070","Mountains"],"9":["#F0F0F0","Snowy Mountain Peaks"]}
-// var ColorTileReferenceDict = {"0":"#000000","1":"#04399F","2":"#0078FF","3":"#1FB1FF","4":"#D9DC00","5":"#20A020","6":"#207020","7":"#205020","8":"#707070","9":"#F0F0F0"}
-// var NameTileReferenceDict = {"0":"Abyss","1":"Deep Sea","2":"Sea","3":"Shallow Waters","4":"Sand","5":"Plains","6":"Forest","7":"Dense Forest","8":"Mountains","9":"Snowy Mountain Peaks"}
-
-// function deparseTileToName(str){
-//   let split = str.split('-')
-//   let fin = ""
-//   for(let i = 0; i < split.length; i ++){
-//     //case ground
-//     if(split[i][0] == "G"){
-//       let read = split[i][1]
-//       fin += ("-G"+TILESALL[read][1])
-//     } else if(split[i][0] == "B"){
-//       let read = split[i][1]
-//       fin += ("-B"+BLOCKSALL[read][1])
-//     }
-//   }
-//   let finSplit = fin.split("-")
-//   for(let i = 0; i < HeightMap.length; i++){
-//     for(let j = 0; j < finSplit.length; j++){
-//       if(finSplit[j][0] == HeightMap[i]){
-//         return(finSplit[j].substring(1))
-//       }
-
-//     }
-//   }
-// }
-///////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////
 
 
 
