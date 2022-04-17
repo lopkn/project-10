@@ -63,7 +63,9 @@ class mob{
 			this.entityStats.strength += 2
 		}else if(type == "verdant"){
 			this.hp = 170
-		} else {
+		}else if(type == "duck"){
+			this.hp = 30
+		}  else {
 			this.hp = 100
 		}
 
@@ -138,6 +140,13 @@ class mob{
 					myAction.push(tr)
 
 				}
+			}
+		}else if(this.entityType == "duck"){
+			let moveAmount = Math.random()*20
+			for(let i = 0; i < moveAmount; i++){
+				let tr = randomItem(["w",2,"a",2,"s",2,"d",2,"",10])
+				myAction.push(tr)
+
 			}
 		}
 
@@ -214,7 +223,7 @@ class player{
 		this.y = Math.floor(Math.random()*7)
 		this.chunk = {"x":0,"y":0}
 		this.selectedSlot = 0
-		this.Inventory = ["B:7-A:50","B:2-A:40","U:2-A:100","Sl:1-A:30",""]
+		this.Inventory = ["B:5-A:50","B:2-A:40","U:2-A:100","Sl:1-A:30",""]
 		this.effects = []
 		this.inCombat = false
 		this.hp = 100

@@ -7,7 +7,7 @@ class Player{
     this.hp = 100
     this.chunk = {"x":0,"y":0}
     this.selectedSlot = 0
-    this.Inventory = ["B:1-A:50","B:2-A:40","U:2-A:100","Sl:1-A:30",""]
+    this.Inventory = ["B:5-A:50","B:2-A:40","U:2-A:100","Sl:1-A:30",""]
   }
 }
 
@@ -863,7 +863,7 @@ document.addEventListener('mousedown', (event) => {
     // socket.emit('click',[player.id,a,b])
   }
 
-  if(inRect(mouseX,mouseY,850,675,380,130)){
+  if(combatScreen.screenActive != 0 && inRect(mouseX,mouseY,850,675,380,130)){
 
     let temp = Math.floor((mouseY-675)/32.5)
 
