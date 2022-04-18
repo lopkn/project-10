@@ -228,6 +228,10 @@ class player{
 		this.inCombat = false
 		this.hp = 100
 
+
+		this.temporalMap = {}
+
+
 		this.entityStats = {
 			"strength" : 1,
 			"agility" : 1,
@@ -367,7 +371,11 @@ class player{
 					let xx = map[i][j][0] + sS[0]*chunkSize
 					let yy = map[i][j][1] + sS[1]*chunkSize
 					if(inRect(xx,yy,this.x-27,this.y-27,53,53)){
-						tmap2[xx+","+yy] = map[i][j][2]
+						if(map[i][j][2] != this.temporalMap[xx+","+yy]){
+							tmap2[xx+","+yy] = map[i][j][2]
+						}
+						this.temporalMap[xx+","+yy] = map[i][j][2]
+
 					}
 
 

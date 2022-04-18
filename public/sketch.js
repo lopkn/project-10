@@ -100,6 +100,7 @@ display2.style.left = "850px"
 
 
 socket = io.connect('/');
+
 socket.on('sendWhenJoin',joinSuccess)
 socket.on('relay',relayPlayer)
 socket.on('chatUpdate',updateChat)
@@ -115,6 +116,44 @@ socket.on("combatText",combatText)
 socket.on("config",configure)
 
 
+var PSDon = false
+function PacketSizeDebuggerToggle(){
+  if(PSDon){
+    PSDon = false
+  } else {
+    PSDon = true
+  }
+}
+
+function PacketSizeDebugger(){
+  socket.on('sendWhenJoin', (e) =>{sizeTell(e,"1")})
+  socket.on('relay',(e) =>{sizeTell(e,"2")})
+  socket.on('chatUpdate',(e) =>{sizeTell(e,"3")})
+  socket.on('mapUpdate2',(e) =>{sizeTell(e,"4")})
+  socket.on('invrelay',(e) =>{sizeTell(e,"5")})
+  socket.on('TIME',(e) =>{sizeTell(e,"6")})
+  socket.on('TICK',(e) =>{sizeTell(e,"7")})
+  socket.on("DeathScreen",(e) =>{sizeTell(e,"8")})
+  socket.on('PING',(e) =>{sizeTell(e,"9")})
+  socket.on("chat",(e) =>{sizeTell(e,"0")})
+  socket.on("comrelay",(e) =>{sizeTell(e,"11")})
+  socket.on("combatText",(e) =>{sizeTell(e,"12")})
+  socket.on("config",(e) =>{sizeTell(e,"13")})
+}
+
+function sizeTell(e,n){
+  if(PSDon){
+    try{
+    console.log(n+"-"+JSON.stringify(e).length)}
+    catch{
+      console.log(n+"=err="+e)
+    }
+  }
+}
+
+
+
+
 // socket.on('playersRelay',playersUpdate)
 
 
@@ -128,6 +167,9 @@ socket.on("config",configure)
   var canvasAnimation
 
 function configure(e){
+
+
+
    BLOCKSALL = e[0]
    HeightMap = e[1]
    TILESALL = e[2]
@@ -1146,7 +1188,16 @@ var map = {}
 var players = []
 
 
-
+function joinDict(d1, d2){
+    let final = {}
+    for (let i in d1) {
+      final[i] = d1[i]
+    }
+    for (let j in d2) {
+      final[j] = d2[j]
+    }
+    return final;
+};
 
 
 function UPDATEMAP(input){
@@ -1154,7 +1205,7 @@ function UPDATEMAP(input){
   let constructedMap = []
   // NPEs = input[0]
   players = input[1]
-  map = input[2]
+  map = joinDict(map,input[2])
 
   let trees = []
   let shades = []
