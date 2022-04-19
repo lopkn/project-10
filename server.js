@@ -272,6 +272,21 @@ class player{
 
 
 
+	sendBeam(){
+		let tempBeams = []
+		for(let i = 0; i < relayBeams.length; i++){
+			if(distance(relayBeams[i][0],relayBeams[i][1],this.x,this.y) < 100){
+				tempBeams.push(relayBeams[i])
+			}
+		}
+
+		io.to(this.id).emit("BeamRelay",tempBeams)
+
+	}
+
+
+
+
 
 	login(n,p){
 
@@ -676,6 +691,7 @@ function doSomething(){
 	}
 	if(TIME < 0 && TIME % 5 === 0){
 		processPlayersActions()
+		allPlayersSendBeams()
 		allPlayersGenerateChunks()
 	}else if(TIME == 0){
 		ProcessStep = 1
@@ -733,7 +749,16 @@ function allEffectTick(){
 }
 
 
+function allPlayersSendBeams(){
+	for(let i = 0 ; i < entities.length; i++){
+		if(entities[i].entityType == "player"){
+			entities[i].sendBeam()
+		}
+	}
 
+	relayBeams = []
+
+}
 
 
 
@@ -977,6 +1002,9 @@ function processKey(e){
 		entities[i].pressed(e[1])
 	}
 }
+
+
+var relayBeams = []
 function processClick(e){
 
 	let r = findPlayerInArr(e[0])
@@ -992,6 +1020,9 @@ function processClick(e){
 
 	let decodedXY = rCoordToChunk(e[1])
 	
+
+	relayBeams.push([entities[r].x,entities[r].y,decodedXY.x,decodedXY.y])
+
 
 	//click player
 

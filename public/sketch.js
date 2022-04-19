@@ -1,4 +1,9 @@
 
+var renderBlocks = 20
+var BlockPixels = 20
+var BlockPixelsHalf = 10
+
+
 class Player{
   constructor(id){
     this.id = id
@@ -10,6 +15,27 @@ class Player{
     this.Inventory = ["B:5-A:50","B:2-A:40","U:2-A:100","Sl:1-A:30",""]
   }
 }
+
+class Beam{
+  constructor(x,y,tx,ty){
+    this.x = ( (x+20-player.x) * BlockPixels + BlockPixelsHalf)
+    this.y = ((y+20-player.y) * BlockPixels + BlockPixelsHalf)
+    this.tx = ((tx+20-player.x) * BlockPixels + BlockPixelsHalf) - this.x
+    this.ty = ((ty+20-player.y) * BlockPixels + BlockPixelsHalf) - this.y
+    this.life = 100
+  }
+
+  upDraw(){
+    ctx.lineWidth = this.life/5
+    ctx.strokeStyle = ("rgb("+Math.random()*255+","+this.life+","+0+")")
+    line(this.x,this.y,this.tx,this.ty)
+    this.life -= 100/fps
+  }
+
+
+}
+
+
 
 var fps = 10
 
@@ -114,6 +140,7 @@ socket.on("chat",chatProcess)
 socket.on("comrelay",combatProcess)
 socket.on("combatText",combatText)
 socket.on("config",configure)
+socket.on("BeamRelay",BeamUpdate)
 
 
 var PSDon = false
@@ -139,6 +166,7 @@ function PacketSizeDebugger(){
   socket.on("comrelay",(e) =>{sizeTell(e,"11")})
   socket.on("combatText",(e) =>{sizeTell(e,"12")})
   socket.on("config",(e) =>{sizeTell(e,"13")})
+  socket.on("BeamRelay",(e) =>{sizeTell(e,"14")})
 }
 
 function sizeTell(e,n){
@@ -944,6 +972,9 @@ var scrollHorizontal = 0
 var mouseCoords = []
 
 var circleSIGH = [[20,8],[13,11],[11,13],[8,20],[11,27],[13,29],[20,32],[27,29],[29,27],[32,20],[29,13],[27,11]]
+
+var animationBeams = []
+
 // let maxSteps = 2000000
 
 // main loop
@@ -1021,6 +1052,17 @@ function repeat(){
     ctx.fillText("press enter to complete",330,315)
   }
 
+  for(let i = 0; i < animationBeams.length; i++){
+
+    animationBeams[i].upDraw()
+    if(animationBeams[i].life < 0){
+      animationBeams.splice(0,1)
+      i--
+    }
+
+  }
+
+
 
   if(TNEWATTRIBUTEOF(player.Inventory[player.selectedSlot],"B") != "NONE"){
     fill("rgba(100,255,100,"+flash+")")
@@ -1070,6 +1112,13 @@ function repeatCombat(){
 
 //repeat end =-=========================-================================-================================-=
 
+
+
+function BeamUpdate(e){
+  for(let i = 0; i < e.length; i++){
+    animationBeams.push(new Beam(e[i][0],e[i][1],e[i][2],e[i][3]))
+  }
+}
 
 
 function tick(){

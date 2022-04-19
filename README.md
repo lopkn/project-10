@@ -12,6 +12,7 @@ FEATURES DONE (after creation of tdl)
 - mobs and entities
 - death screen
 - custom fps and improved timer
+- animation beam
 
 
 TO DO LIST
@@ -26,6 +27,10 @@ TO DO LIST
 - rendering Dimensions
 
 - mouse tile scanner
+
+- animation beam styles
+
+- tile animations
 
 - explosives!
 
