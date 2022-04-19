@@ -25,6 +25,8 @@ TO DO LIST
 
 - rendering Dimensions
 
+- mouse tile scanner
+
 - explosives!
 
 - item name and descriptions

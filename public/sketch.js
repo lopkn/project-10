@@ -31,7 +31,7 @@ var AActionStore = []
 var ChatBox = ""
 var flash = 0
 
-
+// document.body.style.zoom=1
 
 var cm = document.getElementById("mapCanvas");
 var ctxm = cm.getContext("2d");
@@ -213,9 +213,15 @@ function timeUpdate(e){
 }
 
 
-function timerUpdate(e){
+function timerUpdate(e,flash){
   timerctx.fillStyle = "#000000"
+   if(flash == 1){timerctx.fillStyle = "#2F2F00"
+   setTimeout(() => {timerUpdate(60)},100);
+ }
   timerctx.fillRect(0, 0, 140, 140)
+
+
+
   let a = "rgb("+(255 * e / 60)+","+(255 - 255 * e / 60)+",120)"
   timerctx.strokeStyle = a
   timerctx.beginPath();
@@ -1067,6 +1073,10 @@ function repeatCombat(){
 
 
 function tick(){
+
+  timerUpdate(60,1)
+
+
   if(commanding  == 0){
     ActionStore = []
     ActionPrint = []

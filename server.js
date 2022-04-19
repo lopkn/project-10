@@ -274,6 +274,9 @@ class player{
 
 
 	login(n,p){
+
+
+		try{
 		if(n.length > 10){
 			this.log(CURRENTCONFIGS.ConsoleResponses.IGNLong,cmdc.error)
 			return;
@@ -282,6 +285,11 @@ class player{
 			this.log(CURRENTCONFIGS.ConsoleResponses.PsswdLong,cmdc.error)
 			return;
 		}
+	} catch {
+		this.log("invalid syntax",cmdc.error)
+			return;
+	}
+
 		if(playerList[n] == undefined){
 				if(this.name == undefined){
 				playerList[n] = {"psswd":p}
