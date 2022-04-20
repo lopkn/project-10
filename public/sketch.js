@@ -18,16 +18,21 @@ class Player{
 
 class Beam{
   constructor(x,y,tx,ty){
+    this.setPos(x,y,tx,ty)
+    this.life = 100
+  }
+
+  setPos(x,y,tx,ty){
     this.x = ( (x+20-player.x) * BlockPixels + BlockPixelsHalf)
     this.y = ((y+20-player.y) * BlockPixels + BlockPixelsHalf)
     this.tx = ((tx+20-player.x) * BlockPixels + BlockPixelsHalf) - this.x
     this.ty = ((ty+20-player.y) * BlockPixels + BlockPixelsHalf) - this.y
-    this.life = 100
   }
 
   upDraw(){
     ctx.lineWidth = this.life/5
-    ctx.strokeStyle = ("rgb("+Math.random()*255+","+this.life+","+0+")")
+    let a = Math.random()
+    ctx.strokeStyle = ("rgb("+a*255+","+this.life*2*a+","+0+")")
     line(this.x,this.y,this.tx,this.ty)
     this.life -= 100/fps
   }

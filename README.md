@@ -46,6 +46,8 @@ TO DO LIST
 
 - actual structure generation
 
+- natural entity spawning
+
 - ore and crafting
 
 - ping compensation

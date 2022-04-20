@@ -179,6 +179,29 @@ class mob{
 
 
 	}
+
+	entityCheckIfBlock(coords){
+		let a;
+		let t = CoordToMap(coords[0],coords[1])
+		try{
+			a = map[t[0]][t[1]][2]
+		} catch {
+			a = undefined
+		}
+		if(a == undefined){
+			let ctc = CoordToChunk(coords[0],coords[1])
+
+			GenerateChunk(ctc.x,ctc.y)
+			t = CoordToMap(coords[0],coords[1])
+			// console.log(ctc,t,generatedChunks)
+			a = map[t[0]][t[1]][2]
+		}
+
+		return(!alreadyHasBlock(a))
+
+	}
+
+
 	pressed(i){
 
 		if(this.hp <= 0 ){
@@ -188,23 +211,23 @@ class mob{
 
 
 		if(i == "w"){
-			let t = CoordToMap(this.x,this.y-1)
-			if(!alreadyHasBlock(map[t[0]][t[1]][2])){
+			let t = [this.x,this.y-1]
+			if(this.entityCheckIfBlock(t)){
 			this.y -= 1}
 		}
 		if(i == "s"){
-			let t = CoordToMap(this.x,this.y+1)
-			if(!alreadyHasBlock(map[t[0]][t[1]][2])){
+			let t = [this.x,this.y+1]
+			if(this.entityCheckIfBlock(t)){
 			this.y += 1}
 		}
 		if(i == "a"){
-			let t = CoordToMap(this.x-1,this.y)
-			if(!alreadyHasBlock(map[t[0]][t[1]][2])){
+			let t = [this.x-1,this.y]
+			if(this.entityCheckIfBlock(t)){
 			this.x -= 1}
 		}
 		if(i == "d"){
-			let t = CoordToMap(this.x+1,this.y)
-			if(!alreadyHasBlock(map[t[0]][t[1]][2])){
+			let t = [this.x+1,this.y]
+			if(this.entityCheckIfBlock(t)){
 			this.x += 1}
 		}
 	}
@@ -1656,6 +1679,9 @@ function alreadyHasBlock(str){
   }
   return(false)
 }
+
+
+
 function alreadyHasBlockATT(str,att){
   let split = str.split("-")
   for(let i = 0; i < split.length; i++){
@@ -1724,6 +1750,9 @@ function CoordToMap(x,y){
 	let cx = Math.floor(x/chunkSize)
 	let cy = Math.floor(y/chunkSize)
 	let p = x-cx*chunkSize + (y-cy*chunkSize)*chunkSize + 3
+
+
+
 	return([generatedChunks[cx+","+cy],p])
 }
 
@@ -1737,7 +1766,7 @@ function amountOfItems(p){
     return(e)
   } else {return("none")}
 }
-
+//error here
 
 
 
