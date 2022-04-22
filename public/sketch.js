@@ -13,6 +13,9 @@ class Player{
     this.chunk = {"x":0,"y":0}
     this.selectedSlot = 0
     this.Inventory = ["B:5-A:50","B:2-A:40","U:2-A:100","Sl:1-A:30",""]
+    this.clientInfo = {"scanmode":"off"}
+
+
   }
 }
 
@@ -42,7 +45,7 @@ class Beam{
 
 
 
-var fps = 10
+var fps = 20
 
 
 
@@ -792,9 +795,13 @@ function commandingPush(e){
     textStoreIndex = -1
     textStore.splice(0,0,ActionStore[ActionStore.length-1])
     let temp = AActionStore[AActionStore.length -1]
-    let temp2 = parseInt(temp.split(" ")[1])
+    let tempsplit = temp.split(" ")
+    let temp2 = parseInt(tempsplit[1])
 
-    if(temp.split(" ")[0] == "/fps" && isNaN(temp2)==false){
+
+    //=================CLIENT COMMANDS ================
+
+    if(tempsplit[0] == "/fps" && isNaN(temp2)==false){
       fps = temp2
       clearInterval(canvasAnimation)
         canvasAnimation = setInterval(function(){ 
@@ -802,9 +809,21 @@ function commandingPush(e){
       }, 100/(fps/10));
 
 
-      delete AActionStore[AActionStore.length -1]
+      AActionStore.splice([AActionStore.length -1],1)
 
-    } else {
+    }
+     if((tempsplit[0] == "/scanmode" ||tempsplit[0] == "/scan" )){
+      player.clientInfo.scanmode = tempsplit[1]
+
+
+    }
+
+
+
+  //=================CLIENT COMMANDS ================
+
+
+     else {
 
     AActionStore[AActionStore.length -1] = "$" + temp
     }
@@ -1006,7 +1025,10 @@ function repeat(){
   
     fill("rgba(200,0,255,0.3)")
     rectAtCoords(Math.floor(mouseX/20),Math.floor(mouseY/20))
-
+    if(player.clientInfo.scanmode == "on"){
+      fill("rgb(255,0,"+(flash*2550)+")")
+      textO(map[mouseCoords[0]+","+mouseCoords[1]],mouseX-30,mouseY-30)
+    }
 
 
   } else if(inRect(mouseX,mouseY,0,825,820,50)){
