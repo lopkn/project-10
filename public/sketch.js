@@ -20,6 +20,11 @@ class Player{
 }
 
 class Beam{
+
+//for(let i = 0; i < 50; i++){animationBeams.push(new Beam(player.x,player.y,Math.random()*50-25,Math.random()*50-25,"EnterCombat"))}
+//for fun client beam
+
+
   constructor(x,y,tx,ty,type){
     this.setPos(x,y,tx,ty)
     this.life = 100
@@ -37,7 +42,13 @@ class Beam{
   let a = Math.random()
   switch(this.type){
 
+  case "client":
 
+    ctx.lineWidth = this.life/16
+
+    ctx.strokeStyle = ("rgba(255,0,0,"+this.life/150+")")
+
+    break;
   case "none":
 
     ctx.lineWidth = this.life/7
@@ -1024,6 +1035,10 @@ document.addEventListener('mousedown', (event) => {
     // console.log([player.id,a,b])
     ActionStore.push("click:"+mouseCoords[0]+","+mouseCoords[1])
     // console.log(ee,a,b)
+
+    animationBeams.push(new Beam(player.x,player.y,mouseCoords[0],mouseCoords[1],"client"))
+
+
     AActionStore.push(["click",a,b])
     ActionPrint.push([Math.floor(mouseX/BlockPixels),Math.floor(mouseY/BlockPixels),"rgba(255,0,0,0.3)"])
     // socket.emit('click',[player.id,a,b])
