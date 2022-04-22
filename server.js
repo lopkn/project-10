@@ -236,7 +236,9 @@ class mob{
 this.chunk = CoordToChunk(this.x,this.y)
 	}
 }
-
+//================================ ------ =========================================
+//================================ PLAYER =========================================
+//================================ ------ =========================================
 class player{
 	constructor(id){
 		this.entityType = "player"
@@ -246,7 +248,7 @@ class player{
 		this.y = Math.floor(Math.random()*7)
 		this.chunk = {"x":0,"y":0}
 		this.selectedSlot = 0
-		this.Inventory = ["B:5-A:50","B:2-A:40","U:2-A:100","Sl:1-A:30",""]
+		this.Inventory = ["B:1-A:50","B:5-A:50","U:2-A:100","Sl:1-A:30",""]
 		this.effects = []
 		this.inCombat = false
 		this.hp = 100
@@ -607,7 +609,7 @@ var MainHelpMenu = CURRENTCONFIGS.ConsoleResponses["Help1-1"] + changingConfig.B
 function newConnection(socket){
 	// socket.on('requestMap', sendMap)
 	// socket.on('key', processKey)
-	// socket.on('click', processClick)
+	// socket.on('click', processClik)
 	// socket.on('selectInventorySlot', selectSlot)
 	socket.on('AT',ACTIONPROCESS)
 	socket.on("returnPing",STOPPING)
@@ -1043,48 +1045,55 @@ function processClick(e){
 
 	let decodedXY = rCoordToChunk(e[1])
 	
+	let clickResult = "none"
+	
 
-	relayBeams.push([entities[r].x,entities[r].y,decodedXY.x,decodedXY.y])
 
-
-	//click player
+	//click entity
 
 	for(let i = 0; i < entities.length; i++){
 		if(i != r && decodedXY.x == entities[i].x && decodedXY.y == entities[i].y && !entities[i].inCombat && !entities[r].inCombat){
+			if(distance(entities[r].x,entities[r].y,decodedXY.x,decodedXY.y) <= 13){
 			allCombatInstances[JSON.stringify(combatIdCounter)] = new combatInstance(entities[r].id,entities[i].id)
 			console.log("new combat instance: " +entities[r].id+","+entities[i].id)
-			entities[r].combatRelay(true)
-			entities[i].combatRelay(true)
+			entities[r].combatRelay(entities[i].entityType)
+			entities[i].combatRelay(entities[r].entityType)
 			entities[r].log((entities[i].name ? entities[i].name : ((entities[i].entityType == "player") ? entities[i].id : entities[i].entityType))+" has entered combat with you!",cmdc.combat)
 			entities[i].log((entities[r].name ? entities[r].name : ((entities[r].entityType == "player") ? entities[r].id : entities[r].entityType))+" has entered combat with you!",cmdc.combat)
-			return;
+			clickResult = "EnterCombat"
+			break;
 		}
+	}
 
 
 	}
 
 
 
-	//if block
+	if(clickResult == "none"){
 	if(att != "NONE" && a > 0){
 		if(!alreadyHasBlock(map[chunkPos][e[2]][2])){
 			
 			if(distance(decodedXY.x,decodedXY.y,entities[r].x,entities[r].y) <= 12){
 				map[chunkPos][e[2]][2] += "-B:" + att
 				removeItemFromSelected(e[0],1)
+				clickResult = "BlockPlace"
 			} else {
 				entities[r].log("you are too far away to place a block there!",cmdc.small_error)
+				clickResult = "FarBlockPlace"
 			}
 
-		} //util break
+		}
 	}else	if(att2 != "NONE" && a > 0){
 		if(!alreadyHasBlockATT(map[chunkPos][e[2]][2],"Sl")){
 			
 			if(distance(decodedXY.x,decodedXY.y,entities[r].x,entities[r].y) <= 12){
 				map[chunkPos][e[2]][2] += "-Sl:" + att2
 				removeItemFromSelected(e[0],1)
+				clickResult = "SlabPlace"
 			} else {
 				entities[r].log("you are too far away to place a slab there!",cmdc.small_error)
+				clickResult = "FarSlabPlace"
 			}
 
 		} //util break
@@ -1095,14 +1104,19 @@ function processClick(e){
 			if(seeBreak == "remove"){
 				give(r,1,"B:"+TNEWATTRIBUTEOF(map[chunkPos][e[2]][2],"B"))
 				map[chunkPos][e[2]][2] = TNEWremoveFromTile(TNEWremoveFromTile(TNEWremoveFromTile(map[chunkPos][e[2]][2],"B"),"D"),"T")
+				clickResult = "BreakBlock"
 			} else {
 				map[chunkPos][e[2]][2] = seeBreak
+				clickResult = "HitBlock"
 			}
+
 		}
 
 
 
-	}
+	}}
+
+	relayBeams.push([entities[r].x,entities[r].y,decodedXY.x,decodedXY.y,clickResult])
 }
 
 

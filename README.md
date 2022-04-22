@@ -22,6 +22,8 @@ TO DO LIST
 
 - player health & moves
 
+- combat sprite
+
 - structure array compression
 
 - rendering Dimensions

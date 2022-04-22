@@ -12,7 +12,7 @@ class Player{
     this.hp = 100
     this.chunk = {"x":0,"y":0}
     this.selectedSlot = 0
-    this.Inventory = ["B:5-A:50","B:2-A:40","U:2-A:100","Sl:1-A:30",""]
+    this.Inventory = ["B:1-A:50","B:5-A:50","U:2-A:100","Sl:1-A:30",""]
     this.clientInfo = {"scanmode":"off"}
 
 
@@ -20,9 +20,10 @@ class Player{
 }
 
 class Beam{
-  constructor(x,y,tx,ty){
+  constructor(x,y,tx,ty,type){
     this.setPos(x,y,tx,ty)
     this.life = 100
+    this.type = type
   }
 
   setPos(x,y,tx,ty){
@@ -33,14 +34,73 @@ class Beam{
   }
 
   upDraw(){
-    if(this.life > 0){
-    ctx.lineWidth = this.life/5}
+  let a = Math.random()
+  switch(this.type){
 
-    let a = Math.random()
-    ctx.strokeStyle = ("rgb("+a*255+","+this.life*2*a+","+0+")")
-    line(this.x,this.y,this.tx,this.ty)
-    this.life -= 100/fps
+
+  case "none":
+
+    ctx.lineWidth = this.life/7
+
+    ctx.strokeStyle = ("rgb("+a*255+","+this.life*2*a+",0)")
+    break;  
+  case "HitBlock":
+
+    ctx.lineWidth = this.life/5
+
+    ctx.strokeStyle = ("rgb("+a*255+","+this.life*2*a+",0)")
+
+    break;
+  case "BreakBlock":
+
+    ctx.lineWidth = this.life/4
+
+
+    ctx.strokeStyle = ("rgb("+a*255+","+this.life*2*a+","+255*(1-a)+")")
+
+    break;
+  case "BlockPlace":
+
+    ctx.lineWidth = this.life/5
+
+
+    ctx.strokeStyle = ("rgba(200,100,0,"+this.life/100+")")
+
+    break;
+  case "SlabPlace":
+
+    ctx.lineWidth = this.life/5
+
+
+    ctx.strokeStyle = ("rgba(200,150,0,"+this.life/100+")")
+
+    break;
+  case "FarBlockPlace":
+
+    ctx.lineWidth = this.life/7
+    ctx.strokeStyle = ("rgba("+a*200+","+a*this.life+",0,"+this.life/100+")")
+
+    
+    break;
+  case "FarSlabPlace":
+    ctx.lineWidth = this.life/7
+    ctx.strokeStyle = ("rgba("+a*200+","+a*1.5*this.life+",0,"+this.life/100+")")
+    break;
+
+  case "EnterCombat":
+
+    ctx.lineWidth = this.life/6
+
+    ctx.strokeStyle = ("rgb("+a*255+","+(1-a)*255+","+(1-a)*255+")")
+
+    break;
+
+
   }
+      line(this.x,this.y,this.tx,this.ty)
+      this.life -= 100/fps
+
+}
 
 
 }
@@ -338,6 +398,13 @@ playerSprites.src = 'playerSprites.png'
 function COMtext(i,x,y){
   combatctx.fillText(i,x,y)
 }
+function comDrawEnemyMapSprite(entityName){
+
+    let a = EntityReferenceDict[entityName]
+    combatctx.drawImage(entityMapImg,21*(a)+1,1,20,20,350,100,50,50)
+
+  
+}
 
 class textPhysicsPiece{
   constructor(text,x,y,color,vx,vy,g,t,e){
@@ -424,8 +491,7 @@ class Combat{
     this.screenActive = 0
     this.frame = 0
     this.started = 0
-    this.party1 = [1]
-    this.party2 = [1]
+    this.enemy = "player"
     this.choicePath = ""
     this.currentMenu = ["attack","defense","item","help"]
     this.allmenu = {
@@ -465,12 +531,11 @@ class Combat{
 
 
 
-  restart(){
+  restart(enemy){
     this.screenActive = 1
     this.frame = 0
     this.started = 0
-    this.party1 = [1]
-    this.party2 = [1]
+    this.enemy = enemy
     this.ctext = []
   }
 
@@ -519,14 +584,13 @@ class Combat{
     COMrect(5,5,player.hp*2,10)
 
 
-    for(let i = 0; i < this.party1.length; i++){
+
       COMfill("#FFFFFF")
       COMrect(50,100,50,50)
-    }
-    for(let i = 0; i < this.party2.length; i++){
-      COMfill("#FFFFFF")
-      COMrect(350,100,50,50)
-    }
+    
+
+      comDrawEnemyMapSprite(this.enemy)
+    
 
 
     if(inRect(mouseX,mouseY,850,675,380,130)){
@@ -961,7 +1025,7 @@ document.addEventListener('mousedown', (event) => {
     ActionStore.push("click:"+mouseCoords[0]+","+mouseCoords[1])
     // console.log(ee,a,b)
     AActionStore.push(["click",a,b])
-    ActionPrint.push([Math.floor(mouseX/20),Math.floor(mouseY/20),"rgba(255,0,0,0.3)"])
+    ActionPrint.push([Math.floor(mouseX/BlockPixels),Math.floor(mouseY/BlockPixels),"rgba(255,0,0,0.3)"])
     // socket.emit('click',[player.id,a,b])
   }
 
@@ -1001,7 +1065,7 @@ var circleSIGH = [[20,8],[13,11],[11,13],[8,20],[11,27],[13,29],[20,32],[27,29],
 
 var animationBeams = []
 
-// let maxSteps = 2000000
+
 
 // main loop
 // ==================================================================================================================
@@ -1022,11 +1086,11 @@ function repeat(){
     scrollTop = window.scrollY
     scrollHorizontal = window.scrollX
     try{
-      mouseCoords = [Math.floor(mouseX/20)-20+player.x,Math.floor(mouseY/20)-20+player.y]
+      mouseCoords = [Math.floor(mouseX/BlockPixels)-20+player.x,Math.floor(mouseY/BlockPixels)-20+player.y]
     } catch{}
   
     fill("rgba(200,0,255,0.3)")
-    rectAtCoords(Math.floor(mouseX/20),Math.floor(mouseY/20))
+    rectAtCoords(Math.floor(mouseX/BlockPixels),Math.floor(mouseY/BlockPixels))
     if(player.clientInfo.scanmode == "on"){
       fill("rgb(255,0,"+(flash*2550)+")")
       textO(map[mouseCoords[0]+","+mouseCoords[1]],mouseX-30,mouseY-30)
@@ -1145,7 +1209,7 @@ function repeatCombat(){
 
 function BeamUpdate(e){
   for(let i = 0; i < e.length; i++){
-    animationBeams.push(new Beam(e[i][0],e[i][1],e[i][2],e[i][3]))
+    animationBeams.push(new Beam(e[i][0],e[i][1],e[i][2],e[i][3],e[i][4]))
   }
 }
 
@@ -1180,12 +1244,14 @@ function tick(){
 function combatProcess(e){
   player.hp = e[0]
   if(e[1] != undefined){
-    if(e[1]){
-      combatScreen.restart()
-    }
-    if(!e[1]){
+    if(e[1] === false){
       combatScreen.stopscreen()
+    } else
+
+    {
+      combatScreen.restart(e[1])
     }
+    
 
 
   }
@@ -1259,11 +1325,11 @@ CombatAnimation = setInterval(function(){
 
 
 function rectAtCoords(x,y){
-  rect(x*20,y*20,20,20)
+  rect(x*BlockPixels,y*BlockPixels,BlockPixels,BlockPixels)
 }
 
 function rectAtCoordsM(x,y){
-  rectM(x*20,y*20,20,20)
+  rectM(x*BlockPixels,y*BlockPixels,BlockPixels,BlockPixels)
 }
 
 function clearCanvas(){
@@ -1333,8 +1399,8 @@ function UPDATEMAP(input){
       }
             if(a != "full"){
         ctxm.lineWidth = a * 5
-        lineM(ccx*20+10-a*9,ccy*20+10-a*9,a*18,a*18)
-        lineM(ccx*20+10-a*9,ccy*20+10+a*9,a*18,-a*18)
+        lineM(ccx*BlockPixels+10-a*9,ccy*BlockPixels+10-a*9,a*18,a*18)
+        lineM(ccx*BlockPixels+10-a*9,ccy*BlockPixels+10+a*9,a*18,-a*18)
       
       }
   }
@@ -1558,7 +1624,7 @@ function CoordToChunk(x,y){
 
 function updateInv(e){
   player.Inventory = e[0]
-  // player.selectedSlot = e[1]
+
 }
 
 
@@ -1568,23 +1634,19 @@ function updateInv(e){
 
 
 function drawTilesMapSprite(tileName,x,y){
-  // let a = TNEWATTRIBUTEOF(itemID,"B")
-  // if(a != "NONE"){
 
     let a = ImgReferenceDict[tileName]
 
-    ctxm.drawImage(tileMapImg,21*(a)+1,1,20,20,x*20,y*20,20,20)
-  // }
+    ctxm.drawImage(tileMapImg,21*(a)+1,1,20,20,x*BlockPixels,y*BlockPixels,BlockPixels,BlockPixels)
+
   
 }
 function drawEntitiesMapSprite(entityName,x,y){
-  // let a = TNEWATTRIBUTEOF(itemID,"B")
-  // if(a != "NONE"){
 
     let a = EntityReferenceDict[entityName]
 
-    ctxm.drawImage(entityMapImg,21*(a)+1,1,20,20,(x+20-player.x)*20,(y+20-player.y)*20,20,20)
-  // }
+    ctxm.drawImage(entityMapImg,21*(a)+1,1,20,20,(x+20-player.x)*BlockPixels,(y+20-player.y)*BlockPixels,BlockPixels,BlockPixels)
+
   
 }
 
