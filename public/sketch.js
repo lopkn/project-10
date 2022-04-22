@@ -33,7 +33,9 @@ class Beam{
   }
 
   upDraw(){
-    ctx.lineWidth = this.life/5
+    if(this.life > 0){
+    ctx.lineWidth = this.life/5}
+
     let a = Math.random()
     ctx.strokeStyle = ("rgb("+a*255+","+this.life*2*a+","+0+")")
     line(this.x,this.y,this.tx,this.ty)
@@ -1080,12 +1082,12 @@ function repeat(){
   }
 
   for(let i = 0; i < animationBeams.length; i++){
-
-    animationBeams[i].upDraw()
-    if(animationBeams[i].life < 0){
-      animationBeams.splice(0,1)
+    if(animationBeams[i].life <= 0){
+      animationBeams.splice(i,1)
       i--
-    }
+    } else {
+    animationBeams[i].upDraw()}
+
 
   }
 
