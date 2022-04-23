@@ -1039,7 +1039,7 @@ document.addEventListener('mousedown', (event) => {
 
 
     AActionStore.push(["click",a,b])
-    ActionPrint.push([Math.floor(mouseX/BlockPixels),Math.floor(mouseY/BlockPixels),"rgba(255,0,0,0.3)"])
+    ActionPrint.push([mouseCoords[0]-player.x+20,mouseCoords[1]-player.y+20,"rgba(255,0,0,0.3)"])
     // socket.emit('click',[player.id,a,b])
   }
 
@@ -1521,24 +1521,7 @@ function drawTree(x,y,l,s){
 //   return("NONE")
 // }
 
-function bracketLevels(str){
-  let level = 0
-  let out = {}
-  for(let i = 0; i < str.length; i++){
-    if(str[i] == "(" || str[i] == "[" || str[i] == "{" ){
-      level += 1
-    } else if(str[i] == ")" || str[i] == "]" || str[i] == "}" ){
-      level -= 1
-    } else {
-      out[JSON.stringify(level)] = str[i]
-    }
 
-
-  }
-
-  return(out)
-
-}
 
 
 function TNEWATTRIBUTEOF(str,e){
@@ -1554,17 +1537,7 @@ function TNEWATTRIBUTEOF(str,e){
 }
 
 
-function ATTRIBUTEOF(str,e){
-  if(str == undefined){return("NONE")}
-  let split = str.split("-")
-  for(let i = 0; i < split.length; i++){
-    let act = split[i].split(":")
-    if(act[0] == e){
-      return(act[1])
-    }
-  }
-  return("NONE")
-}
+
 
 
 

@@ -33,8 +33,8 @@ function ping(e){
 	io.to(entities[e].id).emit('PING')
 	startPing = 1
 }
-
-perSeed = new perlin(164.44)
+//old seed 164.44
+perSeed = new perlin(174.44)
 class mob{
 	constructor(type,x,y,id){
 		this.entityType = type
@@ -136,7 +136,7 @@ class mob{
 			} else {
 				let moveAmount = Math.random()*2 + 17
 				for(let i = 0; i < moveAmount; i++){
-					let tr = randomItem(["w",2,"a",2,"s",2,"d",2,["com","003"],1,["com","002"],1,["com","003"],1])
+					let tr = randomItem(["w",2,"a",2,"s",2,"d",2,["com","001"],1,["com","002"],1,["com","003"],1])
 					myAction.push(tr)
 
 				}

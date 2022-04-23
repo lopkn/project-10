@@ -13,6 +13,9 @@ FEATURES DONE (after creation of tdl)
 - death screen
 - custom fps and improved timer
 - animation beams
+- mouse tile scanner
+- combat sprite
+
 
 TO DO LIST
 
@@ -21,13 +24,13 @@ TO DO LIST
 
 - player health & moves
 
-- combat sprite
+- hunger system
+
+- combat animation
 
 - structure array compression
 
 - rendering Dimensions
-
-- mouse tile scanner
 
 - tile animations
 
