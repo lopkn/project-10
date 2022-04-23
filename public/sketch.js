@@ -285,11 +285,10 @@ function configure(e){
    SLABSALL = e[3]
    ImgReferenceDict = e[4]
    EntityReferenceDict = e[5]
-  // var ColorTileReferenceDict = e[3]
-  // var NameTileReferenceDict = e[4]
+ 
 
 
-
+  clearInterval(canvasAnimation)
   canvasAnimation = setInterval(function(){ 
         repeat()
       }, 100/(fps/10));
@@ -1510,18 +1509,52 @@ function drawTree(x,y,l,s){
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-function ATTRIBUTEOF(str,e){
+// function ATTRIBUTEOF(str,e){
+//   if(str == undefined){return("NONE")}
+//   let split = str.split("-")
+//   for(let i = 0; i < split.length; i++){
+//     if(split[i][0] == e){
+//       return(split[i].substring(1))
+
+//     }
+//   }
+//   return("NONE")
+// }
+
+function bracketLevels(str){
+  let level = 0
+  let out = {}
+  for(let i = 0; i < str.length; i++){
+    if(str[i] == "(" || str[i] == "[" || str[i] == "{" ){
+      level += 1
+    } else if(str[i] == ")" || str[i] == "]" || str[i] == "}" ){
+      level -= 1
+    } else {
+      out[JSON.stringify(level)] = str[i]
+    }
+
+
+  }
+
+  return(out)
+
+}
+
+
+function TNEWATTRIBUTEOF(str,e){
   if(str == undefined){return("NONE")}
   let split = str.split("-")
   for(let i = 0; i < split.length; i++){
-    if(split[i][0] == e){
-      return(split[i].substring(1))
-
+    let act = split[i].split(":")
+    if(act[0] == e){
+      return(act[1])
     }
   }
   return("NONE")
 }
-function TNEWATTRIBUTEOF(str,e){
+
+
+function ATTRIBUTEOF(str,e){
   if(str == undefined){return("NONE")}
   let split = str.split("-")
   for(let i = 0; i < split.length; i++){

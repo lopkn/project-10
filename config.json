@@ -48,33 +48,9 @@
 	},
 
 
-	"ColorTileReferenceDict" : {
-		"0":"#000000",
-		"1":"#04399F",
-		"2":"#0078FF",
-		"3":"#1FB1FF",
-		"4":"#D9DC00",
-		"5":"#20A020",
-		"6":"#207020",
-		"7":"#205020",
-		"8":"#707070",
-		"9":"#F0F0F0"
-	},
 
 
 
-	"NameTileReferenceDict" : {
-		"0":"Abyss",
-		"1":"Deep Sea",
-		"2":"Sea",
-		"3":"Shallow Waters",
-		"4":"Sand",
-		"5":"Plains",
-		"6":"Forest",
-		"7":"Dense Forest",
-		"8":"Mountains",
-		"9":"Snowy Mountain Peaks"
-	},
 
 
 	"Structures" : {

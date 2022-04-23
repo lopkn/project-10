@@ -974,6 +974,11 @@ if(st[0] == "/"){
 		}
 
 	}
+	//generate structure command
+	else if(strsplit[0] == "gen" && entities[p].keyholder == true){
+		generateStructureCmd(p,strsplit[1],strsplit[2],strsplit[3],strsplit[4])
+
+	}
 	//playerno command
 		else if(strsplit[0] == "pno"){
 		ArrLoc(p)
@@ -1027,6 +1032,19 @@ function processKey(e){
 		entities[i].pressed(e[1])
 	}
 }
+
+
+
+function generateStructureCmd(p,s,x,y,o){
+	generateStructure(s,parseInt(x),parseInt(y),JSON.parse(o))
+}
+
+
+
+
+
+
+
 
 
 var relayBeams = []
@@ -1596,9 +1614,111 @@ function inListRS(inp,arr){
 
 
 ///input a attribute string and an attribute to find the value of the attribute
+function bracketLevels(str){
+  let level = 0
+
+  let counters = []
+
+  let out = [""]
+  for(let i = 0; i < str.length; i++){
+    if(str[i] == "(" || str[i] == "[" || str[i] == "{" ){
+
+    	if(counters[level] == undefined){
+    		counters[level] = 0
+    	} else {
+    		counters[level] ++
+    	}
+
+			out[level] += ("^"+counters[level]+"^")
+
+      level += 1
+      if(out[level] == undefined){
+      	out[level] = ""
+      }
+    } else if(str[i] == ")" || str[i] == "]" || str[i] == "}" ){
+
+    	out[level] += ("&")
+
+      level -= 1
+
+    } else {
+    	
+
+      out[level] += str[i]
+    }
+
+
+  }
+
+  return(out)
+
+}
+
+function bracketCompressionProcess(str,arr,parseLevel){
+
+	let outStr = ""
+	let parsedInt = ""
+	let isParsing = 0
+
+	for(let i = 0; i < str.length; i++){
+		if(str[i] != "^" && isParsing == 0){
+			outStr += str[i]
+		} else if(str[i] != "^" && isParsing == 1){
+			parsedInt += str[i] 
+		} else {
+			if(isParsing == 0){
+				isParsing = 1
+			} else {
+				isParsing = 0
+
+				let splitarr = arr[parseLevel].split("&")
+
+				let toutStr = ("[" + splitarr[parseInt(parsedInt)] + "]")
+
+				outStr += bracketCompressionProcess(toutStr,arr,parseLevel+1)
+
+
+
+			}
+		}
+
+
+
+	}
+
+
+
+		return(outStr)
+
+}
+
+
+function strHas(str,has){
+	for(let i = 0; i < str.length; i++){
+		for(let j = 0; j < has.length; j++){
+			if(str[i] == has[j]){
+				return([i,j])
+			}
+		}
+	}
+	return(false)
+
+}
+
+function strHasBrackets(str){
+	for(let i = 0; i < str.length; i++){
+		if(str[i] == "(" || str[i] == "[" || str[i] == "{" || str[i] == ")" || str[i] == "]" || str[i] == "}"){
+			return(str[i])
+		}
+	}
+	return(false)
+}
 
 function TNEWATTRIBUTEOF(str,e){
   if(str == undefined){return("NONE")}
+
+  	if(!strHasBrackets(str)){
+
   let split = str.split("-")
   for(let i = 0; i < split.length; i++){
   	let act = split[i].split(":")
@@ -1607,6 +1727,40 @@ function TNEWATTRIBUTEOF(str,e){
   	}
   }
   return("NONE")
+	} else {
+		let BLs = bracketLevels(str)
+
+  let BaseSplit = BLs[0].split("-")
+  for(let i = 0; i < BaseSplit.length; i++){
+  	let act = BaseSplit[i].split(":")
+  	if(act[0] == e){
+
+  		if(strHas(act[1],"^")){
+
+
+  			
+
+  		return(bracketCompressionProcess(act[1],BLs,1))
+
+
+
+
+
+  		} else {
+
+  		return(act[1])
+  	}
+
+  	}
+  }
+  return("NONE")
+
+
+	}
+
+
+
+
 }
 
 function MasterTileDeparser(str){
@@ -1647,8 +1801,6 @@ var HeightMap = CURRENTCONFIGS.HeightMap
 
 
 var TILESALL = CURRENTCONFIGS.TILESALL
-var ColorTileReferenceDict = CURRENTCONFIGS.ColorTileReferenceDict
-var NameTileReferenceDict = CURRENTCONFIGS.NameTileReferenceDict
 
 //-------------------------------------------
 function selectedSlotItems(p){
