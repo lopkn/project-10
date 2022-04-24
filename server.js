@@ -248,7 +248,7 @@ class player{
 		this.y = Math.floor(Math.random()*7)
 		this.chunk = {"x":0,"y":0}
 		this.selectedSlot = 0
-		this.Inventory = ["B:1-A:50","B:5-A:50","U:2-A:100","Sl:1-A:30",""]
+		this.Inventory = ["B:1-A:50","B:5-A:50","U:4-A:100","Sl:1-A:30",""]
 		this.effects = []
 		this.inCombat = false
 		this.hp = 100
@@ -291,6 +291,10 @@ class player{
 			playerList[n].chunk = this.chunk
 			playerList[n].selectedSlot = this.selectedSlot
 			playerList[n].Inventory = this.Inventory
+			if(this.keyholder != undefined){
+				playerList[n].Inventory = this.Inventory
+			}
+
 		}
 	}
 
@@ -335,6 +339,12 @@ class player{
 				playerList[n] = {"psswd":p}
 				playerList[n].x = this.x
 				playerList[n].y = this.y
+
+				if(this.keyholder != undefined){
+					playerList[n].keyholder = this.keyholder
+				}
+
+
 				playerList[n].chunk = this.chunk
 				playerList[n].selectedSlot = this.selectedSlot
 				playerList[n].Inventory = this.Inventory
@@ -354,6 +364,9 @@ class player{
 			if(playerList[n].psswd == p){
 				this.x = playerList[n].x
 				this.y = playerList[n].y
+				if(playerList[n].keyholder != undefined){
+					this.keyholder = playerList[n].keyholder
+				}
 				this.chunk = playerList[n].chunk
 				this.selectedSlot = playerList[n].selectedSlot
 				this.Inventory = playerList[n].Inventory
@@ -659,6 +672,7 @@ function newConnection(socket){
         			endCombatInstance(entities[i].inCombat)
         		}
 
+        		updatePlayerFile()
 
 
 
@@ -733,6 +747,9 @@ function doSomething(){
 			io.to(entities[i].id).emit('chatUpdate')}
 			entities[i].kill()
 		}
+
+
+
 		entitiesCollectiveActions = []
 		combatMoveTracker = {}
 
@@ -1102,6 +1119,12 @@ function processClick(e){
 			if(distance(decodedXY.x,decodedXY.y,entities[r].x,entities[r].y) <= 12){
 				map[chunkPos][e[2]][2] += "-B:" + att
 				removeItemFromSelected(e[0],1)
+
+				if(TNEWATTRIBUTEOF(map[chunkPos][e[2]][2],"I") != "NONE"){
+					DropItems(decodedXY.x,decodedXY.y,TNEWATTRIBUTEOF(map[chunkPos][e[2]][2],"I"))
+				}
+
+
 				clickResult = "BlockPlace"
 			} else {
 				entities[r].log("you are too far away to place a block there!",cmdc.small_error)
@@ -1178,13 +1201,13 @@ function DropItems(x,y,arr){
 	if(tileItemable(tilename)){
 		map[cchunk[0]][cchunk[1]][2] += ("-I:["+arr[0]+"]")
 
-		return(true)
+		
 
 		if(arr.length > 1){
 			arr.splice(0,1)
 			DropItems(x+Math.floor(Math.random()*4-2),y+Math.floor(Math.random()*4-2),arr)
 		}
-
+		return(true)
 
 	} else {
 		DropItems(x+Math.floor(Math.random()*4-2),y+Math.floor(Math.random()*4-2),arr)

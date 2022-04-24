@@ -12,7 +12,7 @@ class Player{
     this.hp = 100
     this.chunk = {"x":0,"y":0}
     this.selectedSlot = 0
-    this.Inventory = ["B:1-A:50","B:5-A:50","U:2-A:100","Sl:1-A:30",""]
+    this.Inventory = ["B:1-A:50","B:5-A:50","U:4-A:100","Sl:1-A:30",""]
     this.clientInfo = {"scanmode":"off"}
 
 
@@ -1419,8 +1419,10 @@ function UPDATEMAP(input){
       }
 
       if(TNEWATTRIBUTEOF(tblock,"I") != "NONE"){
-        fillM("#FF00FF")
-        rectAtCoordsM(ccx,ccy)
+
+        let item = TNEWATTRIBUTEOF(tblock,"I")
+
+        drawTileItemsMapSprite(item,ccx,ccy)
       }
 
   }
@@ -1519,9 +1521,102 @@ function drawTree(x,y,l,s){
 
 
 
+function bracketLevels(str){
+  let level = 0
+
+  let counters = []
+
+  let out = [""]
+  for(let i = 0; i < str.length; i++){
+    if(str[i] == "(" || str[i] == "[" || str[i] == "{" ){
+
+      if(counters[level] == undefined){
+        counters[level] = 0
+      } else {
+        counters[level] ++
+      }
+
+      out[level] += ("^"+counters[level]+"^")
+
+      level += 1
+      if(out[level] == undefined){
+        out[level] = ""
+      }
+    } else if(str[i] == ")" || str[i] == "]" || str[i] == "}" ){
+
+      out[level] += ("&")
+
+      level -= 1
+
+    } else {
+      
+
+      out[level] += str[i]
+    }
+
+
+  }
+
+  return(out)
+
+}
+
+function bracketCompressionProcess(str,arr,parseLevel){
+
+  let outStr = ""
+  let parsedInt = ""
+  let isParsing = 0
+
+  for(let i = 0; i < str.length; i++){
+    if(str[i] != "^" && isParsing == 0){
+      outStr += str[i]
+    } else if(str[i] != "^" && isParsing == 1){
+      parsedInt += str[i] 
+    } else {
+      if(isParsing == 0){
+        isParsing = 1
+      } else {
+        isParsing = 0
+
+        let splitarr = arr[parseLevel].split("&")
+
+        let toutStr = (splitarr[parseInt(parsedInt)])
+
+        outStr += bracketCompressionProcess(toutStr,arr,parseLevel+1)
+
+
+
+      }
+    }
+
+
+
+  }
+
+
+
+    return(outStr)
+
+}
+
+
+function strHas(str,has){
+  for(let i = 0; i < str.length; i++){
+    for(let j = 0; j < has.length; j++){
+      if(str[i] == has[j]){
+        return([i,j])
+      }
+    }
+  }
+  return(false)
+
+}
 
 function TNEWATTRIBUTEOF(str,e){
   if(str == undefined){return("NONE")}
+
+    if(!strHasBrackets(str)){
+
   let split = str.split("-")
   for(let i = 0; i < split.length; i++){
     let act = split[i].split(":")
@@ -1530,6 +1625,48 @@ function TNEWATTRIBUTEOF(str,e){
     }
   }
   return("NONE")
+  } else {
+    let BLs = bracketLevels(str)
+
+  let BaseSplit = BLs[0].split("-")
+  for(let i = 0; i < BaseSplit.length; i++){
+    let act = BaseSplit[i].split(":")
+    if(act[0] == e){
+
+      if(strHas(act[1],"^")){
+
+
+        
+
+      return(bracketCompressionProcess(act[1],BLs,1))
+
+
+
+
+
+      } else {
+
+      return(act[1])
+    }
+
+    }
+  }
+  return("NONE")
+
+
+  }
+
+
+
+
+}
+function strHasBrackets(str){
+  for(let i = 0; i < str.length; i++){
+    if(str[i] == "(" || str[i] == "[" || str[i] == "{" || str[i] == ")" || str[i] == "]" || str[i] == "}"){
+      return(str[i])
+    }
+  }
+  return(false)
 }
 
 
@@ -1647,6 +1784,23 @@ function updateInv(e){
 
 
 
+function drawTileItemsMapSprite(itemstr,x,y){
+
+  let a = TNEWATTRIBUTEOF(itemstr,"B")
+  if(a != "NONE"){
+    ctxm.drawImage(img,20*(parseInt(a)-1)+1,1,18,18,BlockPixels*x,BlockPixels*y,BlockPixels,BlockPixels)
+  }
+  let b = TNEWATTRIBUTEOF(itemstr,"U")
+  if(b !="NONE"){
+    ctxm.drawImage(img,20*(parseInt(b)-1)+1,21,19,19,BlockPixels*x,BlockPixels*y,BlockPixels,BlockPixels)
+  }
+    let c = TNEWATTRIBUTEOF(itemstr,"Sl")
+  if(c !="NONE"){
+    // console.log("eee")
+    ctxm.drawImage(img,20*(parseInt(c)-1)+1,41,19,19,BlockPixels*x,BlockPixels*y,BlockPixels,BlockPixels)
+  }
+  
+}
 
 
 

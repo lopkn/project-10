@@ -19,6 +19,9 @@ FEATURES DONE (after creation of tdl)
 
 TO DO LIST
 
+- dropped item rendering and pickup
+
+- resizing update
 
 - player combat
 
@@ -43,6 +46,8 @@ TO DO LIST
 - biomes
 
 - rivers
+
+- stationary and non stationary click options
 
 - movement terrain turn management
 
