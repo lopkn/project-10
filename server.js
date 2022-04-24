@@ -1473,6 +1473,36 @@ function rotateStructure(arr,rotate,mirror){
 }
 
 
+function structureArrDecompress(arr){
+	let outarr = []
+	outarr.push(arr[0])
+
+	for(let i = 1; i < arr.length; i++){
+		if(arr[i][0] == "@"){
+			let split = (arr[i].substring(1)).split("@")
+			let number = parseInt(split[1])
+			let block = split[0]
+			for(let j = 0; j < number; j++){
+
+				outarr.push(block)
+			}
+
+
+
+		} else {
+			outarr.push(arr[i])
+		}
+
+
+	}
+
+	return(outarr)
+
+
+}
+
+
+
 
 function generateStructure(st,x,y,options){
 	let structure = CURRENTCONFIGS.Structures[st]
