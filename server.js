@@ -390,20 +390,27 @@ class player{
 			if(!alreadyHasBlock(map[t[0]][t[1]][2])){
 			this.y -= 1}
 		}
-		if(i == "s"){
+		else if(i == "s"){
 			let t = CoordToMap(this.x,this.y+1)
 			if(!alreadyHasBlock(map[t[0]][t[1]][2])){
 			this.y += 1}
 		}
-		if(i == "a"){
+		else if(i == "a"){
 			let t = CoordToMap(this.x-1,this.y)
 			if(!alreadyHasBlock(map[t[0]][t[1]][2])){
 			this.x -= 1}
 		}
-		if(i == "d"){
+		else if(i == "d"){
 			let t = CoordToMap(this.x+1,this.y)
 			if(!alreadyHasBlock(map[t[0]][t[1]][2])){
 			this.x += 1}
+		}
+		else if(i == "t"){
+			let item = this.Inventory[this.selectedSlot]
+			this.Inventory[this.selectedSlot] = ""
+			DropItems(this.x,this.y,[item])
+			this.invrelay()
+
 		}
 	}
 
@@ -1118,7 +1125,11 @@ function processClick(e){
 	} else {
 		if(alreadyHasBlock(map[chunkPos][e[2]][2]) && TNEWATTRIBUTEOF(item,"U") != "NONE"){
 			// 
-			let seeBreak = TNEWbreakBlockBy(map[chunkPos][e[2]][2],225+Math.floor(Math.random()*10-5))
+			let utilityType = CURRENTCONFIGS.ItemReferenceDict[TNEWATTRIBUTEOF(item,"U")].type
+			let utilityStrength = CURRENTCONFIGS.ItemReferenceDict[TNEWATTRIBUTEOF(item,"U")].strength
+			if(utilityType == "multitul" || utilityType == "pax"){
+
+			let seeBreak = TNEWbreakBlockBy(map[chunkPos][e[2]][2],utilityStrength+Math.floor(Math.random()*10-5))
 			if(seeBreak == "remove"){
 
 				let item = "B:"+TNEWATTRIBUTEOF(map[chunkPos][e[2]][2],"B")
@@ -1141,7 +1152,7 @@ function processClick(e){
 			}
 
 		}
-
+	}
 
 
 	}}

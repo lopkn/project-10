@@ -26,6 +26,15 @@
 	},
 
 
+	"ItemReferenceDict":{
+		"1":{"type":"multitul","strength":250},
+		"2":{"type":"pickaxe","strength":25},
+		"3":{"type":"axe","strength":25},
+		"4":{"type":"pax","strength":25}
+
+	},
+
+
 
 	"HeightMap" :["B","Sl","G"],
 	"SLABSALL" :{
