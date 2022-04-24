@@ -1118,11 +1118,23 @@ function processClick(e){
 	} else {
 		if(alreadyHasBlock(map[chunkPos][e[2]][2]) && TNEWATTRIBUTEOF(item,"U") != "NONE"){
 			// 
-			let seeBreak = TNEWbreakBlockBy(map[chunkPos][e[2]][2],25+Math.floor(Math.random()*10-5))
+			let seeBreak = TNEWbreakBlockBy(map[chunkPos][e[2]][2],225+Math.floor(Math.random()*10-5))
 			if(seeBreak == "remove"){
-				give(r,1,"B:"+TNEWATTRIBUTEOF(map[chunkPos][e[2]][2],"B"))
-				map[chunkPos][e[2]][2] = TNEWremoveFromTile(TNEWremoveFromTile(TNEWremoveFromTile(map[chunkPos][e[2]][2],"B"),"D"),"T")
+
+				let item = "B:"+TNEWATTRIBUTEOF(map[chunkPos][e[2]][2],"B")
+
+				let blockItem = give(r,1,item)
+
+				map[chunkPos][e[2]][2] = ArrRemoveFromTile(map[chunkPos][e[2]][2],["B","D","T","S"])
 				clickResult = "BreakBlock"
+				if(blockItem == "no space"){
+
+					DropItems(decodedXY.x,decodedXY.y,[item])
+
+
+				}
+	
+
 			} else {
 				map[chunkPos][e[2]][2] = seeBreak
 				clickResult = "HitBlock"
@@ -1139,6 +1151,38 @@ function processClick(e){
 
 
 
+
+
+
+function DropItems(x,y,arr){
+	
+	let cchunk = CoordToMap(x,y)
+
+
+
+	// let e2 = 3+((x%chunkSize)+(y%chunkSize)*chunkSize)
+
+	let tilename = map[cchunk[0]][cchunk[1]][2]
+
+	if(tileItemable(tilename)){
+		map[cchunk[0]][cchunk[1]][2] += ("-I:["+arr[0]+"]")
+
+		return(true)
+
+		if(arr.length > 1){
+			arr.splice(0,1)
+			DropItems(x+Math.floor(Math.random()*4-2),y+Math.floor(Math.random()*4-2),arr)
+		}
+
+
+	} else {
+		DropItems(x+Math.floor(Math.random()*4-2),y+Math.floor(Math.random()*4-2),arr)
+	}
+
+
+
+
+}
 
 
 
@@ -1166,7 +1210,6 @@ function helpCommand(e,p){
 		entities[p].log("Invalid help option.</br> If you think entities would need help with this, tell me your idea in discord. (lopkn#0019)","#FF0000")
 	}
 }
-
 
 
 
@@ -1240,6 +1283,31 @@ function selectSlot(e){
 }
 
 
+function ArrRemoveFromTile(str,type){
+	let split = str.split("-")
+	let fin = ""
+	for(let i = 0; i < split.length; i++){
+
+		let isRemove = 0
+
+		for(let j = 0 ; j < type.length; j++){
+			if(split[i].split(":")[0] == type[j]){
+				isRemove = 1
+				break;
+				
+			}
+		}
+		if(isRemove == 0){
+			fin += "-" + split[i]
+		} else {
+			isRemove = 0
+		}
+	}
+	return(fin.substring(1))
+}
+
+
+
 function TNEWremoveFromTile(str,type){
 	let split = str.split("-")
 	let fin = ""
@@ -1249,6 +1317,14 @@ function TNEWremoveFromTile(str,type){
 		}
 	}
 	return(fin.substring(1))
+}
+
+
+function tileItemable(str){
+	if(TNEWATTRIBUTEOF(str,"B") == "NONE" && TNEWATTRIBUTEOF(str,"I") == "NONE"){
+		return(true)
+	}
+	return(false)
 }
 
 
@@ -1443,6 +1519,9 @@ function give(p,amount,item){
 			return("2")
 		}
 	}
+
+	return("no space")
+
 }
 
 function ArrLoc(p){

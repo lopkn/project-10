@@ -1417,6 +1417,12 @@ function UPDATEMAP(input){
         lineM(ccx*BlockPixels+10-a*9,ccy*BlockPixels+10+a*9,a*18,-a*18)
       
       }
+
+      if(TNEWATTRIBUTEOF(tblock,"I") != "NONE"){
+        fillM("#FF00FF")
+        rectAtCoordsM(ccx,ccy)
+      }
+
   }
 
     playersUpdate(input[1])
@@ -1509,17 +1515,7 @@ function drawTree(x,y,l,s){
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-// function ATTRIBUTEOF(str,e){
-//   if(str == undefined){return("NONE")}
-//   let split = str.split("-")
-//   for(let i = 0; i < split.length; i++){
-//     if(split[i][0] == e){
-//       return(split[i].substring(1))
 
-//     }
-//   }
-//   return("NONE")
-// }
 
 
 
