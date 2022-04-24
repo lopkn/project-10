@@ -15,6 +15,7 @@ FEATURES DONE (after creation of tdl)
 - animation beams
 - mouse tile scanner
 - combat sprite
+- structure array compression
 
 
 TO DO LIST
@@ -30,8 +31,6 @@ TO DO LIST
 - hunger system
 
 - combat animation
-
-- structure array compression
 
 - rendering Dimensions
 

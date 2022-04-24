@@ -1473,9 +1473,44 @@ function rotateStructure(arr,rotate,mirror){
 }
 
 
+function structureArrCompress(arr){
+
+	let hold = "STARTHOLD"
+	let number = 2
+
+	for(let i = 1; i < arr.length; i++){
+
+		if(arr[i] == hold){
+			if(arr[i-1][0] != "@"){
+				arr[i-1] = "@" + arr[i-1] + "@2"
+			} else {
+				number += 1
+				arr[i-1] = "@" + hold + "@" + number
+			}
+
+			hold = arr[i]
+			arr.splice(i,1)
+
+			i--
+
+		} else {
+			hold = arr[i]
+			number = 2
+		}
+
+
+
+		
+	}
+	return(arr)
+
+
+}
+
+
 function structureArrDecompress(arr){
 	let outarr = []
-	outarr.push(arr[0])
+	outarr[0] = arr[0]
 
 	for(let i = 1; i < arr.length; i++){
 		if(arr[i][0] == "@"){
