@@ -1494,18 +1494,27 @@ function UPDATEMAP(input){
         drawTileItemsMapSprite(item,ccx,ccy)
 
 
-        if(20 == ccx && 20 == ccy){
+        
+
+      
+      }
+
+      if(20 == ccx && 20 == ccy){
+        if(TNEWATTRIBUTEOF(tblock,"I") != "NONE"){
+          let item = TNEWATTRIBUTEOF(tblock,"I")
           MCVs.TemporalInv.Items = [item]
         } else {
           MCVs.TemporalInv.Items = []
         }
 
-      
-      } else if(TNEWATTRIBUTEOF(tblock,"Ch") != "NONE"){
+        }
 
-      }
 
   }
+
+
+        
+
 
     playersUpdate(input[1])
     // NPEsUpdate(input[0])

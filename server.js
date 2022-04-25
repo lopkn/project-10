@@ -75,6 +75,7 @@ class mob{
 			this.Inventory = ["","B:6-A:1"]
 			this.hp = 170
 		}else if(type == "duck"){
+			this.Inventory = ["U:6-A:10","U:5-A:10","U:4-A:10","U:3-A:10","U:2-A:10","U:1-A:10","B:7-A:10","B:5-A:10","B:4-A:10","B:3-A:10","B:2-A:10","B:1-A:10","B:6-A:10"]
 			this.hp = 30
 		}  else {
 			this.hp = 100
