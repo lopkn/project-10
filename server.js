@@ -6,6 +6,10 @@ var usedIDs = {}
 var generatedChunks = {}
 var chunkSize = 20
 const fs = require('fs');
+
+const process = require('process');
+console.log(`Process pid ${process.pid}`);
+
 // const uuidv4 = require("uuid/dist/v4")
 var perlin2 = require('./perlin')
 var perlin = require('simplex-noise')
@@ -29,9 +33,13 @@ var pping = 0
 var startPing = 0
 
 
-function ping(e){
+function ping(a){
+
+	let e = findPlayerString(a)
+
 	io.to(entities[e].id).emit('PING')
 	startPing = 1
+	
 }
 //old seed 164.44
 perSeed = new perlin(174.44)
@@ -972,7 +980,7 @@ if(st[0] == "/"){
 		entities[p].say(fstr)
 	} 
 	//help command
-	else if(strsplit[0] == "H" || strsplit[0] == "h"){
+	else if(strsplit[0] == "H" || strsplit[0] == "h" || strsplit[0] == "help"){
 		helpCommand(strsplit,p)
 	}
 	//setblock command
@@ -1146,6 +1154,7 @@ function processClick(e){
 
 		} //util break
 	} else {
+		try{
 		if(alreadyHasBlock(map[chunkPos][e[2]][2]) && TNEWATTRIBUTEOF(item,"U") != "NONE"){
 			// 
 			let utilityType = CURRENTCONFIGS.ItemReferenceDict[TNEWATTRIBUTEOF(item,"U")].type
@@ -1178,7 +1187,7 @@ function processClick(e){
 	}
 
 
-	}}
+	} catch { console.log (chunkPos,e)}}}
 
 	relayBeams.push([entities[r].x,entities[r].y,decodedXY.x,decodedXY.y,clickResult])
 }
@@ -1205,12 +1214,12 @@ function DropItems(x,y,arr){
 
 		if(arr.length > 1){
 			arr.splice(0,1)
-			DropItems(x+Math.floor(Math.random()*4-2),y+Math.floor(Math.random()*4-2),arr)
+			DropItems(x+Math.round(Math.random()*4-2),y+Math.round(Math.random()*4-2),arr)
 		}
 		return(true)
 
 	} else {
-		DropItems(x+Math.floor(Math.random()*4-2),y+Math.floor(Math.random()*4-2),arr)
+		DropItems(x+Math.round(Math.random()*4-2),y+Math.round(Math.random()*4-2),arr)
 	}
 
 

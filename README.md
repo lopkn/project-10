@@ -16,13 +16,15 @@ FEATURES DONE (after creation of tdl)
 - mouse tile scanner
 - combat sprite
 - structure array compression
+- custom favicon
+
 
 
 TO DO LIST
 
 - dropped item rendering and pickup
 
-- resizing update
+- resizing & zoomout update
 
 - player combat
 
