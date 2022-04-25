@@ -51,7 +51,7 @@ class mob{
 		this.y = y
 		this.chunk = {"x":0,"y":0}
 		this.selectedSlot = 0
-		this.Inventory = ["","B:2-A:40","U:2-A:100","Sl:1-A:30",""]
+		this.Inventory = [""]
 		this.effects = []
 		this.inCombat = false
 		this.entityStats = {
@@ -65,11 +65,14 @@ class mob{
 		if(type == "zombie"){
 			this.hp = 60
 		}else if(type == "rampant"){
+			this.Inventory = ["U:6-A:1","B:1-A:6"]
 			this.hp = 30
 		}else if(type == "preponderant"){
+			this.Inventory = ["U:6-A:1","U:3-A:1"]
 			this.hp = 50
 			this.entityStats.strength += 2
 		}else if(type == "verdant"){
+			this.Inventory = ["","B:6-A:1"]
 			this.hp = 170
 		}else if(type == "duck"){
 			this.hp = 30
@@ -170,6 +173,8 @@ class mob{
 	combatRelay(){}
 	invrelay(){}
 	removeSelf(){
+		console.log(this.Inventory)
+			DropItems(this.x,this.y,removeEmptyArrStrings(this.Inventory))
 		for(let i = entities.length - 1; i > -1; i--){
 			if(entities[i].id == this.id){
 				entities.splice(i,1)
@@ -180,6 +185,9 @@ class mob{
 	kill(){				
 		
 		if(this.hp <= 0 ){
+
+
+
 			this.removeSelf()
 		}
 }
@@ -1222,7 +1230,16 @@ function processClick(e){
 }
 
 
+function removeEmptyArrStrings(arr){
+	for(let i = arr.length-1; i > -1; i--){
 
+		if(arr[i] == ""){
+
+			arr.splice(i,1)
+		}
+	}
+	return(arr)
+}
 
 
 
@@ -2272,6 +2289,13 @@ class combatInstance{
 							dfern += 3*(utilityATK[1] + Math.random()*utilityATK[2])
 							this.textarr[a][1] += utilityATK[0]
 
+			} else {
+				if(TNEWATTRIBUTEOF(item,"B") != "NONE"){
+					let ts = getstats(pno,"strength")
+					console.log(ts)
+					dfern += 3 + ts*0.5 + ts*Math.random()*2
+					this.textarr[a][1] += CURRENTCONFIGS.BLOCKSALL[TNEWATTRIBUTEOF(item,"B")][1]
+				}
 			}
 
 			

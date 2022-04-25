@@ -131,6 +131,11 @@ var player;
 var currentlyPressedKeys = []
 var c = document.getElementById("myCanvas");
 var ctx = c.getContext("2d");
+
+var InterfaceCanvas = document.getElementById("Interface")
+var menuCTX = InterfaceCanvas.getContext("2d")
+
+
 var mouseX = 0
 var mouseY = 0
 var ActionStore = []
@@ -138,7 +143,10 @@ var AActionStore = []
 var ChatBox = ""
 var flash = 0
 
-// document.body.style.zoom=1
+
+var allzoom = 1
+
+// document.body.style.zoom= allzoom
 
 var cm = document.getElementById("mapCanvas");
 var ctxm = cm.getContext("2d");
@@ -265,7 +273,7 @@ function sizeTell(e,n){
 
 // socket.on('playersRelay',playersUpdate)
 
-
+  var CLOCKNUMBER = 0
 
   var BLOCKSALL
   var HeightMap
@@ -291,6 +299,7 @@ function configure(e){
   clearInterval(canvasAnimation)
   canvasAnimation = setInterval(function(){ 
         repeat()
+        CLOCKNUMBER++
       }, 100/(fps/10));
 
 
@@ -350,6 +359,7 @@ function timerUpdate(e,flash){
   timerctx.font = "20px Arial"
   timerctx.fillStyle = "#00FF00"
   timerctx.fillText(e,0,20)
+  // CLOCKNUMBER = e
 }
 
 function joinSuccess(m){
@@ -367,11 +377,13 @@ ondrag = function(e){}
 var img = new Image();
 var tileMapImg = new Image();
 var entityMapImg = new Image();
+var animation = new Image();
 
 
 entityMapImg.src = 'entitiesMap.png'
 tileMapImg.src = 'tilesMap.png'
 img.src = 'ItemMap.png';
+animation.src = 'AnimationItem.png'
 
 var playerSprites = new Image();
 playerSprites.src = 'playerSprites.png'
@@ -1009,10 +1021,39 @@ document.addEventListener('keydown', (event) => {
 
 
 
+document.addEventListener('mouseup', (event) => {
 
+  MCVs.held = "none"
+
+
+})
 
 document.addEventListener('mousedown', (event) => {
   // console.log(mouseX,mouseY,mouseCoords)
+  let onBarCheck = onBar(mouseX,mouseY)
+  if( onBarCheck != "no"){
+
+    if(onBarCheck[0] == 1){
+
+      if(MCVs[onBarCheck[1]].open){
+        MCVs[onBarCheck[1]].open = false
+      } else {
+        MCVs[onBarCheck[1]].open = true
+      }
+
+    } else {
+      MCVs.held = [onBarCheck[1],mouseX,mouseY]
+    }
+
+
+
+
+
+
+    return;
+  }
+
+
 
   if(inRect(mouseX,mouseY,0,825,820,50)){
   if(player.selectedSlot == Math.floor(mouseX/50)){
@@ -1099,6 +1140,21 @@ var animationBeams = []
 
 
 function repeat(){
+
+  if(MCVs.held != "none"){
+
+    MCVs[MCVs.held[0]].x += mouseX - MCVs.held[1]
+    MCVs[MCVs.held[0]].y += mouseY - MCVs.held[2]
+
+    MCVs.held[1] = mouseX
+    MCVs.held[2] = mouseY
+
+
+  }
+
+  drawMenuCtx()
+
+
 
   clearCanvas()
   InvDraw()
@@ -1436,6 +1492,17 @@ function UPDATEMAP(input){
         let item = TNEWATTRIBUTEOF(tblock,"I")
 
         drawTileItemsMapSprite(item,ccx,ccy)
+
+
+        if(20 == ccx && 20 == ccy){
+          MCVs.TemporalInv.Items = [item]
+        } else {
+          MCVs.TemporalInv.Items = []
+        }
+
+      
+      } else if(TNEWATTRIBUTEOF(tblock,"Ch") != "NONE"){
+
       }
 
   }
@@ -1835,6 +1902,22 @@ function drawEntitiesMapSprite(entityName,x,y){
 }
 
 
+function drawAnimationItem(x,y){
+
+    let a = Math.floor((CLOCKNUMBER%50)/10)
+
+    ctx.drawImage(animation,21*(a)+1,1,20,20,x*BlockPixels,y*BlockPixels,BlockPixels,BlockPixels)
+
+  
+}
+function drawEntitiesMapSprite(entityName,x,y){
+
+    let a = EntityReferenceDict[entityName]
+
+    ctxm.drawImage(entityMapImg,21*(a)+1,1,20,20,(x+20-player.x)*BlockPixels,(y+20-player.y)*BlockPixels,BlockPixels,BlockPixels)
+
+  
+}
 
 
 
@@ -1854,4 +1937,119 @@ function drawItemMapSprite(itemID,Slot){
     invctx.drawImage(img,20*(parseInt(c)-1),40,21,21,50*Slot,0,50,50)
   }
   
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ======================================== -------- =======================================
+// ======================================== MENU CTX =======================================
+// ======================================== -------- =======================================
+
+var MCVs = {
+
+  "held":"none",
+  "allBars":["TemporalInv"],
+  "TemporalInv":{
+    "open":true,
+    "x": 5,
+    "y": 5,
+    "width": 70,
+    "Items":["U:1-A:1"]
+  }
+
+}
+ function MCTXrect(x,y,x2,y2){
+    menuCTX.fillRect(x,y,x2,y2)
+  }
+ function MCTXfill(i){
+    menuCTX.fillStyle = i
+  }
+
+function MCTXtext(i,x,y){
+  menuCTX.fillText(i,x,y)
+}
+
+function MaximiniButton(x,y,open){
+  if(open == true){
+  MCTXfill("rgba(150,0,0,0.9")} else {
+    MCTXfill("rgba(0,100,0,0.9")
+  }
+  MCTXrect(x+2,y+2,16,16)
+}
+
+
+function menuDrawItemMapSprite(itemID,Slot,x,y){
+  let a = TNEWATTRIBUTEOF(itemID,"B")
+  if(a != "NONE"){
+    menuCTX.drawImage(img,20*(parseInt(a)-1),0,20,20,x,50*Slot+y,70,70)
+  }
+  let b = TNEWATTRIBUTEOF(itemID,"U")
+  if(b !="NONE"){
+    menuCTX.drawImage(img,20*(parseInt(b)-1),20,21,21,x,50*Slot+y,70,70)
+  }
+    let c = TNEWATTRIBUTEOF(itemID,"Sl")
+  if(c !="NONE"){
+    // console.log("eee")
+    menuCTX.drawImage(img,20*(parseInt(c)-1),40,21,21,x,50*Slot+y,70,70)
+  }
+  
+}
+
+
+function drawMenuCtx(){
+
+menuCTX.clearRect(0, 0, 820, 820)
+
+//draw tempinv
+
+if(MCVs.TemporalInv.open == true){
+  MCTXfill("rgba(200,200,255,0.7)")
+  MCTXrect(MCVs.TemporalInv.x,MCVs.TemporalInv.y,MCVs.TemporalInv.width,20)
+  MCTXfill("rgba(70,70,70,0.7)")
+  MCTXrect(MCVs.TemporalInv.x,MCVs.TemporalInv.y+20,MCVs.TemporalInv.width,MCVs.TemporalInv.Items.length*70)
+
+  for(let i = 0; i < MCVs.TemporalInv.Items.length; i++){
+    menuDrawItemMapSprite(MCVs.TemporalInv.Items[i],i,MCVs.TemporalInv.x,MCVs.TemporalInv.y+20)
+  }
+
+
+  MaximiniButton(MCVs.TemporalInv.x,MCVs.TemporalInv.y,true)
+} else {
+  MCTXfill("rgba(255,200,200,0.7)")
+  MCTXrect(MCVs.TemporalInv.x,MCVs.TemporalInv.y,MCVs.TemporalInv.width,20)
+  MaximiniButton(MCVs.TemporalInv.x,MCVs.TemporalInv.y,false)
+}
+
+
+
+}
+
+function onBar(x,y){
+  for(let i = 0; i < MCVs.allBars.length; i++){
+
+    if(inRect(x,y,MCVs[MCVs.allBars[i]].x,MCVs[MCVs.allBars[i]].y,MCVs[MCVs.allBars[i]].width,20)){
+      
+      if(inRect(x,y,MCVs[MCVs.allBars[i]].x+2,MCVs[MCVs.allBars[i]].y+2,16,16)){
+        return([1,MCVs.allBars[i]])
+      }
+      return([2,MCVs.allBars[i]])
+
+
+    }
+
+  }
+
+  return("no")
+
 }
