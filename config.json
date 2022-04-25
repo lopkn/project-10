@@ -27,10 +27,11 @@
 
 
 	"ItemReferenceDict":{
-		"1":{"type":"multitul","strength":250},
-		"2":{"type":"pickaxe","strength":25},
-		"3":{"type":"axe","strength":25},
-		"4":{"type":"pax","strength":25}
+		"1":{"type":"multitul","strength":250,"attack":["demonic rage",10,5]},
+		"2":{"type":"pickaxe","strength":25,"attack":["swing",1.3,0.2]},
+		"3":{"type":"axe","strength":25,"attack":["swing",1.7,3]},
+		"4":{"type":"pax","strength":25,"attack":["swing",1.7,2]},
+		"5":{"type":"sword","attack":["slash",2.5,0]}
 
 	},
 

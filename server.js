@@ -432,6 +432,30 @@ class player{
 			DropItems(this.x,this.y,[item])
 			this.invrelay()
 
+		}else if(i == "p"){
+
+			let coord = CoordToMap(this.x,this.y)
+
+			let item = removeOutterBracket(TNEWATTRIBUTEOF(map[coord[0]][coord[1]][2],"I"))
+			if(item == "NONE"){return;}
+			let amount = TNEWATTRIBUTEOF(item,"A")
+			if(amount == "NONE"){
+				amount = 1
+				console.log(item)
+			} else {
+
+				amount = parseInt(amount)
+				item = removeAttributeOf(item,"A")
+			}
+
+			let seegive = give(findPlayerInArr(this.id),amount,item)
+			if(seegive != "no space"){
+				map[coord[0]][coord[1]][2] = removeAttributeOf(map[coord[0]][coord[1]][2],"I")
+			}
+
+
+		
+
 		}
 	}
 
@@ -636,9 +660,9 @@ var MainHelpMenu = CURRENTCONFIGS.ConsoleResponses["Help1-1"] + changingConfig.B
 
 function newConnection(socket){
 	// socket.on('requestMap', sendMap)
-	// socket.on('key', processKey)
-	// socket.on('click', processClik)
-	// socket.on('selectInventorySlot', selectSlot)
+	socket.on('key', processKey)
+	socket.on('click', processClick)
+	socket.on('selectInventorySlot', selectSlot)
 	socket.on('AT',ACTIONPROCESS)
 	socket.on("returnPing",STOPPING)
 	console.log(socket.id + " has joined at " + Date())
@@ -1098,6 +1122,12 @@ function processClick(e){
 	let clickResult = "none"
 	
 
+	try{
+		if(alreadyHasBlock(map[chunkPos][e[2]][2])){}
+	} catch {
+		console.log("cerr",chunkPos,e)
+	}
+
 
 	//click entity
 
@@ -1154,7 +1184,6 @@ function processClick(e){
 
 		} //util break
 	} else {
-		try{
 		if(alreadyHasBlock(map[chunkPos][e[2]][2]) && TNEWATTRIBUTEOF(item,"U") != "NONE"){
 			// 
 			let utilityType = CURRENTCONFIGS.ItemReferenceDict[TNEWATTRIBUTEOF(item,"U")].type
@@ -1187,7 +1216,7 @@ function processClick(e){
 	}
 
 
-	} catch { console.log (chunkPos,e)}}}
+	}}
 
 	relayBeams.push([entities[r].x,entities[r].y,decodedXY.x,decodedXY.y,clickResult])
 }
@@ -1901,6 +1930,35 @@ function strHasBrackets(str){
 	return(false)
 }
 
+
+
+function removeOutterBracket(str){
+	if(str[0] == "[" && str[str.length-1] == "]"){
+		str = str.substring(1)
+		str = str.slice(0,-1)
+	}
+
+	return(str)
+}
+
+
+function removeAttributeOf(str,e){
+	let BLs = bracketLevels(str)
+	let split = BLs[0].split("-")
+	let outstr = ""
+
+	for(let i = 0; i < split.length; i++){
+		let split2 = split[i].split(":")
+		if(split2[0] != e){
+			outstr += "-" + split2[0] + ":" + TNEWATTRIBUTEOF(str,split2[0])
+		}
+	}
+
+	return(outstr.substring(1))
+
+}
+
+
 function TNEWATTRIBUTEOF(str,e){
   if(str == undefined){return("NONE")}
 
@@ -2197,6 +2255,30 @@ class combatInstance{
 
 		let b = (a == 0 ? 1 : 0)
 		let pno = (a == 0 ? this.p1n : this.p2n)
+
+
+		//USE ITEM
+
+		if(str == "000"){
+
+			let item = entities[pno].Inventory[entities[pno].selectedSlot]
+			if(TNEWATTRIBUTEOF(item,"U") != "NONE"){
+				let utilityDef = CURRENTCONFIGS.ItemReferenceDict[TNEWATTRIBUTEOF(item,"U")]
+				let utilityATK = utilityDef.attack
+
+
+				console.log(pno,utilityDef)
+
+							dfern += 3*(utilityATK[1] + Math.random()*utilityATK[2])
+							this.textarr[a][1] += utilityATK[0]
+
+			}
+
+			
+ 
+		}
+
+
 //punch
 		if(str == "001"){
 			let ts = getstats(pno,"strength")

@@ -26,6 +26,8 @@ TO DO LIST
 
 - resizing & zoomout update
 
+- mobile support
+
 - player combat
 
 - player health & moves

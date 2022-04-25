@@ -1017,13 +1017,21 @@ document.addEventListener('mousedown', (event) => {
   if(inRect(mouseX,mouseY,0,825,820,50)){
   if(player.selectedSlot == Math.floor(mouseX/50)){
     player.selectedSlot = -1
+
+
+
     // socket.emit('selectInventorySlot',[player.id,-1])
   } else {
   player.selectedSlot = Math.floor(mouseX/50)}
   ActionStore.push("select:"+player.selectedSlot)
   AActionStore.push(["sel",player.selectedSlot])
   ActionPrint.push([200,200,"#FF00FF"])
-  // socket.emit('selectInventorySlot',[player.id,player.selectedSlot])
+
+  if(player.IMMEDITY == true){
+  socket.emit('selectInventorySlot',[player.id,player.selectedSlot])
+  AActionStore.splice(AActionStore.length-1,1)
+  }
+
   }
 
 
@@ -1040,7 +1048,12 @@ document.addEventListener('mousedown', (event) => {
 
     AActionStore.push(["click",a,b])
     ActionPrint.push([mouseCoords[0]-player.x+20,mouseCoords[1]-player.y+20,"rgba(255,0,0,0.3)"])
-    // socket.emit('click',[player.id,a,b])
+    if(player.IMMEDITY == true){
+    socket.emit('click',[player.id,a,b])
+    AActionStore.splice(AActionStore.length-1,1)
+    ActionStore.splice(ActionStore.length-1,1)
+
+    }
   }
 
   if(combatScreen.screenActive != 0 && inRect(mouseX,mouseY,850,675,380,130)){
