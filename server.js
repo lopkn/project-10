@@ -5,6 +5,10 @@ var map = []
 var usedIDs = {}
 var generatedChunks = {}
 var chunkSize = 20
+var allChestLinks = {}
+
+
+
 const fs = require('fs');
 
 const process = require('process');
@@ -269,6 +273,8 @@ class player{
 		this.effects = []
 		this.inCombat = false
 		this.hp = 100
+
+		this.chestLink = ["none"]
 
 
 		this.temporalMap = {}
@@ -568,9 +574,12 @@ if(inEffectArr("blind1",this.effects)){
 			}
 		}
 
+		let chiv = ""
+		if(this.chestLink[0] != "none"){
+			chiv = this.chestLink
+		}
 
-
-		io.to(this.id).emit('mapUpdate2',["",t,tmap2])
+		io.to(this.id).emit('mapUpdate2',[chiv,t,tmap2])
 
 	}
 
@@ -1159,6 +1168,44 @@ function processClick(e){
 
 
 
+
+	if(TNEWATTRIBUTEOF(map[chunkPos][e[2]][2],"Ch") != "NONE"){
+		if(distance(decodedXY.x,decodedXY.y,entities[r].x,entities[r].y) <= 2){
+
+
+		chestInv = removeOutterBracket(TNEWATTRIBUTEOF(map[chunkPos][e[2]][2],"Ch"))
+
+		let chestAtt = [chunkPos,e[2]]
+
+	    	if(entities[r].chestLink[0] != chestAtt){
+	    		entities[r].chestLink[0] = chestAtt
+	    		entities[r].chestLink[1] = chestInv
+	    		let tempclink = allChestLinks[decodedXY.x+","+decodedXY.y]
+
+	    		if(tempclink == undefined){
+	    			allChestLinks[decodedXY.x+","+decodedXY.y] = {}
+	    		}
+
+	    		allChestLinks[decodedXY.x+","+decodedXY.y][r] = chestAtt
+
+
+
+	    	} else {
+	    		entities[r].chestLink = ["none"]
+	    		delete allChestLinks[decodedXY.x+","+decodedXY.y][r] 
+	    		if(Object.keys(allChestLinks[decodedXY.x+","+decodedXY.y]).length == 0){
+	    			delete allChestLinks[decodedXY.x+","+decodedXY.y]
+	    		}
+	    	}
+
+
+	    	clickResult = "Chest"
+	} else {
+		entities[r].log("you are too far away!",cmdc.small_error)
+	}
+
+
+
 	if(clickResult == "none"){
 	if(att != "NONE" && a > 0){
 		if(!alreadyHasBlock(map[chunkPos][e[2]][2])){
@@ -1192,6 +1239,12 @@ function processClick(e){
 			}
 
 		} //util break
+
+
+		}
+
+
+
 	} else {
 		if(alreadyHasBlock(map[chunkPos][e[2]][2]) && TNEWATTRIBUTEOF(item,"U") != "NONE"){
 			// 

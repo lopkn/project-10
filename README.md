@@ -34,6 +34,8 @@ TO DO LIST
 
 - hunger system
 
+- command autocomplete
+
 - combat animation
 
 - rendering Dimensions

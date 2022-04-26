@@ -105,6 +105,13 @@ class Beam{
     ctx.strokeStyle = ("rgb("+a*255+","+(1-a)*255+","+(1-a)*255+")")
 
     break;
+  case "Chest":
+
+    ctx.lineWidth = this.life/6
+
+    ctx.strokeStyle = ("rgb(0,"+(1-a)*255+","+(1-a)*255+")")
+
+    break;
 
 
   }
@@ -1035,10 +1042,10 @@ document.addEventListener('mousedown', (event) => {
 
     if(onBarCheck[0] == 1){
 
-      if(MCVs[onBarCheck[1]].open){
-        MCVs[onBarCheck[1]].open = false
+      if(MCVs[onBarCheck[1]].maxed){
+        MCVs[onBarCheck[1]].maxed = false
       } else {
-        MCVs[onBarCheck[1]].open = true
+        MCVs[onBarCheck[1]].maxed = true
       }
 
     } else {
@@ -1439,6 +1446,23 @@ function joinDict(d1, d2){
 
 function UPDATEMAP(input){
 
+  if(input[0] != ""){
+    let chiv = input[0]
+    MCVs.ChestInv.open = true
+    MCVs.ChestInv.Items[0] = chiv[1]
+  }
+
+
+
+
+
+
+
+
+
+
+
+//updatemap
   let constructedMap = []
   // NPEs = input[0]
   players = input[1]
@@ -1463,7 +1487,6 @@ function UPDATEMAP(input){
       let bb = constructedMap[i].split(",")
       let ccx = parseInt(bb[0])+20-player.x
       let ccy = parseInt(bb[1])+20-player.y
-
       if(deparsed[0][0] == "#"){
       fillM(deparsed[0])
       rectAtCoordsM(ccx,ccy)} else{
@@ -1968,10 +1991,19 @@ function drawItemMapSprite(itemID,Slot){
 var MCVs = {
 
   "held":"none",
-  "allBars":["TemporalInv"],
+  "allBars":["TemporalInv","ChestInv"],
   "TemporalInv":{
-    "open":true,
+    "open":false,
+    "maxed":true,
     "x": 5,
+    "y": 5,
+    "width": 70,
+    "Items":["U:1-A:1"]
+  },
+  "ChestInv":{
+    "open":false,
+    "maxed":true,
+    "x": 200,
     "y": 5,
     "width": 70,
     "Items":["U:1-A:1"]
@@ -1989,13 +2021,19 @@ function MCTXtext(i,x,y){
   menuCTX.fillText(i,x,y)
 }
 
-function MaximiniButton(x,y,open){
-  if(open == true){
+function MaximiniButton(x,y,maxed){
+  if(maxed == true){
   MCTXfill("rgba(150,0,0,0.9")} else {
     MCTXfill("rgba(0,100,0,0.9")
   }
   MCTXrect(x+2,y+2,16,16)
 }
+
+function renderBar(Menu,color){
+  MCTXfill(color)
+  MCTXrect(MCVs[Menu].x,MCVs[Menu].y,MCVs[Menu].width,20)
+}
+
 
 
 function menuDrawItemMapSprite(itemID,Slot,x,y){
@@ -2022,9 +2060,17 @@ menuCTX.clearRect(0, 0, 820, 820)
 
 //draw tempinv
 
-if(MCVs.TemporalInv.open == true){
-  MCTXfill("rgba(200,200,255,0.7)")
-  MCTXrect(MCVs.TemporalInv.x,MCVs.TemporalInv.y,MCVs.TemporalInv.width,20)
+if(MCVs.TemporalInv.Items.length > 0){
+  MCVs.TemporalInv.open = true
+} else {
+  MCVs.TemporalInv.open = false
+}
+
+
+if(MCVs.TemporalInv.open){
+if(MCVs.TemporalInv.maxed == true){
+
+  renderBar('TemporalInv',"rgba(200,200,255,0.7)")
   MCTXfill("rgba(70,70,70,0.7)")
   MCTXrect(MCVs.TemporalInv.x,MCVs.TemporalInv.y+20,MCVs.TemporalInv.width,MCVs.TemporalInv.Items.length*70)
 
@@ -2035,9 +2081,40 @@ if(MCVs.TemporalInv.open == true){
 
   MaximiniButton(MCVs.TemporalInv.x,MCVs.TemporalInv.y,true)
 } else {
-  MCTXfill("rgba(255,200,200,0.7)")
-  MCTXrect(MCVs.TemporalInv.x,MCVs.TemporalInv.y,MCVs.TemporalInv.width,20)
+  renderBar('TemporalInv',"rgba(255,200,200,0.7)")
   MaximiniButton(MCVs.TemporalInv.x,MCVs.TemporalInv.y,false)
+}
+}
+
+
+//draw chestinv
+
+if(MCVs.ChestInv.Items.length > 0){
+  MCVs.ChestInv.open = true
+} else {
+  MCVs.ChestInv.open = false
+}
+
+
+
+
+if(MCVs.ChestInv.open){
+if(MCVs.ChestInv.maxed == true){
+
+  renderBar('ChestInv',"rgba(200,200,255,0.7)")
+  MCTXfill("rgba(70,70,70,0.7)")
+  MCTXrect(MCVs.ChestInv.x,MCVs.ChestInv.y+20,MCVs.ChestInv.width,MCVs.ChestInv.Items.length*70)
+
+  for(let i = 0; i < MCVs.ChestInv.Items.length; i++){
+    menuDrawItemMapSprite(MCVs.ChestInv.Items[i],i,MCVs.ChestInv.x,MCVs.ChestInv.y+20)
+  }
+
+
+  MaximiniButton(MCVs.ChestInv.x,MCVs.ChestInv.y,true)
+} else {
+  renderBar('ChestInv',"rgba(255,200,200,0.7)")
+  MaximiniButton(MCVs.ChestInv.x,MCVs.ChestInv.y,false)
+}
 }
 
 
@@ -2046,7 +2123,7 @@ if(MCVs.TemporalInv.open == true){
 
 function onBar(x,y){
   for(let i = 0; i < MCVs.allBars.length; i++){
-
+    if(MCVs[MCVs.allBars[i]].open){
     if(inRect(x,y,MCVs[MCVs.allBars[i]].x,MCVs[MCVs.allBars[i]].y,MCVs[MCVs.allBars[i]].width,20)){
       
       if(inRect(x,y,MCVs[MCVs.allBars[i]].x+2,MCVs[MCVs.allBars[i]].y+2,16,16)){
@@ -2055,7 +2132,7 @@ function onBar(x,y){
       return([2,MCVs.allBars[i]])
 
 
-    }
+    }}
 
   }
 
