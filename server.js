@@ -576,7 +576,17 @@ if(inEffectArr("blind1",this.effects)){
 
 		let chiv = ""
 		if(this.chestLink[0] != "none"){
+
+			let chestXY = this.chestLink[0].split(",")
+
+			if(distance(this.x,this.y,parseInt(chestXY[0]),parseInt(chestXY[1])) <= 2){
 			chiv = this.chestLink
+			} else {
+
+				delete allChestLinks[this.chestLink[0]][this.id]
+				this.chestLink = ["none"]
+
+			}
 		}
 
 		io.to(this.id).emit('mapUpdate2',[chiv,t,tmap2])
@@ -1175,10 +1185,10 @@ function processClick(e){
 
 		chestInv = removeOutterBracket(TNEWATTRIBUTEOF(map[chunkPos][e[2]][2],"Ch"))
 
-		let chestAtt = [chunkPos,e[2]]
+		let chestAtt = [decodedXY.x+","+decodedXY.y]
 
 	    	if(entities[r].chestLink[0] != chestAtt){
-	    		entities[r].chestLink[0] = chestAtt
+	    		entities[r].chestLink[0] = decodedXY.x+","+decodedXY.y
 	    		entities[r].chestLink[1] = chestInv
 	    		let tempclink = allChestLinks[decodedXY.x+","+decodedXY.y]
 
@@ -1186,18 +1196,17 @@ function processClick(e){
 	    			allChestLinks[decodedXY.x+","+decodedXY.y] = {}
 	    		}
 
-	    		allChestLinks[decodedXY.x+","+decodedXY.y][r] = chestAtt
+	    		allChestLinks[decodedXY.x+","+decodedXY.y][entities[r].id] = decodedXY.x+","+decodedXY.y
 
 
 
 	    	} else {
 	    		entities[r].chestLink = ["none"]
-	    		delete allChestLinks[decodedXY.x+","+decodedXY.y][r] 
+	    		delete allChestLinks[decodedXY.x+","+decodedXY.y][entities[r].id] 
 	    		if(Object.keys(allChestLinks[decodedXY.x+","+decodedXY.y]).length == 0){
 	    			delete allChestLinks[decodedXY.x+","+decodedXY.y]
 	    		}
 	    	}
-
 
 	    	clickResult = "Chest"
 	} else {
@@ -1245,7 +1254,7 @@ function processClick(e){
 
 
 
-	} else {
+	else {
 		if(alreadyHasBlock(map[chunkPos][e[2]][2]) && TNEWATTRIBUTEOF(item,"U") != "NONE"){
 			// 
 			let utilityType = CURRENTCONFIGS.ItemReferenceDict[TNEWATTRIBUTEOF(item,"U")].type
@@ -1278,7 +1287,7 @@ function processClick(e){
 	}
 
 
-	}}
+	}}}
 
 	relayBeams.push([entities[r].x,entities[r].y,decodedXY.x,decodedXY.y,clickResult])
 }

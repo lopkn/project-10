@@ -1450,6 +1450,9 @@ function UPDATEMAP(input){
     let chiv = input[0]
     MCVs.ChestInv.open = true
     MCVs.ChestInv.Items[0] = chiv[1]
+  } else {
+    MCVs.ChestInv.open = false
+    MCVs.ChestInv.Items = []
   }
 
 
