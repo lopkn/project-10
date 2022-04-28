@@ -54,7 +54,7 @@ class BeamSnake{
     this.original = original
     this.steps = steps + 1
     this.length = length
-    this.random = random / (distance(original[0],original[1],original[2],original[3]))
+    this.random = random * (distance(original[0],original[1],original[2],original[3]))
     this.step(1)
   }
 
@@ -169,6 +169,13 @@ class Beam{
     ctx.lineWidth = this.life/6
 
     ctx.strokeStyle = ("rgb(0,"+(1-a)*255+","+(1-a)*255+")")
+
+    break;
+  case "DevLightning":
+
+    ctx.lineWidth = this.life/6
+
+    ctx.strokeStyle = ("rgb("+(1-a)*255+","+(a)*255+",255)")
 
     break;
 
@@ -1120,7 +1127,7 @@ document.addEventListener('mousedown', (event) => {
   }
 
 
-  allBeamSnakes.push(new BeamSnake([player.x,player.y,mouseCoords[0],mouseCoords[1],"BlockPlace"],15,8))
+  allBeamSnakes.push(new BeamSnake([player.x,player.y,mouseCoords[0],mouseCoords[1],"DevLightning"],15,0.4))
 
 
   if(inRect(mouseX,mouseY,0,825,820,50)){
