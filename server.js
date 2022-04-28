@@ -7,6 +7,8 @@ var generatedChunks = {}
 var chunkSize = 20
 var allChestLinks = {}
 
+var allTickyBlocks = []
+
 
 
 const fs = require('fs');
@@ -1211,7 +1213,7 @@ function processClick(e){
 	    	clickResult = "Chest"
 	} else {
 		entities[r].log("you are too far away!",cmdc.small_error)
-	}
+	}}
 
 
 
@@ -1287,7 +1289,7 @@ function processClick(e){
 	}
 
 
-	}}}
+	}}
 
 	relayBeams.push([entities[r].x,entities[r].y,decodedXY.x,decodedXY.y,clickResult])
 }

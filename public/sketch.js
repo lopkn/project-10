@@ -19,6 +19,65 @@ class Player{
   }
 }
 
+class Explosion{
+  constructor(x,y,size,type){
+    this.x = ((x+20-player.x) * BlockPixels + BlockPixelsHalf)
+    this.y = ((y+20-player.y) * BlockPixels + BlockPixelsHalf)
+    this.size = size
+    this.life = size
+    this.type = type
+    this.frame = 20
+  }
+
+  upDraw(){
+    let frame = Math.floor(this.life/(this.size/20))
+    if(this.frame != frame){
+
+
+    }
+
+
+
+
+    this.life -= 20/fps
+  }
+
+
+}
+
+
+var allBeamSnakes = []
+
+class BeamSnake{
+  constructor(original,steps,random){
+    this.currentBeams = [original]
+    this.original = original
+    this.steps = steps + 1
+    this.length = length
+    this.random = random / (distance(original[0],original[1],original[2],original[3]))
+    this.step(1)
+  }
+
+  step(lightning){
+    let newBeams = []
+    for(let i = 0; i < this.currentBeams.length; i++){
+      let ts = this.currentBeams[i]
+      animationBeams.push(new Beam(Math.round(ts[0]),Math.round(ts[1]),Math.round(ts[2]),Math.round(ts[3]),ts[4]))
+      for(let i = 0; i < lightning; i++){
+        let velocity1 = ts[2]+(ts[2]-ts[0])+(Math.random()*this.random-(this.random/2))
+        let velocity2 = ts[3]+(ts[3]-ts[1])+(Math.random()*this.random-(this.random/2))
+        newBeams.push([ts[2],ts[3],velocity1,velocity2,ts[4]])
+      }
+    }
+    this.currentBeams = newBeams
+    this.steps -= 1
+  }
+
+
+}
+
+
+
 class Beam{
 
 //for(let i = 0; i < 50; i++){animationBeams.push(new Beam(player.x,player.y,Math.random()*50-25,Math.random()*50-25,"EnterCombat"))}
@@ -1061,6 +1120,8 @@ document.addEventListener('mousedown', (event) => {
   }
 
 
+  allBeamSnakes.push(new BeamSnake([player.x,player.y,mouseCoords[0],mouseCoords[1],"BlockPlace"],15,8))
+
 
   if(inRect(mouseX,mouseY,0,825,820,50)){
   if(player.selectedSlot == Math.floor(mouseX/50)){
@@ -1243,6 +1304,14 @@ function repeat(){
     animationBeams[i].upDraw()}
 
 
+  }
+    for(let i = 0; i < allBeamSnakes.length; i++){
+    if(allBeamSnakes[i].steps <= 0){
+      allBeamSnakes.splice(i,1)
+      i--
+    } else {
+      allBeamSnakes[i].step(1+Math.floor(Math.random()*2))
+    }
   }
 
 

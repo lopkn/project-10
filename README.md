@@ -17,12 +17,10 @@ FEATURES DONE (after creation of tdl)
 - combat sprite
 - structure array compression
 - custom favicon
-
+- dropped items
 
 
 TO DO LIST
-
-- dropped item rendering and pickup
 
 - resizing & zoomout update
 
