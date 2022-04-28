@@ -19,27 +19,43 @@ class Player{
   }
 }
 
+var allExplosions = []
+
 class Explosion{
-  constructor(x,y,size,type){
+  constructor(x,y,size,type,frame){
     this.x = ((x+20-player.x) * BlockPixels + BlockPixelsHalf)
     this.y = ((y+20-player.y) * BlockPixels + BlockPixelsHalf)
     this.size = size
     this.life = size
     this.type = type
-    this.frame = 20
-  }
-
-  upDraw(){
-    let frame = Math.floor(this.life/(this.size/20))
-    if(this.frame != frame){
-
-
+    this.frame = frame
+    this.Sbeams = []
+    for(let i = 0; i < size; i++){
+      this.Sbeams.push(new BeamSnake([x,y,Math.random()*6-3,Math.random()*6-3,"Explosion"],109,0.1))
     }
 
 
+  }
+
+  upDraw(){
+    let frame = Math.floor(this.life/(this.size/this.frame))
+    if(this.frame != frame){
+      for(let i = 0; i < this.Sbeams.length; i++){
+        this.Sbeams[i].step(Math.round(Math.random()*2),0.996)
+        
+      }
+      this.frame = frame
+      // console.log(frame)
+    }
+
+    ctx.beginPath()
+    ctx.lineWidth = this.life*5
+    ctx.strokeStyle = "rgba(255,255,0,0.8)"
+    ctx.arc(this.x, this.y, (this.size-this.life)*20, 0, 2 * Math.PI)
+    ctx.stroke()
 
 
-    this.life -= 20/fps
+    this.life -= (this.size/50)*60/(fps)
   }
 
 
@@ -58,7 +74,7 @@ class BeamSnake{
     this.step(1)
   }
 
-  step(lightning){
+  step(lightning,decay){
     let newBeams = []
     for(let i = 0; i < this.currentBeams.length; i++){
       let ts = this.currentBeams[i]
@@ -66,6 +82,10 @@ class BeamSnake{
       for(let i = 0; i < lightning; i++){
         let velocity1 = ts[2]+(ts[2]-ts[0])+(Math.random()*this.random-(this.random/2))
         let velocity2 = ts[3]+(ts[3]-ts[1])+(Math.random()*this.random-(this.random/2))
+        if(decay != undefined){
+          velocity2 *= decay
+          velocity1 *= decay
+        }
         newBeams.push([ts[2],ts[3],velocity1,velocity2,ts[4]])
       }
     }
@@ -176,6 +196,13 @@ class Beam{
     ctx.lineWidth = this.life/6
 
     ctx.strokeStyle = ("rgb("+(1-a)*255+","+(a)*255+",255)")
+
+    break;
+  case "Explosion":
+
+    ctx.lineWidth = this.life/6
+
+    ctx.strokeStyle = ("rgb(255,"+this.life*3.5*a+",0)")
 
     break;
 
@@ -303,6 +330,7 @@ socket.on("comrelay",combatProcess)
 socket.on("combatText",combatText)
 socket.on("config",configure)
 socket.on("BeamRelay",BeamUpdate)
+socket.on("LightningRelay",LightningUpdate)
 
 
 var PSDon = false
@@ -329,6 +357,7 @@ function PacketSizeDebugger(){
   socket.on("combatText",(e) =>{sizeTell(e,"12")})
   socket.on("config",(e) =>{sizeTell(e,"13")})
   socket.on("BeamRelay",(e) =>{sizeTell(e,"14")})
+  socket.on("LightningRelay",(e) =>{sizeTell(e,"15")})
 }
 
 function sizeTell(e,n){
@@ -1127,7 +1156,7 @@ document.addEventListener('mousedown', (event) => {
   }
 
 
-  allBeamSnakes.push(new BeamSnake([player.x,player.y,mouseCoords[0],mouseCoords[1],"DevLightning"],15,0.4))
+  // allBeamSnakes.push(new BeamSnake([player.x,player.y,mouseCoords[0],mouseCoords[1],"DevLightning"],15,0.4))
 
 
   if(inRect(mouseX,mouseY,0,825,820,50)){
@@ -1320,7 +1349,16 @@ function repeat(){
       allBeamSnakes[i].step(1+Math.floor(Math.random()*2))
     }
   }
+  for(let i = 0; i < allExplosions.length; i++){
+    if(allExplosions[i].life <= 0){
+      allExplosions.splice(i,1)
+      i--
+    } else {
+      allExplosions[i].upDraw()
+    }
 
+
+  }
 
 
   if(TNEWATTRIBUTEOF(player.Inventory[player.selectedSlot],"B") != "NONE"){
@@ -1371,7 +1409,9 @@ function repeatCombat(){
 
 //repeat end =-=========================-================================-================================-=
 
-
+function LightningUpdate(e){
+  allBeamSnakes.push(new BeamSnake(e,15,0.4))
+}
 
 function BeamUpdate(e){
   for(let i = 0; i < e.length; i++){

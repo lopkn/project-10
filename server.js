@@ -1127,7 +1127,9 @@ function generateStructureCmd(p,s,x,y,o){
 
 
 
-
+function emitLightning(x,y,xx,yy,ty){
+	io.emit("LightningRelay",[x,y,xx,yy,ty])
+}
 
 
 
@@ -1237,7 +1239,7 @@ function processClick(e){
 			}
 
 		}
-	}else	if(att2 != "NONE" && a > 0){
+	}else if(att2 != "NONE" && a > 0){
 		if(!alreadyHasBlockATT(map[chunkPos][e[2]][2],"Sl")){
 			
 			if(distance(decodedXY.x,decodedXY.y,entities[r].x,entities[r].y) <= 12){
@@ -1252,6 +1254,11 @@ function processClick(e){
 		} //util break
 
 
+		}
+
+
+	else if(TNEWATTRIBUTEOF(item,"U") == "7" && a > 0){
+		emitLightning(entities[r].x,entities[r].y,decodedXY.x,decodedXY.y,"DevLightning")
 		}
 
 
@@ -2254,6 +2261,9 @@ function CoordToMap(x,y){
 function amountOfItems(p){
 	let r = findPlayerInArr(p)
 	let player = entities[r]
+
+	try{if(player.Inventory){}} catch {console.log(p)}
+
   if(player.Inventory[player.selectedSlot] != undefined){
     let e = TNEWATTRIBUTEOF(player.Inventory[player.selectedSlot],"A")
     return(e)
