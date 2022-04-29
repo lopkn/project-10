@@ -18,6 +18,7 @@ FEATURES DONE (after creation of tdl)
 - structure array compression
 - custom favicon
 - dropped items
+- chests and inventory
 
 
 TO DO LIST
@@ -29,6 +30,8 @@ TO DO LIST
 - player combat
 
 - player health & moves
+
+- server generated lightning beams
 
 - hunger system
 
@@ -46,6 +49,8 @@ TO DO LIST
 
 - terrain randomness
 
+- try out WFC
+
 - biomes
 
 - rivers
@@ -61,8 +66,6 @@ TO DO LIST
 - ore and crafting
 
 - ping compensation
-
-- chests and inventory
 
 - player disconnect timer
 

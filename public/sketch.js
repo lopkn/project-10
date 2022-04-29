@@ -31,7 +31,7 @@ class Explosion{
     this.frame = frame
     this.Sbeams = []
     for(let i = 0; i < size; i++){
-      this.Sbeams.push(new BeamSnake([x,y,Math.random()*6-3,Math.random()*6-3,"Explosion"],109,0.1))
+      this.Sbeams.push(new BeamSnake([x,y,x+Math.random()*6-3,y+Math.random()*6-3,"Explosion"],109,0.1))
     }
 
 
@@ -41,11 +41,10 @@ class Explosion{
     let frame = Math.floor(this.life/(this.size/this.frame))
     if(this.frame != frame){
       for(let i = 0; i < this.Sbeams.length; i++){
-        this.Sbeams[i].step(Math.round(Math.random()*2),0.996)
+        this.Sbeams[i].step(Math.round(Math.random()*2),0.9)
         
       }
       this.frame = frame
-      // console.log(frame)
     }
 
     ctx.beginPath()
@@ -80,13 +79,13 @@ class BeamSnake{
       let ts = this.currentBeams[i]
       animationBeams.push(new Beam(Math.round(ts[0]),Math.round(ts[1]),Math.round(ts[2]),Math.round(ts[3]),ts[4]))
       for(let i = 0; i < lightning; i++){
-        let velocity1 = ts[2]+(ts[2]-ts[0])+(Math.random()*this.random-(this.random/2))
-        let velocity2 = ts[3]+(ts[3]-ts[1])+(Math.random()*this.random-(this.random/2))
+        let velocity1 = (ts[2]-ts[0])+(Math.random()*this.random-(this.random/2))
+        let velocity2 = (ts[3]-ts[1])+(Math.random()*this.random-(this.random/2))
         if(decay != undefined){
           velocity2 *= decay
           velocity1 *= decay
         }
-        newBeams.push([ts[2],ts[3],velocity1,velocity2,ts[4]])
+        newBeams.push([ts[2],ts[3],ts[2]+velocity1,ts[3]+velocity2,ts[4]])
       }
     }
     this.currentBeams = newBeams
@@ -500,7 +499,6 @@ playerSprites.src = 'playerSprites.png'
 
   function deathScreen(){
     clearInterval(canvasAnimation)
-    console.log(canvasAnimation)
     fill("#500000")
     rect(0,0,900,900)
     fill("#FF0000")
@@ -1157,7 +1155,7 @@ document.addEventListener('mousedown', (event) => {
 
 
   // allBeamSnakes.push(new BeamSnake([player.x,player.y,mouseCoords[0],mouseCoords[1],"DevLightning"],15,0.4))
-
+  allExplosions.push(new Explosion(mouseCoords[0],mouseCoords[1],10,1,5))
 
   if(inRect(mouseX,mouseY,0,825,820,50)){
   if(player.selectedSlot == Math.floor(mouseX/50)){
@@ -2110,7 +2108,7 @@ function drawItemMapSprite(itemID,Slot){
 var MCVs = {
 
   "held":"none",
-  "allBars":["TemporalInv","ChestInv"],
+  "allBars":["TemporalInv","ChestInv","PlayerBars"],
   "TemporalInv":{
     "open":false,
     "maxed":true,
@@ -2126,6 +2124,14 @@ var MCVs = {
     "y": 5,
     "width": 70,
     "Items":["U:1-A:1"]
+  },
+  "PlayerBars":{
+    // "open":true,
+    "maxed":true,
+    "x":700,
+    "y":5,
+    "width":100,
+    "Bars":[[50,"#00FF00"],[190,"#FFFF00"],[100,"#00FFFF"]]
   }
 
 }
@@ -2151,6 +2157,7 @@ function MaximiniButton(x,y,maxed){
 function renderBar(Menu,color){
   MCTXfill(color)
   MCTXrect(MCVs[Menu].x,MCVs[Menu].y,MCVs[Menu].width,20)
+  MaximiniButton(MCVs[Menu].x,MCVs[Menu].y,MCVs[Menu].maxed)
 }
 
 
@@ -2177,6 +2184,36 @@ function drawMenuCtx(){
 
 menuCTX.clearRect(0, 0, 820, 820)
 
+
+
+//draw playerBars
+if(MCVs.PlayerBars.maxed == true){
+
+  let tmenu = MCVs.PlayerBars
+  renderBar('PlayerBars',"rgba(255,200,200,0.7)")
+  MCTXfill("rgba(70,70,70,0.7)")
+  MCTXrect(tmenu.x,tmenu.y+20,tmenu.width,200)
+
+  let BarSpace =  (tmenu.width - (5* tmenu.Bars.length + 5))/tmenu.Bars.length
+  let twidtholder = 5
+
+  for(let i = 0; i < tmenu.Bars.length; i++){
+    MCTXfill("#000000")
+    MCTXrect(tmenu.x+twidtholder,tmenu.y+25,BarSpace,190)
+    MCTXfill(tmenu.Bars[i][1])
+    MCTXrect(tmenu.x+twidtholder,tmenu.y+25,BarSpace,tmenu.Bars[i][0])
+    twidtholder += BarSpace+5
+  }
+
+
+
+
+} else {
+  renderBar('PlayerBars',"rgba(255,100,100,0.7)")
+
+}
+
+
 //draw tempinv
 
 if(MCVs.TemporalInv.Items.length > 0){
@@ -2198,10 +2235,10 @@ if(MCVs.TemporalInv.maxed == true){
   }
 
 
-  MaximiniButton(MCVs.TemporalInv.x,MCVs.TemporalInv.y,true)
+
 } else {
   renderBar('TemporalInv',"rgba(255,200,200,0.7)")
-  MaximiniButton(MCVs.TemporalInv.x,MCVs.TemporalInv.y,false)
+
 }
 }
 
@@ -2229,12 +2266,14 @@ if(MCVs.ChestInv.maxed == true){
   }
 
 
-  MaximiniButton(MCVs.ChestInv.x,MCVs.ChestInv.y,true)
+
 } else {
   renderBar('ChestInv',"rgba(255,200,200,0.7)")
-  MaximiniButton(MCVs.ChestInv.x,MCVs.ChestInv.y,false)
+
 }
 }
+
+
 
 
 
@@ -2242,7 +2281,7 @@ if(MCVs.ChestInv.maxed == true){
 
 function onBar(x,y){
   for(let i = 0; i < MCVs.allBars.length; i++){
-    if(MCVs[MCVs.allBars[i]].open){
+    if(MCVs[MCVs.allBars[i]].open || MCVs[MCVs.allBars[i]].open == undefined){
     if(inRect(x,y,MCVs[MCVs.allBars[i]].x,MCVs[MCVs.allBars[i]].y,MCVs[MCVs.allBars[i]].width,20)){
       
       if(inRect(x,y,MCVs[MCVs.allBars[i]].x+2,MCVs[MCVs.allBars[i]].y+2,16,16)){
@@ -2252,7 +2291,6 @@ function onBar(x,y){
 
 
     }}
-
   }
 
   return("no")

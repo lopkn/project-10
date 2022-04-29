@@ -1128,7 +1128,9 @@ function generateStructureCmd(p,s,x,y,o){
 
 
 function emitLightning(x,y,xx,yy,ty){
-	io.emit("LightningRelay",[x,y,xx,yy,ty])
+	let xa = x + (xx-x)/7
+	let ya = y + (yy-y)/7
+	io.emit("LightningRelay",[x,y,xa,ya,ty])
 }
 
 
@@ -1331,7 +1333,8 @@ function DropItems(x,y,arr){
 		
 
 		if(arr.length > 1){
-			arr.splice(0,1)
+			try{
+			arr.splice(0,1)} catch {console.log(arr)}
 			DropItems(x+Math.round(Math.random()*4-2),y+Math.round(Math.random()*4-2),arr)
 		}
 		return(true)
