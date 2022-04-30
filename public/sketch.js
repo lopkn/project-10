@@ -329,7 +329,7 @@ socket.on("comrelay",combatProcess)
 socket.on("combatText",combatText)
 socket.on("config",configure)
 socket.on("BeamRelay",BeamUpdate)
-socket.on("LightningRelay",LightningUpdate)
+socket.on("ParticleRelay",ParticleUpdate)
 
 
 var PSDon = false
@@ -356,7 +356,7 @@ function PacketSizeDebugger(){
   socket.on("combatText",(e) =>{sizeTell(e,"12")})
   socket.on("config",(e) =>{sizeTell(e,"13")})
   socket.on("BeamRelay",(e) =>{sizeTell(e,"14")})
-  socket.on("LightningRelay",(e) =>{sizeTell(e,"15")})
+  socket.on("ParticleRelay",(e) =>{sizeTell(e,"15")})
 }
 
 function sizeTell(e,n){
@@ -1155,7 +1155,7 @@ document.addEventListener('mousedown', (event) => {
 
 
   // allBeamSnakes.push(new BeamSnake([player.x,player.y,mouseCoords[0],mouseCoords[1],"DevLightning"],15,0.4))
-  allExplosions.push(new Explosion(mouseCoords[0],mouseCoords[1],10,1,5))
+  // allExplosions.push(new Explosion(mouseCoords[0],mouseCoords[1],10,1,5))
 
   if(inRect(mouseX,mouseY,0,825,820,50)){
   if(player.selectedSlot == Math.floor(mouseX/50)){
@@ -1407,13 +1407,22 @@ function repeatCombat(){
 
 //repeat end =-=========================-================================-================================-=
 
-function LightningUpdate(e){
-  allBeamSnakes.push(new BeamSnake(e,15,0.4))
+function ParticleUpdate(e){
+let a = e[1]
+  if(e[0] == "DevLightning"){
+  allBeamSnakes.push(new BeamSnake(a,15,0.4))
+  } else if (e[0] == "Explosion"){
+
+    allExplosions.push(new Explosion(a[0],a[1],10,1,5))
+  }
+
+
 }
 
 function BeamUpdate(e){
   for(let i = 0; i < e.length; i++){
     animationBeams.push(new Beam(e[i][0],e[i][1],e[i][2],e[i][3],e[i][4]))
+ 
   }
 }
 

@@ -19,6 +19,7 @@ FEATURES DONE (after creation of tdl)
 - custom favicon
 - dropped items
 - chests and inventory
+- explosives!!
 
 
 TO DO LIST
@@ -42,8 +43,6 @@ TO DO LIST
 - rendering Dimensions
 
 - tile animations
-
-- explosives!
 
 - item name and descriptions
 

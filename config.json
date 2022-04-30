@@ -7,7 +7,8 @@
 		"4":["Gold Ore","Gold Ore",400],
 		"5":["#00FFFF","Diamond Block",800],
 		"6":["Diamond Ore","Diamond Ore",200],
-		"7":["Glass Block","Glass Block",50]
+		"7":["Glass Block","Glass Block",50],
+		"8":["#703000","Explosive",20]
 	},
 
 	"TileImageReferenceDict":{

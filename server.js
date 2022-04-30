@@ -271,7 +271,7 @@ class player{
 		this.y = Math.floor(Math.random()*7)
 		this.chunk = {"x":0,"y":0}
 		this.selectedSlot = 0
-		this.Inventory = ["B:1-A:50","B:5-A:50","U:4-A:100","Sl:1-A:30",""]
+		this.Inventory = ["B:8-A:50","B:5-A:50","U:4-A:100","Sl:1-A:30",""]
 		this.effects = []
 		this.inCombat = false
 		this.hp = 100
@@ -458,7 +458,7 @@ class player{
 			let amount = TNEWATTRIBUTEOF(item,"A")
 			if(amount == "NONE"){
 				amount = 1
-				console.log(item)
+				
 			} else {
 
 				amount = parseInt(amount)
@@ -796,6 +796,7 @@ function doSomething(){
 	} else if(TIME == 70){
 
 		TIME = getLongestPlayerAction() * -5
+		tickAllBlocks()
 	}
 	if(TIME < 0 && TIME % 5 === 0){
 		processPlayersActions()
@@ -806,6 +807,7 @@ function doSomething(){
 		for(let i = entities.length -1; i > -1; i--){
 			entities[i].save()
 			if(entities[i].entityType=="player"){
+				entities[i].relay2()
 			io.to(entities[i].id).emit('chatUpdate')}
 			entities[i].kill()
 		}
@@ -818,6 +820,7 @@ function doSomething(){
 
 
 		allEffectTick()
+		
 
 
 
@@ -1130,7 +1133,7 @@ function generateStructureCmd(p,s,x,y,o){
 function emitLightning(x,y,xx,yy,ty){
 	let xa = x + (xx-x)/7
 	let ya = y + (yy-y)/7
-	io.emit("LightningRelay",[x,y,xa,ya,ty])
+	io.emit("ParticleRelay",["DevLightning",[x,y,xa,ya,ty]])
 }
 
 
@@ -1227,10 +1230,14 @@ function processClick(e){
 			
 			if(distance(decodedXY.x,decodedXY.y,entities[r].x,entities[r].y) <= 12){
 				map[chunkPos][e[2]][2] += "-B:" + att
+				if(att == "8"){
+					map[chunkPos][e[2]][2] += "-Tk:[XPL:1]"
+					allTickyBlocks.push([decodedXY.x,decodedXY.y])
+				}
 				removeItemFromSelected(e[0],1)
 
 				if(TNEWATTRIBUTEOF(map[chunkPos][e[2]][2],"I") != "NONE"){
-					DropItems(decodedXY.x,decodedXY.y,TNEWATTRIBUTEOF(map[chunkPos][e[2]][2],"I"))
+					DropItems(decodedXY.x,decodedXY.y,[removeOutterBracket(TNEWATTRIBUTEOF(map[chunkPos][e[2]][2],"I"))])
 				}
 
 
@@ -1322,10 +1329,12 @@ function DropItems(x,y,arr){
 	let cchunk = CoordToMap(x,y)
 
 
-
+	let tilename
 	// let e2 = 3+((x%chunkSize)+(y%chunkSize)*chunkSize)
-
-	let tilename = map[cchunk[0]][cchunk[1]][2]
+	try{
+	tilename = map[cchunk[0]][cchunk[1]][2]} catch{
+		console.log(cchunk,x,y)
+	}
 
 	if(tileItemable(tilename)){
 		map[cchunk[0]][cchunk[1]][2] += ("-I:["+arr[0]+"]")
@@ -1379,7 +1388,7 @@ function helpCommand(e,p){
 
 
 
-function TNEWbreakBlockBy(str,a){
+function breakBlockBy(str,a){
 
   let split = str.split("-")
   let e = -1
@@ -1409,7 +1418,38 @@ function TNEWbreakBlockBy(str,a){
 	}
 }
 
+function TNEWbreakBlockBy(str,a){
 
+	let tblockATT = TNEWATTRIBUTEOF(str,"B")
+	if(tblockATT != "NONE"){
+		let dura = parseInt(TNEWATTRIBUTEOF(str,"D"))
+		if(isNaN(dura)){
+			dura = BLOCKSALL[TtblockATT][2]
+		}
+		let fdura = dura-a
+		if(fdura > 0){
+			return(removeAttributeOf(str,"D")+"-D:"+fdura)}
+		else {
+			return("remove")
+		}
+	}
+	return("no block")
+}
+
+function getBlockDurability(str,a){
+	let blockATT = TNEWATTRIBUTEOF(str,"B")
+	if(blockATT != "NONE"){
+
+		let dura = parseInt(TNEWATTRIBUTEOF(str,"D"))
+		if(isNaN(dura)){
+			dura = BLOCKSALL[blockATT][2]
+		}
+
+		return(dura)
+	} else {
+		return("no block")
+	}
+}
 
 
 
@@ -1463,8 +1503,6 @@ function ArrRemoveFromTile(str,type){
 		}
 		if(isRemove == 0){
 			fin += "-" + split[i]
-		} else {
-			isRemove = 0
 		}
 	}
 	return(fin.substring(1))
@@ -1728,6 +1766,9 @@ function setBlock(x,y,block){
 function setblock(x,y,block){
 	let ctm = CoordToMap(x,y)
 	map[ctm[0]][ctm[1]][2] = block
+	if(TNEWATTRIBUTEOF(block,"Tk") != "NONE"){
+		allTickyBlocks.push([x,y])
+	}
 }
 
 
@@ -2002,6 +2043,7 @@ function bracketCompressionProcess(str,arr,parseLevel){
 
 
 function strHas(str,has){
+	try{
 	for(let i = 0; i < str.length; i++){
 		for(let j = 0; j < has.length; j++){
 			if(str[i] == has[j]){
@@ -2010,7 +2052,9 @@ function strHas(str,has){
 		}
 	}
 	return(false)
-
+		} catch{
+			console.log(str,has)
+		}
 }
 
 function strHasBrackets(str){
@@ -2584,6 +2628,113 @@ function randomItem(List){
 
 
 
+//============ block tickers ======
+function tickAllBlocks(){
+	for(let i = allTickyBlocks.length-1; i > -1; i--){
+
+		let tempctm = CoordToMap(allTickyBlocks[i][0],allTickyBlocks[i][1])
+		let blockStr = map[tempctm[0]][tempctm[1]][2]
+
+		let tickAtt = removeOutterBracket(TNEWATTRIBUTEOF(blockStr,"Tk"))
+
+		let tsplit1 = tickAtt.split("-")
+		let outtick = ""
+		for(let j = tsplit1.length-1; j > -1; j--){
+			let tempRemove = false
+			let tdestr
+			
+			tdestr = deductStrAtt(tsplit1[j])
+			
+			if(tdestr.split(":")[1] == "0"){
+				tempRemove = tickAtZero(tdestr.split(":")[0],allTickyBlocks[i])
+			}
+
+
+			if(!tempRemove){
+				outtick += "-" + tdestr
+			}
+
+
+		}
+		outtick = outtick.substring(1)
+		map[tempctm[0]][tempctm[1]][2] = removeAttributeOf(map[tempctm[0]][tempctm[1]][2],"Tk") + "-Tk:[" + outtick + "]"
+		if(outtick.length == 0){
+			allTickyBlocks.splice(i,1)
+			map[tempctm[0]][tempctm[1]][2] = removeAttributeOf(map[tempctm[0]][tempctm[1]][2],"Tk")
+			continue;
+		}
+		
+		
+
+	}
+}
+
+function deductStrAtt(str){
+
+	let split = str.split(":")
+	if(!isNaN(split[1])){
+		return(split[0]+":"+(parseInt(split[1])-1))
+	}
+
+}
+
+function tickAtZero(str,pos){
+
+	if(str == "DBG"){
+		console.log("debugger tick")
+		return(true)
+	} else if (str == "XPL"){
+		explosion(pos[0],pos[1],6)
+		return(true)
+	}
+	return(false)
+}
+
+
+
+function explosion(x,y,size){
+
+	let attemptx = x
+	let attempty = y
+	for(let i = 0; i < size*size*6; i++){
+		
+		let tempdist = distance(x,y,attemptx,attempty)
+		if(tempdist <= size){
+
+			let tctm = CoordToMap(attemptx,attempty)
+			let tbstr = map[tctm[0]][tctm[1]][2]
+			let TblockATT = TNEWATTRIBUTEOF(tbstr,"B")
+
+			if(TblockATT == "NONE" || (TblockATT == "8" && tempdist != 0)){
+				attemptx = Math.round(Math.random()*size*2-size)
+				attempty = Math.round(Math.random()*size*2-size)
+				continue;
+			}
+			let breakby = Math.floor((BLOCKSALL[TblockATT][2] + 40) * 0.3 * ((size-tempdist)/size))
+			if(tempdist == 0){
+				breakby = 9000
+			}
+
+
+
+			let bbb = breakBlockBy(tbstr,breakby)
+			if(bbb == "remove"){
+				if(tempdist != 0){
+					DropItems(attemptx,attempty,["B:"+TblockATT])
+				}
+				map[tctm[0]][tctm[1]][2] = ArrRemoveFromTile(tbstr,["B","D","T","S"])
+			} else {
+				map[tctm[0]][tctm[1]][2] = bbb
+			}
+
+
+		}
+		attemptx = Math.round(Math.random()*size*2-size)
+		attempty = Math.round(Math.random()*size*2-size)
+	}
+	io.emit("ParticleRelay",["Explosion",[x,y]])
+
+}
 
 
 
