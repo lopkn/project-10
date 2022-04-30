@@ -2704,10 +2704,9 @@ function explosion(x,y,size){
 			let tctm = CoordToMap(attemptx,attempty)
 			let tbstr = map[tctm[0]][tctm[1]][2]
 			let TblockATT = TNEWATTRIBUTEOF(tbstr,"B")
-
 			if(TblockATT == "NONE" || (TblockATT == "8" && tempdist != 0)){
-				attemptx = Math.round(Math.random()*size*2-size)
-				attempty = Math.round(Math.random()*size*2-size)
+				attemptx = x+Math.round(Math.random()*size*2-size)
+				attempty = y+Math.round(Math.random()*size*2-size)
 				continue;
 			}
 			let breakby = Math.floor((BLOCKSALL[TblockATT][2] + 40) * 0.3 * ((size-tempdist)/size))
@@ -2729,8 +2728,8 @@ function explosion(x,y,size){
 
 
 		}
-		attemptx = Math.round(Math.random()*size*2-size)
-		attempty = Math.round(Math.random()*size*2-size)
+		attemptx = x+Math.round(Math.random()*size*2-size)
+		attempty = y+Math.round(Math.random()*size*2-size)
 	}
 	io.emit("ParticleRelay",["Explosion",[x,y]])
 
