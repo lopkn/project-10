@@ -34,7 +34,8 @@
 		"4":{"type":"pax","strength":25,"attack":["swing",1.7,2]},
 		"5":{"type":"dagger","attack":["slash",2.5,1]},
 		"6":{"type":"sword","attack":["slash",2.2,1]},
-		"7":{"type":"staff","attack":["developer's lightning",10,5]}
+		"7":{"type":"staff","stafftype":"lightning","attack":["developer's lightning",10,5]},
+		"8":{"type":"staff","stafftype":"explosive","attack":["obliterate",10,5]}
 
 	},
 

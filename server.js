@@ -1269,6 +1269,9 @@ function processClick(e){
 	else if(TNEWATTRIBUTEOF(item,"U") == "7" && a > 0){
 		emitLightning(entities[r].x,entities[r].y,decodedXY.x,decodedXY.y,"DevLightning")
 		}
+	else if(TNEWATTRIBUTEOF(item,"U") == "8" && a > 0){
+		explosion(decodedXY.x,decodedXY.y,6)
+		}
 
 
 
@@ -2702,7 +2705,13 @@ function explosion(x,y,size){
 		if(tempdist <= size){
 
 			let tctm = CoordToMap(attemptx,attempty)
-			let tbstr = map[tctm[0]][tctm[1]][2]
+			let tbstr
+			if(tctm[0] == undefined){
+				attemptx = x+Math.round(Math.random()*size*2-size)
+				attempty = y+Math.round(Math.random()*size*2-size)
+				continue;
+			}
+			tbstr = map[tctm[0]][tctm[1]][2]
 			let TblockATT = TNEWATTRIBUTEOF(tbstr,"B")
 			if(TblockATT == "NONE" || (TblockATT == "8" && tempdist != 0)){
 				attemptx = x+Math.round(Math.random()*size*2-size)
