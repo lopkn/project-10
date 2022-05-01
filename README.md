@@ -20,6 +20,8 @@ FEATURES DONE (after creation of tdl)
 - dropped items
 - chests and inventory
 - explosives!!
+- commands update
+- player disconnect timer
 
 
 TO DO LIST
@@ -48,6 +50,10 @@ TO DO LIST
 
 - tile animations
 
+- animation relativity
+
+- function for block breaking
+
 - item name and descriptions
 
 - terrain randomness
@@ -70,7 +76,7 @@ TO DO LIST
 
 - ping compensation
 
-- player disconnect timer
+- timer voting system
 
 - chunk saves (low priority)
 

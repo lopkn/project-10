@@ -709,7 +709,7 @@ changingConfig.Build += 1
 fs.writeFile('./changingConfig.json',JSON.stringify(changingConfig), function writeJSON(err){if(err)return console.log(err)})
 
 var MainHelpMenu = CURRENTCONFIGS.ConsoleResponses["Help1-1"] + changingConfig.Build + CURRENTCONFIGS.ConsoleResponses["Help1-2"]
-
+var disconnected = []
 
 function newConnection(socket){
 	// socket.on('requestMap', sendMap)
@@ -728,7 +728,7 @@ function newConnection(socket){
 	io.to(socket.id).emit('sendWhenJoin', socket.id)
 	entities[entities.length-1].relay2()
 	
-	    socket.on('disconnect',function(){disconnect(socket)});
+	    socket.on('disconnect',function(){disconnected.push(socket)});
 }
 
 
@@ -748,7 +748,10 @@ function newConnection(socket){
 	}
 
 
- function disconnect(socket) {
+ function disconnect(){
+
+ 	for(let i = 0; i < disconnected.length; i++){
+ 		let socket = disconnected[i]
         console.log(socket.id + " has disconnected");
         broadcast("--"+socket.id+" has left!",cmdc.small_error)
         for(let i = 0; i < entities.length; i++){
@@ -763,8 +766,11 @@ function newConnection(socket){
 
         		entities.splice(i,1)
         		break
+        		}
         	}
-        }
+    	}
+
+        disconnected = []
     }
 
 
@@ -826,6 +832,7 @@ function doSomething(){
 		allPlayersSendBeams()
 		allPlayersGenerateChunks()
 	}else if(TIME == 0){
+		disconnect()
 		ProcessStep = 1
 		for(let i = entities.length -1; i > -1; i--){
 			entities[i].save()
@@ -1066,7 +1073,8 @@ if(st[0] == "/"){
 	}
 	//setblock command
 	else if(strsplit[0] == "set" && entities[p].keyholder == true){
-		setblock(parseInt(strsplit[1]),parseInt(strsplit[2]),strsplit[3])
+		let pos = getRelativity(p,strsplit[1],strsplit[2])
+		setblock(pos[0],pos[1],strsplit[3])
 	}
 
 	//give command
@@ -1876,19 +1884,26 @@ function tp(r,i1,i2){
 		}
 
 
-	} else if(!isNaN(parseInt(i1))&& !isNaN(parseInt(i2))){
-		entities[r].x = parseInt(i1)
-		entities[r].y = parseInt(i2)
-		entities[r].log("successfully teleported to "+i1+","+i2,cmdc.success)
-	} else if(i1[0] == "=" && i2[0] == "="){
-		let ar = parseInt(i1.split("=")[1])
-		let ae = parseInt(i2.split("=")[1])
-		if(!isNaN(ar) && !isNaN(ae)){
-			entities[r].x += ar
-			entities[r].y += ae
-			entities[r].log("successfully teleported to "+i1+","+i2,cmdc.success)
-		}
 	}
+	//  else if(!isNaN(parseInt(i1))&& !isNaN(parseInt(i2))){
+	// 	entities[r].x = parseInt(i1)
+	// 	entities[r].y = parseInt(i2)
+	// 	entities[r].log("successfully teleported to "+i1+","+i2,cmdc.success)
+	// } else if(i1[0] == "=" && i2[0] == "="){
+	// 	let ar = parseInt(i1.split("=")[1])
+	// 	let ae = parseInt(i2.split("=")[1])
+	// 	if(!isNaN(ar) && !isNaN(ae)){
+	// 		entities[r].x += ar
+	// 		entities[r].y += ae
+	// 		entities[r].log("successfully teleported to "+i1+","+i2,cmdc.success)
+	// 	}
+	// }
+		else{
+			let pos = getRelativity(r,i1,i2)
+			entities[r].x = pos[0]
+			entities[r].y = pos[1]
+			entities[r].log("successfully teleported to "+pos[0] + "," + pos[1],cmdc.success)
+		}
 
 }
 
@@ -2779,7 +2794,7 @@ function explosion(x,y,size){
 	for(let i = 0; i < entities.length; i++){
 		let a = distance(entities[i].x,entities[i].y,x,y)
 		if(a <= size){
-			entities[i].hp -= (size-a)*20
+			entities[i].hp -= Math.floor((size-a)*20)
 		}
 	}
 

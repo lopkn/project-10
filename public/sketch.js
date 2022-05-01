@@ -1279,6 +1279,7 @@ function repeat(){
     if(player.clientInfo.scanmode == "on"){
       fill("rgb(255,0,"+(flash*2550)+")")
       textO(map[mouseCoords[0]+","+mouseCoords[1]],mouseX-30,mouseY-30)
+      textO(mouseCoords[0]+","+mouseCoords[1],mouseX-30,mouseY-60)
     }
 
 
