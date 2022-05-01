@@ -26,6 +26,8 @@ FEATURES DONE (after creation of tdl)
 
 TO DO LIST
 
+- shades layer
+
 - resizing & zoomout update
 
 - mobile support

@@ -1346,7 +1346,7 @@ function processClick(e){
 
 		}else if(utilityType == "staff"){
 			let staffInfo = CURRENTCONFIGS.ItemReferenceDict[utilityNum].staff
-
+			
 			if(staffInfo.type == "lightning" && a > 0){
 				emitLightning(entities[r].x,entities[r].y,decodedXY.x,decodedXY.y,"DevLightning")
 			}
@@ -1356,6 +1356,7 @@ function processClick(e){
 
 			else if(staffInfo.type == "summoning" && a > 0){
 				summonNewMob(staffInfo.mob,decodedXY.x,decodedXY.y)
+				clickResult = "Staff"
 			}
 
 		}	

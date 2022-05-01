@@ -176,6 +176,15 @@ class Beam{
     ctx.strokeStyle = ("rgba("+a*200+","+a*1.5*this.life+",0,"+this.life/100+")")
     break;
 
+  case "Staff":
+
+    ctx.lineWidth = this.life/5
+
+
+    ctx.strokeStyle = ("rgb("+a*150+",0,"+a*120+")")
+
+    break;
+
   case "EnterCombat":
 
     ctx.lineWidth = this.life/6
