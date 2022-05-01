@@ -180,7 +180,9 @@ class mob{
 	combatRelay(){}
 	invrelay(){}
 	removeSelf(){
-		console.log(this.Inventory)
+		
+		delete usedIDs[this.id]
+
 			DropItems(this.x,this.y,removeEmptyArrStrings(this.Inventory))
 		for(let i = entities.length - 1; i > -1; i--){
 			if(entities[i].id == this.id){
@@ -216,7 +218,7 @@ class mob{
 
 			GenerateChunk(ctc.x,ctc.y)
 			t = CoordToMap(coords[0],coords[1])
-			// console.log(ctc,t,generatedChunks)
+			
 			a = map[t[0]][t[1]][2]
 		}
 
@@ -1148,7 +1150,7 @@ fs.writeFile('./playerList.json',JSON.stringify(playerList,null,4), function wri
 function processKey(e){
 	let i = findPlayerInArr(e[0])
 	if(i === false){
-		console.log(i)
+		console.log("cerr: processKey",e)
 	} else {
 		entities[i].pressed(e[1])
 	}
@@ -1309,21 +1311,16 @@ function processClick(e){
 		}
 
 
-	else if(TNEWATTRIBUTEOF(item,"U") == "7" && a > 0){
-		emitLightning(entities[r].x,entities[r].y,decodedXY.x,decodedXY.y,"DevLightning")
-		}
-	else if(TNEWATTRIBUTEOF(item,"U") == "8" && a > 0){
-		explosion(decodedXY.x,decodedXY.y,6)
-		}
 
 
 
 	else {
-		if(alreadyHasBlock(map[chunkPos][e[2]][2]) && TNEWATTRIBUTEOF(item,"U") != "NONE"){
+		let utilityNum = TNEWATTRIBUTEOF(item,"U")
+		if(utilityNum != "NONE"){
 			// 
-			let utilityType = CURRENTCONFIGS.ItemReferenceDict[TNEWATTRIBUTEOF(item,"U")].type
-			let utilityStrength = CURRENTCONFIGS.ItemReferenceDict[TNEWATTRIBUTEOF(item,"U")].strength
-			if(utilityType == "multitul" || utilityType == "pax"){
+			let utilityType = CURRENTCONFIGS.ItemReferenceDict[utilityNum].type
+			let utilityStrength = CURRENTCONFIGS.ItemReferenceDict[utilityNum].strength
+			if((utilityType == "multitul" || utilityType == "pax")&&alreadyHasBlock(map[chunkPos][e[2]][2])){
 
 			let seeBreak = TNEWbreakBlockBy(map[chunkPos][e[2]][2],utilityStrength+Math.floor(Math.random()*10-5))
 			if(seeBreak == "remove"){
@@ -1347,7 +1344,21 @@ function processClick(e){
 				clickResult = "HitBlock"
 			}
 
-		}
+		}else if(utilityType == "staff"){
+			let staffInfo = CURRENTCONFIGS.ItemReferenceDict[utilityNum].staff
+
+			if(staffInfo.type == "lightning" && a > 0){
+				emitLightning(entities[r].x,entities[r].y,decodedXY.x,decodedXY.y,"DevLightning")
+			}
+			else if(staffInfo.type == "explosive" && a > 0){
+				explosion(decodedXY.x,decodedXY.y,6)
+			}
+
+			else if(staffInfo.type == "summoning" && a > 0){
+				summonNewMob(staffInfo.mob,decodedXY.x,decodedXY.y)
+			}
+
+		}	
 	}
 
 
@@ -1926,7 +1937,7 @@ function summonNewMob(name,x,y,id){
 	
 	usedIDs[id] = true
 	entities.push(new mob(name,x,y,id))
-
+	return("successfully summoned")
 
 
 }
@@ -2106,7 +2117,7 @@ function strHas(str,has){
 	}
 	return(false)
 		} catch{
-			console.log(str,has)
+			console.log("cerr: strHas",str,has)
 		}
 }
 
@@ -2467,7 +2478,7 @@ class combatInstance{
 			} else {
 				if(TNEWATTRIBUTEOF(item,"B") != "NONE"){
 					let ts = getstats(pno,"strength")
-					console.log(ts)
+					
 					dfern += 3 + ts*0.5 + ts*Math.random()*2
 					this.textarr[a][1] += CURRENTCONFIGS.BLOCKSALL[TNEWATTRIBUTEOF(item,"B")][1]
 				}
