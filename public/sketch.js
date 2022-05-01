@@ -14,7 +14,7 @@ class Player{
     this.selectedSlot = 0
     this.Inventory = ["B:1-A:50","B:5-A:50","U:4-A:100","Sl:1-A:30",""]
     this.clientInfo = {"scanmode":"off"}
-
+    this.serverSelctedSlot = 0
 
   }
 }
@@ -628,7 +628,7 @@ class Combat{
   "3":function(){chatProcess([">"," for help use /h combat"])},
 
 
-  "00":["swing item","punch","jab","kick"],
+  "00":["use item","punch","jab","kick"],
   "000":"return",
   "001":"return",
   "002":"return",
@@ -1500,8 +1500,10 @@ function InvDraw(){
     drawItemMapSprite(player.Inventory[i],i)
   }
 
-  fillI("rgba(255,255,0,0.4)")
+  fillI("rgba(255,255,0,0.3)")
   rectI(player.selectedSlot*50,0,50,50)
+  fillI("rgba(0,255,0,0.1)")
+  rectI(player.serverSelectedSlot*50,0,50,50)
   let e = amountOfItems()
   if(e != "none"){
   fillI("#FFFFFF")
@@ -1569,14 +1571,19 @@ function joinDict(d1, d2){
 
 function UPDATEMAP(input){
 
-  if(input[0] != ""){
-    let chiv = input[0]
-    MCVs.ChestInv.open = true
-    MCVs.ChestInv.Items[0] = chiv[1]
-  } else {
-    MCVs.ChestInv.open = false
-    MCVs.ChestInv.Items = []
-  }
+  player.hp = input[0][0]
+
+  // if(input[0] != ""){
+  //   let chiv = input[0]
+  //   MCVs.ChestInv.open = true
+
+  //   let splitchiv = chiv[1].split("=")
+  //   for(let i = 0; i < splitchiv.length; i++){
+  //   MCVs.ChestInv.Items[i] = splitchiv[i]}
+  // } else {
+  //   MCVs.ChestInv.open = false
+  //   MCVs.ChestInv.Items = []
+  // }
 
 
 
@@ -2016,7 +2023,18 @@ function CoordToChunk(x,y){
 
 function updateInv(e){
   player.Inventory = e[0]
+  player.serverSelectedSlot = e[1]
+   if(e[2] != ""){
+    let chiv = e[2]
+    MCVs.ChestInv.open = true
 
+    let splitchiv = chiv[1].split("=")
+    for(let i = 0; i < splitchiv.length; i++){
+    MCVs.ChestInv.Items[i] = splitchiv[i]}
+  } else {
+    MCVs.ChestInv.open = false
+    MCVs.ChestInv.Items = []
+  }
 }
 
 
@@ -2140,7 +2158,7 @@ var MCVs = {
     "x":700,
     "y":5,
     "width":100,
-    "Bars":[[50,"#00FF00"],[190,"#FFFF00"],[100,"#00FFFF"]]
+    "Bars":[["HP","#00FF00"],[190,"#FFFF00"],[100,"#00FFFF"]]
   }
 
 }
@@ -2174,16 +2192,16 @@ function renderBar(Menu,color){
 function menuDrawItemMapSprite(itemID,Slot,x,y){
   let a = TNEWATTRIBUTEOF(itemID,"B")
   if(a != "NONE"){
-    menuCTX.drawImage(img,20*(parseInt(a)-1),0,20,20,x,50*Slot+y,70,70)
+    menuCTX.drawImage(img,20*(parseInt(a)-1),0,20,20,x,70*Slot+y,70,70)
   }
   let b = TNEWATTRIBUTEOF(itemID,"U")
   if(b !="NONE"){
-    menuCTX.drawImage(img,20*(parseInt(b)-1),20,21,21,x,50*Slot+y,70,70)
+    menuCTX.drawImage(img,20*(parseInt(b)-1),20,21,21,x,70*Slot+y,70,70)
   }
     let c = TNEWATTRIBUTEOF(itemID,"Sl")
   if(c !="NONE"){
     // console.log("eee")
-    menuCTX.drawImage(img,20*(parseInt(c)-1),40,21,21,x,50*Slot+y,70,70)
+    menuCTX.drawImage(img,20*(parseInt(c)-1),40,21,21,x,70*Slot+y,70,70)
   }
   
 }
@@ -2210,7 +2228,12 @@ if(MCVs.PlayerBars.maxed == true){
     MCTXfill("#000000")
     MCTXrect(tmenu.x+twidtholder,tmenu.y+25,BarSpace,190)
     MCTXfill(tmenu.Bars[i][1])
-    MCTXrect(tmenu.x+twidtholder,tmenu.y+25,BarSpace,tmenu.Bars[i][0])
+
+    let actfill = tmenu.Bars[i][0]
+    if(tmenu.Bars[i][0] == "HP"){
+      actfill = 190*(player.hp/100)
+    }
+    MCTXrect(tmenu.x+twidtholder,tmenu.y+25,BarSpace,actfill)
     twidtholder += BarSpace+5
   }
 

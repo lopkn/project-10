@@ -291,6 +291,26 @@ class player{
 		}
 		
 	}
+
+
+
+	switchItems(of,i1slot,i2slot){
+		if(of == "chest" && this.chestLink[0]!="none"){
+			let splitchiv = this.chestLink[1].split("=")
+			let i1 = splitchiv[i1slot]
+			let i2 = this.Inventory[i2slot]
+			splitchiv[i1slot] = i2
+			this.Inventory[i2slot] = i1
+			let chivstr = ""
+			for(let i = 0; i < splitchiv.length; i++){
+				chivstr += "=" + splitchiv[i]
+			}
+			chestUpdate("update","["+chivstr.substring(1)+"]",this.chestLink[0])
+			this.chestLink[1] = chivstr.substring(1)
+		}
+	}
+
+
 	say(e){
 		for(let i = 0; i < entities.length; i++){
 			if(distance(entities[i].x,entities[i].y,this.x,this.y) < 33){
@@ -576,6 +596,21 @@ if(inEffectArr("blind1",this.effects)){
 			}
 		}
 
+		
+
+		let stats = [this.hp]
+
+		io.to(this.id).emit('mapUpdate2',[stats,t,tmap2])
+
+	}
+
+
+
+	combatRelay(close){
+		io.to(this.id).emit('comrelay',[this.hp,close])
+	}
+
+	invrelay(){
 		let chiv = ""
 		if(this.chestLink[0] != "none"){
 
@@ -590,19 +625,7 @@ if(inEffectArr("blind1",this.effects)){
 
 			}
 		}
-
-		io.to(this.id).emit('mapUpdate2',[chiv,t,tmap2])
-
-	}
-
-
-
-	combatRelay(close){
-		io.to(this.id).emit('comrelay',[this.hp,close])
-	}
-
-	invrelay(){
-		io.to(this.id).emit('invrelay',[this.Inventory])
+		io.to(this.id).emit('invrelay',[this.Inventory,this.selectedSlot,chiv])
 	}
 }
 
@@ -808,6 +831,7 @@ function doSomething(){
 			entities[i].save()
 			if(entities[i].entityType=="player"){
 				entities[i].relay2()
+				entities[i].invrelay()
 			io.to(entities[i].id).emit('chatUpdate')}
 			entities[i].kill()
 		}
@@ -1137,6 +1161,16 @@ function emitLightning(x,y,xx,yy,ty){
 }
 
 
+function chestUpdate(type,str,pos){
+	let apos = pos.split(",")
+	let tctm = CoordToMap(parseInt(apos[0]),parseInt(apos[1]))
+	let tcstr = map[tctm[0]][tctm[1]][2]
+	if(type == "update"){
+		map[tctm[0]][tctm[1]][2] = removeAttributeOf(tcstr,"Ch") + "-Ch:" + str
+	} else if(type == "delete"){
+		map[tctm[0]][tctm[1]][2] = removeAttributeOf(tcstr,"Ch")
+	}
+}
 
 
 
@@ -1170,7 +1204,7 @@ function processClick(e){
 
 	for(let i = 0; i < entities.length; i++){
 		if(i != r && decodedXY.x == entities[i].x && decodedXY.y == entities[i].y && !entities[i].inCombat && !entities[r].inCombat){
-			if(distance(entities[r].x,entities[r].y,decodedXY.x,decodedXY.y) <= 13){
+			if(distance(entities[r].x,entities[r].y,decodedXY.x,decodedXY.y) <= 13 && entities[i].hp > 0){
 			allCombatInstances[JSON.stringify(combatIdCounter)] = new combatInstance(entities[r].id,entities[i].id)
 			console.log("new combat instance: " +entities[r].id+","+entities[i].id)
 			entities[r].combatRelay(entities[i].entityType)
@@ -1238,6 +1272,7 @@ function processClick(e){
 
 				if(TNEWATTRIBUTEOF(map[chunkPos][e[2]][2],"I") != "NONE"){
 					DropItems(decodedXY.x,decodedXY.y,[removeOutterBracket(TNEWATTRIBUTEOF(map[chunkPos][e[2]][2],"I"))])
+					map[chunkPos][e[2]][2] = removeAttributeOf(map[chunkPos][e[2]][2],"I")
 				}
 
 
@@ -1427,7 +1462,7 @@ function TNEWbreakBlockBy(str,a){
 	if(tblockATT != "NONE"){
 		let dura = parseInt(TNEWATTRIBUTEOF(str,"D"))
 		if(isNaN(dura)){
-			dura = BLOCKSALL[TtblockATT][2]
+			dura = BLOCKSALL[tblockATT][2]
 		}
 		let fdura = dura-a
 		if(fdura > 0){
@@ -2740,6 +2775,14 @@ function explosion(x,y,size){
 		attemptx = x+Math.round(Math.random()*size*2-size)
 		attempty = y+Math.round(Math.random()*size*2-size)
 	}
+
+	for(let i = 0; i < entities.length; i++){
+		let a = distance(entities[i].x,entities[i].y,x,y)
+		if(a <= size){
+			entities[i].hp -= (size-a)*20
+		}
+	}
+
 	io.emit("ParticleRelay",["Explosion",[x,y]])
 
 }

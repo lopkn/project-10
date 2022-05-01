@@ -30,6 +30,10 @@ TO DO LIST
 
 - player combat
 
+- blood and ash tiles
+
+- textures overhaul
+
 - player health & moves
 
 - server generated lightning beams
