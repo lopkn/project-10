@@ -283,6 +283,8 @@ class player{
 
 		this.temporalMap = {}
 
+		this.stepStatus = {"hp":0}
+
 
 		this.entityStats = {
 			"strength" : 1,
@@ -609,8 +611,18 @@ if(inEffectArr("blind1",this.effects)){
 
 
 	combatRelay(close){
-		io.to(this.id).emit('comrelay',[this.hp,close])
+		io.to(this.id).emit('comrelay',[close])
 	}
+
+
+
+	statusRelay(){
+		this.stepStatus = {"hp":this.hp}
+		io.to(this.id).emit("statusRelay",this.stepStatus)
+		
+	}
+
+
 
 	invrelay(){
 		let chiv = ""
@@ -833,6 +845,13 @@ function doSomething(){
 		processPlayersActions()
 		allPlayersSendBeams()
 		allPlayersGenerateChunks()
+
+		for(let i = 0; i < entities.length; i++){
+			if(entities[i].entityType=="player"){
+				entities[i].statusRelay()
+			}
+		}
+
 	}else if(TIME == 0){
 		disconnect()
 		ProcessStep = 1
@@ -841,6 +860,7 @@ function doSomething(){
 			if(entities[i].entityType=="player"){
 				entities[i].relay2()
 				entities[i].invrelay()
+				entities[i].statusRelay()
 			io.to(entities[i].id).emit('chatUpdate')}
 			entities[i].kill()
 		}

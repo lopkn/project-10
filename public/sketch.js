@@ -339,6 +339,7 @@ socket.on("combatText",combatText)
 socket.on("config",configure)
 socket.on("BeamRelay",BeamUpdate)
 socket.on("ParticleRelay",ParticleUpdate)
+socket.on("statusRelay",statusUpdate)
 
 
 var PSDon = false
@@ -366,6 +367,7 @@ function PacketSizeDebugger(){
   socket.on("config",(e) =>{sizeTell(e,"13")})
   socket.on("BeamRelay",(e) =>{sizeTell(e,"14")})
   socket.on("ParticleRelay",(e) =>{sizeTell(e,"15")})
+  socket.on("statusRelay",(e) =>{sizeTell(e,"16")})
 }
 
 function sizeTell(e,n){
@@ -1223,6 +1225,17 @@ document.addEventListener('mousedown', (event) => {
 })
 
 
+
+
+function statusUpdate(e){
+  let hpChange = e.hp - player.hp
+  player.hp = e.hp
+  console.log(hpChange)
+  MCVs.PlayerBars.Bars[0][2].height -= hpChange * 1.9
+}
+
+
+
 function distance(x,y,x2,y2){
   let a = x-x2
   let b = y-y2
@@ -1465,14 +1478,13 @@ function tick(){
 
 
 function combatProcess(e){
-  player.hp = e[0]
-  if(e[1] != undefined){
-    if(e[1] === false){
+  if(e[0] != undefined){
+    if(e[0] === false){
       combatScreen.stopscreen()
     } else
 
     {
-      combatScreen.restart(e[1])
+      combatScreen.restart(e[0])
     }
     
 
@@ -1581,7 +1593,7 @@ function joinDict(d1, d2){
 
 function UPDATEMAP(input){
 
-  player.hp = input[0][0]
+  // player.hp = input[0][0]
 
   // if(input[0] != ""){
   //   let chiv = input[0]
@@ -2142,6 +2154,37 @@ function drawItemMapSprite(itemID,Slot){
 // ======================================== MENU CTX =======================================
 // ======================================== -------- =======================================
 
+
+class barDropper{
+
+  constructor(col,barno){
+    this.barno = barno
+    this.col = col
+    let tmenu = MCVs.PlayerBars
+    this.width = (tmenu.width - (5* tmenu.Bars.length + 5))/tmenu.Bars.length
+    this.x = 5 + barno * (this.width+5)
+    this.height = 0
+  }
+
+  upDraw(){
+    if(this.height > 0){
+
+      let tmenu = MCVs.PlayerBars
+      MCTXfill(this.col)
+      let actfill = tmenu.Bars[this.barno][0]
+      if(tmenu.Bars[this.barno][0] == "HP"){
+        actfill = 190*(player.hp/100)
+      }
+      MCTXrect(tmenu.x + this.x,tmenu.y +25+(190-actfill),this.width,this.height*-1)
+
+      this.height -= 20/fps
+
+    }
+  }
+
+}
+
+
 var MCVs = {
 
   "held":"none",
@@ -2198,6 +2241,9 @@ function renderBar(Menu,color){
 }
 
 
+MCVs.PlayerBars.Bars[0][2] = new barDropper("#700000",0)
+
+
 
 function menuDrawItemMapSprite(itemID,Slot,x,y){
   let a = TNEWATTRIBUTEOF(itemID,"B")
@@ -2243,8 +2289,14 @@ if(MCVs.PlayerBars.maxed == true){
     if(tmenu.Bars[i][0] == "HP"){
       actfill = 190*(player.hp/100)
     }
-    MCTXrect(tmenu.x+twidtholder,tmenu.y+25,BarSpace,actfill)
+    MCTXrect(tmenu.x+twidtholder,tmenu.y+25+(190-actfill),BarSpace,actfill)
     twidtholder += BarSpace+5
+
+    if(tmenu.Bars[i][2] != undefined){
+      tmenu.Bars[i][2].upDraw()
+    }
+
+
   }
 
 
