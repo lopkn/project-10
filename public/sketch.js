@@ -254,7 +254,7 @@ var flash = 0
 
 var allzoom = 1
 
-// document.body.style.zoom= allzoom
+document.body.style.zoom= allzoom
 
 var cm = document.getElementById("mapCanvas");
 var ctxm = cm.getContext("2d");
@@ -481,7 +481,7 @@ function joinSuccess(m){
 
 
 
-onmousemove = function(e){mouseX = e.clientX - 5 +scrollX; mouseY = e.clientY -2 + scrollY}
+onmousemove = function(e){mouseX = (e.clientX - 5 +scrollX)/allzoom; mouseY = (e.clientY -2 + scrollY)/allzoom}
 ondrag = function(e){}
 
 
@@ -1230,7 +1230,6 @@ document.addEventListener('mousedown', (event) => {
 function statusUpdate(e){
   let hpChange = e.hp - player.hp
   player.hp = e.hp
-  console.log(hpChange)
   MCVs.PlayerBars.Bars[0][2].height -= hpChange * 1.9
 }
 
