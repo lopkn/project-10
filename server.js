@@ -2835,6 +2835,43 @@ function explosion(x,y,size){
 }
 
 
+function serverLightning(original,steps,random,lightning,decay){
+    let currentBeams = [original]
+    steps = steps + 1
+    random = random * (distance(original[0],original[1],original[2],original[3]))
+  
+    let fout = []
+    
 
+  
+    for(let s = 0; s < steps; s++){
+  
+
+
+    let newBeams = []
+    for(let i = 0; i < currentBeams.length; i++){
+      let ts = currentBeams[i]
+      // animationBeams.push(new Beam(Math.round(ts[0]),Math.round(ts[1]),Math.round(ts[2]),Math.round(ts[3]),ts[4]))
+      fout.push([s,Math.round(ts[0]),Math.round(ts[1]),Math.round(ts[2]),Math.round(ts[3])])
+      for(let i = 0; i < lightning; i++){
+        let velocity1 = (ts[2]-ts[0])+(Math.random()*random-(random/2))
+        let velocity2 = (ts[3]-ts[1])+(Math.random()*random-(random/2))
+        if(decay != undefined){
+          velocity2 *= decay
+          velocity1 *= decay
+        }
+        newBeams.push([ts[2],ts[3],ts[2]+velocity1,ts[3]+velocity2,ts[4]])
+      }
+    }
+    currentBeams = newBeams
+    
+  }
+
+
+    return(fout)
+  
+}
 
 //game functions end//===============================================================================
+
+
