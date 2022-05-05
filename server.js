@@ -2,10 +2,14 @@
 
 var entities = []
 var map = []
+var tnewMap = {"O":[]}
 var usedIDs = {}
 var generatedChunks = {}
 var chunkSize = 20
 var allChestLinks = {}
+
+const dimension = "O"
+
 
 var allTickyBlocks = []
 
@@ -209,7 +213,7 @@ class mob{
 		let a;
 		let t = CoordToMap(coords[0],coords[1])
 		try{
-			a = map[t[0]][t[1]][2]
+			a = tnewMap[dimension][t[0]][t[1]][2]
 		} catch {
 			a = undefined
 		}
@@ -219,7 +223,7 @@ class mob{
 			GenerateChunk(ctc.x,ctc.y)
 			t = CoordToMap(coords[0],coords[1])
 			
-			a = map[t[0]][t[1]][2]
+			a = tnewMap[dimension][t[0]][t[1]][2]
 		}
 
 		return(!alreadyHasBlock(a))
@@ -449,22 +453,22 @@ class player{
 	pressed(i){
 		if(i == "w"){
 			let t = CoordToMap(this.x,this.y-1)
-			if(!alreadyHasBlock(map[t[0]][t[1]][2])){
+			if(!alreadyHasBlock(tnewMap[dimension][t[0]][t[1]][2])){
 			this.y -= 1}
 		}
 		else if(i == "s"){
 			let t = CoordToMap(this.x,this.y+1)
-			if(!alreadyHasBlock(map[t[0]][t[1]][2])){
+			if(!alreadyHasBlock(tnewMap[dimension][t[0]][t[1]][2])){
 			this.y += 1}
 		}
 		else if(i == "a"){
 			let t = CoordToMap(this.x-1,this.y)
-			if(!alreadyHasBlock(map[t[0]][t[1]][2])){
+			if(!alreadyHasBlock(tnewMap[dimension][t[0]][t[1]][2])){
 			this.x -= 1}
 		}
 		else if(i == "d"){
 			let t = CoordToMap(this.x+1,this.y)
-			if(!alreadyHasBlock(map[t[0]][t[1]][2])){
+			if(!alreadyHasBlock(tnewMap[dimension][t[0]][t[1]][2])){
 			this.x += 1}
 		}
 		else if(i == "t"){
@@ -477,7 +481,7 @@ class player{
 
 			let coord = CoordToMap(this.x,this.y)
 
-			let item = removeOutterBracket(TNEWATTRIBUTEOF(map[coord[0]][coord[1]][2],"I"))
+			let item = removeOutterBracket(TNEWATTRIBUTEOF(tnewMap[dimension][coord[0]][coord[1]][2],"I"))
 			if(item == "NONE"){return;}
 			let amount = TNEWATTRIBUTEOF(item,"A")
 			if(amount == "NONE"){
@@ -491,7 +495,7 @@ class player{
 
 			let seegive = give(findPlayerInArr(this.id),amount,item)
 			if(seegive != "no space"){
-				map[coord[0]][coord[1]][2] = removeAttributeOf(map[coord[0]][coord[1]][2],"I")
+				tnewMap[dimension][coord[0]][coord[1]][2] = removeAttributeOf(tnewMap[dimension][coord[0]][coord[1]][2],"I")
 			}
 
 
@@ -504,18 +508,18 @@ class player{
 		io.to(this.id).emit('relay',[this.x,this.y,this.chunk])
 		let tnpe = [];
 		let tmap2 = {}
-		for(let i = 0; i < map.length; i++){
-			if(distance(map[i][0]*20+10,map[i][1]*20+10,this.x,this.y)<49){
-				let sS = [map[i][0],map[i][1],map[i][2]]
-				for(let j = 3; j < map[i].length; j ++){
+		for(let i = 0; i < tnewMap[dimension].length; i++){
+			if(distance(tnewMap[dimension][i][0]*20+10,tnewMap[dimension][i][1]*20+10,this.x,this.y)<49){
+				let sS = [tnewMap[dimension][i][0],tnewMap[dimension][i][1],tnewMap[dimension][i][2]]
+				for(let j = 3; j < tnewMap[dimension][i].length; j ++){
 					
-					let xx = map[i][j][0] + sS[0]*chunkSize
-					let yy = map[i][j][1] + sS[1]*chunkSize
+					let xx = tnewMap[dimension][i][j][0] + sS[0]*chunkSize
+					let yy = tnewMap[dimension][i][j][1] + sS[1]*chunkSize
 					if(inRect(xx,yy,this.x-27,this.y-27,53,53)){
-						if(map[i][j][2] != this.temporalMap[xx+","+yy]){
-							tmap2[xx+","+yy] = map[i][j][2]
+						if(tnewMap[dimension][i][j][2] != this.temporalMap[xx+","+yy]){
+							tmap2[xx+","+yy] = tnewMap[dimension][i][j][2]
 						}
-						this.temporalMap[xx+","+yy] = map[i][j][2]
+						this.temporalMap[xx+","+yy] = tnewMap[dimension][i][j][2]
 
 					}
 
@@ -1194,11 +1198,11 @@ function emitLightning(x,y,xx,yy,ty){
 function chestUpdate(type,str,pos){
 	let apos = pos.split(",")
 	let tctm = CoordToMap(parseInt(apos[0]),parseInt(apos[1]))
-	let tcstr = map[tctm[0]][tctm[1]][2]
+	let tcstr = tnewMap[dimension][tctm[0]][tctm[1]][2]
 	if(type == "update"){
-		map[tctm[0]][tctm[1]][2] = removeAttributeOf(tcstr,"Ch") + "-Ch:" + str
+		tnewMap[dimension][tctm[0]][tctm[1]][2] = removeAttributeOf(tcstr,"Ch") + "-Ch:" + str
 	} else if(type == "delete"){
-		map[tctm[0]][tctm[1]][2] = removeAttributeOf(tcstr,"Ch")
+		tnewMap[dimension][tctm[0]][tctm[1]][2] = removeAttributeOf(tcstr,"Ch")
 	}
 }
 
@@ -1224,7 +1228,7 @@ function processClick(e){
 	
 
 	try{
-		if(alreadyHasBlock(map[chunkPos][e[2]][2])){}
+		if(alreadyHasBlock(tnewMap[dimension][chunkPos][e[2]][2])){}
 	} catch {
 		console.log("cerr",chunkPos,e)
 	}
@@ -1252,11 +1256,11 @@ function processClick(e){
 
 
 
-	if(TNEWATTRIBUTEOF(map[chunkPos][e[2]][2],"Ch") != "NONE"){
+	if(TNEWATTRIBUTEOF(tnewMap[dimension][chunkPos][e[2]][2],"Ch") != "NONE"){
 		if(distance(decodedXY.x,decodedXY.y,entities[r].x,entities[r].y) <= 2){
 
 
-		chestInv = removeOutterBracket(TNEWATTRIBUTEOF(map[chunkPos][e[2]][2],"Ch"))
+		chestInv = removeOutterBracket(TNEWATTRIBUTEOF(tnewMap[dimension][chunkPos][e[2]][2],"Ch"))
 
 		let chestAtt = [decodedXY.x+","+decodedXY.y]
 
@@ -1290,19 +1294,19 @@ function processClick(e){
 
 	if(clickResult == "none"){
 	if(att != "NONE" && a > 0){
-		if(!alreadyHasBlock(map[chunkPos][e[2]][2])){
+		if(!alreadyHasBlock(tnewMap[dimension][chunkPos][e[2]][2])){
 			
 			if(distance(decodedXY.x,decodedXY.y,entities[r].x,entities[r].y) <= 12){
-				map[chunkPos][e[2]][2] += "-B:" + att
+				tnewMap[dimension][chunkPos][e[2]][2] += "-B:" + att
 				if(att == "8"){
-					map[chunkPos][e[2]][2] += "-Tk:[XPL:1]"
+					tnewMap[dimension][chunkPos][e[2]][2] += "-Tk:[XPL:1]"
 					allTickyBlocks.push([decodedXY.x,decodedXY.y])
 				}
 				removeItemFromSelected(e[0],1)
 
-				if(TNEWATTRIBUTEOF(map[chunkPos][e[2]][2],"I") != "NONE"){
-					DropItems(decodedXY.x,decodedXY.y,[removeOutterBracket(TNEWATTRIBUTEOF(map[chunkPos][e[2]][2],"I"))])
-					map[chunkPos][e[2]][2] = removeAttributeOf(map[chunkPos][e[2]][2],"I")
+				if(TNEWATTRIBUTEOF(tnewMap[dimension][chunkPos][e[2]][2],"I") != "NONE"){
+					DropItems(decodedXY.x,decodedXY.y,[removeOutterBracket(TNEWATTRIBUTEOF(tnewMap[dimension][chunkPos][e[2]][2],"I"))])
+					tnewMap[dimension][chunkPos][e[2]][2] = removeAttributeOf(tnewMap[dimension][chunkPos][e[2]][2],"I")
 				}
 
 
@@ -1314,10 +1318,10 @@ function processClick(e){
 
 		}
 	}else if(att2 != "NONE" && a > 0){
-		if(!alreadyHasBlockATT(map[chunkPos][e[2]][2],"Sl")){
+		if(!alreadyHasBlockATT(tnewMap[dimension][chunkPos][e[2]][2],"Sl")){
 			
 			if(distance(decodedXY.x,decodedXY.y,entities[r].x,entities[r].y) <= 12){
-				map[chunkPos][e[2]][2] += "-Sl:" + att2
+				tnewMap[dimension][chunkPos][e[2]][2] += "-Sl:" + att2
 				removeItemFromSelected(e[0],1)
 				clickResult = "SlabPlace"
 			} else {
@@ -1340,16 +1344,16 @@ function processClick(e){
 			// 
 			let utilityType = CURRENTCONFIGS.ItemReferenceDict[utilityNum].type
 			let utilityStrength = CURRENTCONFIGS.ItemReferenceDict[utilityNum].strength
-			if((utilityType == "multitul" || utilityType == "pax")&&alreadyHasBlock(map[chunkPos][e[2]][2])){
+			if((utilityType == "multitul" || utilityType == "pax")&&alreadyHasBlock(tnewMap[dimension][chunkPos][e[2]][2])){
 
-			let seeBreak = TNEWbreakBlockBy(map[chunkPos][e[2]][2],utilityStrength+Math.floor(Math.random()*10-5))
+			let seeBreak = TNEWbreakBlockBy(tnewMap[dimension][chunkPos][e[2]][2],utilityStrength+Math.floor(Math.random()*10-5))
 			if(seeBreak == "remove"){
 
-				let item = "B:"+TNEWATTRIBUTEOF(map[chunkPos][e[2]][2],"B")
+				let item = "B:"+TNEWATTRIBUTEOF(tnewMap[dimension][chunkPos][e[2]][2],"B")
 
 				let blockItem = give(r,1,item)
 
-				map[chunkPos][e[2]][2] = ArrRemoveFromTile(map[chunkPos][e[2]][2],["B","D","T","S"])
+				tnewMap[dimension][chunkPos][e[2]][2] = ArrRemoveFromTile(tnewMap[dimension][chunkPos][e[2]][2],["B","D","T","S"])
 				clickResult = "BreakBlock"
 				if(blockItem == "no space"){
 
@@ -1360,7 +1364,7 @@ function processClick(e){
 	
 
 			} else {
-				map[chunkPos][e[2]][2] = seeBreak
+				tnewMap[dimension][chunkPos][e[2]][2] = seeBreak
 				clickResult = "HitBlock"
 			}
 
@@ -1410,12 +1414,12 @@ function DropItems(x,y,arr){
 	let tilename
 	// let e2 = 3+((x%chunkSize)+(y%chunkSize)*chunkSize)
 	try{
-	tilename = map[cchunk[0]][cchunk[1]][2]} catch{
+	tilename = tnewMap[dimension][cchunk[0]][cchunk[1]][2]} catch{
 		console.log(cchunk,x,y)
 	}
 
 	if(tileItemable(tilename)){
-		map[cchunk[0]][cchunk[1]][2] += ("-I:["+arr[0]+"]")
+		tnewMap[dimension][cchunk[0]][cchunk[1]][2] += ("-I:["+arr[0]+"]")
 
 		
 
@@ -1629,9 +1633,9 @@ function GenerateChunk(x,y){
 			generateStructureFromNumber(value,x*chunkSize+j,y*chunkSize+i)
 		}
 	}
-	map.push(t)
+	tnewMap[dimension].push(t)
 	let ee = x+","+y
-	generatedChunks[ee] = (map.length-1)
+	generatedChunks[ee] = (tnewMap[dimension].length-1)
 
 	if(promiseChunks[ee] != undefined){
 		for(let i = 0; i < promiseChunks[ee].length; i++){
@@ -1825,9 +1829,9 @@ function setBlock(x,y,block){
 	let ctm = CoordToMap(x,y)
 
 	if(ctm[0] != undefined){
-		map[ctm[0]][ctm[1]][2] = TNEWkeepOnlyTile(map[ctm[0]][ctm[1]][2],"G")
+		tnewMap[dimension][ctm[0]][ctm[1]][2] = TNEWkeepOnlyTile(tnewMap[dimension][ctm[0]][ctm[1]][2],"G")
 			if(block != ""){
-				map[ctm[0]][ctm[1]][2] += "-" + block
+				tnewMap[dimension][ctm[0]][ctm[1]][2] += "-" + block
 			}
 		} else {
 			let ctc = CoordToChunk(x,y)
@@ -1843,7 +1847,7 @@ function setBlock(x,y,block){
 
 function setblock(x,y,block){
 	let ctm = CoordToMap(x,y)
-	map[ctm[0]][ctm[1]][2] = block
+	tnewMap[dimension][ctm[0]][ctm[1]][2] = block
 	if(TNEWATTRIBUTEOF(block,"Tk") != "NONE"){
 		allTickyBlocks.push([x,y])
 	}
@@ -2718,7 +2722,7 @@ function tickAllBlocks(){
 	for(let i = allTickyBlocks.length-1; i > -1; i--){
 
 		let tempctm = CoordToMap(allTickyBlocks[i][0],allTickyBlocks[i][1])
-		let blockStr = map[tempctm[0]][tempctm[1]][2]
+		let blockStr = tnewMap[dimension][tempctm[0]][tempctm[1]][2]
 
 		let tickAtt = removeOutterBracket(TNEWATTRIBUTEOF(blockStr,"Tk"))
 
@@ -2742,10 +2746,10 @@ function tickAllBlocks(){
 
 		}
 		outtick = outtick.substring(1)
-		map[tempctm[0]][tempctm[1]][2] = removeAttributeOf(map[tempctm[0]][tempctm[1]][2],"Tk") + "-Tk:[" + outtick + "]"
+		tnewMap[dimension][tempctm[0]][tempctm[1]][2] = removeAttributeOf(tnewMap[dimension][tempctm[0]][tempctm[1]][2],"Tk") + "-Tk:[" + outtick + "]"
 		if(outtick.length == 0){
 			allTickyBlocks.splice(i,1)
-			map[tempctm[0]][tempctm[1]][2] = removeAttributeOf(map[tempctm[0]][tempctm[1]][2],"Tk")
+			tnewMap[dimension][tempctm[0]][tempctm[1]][2] = removeAttributeOf(tnewMap[dimension][tempctm[0]][tempctm[1]][2],"Tk")
 			continue;
 		}
 		
@@ -2793,7 +2797,7 @@ function explosion(x,y,size){
 				attempty = y+Math.round(Math.random()*size*2-size)
 				continue;
 			}
-			tbstr = map[tctm[0]][tctm[1]][2]
+			tbstr = tnewMap[dimension][tctm[0]][tctm[1]][2]
 			let TblockATT = TNEWATTRIBUTEOF(tbstr,"B")
 			if(TblockATT == "NONE" || (TblockATT == "8" && tempdist != 0)){
 				attemptx = x+Math.round(Math.random()*size*2-size)
@@ -2812,9 +2816,9 @@ function explosion(x,y,size){
 				if(tempdist != 0){
 					DropItems(attemptx,attempty,["B:"+TblockATT])
 				}
-				map[tctm[0]][tctm[1]][2] = ArrRemoveFromTile(tbstr,["B","D","T","S"])
+				tnewMap[dimension][tctm[0]][tctm[1]][2] = ArrRemoveFromTile(tbstr,["B","D","T","S"])
 			} else {
-				map[tctm[0]][tctm[1]][2] = bbb
+				tnewMap[dimension][tctm[0]][tctm[1]][2] = bbb
 			}
 
 
