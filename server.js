@@ -74,12 +74,12 @@ function ping(a){
 let perSeeds = {"O":new perlin(174.44),"T":new perlin(164.44)}
 
 class mob{
-	constructor(type,x,y,id){
+	constructor(type,x,y,id,dimension){
 		this.entityType = type
 		this.id = id
 		this.x = x
 		this.y = y
-		this.dimension = "O"
+		this.dimension = dimension
 		this.chunk = {"x":0,"y":0}
 		this.selectedSlot = 0
 		this.Inventory = [""]
@@ -164,7 +164,7 @@ class mob{
 
 			if(Math.random() > 0.6 && this.inCombat == false){
 				for(let i = 0; i < entities.length; i++){
-					if(entities[i].entityType == "player" && distance(this.x,this.y,entities[i].x,entities[i].y) < 5){
+					if(entities[i].entityType == "player" && entities[i].dimension == this.dimension&&distance(this.x,this.y,entities[i].x,entities[i].y) < 5){
 						let a = CoordToChunk(entities[i].x,entities[i].y)
 						myAction.push(["click",a,a.cx + a.cy*chunkSize+3])
 
@@ -184,7 +184,7 @@ class mob{
 
 			if(Math.random() > 0.9 && this.inCombat == false){
 				for(let i = 0; i < entities.length; i++){
-					if(entities[i].entityType == "player" && distance(this.x,this.y,entities[i].x,entities[i].y) <= 3){
+					if(entities[i].entityType == "player" && entities[i].dimension == this.dimension&&distance(this.x,this.y,entities[i].x,entities[i].y) <= 3){
 						let a = CoordToChunk(entities[i].x,entities[i].y)
 						myAction.push(["click",a,a.cx + a.cy*chunkSize+3])
 
@@ -403,7 +403,7 @@ class player{
 	sendBeam(){
 		let tempBeams = []
 		for(let i = 0; i < relayBeams.length; i++){
-			if(distance(relayBeams[i][0],relayBeams[i][1],this.x,this.y) < 100){
+			if(distance(relayBeams[i][0],relayBeams[i][1],this.x,this.y) < 100 && relayBeams[i][5] == this.dimension){
 				tempBeams.push(relayBeams[i])
 			}
 		}
@@ -645,7 +645,7 @@ if(inEffectArr("blind1",this.effects)){
 
 		let t = []
 		for(let i = 0; i < entities.length; i++){
-			if(distance(entities[i].x,entities[i].y,this.x,this.y) < 33 && entities[i].id != this.id){
+			if(distance(entities[i].x,entities[i].y,this.x,this.y) < 33 && entities[i].dimension == this.dimension&&entities[i].id != this.id){
 				t.push([entities[i].x,entities[i].y,entities[i].entityType])
 			}
 		}
@@ -1257,10 +1257,22 @@ function generateStructureCmd(p,s,x,y,o){
 
 
 
-function emitLightning(x,y,xx,yy,ty){
+function emitLightning(x,y,xx,yy,ty,dimension){
 	let xa = x + (xx-x)/7
 	let ya = y + (yy-y)/7
-	io.emit("ParticleRelay",["DevLightning",[x,y,xa,ya,ty]])
+	ParticleRelay(["DevLightning",[x,y,xa,ya,ty]],dimension)
+}
+
+
+function ParticleRelay(arr,dimension){
+
+	for(let i = 0; i < entities.length; i++){
+		if(entities[i].entityType == "player" && entities[i].dimension == dimension){
+			io.to(entities[i].id).emit("ParticleRelay",arr)
+		}
+	}
+
+
 }
 
 
@@ -1445,7 +1457,7 @@ function processClick(e){
 			let staffInfo = CURRENTCONFIGS.ItemReferenceDict[utilityNum].staff
 			
 			if(staffInfo.type == "lightning" && a > 0){
-				emitLightning(entities[r].x,entities[r].y,decodedXY.x,decodedXY.y,"DevLightning")
+				emitLightning(entities[r].x,entities[r].y,decodedXY.x,decodedXY.y,"DevLightning",dimension)
 			}
 			else if(staffInfo.type == "explosive" && a > 0){
 				explosion(decodedXY.x,decodedXY.y,6)
@@ -1462,7 +1474,7 @@ function processClick(e){
 
 	}}
 
-	relayBeams.push([entities[r].x,entities[r].y,decodedXY.x,decodedXY.y,clickResult])
+	relayBeams.push([entities[r].x,entities[r].y,decodedXY.x,decodedXY.y,clickResult,dimension])
 }
 
 
@@ -2038,11 +2050,17 @@ function tp(r,i1,i2){
 
 function summonCmd(p,name,x,y,id){
 	let r = getRelativity(p,x,y)
-	summonNewMob(name,r[0],r[1],id)
+	summonNewMob(name,r[0],r[1],id,entities[p].dimension)
 
 }
 
-function summonNewMob(name,x,y,id){
+function summonNewMob(name,x,y,id,d){
+
+	let dimension = "O"
+	if(d != undefined){
+		dimension = d
+	}
+
 
 	if(id == undefined){
 		id = Math.floor(Math.random()*10000)
@@ -2053,7 +2071,7 @@ function summonNewMob(name,x,y,id){
 		}
 	
 	usedIDs[id] = true
-	entities.push(new mob(name,x,y,id))
+	entities.push(new mob(name,x,y,id,dimension))
 	return("successfully summoned")
 
 
@@ -2961,12 +2979,12 @@ function explosion(x,y,size,d){
 
 	for(let i = 0; i < entities.length; i++){
 		let a = distance(entities[i].x,entities[i].y,x,y)
-		if(a <= size){
+		if(entities[i].dimension == dimension && a <= size){
 			entities[i].hp -= Math.floor((size-a)*20)
 		}
 	}
 
-	io.emit("ParticleRelay",["Explosion",[x,y]])
+	ParticleRelay(["Explosion",[x,y]],dimension)
 
 }
 

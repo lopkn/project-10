@@ -22,6 +22,7 @@ FEATURES DONE (after creation of tdl)
 - explosives!!
 - commands update
 - player disconnect timer
+- rendering Dimensions
 
 
 TO DO LIST
@@ -48,7 +49,7 @@ TO DO LIST
 
 - combat animation
 
-- rendering Dimensions
+- particle dimensions
 
 - tile animations
 
