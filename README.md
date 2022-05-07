@@ -74,11 +74,15 @@ TO DO LIST
 
 - natural entity spawning
 
+- NPCs and quests
+
 - ore and crafting
 
 - ping compensation
 
 - timer voting system
+
+- help menu update (low priority)
 
 - chunk saves (low priority)
 
