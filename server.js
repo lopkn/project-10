@@ -2,9 +2,9 @@
 
 var entities = []
 var map = []
-var tnewMap = {"O":[]}
+var tnewMap = {"O":[],"T":[]}
 var usedIDs = {}
-var generatedChunks = {"O":{}}
+var generatedChunks = {"O":{},"T":{}}
 var chunkSize = 20
 var allChestLinks = {}
 
@@ -34,7 +34,7 @@ var playerList = require("./playerList")
 
 var cmdc = {"success":"#00C000","error":"#FF0000","small_error":"#FFCFCF","item":"#FFFF00","combat":"#FF8800"}
 
-var promiseChunks = {"O":{}}
+var promiseChunks = {"O":{},"T":{}}
 
 var consoleKey = "216"
 
@@ -53,7 +53,8 @@ function getServerDataSize(){
 	strl += getStrLengthOf(tnewMap)
 	strl += getStrLengthOf(entities)
 	strl += getStrLengthOf(allTickyBlocks)
-	return(strl)
+	let strl2 = getStrLengthOf(perSeeds)
+	return(strl + "-" + strl2)
 
 }
 
@@ -68,7 +69,10 @@ function ping(a){
 	
 }
 //old seed 164.44
-perSeed = new perlin(174.44)
+// perSeed = new perlin(174.44)
+
+let perSeeds = {"O":new perlin(174.44),"T":new perlin(164.44)}
+
 class mob{
 	constructor(type,x,y,id){
 		this.entityType = type
@@ -253,7 +257,7 @@ class mob{
 
 	entityCheckIfBlock(coords){
 		let a;
-		let t = CoordToMap(coords[0],coords[1])
+		let t = CoordToMap(coords[0],coords[1],this.dimension)
 		try{
 			a = tnewMap[dimension][t[0]][t[1]][2]
 		} catch {
@@ -263,7 +267,7 @@ class mob{
 			let ctc = CoordToChunk(coords[0],coords[1])
 
 			GenerateChunk(ctc.x,ctc.y)
-			t = CoordToMap(coords[0],coords[1])
+			t = CoordToMap(coords[0],coords[1],this.dimension)
 			
 			a = tnewMap[dimension][t[0]][t[1]][2]
 		}
@@ -494,23 +498,23 @@ class player{
 	}
 	pressed(i){
 		if(i == "w"){
-			let t = CoordToMap(this.x,this.y-1)
-			if(!alreadyHasBlock(tnewMap[dimension][t[0]][t[1]][2])){
+			let t = CoordToMap(this.x,this.y-1,this.dimension)
+			if(!alreadyHasBlock(tnewMap[this.dimension][t[0]][t[1]][2])){
 			this.y -= 1}
 		}
 		else if(i == "s"){
-			let t = CoordToMap(this.x,this.y+1)
-			if(!alreadyHasBlock(tnewMap[dimension][t[0]][t[1]][2])){
+			let t = CoordToMap(this.x,this.y+1,this.dimension)
+			if(!alreadyHasBlock(tnewMap[this.dimension][t[0]][t[1]][2])){
 			this.y += 1}
 		}
 		else if(i == "a"){
-			let t = CoordToMap(this.x-1,this.y)
-			if(!alreadyHasBlock(tnewMap[dimension][t[0]][t[1]][2])){
+			let t = CoordToMap(this.x-1,this.y,this.dimension)
+			if(!alreadyHasBlock(tnewMap[this.dimension][t[0]][t[1]][2])){
 			this.x -= 1}
 		}
 		else if(i == "d"){
-			let t = CoordToMap(this.x+1,this.y)
-			if(!alreadyHasBlock(tnewMap[dimension][t[0]][t[1]][2])){
+			let t = CoordToMap(this.x+1,this.y,this.dimension)
+			if(!alreadyHasBlock(tnewMap[this.dimension][t[0]][t[1]][2])){
 			this.x += 1}
 		}
 		else if(i == "t"){
@@ -521,9 +525,9 @@ class player{
 
 		}else if(i == "p"){
 
-			let coord = CoordToMap(this.x,this.y)
+			let coord = CoordToMap(this.x,this.y,this.dimension)
 
-			let item = removeOutterBracket(TNEWATTRIBUTEOF(tnewMap[dimension][coord[0]][coord[1]][2],"I"))
+			let item = removeOutterBracket(TNEWATTRIBUTEOF(tnewMap[this.dimension][coord[0]][coord[1]][2],"I"))
 			if(item == "NONE"){return;}
 			let amount = TNEWATTRIBUTEOF(item,"A")
 			if(amount == "NONE"){
@@ -537,7 +541,7 @@ class player{
 
 			let seegive = give(findPlayerInArr(this.id),amount,item)
 			if(seegive != "no space"){
-				tnewMap[dimension][coord[0]][coord[1]][2] = removeAttributeOf(tnewMap[dimension][coord[0]][coord[1]][2],"I")
+				tnewMap[this.dimension][coord[0]][coord[1]][2] = removeAttributeOf(tnewMap[this.dimension][coord[0]][coord[1]][2],"I")
 			}
 
 
@@ -550,18 +554,18 @@ class player{
 		io.to(this.id).emit('relay',[this.x,this.y,this.chunk])
 		let tnpe = [];
 		let tmap2 = {}
-		for(let i = 0; i < tnewMap[dimension].length; i++){
-			if(distance(tnewMap[dimension][i][0]*20+10,tnewMap[dimension][i][1]*20+10,this.x,this.y)<49){
-				let sS = [tnewMap[dimension][i][0],tnewMap[dimension][i][1],tnewMap[dimension][i][2]]
-				for(let j = 3; j < tnewMap[dimension][i].length; j ++){
+		for(let i = 0; i < tnewMap[this.dimension].length; i++){
+			if(distance(tnewMap[this.dimension][i][0]*20+10,tnewMap[this.dimension][i][1]*20+10,this.x,this.y)<49){
+				let sS = [tnewMap[this.dimension][i][0],tnewMap[this.dimension][i][1],tnewMap[this.dimension][i][2]]
+				for(let j = 3; j < tnewMap[this.dimension][i].length; j ++){
 					
-					let xx = tnewMap[dimension][i][j][0] + sS[0]*chunkSize
-					let yy = tnewMap[dimension][i][j][1] + sS[1]*chunkSize
+					let xx = tnewMap[this.dimension][i][j][0] + sS[0]*chunkSize
+					let yy = tnewMap[this.dimension][i][j][1] + sS[1]*chunkSize
 					if(inRect(xx,yy,this.x-27,this.y-27,53,53)){
-						if(tnewMap[dimension][i][j][2] != this.temporalMap[xx+","+yy]){
-							tmap2[xx+","+yy] = tnewMap[dimension][i][j][2]
+						if(tnewMap[this.dimension][i][j][2] != this.temporalMap[xx+","+yy]){
+							tmap2[xx+","+yy] = tnewMap[this.dimension][i][j][2]
 						}
-						this.temporalMap[xx+","+yy] = tnewMap[dimension][i][j][2]
+						this.temporalMap[xx+","+yy] = tnewMap[this.dimension][i][j][2]
 
 					}
 
@@ -748,8 +752,8 @@ var server = app.listen(3000);
 app.use(express.static('public'));
 
 console.log("server is opened")
-console.log(perSeed.noise2D(0.2,0,0))
-
+// console.log(perSeed.noise2D(0.2,0,0))
+// console.log("seeds: " + JSON.stringify(perSeeds))
 
 
 
@@ -845,8 +849,8 @@ function allPlayersGenerateChunks(){
 	for(let i = -1; i < 2; i++){
 		for(let j = -1; j < 2; j++){
 			try{
-			if(generatedChunks[dimension][(ps[p].chunk.x+j)+","+(ps[p].chunk.y+i)] == undefined){
-				GenerateChunk(ps[p].chunk.x+j,ps[p].chunk.y+i)
+			if(generatedChunks[ps[p].dimension][(ps[p].chunk.x+j)+","+(ps[p].chunk.y+i)] == undefined){
+				GenerateChunk(ps[p].chunk.x+j,ps[p].chunk.y+i,ps[p].dimension)
 			}}
 			catch(err){
 				console.log(ps,err)
@@ -940,8 +944,8 @@ setInterval(function(){if(startPing == 1){pping++}},1)
 
 
 
-function tellPerlin(x,y){
-	console.log(perSeed.noise2D(x/100,y/100,0))
+function tellPerlin(x,y,d){
+	console.log(perSeeds[d].noise2D(x/100,y/100,0))
 }
 
 
@@ -1237,9 +1241,13 @@ function emitLightning(x,y,xx,yy,ty){
 }
 
 
-function chestUpdate(type,str,pos){
+function chestUpdate(type,str,pos,d){
+	let dimension = "O"
+	if(d != undefined){
+		dimension = d
+	}
 	let apos = pos.split(",")
-	let tctm = CoordToMap(parseInt(apos[0]),parseInt(apos[1]))
+	let tctm = CoordToMap(parseInt(apos[0]),parseInt(apos[1]),dimension)
 	let tcstr = tnewMap[dimension][tctm[0]][tctm[1]][2]
 	if(type == "update"){
 		tnewMap[dimension][tctm[0]][tctm[1]][2] = removeAttributeOf(tcstr,"Ch") + "-Ch:" + str
@@ -1448,9 +1456,14 @@ function removeEmptyArrStrings(arr){
 
 
 
-function DropItems(x,y,arr){
+function DropItems(x,y,arr,d){
+
+	let dimension = "O"
+	if(d != undefined){
+		dimension = d
+	}
 	
-	let cchunk = CoordToMap(x,y)
+	let cchunk = CoordToMap(x,y,dimension)
 
 
 	let tilename
@@ -1676,8 +1689,8 @@ function GenerateChunk(x,y,d){
 	let t = [x,y,"buffer"]
 	for(let i = 0; i < chunkSize; i++){
 		for(let j = 0; j < chunkSize; j++){
-			let value =200+perSeed.noise2D((0.2+j+x*chunkSize)/199.7,(0.2+i+y*chunkSize)/199.7)*200
-			t.push([j,i,TNEWgenerateTileFromNumber(value,0)])
+			let value =200+perSeeds[dimension].noise2D((0.2+j+x*chunkSize)/199.7,(0.2+i+y*chunkSize)/199.7)*200
+			t.push([j,i,TNEWgenerateTileFromNumber(value,dimension)])
 			generateStructureFromNumber(value,x*chunkSize+j,y*chunkSize+i)
 		}
 	}
@@ -1873,8 +1886,12 @@ function generateStructure(st,x,y,options){
 
 
 
-function setBlock(x,y,block){
-	let ctm = CoordToMap(x,y)
+function setBlock(x,y,block,d){
+	let dimension = "O"
+	if(d != undefined){
+		dimension = d
+	}
+	let ctm = CoordToMap(x,y,dimension)
 
 	if(ctm[0] != undefined){
 		tnewMap[dimension][ctm[0]][ctm[1]][2] = TNEWkeepOnlyTile(tnewMap[dimension][ctm[0]][ctm[1]][2],"G")
@@ -1893,8 +1910,12 @@ function setBlock(x,y,block){
 }
 
 
-function setblock(x,y,block){
-	let ctm = CoordToMap(x,y)
+function setblock(x,y,block,d){
+	let dimension = "O"
+	if(d != undefined){
+		dimension = d
+	}
+	let ctm = CoordToMap(x,y,dimension)
 	tnewMap[dimension][ctm[0]][ctm[1]][2] = block
 	if(TNEWATTRIBUTEOF(block,"Tk") != "NONE"){
 		allTickyBlocks.push([x,y])
@@ -2392,8 +2413,10 @@ function generateStructureFromNumber(input,x,y){
 
 }
 
-function TNEWgenerateTileFromNumber(input,e){
-	if(e == 0){
+function TNEWgenerateTileFromNumber(input,d){
+
+
+	if(d == "O"){
 		let tile = "G:"
 		if(input < 70){
 			tile += "1"
@@ -2425,12 +2448,46 @@ function TNEWgenerateTileFromNumber(input,e){
 
 			return(tile)
 	}
+
+	 else if(d == "T"){
+		let tile = "G:"
+		 if(input < 90){
+			tile += "2"
+		} else if(input < 140){
+			tile += "3"
+		} else if(input < 145){
+			tile += "4"
+		} else if(input < 230){
+			tile += "5"
+		} else if(input < 300){
+			tile += "6"
+		} else if(input < 335){
+			tile += "7"
+		} else if(input >= 335){
+			tile += "8"
+		}
+		if(input >= 150 && input < 300){
+			if(Math.random() > 1-input/30000){
+				tile += "-B:3-T:1-S:" + (Math.floor(Math.random()*3)+1)
+			}
+		}
+
+		
+
+
+			return(tile)
+	}
 }
 
 
 
 
-function CoordToMap(x,y){
+function CoordToMap(x,y,d){
+	let dimension = "O"
+	if(d != undefined){
+		dimension = d
+	}
+
 	let cx = Math.floor(x/chunkSize)
 	let cy = Math.floor(y/chunkSize)
 	let p = x-cx*chunkSize + (y-cy*chunkSize)*chunkSize + 3
@@ -2829,7 +2886,11 @@ function tickAtZero(str,pos){
 
 
 
-function explosion(x,y,size){
+function explosion(x,y,size,d){
+	let dimension = "O"
+	if(d != undefined){
+		dimension = d
+	}
 
 	let attemptx = x
 	let attempty = y
@@ -2838,7 +2899,7 @@ function explosion(x,y,size){
 		let tempdist = distance(x,y,attemptx,attempty)
 		if(tempdist <= size){
 
-			let tctm = CoordToMap(attemptx,attempty)
+			let tctm = CoordToMap(attemptx,attempty,dimension)
 			let tbstr
 			if(tctm[0] == undefined){
 				attemptx = x+Math.round(Math.random()*size*2-size)
