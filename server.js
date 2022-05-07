@@ -4,11 +4,11 @@ var entities = []
 var map = []
 var tnewMap = {"O":[]}
 var usedIDs = {}
-var generatedChunks = {}
+var generatedChunks = {"O":{}}
 var chunkSize = 20
 var allChestLinks = {}
 
-const dimension = "O"
+var dimension = "O"
 
 
 var allTickyBlocks = []
@@ -34,13 +34,29 @@ var playerList = require("./playerList")
 
 var cmdc = {"success":"#00C000","error":"#FF0000","small_error":"#FFCFCF","item":"#FFFF00","combat":"#FF8800"}
 
-var promiseChunks = {}
+var promiseChunks = {"O":{}}
 
 var consoleKey = "216"
 
 
 var pping = 0
 var startPing = 0
+
+function getStrLengthOf(e){
+	return(JSON.stringify(e).length)
+}
+
+
+function getServerDataSize(){
+	let strl = 0
+	strl += getStrLengthOf(CURRENTCONFIGS)
+	strl += getStrLengthOf(tnewMap)
+	strl += getStrLengthOf(entities)
+	strl += getStrLengthOf(allTickyBlocks)
+	return(strl)
+
+}
+
 
 
 function ping(a){
@@ -59,6 +75,7 @@ class mob{
 		this.id = id
 		this.x = x
 		this.y = y
+		this.dimension = "O"
 		this.chunk = {"x":0,"y":0}
 		this.selectedSlot = 0
 		this.Inventory = [""]
@@ -72,24 +89,49 @@ class mob{
 
 		}
 
-		if(type == "zombie"){
-			this.hp = 60
-		}else if(type == "rampant"){
-			this.Inventory = ["U:6-A:1","B:1-A:6"]
-			this.hp = 30
-		}else if(type == "preponderant"){
-			this.Inventory = ["U:6-A:1","U:3-A:1"]
-			this.hp = 50
-			this.entityStats.strength += 2
-		}else if(type == "verdant"){
-			this.Inventory = ["","B:6-A:1"]
-			this.hp = 170
-		}else if(type == "duck"){
-			this.Inventory = ["U:6-A:10","U:5-A:10","U:4-A:10","U:3-A:10","U:2-A:10","U:1-A:10","B:7-A:10","B:5-A:10","B:4-A:10","B:3-A:10","B:2-A:10","B:1-A:10","B:6-A:10"]
-			this.hp = 30
-		}  else {
-			this.hp = 100
-		}
+
+		switch(type){
+
+  case "zombie":
+
+    this.hp = 60
+
+    break;
+  case "rampant":
+
+    this.Inventory = ["U:6-A:1","B:1-A:6"]
+	this.hp = 30
+
+    break;
+  case "preponderant":
+
+    this.Inventory = ["U:6-A:1","U:3-A:1"]
+	this.hp = 50
+	this.entityStats.strength += 2
+
+    break;
+
+  case "verdant":
+
+    this.Inventory = ["","B:6-A:1"]
+	this.hp = 170
+
+    break;
+  case "duck":
+
+    this.hp = 30
+
+    break;
+  default:
+  	this.hp = 100
+}
+
+		
+		
+	
+			// this.Inventory = ["U:6-A:10","U:5-A:10","U:4-A:10","U:3-A:10","U:2-A:10","U:1-A:10","B:7-A:10","B:5-A:10","B:4-A:10","B:3-A:10","B:2-A:10","B:1-A:10","B:6-A:10"]
+			
+		
 
 
 
@@ -277,11 +319,11 @@ class player{
 		this.y = Math.floor(Math.random()*7)
 		this.chunk = {"x":0,"y":0}
 		this.selectedSlot = 0
+		this.dimension = "O"
 		this.Inventory = ["B:8-A:50","B:5-A:50","U:4-A:100","Sl:1-A:30",""]
 		this.effects = []
 		this.inCombat = false
 		this.hp = 100
-
 		this.chestLink = ["none"]
 
 
@@ -803,7 +845,7 @@ function allPlayersGenerateChunks(){
 	for(let i = -1; i < 2; i++){
 		for(let j = -1; j < 2; j++){
 			try{
-			if(generatedChunks[(ps[p].chunk.x+j)+","+(ps[p].chunk.y+i)] == undefined){
+			if(generatedChunks[dimension][(ps[p].chunk.x+j)+","+(ps[p].chunk.y+i)] == undefined){
 				GenerateChunk(ps[p].chunk.x+j,ps[p].chunk.y+i)
 			}}
 			catch(err){
@@ -1212,8 +1254,8 @@ var relayBeams = []
 function processClick(e){
 
 	let r = findPlayerInArr(e[0])
-
-	let chunkPos = generatedChunks[e[1].x + "," + e[1].y]
+	let dimension = entities[r].dimension
+	let chunkPos = generatedChunks[dimension][e[1].x + "," + e[1].y]
 
 	let item = selectedSlotItems(e[0])
 
@@ -1624,7 +1666,13 @@ function TNEWkeepOnlyTile(str,type){
 }
 
 
-function GenerateChunk(x,y){
+function GenerateChunk(x,y,d){
+	let dimension = "O"
+	if(d != undefined){
+		dimension = d
+	}
+
+
 	let t = [x,y,"buffer"]
 	for(let i = 0; i < chunkSize; i++){
 		for(let j = 0; j < chunkSize; j++){
@@ -1635,11 +1683,11 @@ function GenerateChunk(x,y){
 	}
 	tnewMap[dimension].push(t)
 	let ee = x+","+y
-	generatedChunks[ee] = (tnewMap[dimension].length-1)
+	generatedChunks[dimension][ee] = (tnewMap[dimension].length-1)
 
-	if(promiseChunks[ee] != undefined){
-		for(let i = 0; i < promiseChunks[ee].length; i++){
-			setBlock(promiseChunks[ee][i][0],promiseChunks[ee][i][1],promiseChunks[ee][i][2])
+	if(promiseChunks[dimension][ee] != undefined){
+		for(let i = 0; i < promiseChunks[dimension][ee].length; i++){
+			setBlock(promiseChunks[dimension][ee][i][0],promiseChunks[dimension][ee][i][1],promiseChunks[dimension][ee][i][2])
 		}
 	}
 }
@@ -1836,10 +1884,10 @@ function setBlock(x,y,block){
 		} else {
 			let ctc = CoordToChunk(x,y)
 			let coord = ctc.x+","+ctc.y
-			if(promiseChunks[coord] == undefined){
-				promiseChunks[coord] = [[x,y,block]]
+			if(promiseChunks[dimension][coord] == undefined){
+				promiseChunks[dimension][coord] = [[x,y,block]]
 			} else {
-				promiseChunks[coord].push([x,y,block])
+				promiseChunks[dimension][coord].push([x,y,block])
 			}
 		}
 }
@@ -2389,7 +2437,7 @@ function CoordToMap(x,y){
 
 
 
-	return([generatedChunks[cx+","+cy],p])
+	return([generatedChunks[dimension][cx+","+cy],p])
 }
 
 
