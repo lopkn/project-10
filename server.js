@@ -233,7 +233,7 @@ class mob{
 		
 		delete usedIDs[this.id]
 
-			DropItems(this.x,this.y,removeEmptyArrStrings(this.Inventory))
+			DropItems(this.x,this.y,removeEmptyArrStrings(this.Inventory),this.dimension)
 		for(let i = entities.length - 1; i > -1; i--){
 			if(entities[i].id == this.id){
 				entities.splice(i,1)
@@ -520,7 +520,7 @@ class player{
 		else if(i == "t"){
 			let item = this.Inventory[this.selectedSlot]
 			this.Inventory[this.selectedSlot] = ""
-			DropItems(this.x,this.y,[item])
+			DropItems(this.x,this.y,[item],dimension)
 			this.invrelay()
 
 		}else if(i == "p"){
@@ -783,10 +783,20 @@ function newConnection(socket){
 	socket.on('AT',ACTIONPROCESS)
 	socket.on("returnPing",STOPPING)
 	console.log(socket.id + " has joined at " + Date())
+
+	let clientIp = socket.request.connection.remoteAddress
+
+	console.log("Join IP = " + clientIp)
+
 	broadcast("--"+socket.id+" has joined!",cmdc.item)
 	entities.push(new player(socket.id))
 	entities[findPlayerInArr(socket.id)].log(MainHelpMenu,"#A000FF")
 	joined(socket.id)
+
+	if(clientIp == "::ffff:192.168.1.1"){
+		entities[findPlayerInArr(socket.id)].keyholder = true
+		entities[findPlayerInArr(socket.id)].log("Automatic keyholder! welcome back","#00FFFF")
+	}
 
 
 	io.to(socket.id).emit('sendWhenJoin', socket.id)
@@ -864,12 +874,15 @@ function allPlayersGenerateChunks(){
 	}
 }
 }
-var TIME = 40
+var TIME = 0
+
+var TickLimit = 70
+
 function doSomething(){
-	if(TIME < 60){
+	if(TIME < TickLimit-10){
 		TIME += 1
 		io.emit('TIME',TIME)
-	} else if(TIME == 60){
+	} else if(TIME == TickLimit-10){
 		allPlayersGenerateChunks()
 		TIME += 1
 		io.emit('TICK')
@@ -884,9 +897,9 @@ function doSomething(){
 		}
 
 
-	} else if(TIME < 70){
+	} else if(TIME < TickLimit){
 		TIME += 1
-	} else if(TIME == 70){
+	} else if(TIME == TickLimit){
 
 		TIME = getLongestPlayerAction() * -5
 		tickAllBlocks()
@@ -1157,6 +1170,16 @@ if(st[0] == "/"){
 		else if(strsplit[0] == "tp" && entities[p].keyholder == true){
 		tp(p,strsplit[1],strsplit[2])
 	}
+
+		else if((strsplit[0] == "dimensionjump" || strsplit[0] == "djump")&& entities[p].keyholder == true){
+		if(strsplit[1] == "O" || strsplit[1] == "T"){
+			entities[p].dimension = strsplit[1]
+			entities[p].log("jumped to dimension " + strsplit[1],cmdc.success)
+		} else {
+			entities[p].log("non existant dimension - " + strsplit[1],cmdc.error)
+		}
+	}
+
 	//summon command
 		else if(strsplit[0] == "summon" && entities[p].keyholder == true){
 		let tempFstore = summonCmd(p,strsplit[1],strsplit[2],strsplit[3],strsplit[4])
@@ -1350,12 +1373,12 @@ function processClick(e){
 				tnewMap[dimension][chunkPos][e[2]][2] += "-B:" + att
 				if(att == "8"){
 					tnewMap[dimension][chunkPos][e[2]][2] += "-Tk:[XPL:1]"
-					allTickyBlocks.push([decodedXY.x,decodedXY.y])
+					allTickyBlocks.push([decodedXY.x,decodedXY.y,dimension])
 				}
 				removeItemFromSelected(e[0],1)
 
 				if(TNEWATTRIBUTEOF(tnewMap[dimension][chunkPos][e[2]][2],"I") != "NONE"){
-					DropItems(decodedXY.x,decodedXY.y,[removeOutterBracket(TNEWATTRIBUTEOF(tnewMap[dimension][chunkPos][e[2]][2],"I"))])
+					DropItems(decodedXY.x,decodedXY.y,[removeOutterBracket(TNEWATTRIBUTEOF(tnewMap[dimension][chunkPos][e[2]][2],"I"))],dimension)
 					tnewMap[dimension][chunkPos][e[2]][2] = removeAttributeOf(tnewMap[dimension][chunkPos][e[2]][2],"I")
 				}
 
@@ -1481,12 +1504,12 @@ function DropItems(x,y,arr,d){
 		if(arr.length > 1){
 			try{
 			arr.splice(0,1)} catch {console.log(arr)}
-			DropItems(x+Math.round(Math.random()*4-2),y+Math.round(Math.random()*4-2),arr)
+			DropItems(x+Math.round(Math.random()*4-2),y+Math.round(Math.random()*4-2),arr,dimension)
 		}
 		return(true)
 
 	} else {
-		DropItems(x+Math.round(Math.random()*4-2),y+Math.round(Math.random()*4-2),arr)
+		DropItems(x+Math.round(Math.random()*4-2),y+Math.round(Math.random()*4-2),arr,dimension)
 	}
 
 
@@ -1918,7 +1941,7 @@ function setblock(x,y,block,d){
 	let ctm = CoordToMap(x,y,dimension)
 	tnewMap[dimension][ctm[0]][ctm[1]][2] = block
 	if(TNEWATTRIBUTEOF(block,"Tk") != "NONE"){
-		allTickyBlocks.push([x,y])
+		allTickyBlocks.push([x,y,dimension])
 	}
 }
 
@@ -2825,8 +2848,8 @@ function randomItem(List){
 //============ block tickers ======
 function tickAllBlocks(){
 	for(let i = allTickyBlocks.length-1; i > -1; i--){
-
-		let tempctm = CoordToMap(allTickyBlocks[i][0],allTickyBlocks[i][1])
+		let dimension = allTickyBlocks[i][2]
+		let tempctm = CoordToMap(allTickyBlocks[i][0],allTickyBlocks[i][1],dimension)
 		let blockStr = tnewMap[dimension][tempctm[0]][tempctm[1]][2]
 
 		let tickAtt = removeOutterBracket(TNEWATTRIBUTEOF(blockStr,"Tk"))
@@ -2878,7 +2901,7 @@ function tickAtZero(str,pos){
 		console.log("debugger tick")
 		return(true)
 	} else if (str == "XPL"){
-		explosion(pos[0],pos[1],6)
+		explosion(pos[0],pos[1],6,pos[2])
 		return(true)
 	}
 	return(false)
@@ -2923,7 +2946,7 @@ function explosion(x,y,size,d){
 			let bbb = breakBlockBy(tbstr,breakby)
 			if(bbb == "remove"){
 				if(tempdist != 0){
-					DropItems(attemptx,attempty,["B:"+TblockATT])
+					DropItems(attemptx,attempty,["B:"+TblockATT],dimension)
 				}
 				tnewMap[dimension][tctm[0]][tctm[1]][2] = ArrRemoveFromTile(tbstr,["B","D","T","S"])
 			} else {
