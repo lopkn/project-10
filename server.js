@@ -340,7 +340,8 @@ class player{
 			"strength" : 1,
 			"agility" : 1,
 			"mana" : 1,
-			"magic" : 1
+			"magic" : 1,
+			"summoning" : 1
 
 		}
 		
@@ -1242,9 +1243,7 @@ fs.writeFile('./playerList.json',JSON.stringify(playerList,null,4), function wri
 
 function processKey(e){
 	let i = findPlayerInArr(e[0])
-	if(i === false){
-		console.log("cerr: processKey",e)
-	} else {
+	if(i !== false){
 		entities[i].pressed(e[1])
 	}
 }
@@ -1460,11 +1459,12 @@ function processClick(e){
 				emitLightning(entities[r].x,entities[r].y,decodedXY.x,decodedXY.y,"DevLightning",dimension)
 			}
 			else if(staffInfo.type == "explosive" && a > 0){
-				explosion(decodedXY.x,decodedXY.y,6)
+				explosion(decodedXY.x,decodedXY.y,6,dimension)
 			}
 
 			else if(staffInfo.type == "summoning" && a > 0){
-				summonNewMob(staffInfo.mob,decodedXY.x,decodedXY.y)
+				let playermagic = entities[r].entityStats.summoning
+				summonNewMob(staffInfo.mob,decodedXY.x,decodedXY.y,entities[r].id+Math.floor(Math.random()*playermagic+1.3),dimension)
 				clickResult = "Staff"
 			}
 
@@ -2770,10 +2770,12 @@ class combatInstance{
 	end(){
 		if(entities[this.p1n] != undefined){
 		entities[this.p1n].inCombat = false
-		entities[this.p1n].combatRelay(false)}
+		entities[this.p1n].combatRelay(false)
+
+	}if(entities[this.p1n] != undefined){
 		entities[this.p2n].inCombat = false
 		entities[this.p2n].combatRelay(false)
-
+	}
 
 	}
 
