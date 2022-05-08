@@ -49,8 +49,6 @@ TO DO LIST
 
 - combat animation
 
-- particle dimensions
-
 - tile animations
 
 - animation relativity

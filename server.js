@@ -74,7 +74,7 @@ function ping(a){
 let perSeeds = {"O":new perlin(174.44),"T":new perlin(164.44)}
 
 class mob{
-	constructor(type,x,y,id,dimension){
+	constructor(type,x,y,id,dimension,staffStats){
 		this.entityType = type
 		this.id = id
 		this.x = x
@@ -85,6 +85,13 @@ class mob{
 		this.Inventory = [""]
 		this.effects = []
 		this.inCombat = false
+		this.staffStats = "none"
+		if(staffStats != undefined){
+			this.staffStats = staffStats
+
+		}
+
+
 		this.entityStats = {
 			"strength" : 1,
 			"agility" : 1,
@@ -104,6 +111,10 @@ class mob{
   case "rampant":
 
     this.Inventory = ["U:6-A:1","B:1-A:6"]
+	this.hp = 30
+
+    break;
+  case "minion":
 	this.hp = 30
 
     break;
@@ -180,6 +191,35 @@ class mob{
 				myAction.push(tr)
 
 			}
+		} else if(this.entityType == "minion"){
+
+			if(Math.random() > 0.9 && this.inCombat == false){
+				for(let i = 0; i < entities.length; i++){
+					if(entities[i].entityType == "player" && entities[i].id != this.staffStats.owner &&entities[i].dimension == this.dimension&&distance(this.x,this.y,entities[i].x,entities[i].y) <= 6){
+						let a = CoordToChunk(entities[i].x,entities[i].y)
+						myAction.push(["click",a,a.cx + a.cy*chunkSize+3])
+
+					}
+				}
+
+
+			}
+
+			if(this.inCombat == false){
+			let moveAmount = Math.random()*12
+			for(let i = 0; i < moveAmount; i++){
+				let tr = randomItem(["w",1,"a",1,"s",1,"d",1,"",30])
+				myAction.push(tr)
+
+			}
+			} else {
+				let moveAmount = Math.random()*2 + 17
+				for(let i = 0; i < moveAmount; i++){
+					let tr = randomItem(["w",2,"a",2,"s",2,"d",2,["com","001"],1])
+					myAction.push(tr)
+
+				}
+			}
 		} else if(this.entityType == "preponderant"){
 
 			if(Math.random() > 0.9 && this.inCombat == false){
@@ -197,7 +237,7 @@ class mob{
 			if(this.inCombat == false){
 			let moveAmount = Math.random()*12
 			for(let i = 0; i < moveAmount; i++){
-				let tr = randomItem(["w",1,"a",1,"s",1,"d",1,["com","003"],2,["com","002"],2,"",30])
+				let tr = randomItem(["w",1,"a",1,"s",1,"d",1,"",30])
 				myAction.push(tr)
 
 			}
@@ -374,6 +414,7 @@ class player{
 
 
 		}
+		console.log((this.name ? this.name : this.id) + " : " + e)
 	}
 
 	kill(){
@@ -647,7 +688,7 @@ if(inEffectArr("blind1",this.effects)){
 		let t = []
 		for(let i = 0; i < entities.length; i++){
 			if(distance(entities[i].x,entities[i].y,this.x,this.y) < 33 && entities[i].dimension == this.dimension&&entities[i].id != this.id){
-				t.push([entities[i].x,entities[i].y,entities[i].entityType])
+				t.push([entities[i].x,entities[i].y,entities[i].entityType,(entities[i].name ? entities[i].name : entities[i].id)])
 			}
 		}
 
@@ -1296,7 +1337,13 @@ var relayBeams = []
 function processClick(e){
 
 	let r = findPlayerInArr(e[0])
+
+	if(r === false){
+		console.log("processClick: "+e)
+	}
+
 	let dimension = entities[r].dimension
+
 	let chunkPos = generatedChunks[dimension][e[1].x + "," + e[1].y]
 
 	let item = selectedSlotItems(e[0])
@@ -2772,7 +2819,7 @@ class combatInstance{
 		entities[this.p1n].inCombat = false
 		entities[this.p1n].combatRelay(false)
 
-	}if(entities[this.p1n] != undefined){
+	}if(entities[this.p2n] != undefined){
 		entities[this.p2n].inCombat = false
 		entities[this.p2n].combatRelay(false)
 	}

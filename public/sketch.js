@@ -1269,6 +1269,22 @@ function repeat(){
     MCVs[MCVs.held[0]].x += mouseX - MCVs.held[1]
     MCVs[MCVs.held[0]].y += mouseY - MCVs.held[2]
 
+    if(MCVs[MCVs.held[0]].x < 0){
+
+      MCVs[MCVs.held[0]].x = 0
+      
+    }else if(MCVs[MCVs.held[0]].x > 820 - MCVs[MCVs.held[0]].width){
+
+      MCVs[MCVs.held[0]].x = 820- MCVs[MCVs.held[0]].width
+    }else if(MCVs[MCVs.held[0]].y < 0){
+
+      MCVs[MCVs.held[0]].y = 0
+    }else if(MCVs[MCVs.held[0]].y > 800){
+
+      MCVs[MCVs.held[0]].y = 800
+    }
+
+
     MCVs.held[1] = mouseX
     MCVs.held[2] = mouseY
 
@@ -1301,6 +1317,16 @@ function repeat(){
       fill("rgb(255,0,"+(flash*2550)+")")
       textO(map[mouseCoords[0]+","+mouseCoords[1]],mouseX-30,mouseY-30)
       textO(mouseCoords[0]+","+mouseCoords[1],mouseX-30,mouseY-60)
+
+      for(let i = 0; i < players.length; i++){
+
+        if(players[i][0] == mouseCoords[0] && players[i][1] == mouseCoords[1]){
+          textO(players[i][3],mouseX-30,mouseY-90)
+        }
+
+      }
+
+
     }
 
 
@@ -2089,14 +2115,14 @@ function drawTilesMapSprite(tileName,x,y){
 
   
 }
-function drawEntitiesMapSprite(entityName,x,y){
+// function drawEntitiesMapSprite(entityName,x,y){
 
-    let a = EntityReferenceDict[entityName]
+//     let a = EntityReferenceDict[entityName]
 
-    ctxm.drawImage(entityMapImg,21*(a)+1,1,20,20,(x+20-player.x)*BlockPixels,(y+20-player.y)*BlockPixels,BlockPixels,BlockPixels)
+//     ctxm.drawImage(entityMapImg,21*(a)+1,1,20,20,(x+20-player.x)*BlockPixels,(y+20-player.y)*BlockPixels,BlockPixels,BlockPixels)
 
   
-}
+// }
 
 
 function drawAnimationItem(x,y){
