@@ -39,7 +39,8 @@
 		"8":{"type":"staff","staff":{"type":"explosive"},"attack":["obliterate",10,5]},
 		"9":{"type":"staff","staff":{"type":"summoning","mob":"zombie"},"attack":["swing",1,0.3]},
 		"10":{"type":"staff","staff":{"type":"summoning","mob":"rampant"},"attack":["swing",1,0.3]},
-		"11":{"type":"staff","staff":{"type":"summoning","mob":"verdant"},"attack":["swing",1,0.3]}
+		"11":{"type":"staff","staff":{"type":"summoning","mob":"verdant"},"attack":["swing",1,0.3]},
+		"12":{"type":"staff","staff":{"type":"summoning","mob":"minion"},"attack":["swing",1,0.3]}
 
 	},
 

@@ -85,7 +85,8 @@ class mob{
 		this.Inventory = [""]
 		this.effects = []
 		this.inCombat = false
-		this.staffStats = "none"
+		this.staffStats = {}
+		this.movethought = []
 		if(staffStats != undefined){
 			this.staffStats = staffStats
 
@@ -153,6 +154,35 @@ class mob{
 
 	}
 	say(){}
+
+
+	movethoughtUpdate(e){
+		if(e == "s"){
+			this.movethought[1] += 1
+		} else if(e == "w") {
+			this.movethought[1] -= 1
+		} else if(e == "a") {
+			this.movethought[0] -= 1
+		} else if(e == "d") {
+			this.movethought[0] += 1
+		}
+	}
+
+
+	getPosTarget(e){
+		if(e == "owner" && this.staffStats.owner != undefined){
+			let target = findPlayerInArr(this.staffStats.owner)
+			if(target === false){
+				return([this.x,this.y])
+			}
+			return([entities[target].x,entities[target].y])
+		}
+	}
+
+	damage(e){
+		this.hp -= e
+		return(this.kill())
+	}
 	nonPlayerActions(){
 		let myAction = []
 		myAction.push(this.id)
@@ -193,7 +223,7 @@ class mob{
 			}
 		} else if(this.entityType == "minion"){
 
-			if(Math.random() > 0.9 && this.inCombat == false){
+			if(Math.random() > 0.5 && this.inCombat == false){
 				for(let i = 0; i < entities.length; i++){
 					if(entities[i].entityType == "player" && entities[i].id != this.staffStats.owner &&entities[i].dimension == this.dimension&&distance(this.x,this.y,entities[i].x,entities[i].y) <= 6){
 						let a = CoordToChunk(entities[i].x,entities[i].y)
@@ -206,9 +236,18 @@ class mob{
 			}
 
 			if(this.inCombat == false){
-			let moveAmount = Math.random()*12
-			for(let i = 0; i < moveAmount; i++){
-				let tr = randomItem(["w",1,"a",1,"s",1,"d",1,"",30])
+
+				this.movethought = [this.x,this.y]
+
+				let tar = this.getPosTarget("owner")
+			let moveAmount = distance(this.x,this.y,tar[0],tar[1])
+			for(let i = 0; (i < moveAmount && i < 20); i++){
+				let tr = randomItem(["w",1,"a",1,"s",1,"d",1,"",20])
+				if(Math.random()*20 < moveAmount){
+						tr = calculatePathStep(this.movethought[0],this.movethought[1],tar[0],tar[1],this.dimension)
+					}
+
+				this.movethoughtUpdate(tr)
 				myAction.push(tr)
 
 			}
@@ -216,10 +255,13 @@ class mob{
 				let moveAmount = Math.random()*2 + 17
 				for(let i = 0; i < moveAmount; i++){
 					let tr = randomItem(["w",2,"a",2,"s",2,"d",2,["com","001"],1])
+					
 					myAction.push(tr)
 
 				}
 			}
+
+
 		} else if(this.entityType == "preponderant"){
 
 			if(Math.random() > 0.9 && this.inCombat == false){
@@ -272,8 +314,10 @@ class mob{
 	removeSelf(){
 		
 		delete usedIDs[this.id]
-
-			DropItems(this.x,this.y,removeEmptyArrStrings(this.Inventory),this.dimension)
+			let titems = removeEmptyArrStrings(this.Inventory)
+			if(titems.length > 0){
+				DropItems(this.x,this.y,titems,this.dimension)
+			}
 		for(let i = entities.length - 1; i > -1; i--){
 			if(entities[i].id == this.id){
 				entities.splice(i,1)
@@ -285,10 +329,12 @@ class mob{
 		
 		if(this.hp <= 0 ){
 
-
+			endCombatInstance(this.comid)
 
 			this.removeSelf()
+			return(true)
 		}
+		return(false)
 }
 	save(){
 
@@ -351,9 +397,78 @@ class mob{
 this.chunk = CoordToChunk(this.x,this.y)
 	}
 }
-//================================ ------ =========================================
-//================================ PLAYER =========================================
-//================================ ------ =========================================
+
+
+
+function calculatePathStep(x,y,tx,ty,d){
+
+	let stepTo = "none"
+
+	let shortest = 30
+
+
+	let tk = distance(x,y-1,tx,ty)
+	if(tk < shortest && !isBlockage(x,y-1,d)){
+		stepTo = "w"
+		shortest = tk
+	}
+
+	tk = distance(x,y+1,tx,ty)
+	if(tk < shortest&& !isBlockage(x,y+1,d)){
+		stepTo = "s"
+		shortest = tk
+	}
+
+	tk = distance(x-1,y,tx,ty)
+	if(tk < shortest&& !isBlockage(x-1,y,d)){
+		stepTo = "a"
+		shortest = tk
+	}
+
+	tk = distance(x+1,y,tx,ty)
+	if(tk < shortest&& !isBlockage(x+1,y,d)){
+		stepTo = "d"
+		shortest = tk
+	}
+
+	return(stepTo)
+
+}
+
+
+
+function isBlockage(x,y,d){
+
+	let t = CoordToMap(x,y,d)
+	if(!alreadyHasBlock(tnewMap[this.dimension][t[0]][t[1]][2])){
+
+		for(let i = 0; i < entities.length; i++){
+			if(entities[i].x == x && entities[i].y == y){
+				return(true)
+			}
+		}
+		return(false)
+
+	}
+	return(true)
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+//================================ ------ =======================================================================
+//================================ PLAYER =======================================================================
+//================================ ------ =======================================================================
 class player{
 	constructor(id){
 		this.entityType = "player"
@@ -364,7 +479,7 @@ class player{
 		this.chunk = {"x":0,"y":0}
 		this.selectedSlot = 0
 		this.dimension = "O"
-		this.Inventory = ["B:8-A:50","B:5-A:50","U:4-A:100","Sl:1-A:30",""]
+		this.Inventory = ["U:12-A:50","B:5-A:50","U:4-A:100","Sl:1-A:30",""]
 		this.effects = []
 		this.inCombat = false
 		this.hp = 100
@@ -416,6 +531,12 @@ class player{
 		}
 		console.log((this.name ? this.name : this.id) + " : " + e)
 	}
+
+	damage(e){
+		this.hp -= e
+		this.kill()
+	}
+
 
 	kill(){
 
@@ -1356,6 +1477,7 @@ function processClick(e){
 	let decodedXY = rCoordToChunk(e[1])
 	
 	let clickResult = "none"
+	console.log(e)
 	
 
 	try{
@@ -1511,7 +1633,7 @@ function processClick(e){
 
 			else if(staffInfo.type == "summoning" && a > 0){
 				let playermagic = entities[r].entityStats.summoning
-				summonNewMob(staffInfo.mob,decodedXY.x,decodedXY.y,entities[r].id+Math.floor(Math.random()*playermagic+1.3),dimension)
+				summonNewMob(staffInfo.mob,decodedXY.x,decodedXY.y,entities[r].id+Math.floor(Math.random()*playermagic+1.3),dimension,{"owner":entities[r].id})
 				clickResult = "Staff"
 			}
 
@@ -1539,6 +1661,7 @@ function removeEmptyArrStrings(arr){
 
 
 function DropItems(x,y,arr,d){
+
 
 	let dimension = "O"
 	if(d != undefined){
@@ -1791,7 +1914,7 @@ function GenerateChunk(x,y,d){
 
 ///put in coordinates to find the coordinate's chunk. returns in Dict
 function CoordToChunk(x,y){
-	return({"x":Math.floor(x/chunkSize),"y":Math.floor(y/chunkSize),"cx":x%chunkSize,"cy":y%chunkSize})
+  return({"x":Math.floor(x/chunkSize),"y":Math.floor(y/chunkSize),"cx":x-Math.floor(x/chunkSize)*chunkSize,"cy":y-Math.floor(y/chunkSize)*chunkSize})
 }
 
 function rCoordToChunk(i){
@@ -2101,7 +2224,7 @@ function summonCmd(p,name,x,y,id){
 
 }
 
-function summonNewMob(name,x,y,id,d){
+function summonNewMob(name,x,y,id,d,stats){
 
 	let dimension = "O"
 	if(d != undefined){
@@ -2118,7 +2241,7 @@ function summonNewMob(name,x,y,id,d){
 		}
 	
 	usedIDs[id] = true
-	entities.push(new mob(name,x,y,id,dimension))
+	entities.push(new mob(name,x,y,id,dimension,stats))
 	return("successfully summoned")
 
 
@@ -2757,8 +2880,9 @@ class combatInstance{
 
 		this.p1n = findPlayerInArr(this.p1)
 		this.p2n = findPlayerInArr(this.p2)
-		if(this.p1n === false || this.p2n === false){
+		if(this.p1n === false || this.p2n === false || entities[this.p1n] == undefined || entities[this.p2n] == undefined){
 			endCombatInstance(this.comid)
+			return;
 		}
 
 
@@ -2783,8 +2907,11 @@ class combatInstance{
 
 
 
-		entities[this.p1n].hp -= a
-		entities[this.p2n].hp -= b
+		if(entities[this.p1n].damage(a) || entities[this.p2n].damage(b)){
+			endCombatInstance(this.comid)
+			return;
+		}
+		
 
 		entities[this.p1n].combatRelay()
 		entities[this.p2n].combatRelay()
@@ -2866,6 +2993,9 @@ function CompleteCombatSimul(){
 
 
 function endCombatInstance(str){
+
+	if(allCombatInstances[str] != undefined){
+
 	allCombatInstances[str].end()
 
 
@@ -2877,7 +3007,7 @@ function endCombatInstance(str){
 	}
 
 	delete allCombatInstances[str]
-
+	}
 
 }
 
@@ -3029,7 +3159,7 @@ function explosion(x,y,size,d){
 	for(let i = 0; i < entities.length; i++){
 		let a = distance(entities[i].x,entities[i].y,x,y)
 		if(entities[i].dimension == dimension && a <= size){
-			entities[i].hp -= Math.floor((size-a)*20)
+			entities[i].damage(Math.floor((size-a)*20))
 		}
 	}
 
