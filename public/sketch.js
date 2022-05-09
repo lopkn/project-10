@@ -118,6 +118,7 @@ class Beam{
 
   upDraw(){
   let a = Math.random()
+  let normtype = 1
   switch(this.type){
 
   case "client":
@@ -213,9 +214,29 @@ class Beam{
     ctx.strokeStyle = ("rgb(255,"+this.life*3.5*a+",0)")
 
     break;
+case "Teleport":
 
+    ctx.lineWidth = 25
+    
+    ctx.strokeStyle = ("rgb(255,"+this.life*3.5*a+",0)")
+
+    ctx.save(); // save canvas
+
+    ctx.rotate(30 * Math.PI / 180); // rotate canvas
+
+    line(0,0,40,40)
+
+    ctx.restore();
+
+    ctx.lineWidth = this.life/6
+
+    ctx.strokeStyle = ("rgb(0,"+this.life*3.5*a+",255)")
+
+    break;
 
   }
+
+
       line(this.x,this.y,this.tx,this.ty)
       this.life -= 100/fps
 
@@ -258,6 +279,8 @@ document.body.style.zoom= allzoom
 
 var cm = document.getElementById("mapCanvas");
 var ctxm = cm.getContext("2d");
+  ctxm.font = "20px Arial"
+  ctxm.fillStyle = "#FFFF00"
 
 
         var inv = document.getElementById("Inventory");
@@ -893,6 +916,12 @@ var combatScreen = new Combat()
 
 /////////////////////////////////////////////////////
 
+
+
+
+
+
+
 function text(str){
   display.style.color = "#00FF00"
   display.innerHTML = str
@@ -928,6 +957,11 @@ function fillM(i){
 function textO(str,x,y){
   ctx.font = "30px Arial"
   ctx.fillText(str,x,y)
+}
+
+function textOs(str,x,y){
+  ctx.font = "30px Arial"
+  ctx.fillText(str,x,y,840)
 }
 
 function rectI(x,y,x2,y2){
@@ -1321,7 +1355,7 @@ function repeat(){
       for(let i = 0; i < players.length; i++){
 
         if(players[i][0] == mouseCoords[0] && players[i][1] == mouseCoords[1]){
-          textO(players[i][3],mouseX-30,mouseY-90)
+          textO(players[i][3][2],mouseX-30,mouseY-90)
         }
 
       }
@@ -1370,7 +1404,7 @@ function repeat(){
   let l = JSON.stringify(ActionStore)
 
   fill("rgba(255,0,200,0.5)")
-  textO(l,400-(l.length-2)*6.25 ,370)
+  textOs(l,400-(l.length-2)*6.25 ,370)
   if(commanding == 1){
     fill("#FF4F00")
     textO("Input mode: text",310,340)
@@ -1763,13 +1797,22 @@ function UPDATEMAP(input){
 
 function drawAtCoords(x,y,col){
   fillM(col)
-  rectAtCoordsM(x+20-player.x,y+20-player.y)
+  rectAtCoordsM(x+renderBlocks-player.x,y+renderBlocks-player.y)
 }
 
 function playersUpdate(e){
   for(let i = 0; i < e.length; i++){
     drawEntitiesMapSprite(e[i][2],e[i][0],e[i][1])
+
+    if(e[i][3][1] == "player"){
+
+    let trenderName = e[i][3][0] ? e[i][3][0] : "guest"
+
+    ctxm.fillStyle = "#FF0000"
+    ctxm.fillText(trenderName,(e[i][0]+renderBlocks-player.x)*BlockPixels-trenderName.length*3,BlockPixels*(e[i][1]+ renderBlocks-player.y)-10)
+    }
   }
+
 }
 
 

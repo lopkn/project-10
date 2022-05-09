@@ -23,7 +23,7 @@ console.log(`Process pid ${process.pid}`);
 // const uuidv4 = require("uuid/dist/v4")
 var perlin2 = require('./perlin')
 var perlin = require('simplex-noise')
-var ticktoggle = 0
+var DEBUGGINGLOGS = {"ticktoggle":0,"combat":0}
 
 
 // fs.writeFile('./memory.json',inp, function writeJSON(err){if(err)return console.log(err)})
@@ -225,7 +225,7 @@ class mob{
 
 			if(Math.random() > 0.5 && this.inCombat == false){
 				for(let i = 0; i < entities.length; i++){
-					if(entities[i].entityType == "player" && entities[i].id != this.staffStats.owner &&entities[i].dimension == this.dimension&&distance(this.x,this.y,entities[i].x,entities[i].y) <= 6){
+					if((entities[i].staffStats == undefined ||entities[i].staffStats.owner != this.staffStats.owner)&& entities[i].id != this.staffStats.owner &&entities[i].dimension == this.dimension&&distance(this.x,this.y,entities[i].x,entities[i].y) <= 6){
 						let a = CoordToChunk(entities[i].x,entities[i].y)
 						myAction.push(["click",a,a.cx + a.cy*chunkSize+3])
 
@@ -347,18 +347,17 @@ class mob{
 		try{
 			a = tnewMap[dimension][t[0]][t[1]][2]
 		} catch {
-			a = undefined
-		}
-		if(a == undefined){
 			let ctc = CoordToChunk(coords[0],coords[1])
 
 			GenerateChunk(ctc.x,ctc.y)
-			t = CoordToMap(coords[0],coords[1],this.dimension)
+			// t = CoordToMap(coords[0],coords[1],this.dimension)
 			
-			a = tnewMap[dimension][t[0]][t[1]][2]
+			// a = tnewMap[dimension][t[0]][t[1]][2]
 		}
+			
+		
 
-		return(!alreadyHasBlock(a))
+		return(!isBlockage(coords[0],coords[1],this.dimension))
 
 	}
 
@@ -474,8 +473,8 @@ class player{
 		this.entityType = "player"
 		this.id = id
 		usedIDs[id] = true
-		this.x = Math.floor(Math.random()*7)
-		this.y = Math.floor(Math.random()*7)
+		this.x = 100+Math.floor(Math.random()*7)
+		this.y = Math.floor(Math.random()*7)-100
 		this.chunk = {"x":0,"y":0}
 		this.selectedSlot = 0
 		this.dimension = "O"
@@ -496,7 +495,7 @@ class player{
 			"agility" : 1,
 			"mana" : 1,
 			"magic" : 1,
-			"summoning" : 1
+			"summoning" : 10
 
 		}
 		
@@ -606,7 +605,7 @@ class player{
 					playerList[n].keyholder = this.keyholder
 				}
 
-
+				playerList[n].dimension = this.dimension
 				playerList[n].chunk = this.chunk
 				playerList[n].selectedSlot = this.selectedSlot
 				playerList[n].Inventory = this.Inventory
@@ -629,6 +628,7 @@ class player{
 				if(playerList[n].keyholder != undefined){
 					this.keyholder = playerList[n].keyholder
 				}
+				this.dimension = playerList[n].dimension
 				this.chunk = playerList[n].chunk
 				this.selectedSlot = playerList[n].selectedSlot
 				this.Inventory = playerList[n].Inventory
@@ -809,7 +809,7 @@ if(inEffectArr("blind1",this.effects)){
 		let t = []
 		for(let i = 0; i < entities.length; i++){
 			if(distance(entities[i].x,entities[i].y,this.x,this.y) < 33 && entities[i].dimension == this.dimension&&entities[i].id != this.id){
-				t.push([entities[i].x,entities[i].y,entities[i].entityType,(entities[i].name ? entities[i].name : entities[i].id)])
+				t.push([entities[i].x,entities[i].y,entities[i].entityType,[entities[i].name,entities[i].entityType,entities[i].id]])
 			}
 		}
 
@@ -1049,7 +1049,7 @@ function doSomething(){
 		allPlayersGenerateChunks()
 		TIME += 1
 		io.emit('TICK')
-		if(ticktoggle == 1){
+		if(DEBUGGINGLOGS.ticktoggle == 1){
 		console.log("tick")
 	}
 
@@ -1461,6 +1461,7 @@ function processClick(e){
 
 	if(r === false){
 		console.log("processClick: "+e)
+		return
 	}
 
 	let dimension = entities[r].dimension
@@ -1477,7 +1478,6 @@ function processClick(e){
 	let decodedXY = rCoordToChunk(e[1])
 	
 	let clickResult = "none"
-	console.log(e)
 	
 
 	try{
@@ -2772,7 +2772,8 @@ class combatInstance{
 	process(p,str){
 
 		if(p == this.p1){
-			console.log(p,str,1)
+			if(DEBUGGINGLOGS.combat == 1){
+			console.log(p,str,1)}
 			let temp = this.process2(this.p1m,this.p2m,this.p1d,this.p2d,str,0)
 			this.p1m *= temp[0]
 			this.p2m *= temp[1]
@@ -2782,7 +2783,8 @@ class combatInstance{
 
 		}
 		if(p == this.p2){
-			console.log(p,str,2)
+			if(DEBUGGINGLOGS.combat == 1){
+			console.log(p,str,2)}
 			let temp = this.process2(this.p2m,this.p1m,this.p2d,this.p1d,str,1)
 			this.p2m *= temp[0]
 			this.p1m *= temp[1]
@@ -2811,7 +2813,6 @@ class combatInstance{
 				let utilityATK = utilityDef.attack
 
 
-				console.log(pno,utilityDef)
 
 							dfern += 3*(utilityATK[1] + Math.random()*utilityATK[2])
 							this.textarr[a][1] += utilityATK[0]
@@ -2833,7 +2834,6 @@ class combatInstance{
 //punch
 		if(str == "001"){
 			let ts = getstats(pno,"strength")
-			console.log(ts)
 			dfern += 3 + ts*0.3 + ts*Math.random()*2
 			this.textarr[a][1] += "punch"
 		}
@@ -2942,6 +2942,11 @@ class combatInstance{
 
 
 	end(){
+
+
+		this.p1n = findPlayerInArr(this.p1)
+		this.p2n = findPlayerInArr(this.p2)
+
 		if(entities[this.p1n] != undefined){
 		entities[this.p1n].inCombat = false
 		entities[this.p1n].combatRelay(false)
@@ -2977,7 +2982,11 @@ function combatProcess(p,str){
 	let r = findPlayerInArr(p)
 	if(r !== false && entities[r].inCombat){
 
+		try{
 		allCombatInstances[entities[r].inCombat].process(p,str)
+		} catch {
+			console.log("cerr combatProcess",allCombatInstances,p,entities[r].inCombat,str)
+		}
 
 	}
 }
