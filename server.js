@@ -1475,6 +1475,8 @@ function processClick(e){
 	let att = TNEWATTRIBUTEOF(item,"B")
 	let att2 = TNEWATTRIBUTEOF(item,"Sl")
 
+	let originPos = [entities[r].x,entities[r].y]
+
 	let decodedXY = rCoordToChunk(e[1])
 	
 	let clickResult = "none"
@@ -1629,6 +1631,10 @@ function processClick(e){
 			}
 			else if(staffInfo.type == "explosive" && a > 0){
 				explosion(decodedXY.x,decodedXY.y,6,dimension)
+			}else if(staffInfo.type == "teleporting" && a > 0){
+				entities[r].x = decodedXY.x
+				entities[r].y = decodedXY.y
+				clickResult = "Teleport"
 			}
 
 			else if(staffInfo.type == "summoning" && a > 0){
@@ -1643,7 +1649,7 @@ function processClick(e){
 
 	}}
 
-	relayBeams.push([entities[r].x,entities[r].y,decodedXY.x,decodedXY.y,clickResult,dimension])
+	relayBeams.push([originPos[0],originPos[1],decodedXY.x,decodedXY.y,clickResult,dimension])
 }
 
 
@@ -2894,9 +2900,11 @@ class combatInstance{
 
 		if(this.textarr[0][2] == "" && a != 0){
 			this.textarr[0][2] = a
+			relayBeams.push([entities[this.p2n].x,entities[this.p2n].y,entities[this.p1n].x,entities[this.p1n].y,"Attack","O"])
 		}
 		if(this.textarr[1][2] == "" && b != 0){
 			this.textarr[1][2] = b
+			relayBeams.push([entities[this.p1n].x,entities[this.p1n].y,entities[this.p2n].x,entities[this.p2n].y,"Attack","O"])
 		}
 		if(this.textarr[0][2] == "block" && a != 0){
 			this.textarr[0][2] = "b-" + a

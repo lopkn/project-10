@@ -114,11 +114,20 @@ class Beam{
     this.y = ((y+20-player.y) * BlockPixels + BlockPixelsHalf)
     this.tx = ((tx+20-player.x) * BlockPixels + BlockPixelsHalf) - this.x
     this.ty = ((ty+20-player.y) * BlockPixels + BlockPixelsHalf) - this.y
+
+    this.playerpos = [player.x,player.y]
+
+
+    this.shooter = [this.x,this.y,this.tx,this.ty]
+    console.log(this.shooter)
   }
 
   upDraw(){
   let a = Math.random()
   let normtype = 1
+  let tposx
+  let tposy
+  let TrelativeCorrection = [(this.playerpos[0]-player.x)*20,(this.playerpos[1]-player.y)*20]
   switch(this.type){
 
   case "client":
@@ -216,28 +225,39 @@ class Beam{
     break;
 case "Teleport":
 
-    ctx.lineWidth = 25
-    
-    ctx.strokeStyle = ("rgb(255,"+this.life*3.5*a+",0)")
-
-    ctx.save(); // save canvas
-
-    ctx.rotate(30 * Math.PI / 180); // rotate canvas
-
-    line(0,0,40,40)
-
-    ctx.restore();
+    ctx.lineWidth = 50
+    ctx.strokeStyle = ("rgb(0,"+this.life*3.5*(1-a)+",255)")
+    tposx = this.shooter[2]*0.1
+    tposy = this.shooter[3]*0.1
+    line(this.shooter[0]+TrelativeCorrection[0],this.shooter[1]+TrelativeCorrection[1],tposx,tposy)
+    this.shooter[0] += tposx
+    this.shooter[1] += tposy
 
     ctx.lineWidth = this.life/6
-
     ctx.strokeStyle = ("rgb(0,"+this.life*3.5*a+",255)")
+    this.life -= 100/fps
+    break;
+case "Attack":
 
+    ctx.lineWidth = 15
+    ctx.strokeStyle = ("rgb(255,"+this.life*3.5*(1-a)+",0)")
+    tposx = this.shooter[2]*0.1
+    tposy = this.shooter[3]*0.1
+    line(this.shooter[0]+TrelativeCorrection[0],this.shooter[1]+TrelativeCorrection[1],tposx,tposy)
+    this.shooter[0] += tposx
+    this.shooter[1] += tposy
+
+    ctx.lineWidth = this.life/6
+    ctx.strokeStyle = ("rgb(255,"+this.life*3.5*a+",0)")
+    this.life -= 100/fps
     break;
 
   }
 
 
-      line(this.x,this.y,this.tx,this.ty)
+      
+
+      line(this.x+TrelativeCorrection[0],this.y+TrelativeCorrection[1],this.tx,this.ty)
       this.life -= 100/fps
 
 }

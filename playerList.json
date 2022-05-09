@@ -1,13 +1,13 @@
 {
     "lopkn": {
         "psswd": "123",
-        "x": 80,
-        "y": -76,
+        "x": 74,
+        "y": -66,
         "chunk": {
-            "x": 4,
+            "x": 3,
             "y": -4,
-            "cx": 0,
-            "cy": 4
+            "cx": 14,
+            "cy": 14
         },
         "selectedSlot": 6,
         "dimension": "O",
