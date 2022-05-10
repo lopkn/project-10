@@ -2937,7 +2937,8 @@ class combatInstance{
 		if(distance(entities[this.p1n].x,entities[this.p1n].y,entities[this.p2n].x,entities[this.p2n].y) > 13){
 			endCombatInstance(this.comid)
 		}
-		if(entities[this.p1n].hp <= 0 || entities[this.p2n].hp <= 0){
+		// entities[this.p1n].hp <= 0 || entities[this.p2n].hp <= 0
+		if(entities[this.p1n].dimension != entities[this.p2n].dimension){
 			endCombatInstance(this.comid)
 		}
 

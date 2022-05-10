@@ -119,7 +119,6 @@ class Beam{
 
 
     this.shooter = [this.x,this.y,this.tx,this.ty]
-    console.log(this.shooter)
   }
 
   upDraw(){
@@ -225,7 +224,7 @@ class Beam{
     break;
 case "Teleport":
 
-    ctx.lineWidth = 50
+    ctx.lineWidth = 25
     ctx.strokeStyle = ("rgb(0,"+this.life*3.5*(1-a)+",255)")
     tposx = this.shooter[2]*0.1
     tposy = this.shooter[3]*0.1
