@@ -3,6 +3,8 @@ var renderBlocks = 20
 var BlockPixels = 20
 var BlockPixelsHalf = 10
 
+var DEBUGGINGLOGS = {"Timeticker" : 0}
+
 
 class Player{
   constructor(id){
@@ -484,7 +486,16 @@ function timeUpdate(e){
 }
 
 
+
+
+
 function timerUpdate(e,flash){
+
+  if(e - DEBUGGINGLOGS.Timeticker > 1){
+    console.log (e,DEBUGGINGLOGS.Timeticker)
+  }
+  DEBUGGINGLOGS.Timeticker = e
+
   timerctx.fillStyle = "#000000"
    if(flash == 1){timerctx.fillStyle = "#2F2F00"
    setTimeout(() => {timerUpdate(60)},100);

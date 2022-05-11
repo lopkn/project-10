@@ -1,15 +1,15 @@
 {
     "lopkn": {
         "psswd": "123",
-        "x": 74,
-        "y": -66,
+        "x": 101,
+        "y": -94,
         "chunk": {
-            "x": 3,
-            "y": -4,
-            "cx": 14,
-            "cy": 14
+            "x": 5,
+            "y": -5,
+            "cx": 1,
+            "cy": 6
         },
-        "selectedSlot": 6,
+        "selectedSlot": 2,
         "dimension": "O",
         "keyholder": true,
         "Inventory": [
@@ -17,7 +17,7 @@
             "U:9-A:1",
             "U:1-A:1",
             "U:10-A:1",
-            "B:3-A:20",
+            "U:13-A:1",
             "U:7-A:1",
             "U:8-A:1"
         ]
@@ -65,18 +65,18 @@
     },
     "Meshirou": {
         "psswd": "77",
-        "x": 19,
-        "y": 16,
+        "x": -40,
+        "y": 94,
         "chunk": {
-            "x": 0,
-            "y": 0,
-            "cx": 19,
-            "cy": 16
+            "x": -2,
+            "y": 4,
+            "cx": 0,
+            "cy": 14
         },
-        "selectedSlot": 4,
+        "selectedSlot": 0,
         "dimension": "O",
         "Inventory": [
-            "B:8-A:36",
+            "U:13-A:1",
             "B:5-A:28",
             "U:4-A:100",
             "U:6-A:1",

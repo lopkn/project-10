@@ -20,9 +20,13 @@ FEATURES DONE (after creation of tdl)
 - dropped items
 - chests and inventory
 - explosives!!
+- particles and staffs
+- minion entities
 - commands update
 - player disconnect timer
 - rendering Dimensions
+- player combat
+- 
 
 
 TO DO LIST
@@ -33,8 +37,6 @@ TO DO LIST
 
 - mobile support
 
-- player combat
-
 - blood and ash tiles
 
 - textures overhaul
@@ -43,6 +45,8 @@ TO DO LIST
 
 - server generated lightning beams
 
+- player map purge
+
 - hunger system
 
 - command autocomplete
@@ -50,8 +54,6 @@ TO DO LIST
 - combat animation
 
 - tile animations
-
-- animation relativity
 
 - function for block breaking
 
