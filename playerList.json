@@ -1,15 +1,15 @@
 {
     "lopkn": {
         "psswd": "123",
-        "x": 101,
-        "y": -94,
+        "x": 234,
+        "y": -150,
         "chunk": {
-            "x": 5,
-            "y": -5,
-            "cx": 1,
-            "cy": 6
+            "x": 11,
+            "y": -8,
+            "cx": 14,
+            "cy": 10
         },
-        "selectedSlot": 2,
+        "selectedSlot": 4,
         "dimension": "O",
         "keyholder": true,
         "Inventory": [

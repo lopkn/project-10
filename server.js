@@ -1,5 +1,5 @@
 
-
+var plArr = []
 var enArr = []
 var enDict = {}
 
@@ -174,12 +174,14 @@ class mob{
 
 
 	getPosTarget(e){
-		if(e == "owner" && this.staffStats.owner != undefined && enDict[this.staffStats.owner].dimension == this.dimension){
+		if(e == "owner" && enDict[this.staffStats.owner] != undefined && enDict[this.staffStats.owner].dimension == this.dimension){
 			let target = this.staffStats.owner
 			if(enDict[target] == undefined){
 				return([this.x,this.y])
 			}
 			return([enDict[target].x,enDict[target].y])
+		} else {
+			return([this.x,this.y])
 		}
 	}
 
@@ -492,6 +494,7 @@ class player{
 		this.effects = []
 		this.inCombat = false
 		this.hp = 100
+		this.maxhp = 100
 		this.chestLink = ["none"]
 
 
@@ -527,6 +530,8 @@ class player{
 			chestUpdate("update","["+chivstr.substring(1)+"]",this.chestLink[0])
 			this.chestLink[1] = chivstr.substring(1)
 		}
+
+		this.invrelay()
 	}
 
 
@@ -544,6 +549,13 @@ class player{
 		console.log((this.name ? this.name : this.id) + " : " + e)
 	}
 
+
+	heal(e){
+		this.hp += e
+		if(this.hp > this.maxhp){
+			this.hp = 100
+		}
+	}
 	damage(e){
 		this.hp -= e
 		return(this.kill())
@@ -868,6 +880,7 @@ if(inEffectArr("blind1",this.effects)){
 				delete allChestLinks[this.chestLink[0]][this.id]
 				this.chestLink = ["none"]
 
+
 			}
 		}
 		io.to(this.id).emit('invrelay',[this.Inventory,this.selectedSlot,chiv])
@@ -971,6 +984,7 @@ function newConnection(socket){
 
 	broadcast("--"+socket.id+" has joined!",cmdc.item)
 	enArr.push(socket.id)
+	plArr.push(socket.id)
 	enDict[socket.id] = new player(socket.id)
 
 
@@ -1028,6 +1042,16 @@ function newConnection(socket){
         		break
         		}
         	}
+
+        for(let i = 0; i < plArr.length; i++){
+
+        	if(plArr[i] == socket.id){
+
+
+        		plArr.splice(i,1)
+        		break
+        		}
+        }
         delete enDict[socket.id]
 
     	}
@@ -1100,10 +1124,8 @@ function doSomething(){
 		allPlayersSendBeams()
 		allPlayersGenerateChunks()
 
-		for(let i = 0; i < enArr.length; i++){
-			if(enDict[enArr[i]].entityType=="player"){
-				enDict[enArr[i]].statusRelay()
-			}
+		for(let i = 0; i < plArr.length; i++){
+				enDict[plArr[i]].statusRelay()
 		}
 
 	}else if(TIME == 0){
@@ -1173,11 +1195,11 @@ function allEffectTick(){
 
 
 function allPlayersSendBeams(){
-	for(let i = 0 ; i < enArr.length; i++){
-		let enid = enArr[i]
-		if(enDict[enid].entityType == "player"){
+	for(let i = 0 ; i < plArr.length; i++){
+		let enid = plArr[i]
+		// if(enDict[enid].entityType == "player"){
 			enDict[enid].sendBeam()
-		}
+		// }
 	}
 
 	relayBeams = []
@@ -1215,11 +1237,12 @@ function CombatMoveUpdate(e){
 var processees = {
 	"click":[],
 	"select":[],
+	"switch":[],
 	"command":[],
 	"key":[],
 	"combat":[]
 }
-var processeeOrders = ["click","combat","key","command","select"]
+var processeeOrders = ["click","combat","key","command","select","switch"]
 
 function processPlayersActions(){
 	let mx = 0
@@ -1245,6 +1268,8 @@ function processPlayersActions(){
 			processees["select"].push([q,s])
 		} else if(s[0] == "com" && CombatMoveUpdate(q)){
 			processees["combat"].push([q,s])
+		} else if(s[0] == "swt" && CombatMoveUpdate(q)){
+			processees["switch"].push([q,s])
 		}
 	}
 
@@ -1266,6 +1291,7 @@ function processPlayersActions(){
 	processees = {
 	"click":[],
 	"select":[],
+	"switch":[],
 	"command":[],
 	"key":[],
 	"combat":[]
@@ -1319,6 +1345,9 @@ function CompleteActionStep(p,s){
 		} else if(s[0] == "sel"){
 			//if action is select
 			selectSlot([p,s[1]])
+		} else if(s[0] == "swt"){
+			//if action is switch
+			enDict[p].switchItems("chest",s[1],enDict[p].selectedSlot)
 		} else if(s[0] == "com"){
 			combatProcess(p,s[1])
 		}
@@ -1563,7 +1592,7 @@ function processClick(e){
 	    		}
 
 	    		allChestLinks[decodedXY.x+","+decodedXY.y][enDict[r].id] = decodedXY.x+","+decodedXY.y
-
+	    		enDict[r].invrelay()
 
 
 	    	} else {
@@ -1572,6 +1601,8 @@ function processClick(e){
 	    		if(Object.keys(allChestLinks[decodedXY.x+","+decodedXY.y]).length == 0){
 	    			delete allChestLinks[decodedXY.x+","+decodedXY.y]
 	    		}
+	    		enDict[r].invrelay()
+
 	    	}
 
 	    	clickResult = "Chest"
@@ -1839,8 +1870,8 @@ function getBlockDurability(str,a){
 
 
 function broadcast(s,e){
-	for(let i = 0; i < enArr.length; i++){
-		enDict[enArr[i]].log(s,e)
+	for(let i = 0; i < plArr.length; i++){
+		enDict[plArr[i]].log(s,e)
 	}
 }
 
@@ -2191,7 +2222,12 @@ function give(p,amount,item){
 }
 
 function ArrLoc(p){
-	enDict[p].log("you are player "+p,cmdc.success)
+	for(let i = 0; i < plArr.length; i++){
+		if(plArr[i] == p){
+			enDict[p].log("you are player "+i+" => " + p,cmdc.success)
+		}
+	}
+	
 }
 
 

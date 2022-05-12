@@ -1216,8 +1216,13 @@ document.addEventListener('mousedown', (event) => {
         MCVs[onBarCheck[1]].maxed = true
       }
 
-    } else {
+    } else if(onBarCheck[0] == 2) {
       MCVs.held = [onBarCheck[1],mouseX,mouseY]
+    } else if(onBarCheck[0] == 3) {
+      // console.log("TEST")
+    ActionStore.push("switch:"+player.selectedSlot+"~"+onBarCheck[2])
+    AActionStore.push(["swt",onBarCheck[2]])
+    ActionPrint.push([200,200,"#FF00FF"])
     }
 
 
@@ -2149,8 +2154,11 @@ function updateInv(e){
     MCVs.ChestInv.open = true
 
     let splitchiv = chiv[1].split("=")
+    MCVs.ChestInv.clickAreas = []
     for(let i = 0; i < splitchiv.length; i++){
-    MCVs.ChestInv.Items[i] = splitchiv[i]}
+    MCVs.ChestInv.Items[i] = splitchiv[i]
+    MCVs.ChestInv.clickAreas[i] = ([0,20+(70*i),70,70,i])
+    }
   } else {
     MCVs.ChestInv.open = false
     MCVs.ChestInv.Items = []
@@ -2301,7 +2309,8 @@ var MCVs = {
     "x": 200,
     "y": 5,
     "width": 70,
-    "Items":["U:1-A:1"]
+    "Items":["U:1-A:1"],
+    "clickAreas":[]
   },
   "PlayerBars":{
     // "open":true,
@@ -2483,6 +2492,19 @@ function onBar(x,y){
 
 
     }}
+
+    if(MCVs[MCVs.allBars[i]].clickAreas != undefined && MCVs[MCVs.allBars[i]].clickAreas.length > 0){
+      for(let j = 0; j < MCVs[MCVs.allBars[i]].clickAreas.length; j++){
+
+        let tarr = MCVs[MCVs.allBars[i]].clickAreas[j]
+
+      if(inRect(x,y,MCVs[MCVs.allBars[i]].x+tarr[0],MCVs[MCVs.allBars[i]].y+tarr[1],tarr[2],tarr[3])){
+        return([3,MCVs.allBars[i],tarr[4]])
+        }
+      }
+    }
+
+
   }
 
   return("no")
