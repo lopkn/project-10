@@ -2209,14 +2209,14 @@ function drawTilesMapSprite(tileName,x,y){
 // }
 
 
-function drawAnimationItem(x,y){
+// function drawAnimationItem(x,y){
 
-    let a = Math.floor((CLOCKNUMBER%50)/10)
+//     let a = Math.floor((CLOCKNUMBER%50)/10)
 
-    ctx.drawImage(animation,21*(a)+1,1,20,20,x*BlockPixels,y*BlockPixels,BlockPixels,BlockPixels)
+//     ctx.drawImage(animation,21*(a)+1,1,20,20,x*BlockPixels,y*BlockPixels,BlockPixels,BlockPixels)
 
   
-}
+// }
 function drawEntitiesMapSprite(entityName,x,y){
 
     let a = EntityReferenceDict[entityName]
@@ -2227,9 +2227,26 @@ function drawEntitiesMapSprite(entityName,x,y){
 }
 
 
-
-
 function drawItemMapSprite(itemID,Slot){
+  let ATTs = ["B","U","Sl"]
+
+  for(let i = 0; i < ATTs.length; i++){
+    let a = TNEWATTRIBUTEOF(itemID,ATTs[i])
+    if(a != "NONE"){
+
+      if(i != 0){
+        invctx.drawImage(img,20*(parseInt(a)-1),0+(i*20),21,21,50*Slot,0,50,50)
+      } else {
+        invctx.drawImage(img,20*(parseInt(a)-1),0+(i*20),20,20,50*Slot,0,50,50)
+      }
+      break;
+    }
+  }
+
+  
+}
+
+function odrawItemMapSprite(itemID,Slot){
   let a = TNEWATTRIBUTEOF(itemID,"B")
   if(a != "NONE"){
     invctx.drawImage(img,20*(parseInt(a)-1),0,20,20,50*Slot,0,50,50)
