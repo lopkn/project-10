@@ -1299,7 +1299,10 @@ document.addEventListener('mousedown', (event) => {
 function statusUpdate(e){
   let hpChange = e.hp - player.hp
   player.hp = e.hp
+  if(hpChange < 0){
   MCVs.PlayerBars.Bars[0][2].height -= hpChange * 1.9
+
+  }
 }
 
 

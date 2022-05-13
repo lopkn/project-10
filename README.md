@@ -19,6 +19,7 @@ FEATURES DONE (after creation of tdl)
 - custom favicon
 - dropped items
 - chests and inventory
+- inventory management GUI
 - explosives!!
 - particles and staffs
 - minion entities
@@ -26,7 +27,9 @@ FEATURES DONE (after creation of tdl)
 - player disconnect timer
 - rendering Dimensions
 - player combat
-- 
+- player health & moves
+- health bar
+
 
 
 TO DO LIST
@@ -40,8 +43,6 @@ TO DO LIST
 - blood and ash tiles
 
 - textures overhaul
-
-- player health & moves
 
 - server generated lightning beams
 
@@ -60,6 +61,8 @@ TO DO LIST
 - item name and descriptions
 
 - terrain randomness
+
+- entity menu
 
 - try out WFC
 

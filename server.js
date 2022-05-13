@@ -527,7 +527,7 @@ class player{
 			for(let i = 0; i < splitchiv.length; i++){
 				chivstr += "=" + splitchiv[i]
 			}
-			chestUpdate("update","["+chivstr.substring(1)+"]",this.chestLink[0])
+			chestUpdate("update",chivstr.substring(1),this.chestLink[0])
 			this.chestLink[1] = chivstr.substring(1)
 		}
 
@@ -1506,7 +1506,11 @@ function chestUpdate(type,str,pos,d){
 	let tctm = CoordToMap(parseInt(apos[0]),parseInt(apos[1]),dimension)
 	let tcstr = tnewMap[dimension][tctm[0]][tctm[1]][2]
 	if(type == "update"){
-		tnewMap[dimension][tctm[0]][tctm[1]][2] = removeAttributeOf(tcstr,"Ch") + "-Ch:" + str
+		let nstrn = removeAttributeOf(tcstr,"Ch") + "-Ch:["+str+"]"
+		tnewMap[dimension][tctm[0]][tctm[1]][2] = nstrn
+		for(let i = 0; i < allChestLinks[pos].length; i ++){
+			enDict[allChestLinks[pos][i]].chestLink[1] = str
+		}
 	} else if(type == "delete"){
 		tnewMap[dimension][tctm[0]][tctm[1]][2] = removeAttributeOf(tcstr,"Ch")
 	}
@@ -1546,6 +1550,17 @@ function processClick(e){
 		if(alreadyHasBlock(tnewMap[dimension][chunkPos][e[2]][2])){}
 	} catch {
 		console.log("cerr",chunkPos,e)
+	}
+	//use instant item
+	let itemconfigs = CURRENTCONFIGS.ItemReferenceDict[TNEWATTRIBUTEOF(item,"U")]
+	if(itemconfigs != undefined && itemconfigs.type == "instant"){
+
+		let tempinst = processInstantItemUsage(r,itemconfigs,decodedXY.x,decodedXY.y)
+		if(tempinst == undefined){
+			return;
+		}
+
+
 	}
 
 
@@ -1588,17 +1603,17 @@ function processClick(e){
 	    		let tempclink = allChestLinks[decodedXY.x+","+decodedXY.y]
 
 	    		if(tempclink == undefined){
-	    			allChestLinks[decodedXY.x+","+decodedXY.y] = {}
+	    			allChestLinks[decodedXY.x+","+decodedXY.y] = []
 	    		}
 
-	    		allChestLinks[decodedXY.x+","+decodedXY.y][enDict[r].id] = decodedXY.x+","+decodedXY.y
+	    		allChestLinks[decodedXY.x+","+decodedXY.y].push(r)
 	    		enDict[r].invrelay()
 
 
 	    	} else {
 	    		enDict[r].chestLink = ["none"]
 	    		delete allChestLinks[decodedXY.x+","+decodedXY.y][enDict[r].id] 
-	    		if(Object.keys(allChestLinks[decodedXY.x+","+decodedXY.y]).length == 0){
+	    		if(allChestLinks[decodedXY.x+","+decodedXY.y].length == 0){
 	    			delete allChestLinks[decodedXY.x+","+decodedXY.y]
 	    		}
 	    		enDict[r].invrelay()
@@ -1669,18 +1684,22 @@ function processClick(e){
 			let seeBreak = TNEWbreakBlockBy(tnewMap[dimension][chunkPos][e[2]][2],utilityStrength+Math.floor(Math.random()*10-5))
 			if(seeBreak == "remove"){
 
-				let item = "B:"+TNEWATTRIBUTEOF(tnewMap[dimension][chunkPos][e[2]][2],"B")
+				// let item = "B:"+TNEWATTRIBUTEOF(tnewMap[dimension][chunkPos][e[2]][2],"B")
 
-				let blockItem = give(r,1,item)
+				// let blockItem = give(r,1,item)
 
-				tnewMap[dimension][chunkPos][e[2]][2] = ArrRemoveFromTile(tnewMap[dimension][chunkPos][e[2]][2],["B","D","T","S"])
+				// tnewMap[dimension][chunkPos][e[2]][2] = ArrRemoveFromTile(tnewMap[dimension][chunkPos][e[2]][2],["B","D","T","S"])
+				let temparr =BreakBlock(tnewMap[dimension][chunkPos][e[2]][2],"block",decodedXY.x,decodedXY.y,dimension,r)
+				tnewMap[dimension][chunkPos][e[2]][2] = temparr[0]
+				DropItems(decodedXY.x,decodedXY.y,temparr[1],dimension)
+
 				clickResult = "BreakBlock"
-				if(blockItem == "no space"){
+				// if(blockItem == "no space"){
 
-					DropItems(decodedXY.x,decodedXY.y,[item])
+				// 	DropItems(decodedXY.x,decodedXY.y,[item])
 
 
-				}
+				// }
 	
 
 			} else {
@@ -1731,7 +1750,7 @@ function removeEmptyArrStrings(arr){
 
 
 
-function DropItems(x,y,arr,d){
+function DropItems(x,y,arr,d,forced){
 
 
 	let dimension = "O"
@@ -1749,7 +1768,7 @@ function DropItems(x,y,arr,d){
 		console.log(cchunk,x,y)
 	}
 
-	if(tileItemable(tilename)){
+	if(tileItemable(tilename) || forced == true){
 		tnewMap[dimension][cchunk[0]][cchunk[1]][2] += ("-I:["+arr[0]+"]")
 
 		
@@ -1829,6 +1848,113 @@ function breakBlockBy(str,a){
 	} else{
 		return("remove")
 	}
+}
+
+function BreakBlock(str,type,x,y,d,player){
+	let outstr = ""
+	let outitem = []
+	if(type == "block"){
+		let keepTypes = ["G","Sl"]
+		let breakTypes = ["B","Ch","Tk"]
+
+		for(let i = 0; i < keepTypes.length; i++){
+			let a = ATTRIBUTESTROF(str,keepTypes[i])
+			if(a!=""){
+			outstr += "-" +a} 
+		}
+		
+
+		for(let i=0;i<breakTypes.length; i++){
+			let outx = processBreakAtt(TNEWATTRIBUTEOF(str,breakTypes[i]),breakTypes[i],x,y,d,"block",player)
+			outstr += outx[0]
+
+			for(let i = 0; i < outx[1].length; i++){
+				outitem.push(outx[1][i])
+			}
+			
+		}
+
+	}
+	return([outstr.substring(1),outitem])
+
+}
+
+function processBreakAtt(str,att,x,y,d,type,player){
+
+	if(str == "NONE"){
+		return(["",""]);
+	}
+	else if(type == "block"){
+
+		switch(att){
+			case "B":
+			let tm = ""
+			if(player != undefined){
+				let a = give(player,1,"B:"+str)
+				if(a == "no space"){
+					tm = [att+":"+str]
+				}
+			} else {
+			tm = [att+":"+str]}
+			return(["",tm])
+			break;
+
+			case "Ch":
+			let items = removeOutterBracket(str).split("=")
+			// DropItems(x,y,items,d,true)
+			let pos = x+","+y
+			chestUpdate("delete","",pos,d)
+			return(["",items])
+			break;
+
+			case "Tk":
+			let tkou = removeOutterBracket(str)
+			let outstr = ""
+			let breakTypes = ["XPL","DBG"]
+			for(let i = 0; i < breakTypes.length; i++){
+				outstr += processBreakAtt(TNEWATTRIBUTEOF(tkou,breakTypes[i]),breakTypes[i],x,y,d,"ticker")
+			}
+			if(outstr == ""){
+				return(["",""])
+			} else {
+				return(["-Tk:["+outstr.substring(1)+"]",""])
+			}
+
+			break;
+
+			case "I":
+			return(["",""])
+			break;
+
+			case "D":
+			return(["",""])
+			break;
+
+
+		}
+
+	} else if(type == "ticker"){
+		switch(att){
+			case "XPL":
+			return("")
+			break;
+
+			case "DBG":
+			return("-DBG:"+str)
+			break;
+		}
+	}
+
+}
+
+function ATTRIBUTESTROF(str,type){
+	let a = TNEWATTRIBUTEOF(str,type)
+	if(a != "NONE"){
+
+		return(type+":"+a)
+
+	}
+	return("")
 }
 
 function TNEWbreakBlockBy(str,a){
@@ -3297,6 +3423,21 @@ function serverLightning(original,steps,random,lightning,decay){
     return(fout)
   
 }
+
+
+//==================================
+
+function processInstantItemUsage(p,item,x,y){
+
+	if(item.instant.type == "healing"){
+		enDict[p].heal(item.instant.hp)
+		return;
+	}
+
+}
+
+
+
 
 //game functions end//===============================================================================
 
