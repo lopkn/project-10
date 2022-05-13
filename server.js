@@ -1552,8 +1552,8 @@ function processClick(e){
 		console.log("cerr",chunkPos,e)
 	}
 	//use instant item
-	let itemconfigs = CURRENTCONFIGS.ItemReferenceDict[TNEWATTRIBUTEOF(item,"U")]
-	if(itemconfigs != undefined && itemconfigs.type == "instant"){
+	let itemconfigs = CURRENTCONFIGS.IinstantReferenceDict[TNEWATTRIBUTEOF(item,"In")]
+	if(itemconfigs != undefined){
 
 		let tempinst = processInstantItemUsage(r,itemconfigs,decodedXY.x,decodedXY.y)
 		if(tempinst == undefined){
@@ -1677,8 +1677,8 @@ function processClick(e){
 		let utilityNum = TNEWATTRIBUTEOF(item,"U")
 		if(utilityNum != "NONE"){
 			// 
-			let utilityType = CURRENTCONFIGS.ItemReferenceDict[utilityNum].type
-			let utilityStrength = CURRENTCONFIGS.ItemReferenceDict[utilityNum].strength
+			let utilityType = CURRENTCONFIGS.IutilityReferenceDict[utilityNum].type
+			let utilityStrength = CURRENTCONFIGS.IutilityReferenceDict[utilityNum].strength
 			if((utilityType == "multitul" || utilityType == "pax")&&alreadyHasBlock(tnewMap[dimension][chunkPos][e[2]][2])){
 
 			let seeBreak = TNEWbreakBlockBy(tnewMap[dimension][chunkPos][e[2]][2],utilityStrength+Math.floor(Math.random()*10-5))
@@ -1708,7 +1708,7 @@ function processClick(e){
 			}
 
 		}else if(utilityType == "staff"){
-			let staffInfo = CURRENTCONFIGS.ItemReferenceDict[utilityNum].staff
+			let staffInfo = CURRENTCONFIGS.IutilityReferenceDict[utilityNum].staff
 			
 			if(staffInfo.type == "lightning" && a > 0){
 				emitLightning(enDict[r].x,enDict[r].y,decodedXY.x,decodedXY.y,"DevLightning",dimension)
@@ -3017,7 +3017,7 @@ class combatInstance{
 
 			let item = enDict[pno].Inventory[enDict[pno].selectedSlot]
 			if(TNEWATTRIBUTEOF(item,"U") != "NONE"){
-				let utilityDef = CURRENTCONFIGS.ItemReferenceDict[TNEWATTRIBUTEOF(item,"U")]
+				let utilityDef = CURRENTCONFIGS.IutilityReferenceDict[TNEWATTRIBUTEOF(item,"U")]
 				let utilityATK = utilityDef.attack
 
 
@@ -3429,8 +3429,11 @@ function serverLightning(original,steps,random,lightning,decay){
 
 function processInstantItemUsage(p,item,x,y){
 
-	if(item.instant.type == "healing"){
-		enDict[p].heal(item.instant.hp)
+	if(item.type == "healing"){
+
+		enDict[p].heal(item.hp)
+
+		removeItemFromSelected(p,1)
 		return;
 	}
 

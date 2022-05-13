@@ -28,7 +28,7 @@
 	},
 
 
-	"ItemReferenceDict":{
+	"IutilityReferenceDict":{
 		"1":{"type":"multitul","strength":250,"attack":["demonic rage",10,5]},
 		"2":{"type":"pickaxe","strength":25,"attack":["swing",1.3,0.2]},
 		"3":{"type":"axe","strength":25,"attack":["swing",1.7,3]},
@@ -41,9 +41,13 @@
 		"10":{"type":"staff","staff":{"type":"summoning","mob":"rampant"},"attack":["swing",1,0.3]},
 		"11":{"type":"staff","staff":{"type":"summoning","mob":"verdant"},"attack":["swing",1,0.3]},
 		"12":{"type":"staff","staff":{"type":"summoning","mob":"minion"},"attack":["swing",1,0.3]},
-		"13":{"type":"staff","staff":{"type":"teleporting"},"attack":["warp",2,0.5]},
-		"14":{"type":"instant","instant":{"type":"healing","hp":3}}
+		"13":{"type":"staff","staff":{"type":"teleporting"},"attack":["warp",2,0.5]}
 
+	},
+
+
+	"IinstantReferenceDict":{
+		"1":{"type":"healing","hp":3}
 	},
 
 
