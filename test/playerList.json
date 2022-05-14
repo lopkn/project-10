@@ -1,0 +1,105 @@
+{
+    "lopkn": {
+        "psswd": "123",
+        "x": 234,
+        "y": -150,
+        "chunk": {
+            "x": 11,
+            "y": -8,
+            "cx": 14,
+            "cy": 10
+        },
+        "selectedSlot": 4,
+        "dimension": "O",
+        "keyholder": true,
+        "Inventory": [
+            "B:6-A:10",
+            "U:9-A:1",
+            "U:1-A:1",
+            "U:10-A:1",
+            "U:13-A:1",
+            "U:7-A:1",
+            "U:8-A:1"
+        ]
+    },
+    "sam": {
+        "psswd": "111",
+        "x": 3,
+        "y": 4,
+        "chunk": {
+            "x": 0,
+            "y": 0,
+            "cx": 3,
+            "cy": 4
+        },
+        "selectedSlot": 0,
+        "dimension": "O",
+        "Inventory": [
+            "B:1-A:50",
+            "B:5-A:50",
+            "U:2-A:100",
+            "Sl:1-A:30",
+            ""
+        ]
+    },
+    "fart": {
+        "psswd": "133",
+        "x": 24,
+        "y": -27,
+        "dimension": "O",
+        "keyholder": true,
+        "chunk": {
+            "x": 1,
+            "y": -2,
+            "cx": 4,
+            "cy": -7
+        },
+        "selectedSlot": 2,
+        "Inventory": [
+            "B:1-A:51",
+            "B:5-A:50",
+            "U:1-A:1",
+            "Sl:1-A:30",
+            "B:3-A:1"
+        ]
+    },
+    "Meshirou": {
+        "psswd": "77",
+        "x": -40,
+        "y": 94,
+        "chunk": {
+            "x": -2,
+            "y": 4,
+            "cx": 0,
+            "cy": 14
+        },
+        "selectedSlot": 0,
+        "dimension": "O",
+        "Inventory": [
+            "U:13-A:1",
+            "B:5-A:28",
+            "U:4-A:100",
+            "U:6-A:1",
+            "U:7-A:1"
+        ]
+    },
+    "Hauwm": {
+        "psswd": "111",
+        "x": 5,
+        "y": 5,
+        "chunk": {
+            "x": 0,
+            "y": 0,
+            "cx": 5,
+            "cy": 5
+        },
+        "selectedSlot": 0,
+        "Inventory": [
+            "B:8-A:49",
+            "B:5-A:50",
+            "U:4-A:100",
+            "Sl:1-A:30",
+            ""
+        ]
+    }
+}

@@ -3,6 +3,8 @@ var renderBlocks = 20
 var BlockPixels = 20
 var BlockPixelsHalf = 10
 
+var renderingVariables = {"itemsize":{"B":20,"Sl":21,"U":21,"In":21}}
+
 var DEBUGGINGLOGS = {"Timeticker" : 0}
 
 
@@ -15,7 +17,7 @@ class Player{
     this.chunk = {"x":0,"y":0}
     this.selectedSlot = 0
     this.Inventory = ["B:1-A:50","B:5-A:50","U:4-A:100","Sl:1-A:30",""]
-    this.clientInfo = {"scanmode":"off"}
+    this.clientInfo = {"scanmode":"off","clickUpdate":"off"}
     this.serverSelctedSlot = 0
 
   }
@@ -1078,6 +1080,8 @@ function commandingPush(e){
      if((tempsplit[0] == "/scanmode" ||tempsplit[0] == "/scan" )){
       player.clientInfo.scanmode = tempsplit[1]
 
+    } else if((tempsplit[0] == "/clickupdate" ||tempsplit[0] == "/cupdate" )){
+      player.clientInfo.clickUpdate = tempsplit[1]
 
     }
 
@@ -1205,6 +1209,9 @@ document.addEventListener('mouseup', (event) => {
 
 document.addEventListener('mousedown', (event) => {
   // console.log(mouseX,mouseY,mouseCoords)
+  if(player.clientInfo.clickUpdate == "on"){
+  repeat()}
+
   let onBarCheck = onBar(mouseX,mouseY)
   if( onBarCheck != "no"){
 
@@ -1335,7 +1342,6 @@ var animationBeams = []
 
 
 function repeat(){
-
   if(MCVs.held != "none"){
 
     MCVs[MCVs.held[0]].x += mouseX - MCVs.held[1]
@@ -1478,6 +1484,18 @@ function repeat(){
 
   }
 
+  for(let i = allParticles.length-1; i >-1 ; i--){
+
+    allParticles[i].physicsUpdate()
+    if(allParticles[i].render() == "kill"){
+      allParticles.splice(i,1)
+    }
+
+
+  }
+
+
+
 
   if(TNEWATTRIBUTEOF(player.Inventory[player.selectedSlot],"B") != "NONE"){
     fill("rgba(100,255,100,"+flash+")")
@@ -1616,7 +1634,7 @@ function InvDraw(){
   rectI(0,0,820,50)
 
   for(let i = 0; i < player.Inventory.length; i++){
-    drawItemMapSprite(player.Inventory[i],i)
+    drawItemMapSprite(player.Inventory[i],"inventory",i)
   }
 
   fillI("rgba(255,255,0,0.3)")
@@ -1766,7 +1784,8 @@ function UPDATEMAP(input){
 
         let item = TNEWATTRIBUTEOF(tblock,"I")
 
-        drawTileItemsMapSprite(item,ccx,ccy)
+        // drawTileItemsMapSprite(item,ccx,ccy)
+        drawItemMapSprite(item,"map",[ccx,ccy])
 
 
         
@@ -2171,23 +2190,25 @@ function updateInv(e){
 
 
 
-function drawTileItemsMapSprite(itemstr,x,y){
 
-  let a = TNEWATTRIBUTEOF(itemstr,"B")
-  if(a != "NONE"){
-    ctxm.drawImage(img,20*(parseInt(a)-1)+1,1,18,18,BlockPixels*x,BlockPixels*y,BlockPixels,BlockPixels)
-  }
-  let b = TNEWATTRIBUTEOF(itemstr,"U")
-  if(b !="NONE"){
-    ctxm.drawImage(img,20*(parseInt(b)-1)+1,21,19,19,BlockPixels*x,BlockPixels*y,BlockPixels,BlockPixels)
-  }
-    let c = TNEWATTRIBUTEOF(itemstr,"Sl")
-  if(c !="NONE"){
-    // console.log("eee")
-    ctxm.drawImage(img,20*(parseInt(c)-1)+1,41,19,19,BlockPixels*x,BlockPixels*y,BlockPixels,BlockPixels)
-  }
+
+// function drawTileItemsMapSprite(itemstr,x,y){
+
+//   let a = TNEWATTRIBUTEOF(itemstr,"B")
+//   if(a != "NONE"){
+//     ctxm.drawImage(img,20*(parseInt(a)-1)+1,1,18,18,BlockPixels*x,BlockPixels*y,BlockPixels,BlockPixels)
+//   }
+//   let b = TNEWATTRIBUTEOF(itemstr,"U")
+//   if(b !="NONE"){
+//     ctxm.drawImage(img,20*(parseInt(b)-1)+1,21,19,19,BlockPixels*x,BlockPixels*y,BlockPixels,BlockPixels)
+//   }
+//     let c = TNEWATTRIBUTEOF(itemstr,"Sl")
+//   if(c !="NONE"){
+//     // console.log("eee")
+//     ctxm.drawImage(img,20*(parseInt(c)-1)+1,41,19,19,BlockPixels*x,BlockPixels*y,BlockPixels,BlockPixels)
+//   }
   
-}
+// }
 
 
 
@@ -2199,24 +2220,7 @@ function drawTilesMapSprite(tileName,x,y){
 
   
 }
-// function drawEntitiesMapSprite(entityName,x,y){
 
-//     let a = EntityReferenceDict[entityName]
-
-//     ctxm.drawImage(entityMapImg,21*(a)+1,1,20,20,(x+20-player.x)*BlockPixels,(y+20-player.y)*BlockPixels,BlockPixels,BlockPixels)
-
-  
-// }
-
-
-// function drawAnimationItem(x,y){
-
-//     let a = Math.floor((CLOCKNUMBER%50)/10)
-
-//     ctx.drawImage(animation,21*(a)+1,1,20,20,x*BlockPixels,y*BlockPixels,BlockPixels,BlockPixels)
-
-  
-// }
 function drawEntitiesMapSprite(entityName,x,y){
 
     let a = EntityReferenceDict[entityName]
@@ -2227,18 +2231,38 @@ function drawEntitiesMapSprite(entityName,x,y){
 }
 
 
-function drawItemMapSprite(itemID,Slot){
-  let ATTs = ["B","U","Sl"]
+function drawItemMapSprite(itemID,where,variables){
+  let ATTs = ["B","U","Sl","In"]
 
   for(let i = 0; i < ATTs.length; i++){
     let a = TNEWATTRIBUTEOF(itemID,ATTs[i])
     if(a != "NONE"){
 
-      if(i != 0){
-        invctx.drawImage(img,20*(parseInt(a)-1),0+(i*20),21,21,50*Slot,0,50,50)
-      } else {
-        invctx.drawImage(img,20*(parseInt(a)-1),0+(i*20),20,20,50*Slot,0,50,50)
+
+
+      let tsize = renderingVariables.itemsize[ATTs[i]]
+
+
+      if(where == "inventory"){
+        let slot = variables
+        invctx.drawImage(img,20*(parseInt(a)-1),(i*20),tsize,tsize,50*slot,0,50,50)
       }
+
+       else if(where == "map"){
+        let x = variables[0]
+        let y = variables[1]
+        ctxm.drawImage(img,20*(parseInt(a)-1)+1,1+(i*20),tsize-2,tsize-2,BlockPixels*x,BlockPixels*y,BlockPixels,BlockPixels)
+      }
+
+      else if(where == "menu"){
+        let x = variables[0]
+        let y = variables[1]
+        let slot = variables[2]
+        menuCTX.drawImage(img,20*(parseInt(a)-1),(i*20),tsize,tsize,x,70*slot+y,70,70)
+      }
+
+
+
       break;
     }
   }
@@ -2246,22 +2270,40 @@ function drawItemMapSprite(itemID,Slot){
   
 }
 
-function odrawItemMapSprite(itemID,Slot){
-  let a = TNEWATTRIBUTEOF(itemID,"B")
-  if(a != "NONE"){
-    invctx.drawImage(img,20*(parseInt(a)-1),0,20,20,50*Slot,0,50,50)
-  }
-  let b = TNEWATTRIBUTEOF(itemID,"U")
-  if(b !="NONE"){
-    invctx.drawImage(img,20*(parseInt(b)-1),20,21,21,50*Slot,0,50,50)
-  }
-    let c = TNEWATTRIBUTEOF(itemID,"Sl")
-  if(c !="NONE"){
-    // console.log("eee")
-    invctx.drawImage(img,20*(parseInt(c)-1),40,21,21,50*Slot,0,50,50)
-  }
+
+// function menuDrawItemMapSprite(itemID,Slot,x,y){
+//   let a = TNEWATTRIBUTEOF(itemID,"B")
+//   if(a != "NONE"){
+//     menuCTX.drawImage(img,20*(parseInt(a)-1),0,20,20,x,70*Slot+y,70,70)
+//   }
+//   let b = TNEWATTRIBUTEOF(itemID,"U")
+//   if(b !="NONE"){
+//     menuCTX.drawImage(img,20*(parseInt(b)-1),20,21,21,x,70*Slot+y,70,70)
+//   }
+//     let c = TNEWATTRIBUTEOF(itemID,"Sl")
+//   if(c !="NONE"){
+//     // console.log("eee")
+//     menuCTX.drawImage(img,20*(parseInt(c)-1),40,21,21,x,70*Slot+y,70,70)
+//   }
   
-}
+// }
+
+// function odrawItemMapSprite(itemID,Slot){
+//   let a = TNEWATTRIBUTEOF(itemID,"B")
+//   if(a != "NONE"){
+//     invctx.drawImage(img,20*(parseInt(a)-1),0,20,20,50*Slot,0,50,50)
+//   }
+//   let b = TNEWATTRIBUTEOF(itemID,"U")
+//   if(b !="NONE"){
+//     invctx.drawImage(img,20*(parseInt(b)-1),20,21,21,50*Slot,0,50,50)
+//   }
+//     let c = TNEWATTRIBUTEOF(itemID,"Sl")
+//   if(c !="NONE"){
+//     // console.log("eee")
+//     invctx.drawImage(img,20*(parseInt(c)-1),40,21,21,50*Slot,0,50,50)
+//   }
+  
+// }
 
 
 
@@ -2372,22 +2414,6 @@ MCVs.PlayerBars.Bars[0][2] = new barDropper("#700000",0)
 
 
 
-function menuDrawItemMapSprite(itemID,Slot,x,y){
-  let a = TNEWATTRIBUTEOF(itemID,"B")
-  if(a != "NONE"){
-    menuCTX.drawImage(img,20*(parseInt(a)-1),0,20,20,x,70*Slot+y,70,70)
-  }
-  let b = TNEWATTRIBUTEOF(itemID,"U")
-  if(b !="NONE"){
-    menuCTX.drawImage(img,20*(parseInt(b)-1),20,21,21,x,70*Slot+y,70,70)
-  }
-    let c = TNEWATTRIBUTEOF(itemID,"Sl")
-  if(c !="NONE"){
-    // console.log("eee")
-    menuCTX.drawImage(img,20*(parseInt(c)-1),40,21,21,x,70*Slot+y,70,70)
-  }
-  
-}
 
 
 function drawMenuCtx(){
@@ -2452,7 +2478,7 @@ if(MCVs.TemporalInv.maxed == true){
   MCTXrect(MCVs.TemporalInv.x,MCVs.TemporalInv.y+20,MCVs.TemporalInv.width,MCVs.TemporalInv.Items.length*70)
 
   for(let i = 0; i < MCVs.TemporalInv.Items.length; i++){
-    menuDrawItemMapSprite(MCVs.TemporalInv.Items[i],i,MCVs.TemporalInv.x,MCVs.TemporalInv.y+20)
+    drawItemMapSprite(MCVs.TemporalInv.Items[i],"menu",[MCVs.TemporalInv.x,MCVs.TemporalInv.y+20,i])
   }
 
 
@@ -2483,7 +2509,7 @@ if(MCVs.ChestInv.maxed == true){
   MCTXrect(MCVs.ChestInv.x,MCVs.ChestInv.y+20,MCVs.ChestInv.width,MCVs.ChestInv.Items.length*70)
 
   for(let i = 0; i < MCVs.ChestInv.Items.length; i++){
-    menuDrawItemMapSprite(MCVs.ChestInv.Items[i],i,MCVs.ChestInv.x,MCVs.ChestInv.y+20)
+    drawItemMapSprite(MCVs.ChestInv.Items[i],"menu",[MCVs.ChestInv.x,MCVs.ChestInv.y+20,i])
   }
 
 
@@ -2530,3 +2556,73 @@ function onBar(x,y){
   return("no")
 
 }
+
+
+
+var allParticles = []
+
+class CustomParticle{
+  constructor(x,y,particleArr,type,custom){
+
+    this.type = type
+    this.x = x
+    this.y = y
+    this.physicsdict = custom.physics
+    this.life = custom.life
+  if(type == "pixel"){
+    this.size = custom.size
+    this.width = custom.width
+
+    this.parr = []
+
+      for(let i = 0; i < particleArr.length; i++){
+
+        let px = (i%this.width)*this.size + this.x
+        let py = (Math.floor(i/this.width))*this.size + this.y
+        this.parr.push([px,py,particleArr[i]]) 
+      }
+  }
+
+
+  }
+
+  render(){
+
+    if(this.life <= 0){
+      return("kill")
+    }
+
+    for(let i = 0; i < this.parr.length; i++){
+      let tempar = this.parr[i]
+      fill(tempar[2])
+      rect(tempar[0]+this.x,tempar[1]+this.y,this.size,this.size)
+
+    }
+
+  }
+
+
+  physicsUpdate(){
+
+    if(this.physicsdict.type == "vector"){
+      this.x += this.physicsdict.vx/fps
+      this.y += this.physicsdict.vy/fps
+
+    }else if(this.physicsdict.type == "gravity"){
+      this.x += this.physicsdict.vx/fps
+      this.y += this.physicsdict.vy/fps
+      this.y -= this.physicsdict.gravity/fps
+    }
+
+
+
+    this.life -= 20/fps
+
+  }
+
+
+
+}
+
+
+

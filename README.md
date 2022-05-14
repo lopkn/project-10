@@ -13,7 +13,7 @@ FEATURES DONE (after creation of tdl)
 - death screen
 - custom fps and improved timer
 - animation beams
-- mouse tile scanner
+- tile scanner
 - combat sprite
 - structure array compression
 - custom favicon
@@ -42,6 +42,8 @@ TO DO LIST
 
 - blood and ash tiles
 
+- particles and fire
+
 - textures overhaul
 
 - server generated lightning beams
@@ -63,6 +65,8 @@ TO DO LIST
 - terrain randomness
 
 - entity menu
+
+- menu only canvas
 
 - try out WFC
 

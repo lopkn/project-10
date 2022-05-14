@@ -554,6 +554,7 @@ class player{
 		this.hp += e
 		if(this.hp > this.maxhp){
 			this.hp = 100
+			this.log("you are fully healed!",cmdc.success)
 		}
 	}
 	damage(e){
@@ -3439,6 +3440,9 @@ function processInstantItemUsage(p,item,x,y){
 
 }
 
+exports.add = function(i, j) {
+  return i + j;
+};
 
 
 
