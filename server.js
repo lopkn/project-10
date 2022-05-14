@@ -91,6 +91,7 @@ class mob{
 		this.inCombat = false
 		this.staffStats = {}
 		this.movethought = []
+		this.Cstats = {"hp":0}
 		if(staffStats != undefined){
 			this.staffStats = staffStats
 
@@ -110,23 +111,23 @@ class mob{
 
   case "zombie":
 
-    this.hp = 60
+    this.Cstats.hp = 60
 
     break;
   case "rampant":
 
     this.Inventory = ["U:6-A:1","B:1-A:6"]
-	this.hp = 30
+	this.Cstats.hp = 30
 
     break;
   case "minion":
-	this.hp = 30
+	this.Cstats.hp = 30
 
     break;
   case "preponderant":
 
     this.Inventory = ["U:6-A:1","U:3-A:1"]
-	this.hp = 50
+	this.Cstats.hp = 50
 	this.entityStats.strength += 2
 
     break;
@@ -134,16 +135,16 @@ class mob{
   case "verdant":
 
     this.Inventory = ["","B:6-A:1"]
-	this.hp = 170
+	this.Cstats.hp = 170
 
     break;
   case "duck":
 
-    this.hp = 30
+    this.Cstats.hp = 30
 
     break;
   default:
-  	this.hp = 100
+  	this.Cstats.hp = 100
 }
 
 		
@@ -186,7 +187,7 @@ class mob{
 	}
 
 	damage(e){
-		this.hp -= e
+		this.Cstats.hp -= e
 		return(this.kill())
 	}
 	nonPlayerActions(){
@@ -338,7 +339,7 @@ class mob{
 
 	kill(){				
 		
-		if(this.hp <= 0 ){
+		if(this.Cstats.hp <= 0 ){
 
 			endCombatInstance(this.comid)
 
@@ -375,7 +376,7 @@ class mob{
 
 	pressed(i){
 
-		if(this.hp <= 0 ){
+		if(this.Cstats.hp <= 0 ){
 			this.removeSelf()
 			return;
 		}
@@ -493,10 +494,16 @@ class player{
 		this.Inventory = ["U:12-A:50","B:5-A:50","U:4-A:100","Sl:1-A:30",""]
 		this.effects = []
 		this.inCombat = false
-		this.hp = 100
-		this.maxhp = 100
+
+		this.Cstats = {"hp":100,"maxhp":100,"hunger":500,"maxhunger":500,"energy":200,"maxenergy":200}
+
+
+		// this.Cstats.hp = 100
+		// this.maxhp = 100
 		this.chestLink = ["none"]
 
+		// this.hunger = 100
+		// this.energy = 200
 
 		this.temporalMap = {}
 
@@ -551,21 +558,68 @@ class player{
 
 
 	heal(e){
-		this.hp += e
-		if(this.hp > this.maxhp){
-			this.hp = 100
+		this.Cstats.hp += e
+		if(this.Cstats.hp > this.Cstats.maxhp){
+			this.Cstats.hp = this.Cstats.maxhp
 			this.log("you are fully healed!",cmdc.success)
 		}
 	}
+
+
+	hungerDeplete(e){
+		if(e == undefined){
+			this.Cstats.hunger -= Math.floor(Math.random()*3)
+			if(this.Cstats.hunger < 150){
+				this.Cstats.hp -= Math.floor((150-this.Cstats.hunger)/30)
+				if(this.Cstats.hunger < 0){
+					this.Cstats.hp -= 3
+					this.Cstats.hunger = 0
+				}
+			}
+		} else {
+			this.Cstats.hunger -= e
+			if(this.Cstats.hunger < 150){
+				if(this.Cstats.hunger < 0){
+					this.Cstats.hunger = 0
+				}
+		}
+	}
+}
+	energyHeal(e){
+
+		if(e == undefined){
+
+			if(this.Cstats.energy < this.Cstats.maxenergy){
+
+				this.Cstats.energy += 5
+				this.hungerDeplete()
+				if(this.Cstats.energy > this.Cstats.maxenergy){
+
+					this.Cstats.energy = this.Cstats.maxenergy
+
+				}
+
+			}
+
+		} else {
+
+			this.Cstats.energy += e
+			if(this.Cstats.energy > this.Cstats.maxenergy){
+				this.Cstats.energy = this.Cstats.maxenergy
+			}
+		}
+	}
+
+
 	damage(e){
-		this.hp -= e
+		this.Cstats.hp -= e
 		return(this.kill())
 	}
 
 
 	kill(){
 
-		if(this.hp <= 0 ){
+		if(this.Cstats.hp <= 0 ){
 			io.to(this.id).emit("DeathScreen")
 			return(true)
 
@@ -846,7 +900,7 @@ if(inEffectArr("blind1",this.effects)){
 
 		
 
-		let stats = [this.hp]
+		let stats = [this.Cstats.hp]
 		// let testerData = [CURRENTCONFIGS,CURRENTCONFIGS,CURRENTCONFIGS,CURRENTCONFIGS]
 		io.to(this.id).emit('mapUpdate2',[stats,t,tmap2])
 
@@ -861,7 +915,7 @@ if(inEffectArr("blind1",this.effects)){
 
 
 	statusRelay(){
-		this.stepStatus = {"hp":this.hp}
+		this.stepStatus = {"hp":this.Cstats.hp,"hunger":this.Cstats.hunger,"energy":this.Cstats.energy}
 		io.to(this.id).emit("statusRelay",this.stepStatus)
 		
 	}
@@ -1090,6 +1144,11 @@ function allPlayersGenerateChunks(){
 	}
 }
 }
+
+
+
+//ticksearch
+
 var TIME = 0
 
 var TickLimit = 70
@@ -1139,6 +1198,9 @@ function doSomething(){
 				enDict[enid].relay2()
 				enDict[enid].invrelay()
 				enDict[enid].statusRelay()
+				enDict[enid].hungerDeplete()
+				enDict[enid].energyHeal()
+
 			io.to(enDict[enid].id).emit('chatUpdate')}
 			enDict[enid].kill()
 		}
@@ -1572,7 +1634,7 @@ function processClick(e){
 		let i = enArr[b]
 
 		if(i != r && decodedXY.x == enDict[i].x && decodedXY.y == enDict[i].y && !enDict[i].inCombat && !enDict[r].inCombat){
-			if(distance(enDict[r].x,enDict[r].y,decodedXY.x,decodedXY.y) <= 13 && enDict[i].hp > 0&& enDict[i].dimension == enDict[r].dimension){
+			if(distance(enDict[r].x,enDict[r].y,decodedXY.x,decodedXY.y) <= 13 && enDict[i].Cstats.hp > 0&& enDict[i].dimension == enDict[r].dimension){
 			allCombatInstances[JSON.stringify(combatIdCounter)] = new combatInstance(enDict[r].id,enDict[i].id)
 			console.log("new combat instance: " +enDict[r].id+","+enDict[i].id)
 			enDict[r].combatRelay(enDict[i].entityType)
@@ -3140,7 +3202,7 @@ class combatInstance{
 		if(distance(enDict[this.p1].x,enDict[this.p1].y,enDict[this.p2].x,enDict[this.p2].y) > 13){
 			endCombatInstance(this.comid)
 		}
-		// enDict[this.p1].hp <= 0 || enDict[this.p2].hp <= 0
+		// enDict[this.p1].Cstats.hp <= 0 || enDict[this.p2].Cstats.hp <= 0
 		if(enDict[this.p1].dimension != enDict[this.p2].dimension){
 			endCombatInstance(this.comid)
 		}
@@ -3432,7 +3494,13 @@ function processInstantItemUsage(p,item,x,y){
 
 	if(item.type == "healing"){
 
-		enDict[p].heal(item.hp)
+		enDict[p].heal(item.amount)
+
+		removeItemFromSelected(p,1)
+		return;
+	} else if(item.type == "food"){
+
+		enDict[p].Cstats.hunger += item.amount
 
 		removeItemFromSelected(p,1)
 		return;

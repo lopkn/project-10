@@ -3,7 +3,7 @@ var renderBlocks = 20
 var BlockPixels = 20
 var BlockPixelsHalf = 10
 
-var renderingVariables = {"itemsize":{"B":20,"Sl":21,"U":21,"In":21}}
+var renderingVariables = {"itemsize":{"B":40,"Sl":42,"U":42,"In":42}}
 
 var DEBUGGINGLOGS = {"Timeticker" : 0}
 
@@ -13,7 +13,9 @@ class Player{
     this.id = id
     this.x = 0
     this.y = 0
-    this.hp = 100
+    // this.hp = 100
+    this.Cstats = {"hp":100,"maxhp":100,"hunger":500,"maxhunger":500,"energy":200,"maxenergy":200}
+    // this.hunger = 100
     this.chunk = {"x":0,"y":0}
     this.selectedSlot = 0
     this.Inventory = ["B:1-A:50","B:5-A:50","U:4-A:100","Sl:1-A:30",""]
@@ -549,7 +551,7 @@ var animation = new Image();
 
 entityMapImg.src = 'entitiesMap.png'
 tileMapImg.src = 'tilesMap.png'
-img.src = 'ItemMap.png';
+img.src = 'newItemMap.png';
 animation.src = 'AnimationItem.png'
 
 var playerSprites = new Image();
@@ -768,8 +770,8 @@ class Combat{
     COMfill("rgb(0,27,91)")
     COMrect(0,270,380,130)
     COMrect(300,237.5,80,32.5)
-    COMfill("rgb("+(255-2.55*player.hp)+","+(2.55*player.hp)+",0)")
-    COMrect(5,5,player.hp*2,10)
+    COMfill("rgb("+(255-2.55*player.Cstats.hp)+","+(2.55*player.Cstats.hp)+",0)")
+    COMrect(5,5,player.Cstats.hp*2,10)
 
 
 
@@ -1304,12 +1306,24 @@ document.addEventListener('mousedown', (event) => {
 
 
 function statusUpdate(e){
-  let hpChange = e.hp - player.hp
-  player.hp = e.hp
+  let hpChange = e.hp - player.Cstats.hp
+  player.Cstats.hp = e.hp
   if(hpChange < 0){
-  MCVs.PlayerBars.Bars[0][2].height -= hpChange * 1.9
-
+    MCVs.PlayerBars.Bars[0][2].height -= hpChange * (190/player.Cstats.maxhp)
   }
+
+  let hungerChange = e.hunger - player.Cstats.hunger
+  player.Cstats.hunger = e.hunger
+  if(hungerChange < 0){
+    MCVs.PlayerBars.Bars[1][2].height -= hungerChange * (190/player.Cstats.maxhunger)
+  }
+
+   let energyChange = e.energy - player.Cstats.energy
+  player.Cstats.energy = e.energy
+  if(energyChange < 0){
+    MCVs.PlayerBars.Bars[2][2].height -= energyChange * (190/player.Cstats.maxenergy)
+  }
+
 }
 
 
@@ -2245,20 +2259,20 @@ function drawItemMapSprite(itemID,where,variables){
 
       if(where == "inventory"){
         let slot = variables
-        invctx.drawImage(img,20*(parseInt(a)-1),(i*20),tsize,tsize,50*slot,0,50,50)
+        invctx.drawImage(img,40*(parseInt(a)-1),(i*40),tsize,tsize,50*slot,0,50,50)
       }
 
        else if(where == "map"){
         let x = variables[0]
         let y = variables[1]
-        ctxm.drawImage(img,20*(parseInt(a)-1)+1,1+(i*20),tsize-2,tsize-2,BlockPixels*x,BlockPixels*y,BlockPixels,BlockPixels)
+        ctxm.drawImage(img,40*(parseInt(a)-1)+2,2+(i*40),tsize-4,tsize-4,BlockPixels*x,BlockPixels*y,BlockPixels,BlockPixels)
       }
 
       else if(where == "menu"){
         let x = variables[0]
         let y = variables[1]
         let slot = variables[2]
-        menuCTX.drawImage(img,20*(parseInt(a)-1),(i*20),tsize,tsize,x,70*slot+y,70,70)
+        menuCTX.drawImage(img,40*(parseInt(a)-1),(i*40),tsize,tsize,x,70*slot+y,70,70)
       }
 
 
@@ -2341,7 +2355,11 @@ class barDropper{
       MCTXfill(this.col)
       let actfill = tmenu.Bars[this.barno][0]
       if(tmenu.Bars[this.barno][0] == "HP"){
-        actfill = 190*(player.hp/100)
+        actfill = 190*(player.Cstats.hp/player.Cstats.maxhp)
+      }else if(tmenu.Bars[this.barno][0] == "hunger"){
+        actfill = 190*(player.Cstats.hunger/player.Cstats.maxhunger)
+      }else if(tmenu.Bars[this.barno][0] == "energy"){
+        actfill = 190*(player.Cstats.energy/player.Cstats.maxenergy)
       }
       MCTXrect(tmenu.x + this.x,tmenu.y +25+(190-actfill),this.width,this.height*-1)
 
@@ -2380,7 +2398,7 @@ var MCVs = {
     "x":700,
     "y":5,
     "width":100,
-    "Bars":[["HP","#00FF00"],[190,"#FFFF00"],[100,"#00FFFF"]]
+    "Bars":[["HP","#00FF00"],["hunger","#FFFF00"],["energy","#00FFFF"]]
   }
 
 }
@@ -2411,8 +2429,8 @@ function renderBar(Menu,color){
 
 
 MCVs.PlayerBars.Bars[0][2] = new barDropper("#700000",0)
-
-
+MCVs.PlayerBars.Bars[1][2] = new barDropper("#505000",1)
+MCVs.PlayerBars.Bars[2][2] = new barDropper("#0000F0",2)
 
 
 
@@ -2440,8 +2458,13 @@ if(MCVs.PlayerBars.maxed == true){
 
     let actfill = tmenu.Bars[i][0]
     if(tmenu.Bars[i][0] == "HP"){
-      actfill = 190*(player.hp/100)
+      actfill = 190*(player.Cstats.hp/player.Cstats.maxhp)
+    }else if(tmenu.Bars[i][0] == "hunger"){
+      actfill = 190*(player.Cstats.hunger/player.Cstats.maxhunger)
+    }else if(tmenu.Bars[i][0] == "energy"){
+      actfill = 190*(player.Cstats.energy/player.Cstats.maxenergy)
     }
+
     MCTXrect(tmenu.x+twidtholder,tmenu.y+25+(190-actfill),BarSpace,actfill)
     twidtholder += BarSpace+5
 

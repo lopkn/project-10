@@ -58,6 +58,8 @@ TO DO LIST
 
 - tile animations
 
+- damage types
+
 - function for block breaking
 
 - item name and descriptions

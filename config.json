@@ -47,7 +47,8 @@
 
 
 	"IinstantReferenceDict":{
-		"1":{"type":"healing","hp":3}
+		"1":{"type":"healing","amount":3},
+		"2":{"type":"food","amount":20}
 	},
 
 
