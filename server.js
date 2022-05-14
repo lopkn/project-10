@@ -451,7 +451,8 @@ function calculatePathStep(x,y,tx,ty,d){
 function isBlockage(x,y,d){
 
 	let t = CoordToMap(x,y,d)
-	if(!alreadyHasBlock(tnewMap[this.dimension][t[0]][t[1]][2])){
+	
+	if(!alreadyHasBlock(tnewMap[d][t[0]][t[1]][2])){
 
 		for(let b = 0; b < enArr.length; b++){
 			let i = enArr[b]
@@ -1046,7 +1047,7 @@ function newConnection(socket){
 	enDict[socket.id].log(MainHelpMenu,"#A000FF")
 	joined(socket.id)
 
-	if(clientIp == "::ffff:192.168.1.1"){
+	if(clientIp == "::ffff:192.168.1.1" || clientIp == "::1"){
 		enDict[socket.id].keyholder = true
 		enDict[socket.id].log("Automatic keyholder! welcome back","#00FFFF")
 	}
