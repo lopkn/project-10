@@ -335,6 +335,7 @@ class mob{
 						let tar = [enDict[ttar].x,enDict[ttar].y]
 						tr = calculatePathStep(this.movethought[0],this.movethought[1],tar[0],tar[1],this.dimension)
 					}
+					this.movethoughtUpdate(tr)
 					myAction.push(tr)
 
 				}
