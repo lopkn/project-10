@@ -139,6 +139,16 @@ class mob{
 	this.Cstats.hp = 170
 
     break;
+
+  case "hunter":
+
+
+  	this.Cstats.hp = 130
+  	this.Inventory = [randomItem(["",40,"In:2-A:1",7,"In:1-A:1",1]),randomItem(["",40,"In:2-A:1",7,"In:1-A:1",1])]
+
+  	break
+
+
   case "duck":
 
     this.Cstats.hp = 30
@@ -278,6 +288,53 @@ class mob{
 				for(let i = 0; i < moveAmount; i++){
 					let tr = randomItem(["w",2,"a",2,"s",2,"d",2,["com","001"],1])
 					
+					myAction.push(tr)
+
+				}
+			}
+
+
+		} else if(this.entityType == "hunter"){
+
+			if(Math.random() > 0.5 && this.inCombat == false){
+				for(let b = 0; b < enArr.length; b++){
+					let i = enArr[b]
+					if((enDict[i].staffStats == undefined ||enDict[i].staffStats.owner != this.staffStats.owner)&& i != this.staffStats.owner &&enDict[i].dimension == this.dimension&&distance(this.x,this.y,enDict[i].x,enDict[i].y) <= 6){
+						let a = CoordToChunk(enDict[i].x,enDict[i].y)
+						myAction.push(["click",a,a.cx + a.cy*chunkSize+3])
+
+					}
+				}
+
+
+			}
+
+			if(this.inCombat == false){
+
+				this.movethought = [this.x,this.y]
+
+				let tar = this.getPosTarget("owner")
+			let moveAmount = distance(this.x,this.y,tar[0],tar[1])
+			for(let i = 0; (i < moveAmount && i < 20); i++){
+				let tr = randomItem(["w",1,"a",1,"s",1,"d",1,"",5])
+				if(Math.random()*20 < moveAmount){
+						tr = calculatePathStep(this.movethought[0],this.movethought[1],tar[0],tar[1],this.dimension)
+					}
+
+				this.movethoughtUpdate(tr)
+				myAction.push(tr)
+
+			}
+			} else {
+				let moveAmount = Math.random()*2 + 17
+				for(let i = 0; i < moveAmount; i++){
+					let tr = randomItem(["w",1,"a",1,"s",1,"d",1,["com","001"],1,["com","002"],1])
+					if(Math.random() > 0.5){
+
+						let ttar = ((allCombatInstances[this.inCombat].p1 == this.id )?allCombatInstances[this.inCombat].p2:allCombatInstances[this.inCombat].p1)
+						let tar = [enDict[ttar].x,enDict[ttar].y]
+						tr = calculatePathStep(this.movethought[0],this.movethought[1],tar[0],tar[1],this.dimension)
+					}
 					myAction.push(tr)
 
 				}
@@ -596,6 +653,23 @@ class player{
 					this.Cstats.hp -= 3
 					this.Cstats.hunger = 0
 				}
+			}
+		}if(e == "tick"){
+			this.Cstats.hunger -= Math.floor(Math.random()*3)
+			if(this.Cstats.hunger < 150){
+				this.Cstats.hp -= Math.floor((150-this.Cstats.hunger)/30)
+				if(this.Cstats.hunger < 0){
+					this.Cstats.hp -= 3
+					this.Cstats.hunger = 0
+				}
+			} else if(this.Cstats.hunger > 200 && this.Cstats.hp != this.Cstats.maxhp){
+
+				this.Cstats.hp += Math.floor(Math.random()*0.8)
+				if(this.Cstats.hp > this.Cstats.maxhp){
+					this.Cstats.hp = this.Cstats.maxhp
+				}
+				this.Cstats.hunger -= 5
+
 			}
 		} else {
 			this.Cstats.hunger -= e
@@ -1219,7 +1293,7 @@ function doSomething(){
 				enDict[enid].relay2()
 				enDict[enid].invrelay()
 				enDict[enid].statusRelay()
-				enDict[enid].hungerDeplete()
+				enDict[enid].hungerDeplete("tick")
 				enDict[enid].energyHeal()
 
 			io.to(enDict[enid].id).emit('chatUpdate')}
