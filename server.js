@@ -78,7 +78,7 @@ function ping(a){
 let perSeeds = {"O":new perlin(174.44),"T":new perlin(164.44)}
 
 class mob{
-	constructor(type,x,y,id,dimension,staffStats){
+	constructor(type,x,y,id,dimension,stats){
 		this.entityType = type
 		this.id = id
 		this.x = x
@@ -89,13 +89,19 @@ class mob{
 		this.Inventory = [""]
 		this.effects = []
 		this.inCombat = false
-		this.staffStats = {}
+		this.stats = {}
+
+		this.turncounters = {"calm":1,"energy":1}
 		this.followerTargeting = {}
 		this.movethought = []
 		this.Cstats = {"hp":0}
-		if(staffStats != undefined){
-			this.staffStats = staffStats
-
+		if(stats != undefined){
+			this.stats = stats
+			if(stats.ownerH != undefined){
+				this.ownerH = stats.ownerH
+			}
+		} else{
+			this.ownerH = {"master":id}
 		}
 
 
@@ -143,7 +149,7 @@ class mob{
   case "hunter":
 
 
-  	this.Cstats.hp = 130
+  	this.Cstats.hp = 70
   	this.Inventory = [randomItem(["",40,"In:2-A:1",7,"In:1-A:1",1]),randomItem(["",40,"In:2-A:1",7,"In:1-A:1",1])]
 
   	break
@@ -170,7 +176,12 @@ class mob{
 
 	}
 	say(){}
-
+		heal(e){
+		this.Cstats.hp += e
+		if(this.Cstats.hp > this.Cstats.maxhp){
+			this.Cstats.hp = this.Cstats.maxhp
+		}
+	}
 
 	movethoughtUpdate(e){
 		if(e == "s"){
@@ -186,11 +197,9 @@ class mob{
 
 
 	getPosTarget(e){
-		if(e == "owner" && enDict[this.staffStats.owner] != undefined && enDict[this.staffStats.owner].dimension == this.dimension){
-			let target = this.staffStats.owner
-			if(enDict[target] == undefined){
-				return([this.x,this.y])
-			}
+		if(e == "owner" && enDict[this.ownerH.master] != undefined && enDict[this.ownerH.master].dimension == this.dimension){
+			let target = this.ownerH.master
+			
 			let a = enDict[target].followerTargeting[this.entityType]
 			if(a != undefined){
 
@@ -198,6 +207,8 @@ class mob{
 				
 			}
 			return([enDict[target].x,enDict[target].y])
+		} else if(e == "ranradius"){
+			return([this.x + Math.floor(Math.random()*10-5),this.y + Math.floor(Math.random()*10-5)])
 		} else {
 
 
@@ -216,21 +227,24 @@ class mob{
 		let myAction = []
 		myAction.push(this.id)
 
-		if(this.entityType == "zombie"){
+		switch (this.entityType){
+		case "zombie":{
 			let moveAmount = Math.random()*20
 			for(let i = 0; i < moveAmount; i++){
 				let tr = randomItem(["w",2,"a",2,"s",2,"d",2,["com","001"],1,["com","002"],1,"",10])
 				myAction.push(tr)
 
 			}
-		} else if(this.entityType == "rampant"){
+		}break;
+		case "rampant":{
 			let moveAmount = Math.random()*5 + 14
 			for(let i = 0; i < moveAmount; i++){
 				let tr = randomItem(["w",6,"a",6,"s",6,"d",6,["com","003"],1,["com","002"],1])
 				myAction.push(tr)
 
 			}
-		} else if(this.entityType == "verdant"){
+		} break;
+		case "verdant":{
 
 			if(Math.random() > 0.6 && this.inCombat == false){
 				for(let b = 0; b < enArr.length; b++){
@@ -252,12 +266,13 @@ class mob{
 				myAction.push(tr)
 
 			}
-		} else if(this.entityType == "minion"){
+		}break;
+		case "minion":{
 
 			if(Math.random() > 0.5 && this.inCombat == false){
 				for(let b = 0; b < enArr.length; b++){
 					let i = enArr[b]
-					if((enDict[i].staffStats == undefined ||enDict[i].staffStats.owner != this.staffStats.owner)&& i != this.staffStats.owner &&enDict[i].dimension == this.dimension&&distance(this.x,this.y,enDict[i].x,enDict[i].y) <= 6){
+					if(!isSameTeam(i,this.id)&&enDict[i].dimension == this.dimension&&distance(this.x,this.y,enDict[i].x,enDict[i].y) <= 6){
 						let a = CoordToChunk(enDict[i].x,enDict[i].y)
 						myAction.push(["click",a,a.cx + a.cy*chunkSize+3])
 
@@ -294,12 +309,13 @@ class mob{
 			}
 
 
-		} else if(this.entityType == "hunter"){
+		} break;
+		case "hunter":{
 
 			if(Math.random() > 0.5 && this.inCombat == false){
 				for(let b = 0; b < enArr.length; b++){
 					let i = enArr[b]
-					if((enDict[i].staffStats == undefined ||enDict[i].staffStats.owner != this.staffStats.owner)&& i != this.staffStats.owner &&enDict[i].dimension == this.dimension&&distance(this.x,this.y,enDict[i].x,enDict[i].y) <= 6){
+					if(!isSameTeam(i,this.id) &&enDict[i].dimension == this.dimension&&distance(this.x,this.y,enDict[i].x,enDict[i].y) <= 6){
 						let a = CoordToChunk(enDict[i].x,enDict[i].y)
 						myAction.push(["click",a,a.cx + a.cy*chunkSize+3])
 
@@ -313,10 +329,10 @@ class mob{
 
 				this.movethought = [this.x,this.y]
 
-				let tar = this.getPosTarget("owner")
+				let tar = this.getPosTarget("ranradius")
 			let moveAmount = distance(this.x,this.y,tar[0],tar[1])
 			for(let i = 0; (i < moveAmount && i < 20); i++){
-				let tr = randomItem(["w",1,"a",1,"s",1,"d",1,"",5])
+				let tr = randomItem(["w",1,"a",1,"s",1,"d",1,"",1])
 				if(Math.random()*20 < moveAmount){
 						tr = calculatePathStep(this.movethought[0],this.movethought[1],tar[0],tar[1],this.dimension)
 					}
@@ -342,7 +358,8 @@ class mob{
 			}
 
 
-		} else if(this.entityType == "preponderant"){
+		}break;
+		case "preponderant":{
 
 			if(Math.random() > 0.9 && this.inCombat == false){
 				for(let b = 0; b < enArr.length; b++){
@@ -372,15 +389,16 @@ class mob{
 
 				}
 			}
-		}else if(this.entityType == "duck"){
+		}break;
+		case "duck":{
 			let moveAmount = Math.random()*20
 			for(let i = 0; i < moveAmount; i++){
 				let tr = randomItem(["w",2,"a",2,"s",2,"d",2,"",10])
 				myAction.push(tr)
 
 			}
-		}
-
+		}break;
+	}
 
 
 		ACTIONPROCESS(myAction)
@@ -569,20 +587,18 @@ class player{
 		this.chunk = {"x":0,"y":0}
 		this.selectedSlot = 0
 		this.dimension = "O"
-		this.Inventory = ["U:12-A:50","B:5-A:50","U:4-A:100","Sl:1-A:30",""]
+		this.Inventory = ["U:12-A:50","B:5-A:50","U:5-A:100","Sl:1-A:30",""]
 		this.effects = []
 		this.inCombat = false
 		this.followerTargeting = {}
+		this.turncounters = {"calm":1,"energy":1}
+
+		this.ownerH = {"master":id}
 
 		this.Cstats = {"hp":100,"maxhp":100,"hunger":500,"maxhunger":500,"energy":200,"maxenergy":200}
 
-
-		// this.Cstats.hp = 100
-		// this.maxhp = 100
 		this.chestLink = ["none"]
 
-		// this.hunger = 100
-		// this.energy = 200
 
 		this.temporalMap = {}
 
@@ -655,7 +671,7 @@ class player{
 					this.Cstats.hunger = 0
 				}
 			}
-		}if(e == "tick"){
+		}else if(e == "tick"){
 			this.Cstats.hunger -= Math.floor(Math.random()*3)
 			if(this.Cstats.hunger < 150){
 				this.Cstats.hp -= Math.floor((150-this.Cstats.hunger)/30)
@@ -665,11 +681,11 @@ class player{
 				}
 			} else if(this.Cstats.hunger > 200 && this.Cstats.hp != this.Cstats.maxhp){
 
-				this.Cstats.hp += Math.floor(Math.random()*0.8)
+				this.Cstats.hp += 1
 				if(this.Cstats.hp > this.Cstats.maxhp){
 					this.Cstats.hp = this.Cstats.maxhp
 				}
-				this.Cstats.hunger -= 5
+				this.Cstats.hunger -= 2
 
 			}
 		} else {
@@ -681,14 +697,48 @@ class player{
 		}
 	}
 }
+
+
+	energyDeplete(e){
+		let deplete = e
+		this.turncounters.energy = minSub(this.turncounters.energy,2,0)[0]
+		if(e == "walk"){
+			deplete = [3,0.25]
+		}
+
+		if(this.Cstats.energy < this.Cstats.maxenergy * deplete[1] && this.Cstats.energy > 0){
+
+			if(deplete[2] == undefined){
+				if(Math.random() < 0.5){
+					this.log("you are a bit exausted",cmdc.small_error)
+					return(1)
+				}
+			} else {
+				if(Math.random() > (this.Cstats.energy/this.Cstats.maxenergy)/deplete[2]){
+					this.log("you are a bit exausted",cmdc.small_error)
+					return(1)
+				}
+			}
+		}
+
+		this.Cstats.energy -= deplete[0]
+		if(this.Cstats.energy <= 0){
+			this.log("you are completely out of energy",cmdc.small_error)
+			this.Cstats.energy = 0
+			return(2)
+		}		
+
+		return(0)
+	}
+
 	energyHeal(e){
 
 		if(e == undefined){
 
 			if(this.Cstats.energy < this.Cstats.maxenergy){
-
-				this.Cstats.energy += 5
-				this.hungerDeplete()
+				let hmulti = Math.floor(1+this.turncounters.energy/3)
+				this.Cstats.energy += 5 * hmulti
+				this.hungerDeplete(1*hmulti)
 				if(this.Cstats.energy > this.Cstats.maxenergy){
 
 					this.Cstats.energy = this.Cstats.maxenergy
@@ -842,22 +892,22 @@ class player{
 	pressed(i){
 		if(i == "w"){
 			let t = CoordToMap(this.x,this.y-1,this.dimension)
-			if(!alreadyHasBlock(tnewMap[this.dimension][t[0]][t[1]][2])){
+			if(!alreadyHasBlock(tnewMap[this.dimension][t[0]][t[1]][2]) && this.energyDeplete("walk") == 0){
 			this.y -= 1}
 		}
 		else if(i == "s"){
 			let t = CoordToMap(this.x,this.y+1,this.dimension)
-			if(!alreadyHasBlock(tnewMap[this.dimension][t[0]][t[1]][2])){
+			if(!alreadyHasBlock(tnewMap[this.dimension][t[0]][t[1]][2])&& this.energyDeplete("walk") == 0){
 			this.y += 1}
 		}
 		else if(i == "a"){
 			let t = CoordToMap(this.x-1,this.y,this.dimension)
-			if(!alreadyHasBlock(tnewMap[this.dimension][t[0]][t[1]][2])){
+			if(!alreadyHasBlock(tnewMap[this.dimension][t[0]][t[1]][2])&& this.energyDeplete("walk") == 0){
 			this.x -= 1}
 		}
 		else if(i == "d"){
 			let t = CoordToMap(this.x+1,this.y,this.dimension)
-			if(!alreadyHasBlock(tnewMap[this.dimension][t[0]][t[1]][2])){
+			if(!alreadyHasBlock(tnewMap[this.dimension][t[0]][t[1]][2])&& this.energyDeplete("walk") == 0){
 			this.x += 1}
 		}
 		else if(i == "t"){
@@ -1037,6 +1087,20 @@ if(inEffectArr("blind1",this.effects)){
 		io.to(this.id).emit('invrelay',[this.Inventory,this.selectedSlot,chiv])
 	}
 }
+
+
+
+
+
+function isSameTeam(e1,e2){
+	if(enDict[e1].ownerH.master == enDict[e2].ownerH.master){
+		return(true)
+	}
+	return(false)
+}
+
+
+
 
 
 
@@ -1293,6 +1357,7 @@ function doSomething(){
 			if(enDict[enid].entityType=="player"){
 				enDict[enid].relay2()
 				enDict[enid].invrelay()
+				enDict[enid].turncounters.energy += 1
 				enDict[enid].statusRelay()
 				enDict[enid].hungerDeplete("tick")
 				enDict[enid].energyHeal()
@@ -1905,7 +1970,8 @@ function processClick(e){
 
 			else if(staffInfo.type == "summoning" && a > 0){
 				let playermagic = enDict[r].entityStats.summoning
-				summonNewMob(staffInfo.mob,decodedXY.x,decodedXY.y,r+Math.floor(Math.random()*playermagic+1.3),dimension,{"owner":r})
+				let tcstats = {"ownerH":{"master":enDict[r].ownerH.master,"summoner":r}}
+				summonNewMob(staffInfo.mob,decodedXY.x,decodedXY.y,r+Math.floor(Math.random()*playermagic+1.3),dimension,tcstats)
 				clickResult = "Staff"
 			}
 
@@ -3620,6 +3686,23 @@ function serverLightning(original,steps,random,lightning,decay){
 }
 
 
+
+//============================
+
+
+function minSub(act,sub,min){
+
+	let a = act - sub
+	if(a < min){
+		return([min,min-a])
+	}
+	return([a,0])
+
+}
+
+
+
+
 //==================================
 
 function processInstantItemUsage(p,item,x,y){
@@ -3643,6 +3726,9 @@ function processInstantItemUsage(p,item,x,y){
 exports.add = function(i, j) {
   return i + j;
 };
+
+
+
 
 
 

@@ -24,7 +24,7 @@
 		"verdant":4,
 		"duck":5,
 		"minion":6,
-		"hunter":4
+		"hunter":7
 
 	},
 
@@ -34,8 +34,8 @@
 		"2":{"type":"pickaxe","strength":25,"attack":["swing",1.3,0.2]},
 		"3":{"type":"axe","strength":25,"attack":["swing",1.7,3]},
 		"4":{"type":"pax","strength":25,"attack":["swing",1.7,2]},
-		"5":{"type":"dagger","attack":["slash",2.5,1]},
-		"6":{"type":"sword","attack":["slash",2.2,1]},
+		"5":{"type":"dagger","attack":["slash",2.2,1]},
+		"6":{"type":"sword","attack":["slash",2.5,0.9]},
 		"7":{"type":"staff","staff":{"type":"lightning"},"attack":["developer's lightning",10,5]},
 		"8":{"type":"staff","staff":{"type":"explosive"},"attack":["obliterate",10,5]},
 		"9":{"type":"staff","staff":{"type":"summoning","mob":"zombie"},"attack":["swing",1,0.3]},

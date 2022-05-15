@@ -29,6 +29,9 @@ FEATURES DONE (after creation of tdl)
 - player combat
 - player health & moves
 - health bar
+- custom items & mobs and block sprites
+- custom particle renderer
+- follower move commanding
 
 
 
@@ -59,6 +62,8 @@ TO DO LIST
 - tile animations
 
 - damage types
+
+- combat victory
 
 - function for block breaking
 
