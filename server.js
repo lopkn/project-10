@@ -90,6 +90,7 @@ class mob{
 		this.effects = []
 		this.inCombat = false
 		this.staffStats = {}
+		this.followerTargeting = {}
 		this.movethought = []
 		this.Cstats = {"hp":0}
 		if(staffStats != undefined){
@@ -180,9 +181,20 @@ class mob{
 			if(enDict[target] == undefined){
 				return([this.x,this.y])
 			}
+			let a = enDict[target].followerTargeting[this.entityType]
+			if(a != undefined){
+
+			return([a[0],a[1]])
+				
+			}
 			return([enDict[target].x,enDict[target].y])
 		} else {
+
+
+
 			return([this.x,this.y])
+
+
 		}
 	}
 
@@ -362,9 +374,7 @@ class mob{
 			let ctc = CoordToChunk(coords[0],coords[1])
 
 			GenerateChunk(ctc.x,ctc.y)
-			// t = CoordToMap(coords[0],coords[1],this.dimension)
-			
-			// a = tnewMap[dimension][t[0]][t[1]][2]
+
 		}
 			
 		
@@ -415,7 +425,7 @@ function calculatePathStep(x,y,tx,ty,d){
 
 	let stepTo = "none"
 
-	let shortest = 30
+	let shortest = 999999
 
 
 	let tk = distance(x,y-1,tx,ty)
@@ -450,7 +460,16 @@ function calculatePathStep(x,y,tx,ty,d){
 
 function isBlockage(x,y,d){
 
-	let t = CoordToMap(x,y,d)
+			let a;
+		let t = CoordToMap(x,y,d)
+		try{
+			a = tnewMap[d][t[0]][t[1]][2]
+		} catch {
+			let ctc = CoordToChunk(x,y)
+
+			GenerateChunk(ctc.x,ctc.y,d)
+			t = CoordToMap(x,y,d)
+		}
 	
 	if(!alreadyHasBlock(tnewMap[d][t[0]][t[1]][2])){
 
@@ -495,6 +514,7 @@ class player{
 		this.Inventory = ["U:12-A:50","B:5-A:50","U:4-A:100","Sl:1-A:30",""]
 		this.effects = []
 		this.inCombat = false
+		this.followerTargeting = {}
 
 		this.Cstats = {"hp":100,"maxhp":100,"hunger":500,"maxhunger":500,"energy":200,"maxenergy":200}
 
@@ -1456,6 +1476,21 @@ if(st[0] == "/"){
 	//tp command
 		else if(strsplit[0] == "tp" && enDict[p].keyholder == true){
 		tp(p,strsplit[1],strsplit[2])
+	}
+	//fgoto command
+		else if(strsplit[0] == "fgoto" || strsplit[0] == "commandto"){
+			let tempos = getRelativity(p,strsplit[2],strsplit[3])
+			if(strsplit[2] == "me"){
+				enDict[p].followerTargeting[strsplit[1]] = undefined
+			}
+			else if(tempos != "NONE"){
+			enDict[p].followerTargeting[strsplit[1]] = [tempos[0],tempos[1]]}
+
+		}
+
+	//broadcast command
+		else if(strsplit[0] == "broadcast" && enDict[p].keyholder == true){
+		broadcast(str.substring(9),"#FF0000")
 	}
 
 		else if((strsplit[0] == "dimensionjump" || strsplit[0] == "djump")&& enDict[p].keyholder == true){
@@ -2429,11 +2464,21 @@ function getRelativity(p,x,y){
 			outx = enDict[p].x + parseInt(x.substring(1))
 		} else {
 			outx = enDict[p].x
+
 		}
 
 	} else {
 			outx = parseInt(x)
+
+			if(isNaN(outx)){
+				return("NONE")
+			}
 	}
+
+	if(y == undefined){
+		return("NONE")
+	}
+
 	if(y[0] == "="){
 		if(y[1] != undefined){
 			outy = enDict[p].y + parseInt(y.substring(1))
@@ -2442,6 +2487,9 @@ function getRelativity(p,x,y){
 		}
 	} else {
 		outy = parseInt(y)
+			if(isNaN(outy)){
+				return("NONE")
+			}
 	}
 
 	return([outx,outy])
