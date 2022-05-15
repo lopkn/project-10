@@ -2381,7 +2381,7 @@ class barDropper{
       }
       MCTXrect(tmenu.x + this.x,tmenu.y +25+(190-actfill),this.width,this.height*-1)
 
-      this.height -= 20/fps
+      this.height -= 10/fps
 
     }
   }

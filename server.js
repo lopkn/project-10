@@ -1357,7 +1357,8 @@ function doSomething(){
 			if(enDict[enid].entityType=="player"){
 				enDict[enid].relay2()
 				enDict[enid].invrelay()
-				enDict[enid].turncounters.energy += 1
+				if(enDict[enid].turncounters.energy < 10){
+				enDict[enid].turncounters.energy += 1}
 				enDict[enid].statusRelay()
 				enDict[enid].hungerDeplete("tick")
 				enDict[enid].energyHeal()
