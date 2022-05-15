@@ -388,6 +388,7 @@ socket.on("config",configure)
 socket.on("BeamRelay",BeamUpdate)
 socket.on("ParticleRelay",ParticleUpdate)
 socket.on("statusRelay",statusUpdate)
+socket.on("rarelay",rareprocess)
 
 
 var PSDon = false
@@ -416,6 +417,7 @@ function PacketSizeDebugger(){
   socket.on("BeamRelay",(e) =>{sizeTell(e,"14")})
   socket.on("ParticleRelay",(e) =>{sizeTell(e,"15")})
   socket.on("statusRelay",(e) =>{sizeTell(e,"16")})
+  socket.on("rarelay",(e)=>{sizeTell(e,"17")})
 }
 
 function sizeTell(e,n){
@@ -434,6 +436,8 @@ function sizeTell(e,n){
 // socket.on('playersRelay',playersUpdate)
 
   var CLOCKNUMBER = 0
+  var clockmax = 60
+
 
   var BLOCKSALL
   var HeightMap
@@ -490,7 +494,21 @@ function timeUpdate(e){
 }
 
 
+function rareprocess(e){
+  let rtype = e[0]
 
+  switch(rtype){
+    case "ticklim":
+    clockmax = e[1]
+    break;
+
+
+
+
+  }
+
+
+}
 
 
 function timerUpdate(e,flash){
@@ -502,16 +520,16 @@ function timerUpdate(e,flash){
 
   timerctx.fillStyle = "#000000"
    if(flash == 1){timerctx.fillStyle = "#2F2F00"
-   setTimeout(() => {timerUpdate(60)},100);
+   setTimeout(() => {timerUpdate(clockmax)},100);
  }
   timerctx.fillRect(0, 0, 140, 140)
 
 
 
-  let a = "rgb("+(255 * e / 60)+","+(255 - 255 * e / 60)+",120)"
+  let a = "rgb("+(255 * e / clockmax)+","+(255 - 255 * e / clockmax)+",120)"
   timerctx.strokeStyle = a
   timerctx.beginPath();
-  timerctx.arc(70, 70, 50, Math.PI * 2 * e/60, 2 * Math.PI);
+  timerctx.arc(70, 70, 50, Math.PI * 2 * e/clockmax, 2 * Math.PI);
   timerctx.stroke();
 
 
@@ -1581,7 +1599,7 @@ function BeamUpdate(e){
 
 function tick(){
 
-  timerUpdate(60,1)
+  timerUpdate(clockmax,1)
 
 
   if(commanding  == 0){

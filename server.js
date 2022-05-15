@@ -373,7 +373,7 @@ class mob{
 		} catch {
 			let ctc = CoordToChunk(coords[0],coords[1])
 
-			GenerateChunk(ctc.x,ctc.y)
+			GenerateChunk(ctc.x,ctc.y,this.dimension)
 
 		}
 			
@@ -1253,7 +1253,10 @@ setInterval(function(){
 setInterval(function(){if(startPing == 1){pping++}},1)
 
 
-
+function TicklimUpdate(e){
+	TickLimit = e
+	io.emit("rarelay",["ticklim",e-10])
+}
 
 function tellPerlin(x,y,d){
 	console.log(perSeeds[d].noise2D(x/100,y/100,0))
@@ -1486,6 +1489,11 @@ if(st[0] == "/"){
 			else if(tempos != "NONE"){
 			enDict[p].followerTargeting[strsplit[1]] = [tempos[0],tempos[1]]}
 
+		}
+
+	//ticklimit command
+		else if((strsplit[0] == "ticklim" || strsplit[0] == "ticklimit" )&&enDict[p].keyholder == true){
+			TicklimUpdate(parseInt(strsplit[1]))
 		}
 
 	//broadcast command
