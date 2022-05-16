@@ -78,7 +78,7 @@ function ping(a){
 let perSeeds = {"O":new perlin(174.44),"T":new perlin(164.44)}
 
 class mob{
-	constructor(type,x,y,id,dimension,stats){
+	constructor(type,x,y,id,dimension,stats,link){
 		this.entityType = type
 		this.id = id
 		this.x = x
@@ -91,6 +91,11 @@ class mob{
 		this.inCombat = false
 		this.stats = {}
 
+
+		this.playerLink = {}
+		if(link != undefined){
+			this.playerLink = link
+		}
 		this.turncounters = {"calm":1,"energy":1}
 		this.followerTargeting = {}
 		this.movethought = []
@@ -199,7 +204,11 @@ class mob{
 	getPosTarget(e){
 		if(e == "owner" && enDict[this.ownerH.master] != undefined && enDict[this.ownerH.master].dimension == this.dimension){
 			let target = this.ownerH.master
-			
+
+			if(target == this.id){
+				return([this.x + Math.floor(Math.random()*10-5),this.y + Math.floor(Math.random()*10-5)])
+			}
+
 			let a = enDict[target].followerTargeting[this.entityType]
 			if(a != undefined){
 
@@ -601,7 +610,7 @@ class player{
 		this.chunk = {"x":0,"y":0}
 		this.selectedSlot = 0
 		this.dimension = "O"
-		this.Inventory = ["U:12-A:50","B:5-A:50","U:5-A:100","Sl:1-A:30",""]
+		this.Inventory = ["U:14-A:50","B:5-A:50","U:5-A:100","Sl:1-A:30",""]
 		this.effects = []
 		this.inCombat = false
 		this.followerTargeting = {}

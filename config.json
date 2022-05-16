@@ -45,7 +45,8 @@
 		"10":{"type":"staff","staff":{"type":"summoning","mob":"rampant","following":true},"attack":["swing",1,0.3]},
 		"11":{"type":"staff","staff":{"type":"summoning","mob":"verdant","following":true},"attack":["swing",1,0.3]},
 		"12":{"type":"staff","staff":{"type":"summoning","mob":"minion","following":true},"attack":["swing",1,0.3]},
-		"13":{"type":"staff","staff":{"type":"teleporting"},"attack":["warp",2,0.5]}
+		"13":{"type":"staff","staff":{"type":"teleporting"},"attack":["warp",2,0.5]},
+		"14":{"type":"staff","staff":{"type":"summoning","mob":"minion"},"attack":["swing",1,0.3]}
 
 	},
 
@@ -57,7 +58,7 @@
 
 	"IimageLinkReferenceDict":{
 		"B":{},
-		"U":{},
+		"U":{"14":12},
 		"Sl":{},
 		"In":{}
 	},
