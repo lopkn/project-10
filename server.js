@@ -209,6 +209,17 @@ class mob{
 			return([enDict[target].x,enDict[target].y])
 		} else if(e == "ranradius"){
 			return([this.x + Math.floor(Math.random()*10-5),this.y + Math.floor(Math.random()*10-5)])
+		} else if(e == "findTarget"){
+			if(this.targeting != undefined){
+			this.targeting.turns -= 1
+			if(this.targeting.turns < 0 || enDict[this.targeting.id] == undefined){
+				this.targeting = undefined
+				return([this.x + Math.floor(Math.random()*10-5),this.y + Math.floor(Math.random()*10-5)])
+			}
+			return([enDict[this.targeting.id].x,enDict[this.targeting.id].y])
+
+			}
+			return([this.x + Math.floor(Math.random()*10-5),this.y + Math.floor(Math.random()*10-5)])
 		} else {
 
 
@@ -311,11 +322,11 @@ class mob{
 
 		} break;
 		case "hunter":{
-
+			//try to enter combat
 			if(Math.random() > 0.5 && this.inCombat == false){
 				for(let b = 0; b < enArr.length; b++){
 					let i = enArr[b]
-					if(!isSameTeam(i,this.id) &&enDict[i].dimension == this.dimension&&distance(this.x,this.y,enDict[i].x,enDict[i].y) <= 6){
+					if(!isSameTeam(i,this.id) &&enDict[i].dimension == this.dimension&&distance(this.x,this.y,enDict[i].x,enDict[i].y) <= 10){
 						let a = CoordToChunk(enDict[i].x,enDict[i].y)
 						myAction.push(["click",a,a.cx + a.cy*chunkSize+3])
 
@@ -324,16 +335,16 @@ class mob{
 
 
 			}
-
+			//not in combat
 			if(this.inCombat == false){
 
 				this.movethought = [this.x,this.y]
 
-				let tar = this.getPosTarget("ranradius")
+				let tar = this.getPosTarget("findTarget")
 			let moveAmount = distance(this.x,this.y,tar[0],tar[1])
 			for(let i = 0; (i < moveAmount && i < 20); i++){
 				let tr = randomItem(["w",1,"a",1,"s",1,"d",1,"",1])
-				if(Math.random()*20 < moveAmount){
+				if(Math.random()*20 < moveAmount && this.hp > 20){
 						tr = calculatePathStep(this.movethought[0],this.movethought[1],tar[0],tar[1],this.dimension)
 					}
 
@@ -341,14 +352,17 @@ class mob{
 				myAction.push(tr)
 
 			}
-			} else {
+
+			}
+			//inside combat
+			 else {
 				let moveAmount = Math.random()*2 + 17
+				let ttar = ((allCombatInstances[this.inCombat].p1 == this.id )?allCombatInstances[this.inCombat].p2:allCombatInstances[this.inCombat].p1)
+				let tar = [enDict[ttar].x,enDict[ttar].y]
+				this.targeting = {"id":ttar,"turns":3}
 				for(let i = 0; i < moveAmount; i++){
 					let tr = randomItem(["w",1,"a",1,"s",1,"d",1,["com","001"],1,["com","002"],1])
-					if(Math.random() > 0.5){
-
-						let ttar = ((allCombatInstances[this.inCombat].p1 == this.id )?allCombatInstances[this.inCombat].p2:allCombatInstances[this.inCombat].p1)
-						let tar = [enDict[ttar].x,enDict[ttar].y]
+					if(Math.random() > 0.5 && this.hp > 20){			
 						tr = calculatePathStep(this.movethought[0],this.movethought[1],tar[0],tar[1],this.dimension)
 					}
 					this.movethoughtUpdate(tr)
@@ -582,8 +596,8 @@ class player{
 		this.entityType = "player"
 		this.id = id
 		usedIDs[id] = true
-		this.x = 100+Math.floor(Math.random()*7)
-		this.y = Math.floor(Math.random()*7)-100
+		this.x = -100+Math.floor(Math.random()*7)
+		this.y = Math.floor(Math.random()*7)+100
 		this.chunk = {"x":0,"y":0}
 		this.selectedSlot = 0
 		this.dimension = "O"
@@ -634,6 +648,11 @@ class player{
 		}
 
 		this.invrelay()
+	}
+
+	purgeMap(){
+		this.temporalMap = {}
+		io.to(this.id).emit("rarelay",["purge"])
 	}
 
 
@@ -703,7 +722,7 @@ class player{
 		let deplete = e
 		this.turncounters.energy = minSub(this.turncounters.energy,2,0)[0]
 		if(e == "walk"){
-			deplete = [3,0.25]
+			deplete = [2,0.25]
 		}
 
 		if(this.Cstats.energy < this.Cstats.maxenergy * deplete[1] && this.Cstats.energy > 0){
@@ -1206,7 +1225,7 @@ function newConnection(socket){
 	enDict[socket.id].log(MainHelpMenu,"#A000FF")
 	joined(socket.id)
 
-	if(clientIp == "::ffff:192.168.1.1" || clientIp == "::1"){
+	if(clientIp == "::ffff:192.168.1.1" || clientIp == "::1" || clientIp == "::ffff:223.18.29.177"){
 		enDict[socket.id].keyholder = true
 		enDict[socket.id].log("Automatic keyholder! welcome back","#00FFFF")
 	}
@@ -1228,7 +1247,8 @@ function newConnection(socket){
 			CURRENTCONFIGS.TILESALL,
 			CURRENTCONFIGS.SLABSALL,
 			CURRENTCONFIGS.TileImageReferenceDict,
-			CURRENTCONFIGS.EntityImageReferenceDict
+			CURRENTCONFIGS.EntityImageReferenceDict,
+			CURRENTCONFIGS.IimageLinkReferenceDict
 		]
 
 		io.to(e).emit("config",a)
@@ -1395,8 +1415,8 @@ setInterval(function(){if(startPing == 1){pping++}},1)
 
 
 function TicklimUpdate(e){
-	TickLimit = e
-	io.emit("rarelay",["ticklim",e-10])
+	TickLimit = e + 10
+	io.emit("rarelay",["ticklim",e])
 }
 
 function tellPerlin(x,y,d){
@@ -1670,7 +1690,10 @@ if(st[0] == "/"){
 		else if(strsplit[0] == "pno"){
 		ArrLoc(p)
 	}
-
+	//purge command
+		else if(strsplit[0] == "purge" || strsplit[0] == "mapurge"){
+		enDict(p).purgeMap()
+	}
 	//login command
 
 		else if(strsplit[0] == "login"){
@@ -1971,8 +1994,12 @@ function processClick(e){
 
 			else if(staffInfo.type == "summoning" && a > 0){
 				let playermagic = enDict[r].entityStats.summoning
-				let tcstats = {"ownerH":{"master":enDict[r].ownerH.master,"summoner":r}}
-				summonNewMob(staffInfo.mob,decodedXY.x,decodedXY.y,r+Math.floor(Math.random()*playermagic+1.3),dimension,tcstats)
+				let tid = r+Math.floor(Math.random()*playermagic+1.3)
+				let tcstats = {"ownerH":{"master":tid}}
+				if(staffInfo.following == true){
+					tcstats = {"ownerH":{"master":enDict[r].ownerH.master,"summoner":r}}
+				} 
+				summonNewMob(staffInfo.mob,decodedXY.x,decodedXY.y,tid,dimension,tcstats)
 				clickResult = "Staff"
 			}
 

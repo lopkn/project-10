@@ -446,6 +446,7 @@ function sizeTell(e,n){
   var ImgReferenceDict
   var EntityReferenceDict
   var canvasAnimation
+  var IimageLinkReferenceDict
 
 function configure(e){
 
@@ -457,7 +458,7 @@ function configure(e){
    SLABSALL = e[3]
    ImgReferenceDict = e[4]
    EntityReferenceDict = e[5]
- 
+   IimageLinkReferenceDict = e[6]
 
 
   clearInterval(canvasAnimation)
@@ -501,7 +502,9 @@ function rareprocess(e){
     case "ticklim":
     clockmax = e[1]
     break;
-
+    case "purge":
+    map = {}
+    break;
 
 
 
@@ -1740,24 +1743,6 @@ function joinDict(d1, d2){
 
 function UPDATEMAP(input){
 
-  // player.hp = input[0][0]
-
-  // if(input[0] != ""){
-  //   let chiv = input[0]
-  //   MCVs.ChestInv.open = true
-
-  //   let splitchiv = chiv[1].split("=")
-  //   for(let i = 0; i < splitchiv.length; i++){
-  //   MCVs.ChestInv.Items[i] = splitchiv[i]}
-  // } else {
-  //   MCVs.ChestInv.open = false
-  //   MCVs.ChestInv.Items = []
-  // }
-
-
-
-
-
 
 
 
@@ -2263,6 +2248,15 @@ function drawEntitiesMapSprite(entityName,x,y){
 }
 
 
+function itemDictLinks(type,num){
+
+  if(IimageLinkReferenceDict[type][num] == undefined){
+      return(num)
+  }
+
+  return(IimageLinkReferenceDict[type][num])
+}
+
 function drawItemMapSprite(itemID,where,variables){
   let ATTs = ["B","U","Sl","In"]
 
@@ -2270,27 +2264,27 @@ function drawItemMapSprite(itemID,where,variables){
     let a = TNEWATTRIBUTEOF(itemID,ATTs[i])
     if(a != "NONE"){
 
-
-
+      a = itemDictLinks(ATTs[i],a)
+      let no = parseInt(a)
       let tsize = renderingVariables.itemsize[ATTs[i]]
 
 
       if(where == "inventory"){
         let slot = variables
-        invctx.drawImage(img,40*(parseInt(a)-1),(i*40),tsize,tsize,50*slot,0,50,50)
+        invctx.drawImage(img,40*(no-1),(i*40),tsize,tsize,50*slot,0,50,50)
       }
 
        else if(where == "map"){
         let x = variables[0]
         let y = variables[1]
-        ctxm.drawImage(img,40*(parseInt(a)-1)+2,2+(i*40),tsize-4,tsize-4,BlockPixels*x,BlockPixels*y,BlockPixels,BlockPixels)
+        ctxm.drawImage(img,40*(no-1)+2,2+(i*40),tsize-4,tsize-4,BlockPixels*x,BlockPixels*y,BlockPixels,BlockPixels)
       }
 
       else if(where == "menu"){
         let x = variables[0]
         let y = variables[1]
         let slot = variables[2]
-        menuCTX.drawImage(img,40*(parseInt(a)-1),(i*40),tsize,tsize,x,70*slot+y,70,70)
+        menuCTX.drawImage(img,40*(no-1),(i*40),tsize,tsize,x,70*slot+y,70,70)
       }
 
 

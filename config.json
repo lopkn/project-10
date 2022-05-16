@@ -1,5 +1,8 @@
 {
 
+
+
+
 	"BLOCKSALL":{
 		"1":{"0":"#B96A04","1":"Oak Wood","2":100},
 		"2":{"0":"#8C8C8C","1":"Stone","2":400},
@@ -38,10 +41,10 @@
 		"6":{"type":"sword","attack":["slash",2.5,0.9]},
 		"7":{"type":"staff","staff":{"type":"lightning"},"attack":["developer's lightning",10,5]},
 		"8":{"type":"staff","staff":{"type":"explosive"},"attack":["obliterate",10,5]},
-		"9":{"type":"staff","staff":{"type":"summoning","mob":"zombie"},"attack":["swing",1,0.3]},
-		"10":{"type":"staff","staff":{"type":"summoning","mob":"rampant"},"attack":["swing",1,0.3]},
-		"11":{"type":"staff","staff":{"type":"summoning","mob":"verdant"},"attack":["swing",1,0.3]},
-		"12":{"type":"staff","staff":{"type":"summoning","mob":"minion"},"attack":["swing",1,0.3]},
+		"9":{"type":"staff","staff":{"type":"summoning","mob":"zombie","following":true},"attack":["swing",1,0.3]},
+		"10":{"type":"staff","staff":{"type":"summoning","mob":"rampant","following":true},"attack":["swing",1,0.3]},
+		"11":{"type":"staff","staff":{"type":"summoning","mob":"verdant","following":true},"attack":["swing",1,0.3]},
+		"12":{"type":"staff","staff":{"type":"summoning","mob":"minion","following":true},"attack":["swing",1,0.3]},
 		"13":{"type":"staff","staff":{"type":"teleporting"},"attack":["warp",2,0.5]}
 
 	},
@@ -49,7 +52,14 @@
 
 	"IinstantReferenceDict":{
 		"1":{"type":"healing","amount":10},
-		"2":{"type":"food","amount":20}
+		"2":{"type":"food","amount":30}
+	},
+
+	"IimageLinkReferenceDict":{
+		"B":{},
+		"U":{},
+		"Sl":{},
+		"In":{}
 	},
 
 
