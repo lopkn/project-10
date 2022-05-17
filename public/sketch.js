@@ -1207,7 +1207,25 @@ function commandingPush(e){
     } else if((tempsplit[0] == "/rezoom" ||tempsplit[0] == "/autozoom"||tempsplit[0] == "/rescale")){
       windowRescale()
     } else if((tempsplit[0] == "/schoolmode" ||tempsplit[0] == "/schmode" )){
-      player.clientInfo.schmode = tempsplit[1]
+      let option = tempsplit[1]
+      if(option == undefined || option != "on" || option != "off"){
+        if(player.clientInfo.schmode == "off"){
+          option = "on"
+        } else {
+          option = "off"
+        }
+      }
+
+      player.clientInfo.schmode = option
+      if(option == "on"){
+        ctxm.fillStyle = "#000000"
+        ctxm.fillRect(0,0,840,840)
+
+      MCVs.PlayerBars.maxed = false
+
+
+      }
+
     } else if((tempsplit[0] == "/actxt" ||tempsplit[0] == "/actiontext" )){
       player.clientInfo.actionTextColor = tempsplit[1]
     }
