@@ -1207,7 +1207,37 @@ var io = socket(server);
 
 io.sockets.on('connection', newConnection)
 changingConfig.Build += 1
-fs.writeFile('./changingConfig.json',JSON.stringify(changingConfig), function writeJSON(err){if(err)return console.log(err)})
+function updateChangingConfigFile(){
+	fs.writeFile('./changingConfig.json',JSON.stringify(changingConfig), function writeJSON(err){if(err)return console.log(err)})
+}
+updateChangingConfigFile()
+
+
+
+function tablearn(e){
+	let indict = e[0]
+	let inarr = e[1]
+	let type = e[2]
+
+	if(type == "force"){
+
+		changingConfig.Tabcuts.dict = indict
+		changingConfig.Tabcuts.arr = inarr
+
+	}
+
+
+
+	updateChangingConfigFile()
+}
+
+
+
+
+
+
+
+
 
 var MainHelpMenu = CURRENTCONFIGS.ConsoleResponses["Help1-1"] + changingConfig.Build + CURRENTCONFIGS.ConsoleResponses["Help1-2"]
 var disconnected = []
@@ -1218,6 +1248,7 @@ function newConnection(socket){
 	socket.on('click', processClick)
 	socket.on('selectInventorySlot', selectSlot)
 	socket.on('AT',ACTIONPROCESS)
+	socket.on("tablearn",tablearn)
 	socket.on("returnPing",STOPPING)
 	console.log(socket.id + " has joined at " + Date())
 
@@ -1246,6 +1277,10 @@ function newConnection(socket){
 	
 	    socket.on('disconnect',function(){disconnected.push(socket)});
 }
+
+
+
+	
 
 
 
@@ -1648,7 +1683,7 @@ if(st[0] == "/"){
 		give(p,parseInt(strsplit[1]),strsplit[2])
 	}
 	//tp command
-		else if(strsplit[0] == "tp" && enDict[p].keyholder == true){
+		else if((strsplit[0] == "tp" || strsplit[0] == "teleport")&& enDict[p].keyholder == true){
 		tp(p,strsplit[1],strsplit[2])
 	}
 	//fgoto command
@@ -1691,11 +1726,19 @@ if(st[0] == "/"){
 		}
 
 	}
+	
 	//generate structure command
 	else if(strsplit[0] == "gen" && enDict[p].keyholder == true){
 		generateStructureCmd(p,strsplit[1],strsplit[2],strsplit[3],strsplit[4])
 
 	}
+
+	//pull tabcuts command
+	else if(strsplit[0] == "pulltabcuts" && enDict[p].keyholder == true){
+		io.to(p).emit("rarelay",["pulltabcuts",changingConfig.Tabcuts])
+
+	}
+
 	//playerno command
 		else if(strsplit[0] == "pno"){
 		ArrLoc(p)

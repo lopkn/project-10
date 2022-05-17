@@ -536,8 +536,10 @@ function rareprocess(e){
     case "purge":
     map = {}
     break;
-
-
+    case "pulltabcuts":
+    wordTabDict = e[1].dict
+    wordTabArr = e[1].arr
+    break;
 
   }
 
@@ -1206,7 +1208,7 @@ function commandingPush(e){
 
     } else if((tempsplit[0] == "/rezoom" ||tempsplit[0] == "/autozoom"||tempsplit[0] == "/rescale")){
       windowRescale()
-    } else if((tempsplit[0] == "/schoolmode" ||tempsplit[0] == "/schmode" )){
+    } else if((tempsplit[0] == "/schoolmode" ||tempsplit[0] == "/schmode" || tempsplit[0] == "/bosskey")){
       let option = tempsplit[1]
       if(option == undefined || option != "on" || option != "off"){
         if(player.clientInfo.schmode == "off"){
@@ -1228,6 +1230,8 @@ function commandingPush(e){
 
     } else if((tempsplit[0] == "/actxt" ||tempsplit[0] == "/actiontext" )){
       player.clientInfo.actionTextColor = tempsplit[1]
+    } else if((tempsplit[0] == "/pushtabcuts")){
+      socket.emit("tablearn",[wordTabDict,wordTabArr,"force"])
     }
 
 
@@ -1275,8 +1279,9 @@ function commandingArrow(e){
 
 var wordTabDict = {}
 var wordTabArr = []
+var currentTabSuggestion = ["",""]
 
-learnTabWord(["hello","hi","whatsup","sup","no"],1)
+learnTabWord(["hello","/help","/schmode","/actxt","/scanmode","/login","/clickupdate","/keyholder","/commandto"],3)
 
 function learnTabWord(input,score){
   if(score == undefined){
@@ -1345,7 +1350,7 @@ function joinArrBy(arr,by){
 
 function tabPurifiedChar(char){
   char = char.toLowerCase()
-  if(char == "=" || char == "(" || char == ")" || char == "{" || char == "}" || char == "[" || char == "]"){
+  if(char == "=" || char == "(" || char == ")" || char == "{" || char == "}" || char == "[" || char == "]" || char == ":"){
     return("descimate")
   }
   if(char == "," || char == "."){
@@ -1777,7 +1782,18 @@ function repeat(){
     fill("#FF4F00")
     textO("Input mode: text",310,450)
     ctx.font = "15px Arial"
-    ctx.fillText("press enter to complete",330,475)
+    ctx.fillText("press tab for autofill, press enter to complete",280,475)
+
+    let prtsuggest = ""
+    let ac = ActionStore[ActionStore.length-1]
+    if(currentTabSuggestion[0] != ac){
+      currentTabSuggestion = [ac,processTab(ac)]
+    }
+    prtsuggest = currentTabSuggestion[1][0]
+    ctx.font = "20px Arial"
+    fill("#FFFF00")
+    ctx.fillText(prtsuggest,330,495)
+
   }
 
   for(let i = 0; i < animationBeams.length; i++){
