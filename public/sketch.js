@@ -306,9 +306,9 @@ var allzoom = 1
 
 function windowRescale(){
   let zoomScale = 1
-  
+
   ZOOMSETTINGS = {"windowWidth":window.innerWidth, "windowHeight":window.innerHeight,"expectWidth":1560,"expectHeight":940}
-  
+
   if(ZOOMSETTINGS.windowWidth < ZOOMSETTINGS.expectWidth){
     zoomScale = ZOOMSETTINGS.windowWidth/ZOOMSETTINGS.expectWidth
   }
@@ -1048,8 +1048,8 @@ function textO(str,x,y){
 
 function textOs(str,x,y){
   ctx.font = "30px Monaco"
-  let cstr = str.match(/.{1,32}/g)
-  let raise = Math.floor(str.length/32)
+  let cstr = seperateStringSpecial(str)
+  let raise = cstr.length - 1
   for(let i = raise; i > -1 ; i--){
     ctx.fillText(cstr[i],x,y + (i*20) - (raise*20),820)
   }
@@ -1068,6 +1068,49 @@ function textI(str,x,y){
 }
 
 ////////////////////////////////////////////////////
+
+
+
+function seperateStringSpecial(str){
+  let outarr = []
+  let pushstr = ""
+  let strleng = str.length
+  for(let i = 0; i< strleng; i++){
+
+    if(i < 37){
+      pushstr += str[i]
+    } else if(i < 47){
+      if(str[i] != " " && str[i] != "," && str[i] != "."){
+        pushstr += str[i]
+      } else {
+        pushstr += str[i]
+        strleng -= i
+        str = str.substring(i)
+        i = 0
+        outarr.push(pushstr)
+        pushstr = ""
+      }
+    } else {
+      pushstr += str[i] + "-"
+      strleng -= i
+      str = str.substring(i)
+        i = 0
+        outarr.push(pushstr)
+        pushstr = ""
+    }
+
+  }
+
+  if(pushstr.length > 0){
+    outarr.push(pushstr)
+  }
+
+  return(outarr)
+}
+
+
+
+
 
 
 function inRect(x,y,rx,ry,rw,rh){
@@ -1144,7 +1187,7 @@ function commandingPush(e){
     } else if((tempsplit[0] == "/clickupdate" ||tempsplit[0] == "/cupdate" )){
       player.clientInfo.clickUpdate = tempsplit[1]
 
-    } else if((tempsplit[0] == "/rezoom" ||tempsplit[0] == "/autozoom" )){
+    } else if((tempsplit[0] == "/rezoom" ||tempsplit[0] == "/autozoom"||tempsplit[0] == "/rescale")){
       windowRescale()
     }
 
@@ -1528,9 +1571,9 @@ function repeat(){
   ctx.textAlign = "start"
   if(commanding == 1){
     fill("#FF4F00")
-    textO("Input mode: text",310,340)
+    textO("Input mode: text",310,450)
     ctx.font = "15px Arial"
-    ctx.fillText("press enter to complete",330,315)
+    ctx.fillText("press enter to complete",330,475)
   }
 
   for(let i = 0; i < animationBeams.length; i++){

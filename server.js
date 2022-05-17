@@ -1850,7 +1850,7 @@ function processClick(e){
 
 		let i = enArr[b]
 
-		if(i != r && decodedXY.x == enDict[i].x && decodedXY.y == enDict[i].y && !enDict[i].inCombat && !enDict[r].inCombat){
+		if(i != r && decodedXY.x == enDict[i].x && decodedXY.y == enDict[i].y && !enDict[i].inCombat && !enDict[r].inCombat && !isSameTeam(r,i)){
 			if(distance(enDict[r].x,enDict[r].y,decodedXY.x,decodedXY.y) <= 13 && enDict[i].Cstats.hp > 0&& enDict[i].dimension == enDict[r].dimension){
 			allCombatInstances[JSON.stringify(combatIdCounter)] = new combatInstance(enDict[r].id,enDict[i].id)
 			console.log("new combat instance: " +enDict[r].id+","+enDict[i].id)
