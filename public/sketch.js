@@ -1231,7 +1231,7 @@ function commandingPush(e){
     } else if((tempsplit[0] == "/actxt" ||tempsplit[0] == "/actiontext" )){
       player.clientInfo.actionTextColor = tempsplit[1]
     } else if((tempsplit[0] == "/pushtabcuts")){
-      socket.emit("tablearn",[wordTabDict,wordTabArr,"force"])
+      socket.emit("tablearn",[wordTabDict,wordTabArr,"force",tempsplit[1]])
     }
 
 

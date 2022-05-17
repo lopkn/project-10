@@ -1212,12 +1212,17 @@ function updateChangingConfigFile(){
 }
 updateChangingConfigFile()
 
-
-
+var shortValidationCode = Math.floor(Math.random()*1000)
+console.log("new short validation code: " +shortValidationCode)
 function tablearn(e){
 	let indict = e[0]
 	let inarr = e[1]
 	let type = e[2]
+	if(e[3] != shortValidationCode){
+		return
+	}
+
+	console.log("recieved a tabcuts push by code: "+e[3])
 
 	if(type == "force"){
 
@@ -1229,6 +1234,8 @@ function tablearn(e){
 
 
 	updateChangingConfigFile()
+	shortValidationCode = Math.floor(Math.random()*1000)
+	console.log("new short validation code: " +shortValidationCode)
 }
 
 
