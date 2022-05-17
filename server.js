@@ -1241,6 +1241,7 @@ function newConnection(socket){
 
 
 	io.to(socket.id).emit('sendWhenJoin', socket.id)
+	io.to(socket.id).emit("rarelay",["ticklim",TickLimit-10])
 	enDict[socket.id].relay2()
 	
 	    socket.on('disconnect',function(){disconnected.push(socket)});

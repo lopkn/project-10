@@ -9,7 +9,6 @@ var DEBUGGINGLOGS = {"Timeticker" : 0}
 
 
 
-
 class Player{
   constructor(id){
     this.id = id
@@ -21,7 +20,7 @@ class Player{
     this.chunk = {"x":0,"y":0}
     this.selectedSlot = 0
     this.Inventory = ["B:1-A:50","B:5-A:50","U:4-A:100","Sl:1-A:30",""]
-    this.clientInfo = {"scanmode":"off","clickUpdate":"off"}
+    this.clientInfo = {"scanmode":"off","clickUpdate":"off","schmode":"off","actionTextColor":"rgba(255,0,200,0.5)"}
     this.serverSelctedSlot = 0
 
   }
@@ -1051,7 +1050,7 @@ function textOs(str,x,y){
   let cstr = seperateStringSpecial(str)
   let raise = cstr.length - 1
   for(let i = raise; i > -1 ; i--){
-    ctx.fillText(cstr[i],x,y + (i*20) - (raise*20),820)
+    ctx.fillText(cstr[i],x,y + (i*23) - (raise*20),820)
   }
 
   
@@ -1148,10 +1147,28 @@ var textStoreIndex = -1
 function commandingPush(e){
 
   if(e != "ArrowUp" && e != "ArrowDown" && e != "Backspace" && e != "Enter" && e != "<" && e != ">"){
+
+
+
+  if(e == " "){
+    let str = ActionStore[ActionStore.length-1]
+    let tsplit = str.split(" ")
+    learnTabWord(tsplit[tsplit.length-1],1)
+  }
   ActionStore[ActionStore.length-1] += e
   AActionStore[AActionStore.length-1] += e
+
+
+
+
   } else if(e == "Backspace") {
     if(ActionStore[ActionStore.length-1].length > 0){
+      let str = ActionStore[ActionStore.length-1]
+      if(str[str.length-1] == " "){
+        let tsplit = str.split(" ")
+        learnTabWord(tsplit[tsplit.length-2],-1)
+      }
+
       ActionStore[ActionStore.length-1] = ActionStore[ActionStore.length-1].substring(0,ActionStore[ActionStore.length-1].length - 1)
       AActionStore[AActionStore.length-1] = AActionStore[AActionStore.length-1].substring(0,AActionStore[AActionStore.length-1].length - 1)
     } else {
@@ -1189,6 +1206,10 @@ function commandingPush(e){
 
     } else if((tempsplit[0] == "/rezoom" ||tempsplit[0] == "/autozoom"||tempsplit[0] == "/rescale")){
       windowRescale()
+    } else if((tempsplit[0] == "/schoolmode" ||tempsplit[0] == "/schmode" )){
+      player.clientInfo.schmode = tempsplit[1]
+    } else if((tempsplit[0] == "/actxt" ||tempsplit[0] == "/actiontext" )){
+      player.clientInfo.actionTextColor = tempsplit[1]
     }
 
 
@@ -1234,7 +1255,149 @@ function commandingArrow(e){
 
 }
 
+var wordTabDict = {}
+var wordTabArr = []
 
+learnTabWord(["hello","hi","whatsup","sup","no"],1)
+
+function learnTabWord(input,score){
+  if(score == undefined){
+    score = 1
+  }
+
+  if(typeof(input) == "string"){
+    if(input.split(" ").length == 1){
+     
+      input = tabPurifiedStr(input)
+      if(input === false){
+        return;
+      }
+
+      if(wordTabDict[input] != undefined){
+
+        wordTabDict[input].freq += score
+        if(score < 0 && wordTabDict[input].freq <= 0){
+          // delete wordTabArr[wordTabDict[input].arrNum]
+
+          for(let i = wordTabArr.length -1; i > -1 ; i--){
+            if(wordTabArr[i] == input){
+              wordTabArr.splice(i,1)
+              break;
+            }
+          }
+
+
+          delete wordTabDict[input];
+
+        }
+        return;
+      }
+
+      if(score > 0){
+        wordTabDict[input] = {"freq":1}
+        wordTabArr.push(input)
+        return;
+      }
+
+
+    } else {
+      learnTabWord(input.split(" "),score)
+    }
+  } else {
+
+    for(let i = 0; i < input.length; i++){
+      learnTabWord(input[i],score)
+    }
+
+
+  }
+
+}
+
+
+function joinArrBy(arr,by){
+  let outstr = ""
+  for(let i = 0; i < arr.length; i++){
+    outstr += by + arr[i]
+  }
+
+  return(outstr.substring(1))
+
+}
+
+function tabPurifiedChar(char){
+  char = char.toLowerCase()
+  if(char == "=" || char == "(" || char == ")" || char == "{" || char == "}" || char == "[" || char == "]"){
+    return("descimate")
+  }
+  if(char == "," || char == "."){
+    return("delete")
+  }
+  return(char)
+}
+
+function tabPurifiedStr(str){
+  let outstr = ""
+  for(let i = 0; i < str.length; i++){
+    let a = tabPurifiedChar(str[i])
+    
+
+    if(a.length == 1){
+      outstr += a
+    } else if(a == "descimate"){
+      return(false)
+    }
+
+
+  }
+  return(outstr)
+}
+
+function processTab(str){
+
+  let strsplit = str.split(" ")
+  let unlowered = strsplit[strsplit.length-1]
+  let endword = unlowered.toLowerCase()
+  let resultantArr = eliminateArr(endword,wordTabArr,0)
+
+  let fout = ["",0]
+
+  for(let i = 0; i < resultantArr.length; i++){
+    let wordStats = wordTabDict[resultantArr[i]]
+
+    let tscore = wordStats.freq
+    if(tscore > fout[1]){
+
+      fout = [resultantArr[i],tscore]
+
+    }
+
+  }
+
+  if(fout[0].length > 0){
+    fout[0] = unlowered + fout[0].substring(unlowered.length)
+  }
+
+
+  return(fout)
+
+}
+
+function eliminateArr(str,arr,pos){
+  let outarr = []
+
+  for(let i = 0; i < arr.length; i++){
+    if(str[0] == arr[i][pos]){
+      outarr.push(arr[i])
+    }
+  }
+  if(str.length > 1){
+    return(eliminateArr(str.substring(1),outarr,pos+1))
+  } else {
+    return(outarr)
+  }
+
+}
 
 
 
@@ -1242,6 +1405,10 @@ let commanding = 0
 KeyboardEvent.repeat = false
 document.addEventListener('keydown', (event) => {
   var name = event.key;
+
+  if(event.which === 9){
+    event.preventDefault();
+  }
 
   if(name.length < 2 && name != "Shift" && name != "Backspace" && name != "/" && commanding == 0){
     ActionStore.push(name)
@@ -1297,7 +1464,26 @@ document.addEventListener('keydown', (event) => {
     } else if(ee == "a"){
       walker.x += 1
     }
+  } else if(name == "Tab" && commanding == 1){
+
+    let a = ActionStore[ActionStore.length-1]
+    let aa = AActionStore[AActionStore.length-1]
+   
+    let tabsuggest = processTab(ActionStore[ActionStore.length-1])
+
+    if(tabsuggest[0] != ""){
+      let sp = ActionStore[ActionStore.length-1].split(" ")
+      sp.pop()
+      sp.push(tabsuggest[0])
+      ActionStore[ActionStore.length-1] = joinArrBy(sp," ")
+      AActionStore[AActionStore.length-1] = ActionStore[ActionStore.length-1]
+
+    }
+
+
   }
+
+
 
 
 }, false);
@@ -1565,7 +1751,7 @@ function repeat(){
 
   let l = JSON.stringify(ActionStore)
   ctx.textAlign = "center"
-  fill("rgba(255,0,200,0.5)")
+  fill(player.clientInfo.actionTextColor)
   
   textOs(l,410,370)
   ctx.textAlign = "start"
@@ -1829,7 +2015,11 @@ function joinDict(d1, d2){
 function UPDATEMAP(input){
 
 
-
+  if(player.clientInfo.schmode == "on"){
+    ctxm.fillStyle = "#000000"
+    ctxm.fillRect(0,0,820,820)
+    return;
+  }
 
 
 
