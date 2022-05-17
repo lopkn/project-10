@@ -1388,7 +1388,7 @@ function processTab(str){
   for(let i = 0; i < resultantArr.length; i++){
     let wordStats = wordTabDict[resultantArr[i]]
 
-    let tscore = wordStats.freq
+    let tscore = wordStats.freq * resultantArr[i].length
     if(tscore > fout[1]){
 
       fout = [resultantArr[i],tscore]

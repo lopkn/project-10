@@ -1736,7 +1736,7 @@ if(st[0] == "/"){
 	//pull tabcuts command
 	else if(strsplit[0] == "pulltabcuts" && enDict[p].keyholder == true){
 		io.to(p).emit("rarelay",["pulltabcuts",changingConfig.Tabcuts])
-
+		enDict[p].log("successfully pulled tabcuts",cmdc.success)
 	}
 
 	//playerno command
