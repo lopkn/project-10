@@ -605,12 +605,12 @@ class player{
 		this.entityType = "player"
 		this.id = id
 		usedIDs[id] = true
-		this.x = -100+Math.floor(Math.random()*7)
+		this.x = -90+Math.floor(Math.random()*7)
 		this.y = Math.floor(Math.random()*7)+100
 		this.chunk = {"x":0,"y":0}
 		this.selectedSlot = 0
 		this.dimension = "O"
-		this.Inventory = ["U:14-A:50","B:5-A:50","U:5-A:100","Sl:1-A:30",""]
+		this.Inventory = ["U:12-A:10","B:5-A:50","U:5-A:100","U:4-A:100",""]
 		this.effects = []
 		this.inCombat = false
 		this.followerTargeting = {}
@@ -1917,7 +1917,7 @@ function processClick(e){
 					tnewMap[dimension][chunkPos][e[2]][2] += "-Tk:[XPL:1]"
 					allTickyBlocks.push([decodedXY.x,decodedXY.y,dimension])
 				}
-				removeItemFromSelected(e[0],1)
+				processItemUsage(r,"norm")
 
 				if(TNEWATTRIBUTEOF(tnewMap[dimension][chunkPos][e[2]][2],"I") != "NONE"){
 					DropItems(decodedXY.x,decodedXY.y,[removeOutterBracket(TNEWATTRIBUTEOF(tnewMap[dimension][chunkPos][e[2]][2],"I"))],dimension)
@@ -1937,7 +1937,7 @@ function processClick(e){
 			
 			if(distance(decodedXY.x,decodedXY.y,enDict[r].x,enDict[r].y) <= 12){
 				tnewMap[dimension][chunkPos][e[2]][2] += "-Sl:" + att2
-				removeItemFromSelected(e[0],1)
+				processItemUsage(r,"norm")
 				clickResult = "SlabPlace"
 			} else {
 				enDict[r].log("you are too far away to place a slab there!",cmdc.small_error)
@@ -1962,6 +1962,7 @@ function processClick(e){
 			if((utilityType == "multitul" || utilityType == "pax")&&alreadyHasBlock(tnewMap[dimension][chunkPos][e[2]][2])){
 
 			let seeBreak = TNEWbreakBlockBy(tnewMap[dimension][chunkPos][e[2]][2],utilityStrength+Math.floor(Math.random()*10-5))
+			processItemUsage(r,"utility")
 			if(seeBreak == "remove"){
 
 				// let item = "B:"+TNEWATTRIBUTEOF(tnewMap[dimension][chunkPos][e[2]][2],"B")
@@ -1992,13 +1993,16 @@ function processClick(e){
 			
 			if(staffInfo.type == "lightning" && a > 0){
 				emitLightning(enDict[r].x,enDict[r].y,decodedXY.x,decodedXY.y,"DevLightning",dimension)
+				processItemUsage(r,"utility")
 			}
 			else if(staffInfo.type == "explosive" && a > 0){
 				explosion(decodedXY.x,decodedXY.y,6,dimension)
+				processItemUsage(r,"utility")
 			}else if(staffInfo.type == "teleporting" && a > 0){
 				enDict[r].x = decodedXY.x
 				enDict[r].y = decodedXY.y
 				clickResult = "Teleport"
+				processItemUsage(r,"utility")
 			}
 
 			else if(staffInfo.type == "summoning" && a > 0){
@@ -2010,6 +2014,7 @@ function processClick(e){
 				} 
 				summonNewMob(staffInfo.mob,decodedXY.x,decodedXY.y,tid,dimension,tcstats)
 				clickResult = "Staff"
+				processItemUsage(r,"utility")
 			}
 
 		}	
@@ -2288,14 +2293,18 @@ function broadcast(s,e){
 
 
 
-function removeItemFromSelected(p,a){
-	let e = findPlayerInArr(p)
-	let player = enDict[p]
-	let original = player.Inventory[player.selectedSlot]
+function removeItemFromSelected(p,a,slot){
+let player = enDict[p]
+	if(slot == undefined){
+		slot = player.selectedSlot
+	}
+
+	
+	let original = player.Inventory[slot]
 	let split = original.split("-")
 	let aa = (parseInt(TNEWATTRIBUTEOF(original,"A"))-a)
-	if(aa > 0){	enDict[p].Inventory[player.selectedSlot] = split[0]+"-A:"+aa}else{
-		enDict[p].Inventory[player.selectedSlot] = ""
+	if(aa > 0){	enDict[p].Inventory[slot] = split[0]+"-A:"+aa}else{
+		enDict[p].Inventory[slot] = ""
 	}
 	enDict[p].invrelay()
 }
@@ -3760,15 +3769,53 @@ function processInstantItemUsage(p,item,x,y){
 
 }
 
-exports.add = function(i, j) {
-  return i + j;
-};
 
+
+
+function processItemUsage(p,use,num,slot){
+
+	if(use == undefined){
+		use = "norm"
+	}
+	if(num == undefined){
+		num = 1
+	}
+
+	if(slot == undefined){
+		slot = enDict[p].selectedSlot
+	}
+
+
+	switch(use){
+		case "norm":
+			removeItemFromSelected(p,num,slot)
+		break;
+
+		case "utility":
+		let att = TNEWATTRIBUTEOF(enDict[p].Inventory[slot],"U")
+			if(CURRENTCONFIGS.IutilityReferenceDict[att].use == undefined){
+				removeItemFromSelected(p,num,slot)
+				return
+			}
+			num = CURRENTCONFIGS.IutilityReferenceDict[att].use
+			removeItemFromSelected(p,num,slot)
+		break;
+
+	}
+
+
+}
 
 
 
 
 
 //game functions end//===============================================================================
+
+
+exports.add = function(i, j) {
+  return i + j;
+};
+
 
 
