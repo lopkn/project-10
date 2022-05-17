@@ -8,6 +8,8 @@ var renderingVariables = {"itemsize":{"B":40,"Sl":42,"U":42,"In":42}}
 var DEBUGGINGLOGS = {"Timeticker" : 0}
 
 
+
+
 class Player{
   constructor(id){
     this.id = id
@@ -297,10 +299,40 @@ var AActionStore = []
 var ChatBox = ""
 var flash = 0
 
+var ZOOMSETTINGS = {"windowWidth":window.innerWidth, "windowHeight":window.innerHeight,"expectWidth":1560,"expectHeight":940}
 
 var allzoom = 1
 
-document.body.style.zoom= allzoom
+
+function windowRescale(){
+  let zoomScale = 1
+  
+  ZOOMSETTINGS = {"windowWidth":window.innerWidth, "windowHeight":window.innerHeight,"expectWidth":1560,"expectHeight":940}
+  
+  if(ZOOMSETTINGS.windowWidth < ZOOMSETTINGS.expectWidth){
+    zoomScale = ZOOMSETTINGS.windowWidth/ZOOMSETTINGS.expectWidth
+  }
+
+  if(ZOOMSETTINGS.windowHeight < ZOOMSETTINGS.expectHeight){
+    let tzoomScale = ZOOMSETTINGS.windowHeight/ZOOMSETTINGS.expectHeight
+    if(tzoomScale < zoomScale){
+      zoomScale = tzoomScale
+    }
+  }
+
+
+  allzoom = zoomScale
+  document.body.style.zoom= allzoom
+  return(zoomScale)
+
+}
+
+windowRescale()
+
+
+
+
+// document.body.style.zoom= allzoom
 
 var cm = document.getElementById("mapCanvas");
 var ctxm = cm.getContext("2d");
@@ -1015,8 +1047,14 @@ function textO(str,x,y){
 }
 
 function textOs(str,x,y){
-  ctx.font = "30px Arial"
-  ctx.fillText(str,x,y,840)
+  ctx.font = "30px Monaco"
+  let cstr = str.match(/.{1,32}/g)
+  let raise = Math.floor(str.length/32)
+  for(let i = raise; i > -1 ; i--){
+    ctx.fillText(cstr[i],x,y + (i*20) - (raise*20),820)
+  }
+
+  
 }
 
 function rectI(x,y,x2,y2){
@@ -1106,6 +1144,8 @@ function commandingPush(e){
     } else if((tempsplit[0] == "/clickupdate" ||tempsplit[0] == "/cupdate" )){
       player.clientInfo.clickUpdate = tempsplit[1]
 
+    } else if((tempsplit[0] == "/rezoom" ||tempsplit[0] == "/autozoom" )){
+      windowRescale()
     }
 
 
@@ -1481,9 +1521,11 @@ function repeat(){
 
 
   let l = JSON.stringify(ActionStore)
-
+  ctx.textAlign = "center"
   fill("rgba(255,0,200,0.5)")
-  textOs(l,400-(l.length-2)*6.25 ,370)
+  
+  textOs(l,410,370)
+  ctx.textAlign = "start"
   if(commanding == 1){
     fill("#FF4F00")
     textO("Input mode: text",310,340)
@@ -2292,7 +2334,10 @@ function drawItemMapSprite(itemID,where,variables){
       break;
     }
   }
-
+  if(itemID == "undefined"){
+          ctxm.fillStyle = "#FF00FF"
+          ctxm.fillRect(variables[0]*20,variables[1]*20,20,20)
+        }
   
 }
 

@@ -2059,8 +2059,9 @@ function DropItems(x,y,arr,d,forced){
 	}
 
 	if(tileItemable(tilename) || forced == true){
-		tnewMap[dimension][cchunk[0]][cchunk[1]][2] += ("-I:["+arr[0]+"]")
-
+		if(arr[0] != "" && arr[0] != undefined){
+			tnewMap[dimension][cchunk[0]][cchunk[1]][2] += ("-I:["+arr[0]+"]")
+		}
 		
 
 		if(arr.length > 1){

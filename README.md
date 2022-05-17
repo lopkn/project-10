@@ -32,14 +32,17 @@ FEATURES DONE (after creation of tdl)
 - custom items & mobs and block sprites
 - custom particle renderer
 - follower move commanding
-
+- auto zoom
+- client memory purge
+- function for block breaking
+- hunger system
 
 
 TO DO LIST
 
 - shades layer
 
-- resizing & zoomout update
+- resizing update
 
 - mobile support
 
@@ -51,10 +54,6 @@ TO DO LIST
 
 - server generated lightning beams
 
-- player map purge
-
-- hunger system
-
 - command autocomplete
 
 - combat animation
@@ -65,8 +64,6 @@ TO DO LIST
 
 - combat victory
 
-- function for block breaking
-
 - item name and descriptions
 
 - terrain randomness
@@ -74,6 +71,8 @@ TO DO LIST
 - entity menu
 
 - menu only canvas
+
+- try out using cache
 
 - try out WFC
 
