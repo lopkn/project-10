@@ -46,7 +46,8 @@
 		"11":{"type":"staff","staff":{"type":"summoning","mob":"verdant","following":true},"attack":["swing",1,0.3]},
 		"12":{"type":"staff","staff":{"type":"summoning","mob":"minion","following":true},"attack":["swing",1,0.3]},
 		"13":{"type":"staff","staff":{"type":"teleporting"},"attack":["warp",2,0.5]},
-		"14":{"type":"staff","staff":{"type":"summoning","mob":"minion"},"attack":["swing",1,0.3]}
+		"14":{"type":"staff","staff":{"type":"summoning","mob":"minion"},"attack":["swing",1,0.3]},
+		"15":{"type":"staff","staff":{"type":"summoning","mob":"hunter","following":true},"attack":["swing",1,0.3]}
 
 	},
 

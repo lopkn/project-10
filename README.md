@@ -32,7 +32,7 @@ FEATURES DONE (after creation of tdl)
 - custom items & mobs and block sprites
 - custom particle renderer
 - follower move commanding
-- auto zoom
+- auto zoom and rescale
 - client memory purge
 - function for block breaking
 - hunger system
@@ -41,8 +41,6 @@ FEATURES DONE (after creation of tdl)
 TO DO LIST
 
 - shades layer
-
-- resizing update
 
 - mobile support
 
@@ -54,7 +52,13 @@ TO DO LIST
 
 - server generated lightning beams
 
-- command autocomplete
+- dungeons
+
+- door block
+
+- custom explosion sizes
+
+- dark rooms
 
 - combat animation
 

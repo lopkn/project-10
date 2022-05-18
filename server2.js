@@ -1730,3 +1730,70 @@ function endCombatInstance(str){
 
 
 //game functions end//===============================================================================
+
+// if(inEffectArr("blind1",this.effects)){
+// 	for(let axx = -20; axx < 21; axx++){
+// 			let ret = retInsideLine(this.x,this.y,this.x+20,this.y+axx)
+// 			let yet = 0
+// 			for(let i = 0; i < ret.length; i++){
+// 				if(yet >0){
+// 									if(TNEWATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"$") == "NONE"){
+// 					tmap2[ret[i][0]+","+ret[i][1]] += "-$:" + yet} else {
+// 						let tempeee = parseInt(TNEWATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"$")) + yet
+// 						tmap2[ret[i][0]+","+ret[i][1]] = TNEWremoveFromTile(tmap2[ret[i][0]+","+ret[i][1]],"$")
+// 						tmap2[ret[i][0]+","+ret[i][1]] += "-$:" + tempeee
+// 					}
+// 				} if(TNEWATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"B") != "NONE"){
+// 					yet += 1
+// 				}
+// 			}
+// 		}
+// 	for(let axx = -20; axx < 21; axx++){
+// 			let ret = retInsideLine(this.x,this.y,this.x+axx,this.y+20)
+// 			let yet = 0
+// 			for(let i = 0; i < ret.length; i++){
+// 				if(yet > 0){
+// 									if(TNEWATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"$") == "NONE"){
+// 					tmap2[ret[i][0]+","+ret[i][1]] += "-$:" + yet} else {
+// 						let tempeee = parseInt(TNEWATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"$")) + yet
+// 						tmap2[ret[i][0]+","+ret[i][1]] = TNEWremoveFromTile(tmap2[ret[i][0]+","+ret[i][1]],"$")
+// 						tmap2[ret[i][0]+","+ret[i][1]] += "-$:" + tempeee
+// 					}
+// 				}  if(TNEWATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"B") != "NONE"){
+// 					yet += 1
+// 				}
+// 			}
+// 		}
+// 	for(let axx = -20; axx < 21; axx++){
+// 			let ret = retInsideLine(this.x,this.y,this.x-20,this.y+axx)
+// 			let yet = 0
+// 			for(let i = 0; i < ret.length; i++){
+// 				if(yet > 0){
+// 									if(TNEWATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"$") == "NONE"){
+// 					tmap2[ret[i][0]+","+ret[i][1]] += "-$:"+yet} else {
+// 						let tempeee = parseInt(TNEWATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"$")) + yet
+// 						tmap2[ret[i][0]+","+ret[i][1]] = TNEWremoveFromTile(tmap2[ret[i][0]+","+ret[i][1]],"$")
+// 						tmap2[ret[i][0]+","+ret[i][1]] += "-$:" + tempeee
+// 					}
+// 				} if(TNEWATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"B") != "NONE"){
+// 					yet += 1
+// 				}
+// 			}
+// 		}
+// 	for(let axx = -20; axx < 21; axx++){
+// 			let ret = retInsideLine(this.x,this.y,this.x+axx,this.y-20)
+// 			let yet = 0
+// 			for(let i = 0; i < ret.length; i++){
+// 				if(yet > 0){
+// 					if(TNEWATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"$") == "NONE"){
+// 					tmap2[ret[i][0]+","+ret[i][1]] += "-$:" + yet} else {
+// 						let tempeee = parseInt(TNEWATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"$")) + yet
+// 						tmap2[ret[i][0]+","+ret[i][1]] = TNEWremoveFromTile(tmap2[ret[i][0]+","+ret[i][1]],"$")
+// 						tmap2[ret[i][0]+","+ret[i][1]] += "-$:" + tempeee
+// 					}
+// 				}  if(TNEWATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"B") != "NONE"){
+// 					yet += 1
+// 				}
+// 			}
+// 		}
+// 	}

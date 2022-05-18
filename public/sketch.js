@@ -20,7 +20,7 @@ class Player{
     this.chunk = {"x":0,"y":0}
     this.selectedSlot = 0
     this.Inventory = ["B:1-A:50","B:5-A:50","U:4-A:100","Sl:1-A:30",""]
-    this.clientInfo = {"scanmode":"off","clickUpdate":"off","schmode":"off","actionTextColor":"rgba(255,0,200,0.5)"}
+    this.clientInfo = {"scanmode":"off","clickUpdate":"on","schmode":"off","actionTextColor":"rgba(255,0,200,0.5)"}
     this.serverSelctedSlot = 0
 
   }
@@ -603,7 +603,7 @@ function joinSuccess(m){
 
 
 
-onmousemove = function(e){mouseX = (e.clientX - 5 +scrollX)/allzoom; mouseY = (e.clientY -2 + scrollY)/allzoom}
+onmousemove = function(e){mouseX = (e.clientX - 5*allzoom +scrollX)/allzoom; mouseY = (e.clientY - 2*allzoom + scrollY)/allzoom}
 ondrag = function(e){}
 
 
@@ -1689,13 +1689,13 @@ function repeat(){
 
       MCVs[MCVs.held[0]].x = 0
       
-    }else if(MCVs[MCVs.held[0]].x > 820 - MCVs[MCVs.held[0]].width){
+    }if(MCVs[MCVs.held[0]].x > 820 - MCVs[MCVs.held[0]].width){
 
       MCVs[MCVs.held[0]].x = 820- MCVs[MCVs.held[0]].width
-    }else if(MCVs[MCVs.held[0]].y < 0){
+    }if(MCVs[MCVs.held[0]].y < 0){
 
       MCVs[MCVs.held[0]].y = 0
-    }else if(MCVs[MCVs.held[0]].y > 800){
+    }if(MCVs[MCVs.held[0]].y > 800){
 
       MCVs[MCVs.held[0]].y = 800
     }
@@ -2203,19 +2203,43 @@ function playersUpdate(e){
   for(let i = 0; i < e.length; i++){
     drawEntitiesMapSprite(e[i][2],e[i][0],e[i][1])
 
-    if(e[i][3][1] == "player"){
+    if(e[i][2] == "player"){
 
     let trenderName = e[i][3][0] ? e[i][3][0] : "guest"
 
     ctxm.fillStyle = "#FF0000"
     ctxm.fillText(trenderName,(e[i][0]+renderBlocks-player.x)*BlockPixels-trenderName.length*3,BlockPixels*(e[i][1]+ renderBlocks-player.y)-10)
     }
+
+    if(e[i][3][1] == true){
+
+      drawBannerAt(e[i][0],e[i][1])
+
+    } else {
+      console.log(e[i][3])
+    }
+
   }
 
 }
 
 
+function drawBannerAt(x,y){
 
+  let fx = (x - player.x + 20) * 20
+  let fy = (y - player.y + 20) * 20
+
+    let tctxm = new Path2D()
+
+    tctxm.moveTo(fx,fy);
+    tctxm.lineTo(fx+5,fy);
+    tctxm.lineTo(fx,fy+5);  
+    // tctxm.lineTo(fx,fy+5);
+    tctxm.closePath();
+    ctxm.fillStyle = "white"
+    ctxm.fill(tctxm);
+
+}
 
 
 

@@ -228,7 +228,7 @@ class mob{
 			return([enDict[this.targeting.id].x,enDict[this.targeting.id].y])
 
 			}
-			return([this.x + Math.floor(Math.random()*10-5),this.y + Math.floor(Math.random()*10-5)])
+			return(this.getPosTarget("owner"))
 		} else {
 
 
@@ -243,6 +243,9 @@ class mob{
 		this.Cstats.hp -= e
 		return(this.kill())
 	}
+	hungerHeal(e){}
+
+
 	nonPlayerActions(){
 		let myAction = []
 		myAction.push(this.id)
@@ -353,7 +356,7 @@ class mob{
 			let moveAmount = distance(this.x,this.y,tar[0],tar[1])
 			for(let i = 0; (i < moveAmount && i < 20); i++){
 				let tr = randomItem(["w",1,"a",1,"s",1,"d",1,"",1])
-				if(Math.random()*20 < moveAmount && this.hp > 20){
+				if(Math.random()*20 < moveAmount && this.Cstats.hp > 20){
 						tr = calculatePathStep(this.movethought[0],this.movethought[1],tar[0],tar[1],this.dimension)
 					}
 
@@ -371,7 +374,7 @@ class mob{
 				this.targeting = {"id":ttar,"turns":3}
 				for(let i = 0; i < moveAmount; i++){
 					let tr = randomItem(["w",1,"a",1,"s",1,"d",1,["com","001"],1,["com","002"],1])
-					if(Math.random() > 0.5 && this.hp > 20){			
+					if(Math.random() > 0.5 && this.Cstats.hp > 20){			
 						tr = calculatePathStep(this.movethought[0],this.movethought[1],tar[0],tar[1],this.dimension)
 					}
 					this.movethoughtUpdate(tr)
@@ -758,7 +761,14 @@ class player{
 
 		return(0)
 	}
+	hungerHeal(e){
 
+		this.Cstats.hunger += e
+		if(this.Cstats.hunger > this.Cstats.maxhunger){
+			this.Cstats.hunger = this.Cstats.maxhunger
+		}
+
+	}
 	energyHeal(e){
 
 		if(e == undefined){
@@ -995,72 +1005,7 @@ class player{
 			}
 		}
 
-if(inEffectArr("blind1",this.effects)){
-	for(let axx = -20; axx < 21; axx++){
-			let ret = retInsideLine(this.x,this.y,this.x+20,this.y+axx)
-			let yet = 0
-			for(let i = 0; i < ret.length; i++){
-				if(yet >0){
-									if(TNEWATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"$") == "NONE"){
-					tmap2[ret[i][0]+","+ret[i][1]] += "-$:" + yet} else {
-						let tempeee = parseInt(TNEWATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"$")) + yet
-						tmap2[ret[i][0]+","+ret[i][1]] = TNEWremoveFromTile(tmap2[ret[i][0]+","+ret[i][1]],"$")
-						tmap2[ret[i][0]+","+ret[i][1]] += "-$:" + tempeee
-					}
-				} if(TNEWATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"B") != "NONE"){
-					yet += 1
-				}
-			}
-		}
-	for(let axx = -20; axx < 21; axx++){
-			let ret = retInsideLine(this.x,this.y,this.x+axx,this.y+20)
-			let yet = 0
-			for(let i = 0; i < ret.length; i++){
-				if(yet > 0){
-									if(TNEWATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"$") == "NONE"){
-					tmap2[ret[i][0]+","+ret[i][1]] += "-$:" + yet} else {
-						let tempeee = parseInt(TNEWATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"$")) + yet
-						tmap2[ret[i][0]+","+ret[i][1]] = TNEWremoveFromTile(tmap2[ret[i][0]+","+ret[i][1]],"$")
-						tmap2[ret[i][0]+","+ret[i][1]] += "-$:" + tempeee
-					}
-				}  if(TNEWATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"B") != "NONE"){
-					yet += 1
-				}
-			}
-		}
-	for(let axx = -20; axx < 21; axx++){
-			let ret = retInsideLine(this.x,this.y,this.x-20,this.y+axx)
-			let yet = 0
-			for(let i = 0; i < ret.length; i++){
-				if(yet > 0){
-									if(TNEWATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"$") == "NONE"){
-					tmap2[ret[i][0]+","+ret[i][1]] += "-$:"+yet} else {
-						let tempeee = parseInt(TNEWATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"$")) + yet
-						tmap2[ret[i][0]+","+ret[i][1]] = TNEWremoveFromTile(tmap2[ret[i][0]+","+ret[i][1]],"$")
-						tmap2[ret[i][0]+","+ret[i][1]] += "-$:" + tempeee
-					}
-				} if(TNEWATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"B") != "NONE"){
-					yet += 1
-				}
-			}
-		}
-	for(let axx = -20; axx < 21; axx++){
-			let ret = retInsideLine(this.x,this.y,this.x+axx,this.y-20)
-			let yet = 0
-			for(let i = 0; i < ret.length; i++){
-				if(yet > 0){
-					if(TNEWATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"$") == "NONE"){
-					tmap2[ret[i][0]+","+ret[i][1]] += "-$:" + yet} else {
-						let tempeee = parseInt(TNEWATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"$")) + yet
-						tmap2[ret[i][0]+","+ret[i][1]] = TNEWremoveFromTile(tmap2[ret[i][0]+","+ret[i][1]],"$")
-						tmap2[ret[i][0]+","+ret[i][1]] += "-$:" + tempeee
-					}
-				}  if(TNEWATTRIBUTEOF(tmap2[ret[i][0]+","+ret[i][1]],"B") != "NONE"){
-					yet += 1
-				}
-			}
-		}
-	}
+
 
 
 
@@ -1068,7 +1013,7 @@ if(inEffectArr("blind1",this.effects)){
 		for(let b = 0; b < enArr.length; b++){
 			let i = enArr[b]
 			if(distance(enDict[i].x,enDict[i].y,this.x,this.y) < 33 && enDict[i].dimension == this.dimension&&i != this.id){
-				t.push([enDict[i].x,enDict[i].y,enDict[i].entityType,[enDict[i].name,enDict[i].entityType,i]])
+				t.push([enDict[i].x,enDict[i].y,enDict[i].entityType,[enDict[i].name,isSameTeam(i,this.id),i]])
 			}
 		}
 
@@ -2059,7 +2004,7 @@ function processClick(e){
 			else if(staffInfo.type == "summoning" && a > 0){
 				let playermagic = enDict[r].entityStats.summoning
 				let tid = r+Math.floor(Math.random()*playermagic+1.3)
-				let tcstats = {"ownerH":{"master":tid}}
+				let tcstats = {"ownerH":{"master":"wild"+tid}}
 				if(staffInfo.following == true){
 					tcstats = {"ownerH":{"master":enDict[r].ownerH.master,"summoner":r}}
 				} 
@@ -2791,6 +2736,10 @@ function summonCmd(p,name,x,y,id){
 }
 
 function summonNewMob(name,x,y,id,d,stats){
+
+	if(stats == undefined){
+		stats = {"ownerH":{"master":"wild"+id}}
+	}
 
 	let dimension = "O"
 	if(d != undefined){
@@ -3813,8 +3762,7 @@ function processInstantItemUsage(p,item,x,y){
 		return;
 	} else if(item.type == "food"){
 
-		enDict[p].Cstats.hunger += item.amount
-
+		enDict[p].hungerHeal(item.amount)
 		removeItemFromSelected(p,1)
 		return;
 	}
