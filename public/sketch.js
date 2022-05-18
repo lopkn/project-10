@@ -511,7 +511,13 @@ function returnPing(){
 let flashpoint = 10
 
 function updateChat(){
-  text("<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>"+ChatBox)
+  let tempa ="<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>"
+
+  if(player != undefined && player.clientInfo.schmode == "on"){
+    tempa +="<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>"
+  }
+
+  text(tempa+ChatBox)
 }
 
 function timeUpdate(e){
@@ -563,6 +569,11 @@ function timerUpdate(e,flash){
 
 
   let a = "rgb("+(255 * e / clockmax)+","+(255 - 255 * e / clockmax)+",120)"
+
+  if(player.clientInfo.schmode == "on"){
+    a = "#303030"
+  }
+
   timerctx.strokeStyle = a
   timerctx.beginPath();
   timerctx.arc(70, 70, 50, Math.PI * 2 * e/clockmax, 2 * Math.PI);
@@ -1975,6 +1986,11 @@ function InvDraw(){
 
   for(let i = 0; i < player.Inventory.length; i++){
     drawItemMapSprite(player.Inventory[i],"inventory",i)
+  }
+
+  if(player.clientInfo.schmode == "on"){
+    fillI("#00002F")
+    rectI(0,0,820,50)
   }
 
   fillI("rgba(255,255,0,0.3)")
