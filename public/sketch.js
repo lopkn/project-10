@@ -1689,15 +1689,15 @@ function repeat(){
 
       MCVs[MCVs.held[0]].x = 0
       
-    }if(MCVs[MCVs.held[0]].x > 820 - MCVs[MCVs.held[0]].width){
+    }if(MCVs[MCVs.held[0]].x > 1560 - MCVs[MCVs.held[0]].width){
 
-      MCVs[MCVs.held[0]].x = 820- MCVs[MCVs.held[0]].width
+      MCVs[MCVs.held[0]].x = 1560- MCVs[MCVs.held[0]].width
     }if(MCVs[MCVs.held[0]].y < 0){
 
       MCVs[MCVs.held[0]].y = 0
-    }if(MCVs[MCVs.held[0]].y > 800){
+    }if(MCVs[MCVs.held[0]].y > 940){
 
-      MCVs[MCVs.held[0]].y = 800
+      MCVs[MCVs.held[0]].y = 940
     }
 
 
@@ -2800,7 +2800,8 @@ MCVs.PlayerBars.Bars[2][2] = new barDropper("#0000F0",2)
 
 function drawMenuCtx(){
 
-menuCTX.clearRect(0, 0, 820, 820)
+menuCTX.fillStyle = "rgba(0,0,0,0.6)"
+menuCTX.clearRect(0, 0, 1560, 940)
 
 
 
