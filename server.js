@@ -3163,7 +3163,7 @@ function TNEWgenerateTileFromNumber(input,d){
 		}
 		if(input >= 150 && input < 300){
 			if(Math.random() > 1-input/30000){
-				tile += "-B:3-T:1-S:" + (Math.floor(Math.random()*3)+4)
+				tile += "-B:3-T:"+(Math.floor(Math.random()*9))+"-S:" + (Math.floor(Math.random()*3)+4)
 			}
 		}
 

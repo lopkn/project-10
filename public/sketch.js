@@ -2120,8 +2120,8 @@ function UPDATEMAP(input){
       }
       if(TNEWATTRIBUTEOF(tblock,"T") != "NONE"){
         if(ccx > -5 && ccy > -5 && ccx < 46 && ccy < 46){
-        // console.log(ccx,ccy,"rgba(30,95,30,0.7)",parseInt(TNEWATTRIBUTEOF(tblock,"S")))
-        trees.push([ccx,ccy,"rgba(10,65,10,0.7)",parseInt(TNEWATTRIBUTEOF(tblock,"S"))])}
+        
+        trees.push([ccx,ccy,"rgba("+10*TNEWATTRIBUTEOF(tblock,"T")+",65,10,0.7)",parseInt(TNEWATTRIBUTEOF(tblock,"S"))])}
       }
             if(a != "full"){
         ctxm.lineWidth = a * 5
