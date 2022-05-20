@@ -303,7 +303,15 @@ var ZOOMSETTINGS = {"windowWidth":window.innerWidth, "windowHeight":window.inner
 var allzoom = 1
 
 
-function windowRescale(){
+function windowRescale(e){
+
+  if(e != undefined && !isNaN(parseInt(e))){
+    allzoom = parseInt(e)
+    document.body.style.zoom = allzoom
+    return(allzoom)
+    return;
+  }
+
   let zoomScale = 1
 
   ZOOMSETTINGS = {"windowWidth":window.innerWidth, "windowHeight":window.innerHeight,"expectWidth":1560,"expectHeight":940}
@@ -1218,7 +1226,7 @@ function commandingPush(e){
       player.clientInfo.clickUpdate = tempsplit[1]
 
     } else if((tempsplit[0] == "/rezoom" ||tempsplit[0] == "/autozoom"||tempsplit[0] == "/rescale")){
-      windowRescale()
+      windowRescale(tempsplit[1])
     } else if((tempsplit[0] == "/schoolmode" ||tempsplit[0] == "/schmode" || tempsplit[0] == "/bosskey")){
       let option = tempsplit[1]
       if(option == undefined || option != "on" || option != "off"){
@@ -1695,9 +1703,9 @@ function repeat(){
     }if(MCVs[MCVs.held[0]].y < 0){
 
       MCVs[MCVs.held[0]].y = 0
-    }if(MCVs[MCVs.held[0]].y > 940){
+    }if(MCVs[MCVs.held[0]].y > 920){
 
-      MCVs[MCVs.held[0]].y = 940
+      MCVs[MCVs.held[0]].y = 920
     }
 
 

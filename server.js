@@ -1424,7 +1424,14 @@ function tellPerlin(x,y,d){
 /////////////////////////////////////////////////////////////
 //game functions//===================================================================================
 
-
+function posHasEntity(x,y,d){
+	for(let i = 0; i < enArr.length; i++){
+		let en = enDict[enArr[i]]
+		if(en.x == x && en.y == y && en.dimension == d){
+			return(enArr[i])
+		}
+	}
+}
 
 function allEffectTick(){
 	for(let i = 0; i < enArr.length; i++){
@@ -1818,6 +1825,8 @@ function processClick(e){
 	let originPos = [enDict[r].x,enDict[r].y]
 
 	let decodedXY = rCoordToChunk(e[1])
+	let clickedDistance = distance(enDict[r].x,enDict[r].y,decodedXY.x,decodedXY.y)
+	let clickedEntity = posHasEntity(decodedXY.x,decodedXY.y,dimension)
 	
 	let clickResult = "none"
 	
@@ -1840,33 +1849,29 @@ function processClick(e){
 	}
 
 
-	//click entity
 
-	for(let b = 0; b < enArr.length; b++){
 
-		let i = enArr[b]
+		let c = clickedEntity
 
-		if(i != r && decodedXY.x == enDict[i].x && decodedXY.y == enDict[i].y && !enDict[i].inCombat && !enDict[r].inCombat && !isSameTeam(r,i)){
-			if(distance(enDict[r].x,enDict[r].y,decodedXY.x,decodedXY.y) <= 13 && enDict[i].Cstats.hp > 0&& enDict[i].dimension == enDict[r].dimension){
-			allCombatInstances[JSON.stringify(combatIdCounter)] = new combatInstance(enDict[r].id,enDict[i].id)
-			console.log("new combat instance: " +enDict[r].id+","+enDict[i].id)
-			enDict[r].combatRelay(enDict[i].entityType)
-			enDict[i].combatRelay(enDict[r].entityType)
-			enDict[r].log((enDict[i].name ? enDict[i].name : ((enDict[i].entityType == "player") ? enDict[i].id : enDict[i].entityType))+" has entered combat with you!",cmdc.combat)
-			enDict[i].log((enDict[r].name ? enDict[r].name : ((enDict[r].entityType == "player") ? enDict[r].id : enDict[r].entityType))+" has entered combat with you!",cmdc.combat)
+		if(c != undefined && c != r && !enDict[c].inCombat && !enDict[r].inCombat && !isSameTeam(r,c)){
+			if(clickedDistance <= 13 && enDict[c].Cstats.hp > 0){
+			allCombatInstances[JSON.stringify(combatIdCounter)] = new combatInstance(enDict[r].id,enDict[c].id)
+			console.log("new combat instance: " +enDict[r].id+","+enDict[c].id)
+			enDict[r].combatRelay(enDict[c].entityType)
+			enDict[c].combatRelay(enDict[r].entityType)
+			enDict[r].log((enDict[c].name ? enDict[i].name : ((enDict[c].entityType == "player") ? enDict[c].id : enDict[c].entityType))+" has entered combat with you!",cmdc.combat)
+			enDict[c].log((enDict[r].name ? enDict[r].name : ((enDict[r].entityType == "player") ? enDict[r].id : enDict[r].entityType))+" has entered combat with you!",cmdc.combat)
 			clickResult = "EnterCombat"
-			break;
 		}
 	}
 
 
-	}
 
 
 
-
+//clicked on a chest
 	if(TNEWATTRIBUTEOF(tnewMap[dimension][chunkPos][e[2]][2],"Ch") != "NONE"){
-		if(distance(decodedXY.x,decodedXY.y,enDict[r].x,enDict[r].y) <= 2){
+		if(clickedDistance <= 2){
 
 
 		chestInv = removeOutterBracket(TNEWATTRIBUTEOF(tnewMap[dimension][chunkPos][e[2]][2],"Ch"))
@@ -1899,7 +1904,8 @@ function processClick(e){
 	    	clickResult = "Chest"
 	} else {
 		enDict[r].log("you are too far away!",cmdc.small_error)
-	}}
+	}
+}
 
 
 
@@ -1907,7 +1913,7 @@ function processClick(e){
 	if(att != "NONE" && a > 0){
 		if(!alreadyHasBlock(tnewMap[dimension][chunkPos][e[2]][2])){
 			
-			if(distance(decodedXY.x,decodedXY.y,enDict[r].x,enDict[r].y) <= 12){
+			if(clickedDistance <= 12){
 				tnewMap[dimension][chunkPos][e[2]][2] += "-B:" + att
 				if(att == "8"){
 					tnewMap[dimension][chunkPos][e[2]][2] += "-Tk:[XPL:1]"
@@ -1952,7 +1958,7 @@ function processClick(e){
 	else {
 		let utilityNum = TNEWATTRIBUTEOF(item,"U")
 		if(utilityNum != "NONE"){
-			// 
+			
 			let utilityType = CURRENTCONFIGS.IutilityReferenceDict[utilityNum].type
 			let utilityStrength = CURRENTCONFIGS.IutilityReferenceDict[utilityNum].strength
 			if((utilityType == "multitul" || utilityType == "pax")&&alreadyHasBlock(tnewMap[dimension][chunkPos][e[2]][2])){
@@ -1961,22 +1967,13 @@ function processClick(e){
 			processItemUsage(r,"utility")
 			if(seeBreak == "remove"){
 
-				// let item = "B:"+TNEWATTRIBUTEOF(tnewMap[dimension][chunkPos][e[2]][2],"B")
-
-				// let blockItem = give(r,1,item)
-
-				// tnewMap[dimension][chunkPos][e[2]][2] = ArrRemoveFromTile(tnewMap[dimension][chunkPos][e[2]][2],["B","D","T","S"])
+	
 				let temparr =BreakBlock(tnewMap[dimension][chunkPos][e[2]][2],"block",decodedXY.x,decodedXY.y,dimension,r)
 				tnewMap[dimension][chunkPos][e[2]][2] = temparr[0]
 				DropItems(decodedXY.x,decodedXY.y,temparr[1],dimension)
 
 				clickResult = "BreakBlock"
-				// if(blockItem == "no space"){
-
-				// 	DropItems(decodedXY.x,decodedXY.y,[item])
-
-
-				// }
+		
 	
 
 			} else {
