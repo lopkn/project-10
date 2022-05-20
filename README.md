@@ -60,6 +60,8 @@ TO DO LIST
 
 - dark rooms
 
+- block outlines
+
 - combat animation
 
 - tile animations

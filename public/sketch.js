@@ -20,7 +20,7 @@ class Player{
     this.chunk = {"x":0,"y":0}
     this.selectedSlot = 0
     this.Inventory = ["B:1-A:50","B:5-A:50","U:4-A:100","Sl:1-A:30",""]
-    this.clientInfo = {"scanmode":"off","clickUpdate":"on","schmode":"off","actionTextColor":"rgba(255,0,200,0.5)"}
+    this.clientInfo = {"blockOutlineColor":"#000000","scanmode":"off","clickUpdate":"on","schmode":"off","actionTextColor":"rgba(255,0,200,0.5)"}
     this.serverSelctedSlot = 0
 
   }
@@ -2158,6 +2158,12 @@ function UPDATEMAP(input){
 
 
         
+    for(let i = player.x - 20; i < player.x + 21;i++){
+        for(let j = player.y - 20; j < player.y + 21; j++){
+          
+          getBlockOutline(i,j)
+      }
+    }
 
 
     playersUpdate(input[1])
@@ -2223,8 +2229,6 @@ function playersUpdate(e){
 
       drawBannerAt(e[i][0],e[i][1])
 
-    } else {
-      console.log(e[i][3])
     }
 
   }
@@ -2695,6 +2699,50 @@ function drawItemMapSprite(itemID,where,variables){
 
 
 
+function isKnownBlock(x,y){
+  let str = x+","+y
+  if(TNEWATTRIBUTEOF(map[str],"B") != "NONE"){
+    return(true)
+  }
+  return(false)
+}
+
+
+
+function getBlockOutline(x,y){
+
+  if(!isKnownBlock(x,y)){
+    return;
+  }
+
+
+  let tdict = {"top":isKnownBlock(x,y-1),"bottom":isKnownBlock(x,y+1),"left":isKnownBlock(x-1,y),"right":isKnownBlock(x+1,y)}
+  ctxm.strokeStyle = player.clientInfo.blockOutlineColor
+  ctxm.lineWidth = 2
+
+  x = x - player.x + 20
+  y = y - player.y + 20
+
+  ctxm.beginPath()
+  if(!tdict.top){
+    ctxm.moveTo(x*20,y*20)
+    ctxm.lineTo(x*20+20,y*20)
+  }
+  if(!tdict.bottom){
+    ctxm.moveTo(x*20,y*20+20)
+    ctxm.lineTo(x*20+20,y*20+20)
+  }
+  if(!tdict.left){
+    ctxm.moveTo(x*20,y*20)
+    ctxm.lineTo(x*20,y*20+20)
+  }
+  if(!tdict.right){
+    ctxm.moveTo(x*20+20,y*20)
+    ctxm.lineTo(x*20+20,y*20+20)
+  }
+  ctxm.stroke()
+
+}
 
 
 

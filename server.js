@@ -2982,15 +2982,20 @@ function TNEWATTRIBUTEOF(str,e){
 
   	if(!strHasBrackets(str)){
 
-  let split = str.split("-")
-  for(let i = 0; i < split.length; i++){
-  	let act = split[i].split(":")
-  	if(act[0] == e){
-  		return(act[1])
-  	}
-  }
-  return("NONE")
-	} else {
+	  let split = str.split("-")
+	  for(let i = 0; i < split.length; i++){
+	  	let act = split[i].split(":")
+	  	if(act[0] == e){
+	  		return(act[1])
+	  	}
+	  }
+	  return("NONE")
+	}
+
+
+
+
+	 else {
 		let BLs = bracketLevels(str)
 
   let BaseSplit = BLs[0].split("-")
@@ -3780,6 +3785,15 @@ function processItemUsage(p,use,num,slot){
 
 	if(slot == undefined){
 		slot = enDict[p].selectedSlot
+	}
+
+	let item = enDict[p].Inventory[slot]
+
+	let unbreaking = TNEWATTRIBUTEOF(item,"Unb")
+	if(unbreaking != "NONE"){
+		if(unbreaking == "0"){
+			return;
+		}
 	}
 
 
