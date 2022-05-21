@@ -20,7 +20,7 @@ class Player{
     this.chunk = {"x":0,"y":0}
     this.selectedSlot = 0
     this.Inventory = ["B:1-A:50","B:5-A:50","U:4-A:100","Sl:1-A:30",""]
-    this.clientInfo = {"blockOutlineColor":"#000000","scanmode":"off","clickUpdate":"on","schmode":"off","actionTextColor":"rgba(255,0,200,0.5)"}
+    this.clientInfo = {"tileRenderer":0,"blockOutlineColor":"#000000","scanmode":"off","clickUpdate":"on","schmode":"off","actionTextColor":"rgba(255,0,200,0.5)"}
     this.serverSelctedSlot = 0
 
   }
@@ -1222,6 +1222,12 @@ function commandingPush(e){
      if((tempsplit[0] == "/scanmode" ||tempsplit[0] == "/scan" )){
       player.clientInfo.scanmode = tempsplit[1]
 
+    }if((tempsplit[0] == "/rendermode" ||tempsplit[0] == "/renderstyle" )){
+      let tempnan = parseInt(tempsplit[1])
+      if(!isNaN(tempnan)){
+        player.clientInfo.tileRenderer = tempnan
+      }
+
     } else if((tempsplit[0] == "/clickupdate" ||tempsplit[0] == "/cupdate" )){
       player.clientInfo.clickUpdate = tempsplit[1]
 
@@ -1910,7 +1916,7 @@ let a = e[1]
   allBeamSnakes.push(new BeamSnake(a,15,0.4))
   } else if (e[0] == "Explosion"){
 
-    allExplosions.push(new Explosion(a[0],a[1],10,1,5))
+    allExplosions.push(new Explosion(a[0],a[1],a[2],1,5))
   }
 
 
@@ -2073,6 +2079,9 @@ function joinDict(d1, d2){
 function UPDATEMAP(input){
 
 
+  ctxm.clearRect(0,0,840,840)
+
+
   if(player.clientInfo.schmode == "on"){
     ctxm.fillStyle = "#000000"
     ctxm.fillRect(0,0,820,820)
@@ -2107,11 +2116,17 @@ function UPDATEMAP(input){
       let bb = constructedMap[i].split(",")
       let ccx = parseInt(bb[0])+20-player.x
       let ccy = parseInt(bb[1])+20-player.y
-      if(deparsed[0][0] == "#"){
-      fillM(deparsed[0])
+
+      let style = player.clientInfo.tileRenderer
+      if(deparsed[0][style] == undefined){
+        style = 0
+      }
+
+      if(deparsed[0][style][0] == "#"){
+      fillM(deparsed[0][style])
       rectAtCoordsM(ccx,ccy)} else{
         //render image
-        drawTilesMapSprite(deparsed[0],ccx,ccy)
+        drawTilesMapSprite(deparsed[0][style],ccx,ccy)
       }
 
 
@@ -2121,7 +2136,7 @@ function UPDATEMAP(input){
       if(TNEWATTRIBUTEOF(tblock,"T") != "NONE"){
         if(ccx > -5 && ccy > -5 && ccx < 46 && ccy < 46){
         
-        trees.push([ccx,ccy,"rgba("+10*TNEWATTRIBUTEOF(tblock,"T")+",65,10,0.7)",parseInt(TNEWATTRIBUTEOF(tblock,"S"))])}
+        trees.push([ccx,ccy,[10*TNEWATTRIBUTEOF(tblock,"T")],parseInt(TNEWATTRIBUTEOF(tblock,"S"))])}
       }
             if(a != "full"){
         ctxm.lineWidth = a * 5
@@ -2261,8 +2276,9 @@ function drawTree(x,y,l,s){
 
   for(let i = -7; i < 8; i++){
     for(let j = -7; j < 8; j++){
-      if(distance(x+j,y+i,x,y) <= s){
-        fillM(l)
+      let d = distance(x+j,y+i,x,y)
+      if(d <= s){
+        fillM("rgba("+l+",65,10,"+(0.5+(s-d)*0.02)+")")
         rectAtCoordsM(x+j,y+i)
       }
     }
@@ -2794,7 +2810,7 @@ class barDropper{
 var MCVs = {
 
   "held":"none",
-  "allBars":["TemporalInv","ChestInv","PlayerBars"],
+  "allBars":["TemporalInv","ChestInv","PlayerBars","EntityMenu"],
   "TemporalInv":{
     "open":false,
     "maxed":true,
@@ -2813,12 +2829,18 @@ var MCVs = {
     "clickAreas":[]
   },
   "PlayerBars":{
-    // "open":true,
     "maxed":true,
     "x":700,
     "y":5,
     "width":100,
     "Bars":[["HP","#00FF00"],["hunger","#FFFF00"],["energy","#00FFFF"]]
+  },
+  "EntityMenu":{
+    "open":true,
+    "maxed":true,
+    "x":700,
+    "y":5,
+    "width":100
   }
 
 }

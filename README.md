@@ -36,6 +36,7 @@ FEATURES DONE (after creation of tdl)
 - client memory purge
 - function for block breaking
 - hunger system
+- block outlines
 
 
 TO DO LIST
@@ -60,7 +61,7 @@ TO DO LIST
 
 - dark rooms
 
-- block outlines
+- multiblock entities
 
 - combat animation
 

@@ -985,6 +985,7 @@ class player{
 		io.to(this.id).emit('relay',[this.x,this.y,this.chunk])
 		let tnpe = [];
 		let tmap2 = {}
+
 		for(let i = 0; i < tnewMap[this.dimension].length; i++){
 			if(distance(tnewMap[this.dimension][i][0]*20+10,tnewMap[this.dimension][i][1]*20+10,this.x,this.y)<49){
 				let sS = [tnewMap[this.dimension][i][0],tnewMap[this.dimension][i][1],tnewMap[this.dimension][i][2]]
@@ -1004,6 +1005,28 @@ class player{
 				}
 			}
 		}
+
+
+		// let unneeded = 0
+		// for(let i = this.x-26; i < this.x+26; i++){
+		// 	for(let j = this.y-26; j < this.y+26; j++){
+		// 		let ctm = CoordToMap(i,j,this.dimension)
+		// 		if(ctm[0] == undefined){
+		// 			unneeded += 1
+		// 			continue;
+		// 		}
+		// 		let tblock = tnewMap[this.dimension][ctm[0]][ctm[1]]
+
+		// 		let	blockStr = tblock[2]
+		// 		let coordstr = (i+","+j)
+		// 		if(blockStr != this.temporalMap[coordstr]){
+		// 			tmap2[coordstr] = blockStr
+		// 		}
+		// 		this.temporalMap[coordstr] = blockStr
+
+
+		// 	}
+		// }
 
 
 
@@ -1405,7 +1428,7 @@ function doSomething(){
 
 setInterval(function(){ 
     doSomething()
-}, 50);
+}, 5);
 
 
 setInterval(function(){if(startPing == 1){pping++}},1)
@@ -2369,6 +2392,12 @@ function TNEWkeepOnlyTile(str,type){
 }
 
 
+function testGenerateChunks(e){
+	for(let i = 0; i < e; i++){
+		GenerateChunk(100,i)
+	}
+}
+
 function GenerateChunk(x,y,d){
 	let dimension = "O"
 	if(d != undefined){
@@ -2613,15 +2642,50 @@ function setblock(x,y,block,d){
 }
 
 
+function itemStackable(item1,item2){
+
+	if(TNEWATTRIBUTEOF(item1,"stk") == "1" || TNEWATTRIBUTEOF(item2,"stk") == "1" ){
+		return(false)
+	}
+
+	let baseatt = BASEATTRIBUTESOF(item1)
+	for(let i = 0; i < baseatt.length; i++){
+		if(baseatt[0] == "A" || baseatt[0] == "M"){
+			continue;
+		}
+		if(TNEWATTRIBUTEOF(item1,baseatt[i]) != TNEWATTRIBUTEOF(item2,baseatt[i])){
+			return(false)
+		}
+
+	}
+
+	return(true)
+
+}
+
 
 function give(p,amount,item){
 	for(let i = 0; i < enDict[p].Inventory.length; i++){
-		let t = enDict[p].Inventory[i].split("-")
-		if(t[0] == item){
+		// let t = enDict[p].Inventory[i].split("-")
+
+
+		// for(let j = 0; j < t.length; j++){
+		// 	let attsplit = t[i].split(":")
+		// 	if(attsplit[0] == "A" || attsplit[0] == "M"){
+		// 		continue;
+		// 	}
+
+
+		// }
+
+
+		// if(t[0] == item){
+		if(itemStackable(item,enDict[p].Inventory[i])){
 			enDict[p].Inventory[i] = addToItem(enDict[p].Inventory[i],amount)
 			enDict[p].invrelay()
 			return("1")
 		}
+
 	}
 	for(let i = 0; i < enDict[p].Inventory.length; i++){
 		if(enDict[p].Inventory[i] == "" || enDict[p].Inventory[i] == undefined){
@@ -2976,6 +3040,30 @@ function removeAttributeOf(str,e){
 
 }
 
+function BASEATTRIBUTESOF(str){
+	let outstr = ""
+	let a = bracketLevels(str)[0]
+	let deleting = false
+	for(let i = 0; i < a.length; i++){
+		if(a[i] == "^"){
+			deleting = !deleting
+			continue
+		}if(deleting){
+			continue
+		}
+
+		outstr += a[i]
+
+	}
+	let outarr = []
+	let split1 = outstr.split("-")
+	for(let i = 0; i < split1.length; i++){
+		outarr.push(split1[i].split(":")[0])
+	}
+
+
+	return(outarr)
+}
 
 function TNEWATTRIBUTEOF(str,e){
   if(str == undefined){return("NONE")}
@@ -3692,7 +3780,7 @@ function explosion(x,y,size,d){
 		}
 	}
 
-	ParticleRelay(["Explosion",[x,y]],dimension)
+	ParticleRelay(["Explosion",[x,y,size]],dimension)
 
 }
 

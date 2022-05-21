@@ -4,20 +4,27 @@
 
 
 	"BLOCKSALL":{
-		"1":{"0":"#B96A04","1":"Oak Wood","2":100},
-		"2":{"0":"#8C8C8C","1":"Stone","2":400},
-		"3":{"0":"#A95A00","1":"Oak Tree Wood","2":400},
-		"4":{"0":"Gold Ore","1":"Gold Ore","2":400},
-		"5":{"0":"#00FFFF","1":"Diamond Block","2":800},
-		"6":{"0":"Diamond Ore","1":"Diamond Ore","2":200},
-		"7":{"0":"Glass Block","1":"Glass Block","2":50},
-		"8":{"0":"#703000","1":"Explosive","2":20}
+		"1":{"0":["#B96A04"],"1":"Oak Wood","2":100},
+		"2":{"0":["#8C8C8C"],"1":"Stone","2":400},
+		"3":{"0":["#A95A00"],"1":"Oak Tree Wood","2":400},
+		"4":{"0":["Gold Ore"],"1":"Gold Ore","2":400},
+		"5":{"0":["#00FFFF"],"1":"Diamond Block","2":800},
+		"6":{"0":["Diamond Ore"],"1":"Diamond Ore","2":200},
+		"7":{"0":["Glass Block"],"1":"Glass Block","2":50},
+		"8":{"0":["#703000"],"1":"Explosive","2":20}
 	},
 
 	"TileImageReferenceDict":{
 		"Gold Ore":0,
 		"Diamond Ore":1,
-		"Glass Block":2
+		"Glass Block":2,
+		"Deep Sea":3,
+		"Sea":4,
+		"Shallow Waters":5,
+		"Sand":6,
+		"Plains":7,
+		"Forest":8,
+		"Dense Forest":9
 	},
 	"EntityImageReferenceDict":{
 		"player":0,
@@ -68,24 +75,23 @@
 
 	"HeightMap" :["B","Sl","G"],
 	"SLABSALL" :{
-			"1":{"0":"#795A02","1":"Wooden slab","2":120},
-			"2":{"0":"#5C5C5C","1":"Stone slab","2":170}
+			"1":{"0":["#795A02"],"1":"Wooden slab","2":120},
+			"2":{"0":["#5C5C5C"],"1":"Stone slab","2":170}
 		},
 
 
 	"TILESALL":{
-		"0":["#000000","Abyss"],
-		"1":["#04399F","Deep Sea"],
-		"2":["#0078FF","Sea"],
-		"3":["#1FB1FF","Shallow Waters"],
-		"4":["#D9DC00","Sand"],
-		"5":["#20A020","Plains"],
-		"6":["#207020","Forest"],
-		"7":["#205020","Dense Forest"],
-		"8":["#707070","Mountains"],
-		"9":["#F0F0F0","Snowy Mountain Peaks"]
+		"0":[["#000000"],"Abyss"],
+		"1":[["#04399F","Deep Sea"],"Deep Sea"],
+		"2":[["#0078FF","Sea"],"Sea"],
+		"3":[["#1FB1FF","Shallow Waters"],"Shallow Waters"],
+		"4":[["#D9DC00","Sand"],"Sand"],
+		"5":[["#20A020","Plains"],"Plains"],
+		"6":[["#207020","Forest"],"Forest"],
+		"7":[["#205020","Dense Forest"],"Dense Forest"],
+		"8":[["#707070"],"Mountains"],
+		"9":[["#F0F0F0"],"Snowy Mountain Peaks"]
 	},
-
 
 
 
