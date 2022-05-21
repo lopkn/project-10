@@ -1428,7 +1428,7 @@ function doSomething(){
 
 setInterval(function(){ 
     doSomething()
-}, 5);
+}, 50);
 
 
 setInterval(function(){if(startPing == 1){pping++}},1)

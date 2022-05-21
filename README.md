@@ -37,6 +37,9 @@ FEATURES DONE (after creation of tdl)
 - function for block breaking
 - hunger system
 - block outlines
+- textures overhaul
+
+
 
 
 TO DO LIST
@@ -48,8 +51,6 @@ TO DO LIST
 - blood and ash tiles
 
 - particles and fire
-
-- textures overhaul
 
 - server generated lightning beams
 

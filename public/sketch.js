@@ -1687,7 +1687,7 @@ var circleSIGH = [[20,8],[13,11],[11,13],[8,20],[11,27],[13,29],[20,32],[27,29],
 
 var animationBeams = []
 
-
+let MCVstate = {}
 
 // main loop
 // ==================================================================================================================
@@ -1721,7 +1721,23 @@ function repeat(){
 
   }
 
-  drawMenuCtx()
+
+
+  if(MCVs.TemporalInv.Items.length > 0){
+  MCVs.TemporalInv.open = true
+} else {
+  MCVs.TemporalInv.open = false
+}
+if(MCVs.ChestInv.Items.length > 0){
+  MCVs.ChestInv.open = true
+} else {
+  MCVs.ChestInv.open = false
+}
+  let strifiedmcv = JSON.stringify(MCVs)
+  if(MCVstate !== strifiedmcv){
+    MCVstate = strifiedmcv
+    drawMenuCtx()
+  }
 
 
 
@@ -2183,6 +2199,11 @@ function UPDATEMAP(input){
 
     playersUpdate(input[1])
     // NPEsUpdate(input[0])
+
+    for(let i = 0; i < input[1].length; i++){
+      let tcol = input[1][i][3][1] ? "#00FF00" : "#FF0000"
+      drawOutline(input[1][i][0],input[1][i][1],tcol,1)
+    }
 
 
   for(let i = 0; i < trees.length; i++){
@@ -2723,10 +2744,25 @@ function isKnownBlock(x,y){
   return(false)
 }
 
+function drawOutline(ix,iy,col,size){
 
+  x = ix - player.x + 20
+  y = iy - player.y + 20
+
+  ctxm.strokeStyle = col
+  ctxm.lineWidth = size
+
+  ctxm.beginPath()
+    ctxm.moveTo(x*20,y*20)
+    ctxm.lineTo(x*20+20,y*20)
+    ctxm.lineTo(x*20+20,y*20+20)
+    ctxm.lineTo(x*20,y*20+20)
+    ctxm.lineTo(x*20,y*20)
+  ctxm.stroke()
+
+}
 
 function getBlockOutline(x,y){
-
   if(!isKnownBlock(x,y)){
     return;
   }
@@ -2836,11 +2872,13 @@ var MCVs = {
     "Bars":[["HP","#00FF00"],["hunger","#FFFF00"],["energy","#00FFFF"]]
   },
   "EntityMenu":{
-    "open":true,
+    "open":false,
     "maxed":true,
     "x":700,
     "y":5,
-    "width":100
+    "width":160,
+    "entity":[],
+    "options":[]
   }
 
 }
@@ -2881,6 +2919,27 @@ function drawMenuCtx(){
 menuCTX.fillStyle = "rgba(0,0,0,0.6)"
 menuCTX.clearRect(0, 0, 1560, 940)
 
+
+//draw entitymenu
+if(MCVs.EntityMenu.open){
+if(MCVs.EntityMenu.maxed == true){
+
+  renderBar('EntityMenu',"rgba(200,200,255,0.7)")
+  MCTXfill("rgba(70,70,70,0.7)")
+  let menuheight = MCVs.EntityMenu.options.length * 30
+  MCTXrect(MCVs.EntityMenu.x,MCVs.EntityMenu.y+20,MCVs.EntityMenu.width,MCVs.EntityMenu)
+
+  for(let i = 0; i < MCVs.ChestInv.Items.length; i++){
+    drawItemMapSprite(MCVs.ChestInv.Items[i],"menu",[MCVs.ChestInv.x,MCVs.ChestInv.y+20,i])
+  }
+
+
+
+} else {
+  renderBar('EntityMenu',"rgba(255,200,200,0.7)")
+
+}
+}
 
 
 //draw playerBars
@@ -2929,11 +2988,7 @@ if(MCVs.PlayerBars.maxed == true){
 
 //draw tempinv
 
-if(MCVs.TemporalInv.Items.length > 0){
-  MCVs.TemporalInv.open = true
-} else {
-  MCVs.TemporalInv.open = false
-}
+
 
 
 if(MCVs.TemporalInv.open){
@@ -2958,11 +3013,7 @@ if(MCVs.TemporalInv.maxed == true){
 
 //draw chestinv
 
-if(MCVs.ChestInv.Items.length > 0){
-  MCVs.ChestInv.open = true
-} else {
-  MCVs.ChestInv.open = false
-}
+
 
 
 
@@ -2987,8 +3038,7 @@ if(MCVs.ChestInv.maxed == true){
 }
 
 
-
-
+return(true)
 
 }
 
