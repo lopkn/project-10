@@ -1994,9 +1994,9 @@ function combatProcess(e){
 
 
 function chatProcess(e){
-  if(e[0] != ">" && e[0].length <= 11){
+  if(e[0] != ">" && e[0].length <= 16){
     ChatBox = "<span style='color:#F0E5FF'>" + e[0] + ": " + e[1] + "</span></br>" + ChatBox
-  } else if(e[0].length > 11){
+  } else if(e[0].length > 16){
     ChatBox = "Guest: " + e[1] + "</br>" + ChatBox
   } else {
     ChatBox = "<span style='font-weight:bold'>R></span>" + e[1] + "</br>" + ChatBox

@@ -726,9 +726,9 @@ class player{
 
 
 	say(e){
-		for(let b = 0; b < enArr.length; b++){
+		for(let b = 0; b < plArr.length; b++){
 
-			let i = enArr[b]
+			let i = plArr[b]
 
 			if(distance(enDict[i].x,enDict[i].y,this.x,this.y) < 33){
 				io.to(enDict[i].id).emit("chat",[(this.name ? this.name : this.id),e,this.x,this.y])
@@ -906,7 +906,7 @@ class player{
 
 
 		try{
-		if(n.length > 10){
+		if(n.length > 16){
 			this.log(CURRENTCONFIGS.ConsoleResponses.IGNLong,cmdc.error)
 			return;
 		}
@@ -1957,7 +1957,7 @@ function processClick(e){
 			console.log("new combat instance: " +enDict[r].id+","+enDict[c].id)
 			enDict[r].combatRelay(enDict[c].entityType)
 			enDict[c].combatRelay(enDict[r].entityType)
-			enDict[r].log((enDict[c].name ? enDict[i].name : ((enDict[c].entityType == "player") ? enDict[c].id : enDict[c].entityType))+" has entered combat with you!",cmdc.combat)
+			enDict[r].log((enDict[c].name ? enDict[c].name : ((enDict[c].entityType == "player") ? enDict[c].id : enDict[c].entityType))+" has entered combat with you!",cmdc.combat)
 			enDict[c].log((enDict[r].name ? enDict[r].name : ((enDict[r].entityType == "player") ? enDict[r].id : enDict[r].entityType))+" has entered combat with you!",cmdc.combat)
 			clickResult = "EnterCombat"
 		}
