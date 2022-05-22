@@ -11,7 +11,8 @@
 		"5":{"0":["#00FFFF"],"1":"Diamond Block","2":800},
 		"6":{"0":["Diamond Ore"],"1":"Diamond Ore","2":200},
 		"7":{"0":["Glass Block"],"1":"Glass Block","2":50},
-		"8":{"0":["#703000"],"1":"Explosive","2":20}
+		"8":{"0":["#703000"],"1":"Explosive","2":20,"datt":{"att":"Tk:[XPL:2]","tk":true}},
+		"9":{"0":["#FF00FF"],"1":"Wooden Chest","2":100,"datt":{"att":"Ch:[=]"}}
 	},
 
 	"TileImageReferenceDict":{

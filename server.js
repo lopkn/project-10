@@ -712,11 +712,11 @@ class player{
 			for(let i = 0; i < splitchiv.length; i++){
 				chivstr += "=" + splitchiv[i]
 			}
-			chestUpdate("update",chivstr.substring(1),this.chestLink[0])
-			this.chestLink[1] = chivstr.substring(1)
+			chestUpdate("update",chivstr.substring(1),this.chestLink[0],this.dimension)
+			// this.chestLink[1] = chivstr.substring(1)
 		}
 
-		this.invrelay()
+		// this.invrelay()
 	}
 
 	purgeMap(){
@@ -1127,7 +1127,7 @@ class player{
 
 			let chestXY = this.chestLink[0].split(",")
 
-			if(distance(this.x,this.y,parseInt(chestXY[0]),parseInt(chestXY[1])) <= 2){
+			if(distance(this.x,this.y,parseInt(chestXY[0]),parseInt(chestXY[1])) <= 3){
 			chiv = this.chestLink
 			} else {
 
@@ -1344,6 +1344,13 @@ function newConnection(socket){
         broadcast("--"+socket.id+" has left!",cmdc.small_error)
 
         
+
+
+        if(enDict[socket.id].chestLink[0] != "none"){
+        	delete allChestLinks[enDict[socket.id].chestLink[0]][socket.id]
+        	// console.log(allChestLinks,enDict[socket.id].chestLink)
+        }
+
 
         if(enDict[socket.id].inCombat !== false){
         			endCombatInstance(enDict[socket.id].inCombat)
@@ -1872,13 +1879,20 @@ function chestUpdate(type,str,pos,d){
 	let apos = pos.split(",")
 	let tctm = CoordToMap(parseInt(apos[0]),parseInt(apos[1]),dimension)
 	let tcstr = tnewMap[dimension][tctm[0]][tctm[1]][2]
+	
 	if(type == "update"){
 		let nstrn = removeAttributeOf(tcstr,"Ch") + "-Ch:["+str+"]"
 		tnewMap[dimension][tctm[0]][tctm[1]][2] = nstrn
-		for(let i = 0; i < allChestLinks[pos].length; i ++){
-			enDict[allChestLinks[pos][i]].chestLink[1] = str
+		let objk = Object.keys(allChestLinks[pos])
+		console.log(objk)
+		for(let i = 0; i < objk.length; i++){
+			enDict[objk[i]].chestLink[1] = str
+			enDict[objk[i]].invrelay()
 		}
-	} else if(type == "delete"){
+	}
+
+
+	else if(type == "delete"){
 		tnewMap[dimension][tctm[0]][tctm[1]][2] = removeAttributeOf(tcstr,"Ch")
 	}
 }
@@ -1955,7 +1969,7 @@ function processClick(e){
 
 //clicked on a chest
 	if(TNEWATTRIBUTEOF(tnewMap[dimension][chunkPos][e[2]][2],"Ch") != "NONE"){
-		if(clickedDistance <= 2){
+		if(clickedDistance <= 3){
 
 
 		chestInv = removeOutterBracket(TNEWATTRIBUTEOF(tnewMap[dimension][chunkPos][e[2]][2],"Ch"))
@@ -1968,17 +1982,17 @@ function processClick(e){
 	    		let tempclink = allChestLinks[decodedXY.x+","+decodedXY.y]
 
 	    		if(tempclink == undefined){
-	    			allChestLinks[decodedXY.x+","+decodedXY.y] = []
+	    			allChestLinks[decodedXY.x+","+decodedXY.y] = {}
 	    		}
 
-	    		allChestLinks[decodedXY.x+","+decodedXY.y].push(r)
+	    		allChestLinks[decodedXY.x+","+decodedXY.y][r] = "buffer"
 	    		enDict[r].invrelay()
 
 
 	    	} else {
 	    		enDict[r].chestLink = ["none"]
 	    		delete allChestLinks[decodedXY.x+","+decodedXY.y][enDict[r].id] 
-	    		if(allChestLinks[decodedXY.x+","+decodedXY.y].length == 0){
+	    		if(Object.keys(allChestLinks[decodedXY.x+","+decodedXY.y]).length == 0){
 	    			delete allChestLinks[decodedXY.x+","+decodedXY.y]
 	    		}
 	    		enDict[r].invrelay()
@@ -1995,14 +2009,24 @@ function processClick(e){
 
 	if(clickResult == "none"){
 	if(att != "NONE" && a > 0){
+		//placeblock
 		if(!alreadyHasBlock(tnewMap[dimension][chunkPos][e[2]][2])){
 			
 			if(clickedDistance <= 12){
 				tnewMap[dimension][chunkPos][e[2]][2] += "-B:" + att
-				if(att == "8"){
-					tnewMap[dimension][chunkPos][e[2]][2] += "-Tk:[XPL:1]"
-					allTickyBlocks.push([decodedXY.x,decodedXY.y,dimension])
+				let txatt = CURRENTCONFIGS.BLOCKSALL[att].datt
+				if(txatt != undefined){
+					tnewMap[dimension][chunkPos][e[2]][2] += "-"+ txatt.att
+
+					if(txatt.tk){
+						allTickyBlocks.push([decodedXY.x,decodedXY.y,dimension])
+					}
+
 				}
+				// if(att == "8"){
+				// 	tnewMap[dimension][chunkPos][e[2]][2] += "-Tk:[XPL:1]"
+				// 	allTickyBlocks.push([decodedXY.x,decodedXY.y,dimension])
+				// }
 				processItemUsage(r,"norm")
 
 				if(TNEWATTRIBUTEOF(tnewMap[dimension][chunkPos][e[2]][2],"I") != "NONE"){
@@ -3822,10 +3846,13 @@ function explosion(x,y,size,d){
 
 			let bbb = breakBlockBy(tbstr,breakby)
 			if(bbb == "remove"){
+				let temparr =BreakBlock(tnewMap[dimension][tctm[0]][tctm[1]][2],"block",attemptx,attempty,dimension)
+				tnewMap[dimension][tctm[0]][tctm[1]][2] = temparr[0]
 				if(tempdist != 0){
-					DropItems(attemptx,attempty,["B:"+TblockATT],dimension)
+					DropItems(attemptx,attempty,temparr[1],dimension)
+					// DropItems(attemptx,attempty,["B:"+TblockATT],dimension)
 				}
-				tnewMap[dimension][tctm[0]][tctm[1]][2] = ArrRemoveFromTile(tbstr,["B","D","T","S"])
+				// tnewMap[dimension][tctm[0]][tctm[1]][2] = ArrRemoveFromTile(tbstr,["B","D","T","S"])
 			} else {
 				tnewMap[dimension][tctm[0]][tctm[1]][2] = bbb
 			}

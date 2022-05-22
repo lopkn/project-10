@@ -2160,6 +2160,7 @@ function UPDATEMAP(input){
       }
             if(a != "full"){
         ctxm.lineWidth = a * 5
+        ctxm.strokeStyle = "#000000"
         lineM(ccx*BlockPixels+10-a*9,ccy*BlockPixels+10-a*9,a*18,a*18)
         lineM(ccx*BlockPixels+10-a*9,ccy*BlockPixels+10+a*9,a*18,-a*18)
       
@@ -2694,10 +2695,10 @@ function drawItemMapSprite(itemID,where,variables){
       break;
     }
   }
-  if(itemID == "undefined"){
-          ctxm.fillStyle = "#FF00FF"
-          ctxm.fillRect(variables[0]*20,variables[1]*20,20,20)
-        }
+  // if(itemID == "undefined"){
+  //         ctxm.fillStyle = "#FF00FF"
+  //         ctxm.fillRect(variables[0]*20,variables[1]*20,20,20)
+  //       }
   
 }
 
