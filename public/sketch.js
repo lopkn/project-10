@@ -637,10 +637,14 @@ playerSprites.src = 'playerSprites.png'
 
 /////////////////////////////////////////////////////
 
-
   function deathScreen(){
+    setTimeout(deathScreentimed,500)
+  }
+
+  function deathScreentimed(){
+
     clearInterval(canvasAnimation)
-    fill("#500000")
+    fill("rgba(80,0,0,0.7)")
     rect(0,0,900,900)
     fill("#FF0000")
     textO("[YOU DIED]",350,400)
@@ -1222,7 +1226,7 @@ function commandingPush(e){
      if((tempsplit[0] == "/scanmode" ||tempsplit[0] == "/scan" )){
       player.clientInfo.scanmode = tempsplit[1]
 
-    }if((tempsplit[0] == "/rendermode" ||tempsplit[0] == "/renderstyle" )){
+    }else if((tempsplit[0] == "/rendermode" ||tempsplit[0] == "/renderstyle" )){
       let tempnan = parseInt(tempsplit[1])
       if(!isNaN(tempnan)){
         player.clientInfo.tileRenderer = tempnan

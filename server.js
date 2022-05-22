@@ -92,10 +92,6 @@ class mob{
 		this.stats = {}
 
 
-		this.playerLink = {}
-		if(link != undefined){
-			this.playerLink = link
-		}
 		this.turncounters = {"calm":1,"energy":1}
 		this.followerTargeting = {}
 		this.movethought = []
@@ -105,8 +101,32 @@ class mob{
 			if(stats.ownerH != undefined){
 				this.ownerH = stats.ownerH
 			}
+
+			if(stats.sleeprange == undefined){
+				this.stats["sleeprange"] = 100
+			}
+
+			if(stats.despawnRange == undefined){
+				this.stats["despawnRange"] = 200
+			}
+
+			if(stats.dropItems == undefined){
+				this.stats["dropItems"] = true
+			}
+
 		} else{
 			this.ownerH = {"master":id}
+			this.stats = {"sleeprange":100,"despawnRange":200}
+		}
+
+
+
+		this.playerLink = {}
+		if(link != undefined){
+			this.playerLink = {"p":link.player,"dist":fastdistance(enDict[link].x,enDict[link].y,this.x,this.y),"sleep":0}
+		} else {
+			this.playerLink = {"sleep":1}
+			this.recalculatePlayerLink()
 		}
 
 
@@ -249,6 +269,18 @@ class mob{
 	nonPlayerActions(){
 		let myAction = []
 		myAction.push(this.id)
+
+		if(this.playerLink.sleep == 0){
+			this.recalculatePlayerLink()
+		}
+		if(this.playerLink.sleep > 0){
+			this.playerLink.sleep -= 1
+			return;
+		}
+		if(this.playerLink.sleep<0){
+			this.playerLink.sleep += 1
+		}
+
 
 		switch (this.entityType){
 		case "zombie":{
@@ -436,11 +468,39 @@ class mob{
 	}
 	combatRelay(){}
 	invrelay(){}
+	recalculatePlayerLink(){
+		if(this.stats.nondespawnable !== true){
+
+			let dst = ["",10000000000]
+			for(let i = 0; i < plArr.length; i++){
+				let en = enDict[plArr[i]]
+				let tdist = fastdistance(en.x,en.y,this.x,this.y)
+				if(tdist < dst[1]){
+					dst = [plArr[i],tdist]
+				}
+
+			}
+
+			if(dst[1] < this.stats.despawnRange * this.stats.despawnRange){
+				this.playerLink.p = dst[0]
+				this.playerLink.dist = dst[1] 
+				this.playerLink.sleep += Math.floor((Math.sqrt(dst[1])-this.stats.sleeprange)/20)
+			} else {
+				//i should despawn
+				this.playerLink.p = dst[0]
+				this.playerLink.dist = dst[1] 
+				this.playerLink.sleep += Math.floor((Math.sqrt(dst[1])-this.stats.sleeprange)/20)
+				console.log("despawn " + this.id)
+			}
+			return(this.playerLink)
+		}
+		return(0)
+	}
 	removeSelf(){
 		
 		delete usedIDs[this.id]
 			let titems = removeEmptyArrStrings(this.Inventory)
-			if(titems.length > 0){
+			if(titems.length > 0 && this.stats.dropItems){
 				DropItems(this.x,this.y,titems,this.dimension)
 			}
 		for(let i = enArr.length - 1; i > -1; i--){
@@ -461,11 +521,8 @@ class mob{
 			return(true)
 		}
 		return(false)
-}
-	save(){
-
-
 	}
+	save(){}
 
 	entityCheckIfBlock(coords){
 		let a;
@@ -1148,7 +1205,11 @@ function distance(x1,y1,x2,y2) {
 	let b = y2-y1
   return(Math.sqrt(a*a+b*b))
 }
-
+function fastdistance(x1,y1,x2,y2) {
+	let a = x2-x1
+	let b = y2-y1
+  return(a*a+b*b)
+}
 
 ///////////////////////////////////////////////////////////////
 var express = require('express');
@@ -2022,15 +2083,19 @@ function processClick(e){
 			}
 
 			else if(staffInfo.type == "summoning" && a > 0){
+
+
 				let playermagic = enDict[r].entityStats.summoning
 				let tid = r+Math.floor(Math.random()*playermagic+1.3)
-				let tcstats = {"ownerH":{"master":"wild"+tid}}
+				let tcstats = {"ownerH":{"master":"wild"+tid},"dropItems":false}
 				if(staffInfo.following == true){
-					tcstats = {"ownerH":{"master":enDict[r].ownerH.master,"summoner":r}}
+					tcstats["ownerH"] = {"master":enDict[r].ownerH.master,"summoner":r}
 				} 
 				summonNewMob(staffInfo.mob,decodedXY.x,decodedXY.y,tid,dimension,tcstats)
 				clickResult = "Staff"
 				processItemUsage(r,"utility")
+
+
 			}
 
 		}	
