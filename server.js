@@ -1116,7 +1116,7 @@ class player{
 	statusRelay(){
 		this.stepStatus = {"hp":this.Cstats.hp,"hunger":this.Cstats.hunger,"energy":this.Cstats.energy}
 		io.to(this.id).emit("statusRelay",this.stepStatus)
-		
+		return(this.id)
 	}
 
 
@@ -1453,11 +1453,10 @@ function doSomething(){
 		allPlayersGenerateChunks()
 
 		for(let i = 0; i < plArr.length; i++){
-				enDict[plArr[i]].statusRelay()
+				let a = enDict[plArr[i]].statusRelay()
 		}
 
 	}else if(TIME == 0){
-		disconnect()
 		ProcessStep = 1
 		for(let i = enArr.length -1; i > -1; i--){
 			let enid = enArr[i]
@@ -1467,12 +1466,13 @@ function doSomething(){
 				enDict[enid].invrelay()
 				if(enDict[enid].turncounters.energy < 10){
 				enDict[enid].turncounters.energy += 1}
-				enDict[enid].statusRelay()
+				
 				enDict[enid].hungerDeplete("tick")
 				enDict[enid].energyHeal()
-
+				enDict[enid].statusRelay()
 			io.to(enDict[enid].id).emit('chatUpdate')}
 			enDict[enid].kill()
+			
 		}
 
 
@@ -1484,7 +1484,7 @@ function doSomething(){
 
 		allEffectTick()
 		
-
+		disconnect()
 
 
 
@@ -1779,7 +1779,7 @@ if(st[0] == "/"){
 	
 	//generate structure command
 	else if(strsplit[0] == "gen" && enDict[p].keyholder == true){
-		generateStructureCmd(p,strsplit[1],strsplit[2],strsplit[3],strsplit[4])
+		generateStructureCmd(p,strsplit[1],strsplit[2],strsplit[3],strsplit[4],strsplit[5])
 
 	}
 
@@ -1845,8 +1845,8 @@ function processKey(e){
 
 
 
-function generateStructureCmd(p,s,x,y,o){
-	generateStructure(s,parseInt(x),parseInt(y),JSON.parse(o))
+function generateStructureCmd(p,s,x,y,d,o){
+	generateStructure(s,parseInt(x),parseInt(y),d,JSON.parse(o))
 }
 
 
@@ -2505,7 +2505,7 @@ function GenerateChunk(x,y,d){
 		for(let j = 0; j < chunkSize; j++){
 			let value =200+perSeeds[dimension].noise2D((0.2+j+x*chunkSize)/199.7,(0.2+i+y*chunkSize)/199.7)*200
 			t.push([j,i,TNEWgenerateTileFromNumber(value,dimension)])
-			generateStructureFromNumber(value,x*chunkSize+j,y*chunkSize+i)
+			generateStructureFromNumber(value,x*chunkSize+j,y*chunkSize+i,dimension)
 		}
 	}
 	tnewMap[dimension].push(t)
@@ -2664,8 +2664,16 @@ function structureArrDecompress(arr){
 
 
 
-function generateStructure(st,x,y,options){
-	let structure = CURRENTCONFIGS.Structures[st]
+function generateStructure(st,x,y,d,options){
+	if(d == undefined){
+		d = "O"
+	}
+	let structure;
+	if(CURRENTCONFIGS.Structures[st] != undefined){
+		structure = structureArrDecompress(CURRENTCONFIGS.Structures[st])
+	} else {
+		structure = structureArrDecompress(st.split("|nxt|"))
+	}
 	if(options != undefined){
 		let rotate = 0
 		let mirror = 0
@@ -2688,13 +2696,13 @@ function generateStructure(st,x,y,options){
 
 
 
-	let ctm = CoordToMap(x,y)
+	let ctm = CoordToMap(x,y,d)
 	let a = structure[0]
 	for(let i = 1; i < structure.length; i++){
 		let j = i-1
-		setBlock(x+j - Math.floor(j/a)*a,y+Math.floor(j/a),structure[i])
+		setBlock(x+j - Math.floor(j/a)*a,y+Math.floor(j/a),structure[i],d)
 	}
-
+	return("done")
 }
 
 
@@ -2807,6 +2815,9 @@ function ArrLoc(p){
 function getRelativity(p,x,y){
 	let outx = 0
 	let outy = 0
+	if(x == undefined){
+		return("NONE")
+	}
 	if(x[0] == "="){
 		if(x[1] != undefined){
 			outx = enDict[p].x + parseInt(x.substring(1))
@@ -3316,13 +3327,18 @@ function removeAcc(Acc){
 }
 
 
-function generateStructureFromNumber(input,x,y){
-			if(input > 310 && input < 335){
+function generateStructureFromNumber(input,x,y,d){
+	if(d == "O"){
+		if(input > 310 && input < 335){
 			if(Math.random() > 0.995){
-				generateStructure(randomItem(ranStrucLists.GoldOre),x,y,{"mirror":"random","rotate":"random"})
+				generateStructure(randomItem(ranStrucLists.GoldOre),x,y,d,{"mirror":"random","rotate":"random"})
+			}
+		} else if(input > 210 && input < 260){
+			if(Math.random() > 0.999){
+				generateStructure("BigHouse",x,y,d,{"mirror":"random","rotate":"random"})
 			}
 		}
-
+	}
 }
 
 function TNEWgenerateTileFromNumber(input,d){

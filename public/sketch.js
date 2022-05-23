@@ -7,6 +7,7 @@ var renderingVariables = {"itemsize":{"B":40,"Sl":42,"U":42,"In":42}}
 
 var DEBUGGINGLOGS = {"Timeticker" : 0}
 
+var wholeScreenRender = {"alphaColors":[]}
 
 
 class Player{
@@ -1665,7 +1666,7 @@ function statusUpdate(e){
   if(energyChange < 0){
     MCVs.PlayerBars.Bars[2][2].height -= energyChange * (190/player.Cstats.maxenergy)
   }
-
+  drawMenuCtx()
 }
 
 
@@ -1698,6 +1699,7 @@ let MCVstate = {}
 
 
 function repeat(){
+  // for(let i = 0; i < 3; i++){allParticles.push( new CustomParticle(100,100,["rgba(0,0,0,1)"],"pixel",{"size":10,"width":3,"physics":{"type":"gravity","gravity":280,"vx":Math.random()*200-100,"vy":Math.random()*125-325,"ground":{"bottom":Math.random()*100+100,"restitution":Math.random()*-0.7+0.1}},"life":150}))}
   if(MCVs.held != "none"){
 
     MCVs[MCVs.held[0]].x += mouseX - MCVs.held[1]
@@ -1747,8 +1749,7 @@ if(MCVs.ChestInv.Items.length > 0){
 
   clearCanvas()
   InvDraw()
-  fill("white")
-  rectAtCoords(20,20)
+  
 
 
 
@@ -2193,6 +2194,7 @@ function UPDATEMAP(input){
   }
 
 
+
         
     for(let i = player.x - 20; i < player.x + 21;i++){
         for(let j = player.y - 20; j < player.y + 21; j++){
@@ -2204,6 +2206,8 @@ function UPDATEMAP(input){
 
     playersUpdate(input[1])
     // NPEsUpdate(input[0])
+    fillM("white")
+    rectAtCoordsM(20,20)
 
     for(let i = 0; i < input[1].length; i++){
       let tcol = input[1][i][3][1] ? "#00FF00" : "#FF0000"
@@ -2220,6 +2224,13 @@ function UPDATEMAP(input){
     fillM("rgba(0,0,0,"+shades[i][2]+")")
     rectAtCoordsM(shades[i][0],shades[i][1])
   }
+
+
+  for(let i = 0; i < wholeScreenRender.alphaColors.length; i++){
+    fillM(wholeScreenRender.alphaColors[i])
+    rectM(0,0,840,840)
+  }
+
 
 }
 
@@ -3132,9 +3143,20 @@ class CustomParticle{
     }else if(this.physicsdict.type == "gravity"){
       this.x += this.physicsdict.vx/fps
       this.y += this.physicsdict.vy/fps
-      this.y -= this.physicsdict.gravity/fps
+      this.physicsdict.vy += this.physicsdict.gravity/fps
     }
 
+    if(this.physicsdict.ground != undefined){
+      if(this.physicsdict.ground.bottom != undefined){
+
+        if(this.y > this.physicsdict.ground.bottom){
+          this.physicsdict.vy *= this.physicsdict.ground.restitution
+          this.physicsdict.vx *= 0.9
+          this.y = this.physicsdict.ground.bottom
+        }
+      }
+
+    }
 
 
     this.life -= 20/fps
