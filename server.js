@@ -2203,8 +2203,14 @@ function helpCommand(e,p){
 		enDict[p].log(CURRENTCONFIGS.ConsoleResponses.Help4,"#FFFF00")
 	} else if(e[1] == "5" || e[1] == "text" || e[1] == "input"){
 		enDict[p].log(CURRENTCONFIGS.ConsoleResponses.Help5,"#FFFF00")
-	} else if(e[1] == "6" || e[1] == "command" || e[1] == "commands"){
-		enDict[p].log(CURRENTCONFIGS.ConsoleResponses.Help6,"#FFFF00")
+	} else if(e[1] == "6" || e[1] == "command" || e[1] == "commands" || e[1] == "6.0"){
+		enDict[p].log(CURRENTCONFIGS.ConsoleResponses["Help6-0"],"#FFFF00")
+	} else if(e[1] == "6.1" || e[1] == "command1" || e[1] == "commands1"){
+		enDict[p].log(CURRENTCONFIGS.ConsoleResponses["Help6-1"],"#FFFF00")
+	} else if(e[1] == "6.2" || e[1] == "command2" || e[1] == "commands2"){
+		enDict[p].log(CURRENTCONFIGS.ConsoleResponses["Help6-2"],"#FFFF00")
+	} else if(e[1] == "6.3" || e[1] == "command3" || e[1] == "commands3"){
+		enDict[p].log(CURRENTCONFIGS.ConsoleResponses["Help6-3"],"#FFFF00")
 	} else if(e[1] == "7" || e[1] == "combat" || e[1] == "battle"){
 		enDict[p].log(CURRENTCONFIGS.ConsoleResponses.Help7,"#FFFF00")
 	} else {

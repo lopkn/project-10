@@ -1458,7 +1458,7 @@ KeyboardEvent.repeat = false
 document.addEventListener('keydown', (event) => {
   var name = event.key;
 
-  if(event.which === 9){
+  if(event.which === 9 || event.which === 32){
     event.preventDefault();
   }
 
