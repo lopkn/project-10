@@ -1795,7 +1795,7 @@ if(st[0] == "/"){
 	}
 	//purge command
 		else if(strsplit[0] == "purge" || strsplit[0] == "mapurge"){
-		enDict(p).purgeMap()
+		enDict[p].purgeMap()
 	}
 	//login command
 
