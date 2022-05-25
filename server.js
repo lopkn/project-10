@@ -1275,7 +1275,7 @@ function tablearn(e){
 
 
 
-var MainHelpMenu = CURRENTCONFIGS.ConsoleResponses["Help1-1"] + changingConfig.Build + CURRENTCONFIGS.ConsoleResponses["Help1-2"]
+var MainHelpMenu = CURRENTCONFIGS.ConsoleResponses.Help["Help1-1"] + changingConfig.Build + CURRENTCONFIGS.ConsoleResponses.Help["Help1-2"]
 var disconnected = []
 
 function newConnection(socket){
@@ -1329,7 +1329,8 @@ function newConnection(socket){
 			CURRENTCONFIGS.SLABSALL,
 			CURRENTCONFIGS.TileImageReferenceDict,
 			CURRENTCONFIGS.EntityImageReferenceDict,
-			CURRENTCONFIGS.IimageLinkReferenceDict
+			CURRENTCONFIGS.IimageLinkReferenceDict,
+			[CURRENTCONFIGS.ConsoleResponses.Help,MainHelpMenu]
 		]
 
 		io.to(e).emit("config",a)
@@ -1720,7 +1721,7 @@ if(st[0] == "/"){
 	} 
 	//help command
 	else if(strsplit[0] == "H" || strsplit[0] == "h" || strsplit[0] == "help"){
-		helpCommand(strsplit,p)
+		// helpCommand(strsplit,p)
 	}
 	//setblock command
 	else if(strsplit[0] == "set" && enDict[p].keyholder == true){
@@ -1755,6 +1756,8 @@ if(st[0] == "/"){
 	//broadcast command
 		else if(strsplit[0] == "broadcast" && enDict[p].keyholder == true){
 		broadcast(str.substring(9),"#FF0000")
+	}	else if(strsplit[0] == "broadcastcol" && enDict[p].keyholder == true){
+		broadcast(str.substring(13+strsplit[1].length),strsplit[1])
 	}
 
 		else if((strsplit[0] == "dimensionjump" || strsplit[0] == "djump")&& enDict[p].keyholder == true){

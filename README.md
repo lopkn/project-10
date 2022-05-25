@@ -38,7 +38,8 @@ FEATURES DONE (after creation of tdl)
 - hunger system
 - block outlines
 - textures overhaul
-
+- custom explosion sizes
+- client size help command
 
 
 
@@ -47,6 +48,8 @@ TO DO LIST
 - shades layer
 
 - mobile support
+
+- auto rescale event
 
 - blood and ash tiles
 
@@ -57,8 +60,6 @@ TO DO LIST
 - dungeons
 
 - door block
-
-- custom explosion sizes
 
 - dark rooms
 
@@ -87,6 +88,8 @@ TO DO LIST
 - biomes
 
 - rivers
+
+- drowning
 
 - stationary and non stationary click options
 

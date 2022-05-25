@@ -487,7 +487,8 @@ function sizeTell(e,n){
   var EntityReferenceDict
   var canvasAnimation
   var IimageLinkReferenceDict
-
+  var consoleHelpResponses
+  var MainHelpMenu
 function configure(e){
 
 
@@ -499,8 +500,9 @@ function configure(e){
    ImgReferenceDict = e[4]
    EntityReferenceDict = e[5]
    IimageLinkReferenceDict = e[6]
-
-
+   consoleHelpResponses = e[7][0]
+   MainHelpMenu = e[7][1]
+   console.log(e[7])
   clearInterval(canvasAnimation)
   canvasAnimation = setInterval(function(){ 
         repeat()
@@ -1262,7 +1264,14 @@ function commandingPush(e){
       player.clientInfo.actionTextColor = tempsplit[1]
     } else if((tempsplit[0] == "/pushtabcuts")){
       socket.emit("tablearn",[wordTabDict,wordTabArr,"force",tempsplit[1]])
+    } else if(tempsplit[0] == "/help" || tempsplit[0] == "/h"){
+
+      helpCommand(tempsplit)
+
+
     }
+
+
 
 
 
@@ -1282,6 +1291,46 @@ function commandingPush(e){
   } else if(e == "ArrowDown"){
     commandingArrow("down")
   }
+}
+
+
+
+
+function helpCommand(e){
+  
+  if(e[1] != undefined){
+    e[1] = e[1].toLowerCase()
+  }
+  if(e[1] == "1" || e[1] == undefined || e[1] == "game" || e[1] == "general"){
+    selfLog(MainHelpMenu,"#A000FF")
+  } else if(e[1] == "2" || e[1] == "list" || e[1] == "content"){
+    selfLog(consoleHelpResponses.Help2,"#FFFF00")
+  } else if(e[1] == "3" || e[1] == "buffer"){
+    selfLog(consoleHelpResponses.Help3,"#FFFF00")
+  } else if(e[1] == "4" || e[1] == "tick" || e[1] == "ticks" || e[1] == "movement" || e[1] == "move"){
+    selfLog(consoleHelpResponses.Help4,"#FFFF00")
+  } else if(e[1] == "5" || e[1] == "text" || e[1] == "input"){
+    selfLog(consoleHelpResponses.Help5,"#FFFF00")
+  } else if(e[1] == "6" || e[1] == "command" || e[1] == "commands" || e[1] == "6.0"){
+    selfLog(consoleHelpResponses["Help6-0"],"#FFFF00")
+  } else if(e[1] == "6.1" || e[1] == "command1" || e[1] == "commands1"){
+    selfLog(consoleHelpResponses["Help6-1"],"#FFFF00")
+  } else if(e[1] == "6.2" || e[1] == "command2" || e[1] == "commands2"){
+    selfLog(consoleHelpResponses["Help6-2"],"#FFFF00")
+  } else if(e[1] == "6.3" || e[1] == "command3" || e[1] == "commands3"){
+    selfLog(consoleHelpResponses["Help6-3"],"#FFFF00")
+  } else if(e[1] == "7" || e[1] == "combat" || e[1] == "battle"){
+    selfLog(consoleHelpResponses.Help7,"#FFFF00")
+  } else {
+    selfLog("Invalid help option.</br> If you think entities would need help with this, tell me your idea in discord. (lopkn#0019)","#FF0000")
+  }
+}
+
+
+
+function selfLog(e,c){
+  let pe = "<span style='color:"+c+";'>" + e + "</span>"
+  chatProcess([">",pe,0,0])
 }
 
 
@@ -3154,6 +3203,8 @@ class CustomParticle{
           this.physicsdict.vx *= 0.9
           this.y = this.physicsdict.ground.bottom
         }
+
+
       }
 
     }
