@@ -95,6 +95,8 @@ TO DO LIST
 
 - movement terrain turn management
 
+- structure generation distances
+
 - actual structure generation
 
 - natural entity spawning

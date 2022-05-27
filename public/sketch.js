@@ -2155,7 +2155,7 @@ function UPDATEMAP(input){
   if(player.clientInfo.schmode == "on"){
     ctxm.fillStyle = "#000000"
     ctxm.fillRect(0,0,820,820)
-    return;
+    // return;
   }
 
 

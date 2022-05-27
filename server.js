@@ -3,6 +3,7 @@ var plArr = []
 var enArr = []
 var enDict = {}
 
+var generatedStructures = []
 
 var map = []
 var tnewMap = {"O":[],"T":[]}
