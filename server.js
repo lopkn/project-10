@@ -2226,36 +2226,73 @@ function helpCommand(e,p){
 
 
 
+function breakBlockBy(str,a,type){
 
-function breakBlockBy(str,a){
 
-  let split = str.split("-")
-  let e = -1
-  let ee = 0
-  let fin = ""
-  for(let i = 0; i < split.length; i++){
-  	let spl2 = split[i].split(":")
-    if(spl2[0] == "D"){
-      e = parseInt(spl2[1])
-    }else if(spl2[0] == "B"){
-      ee = BLOCKSALL[spl2[1]][2]
-      fin += "-" + split[i]
-    } else {
-    	fin += "-" + split[i]
-    }
-  }
-  if(e == -1 || ee == e){
-  	e = ee
-  }
-  let durability = e - a
+	if(type == undefined || type == "block"){
+		let baseatt = BASEATTRIBUTESOF(str)
+		if(baseatt.includes("B")){
 
-  if(durability > 0){
-  fin += ("-D:"+durability)
-  return(fin.substring(1))
-	} else{
-		return("remove")
+			let blocktype = TNEWATTRIBUTEOF(str,"B")
+			let tempdur = baseatt.includes("D") ? TNEWATTRIBUTEOF(str,"D") : BLOCKSALL[blocktype][2]
+
+			if(tempdur <= 0){
+				return("remove")
+			}
+
+			return(MODIFYATTRIBUTEOF(str,"D",tempdur))
+		}
+		return(str)
 	}
+
+
+
 }
+
+
+// function breakBlockBy(str,a,type){
+
+// 	if(type == undefined || type == "block"){
+
+// 	  let split = str.split("-")
+// 	  let e = -1
+// 	  let ee = 0
+// 	  let fin = ""
+// 	  for(let i = 0; i < split.length; i++){
+// 	  	let spl2 = split[i].split(":")
+// 	    if(spl2[0] == "D"){
+// 	      e = parseInt(spl2[1])
+// 	    }else if(spl2[0] == "B"){
+// 	      ee = BLOCKSALL[spl2[1]][2]
+// 	      fin += "-" + split[i]
+// 	    } else {
+// 	    	fin += "-" + split[i]
+// 	    }
+// 	  }
+// 	  if(e == -1 || ee == e){
+// 	  	e = ee
+// 	  }
+// 	  let durability = e - a
+
+// 	  if(durability > 0){
+// 	  fin += ("-D:"+durability)
+// 	  return(fin.substring(1))
+// 		} else{
+// 			return("remove")
+// 		}
+// 	}
+
+// 	if(type == "all"){
+
+// 	}
+
+
+// 	if(type == "slab"){
+
+// 	}
+
+
+// }
 
 function BreakBlock(str,type,x,y,d,player){
 	let outstr = ""
@@ -3266,6 +3303,15 @@ function TNEWATTRIBUTEOF(str,e){
 
 }
 
+
+function MODIFYATTRIBUTEOF(str,a,mod){
+	let tout = removeAttributeOf(str,a) + "-" + a + ":" + mod
+	return(tout)
+}
+
+
+
+
 function MasterTileDeparser(str){
   let split = str.split('-')
   for(let i = 0; i < HeightMap.length; i++){
@@ -3376,7 +3422,7 @@ function generateStructureFromNumber(input,x,y,d){
 			}
 		} else if(input > 210 && input < 260){
 			if(Math.random() > 0.9){
-				generateStructure("BigHouse",x,y,d,{"mirror":"random","rotate":"random"})
+				generateStructure("upHouse",x,y,d,{"mirror":"random","rotate":"random"})
 			}
 		}
 	}
@@ -3907,15 +3953,14 @@ function explosion(x,y,size,d){
 
 
 
-			let bbb = breakBlockBy(tbstr,breakby)
+			let bbb = TNEWbreakBlockBy(tbstr,breakby)
 			if(bbb == "remove"){
-				let temparr =BreakBlock(tnewMap[dimension][tctm[0]][tctm[1]][2],"block",attemptx,attempty,dimension)
+				let temparr = BreakBlock(tnewMap[dimension][tctm[0]][tctm[1]][2],"block",attemptx,attempty,dimension)
 				tnewMap[dimension][tctm[0]][tctm[1]][2] = temparr[0]
 				if(tempdist != 0){
 					DropItems(attemptx,attempty,temparr[1],dimension)
-					// DropItems(attemptx,attempty,["B:"+TblockATT],dimension)
 				}
-				// tnewMap[dimension][tctm[0]][tctm[1]][2] = ArrRemoveFromTile(tbstr,["B","D","T","S"])
+
 			} else {
 				tnewMap[dimension][tctm[0]][tctm[1]][2] = bbb
 			}
