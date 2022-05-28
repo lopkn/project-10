@@ -2018,7 +2018,8 @@ function processClick(e){
 		if(!alreadyHasBlock(tnewMap[dimension][chunkPos][e[2]][2])){
 			
 			if(clickedDistance <= 12){
-				tnewMap[dimension][chunkPos][e[2]][2] += "-B:" + att
+				tnewMap[dimension][chunkPos][e[2]][2] = removeAttributeOf(tnewMap[dimension][chunkPos][e[2]][2],"D")
+				tnewMap[dimension][chunkPos][e[2]][2]  += "-B:" + att
 				let txatt = CURRENTCONFIGS.BLOCKSALL[att].datt
 				if(txatt != undefined){
 					tnewMap[dimension][chunkPos][e[2]][2] += "-"+ txatt.att
@@ -2235,16 +2236,43 @@ function breakBlockBy(str,a,type){
 
 			let blocktype = TNEWATTRIBUTEOF(str,"B")
 			let tempdur = baseatt.includes("D") ? TNEWATTRIBUTEOF(str,"D") : BLOCKSALL[blocktype][2]
-
+			tempdur -= a
 			if(tempdur <= 0){
 				return("remove")
 			}
 
 			return(MODIFYATTRIBUTEOF(str,"D",tempdur))
 		}
-		return(str)
+		return("no block")
 	}
 
+
+
+	if(type == "all"){
+
+		
+	}
+
+
+
+	if(type == "slab"){
+		let baseatt = BASEATTRIBUTESOF(str)
+		if(baseatt.includes("B")){
+			return("cant break")
+		}
+		if(baseatt.includes("Sl")){
+
+			let blocktype = TNEWATTRIBUTEOF(str,"Sl")
+			let tempdur = baseatt.includes("D") ? TNEWATTRIBUTEOF(str,"D") : BLOCKSALL[blocktype][2]
+			tempdur -= a
+			if(tempdur <= 0){
+				return("remove")
+			}
+
+			return(MODIFYATTRIBUTEOF(str,"D",tempdur))
+		}
+		return("no block")		
+	}
 
 
 }

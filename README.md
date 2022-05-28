@@ -40,6 +40,7 @@ FEATURES DONE (after creation of tdl)
 - textures overhaul
 - custom explosion sizes
 - client size help command
+- actual structure generation
 
 
 
@@ -97,7 +98,9 @@ TO DO LIST
 
 - structure generation distances
 
-- actual structure generation
+- breakable slabs
+
+- transparent blocks
 
 - natural entity spawning
 
