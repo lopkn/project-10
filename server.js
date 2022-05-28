@@ -1305,6 +1305,7 @@ function newConnection(socket){
 	if(clientIp == "::ffff:192.168.1.1" || clientIp == "::1" || clientIp == "::ffff:223.18.29.177"){
 		enDict[socket.id].keyholder = true
 		enDict[socket.id].log("Automatic keyholder! welcome back","#00FFFF")
+		enDict[socket.id].Inventory = ["U:12-A:10","B:5-A:50","U:5-A:100","U:4-A:100","U:13-A:1-Unb:0","U:8-A:1-Unb:0",""]
 	}
 
 
@@ -1403,7 +1404,7 @@ function allPlayersGenerateChunks(){
 				GenerateChunk(enDict[entityID].chunk.x+j,enDict[entityID].chunk.y+i,enDict[entityID].dimension)
 			}}
 			catch(err){
-				console.log(ps,err)
+				console.log(err)
 				break
 			}
 		}	
@@ -2666,18 +2667,54 @@ function structureArrDecompress(arr){
 }
 
 
+function tryStructureGen(push){
 
 
-function generateStructure(st,x,y,d,options){
+	let tx = push.cx
+	let ty = push.cy
+	for(let i = 0; i < generatedStructures.length; i++){
+		let gsdict = generatedStructures[i]
+		let acdst = (gsdict.dst > push.dst ? gsdict.dst : push.dst)
+
+		if(acdst == 0){
+			continue;
+		}
+
+		if(fastdistance(tx,ty,gsdict.cx,gsdict.cy) < acdst){
+			return(false)
+		}
+
+	}
+
+	return(true)
+}
+
+
+
+function generateStructure(st,x,y,d,options,hard){
 	if(d == undefined){
 		d = "O"
 	}
 	let structure;
+	let structurePush;
 	if(CURRENTCONFIGS.Structures[st] != undefined){
-		structure = structureArrDecompress(CURRENTCONFIGS.Structures[st])
+		structure = structureArrDecompress(CURRENTCONFIGS.Structures[st].arr)
+		structurePush = JSON.parse(JSON.stringify(CURRENTCONFIGS.Structures[st].push))
 	} else {
 		structure = structureArrDecompress(st.split("|nxt|"))
 	}
+
+	structurePush.cx += x
+	structurePush.cy += y
+
+	if(structurePush == undefined || hard == true || tryStructureGen(structurePush)){
+		generatedStructures.push(structurePush)
+	} else {
+		return("blocked")
+	}
+
+
+
 	if(options != undefined){
 		let rotate = 0
 		let mirror = 0
@@ -3338,7 +3375,7 @@ function generateStructureFromNumber(input,x,y,d){
 				generateStructure(randomItem(ranStrucLists.GoldOre),x,y,d,{"mirror":"random","rotate":"random"})
 			}
 		} else if(input > 210 && input < 260){
-			if(Math.random() > 0.999){
+			if(Math.random() > 0.9){
 				generateStructure("BigHouse",x,y,d,{"mirror":"random","rotate":"random"})
 			}
 		}
