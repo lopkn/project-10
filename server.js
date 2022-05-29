@@ -714,7 +714,7 @@ class player{
 				chivstr += "=" + splitchiv[i]
 			}
 			chestUpdate("update",chivstr.substring(1),this.chestLink[0],this.dimension)
-			// this.chestLink[1] = chivstr.substring(1)
+
 		}
 
 		// this.invrelay()
@@ -1351,7 +1351,7 @@ function newConnection(socket){
 
         if(enDict[socket.id].chestLink[0] != "none"){
         	delete allChestLinks[enDict[socket.id].chestLink[0]][socket.id]
-        	// console.log(allChestLinks,enDict[socket.id].chestLink)
+
         }
 
 
@@ -1457,6 +1457,9 @@ function doSomething(){
 
 		for(let i = 0; i < plArr.length; i++){
 				let a = enDict[plArr[i]].statusRelay()
+				if(enDict[plArr[i]].chestLink[0] != "none"){
+					enDict[plArr[i]].invrelay()
+				}
 		}
 
 	}else if(TIME == 0){
@@ -1973,43 +1976,45 @@ function processClick(e){
 
 
 //clicked on a chest
-	if(TNEWATTRIBUTEOF(tnewMap[dimension][chunkPos][e[2]][2],"Ch") != "NONE"){
-		if(clickedDistance <= 3){
+
+	let tchestblocktypes = ["Ch","CH"]
+
+	for(let loop = 0; loop < tchestblocktypes.length; loop++){
+		if(TNEWATTRIBUTEOF(tnewMap[dimension][chunkPos][e[2]][2],tchestblocktypes[loop]) != "NONE"){
+			if(clickedDistance <= 3){
+
+			chestInv = removeOutterBracket(TNEWATTRIBUTEOF(tnewMap[dimension][chunkPos][e[2]][2],tchestblocktypes[loop]))
+
+			let chestAtt = [decodedXY.x+","+decodedXY.y]
+
+		    	if(enDict[r].chestLink[0] != chestAtt){
+		    		enDict[r].chestLink = [decodedXY.x+","+decodedXY.y,chestInv] 
+		    		let tempclink = allChestLinks[decodedXY.x+","+decodedXY.y]
+
+		    		if(tempclink == undefined){
+		    			allChestLinks[decodedXY.x+","+decodedXY.y] = {}
+		    		}
+
+		    		allChestLinks[decodedXY.x+","+decodedXY.y][r] = tchestblocktypes[loop]
+		    		enDict[r].invrelay()
 
 
-		chestInv = removeOutterBracket(TNEWATTRIBUTEOF(tnewMap[dimension][chunkPos][e[2]][2],"Ch"))
+		    	} else {
+		    		enDict[r].chestLink = ["none"]
+		    		delete allChestLinks[decodedXY.x+","+decodedXY.y][enDict[r].id] 
+		    		if(Object.keys(allChestLinks[decodedXY.x+","+decodedXY.y]).length == 0){
+		    			delete allChestLinks[decodedXY.x+","+decodedXY.y]
+		    		}
+		    		enDict[r].invrelay()
 
-		let chestAtt = [decodedXY.x+","+decodedXY.y]
+		    	}
 
-	    	if(enDict[r].chestLink[0] != chestAtt){
-	    		enDict[r].chestLink[0] = decodedXY.x+","+decodedXY.y
-	    		enDict[r].chestLink[1] = chestInv
-	    		let tempclink = allChestLinks[decodedXY.x+","+decodedXY.y]
-
-	    		if(tempclink == undefined){
-	    			allChestLinks[decodedXY.x+","+decodedXY.y] = {}
-	    		}
-
-	    		allChestLinks[decodedXY.x+","+decodedXY.y][r] = "buffer"
-	    		enDict[r].invrelay()
-
-
-	    	} else {
-	    		enDict[r].chestLink = ["none"]
-	    		delete allChestLinks[decodedXY.x+","+decodedXY.y][enDict[r].id] 
-	    		if(Object.keys(allChestLinks[decodedXY.x+","+decodedXY.y]).length == 0){
-	    			delete allChestLinks[decodedXY.x+","+decodedXY.y]
-	    		}
-	    		enDict[r].invrelay()
-
-	    	}
-
-	    	clickResult = "Chest"
-	} else {
-		enDict[r].log("you are too far away!",cmdc.small_error)
+		    	clickResult = "Chest"
+			} else {
+				enDict[r].log("you are too far away!",cmdc.small_error)
+			}
+		}	
 	}
-}
-
 
 
 	if(clickResult == "none"){
@@ -2017,7 +2022,7 @@ function processClick(e){
 		//placeblock
 		if(!alreadyHasBlock(tnewMap[dimension][chunkPos][e[2]][2])){
 			
-			if(clickedDistance <= 12){
+			if(clickedDistance <= 12 && clickedDistance != 0){
 				tnewMap[dimension][chunkPos][e[2]][2] = removeAttributeOf(tnewMap[dimension][chunkPos][e[2]][2],"D")
 				tnewMap[dimension][chunkPos][e[2]][2]  += "-B:" + att
 				let txatt = CURRENTCONFIGS.BLOCKSALL[att].datt
@@ -2250,7 +2255,7 @@ function breakBlockBy(str,a,type){
 
 	if(type == "all"){
 
-		
+
 	}
 
 
