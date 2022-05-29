@@ -1269,6 +1269,8 @@ function commandingPush(e){
       helpCommand(tempsplit)
 
 
+    } else if(tempsplit[0] == "/process"){
+      SentenceProcess(temp.substring(9))
     }
 
 
@@ -1328,6 +1330,17 @@ function helpCommand(e){
 
 
 
+
+// function SentenceProcess(e){
+
+
+//   selfLog(e)
+
+
+// }
+
+
+
 function selfLog(e,c){
   let pe = "<span style='color:"+c+";'>" + e + "</span>"
   chatProcess([">",pe,0,0])
@@ -1360,7 +1373,7 @@ var wordTabDict = {}
 var wordTabArr = []
 var currentTabSuggestion = ["",""]
 
-learnTabWord(["hello","/help","/schmode","/actxt","/scanmode","/login","/clickupdate","/keyholder","/commandto"],3)
+learnTabWord(["hello","/help","/schmode","/actxt","/scanmode","/login","/clickupdate","/keyholder","/commandto","/process"],3)
 
 function learnTabWord(input,score){
   if(score == undefined){

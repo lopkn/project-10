@@ -1,5 +1,8 @@
 # project-10
 
+join with link http://home.unsown.top:3000/ (up to date but buggy)
+or link https://game-10.lopkn.unsown.top/ (almost always online)
+
 FEATURES DONE (after creation of tdl)
 - Logins and accounts
 - Lighting & effect tables
@@ -39,7 +42,7 @@ FEATURES DONE (after creation of tdl)
 - block outlines
 - textures overhaul
 - custom explosion sizes
-- client size help command
+- client side help command
 - actual structure generation
 
 
