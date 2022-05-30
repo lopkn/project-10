@@ -2667,7 +2667,8 @@ function updateInv(e){
    if(e[2] != ""){
     let chiv = e[2]
     MCVs.ChestInv.open = true
-
+    MCVs.ChestInv.type = chiv[2]
+    console.log(chiv)
     let splitchiv = chiv[1].split("=")
     MCVs.ChestInv.clickAreas = []
     for(let i = 0; i < splitchiv.length; i++){
@@ -2936,6 +2937,7 @@ var MCVs = {
   "ChestInv":{
     "open":false,
     "maxed":true,
+    "type":"Ch",
     "x": 200,
     "y": 5,
     "width": 70,
@@ -3099,15 +3101,25 @@ if(MCVs.TemporalInv.maxed == true){
 if(MCVs.ChestInv.open){
 if(MCVs.ChestInv.maxed == true){
 
-  renderBar('ChestInv',"rgba(200,200,255,0.7)")
-  MCTXfill("rgba(70,70,70,0.7)")
-  MCTXrect(MCVs.ChestInv.x,MCVs.ChestInv.y+20,MCVs.ChestInv.width,MCVs.ChestInv.Items.length*70)
+  if(MCVs.ChestInv.type == "Ch"){
+    renderBar('ChestInv',"rgba(200,200,255,0.7)")
+    MCTXfill("rgba(70,70,70,0.7)")
+    MCTXrect(MCVs.ChestInv.x,MCVs.ChestInv.y+20,MCVs.ChestInv.width,MCVs.ChestInv.Items.length*70)
 
-  for(let i = 0; i < MCVs.ChestInv.Items.length; i++){
-    drawItemMapSprite(MCVs.ChestInv.Items[i],"menu",[MCVs.ChestInv.x,MCVs.ChestInv.y+20,i])
+    for(let i = 0; i < MCVs.ChestInv.Items.length; i++){
+      drawItemMapSprite(MCVs.ChestInv.Items[i],"menu",[MCVs.ChestInv.x,MCVs.ChestInv.y+20,i])
+    }
+
+  } else if(MCVs.ChestInv.type == "CH"){
+    renderBar('ChestInv',"rgba(200,200,255,0.7)")
+    MCTXfill("rgba(255,0,0,0.7)")
+    MCTXrect(MCVs.ChestInv.x,MCVs.ChestInv.y+20,MCVs.ChestInv.width,MCVs.ChestInv.Items.length*70)
+
+    for(let i = 0; i < MCVs.ChestInv.Items.length; i++){
+      drawItemMapSprite(MCVs.ChestInv.Items[i],"menu",[MCVs.ChestInv.x,MCVs.ChestInv.y+20,i])
+    }
+
   }
-
-
 
 } else {
   renderBar('ChestInv',"rgba(255,200,200,0.7)")

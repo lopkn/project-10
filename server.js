@@ -717,7 +717,7 @@ class player{
 
 		}
 
-		// this.invrelay()
+		
 	}
 
 	purgeMap(){
@@ -741,11 +741,13 @@ class player{
 	}
 
 
-	heal(e){
+	heal(e,supress){
 		this.Cstats.hp += e
 		if(this.Cstats.hp > this.Cstats.maxhp){
 			this.Cstats.hp = this.Cstats.maxhp
-			this.log("you are fully healed!",cmdc.success)
+			if(supress == undefined){
+				this.log("you are fully healed!",cmdc.success)
+			}
 		}
 	}
 
@@ -770,7 +772,7 @@ class player{
 				}
 			} else if(this.Cstats.hunger > 200 && this.Cstats.hp != this.Cstats.maxhp){
 
-				this.Cstats.hp += 1
+				this.heal(1,"yes")
 				if(this.Cstats.hp > this.Cstats.maxhp){
 					this.Cstats.hp = this.Cstats.maxhp
 				}
@@ -863,6 +865,7 @@ class player{
 
 		if(this.Cstats.hp <= 0 ){
 			io.to(this.id).emit("DeathScreen")
+			this.Cstats.hp = -141924801284
 			return(true)
 
 		}
@@ -1502,7 +1505,7 @@ function doSomething(){
 
 setInterval(function(){ 
     doSomething()
-}, 50);
+}, 100);
 
 
 setInterval(function(){if(startPing == 1){pping++}},1)
@@ -1892,10 +1895,9 @@ function chestUpdate(type,str,pos,d){
 		let nstrn = removeAttributeOf(tcstr,"Ch") + "-Ch:["+str+"]"
 		tnewMap[dimension][tctm[0]][tctm[1]][2] = nstrn
 		let objk = Object.keys(allChestLinks[pos])
-		console.log(objk)
 		for(let i = 0; i < objk.length; i++){
 			enDict[objk[i]].chestLink[1] = str
-			enDict[objk[i]].invrelay()
+			// enDict[objk[i]].invrelay()
 		}
 	}
 
@@ -1977,7 +1979,7 @@ function processClick(e){
 
 //clicked on a chest
 
-	let tchestblocktypes = ["Ch","CH"]
+	let tchestblocktypes = CURRENTCONFIGS.AttributeTypes.ChivBlocks
 
 	for(let loop = 0; loop < tchestblocktypes.length; loop++){
 		if(TNEWATTRIBUTEOF(tnewMap[dimension][chunkPos][e[2]][2],tchestblocktypes[loop]) != "NONE"){
@@ -1988,7 +1990,7 @@ function processClick(e){
 			let chestAtt = [decodedXY.x+","+decodedXY.y]
 
 		    	if(enDict[r].chestLink[0] != chestAtt){
-		    		enDict[r].chestLink = [decodedXY.x+","+decodedXY.y,chestInv] 
+		    		enDict[r].chestLink = [decodedXY.x+","+decodedXY.y,chestInv,tchestblocktypes[loop]] 
 		    		let tempclink = allChestLinks[decodedXY.x+","+decodedXY.y]
 
 		    		if(tempclink == undefined){

@@ -75,6 +75,12 @@
 
 
 	"HeightMap" :["B","Sl","G"],
+
+	"AttributeTypes":{
+		"ChivBlocks":["Ch","CH"]
+
+	},
+
 	"SLABSALL" :{
 			"1":{"0":["#795A02"],"1":"Wooden slab","2":120},
 			"2":{"0":["#5C5C5C"],"1":"Stone slab","2":170}

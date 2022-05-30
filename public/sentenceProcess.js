@@ -49,16 +49,15 @@ class sentence{
 
 
   findWordMeanings(){
-  let unknownAmount = 0
     for(let i = 0; i < this.wholeSplit.length; i++){
       let meaning = this.dictfind(this.wholeSplit[i])
       
       if(meaning == "unknown"){
-        unknownAmount += 1
+        this.unknownMeanings.push(this.wholeSplit[i])
       }
 
       this.wholeMeanings[this.wholeSplit[i]] = meaning
-      this.is.push(meaning.is)
+      this.is[meaning.is] = 1
 
     }
 
