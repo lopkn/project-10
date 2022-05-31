@@ -2946,7 +2946,7 @@ var MCVs = {
   },
   "PlayerBars":{
     "maxed":true,
-    "x":700,
+    "x":1400,
     "y":5,
     "width":100,
     "Bars":[["HP","#00FF00"],["hunger","#FFFF00"],["energy","#00FFFF"]]
