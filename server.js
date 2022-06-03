@@ -3027,7 +3027,7 @@ function summonNewMob(name,x,y,id,d,stats){
 	}
 
 
-	if(id == undefined){
+	if(id == undefined || id == "rand"){
 		id = Math.floor(Math.random()*10000)
 	}
 
@@ -3045,7 +3045,20 @@ function summonNewMob(name,x,y,id,d,stats){
 
 
 
+function naturalMobSpawn(ampp,mob){
+	for(let j = 0; j < plArr.length; j++){
+	for(let i = 0; i < ampp; i++){
 
+		let tx = Math.floor(Math.random()*100-50)
+		let ty = Math.floor(Math.random()*100-50)
+
+		if((tx > 20 || tx < 0) && (ty > 20 || ty < 0)){
+			summonNewMob(mob,enDict[plArr[j]].x+tx,enDict[plArr[j]].y+ty,"rand",enDict[plArr[j]].dimension)
+		}
+
+	}
+	}
+}
 
 
 function addToItem(str,amount){
