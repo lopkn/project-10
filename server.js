@@ -3052,7 +3052,7 @@ function naturalMobSpawn(ampp,mob){
 		let tx = Math.floor(Math.random()*100-50)
 		let ty = Math.floor(Math.random()*100-50)
 
-		if((tx > 20 || tx < 0) && (ty > 20 || ty < 0)){
+		if((tx > 20 || tx < 0) && (ty > 20 || ty < 0) && !isBlockage(enDict[plArr[j]].x+tx,enDict[plArr[j]].y+ty,enDict[plArr[j]].dimension)){
 			summonNewMob(mob,enDict[plArr[j]].x+tx,enDict[plArr[j]].y+ty,"rand",enDict[plArr[j]].dimension)
 		}
 
