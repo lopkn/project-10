@@ -1999,7 +1999,7 @@ let a = e[1]
   allBeamSnakes.push(new BeamSnake(a,15,0.4))
   } else if (e[0] == "Explosion"){
 
-    allExplosions.push(new Explosion(a[0],a[1],a[2],1,5))
+    allExplosions.push(new Explosion(a[0],a[1],a[2],1,a[2]))
   }
 
 

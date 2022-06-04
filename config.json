@@ -48,7 +48,7 @@
 		"5":{"type":"dagger","attack":["slash",2.2,1]},
 		"6":{"type":"sword","attack":["slash",2.5,0.9]},
 		"7":{"type":"staff","staff":{"type":"lightning"},"attack":["developer's lightning",10,5]},
-		"8":{"type":"staff","staff":{"type":"explosive"},"attack":["obliterate",10,5]},
+		"8":{"type":"staff","staff":{"type":"explosive","size":6},"attack":["obliterate",10,5]},
 		"9":{"type":"staff","staff":{"type":"summoning","mob":"zombie","following":true},"attack":["swing",1,0.3]},
 		"10":{"type":"staff","staff":{"type":"summoning","mob":"rampant","following":true},"attack":["swing",1,0.3]},
 		"11":{"type":"staff","staff":{"type":"summoning","mob":"verdant","following":true},"attack":["swing",1,0.3]},
@@ -56,7 +56,8 @@
 		"13":{"type":"staff","staff":{"type":"teleporting"},"attack":["warp",2,0.5]},
 		"14":{"type":"staff","staff":{"type":"summoning","mob":"minion"},"attack":["swing",1,0.3]},
 		"15":{"type":"staff","staff":{"type":"summoning","mob":"hunter","following":true},"attack":["swing",1,0.3]},
-		"16":{"type":"staff","staff":{"type":"summoning","mob":"hunter"},"attack":["swing",1,0.3]}
+		"16":{"type":"staff","staff":{"type":"summoning","mob":"hunter"},"attack":["swing",1,0.3]},
+		"17":{"type":"staff","staff":{"type":"explosive","size":14},"attack":["obliterate",10,5]}
 
 	},
 
@@ -68,7 +69,7 @@
 
 	"IimageLinkReferenceDict":{
 		"B":{},
-		"U":{"14":12,"16":15},
+		"U":{"14":12,"16":15,"17":8},
 		"Sl":{},
 		"In":{}
 	},

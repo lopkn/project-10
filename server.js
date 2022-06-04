@@ -51,6 +51,17 @@ function getStrLengthOf(e){
 }
 
 
+
+function testFunctionSpeed(func,p1,p2,p3,p4,p5,p6,p7,p8){
+	console.time("Function speed")
+
+	console.log(func(p1,p2,p3,p4,p5,p6,p7,p8))
+
+	console.timeEnd("Function speed")
+	return("done")
+}
+
+
 function getServerDataSize(){
 	let strl = 0
 	strl += getStrLengthOf(CURRENTCONFIGS)
@@ -67,9 +78,8 @@ function getServerDataSize(){
 
 function ping(a){
 
-	let e = findPlayerString(a)
 
-	io.to(enDict[enArr[e]].id).emit('PING')
+	io.to(plArr[a]).emit('PING')
 	startPing = 1
 	
 }
@@ -1734,7 +1744,7 @@ if(st[0] == "/"){
 	//setblock command
 	else if(strsplit[0] == "set" && enDict[p].keyholder == true){
 		let pos = getRelativity(p,strsplit[1],strsplit[2])
-		setblock(pos[0],pos[1],strsplit[3])
+		setblock(pos[0],pos[1],strsplit[3],enDict[p].dimension)
 	}
 
 	//give command
@@ -2110,7 +2120,7 @@ function processClick(e){
 				processItemUsage(r,"utility")
 			}
 			else if(staffInfo.type == "explosive" && a > 0){
-				explosion(decodedXY.x,decodedXY.y,6,dimension)
+				explosion(decodedXY.x,decodedXY.y,staffInfo.size,dimension)
 				processItemUsage(r,"utility")
 			}else if(staffInfo.type == "teleporting" && a > 0){
 				enDict[r].x = decodedXY.x
