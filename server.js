@@ -2179,11 +2179,14 @@ function DropItems(x,y,arr,d,forced){
 	let cchunk = CoordToMap(x,y,dimension)
 
 
-	let tilename
+	let tilename = undefined;
 	// let e2 = 3+((x%chunkSize)+(y%chunkSize)*chunkSize)
 	try{
 	tilename = tnewMap[dimension][cchunk[0]][cchunk[1]][2]} catch{
 		console.log(cchunk,x,y)
+		GenerateChunk(x,y,dimension)
+		cchunk = CoordToMap(x,y,dimension)
+		tilename = tnewMap[dimension][cchunk[0]][cchunk[1]][2]
 	}
 
 	if(tileItemable(tilename) || forced == true){
@@ -2646,6 +2649,9 @@ function TNEWremoveFromTile(str,type){
 
 
 function tileItemable(str){
+	if(str == undefined){
+		return(false)
+	}
 	if(TNEWATTRIBUTEOF(str,"B") == "NONE" && TNEWATTRIBUTEOF(str,"I") == "NONE"){
 		return(true)
 	}

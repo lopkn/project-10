@@ -80,19 +80,7 @@ function Perlin(seed) {
       return mash;
     }
 
-// Simplex perlin noise.
-//----------------------------------------------------------------------------//
-
-    // Ported from Stefan Gustavson's java implementation
-    // http://staffwww.itn.liu.se/~stegu/simplexnoise/simplexnoise.pdf
-    // Read Stefan's excellent paper for details on how this code works.
-    //
-    // Sean McCullough banksean@gmail.com
-
-    /**
-     * You can pass in a random number generator object if you like.
-     * It is assumed to have a random() method.
-     */
+ 
     var SimplexNoise = function(r) {
 	    if (r == undefined) r = Math;
       this.grad3 = [[1,1,0],[-1,1,0],[1,-1,0],[-1,-1,0], 
@@ -212,10 +200,7 @@ function Perlin(seed) {
         else if(x0<z0) { i1=0; j1=1; k1=0; i2=0; j2=1; k2=1; } // Y Z X order 
         else { i1=0; j1=1; k1=0; i2=1; j2=1; k2=0; } // Y X Z order 
       } 
-      // A step of (1,0,0) in (i,j,k) means a step of (1-c,-c,-c) in (x,y,z), 
-      // a step of (0,1,0) in (i,j,k) means a step of (-c,1-c,-c) in (x,y,z), and 
-      // a step of (0,0,1) in (i,j,k) means a step of (-c,-c,1-c) in (x,y,z), where 
-      // c = 1/6.
+ 
       var x1 = x0 - i1 + G3; // Offsets for second corner in (x,y,z) coords 
       var y1 = y0 - j1 + G3; 
       var z1 = z0 - k1 + G3; 
@@ -320,16 +305,7 @@ function Perlin(seed) {
       var gi110 = this.perm[X+1+this.perm[Y+1+this.perm[Z]]] % 12; 
       var gi111 = this.perm[X+1+this.perm[Y+1+this.perm[Z+1]]] % 12; 
       
-      // The gradients of each corner are now: 
-      // g000 = grad3[gi000]; 
-      // g001 = grad3[gi001]; 
-      // g010 = grad3[gi010]; 
-      // g011 = grad3[gi011]; 
-      // g100 = grad3[gi100]; 
-      // g101 = grad3[gi101]; 
-      // g110 = grad3[gi110]; 
-      // g111 = grad3[gi111]; 
-      // Calculate noise contributions from each of the eight corners 
+
       var n000= this.dot(this.grad3[gi000], x, y, z); 
       var n100= this.dot(this.grad3[gi100], x-1, y, z); 
       var n010= this.dot(this.grad3[gi010], x, y-1, z); 

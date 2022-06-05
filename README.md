@@ -44,7 +44,7 @@ FEATURES DONE (after creation of tdl)
 - custom explosion sizes
 - client side help command
 - actual structure generation
-
+- breakable slabs
 
 
 TO DO LIST
@@ -95,13 +95,11 @@ TO DO LIST
 
 - drowning
 
-- stationary and non stationary click options
-
 - movement terrain turn management
 
 - structure generation distances
 
-- breakable slabs
+- multitul breaks slabs
 
 - transparent blocks
 
@@ -114,6 +112,8 @@ TO DO LIST
 - ping compensation
 
 - timer voting system
+
+- stationary and non stationary click options (temporarily scrapped)
 
 - help menu update (low priority)
 
