@@ -2195,7 +2195,7 @@ function UPDATEMAP(input){
      let tblock = map[constructedMap[i]]
 
       let deparsed = RFMasterTileDeparser(tblock)[0] 
-      let a = 1 - TNEWdeparseDurability(tblock)
+      let a = TNEWdeparseDurability(tblock)
       let bb = constructedMap[i].split(",")
       let ccx = parseInt(bb[0])+20-player.x
       let ccy = parseInt(bb[1])+20-player.y
@@ -2630,8 +2630,12 @@ function TNEWdeparseDurability(str){
     if(a[0] == "B"){
       ee = BLOCKSALL[a[1]][2]
     }
+    if(a[0] == "Sl"){
+      ee = ((ee == 0 )? SLABSALL[a[1]][2] : ee)
+    }
   }
-  if(e == -1 || ee == e){return("full")} else {return(e/ee)}
+  if(e == -1 || ee == e){return("full")}
+    return(1-(e/ee))
 }
 
 

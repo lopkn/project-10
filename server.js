@@ -676,8 +676,8 @@ class player{
 		this.entityType = "player"
 		this.id = id
 		usedIDs[id] = true
-		this.x = -90+Math.floor(Math.random()*7)
-		this.y = Math.floor(Math.random()*7)+100
+		this.x = -100
+		this.y = 102
 		this.chunk = {"x":0,"y":0}
 		this.selectedSlot = 0
 		this.dimension = "O"
@@ -2244,21 +2244,34 @@ function helpCommand(e,p){
 
 
 
-function breakBlockBy(str,a,type){
+function breakBlockBy(x,y,d,a,options){
 
-
+	let type = options.type
+	let r = options.player
+	let tout;
+	let tctm = CoordToMap(x,y,d)
+	let str = tnewMap[d][tctm[0]][tctm[1]][2]
+	let baseatt = BASEATTRIBUTESOF(str)
 	if(type == undefined || type == "block"){
-		let baseatt = BASEATTRIBUTESOF(str)
+		
 		if(baseatt.includes("B")){
 
 			let blocktype = TNEWATTRIBUTEOF(str,"B")
 			let tempdur = baseatt.includes("D") ? TNEWATTRIBUTEOF(str,"D") : BLOCKSALL[blocktype][2]
 			tempdur -= a
 			if(tempdur <= 0){
+				
+	
+				let temparr = BreakBlock(str,"block",x,y,d,r)
+				tnewMap[d][tctm[0]][tctm[1]][2] = temparr[0]
+				DropItems(x,y,temparr[1],d)
+
 				return("remove")
 			}
+			tout = MODIFYATTRIBUTEOF(str,"D",tempdur)
+			tnewMap[d][tctm[0]][tctm[1]][2] = tout
 
-			return(MODIFYATTRIBUTEOF(str,"D",tempdur))
+			return(tout)
 		}
 		return("no block")
 	}
@@ -2266,14 +2279,47 @@ function breakBlockBy(str,a,type){
 
 
 	if(type == "all"){
+		if(baseatt.includes("B")){
 
+			let blocktype = TNEWATTRIBUTEOF(str,"B")
+			let tempdur = baseatt.includes("D") ? TNEWATTRIBUTEOF(str,"D") : BLOCKSALL[blocktype][2]
+			tempdur -= a
+			if(tempdur <= 0){
+				
+	
+				let temparr = BreakBlock(str,"block",x,y,d,r)
+				tnewMap[d][tctm[0]][tctm[1]][2] = temparr[0]
+				DropItems(x,y,temparr[1],d)
+
+				return("remove")
+			}
+			tout = MODIFYATTRIBUTEOF(str,"D",tempdur)
+			tnewMap[d][tctm[0]][tctm[1]][2] = tout
+
+			return(tout)
+		} else if(baseatt.includes("Sl")){
+
+			let blocktype = TNEWATTRIBUTEOF(str,"Sl")
+			let tempdur = baseatt.includes("D") ? TNEWATTRIBUTEOF(str,"D") : BLOCKSALL[blocktype][2]
+			tempdur -= a
+			if(tempdur <= 0){
+				let temparr = BreakBlock(str,"slab",x,y,d,r)
+				tnewMap[d][tctm[0]][tctm[1]][2] = temparr[0]
+				DropItems(x,y,temparr[1],d)
+				return("remove")
+			}
+			tout = MODIFYATTRIBUTEOF(str,"D",tempdur)
+			tnewMap[d][tctm[0]][tctm[1]][2] = tout
+
+			return(tout)
+		}
+		return("no block")
 
 	}
 
 
 
 	if(type == "slab"){
-		let baseatt = BASEATTRIBUTESOF(str)
 		if(baseatt.includes("B")){
 			return("cant break")
 		}
@@ -2283,10 +2329,15 @@ function breakBlockBy(str,a,type){
 			let tempdur = baseatt.includes("D") ? TNEWATTRIBUTEOF(str,"D") : BLOCKSALL[blocktype][2]
 			tempdur -= a
 			if(tempdur <= 0){
+				let temparr = BreakBlock(str,"slab",x,y,d,r)
+				tnewMap[d][tctm[0]][tctm[1]][2] = temparr[0]
+				DropItems(x,y,temparr[1],d)
 				return("remove")
 			}
+			tout = MODIFYATTRIBUTEOF(str,"D",tempdur)
+			tnewMap[d][tctm[0]][tctm[1]][2] = tout
 
-			return(MODIFYATTRIBUTEOF(str,"D",tempdur))
+			return(tout)
 		}
 		return("no block")		
 	}
@@ -2362,9 +2413,21 @@ function BreakBlock(str,type,x,y,d,player){
 			}
 			
 		}
+		return([outstr.substring(1),outitem])
+	}
+	
+	if(type == "slab"){
+		let titem = ""
+		if(player != undefined){
+		let a = give(player,1,"Sl:"+TNEWATTRIBUTEOF(str,"Sl"))
+		if(a == "no space"){
+			titem = "Sl:"+TNEWATTRIBUTEOF(str,"Sl")
+		}} else {
+			titem = "Sl:"+TNEWATTRIBUTEOF(str,"Sl")
+		}
+		return([ArrRemoveFromTile(str,["Sl","D"]),[titem]])
 
 	}
-	return([outstr.substring(1),outitem])
 
 }
 
