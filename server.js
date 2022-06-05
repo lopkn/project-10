@@ -2264,7 +2264,14 @@ function breakBlockBy(x,y,d,a,options){
 	
 				let temparr = BreakBlock(str,"block",x,y,d,r)
 				tnewMap[d][tctm[0]][tctm[1]][2] = temparr[0]
-				DropItems(x,y,temparr[1],d)
+				//ITEMDROP
+				if(options.item != "remove"){
+					if(options.item == "scatter"){
+						DropItems(x+Math.round(Math.random()*4-2),y+Math.round(Math.random()*4-2),temparr[1],d)
+					} else {
+						DropItems(x,y,temparr[1],d)
+					}
+				}
 
 				return("remove")
 			}
@@ -2289,7 +2296,14 @@ function breakBlockBy(x,y,d,a,options){
 	
 				let temparr = BreakBlock(str,"block",x,y,d,r)
 				tnewMap[d][tctm[0]][tctm[1]][2] = temparr[0]
-				DropItems(x,y,temparr[1],d)
+				//ITEMDROP
+				if(options.item != "remove"){
+					if(options.item == "scatter"){
+						DropItems(x+Math.round(Math.random()*4-2),y+Math.round(Math.random()*4-2),temparr[1],d)
+					} else {
+						DropItems(x,y,temparr[1],d)
+					}
+				}
 
 				return("remove")
 			}
@@ -2305,7 +2319,14 @@ function breakBlockBy(x,y,d,a,options){
 			if(tempdur <= 0){
 				let temparr = BreakBlock(str,"slab",x,y,d,r)
 				tnewMap[d][tctm[0]][tctm[1]][2] = temparr[0]
-				DropItems(x,y,temparr[1],d)
+				//ITEMDROP
+				if(options.item != "remove"){
+					if(options.item == "scatter"){
+						DropItems(x+Math.round(Math.random()*4-2),y+Math.round(Math.random()*4-2),temparr[1],d)
+					} else {
+						DropItems(x,y,temparr[1],d)
+					}
+				}
 				return("remove")
 			}
 			tout = MODIFYATTRIBUTEOF(str,"D",tempdur)
@@ -2331,7 +2352,14 @@ function breakBlockBy(x,y,d,a,options){
 			if(tempdur <= 0){
 				let temparr = BreakBlock(str,"slab",x,y,d,r)
 				tnewMap[d][tctm[0]][tctm[1]][2] = temparr[0]
-				DropItems(x,y,temparr[1],d)
+				//ITEMDROP
+				if(options.item != "remove"){
+					if(options.item == "scatter"){
+						DropItems(x+Math.round(Math.random()*4-2),y+Math.round(Math.random()*4-2),temparr[1],d)
+					} else {
+						DropItems(x,y,temparr[1],d)
+					}
+				}
 				return("remove")
 			}
 			tout = MODIFYATTRIBUTEOF(str,"D",tempdur)
@@ -4062,29 +4090,36 @@ function explosion(x,y,size,d){
 			}
 			tbstr = tnewMap[dimension][tctm[0]][tctm[1]][2]
 			let TblockATT = TNEWATTRIBUTEOF(tbstr,"B")
-			if(TblockATT == "NONE" || (TblockATT == "8" && tempdist != 0)){
+			let TblockATT2 = TNEWATTRIBUTEOF(tbstr,"Sl")
+			if((TblockATT == "NONE" && TblockATT2 == "NONE")|| (TblockATT == "8" && tempdist != 0)){
 				attemptx = x+Math.round(Math.random()*size*2-size)
 				attempty = y+Math.round(Math.random()*size*2-size)
 				continue;
 			}
-			let breakby = Math.floor((BLOCKSALL[TblockATT][2] + 40) * 0.3 * ((size-tempdist)/size))
+			let tbreakAmt = (TblockATT == "NONE" ? CURRENTCONFIGS.SLABSALL[TblockATT2][2] : BLOCKSALL[TblockATT][2])
+			let breakby = Math.floor((tbreakAmt + 40) * 0.3 * ((size-tempdist)/size))
 			if(tempdist == 0){
 				breakby = 9000
 			}
 
-
-
-			let bbb = TNEWbreakBlockBy(tbstr,breakby)
-			if(bbb == "remove"){
-				let temparr = BreakBlock(tnewMap[dimension][tctm[0]][tctm[1]][2],"block",attemptx,attempty,dimension)
-				tnewMap[dimension][tctm[0]][tctm[1]][2] = temparr[0]
-				if(tempdist != 0){
-					DropItems(attemptx,attempty,temparr[1],dimension)
-				}
-
-			} else {
-				tnewMap[dimension][tctm[0]][tctm[1]][2] = bbb
+			let breakoptions = {"type":"all","item":"scatter"}
+			if(tempdist == 0){
+				breakoptions.item = "remove"
 			}
+
+			breakBlockBy(attemptx,attempty,dimension,breakby,breakoptions)
+
+			// let bbb = TNEWbreakBlockBy(tbstr,breakby)
+			// if(bbb == "remove"){
+			// 	let temparr = BreakBlock(tnewMap[dimension][tctm[0]][tctm[1]][2],"block",attemptx,attempty,dimension)
+			// 	tnewMap[dimension][tctm[0]][tctm[1]][2] = temparr[0]
+			// 	if(tempdist != 0){
+			// 		DropItems(attemptx,attempty,temparr[1],dimension)
+			// 	}
+
+			// } else {
+			// 	tnewMap[dimension][tctm[0]][tctm[1]][2] = bbb
+			// }
 
 
 		}
