@@ -69,7 +69,7 @@ TO DO LIST
 
 - multiblock entities
 
-- combat animation
+- combat animations
 
 - tile animations
 
@@ -82,8 +82,6 @@ TO DO LIST
 - terrain randomness
 
 - entity menu
-
-- menu only canvas
 
 - try out using cache
 
