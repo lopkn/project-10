@@ -12,7 +12,8 @@
 		"6":{"0":["Diamond Ore"],"1":"Diamond Ore","2":200},
 		"7":{"0":["Glass Block"],"1":"Glass Block","2":50},
 		"8":{"0":["#703000"],"1":"Explosive","2":20,"datt":{"att":"Tk:[XPL:2]","tk":true}},
-		"9":{"0":["#FF00FF"],"1":"Wooden Chest","2":100,"datt":{"att":"Ch:[=]"}}
+		"9":{"0":["#FF00FF"],"1":"Wooden Chest","2":100,"datt":{"att":"Ch:[=]"}},
+		"10":{"0":["#703000"],"1":"Fast Explosive","2":20,"datt":{"att":"Tk:[XPL:1]","tk":true}}
 	},
 
 	"TileImageReferenceDict":{
@@ -68,7 +69,7 @@
 	},
 
 	"IimageLinkReferenceDict":{
-		"B":{},
+		"B":{"10":8},
 		"U":{"14":12,"16":15,"17":8},
 		"Sl":{},
 		"In":{}
