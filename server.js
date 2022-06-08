@@ -28,6 +28,7 @@ console.log(`Process pid ${process.pid}`);
 var perlin2 = require('./perlin')
 var perlin = require('simplex-noise')
 var DEBUGGINGLOGS = {"ticktoggle":0,"combat":0}
+var SERVERCOUNTERS = {"ticks":0}
 
 
 // fs.writeFile('./memory.json',inp, function writeJSON(err){if(err)return console.log(err)})
@@ -1445,6 +1446,7 @@ function doSomething(){
 		allPlayersGenerateChunks()
 		TIME += 1
 		io.emit('TICK')
+		SERVERCOUNTERS.ticks += 1
 		if(DEBUGGINGLOGS.ticktoggle == 1){
 		console.log("tick")
 	}
