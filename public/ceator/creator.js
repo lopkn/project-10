@@ -1,0 +1,70 @@
+function setup() {
+  createCanvas(400, 400);
+}
+
+
+
+
+let size = 10
+
+let arr = []
+for(let i = 0; i < size*size; i++){
+  arr.push("")
+}
+
+
+function draw() {
+  
+  background(220);
+  if(mouseIsPressed){
+    mouseCoords = [Math.floor(mouseX/(20*(20/size))),Math.floor(mouseY/(20*(20/size)))]
+    if(keyIsDown(83)){
+      arr[mouseCoords[0] + mouseCoords[1]*size] = "Sl:1"
+    }else if(keyIsDown(67)){
+      arr[mouseCoords[0] + mouseCoords[1]*size] = ""
+    }else if(keyIsDown(68)){
+      arr[mouseCoords[0] + mouseCoords[1]*size] = "B:5"
+    } else{
+      arr[mouseCoords[0] + mouseCoords[1]*size] = document.getElementById("myText").value
+    }
+  }
+  for(let i = 0; i < size; i++){
+    for(let j = 0; j < size; j++){
+      let aa = arr[j+i*size]
+    if(aa == ""){
+      fill(200,200,200)
+    }else if(aa == 'Sl:1'){
+      fill(50,50,50)
+    }else if(aa == 'B:5'){
+      fill(0,255,255)
+    } else {
+      fill(0,0,0)
+    }
+    rect(20*(20/size)*j,20*(20/size)*i,20*(20/size),20*(20/size))
+  }
+  }
+}
+
+
+function ou(){
+  console.log(JSON.stringify(arr))
+}
+
+function output(){
+  out1 = []
+  out2 = []
+  for(let i = 0; i < arr.length; i++){
+    if(arr[i] != ""){out1.push(i%size)
+                     out2.push(Math.floor(i/size))}
+  }
+  
+  let a = JSON.stringify({locx:out1,locy:out2})
+  let b = a.split('"')
+  let c = ''
+  for(let i = 0; i < b.length; i++){
+    c += b[i]
+  }
+console.log(c)
+return([out1,out2])
+  
+}
