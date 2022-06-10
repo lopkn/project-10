@@ -13,6 +13,8 @@ for(let i = 0; i < size*size; i++){
 }
 
 
+var TileCols = {"B:5":"rgb(00FFFF)"}
+
 function draw() {
   
   background(220);
@@ -35,15 +37,29 @@ function draw() {
       fill(200,200,200)
     }else if(aa == 'Sl:1'){
       fill(50,50,50)
-    }else if(aa == 'B:5'){
-      fill(0,255,255)
+    } else{
+    let getcol = getCol(aa)
+    if(getcol !== false){
+        fill(getcol)
     } else {
-      fill(0,0,0)
+        fill(0,0,0)
+      }
     }
     rect(20*(20/size)*j,20*(20/size)*i,20*(20/size),20*(20/size))
   }
   }
 }
+
+function getCol(block){
+  let a = Object.keys(TileCols)
+  for(let i = 0; i < a.length; i++){
+    if(a[i] == block){
+      return(TileCols[a[i]])
+    }
+  }
+  return(false)
+}
+
 
 
 function ou(){
