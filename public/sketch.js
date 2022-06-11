@@ -21,7 +21,7 @@ class Player{
     this.chunk = {"x":0,"y":0}
     this.selectedSlot = 0
     this.Inventory = ["B:1-A:50","B:5-A:50","U:4-A:100","Sl:1-A:30",""]
-    this.clientInfo = {"tileRenderer":0,"blockOutlineColor":"#000000","scanmode":"off","clickUpdate":"on","schmode":"off","actionTextColor":"rgba(255,0,200,0.5)"}
+    this.clientInfo = {"sound":"off","tileRenderer":0,"blockOutlineColor":"#000000","scanmode":"off","clickUpdate":"on","schmode":"off","actionTextColor":"rgba(255,0,200,0.5)"}
     this.serverSelctedSlot = 0
 
   }
@@ -1235,6 +1235,8 @@ function commandingPush(e){
         player.clientInfo.tileRenderer = tempnan
       }
 
+    }else if(tempsplit[0] == "/sound"){
+      player.clientInfo.sound = tempsplit[1]
     } else if((tempsplit[0] == "/clickupdate" ||tempsplit[0] == "/cupdate" )){
       player.clientInfo.clickUpdate = tempsplit[1]
 
