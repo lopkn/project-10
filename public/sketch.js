@@ -1,7 +1,7 @@
 
 var renderBlocks = 20
-var BlockPixels = 20
-var BlockPixelsHalf = 10
+var BlockPixels = 40
+var BlockPixelsHalf = 20
 
 var renderingVariables = {"itemsize":{"B":40,"Sl":42,"U":42,"In":42}}
 
@@ -1869,7 +1869,7 @@ if(MCVs.ChestInv.Items.length > 0){
 
   for(let i = 0; i < ActionPrint.length; i++){
     fill(ActionPrint[i][2])
-    rect(ActionPrint[i][0]*20+5,ActionPrint[i][1]*20+5,10,10)
+    rect(ActionPrint[i][0]*BlockPixels+5,ActionPrint[i][1]*BlockPixels+5,BlockPixels-10,BlockPixels-10)
 
 
 
@@ -2354,14 +2354,14 @@ function playersUpdate(e){
 
 function drawBannerAt(x,y){
 
-  let fx = (x - player.x + 20) * 20
-  let fy = (y - player.y + 20) * 20
+  let fx = (x - player.x + renderBlocks) * BlockPixels
+  let fy = (y - player.y + renderBlocks) * BlockPixels
 
     let tctxm = new Path2D()
 
     tctxm.moveTo(fx,fy);
-    tctxm.lineTo(fx+5,fy);
-    tctxm.lineTo(fx,fy+5);  
+    tctxm.lineTo(fx+BlockPixels/4,fy);
+    tctxm.lineTo(fx,fy+BlockPixels/4);  
     // tctxm.lineTo(fx,fy+5);
     tctxm.closePath();
     ctxm.fillStyle = "white"
@@ -2831,18 +2831,18 @@ function isKnownBlock(x,y){
 
 function drawOutline(ix,iy,col,size){
 
-  x = ix - player.x + 20
-  y = iy - player.y + 20
+  x = ix - player.x + renderBlocks
+  y = iy - player.y + renderBlocks
 
   ctxm.strokeStyle = col
   ctxm.lineWidth = size
 
   ctxm.beginPath()
-    ctxm.moveTo(x*20,y*20)
-    ctxm.lineTo(x*20+20,y*20)
-    ctxm.lineTo(x*20+20,y*20+20)
-    ctxm.lineTo(x*20,y*20+20)
-    ctxm.lineTo(x*20,y*20)
+    ctxm.moveTo(x*BlockPixels,y*BlockPixels)
+    ctxm.lineTo(x*BlockPixels+BlockPixels,y*BlockPixels)
+    ctxm.lineTo(x*BlockPixels+BlockPixels,y*BlockPixels+BlockPixels)
+    ctxm.lineTo(x*BlockPixels,y*BlockPixels+BlockPixels)
+    ctxm.lineTo(x*BlockPixels,y*BlockPixels)
   ctxm.stroke()
 
 }
@@ -2857,25 +2857,25 @@ function getBlockOutline(x,y){
   ctxm.strokeStyle = player.clientInfo.blockOutlineColor
   ctxm.lineWidth = 2
 
-  x = x - player.x + 20
-  y = y - player.y + 20
+  x = x - player.x + renderBlocks
+  y = y - player.y + renderBlocks
 
   ctxm.beginPath()
   if(!tdict.top){
-    ctxm.moveTo(x*20,y*20)
-    ctxm.lineTo(x*20+20,y*20)
+    ctxm.moveTo(x*BlockPixels,y*BlockPixels)
+    ctxm.lineTo((x+1)*BlockPixels,y*BlockPixels)
   }
   if(!tdict.bottom){
-    ctxm.moveTo(x*20,y*20+20)
-    ctxm.lineTo(x*20+20,y*20+20)
+    ctxm.moveTo(x*BlockPixels,(y+1)*BlockPixels)
+    ctxm.lineTo((x+1)*BlockPixels,(y+1)*BlockPixels)
   }
   if(!tdict.left){
-    ctxm.moveTo(x*20,y*20)
-    ctxm.lineTo(x*20,y*20+20)
+    ctxm.moveTo(x*BlockPixels,y*BlockPixels)
+    ctxm.lineTo(x*BlockPixels,(y+1)*BlockPixels)
   }
   if(!tdict.right){
-    ctxm.moveTo(x*20+20,y*20)
-    ctxm.lineTo(x*20+20,y*20+20)
+    ctxm.moveTo((x+1)*BlockPixels,y*BlockPixels)
+    ctxm.lineTo((x+1)*BlockPixels,(y+1)*BlockPixels)
   }
   ctxm.stroke()
 
