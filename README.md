@@ -49,6 +49,10 @@ FEATURES DONE (after creation of tdl)
 
 TO DO LIST
 
+- random item generation for chests
+
+- random block placements for structure generation
+
 - shades layer
 
 - mobile support
