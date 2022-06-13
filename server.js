@@ -4275,6 +4275,22 @@ function processItemUsage(p,use,num,slot){
 }
 
 
+function generateChestContents(input){
+
+	let outitems = ""
+
+	for(let i = 0; i < input.length; i++){
+
+			if(CURRENTCONFIGS.chestLootTables[input[i]] == undefined){
+				outitems += ("=" + input[i])
+			} else {
+				outitems += "=" + randomItem(CURRENTCONFIGS.chestLootTables[input[i]])
+			}
+		}
+
+		return(outitems.substring(1))
+
+}
 
 
 
