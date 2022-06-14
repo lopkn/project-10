@@ -2944,9 +2944,13 @@ function setBlock(x,y,block,d){
 
 	if(ctm[0] != undefined){
 		tnewMap[dimension][ctm[0]][ctm[1]][2] = TNEWkeepOnlyTile(tnewMap[dimension][ctm[0]][ctm[1]][2],"G")
-			if(block != ""){
-				tnewMap[dimension][ctm[0]][ctm[1]][2] += "-" + block
-			}
+			if(typeof(block) == "string"){
+				if(block != ""){
+					tnewMap[dimension][ctm[0]][ctm[1]][2] += "-" + block
+				}
+			} else {
+				tnewMap[dimension][ctm[0]][ctm[1]][2] += "-" + randomItem(block)
+			} 
 		} else {
 			let ctc = CoordToChunk(x,y)
 			let coord = ctc.x+","+ctc.y
