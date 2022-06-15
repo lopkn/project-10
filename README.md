@@ -49,6 +49,8 @@ FEATURES DONE (after creation of tdl)
 
 TO DO LIST
 
+- refactor the bracket string system
+
 - random item generation for chests
 
 - random block placements for structure generation
