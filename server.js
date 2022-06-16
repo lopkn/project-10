@@ -4303,6 +4303,15 @@ function generateChestContents(input){
 
 //G:1-Ch:[B:1-Bbr:{r:1}=Bj:{h:[b:1]}]
 
+
+function NATTRIBUTEOF(str,type){
+	let a = brackedator(str)
+	if(a[type]!=undefined){
+		return(a[type])
+	}
+	return("NONE")
+}
+
 function brackedator(str,option){
 
 	let tempbrackedate = []
