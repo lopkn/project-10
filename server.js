@@ -53,13 +53,18 @@ function getStrLengthOf(e){
 
 
 
-function testFunctionSpeed(func,p1,p2,p3,p4,p5,p6,p7,p8){
-	console.time("Function speed")
+function testFunctionSpeed(opt,vars,func,p1,p2,p3,p4,p5,p6,p7,p8){
+	
 
-	console.log(func(p1,p2,p3,p4,p5,p6,p7,p8))
+	if(opt == "for"){
+		console.time("Function speed")
+		for(let i= 0; i < vars; i++){
+			func(p1,p2,p3,p4,p5,p6,p7,p8)}
+		console.timeEnd("Function speed")
+		return("done")
+	}
 
-	console.timeEnd("Function speed")
-	return("done")
+	
 }
 
 
