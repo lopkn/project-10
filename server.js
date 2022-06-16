@@ -4296,6 +4296,74 @@ function generateChestContents(input){
 
 }
 
+//G:1-Ch:[B:1-Bbr:{r:1}=Bj:{h:[b:1]}]
+
+function brackedator(str,option){
+
+	let tempbrackedate = []
+	let tempbasestring = ""
+
+	let outbases = []
+	let outbaselinks = []
+	let outeffect = "base"
+	let ttout = ""
+
+	for(let i = 0; i < str.length; i++){
+		let brconfig =  CURRENTCONFIGS.brackets[str[i]]
+		if(brconfig != undefined){
+			
+			if(brconfig[0] == "c"){
+
+				if(tempbrackedate[tempbrackedate.length-1] == brconfig.substring(1)){
+					tempbrackedate.pop()
+				} else {
+					return("BRACKETS NOT MATCHING")
+				}
+
+			} else {
+				tempbrackedate.push(str[i])
+			}
+
+		} else if(tempbrackedate.length == 0){
+			tempbasestring += str[i]
+
+			if(str[i] == ":"){
+				outeffect == "link"
+				outbases.push(ttout)
+				ttout = ""
+			}else if(str[i] == "-"){
+				outeffect == "base"
+				outbaselinks.push(ttout)
+				ttout = ""
+			} else {
+					ttout += str[i]
+			}
+
+		}
+
+	}
+	outbaselinks.push(ttout)
+
+	if(option == undefined || option == "normal"){
+		
+
+		return([outbases,outbaselinks])
+
+	} else if(option == "debug1"){
+
+
+		return(tempbasestring)
+
+
+	}
+
+}
+
+
+
+
+
+
 
 
 //game functions end//===============================================================================

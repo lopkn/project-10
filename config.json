@@ -140,5 +140,6 @@
 		"IGNLong":"That name is too long! names can only have a maximum of 10 character length.",
 		"AlreadyLoggedIn":"The login command can only create new accounts if you arent already using one!"
 	},
+	"brackets":{"[":"]","{":"}","(":")","]":"c[","}":"c{",")":"c("},
 	"DefaultTabcuts":["/help","/schmode","/actxt","/scanmode","/login","/clickupdate","/keyholder","/commandto","/process"]
 }
