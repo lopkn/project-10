@@ -4327,11 +4327,14 @@ function brackedator(str,option){
 		} else if(tempbrackedate.length == 0){
 			tempbasestring += str[i]
 
-			if(str[i] == ":"){
+		}
+
+
+		if(tempbrackedate.length == 0&&str[i] == ":"){
 				outeffect == "link"
 				outbases.push(ttout)
 				ttout = ""
-			}else if(str[i] == "-"){
+			}else if(tempbrackedate.length == 0&&str[i] == "-"){
 				outeffect == "base"
 				outbaselinks.push(ttout)
 				ttout = ""
@@ -4339,15 +4342,15 @@ function brackedator(str,option){
 					ttout += str[i]
 			}
 
-		}
-
 	}
 	outbaselinks.push(ttout)
 
 	if(option == undefined || option == "normal"){
-		
-
-		return([outbases,outbaselinks])
+		let outdict = {}
+		for(let i = 0; i < outbases.length; i++){
+			outdict[outbases[i]] = outbaselinks[i]
+		}
+		return(outdict)
 
 	} else if(option == "debug1"){
 
@@ -4355,6 +4358,8 @@ function brackedator(str,option){
 		return(tempbasestring)
 
 
+	} else if(option == "debug2"){
+		return([outbases,outbaselinks])
 	}
 
 }
