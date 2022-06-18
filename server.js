@@ -4327,6 +4327,13 @@ function generateChestContents(input){
 
 
 function NATTRIBUTEOF(str,type){
+
+	let SFOP = sameFunctionOutputs("NATTRIBUTEOF",arguments)
+	if(SFOP[0] == "true"){
+		return(SFOP[1])
+	}
+
+
 	let a = brackedator(str)
 	if(a[type]!=undefined){
 		return(a[type])
@@ -4403,7 +4410,20 @@ function brackedator(str,option){
 }
 
 
+var foutputDict = {}
+function sameFunctionOutputs(func,inputs){
 
+  let b = []
+
+  for(let i = 0; i < inputs.length; i++){
+    if(foutputDict[func][0][i]!==inputs[i]){
+      return(["false"])
+    }
+  }
+
+  return(["true",foutputDict[func][1]])
+
+}
 
 
 
