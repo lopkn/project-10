@@ -2710,7 +2710,7 @@ function GenerateChunk(x,y,d){
 
 	if(promiseChunks[dimension][ee] != undefined){
 		for(let i = 0; i < promiseChunks[dimension][ee].length; i++){
-			setBlock(promiseChunks[dimension][ee][i][0],promiseChunks[dimension][ee][i][1],promiseChunks[dimension][ee][i][2])
+			setBlock(promiseChunks[dimension][ee][i][0],promiseChunks[dimension][ee][i][1],promiseChunks[dimension][ee][i][2],dimension,{"keep":["G"]})
 		}
 	}
 }
@@ -2932,7 +2932,7 @@ function generateStructure(st,x,y,d,options,hard){
 	let a = structure[0]
 	for(let i = 1; i < structure.length; i++){
 		let j = i-1
-		setBlock(x+j - Math.floor(j/a)*a,y+Math.floor(j/a),structure[i],d)
+		setBlock(x+j - Math.floor(j/a)*a,y+Math.floor(j/a),structure[i],d,{"keep":["G"]})
 	}
 	return("done")
 }
@@ -2940,22 +2940,53 @@ function generateStructure(st,x,y,d,options,hard){
 
 
 
-function setBlock(x,y,block,d){
+function setBlock(x,y,block,d,options){
 	let dimension = "O"
 	if(d != undefined){
 		dimension = d
 	}
 	let ctm = CoordToMap(x,y,dimension)
 
+	if(NATTRIBUTEOF(block,"GEN") != "NONE"){
+		let tgenattrs = brackedator(removeOutterBracket(NATTRIBUTEOF(block,"GEN")))
+
+		if(tgenattrs["Ch"] != undefined){
+
+			let tchestitem = generateChestContents(removeOutterBracket(tgenattrs["Ch"]))
+			block += "-Ch:[" + tchestitem + "]"
+		}
+
+
+
+
+		block = TNEWremoveFromTile(block,"GEN")
+
+	}
+
+
 	if(ctm[0] != undefined){
-		tnewMap[dimension][ctm[0]][ctm[1]][2] = TNEWkeepOnlyTile(tnewMap[dimension][ctm[0]][ctm[1]][2],"G")
-			if(typeof(block) == "string"){
+
+
+
+		if(options.keep != undefined){
+
+			let tstrip = ""
+			let tblockdic = brackedator(tnewMap[dimension][ctm[0]][ctm[1]][2])
+			for(let i = 0; i < options.keep.length; i++){
+				if(tblockdic[options.keep[i]] != undefined){
+					tstrip += "-" + options.keep[i] + ":"+tblockdic[options.keep[i]]
+				}
+			}
+
+
+			tnewMap[dimension][ctm[0]][ctm[1]][2] = tstrip.substring(1)
+
 				if(block != ""){
 					tnewMap[dimension][ctm[0]][ctm[1]][2] += "-" + block
 				}
-			} else {
-				tnewMap[dimension][ctm[0]][ctm[1]][2] += "-" + randomItem(block)
-			} 
+		} else {tnewMap[dimension][ctm[0]][ctm[1]][2] = block}
+
+
 		} else {
 			let ctc = CoordToChunk(x,y)
 			let coord = ctc.x+","+ctc.y
@@ -3005,20 +3036,7 @@ function itemStackable(item1,item2){
 
 function give(p,amount,item){
 	for(let i = 0; i < enDict[p].Inventory.length; i++){
-		// let t = enDict[p].Inventory[i].split("-")
 
-
-		// for(let j = 0; j < t.length; j++){
-		// 	let attsplit = t[i].split(":")
-		// 	if(attsplit[0] == "A" || attsplit[0] == "M"){
-		// 		continue;
-		// 	}
-
-
-		// }
-
-
-		// if(t[0] == item){
 		if(itemStackable(item,enDict[p].Inventory[i])){
 			enDict[p].Inventory[i] = addToItem(enDict[p].Inventory[i],amount)
 			enDict[p].invrelay()
@@ -4287,6 +4305,10 @@ function processItemUsage(p,use,num,slot){
 function generateChestContents(input){
 
 	let outitems = ""
+
+	if(typeof(input)=="string"){
+		input = input.split("==")
+	}
 
 	for(let i = 0; i < input.length; i++){
 
