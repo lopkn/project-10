@@ -1,7 +1,7 @@
 
 var renderBlocks = 20
-var BlockPixels = 40
-var BlockPixelsHalf = 20
+var BlockPixels = 20
+var BlockPixelsHalf = 10
 
 var renderingVariables = {"itemsize":{"B":40,"Sl":42,"U":42,"In":42}}
 

@@ -4308,6 +4308,8 @@ function NATTRIBUTEOF(str,type){
 	let a = brackedator(str)
 	if(a[type]!=undefined){
 		return(a[type])
+	} else if(a == "BRACKETS NOT MATCHING"){
+		return("BRACKERROR")
 	}
 	return("NONE")
 }
