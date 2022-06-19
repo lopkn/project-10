@@ -1276,9 +1276,18 @@ function commandingPush(e){
 
 
     } else if(tempsplit[0] == "/playsound"){
-      playSound(tempsplit[1])
+      if(tempsplit[2] == undefined){
+      playSound(tempsplit[1])} else {
+        playSound(tempsplit[1],JSON.parse(tempsplit[2]))
+      }
+
+      selfLog("playing sound: " + tempsplit[1])
+
     } else if(tempsplit[0] == "/stopsound"){
-      stopSound("all")
+      stopSound(tempsplit[1])
+
+      selfLog("stopping all sounds")
+
     } else if(tempsplit[0] == "/process"){
       SentenceProcess(temp.substring(9))
     }
@@ -3263,6 +3272,21 @@ function playSound(sound,options){
 
   currentSounds.unshift(new Audio(sounds[sound]))
   currentSounds[0].play()
+
+  if(options != undefined){
+    if(options.speed != undefined){
+
+      currentSounds[0].playbackRate = options.speed
+
+    }
+    if(options.loop != undefined){
+
+      currentSounds[0].loop = options.loop
+
+    }
+
+  }
+  return("done")
 }
 
 function stopSound(options){
@@ -3273,5 +3297,21 @@ function stopSound(options){
     }
 
     currentSounds = []
+    return("done")
   }
+
+  if(options == "paused"){
+
+    for(let i = currentSounds.length-1; i > -1; i--){
+      if(currentSounds[1] == undefined && currentSounds[i].paused){
+        currentSounds.splice(i)
+      }
+    }
+
+    return("done")
+
+  }
+
 }
+
+
