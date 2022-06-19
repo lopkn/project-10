@@ -618,6 +618,10 @@ onmousemove = function(e){mouseX = (e.clientX - 5*allzoom +scrollX)/allzoom; mou
 ondrag = function(e){}
 
 
+var sounds = {"music.R10":"tl-music/R10-4Discovery.mp3"}
+var currentSounds = []
+
+
 
 var img = new Image();
 var tileMapImg = new Image();
@@ -1271,6 +1275,10 @@ function commandingPush(e){
       helpCommand(tempsplit)
 
 
+    } else if(tempsplit[0] == "/playsound"){
+      playSound(tempsplit[1])
+    } else if(tempsplit[0] == "/stopsound"){
+      stopSound("all")
     } else if(tempsplit[0] == "/process"){
       SentenceProcess(temp.substring(9))
     }
@@ -3251,3 +3259,19 @@ class CustomParticle{
 
 
 
+function playSound(sound,options){
+
+  currentSounds.unshift(new Audio(sounds[sound]))
+  currentSounds[0].play()
+}
+
+function stopSound(options){
+  if(options == "all"){
+
+    for(let i = 0; i < currentSounds.length; i++){
+      currentSounds[i].pause()
+    }
+
+    currentSounds = []
+  }
+}

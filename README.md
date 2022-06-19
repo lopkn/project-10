@@ -22,6 +22,7 @@ FEATURES DONE (after creation of tdl)
 - custom favicon
 - dropped items
 - chests and inventory
+- random item generation for chests
 - inventory management GUI
 - explosives!!
 - particles and staffs
@@ -48,10 +49,6 @@ FEATURES DONE (after creation of tdl)
 
 
 TO DO LIST
-
-- refactor the bracket string system
-
-- random item generation for chests
 
 - random block placements for structure generation
 
@@ -80,6 +77,8 @@ TO DO LIST
 - tile animations
 
 - damage types
+
+- block breaking types
 
 - combat victory
 
