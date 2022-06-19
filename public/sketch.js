@@ -1279,6 +1279,7 @@ function commandingPush(e){
       if(tempsplit[2] == undefined){
       playSound(tempsplit[1])} else {
         playSound(tempsplit[1],JSON.parse(tempsplit[2]))
+
       }
 
       selfLog("playing sound: " + tempsplit[1])
@@ -1899,10 +1900,17 @@ if(MCVs.ChestInv.Items.length > 0){
 
 
 
-  let l = JSON.stringify(ActionStore)
+  // let l = backslashRemover(JSON.stringify(ActionStore))
+  let l = ""
+  for(let i = 0; i < ActionStore.length; i++){
+    l += ",\"" + ActionStore[i] + "\""
+  }
+  l = "[" + l.substring(1) + "]"
+
+
   ctx.textAlign = "center"
   fill(player.clientInfo.actionTextColor)
-  
+
   textOs(l,410,370)
   ctx.textAlign = "start"
   if(commanding == 1){
@@ -2691,7 +2699,6 @@ function updateInv(e){
     let chiv = e[2]
     MCVs.ChestInv.open = true
     MCVs.ChestInv.type = chiv[2]
-    console.log(chiv)
     let splitchiv = chiv[1].split("=")
     MCVs.ChestInv.clickAreas = []
     for(let i = 0; i < splitchiv.length; i++){
@@ -3314,4 +3321,18 @@ function stopSound(options){
 
 }
 
+
+function backslashRemover(string){
+
+  let outstr = ""
+
+  for(let i = 0; i < string.length; i++){
+    if(string[i] != "\\"){
+      outstr += string[i]
+    }
+  }
+
+  return(outstr)
+
+}
 
