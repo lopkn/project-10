@@ -96,9 +96,9 @@ TO DO LIST
 
 - rivers
 
-- drowning
+- enviornmental damage
 
-- movement terrain turn management
+- enviornmental turn management
 
 - structure generation distances
 
