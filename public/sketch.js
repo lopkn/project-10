@@ -3297,6 +3297,11 @@ function playSound(sound,options){
 }
 
 function stopSound(options){
+
+  if(options == undefined){
+    options = "all"
+  }
+
   if(options == "all"){
 
     for(let i = 0; i < currentSounds.length; i++){

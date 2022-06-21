@@ -366,7 +366,7 @@ class mob{
 						tr = calculatePathStep(this.movethought[0],this.movethought[1],tar[0],tar[1],this.dimension)
 					}
 
-				let NEWPATHFINDER = Pathfind(this.movethought[0],this.movethought[1],tar[0],tar[1],this.dimension,75)
+				let NEWPATHFINDER = Pathfind(this.movethought[0],this.movethought[1],tar[0],tar[1],this.dimension,55)
 
 				if(NEWPATHFINDER[2].length > distance(this.movethought[0],this.movethought[1],tar[0],tar[1]) + 5){
 					for(let p = 0; p < NEWPATHFINDER[2].length; p++){
