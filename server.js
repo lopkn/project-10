@@ -366,6 +366,15 @@ class mob{
 						tr = calculatePathStep(this.movethought[0],this.movethought[1],tar[0],tar[1],this.dimension)
 					}
 
+				let NEWPATHFINDER = Pathfind(this.movethought[0],this.movethought[1],tar[0],tar[1],this.dimension,75)
+
+				if(NEWPATHFINDER[2].length > distance(this.movethought[0],this.movethought[1],tar[0],tar[1]) + 5){
+					for(let p = 0; p < NEWPATHFINDER[2].length; p++){
+						this.movethoughtUpdate(NEWPATHFINDER[2][p])
+						myAction.push(NEWPATHFINDER[2][p])
+					}
+				}
+
 				this.movethoughtUpdate(tr)
 				myAction.push(tr)
 
@@ -630,6 +639,110 @@ function calculatePathStep(x,y,tx,ty,d){
 
 	return(stepTo)
 
+}
+
+function Pathfind(pt1x,pt1y,pt2x,pt2y,dimension,maxsteps){
+
+  let Mempath = {}
+  let alreadyFinished = {}
+  alreadyFinished[pt1x+","+pt1y] = true
+  Mempath[pt1x+","+pt1y] = -1
+  let counter = 0
+  let tempMempath = [[pt1x,pt1y]]
+  let found = false
+  
+  for(let STEPS = 0; STEPS < maxsteps && !found; STEPS++){
+    let alreadyStepped = {}
+    let newtempMempath = []
+    for(let i = 0; i < tempMempath.length; i++){
+      let adderCx = tempMempath[i][0]
+      let adderCy = tempMempath[i][1]
+      
+      for(let j = 0; j < 4; j++){
+        
+        let fin = []
+        
+        if(j == 0){
+          fin = [adderCx+1,adderCy]
+        } else if(j == 1){
+          fin = [adderCx-1,adderCy]
+        } else if(j == 2){
+          fin = [adderCx,adderCy+1]
+        } else if(j == 3){
+          fin = [adderCx,adderCy-1]
+        }
+        
+        
+        if(alreadyFinished[fin[0]+","+fin[1]]==undefined&&!isBlockage(fin[0],fin[1],dimension) && alreadyStepped[fin[0]+","+fin[1]] == undefined){
+          alreadyStepped[fin[0]+","+fin[1]] = true
+          newtempMempath.push(fin)
+        }
+        
+        if(fin[0] == pt2x && fin[1] == pt2y){
+          found = true
+          break;
+        }
+        
+      }
+    }
+    
+    tempMempath = newtempMempath
+    for(let i = 0; i < tempMempath.length; i++){
+      Mempath[tempMempath[i][0]+","+tempMempath[i][1]] = counter
+      alreadyFinished[tempMempath[i][0]+","+tempMempath[i][1]] = true
+    }
+    counter++
+    
+  }
+  
+  let finalpath = []
+   let finwalkstr = ""
+  if(found){
+    
+    let stepsarr = [[pt2x,pt2y]]
+    let currentPx = pt2x
+    let currentPy = pt2y
+    
+    let currentCounter = counter
+    for(let i = counter-1; i > -2; i--){
+    for(let j = 0; j < 4; j++){
+        
+        let fin = []
+        
+        let walkstr = ""
+       
+        if(j == 0){
+          fin = [currentPx+1,currentPy]
+          walkstr = "a"
+        } else if(j == 1){
+          fin = [currentPx-1,currentPy]
+          walkstr = "d"
+        } else if(j == 2){
+          fin = [currentPx,currentPy+1]
+          walkstr = "w"
+        } else if(j == 3){
+          fin = [currentPx,currentPy-1]
+          walkstr = "s"
+        }
+      
+      let str = fin[0] + "," + fin[1]
+      if(Mempath[str] == i-1){
+        // currentCounter = Mempath[str] 
+        stepsarr.unshift(fin)
+        finwalkstr = walkstr + finwalkstr
+        currentPx = fin[0]
+        currentPy = fin[1]
+        break;
+        
+      }
+      
+    }}
+    
+    finalpath = stepsarr
+
+  }
+  return([Mempath,finalpath,finwalkstr])
+  
 }
 
 
