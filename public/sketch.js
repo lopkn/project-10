@@ -3291,6 +3291,9 @@ function playSound(sound,options){
       currentSounds[0].loop = options.loop
 
     }
+    if(options.volume != undefined){
+      currentSounds[0].volume = options.volume
+    }
 
   }
   return("done")
