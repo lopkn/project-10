@@ -54,6 +54,8 @@ TO DO LIST
 
 - shades layer
 
+- command syntax autofill
+
 - mobile support
 
 - auto rescale event
