@@ -23,7 +23,9 @@ for(let i = 0; i < gridsizex; i++){
     grid[i+","+j] = ""
   }
 }
-
+function ratcoord(x,y){
+  rect(x*pixlength,y*pixlength,pixlength,pixlength)
+}
 let finder = {"x":3,"y":3}
 let destination = {"x":7,"y":18}
 let barrierdict = {}
@@ -32,10 +34,7 @@ let barrierdict = {}
 
 function draw() {
   background(220);
-  fill(255)
-  rect(finder.x*pixlength,finder.y*pixlength,pixlength,pixlength)
-  fill(0,255,0)
-  rect(destination.x*pixlength,destination.y*pixlength,pixlength,pixlength)
+  
 
   let barriers = Object.keys(barrierdict)
   for(let i = 0; i < barriers.length; i++){
@@ -51,19 +50,26 @@ function draw() {
    barrierdict[Math.floor(mouseX/pixlength) + "," + Math.floor(mouseY/pixlength)] = true
   }
   if(keyIsDown(68) && keytimer < 0){
-    keytimer = 20
+    keytimer = 50
     finoutt = Pathfind(finder.x,finder.y,destination.x,destination.y,75)
     findict = finoutt[0]
     finbrr = finoutt[1]
   }
   
   if(keyIsDown(83) && keytimer < 0){
-    keytimer = 20
-    finoutt3 = PathfindDouble(finder.x,finder.y,destination.x,destination.y,20)
+    keytimer = 50
+    finoutt3 = PathfindDouble(finder.x,finder.y,destination.x,destination.y,37)
     finoutt2 = finoutt3[0]
     collisionpts = finoutt3[1]
   }
-  
+  if(keyIsDown(82) && keytimer < 0){
+    keytimer = 2
+    delete barrierdict[Math.floor(mouseX/pixlength) + "," + Math.floor(mouseY/pixlength)] 
+  }
+  if(keyIsDown(80)){
+    finder.x = Math.floor(mouseX/pixlength)
+    finder.y = Math.floor(mouseY/pixlength)
+  }
   
   keytimer -= 1
   
@@ -73,8 +79,8 @@ function draw() {
     for(let i = 0; i < finoutt2obj.length; i++){
       // noStroke()
       if(finoutt2[finoutt2obj[i]] > 0){
-      fill(0,0,255-(abs(finoutt2[finoutt2obj[i]]*20)),150)} else {
-        fill(255-(abs(finoutt2[finoutt2obj[i]]*20)),0,0,150)
+      fill(0,0,255-(abs(finoutt2[finoutt2obj[i]]*7)),150)} else {
+        fill(255-(abs(finoutt2[finoutt2obj[i]]*7)),0,0,150)
       }
       let tsplit = finoutt2obj[i].split(",")
       rect(tsplit[0]*pixlength,tsplit[1]*pixlength,pixlength,pixlength)
@@ -84,7 +90,16 @@ function draw() {
       fill(0,255,0)
       rect(collisionpts[i][0]*pixlength,collisionpts[i][1]*pixlength,pixlength,pixlength)
     }
-    
+    for(let i = 0; i < finoutt3[2].length;i++){
+      fill(0,255,0,100)
+      rect(finoutt3[2][i][0]*pixlength,finoutt3[2][i][1]*pixlength,pixlength,pixlength)
+      
+    }
+    for(let i = 0; i < finoutt3[3].length;i++){
+      fill(0,255,0,50)
+      rect(finoutt3[3][i][0]*pixlength,finoutt3[3][i][1]*pixlength,pixlength,pixlength)
+      
+    }
     
   }
   
@@ -113,7 +128,10 @@ function draw() {
     }
   
   
-  
+  fill(255)
+  rect(finder.x*pixlength,finder.y*pixlength,pixlength,pixlength)
+  fill(0,105,0)
+  rect(destination.x*pixlength,destination.y*pixlength,pixlength,pixlength)
 }
 
 function isPossible(x,y){
@@ -146,8 +164,11 @@ function PathfindDouble(p1x,p1y,p2x,p2y,maxsteps){
   let choosecase = 1
   let counter = 1
   for(let STEPS = 0; STEPS < maxsteps && collisions.length == 0; STEPS++){
+    // let rcounter = 0
     newMempath1 = []
     newMempath2 = []
+    // console.log(tempMempath1.length)
+    console.log(tempMempath1)
   for(let i = 0; i < tempMempath1.length; i++){
     
           for(let j = 0; j < 4; j++){
@@ -170,7 +191,7 @@ function PathfindDouble(p1x,p1y,p2x,p2y,maxsteps){
         if(isPossible(fin[0],fin[1])){
           if(Mempath[finstr] == undefined){
           newMempath1.push([fin,finstr])} else if(Mempath[finstr] < 0){
-            console.log("collide")
+            // console.log("collide")
             collisions.push(fin)
           } else {
             // console.log(Mempath[finstr])
@@ -178,6 +199,7 @@ function PathfindDouble(p1x,p1y,p2x,p2y,maxsteps){
         }
       }
   }
+    // console.log(rcounter)
   
     if(collisions.length > 0){
       if( Math.random()>0.5){
@@ -189,10 +211,13 @@ function PathfindDouble(p1x,p1y,p2x,p2y,maxsteps){
     }
     
     tempMempath1 = []
-    
+    let tempath = {}
   for(let i = 0; i < newMempath1.length; i++){
-    tempMempath1.push(newMempath1[i][0])
-    Mempath[newMempath1[i][1]] = counter
+    if(tempath[newMempath1[i][1]] != true){
+      tempath[newMempath1[i][1]] = true
+      tempMempath1.push(newMempath1[i][0])
+      Mempath[newMempath1[i][1]] = counter
+    }
   }
   
   //=================================================
@@ -219,7 +244,7 @@ function PathfindDouble(p1x,p1y,p2x,p2y,maxsteps){
         if(isPossible(fin[0],fin[1])){
           if(Mempath[finstr] == undefined){
           newMempath2.push([fin,finstr])} else if(Mempath[finstr] > 1){
-            console.log("collide")
+            // console.log("collide")
             collisions.push(fin)
           } else {
             // console.log(Mempath[finstr])
@@ -234,20 +259,28 @@ function PathfindDouble(p1x,p1y,p2x,p2y,maxsteps){
     }
      
   tempMempath2 = []
+     let tempath = {}
   for(let i = 0; i < newMempath2.length; i++){
+    if(tempath[newMempath2[i][1]] != true){
+      tempath[newMempath2[i][1]] = true
     tempMempath2.push(newMempath2[i][0])
     Mempath[newMempath2[i][1]] = -counter
+    }
   }
     
     counter++
   }
   }
-  
+      let apath1 = []
+    let apath2 = []
   if(collisions.length != 0){
     
     let pathchoise = collisions[Math.floor(Math.random()*collisions.length)]
     let path1 = []
     let path2 = []
+    
+    let path1choise;
+    let path2choise;
     for(let j = 0; j < 4; j++){
         
         let fin = []
@@ -266,16 +299,95 @@ function PathfindDouble(p1x,p1y,p2x,p2y,maxsteps){
     let finstr2 = fin[0] + "," + fin[1]
     
     if(Mempath[finstr2] == collisioncounter[0]){
-        path1[0] = fin
+        path1.push(fin)
       }else if(Mempath[finstr2] == collisioncounter[1]){
-        path2[0] = fin
+        path2.push(fin)
       }
     }
+    apath1.push(path1[Math.floor(Math.random()*path1.length)])
+    apath2.push(path2[Math.floor(Math.random()*path2.length)])
+    path1 = []
+    path2 = []
+    path1choise = apath1[0]
+    path2choise = apath2[0]
+    collisioncounter[0] -= 1
+    collisioncounter[1] += 1
+    
+    while(collisioncounter[0] > 0){
+      
+      for(let j = 0; j < 4; j++){
+        
+        let fin = []
+        
+        if(j == 0){
+          fin = [path1choise[0]+1,path1choise[1]]
+        } else if(j == 1){
+          fin = [path1choise[0]-1,path1choise[1]]
+        } else if(j == 2){
+          fin = [path1choise[0],path1choise[1]+1]
+        } else if(j == 3){
+          fin = [path1choise[0],path1choise[1]-1]
+        }
+    
+    
+    let finstr2 = fin[0] + "," + fin[1]
+    
+    if(Mempath[finstr2] == collisioncounter[0]){
+        path1.push(fin)
+      }
+        
+        
+        
+      //   else if(Mempath[finstr2] == collisioncounter[1]){
+      //   path2.push(fin)
+      // }
+    }
+      
+      path1choise = path1[Math.floor(Math.random()*path1.length)]
+      apath1.push(path1choise)
+      path1 = []
+     collisioncounter[0] -= 1 
+    }
+    //================
+    while(collisioncounter[1] < 0){
+      
+      for(let j = 0; j < 4; j++){
+        
+        let fin = []
+        
+        if(j == 0){
+          fin = [path2choise[0]+1,path2choise[1]]
+        } else if(j == 1){
+          fin = [path2choise[0]-1,path2choise[1]]
+        } else if(j == 2){
+          fin = [path2choise[0],path2choise[1]+1]
+        } else if(j == 3){
+          fin = [path2choise[0],path2choise[1]-1]
+        }
+    
+    
+    let finstr2 = fin[0] + "," + fin[1]
+    
+    if(Mempath[finstr2] == collisioncounter[1]){
+        path2.push(fin)
+      }
+        
+        
+        
+
+    }
+      
+      path2choise = path2[Math.floor(Math.random()*path2.length)]
+      apath2.push(path2choise)
+      path2 = []
+    collisioncounter[1] += 1 
+    }
+    
 
   }
   
   
-  return([Mempath,collisions])
+  return([Mempath,collisions,apath1,apath2])
 
 }
 
@@ -300,6 +412,9 @@ function Pathfind(pt1x,pt1y,pt2x,pt2y,maxsteps){
   for(let STEPS = 0; STEPS < maxsteps && !found; STEPS++){
     let alreadyStepped = {}
     let newtempMempath = []
+    
+    console.log(tempMempath.length)
+    
     for(let i = 0; i < tempMempath.length; i++){
       let adderCx = tempMempath[i][0]
       let adderCy = tempMempath[i][1]
