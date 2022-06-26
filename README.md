@@ -50,7 +50,7 @@ FEATURES DONE (after creation of tdl)
 
 TO DO LIST
 
-- random block placements for structure generation
+- random block placements for structure generation	
 
 - shades layer
 

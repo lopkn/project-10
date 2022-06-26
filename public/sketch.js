@@ -1268,6 +1268,14 @@ function commandingPush(e){
 
     } else if((tempsplit[0] == "/actxt" ||tempsplit[0] == "/actiontext" )){
       player.clientInfo.actionTextColor = tempsplit[1]
+    } else if((tempsplit[0] == "/coinflip")){
+
+      if(Math.random() > 0.5){
+        selfLog("Heads")
+      } else {
+        selfLog("Tails")
+      }
+
     } else if((tempsplit[0] == "/pushtabcuts")){
       socket.emit("tablearn",[wordTabDict,wordTabArr,"force",tempsplit[1]])
     } else if(tempsplit[0] == "/help" || tempsplit[0] == "/h"){
