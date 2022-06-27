@@ -3211,6 +3211,7 @@ class CustomParticle{
     this.type = type
     this.x = x
     this.y = y
+    this.spawnpos = [x,y]
     this.physicsdict = custom.physics
     this.life = custom.life
   if(type == "pixel"){
@@ -3260,11 +3261,17 @@ class CustomParticle{
 
     if(this.physicsdict.ground != undefined){
       if(this.physicsdict.ground.bottom != undefined){
-
+        if(physicsdict.ground.slope == undefined){
         if(this.y > this.physicsdict.ground.bottom){
           this.physicsdict.vy *= this.physicsdict.ground.restitution
           this.physicsdict.vx *= 0.9
           this.y = this.physicsdict.ground.bottom
+        }} else {
+          if(this.y > this.physicsdict.ground.bottom + (this.x - this.spawnpos[0])*this.physicsdict.ground.slope){
+          this.physicsdict.vy *= this.physicsdict.ground.restitution
+          this.physicsdict.vx *= 0.9
+          this.y = this.physicsdict.ground.bottom
+        }
         }
 
 
