@@ -4215,6 +4215,8 @@ function tickAtZero(str,pos){
 	} else if (str == "XPL"){
 		explosion(pos[0],pos[1],6,pos[2])
 		return(true)
+	} else if (str = "SPW"){
+		summonNewMob("rampant",pos[0],pos[1])
 	}
 	return(false)
 }
