@@ -4181,6 +4181,12 @@ function tickAllBlocks(){
 
 			if(tempRemove === false){
 				outtick += "-" + tdestr
+			} else if (tempRemove === true){
+
+			} else {
+
+				outtick += "-" + tempRemove
+
 			}
 
 
@@ -4217,7 +4223,7 @@ function tickAtZero(str,pos){
 		return(true)
 	} else if (str = "SPW"){
 		summonNewMob("rampant",pos[0],pos[1])
-		return(true)
+		return("SPW:3")
 	}
 	return(false)
 }
