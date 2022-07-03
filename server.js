@@ -2044,8 +2044,8 @@ function processClick(e){
 
 	let r = e[0]
 
-	if(r === false){
-		console.log("processClick: "+e)
+	if(r == undefined){
+		console.log("processClick: " + e)
 		return
 	}
 
