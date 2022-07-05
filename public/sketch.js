@@ -68,6 +68,40 @@ class Explosion{
 
 }
 
+class cirParticle{
+  constructor(x,y,life,options){
+    this.life = life
+    this.size = life
+    this.x = (x-player.x+renderBlocks)*BlockPixels + BlockPixelsHalf
+    this.y = (y-player.y+renderBlocks)*BlockPixels + BlockPixelsHalf
+    this.spawnpos = [player.x,player.y]
+    this.options = (options == undefined ? {} : options)
+    this.lifedrain = (this.options.speed == undefined ? 1 : this.options.speed)
+  }
+  update(){
+    
+    if(this.life <= 0){
+      return("kill")
+    }
+
+    this.x -= (player.x - this.spawnpos[0])*BlockPixels
+    this.y -= (player.y - this.spawnpos[1])*BlockPixels
+    this.spawnpos = [player.x,player.y]
+
+    ctx.beginPath()
+    ctx.lineWidth = this.options.Sinverse == undefined ? this.life*5 : (this.size-this.life)*5
+    ctx.strokeStyle = (this.options.color == undefined ? "rgba(255,255,0,0.8)" : this.options.color)
+
+    if(this.options.Dinverse == undefined){
+      ctx.arc(this.x, this.y, (this.size-this.life)*20, 0, 2 * Math.PI)
+    } else {
+      ctx.arc(this.x, this.y, this.life*20, 0, 2 * Math.PI)
+    }
+    ctx.stroke()
+    this.life -= (this.size/50)*60/fps*this.lifedrain
+  }
+}
+
 
 var allBeamSnakes = []
 
@@ -1969,8 +2003,8 @@ if(MCVs.ChestInv.Items.length > 0){
 
   for(let i = allParticles.length-1; i >-1 ; i--){
 
-    allParticles[i].physicsUpdate()
-    if(allParticles[i].render() == "kill"){
+
+    if(allParticles[i].update() == "kill"){
       allParticles.splice(i,1)
     }
 
@@ -3211,7 +3245,7 @@ class CustomParticle{
     this.type = type
     this.x = x
     this.y = y
-    this.spawnpos = [x,y]
+    this.spawnpos = [player.x,player.y]
     this.physicsdict = custom.physics
     this.life = custom.life
   if(type == "pixel"){
@@ -3247,8 +3281,11 @@ class CustomParticle{
   }
 
 
-  physicsUpdate(){
+  update(){
 
+    this.x -= (player.x - this.spawnpos[0])*BlockPixels
+    this.y -= (player.y - this.spawnpos[1])*BlockPixels
+    this.spawnpos = [player.x,player.y]
     if(this.physicsdict.type == "vector"){
       this.x += this.physicsdict.vx/fps
       this.y += this.physicsdict.vy/fps
@@ -3261,7 +3298,7 @@ class CustomParticle{
 
     if(this.physicsdict.ground != undefined){
       if(this.physicsdict.ground.bottom != undefined){
-        if(physicsdict.ground.slope == undefined){
+        if(this.physicsdict.ground.slope == undefined){
         if(this.y > this.physicsdict.ground.bottom){
           this.physicsdict.vy *= this.physicsdict.ground.restitution
           this.physicsdict.vx *= 0.9
@@ -3281,7 +3318,7 @@ class CustomParticle{
 
 
     this.life -= 20/fps
-
+    return(this.render())
   }
 
 
