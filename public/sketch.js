@@ -27,7 +27,7 @@ class Player{
   }
 }
 
-var allExplosions = []
+// var allExplosions = []
 
 class Explosion{
   constructor(x,y,size,type,frame){
@@ -46,7 +46,7 @@ class Explosion{
 
   }
 
-  upDraw(){
+  update(){
     let frame = Math.floor(this.life/(this.size/this.frame))
     if(this.frame != frame){
       for(let i = 0; i < this.Sbeams.length; i++){
@@ -1985,16 +1985,17 @@ if(MCVs.ChestInv.Items.length > 0){
       allBeamSnakes[i].step(1+Math.floor(Math.random()*2))
     }
   }
-  for(let i = 0; i < allExplosions.length; i++){
-    if(allExplosions[i].life <= 0){
-      allExplosions.splice(i,1)
-      i--
-    } else {
-      allExplosions[i].upDraw()
-    }
+
+  // for(let i = 0; i < allExplosions.length; i++){
+  //   if(allExplosions[i].life <= 0){
+  //     allExplosions.splice(i,1)
+  //     i--
+  //   } else {
+  //     allExplosions[i].upDraw()
+  //   }
 
 
-  }
+  // }
 
   for(let i = allParticles.length-1; i >-1 ; i--){
 
@@ -2063,7 +2064,7 @@ let a = e[1]
   allBeamSnakes.push(new BeamSnake(a,15,0.4))
   } else if (e[0] == "Explosion"){
 
-    allExplosions.push(new Explosion(a[0],a[1],a[2],1,a[2]))
+    allParticles.push(new Explosion(a[0],a[1],a[2],1,a[2]))
   }
 
 
@@ -3240,6 +3241,7 @@ class CustomParticle{
     this.type = type
     this.x = x
     this.y = y
+    this.spawnPos = [x,y]
     this.spawnpos = [player.x,player.y]
     this.physicsdict = custom.physics
     this.life = custom.life
@@ -3299,10 +3301,10 @@ class CustomParticle{
           this.physicsdict.vx *= 0.9
           this.y = this.physicsdict.ground.bottom
         }} else {
-          if(this.y > this.physicsdict.ground.bottom + (this.x - this.spawnpos[0])*this.physicsdict.ground.slope){
+          if(this.y > this.physicsdict.ground.bottom + (this.x - this.spawnPos[0])*this.physicsdict.ground.slope){
           this.physicsdict.vy *= this.physicsdict.ground.restitution
           this.physicsdict.vx *= 0.9
-          this.y = this.physicsdict.ground.bottom
+          this.y = this.physicsdict.ground.bottom + (this.x - this.spawnPos[0])*this.physicsdict.ground.slope
         }
         }
 

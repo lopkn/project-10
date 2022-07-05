@@ -4223,7 +4223,7 @@ function tickAtZero(str,pos){
 		return(true)
 	} else if (str = "SPW"){
 		summonNewMob("rampant",pos[0],pos[1])
-		return("SPW:3")
+		return("SPW:7")
 	}
 	return(false)
 }
