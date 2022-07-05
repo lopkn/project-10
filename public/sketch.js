@@ -42,6 +42,7 @@ class Explosion{
       this.Sbeams.push(new BeamSnake([x,y,x+Math.random()*6-3,y+Math.random()*6-3,"Explosion"],109,0.1))
     }
 
+    allParticles.push(new cirParticle(x,y,size))
 
   }
 
@@ -54,12 +55,6 @@ class Explosion{
       }
       this.frame = frame
     }
-
-    ctx.beginPath()
-    ctx.lineWidth = this.life*5
-    ctx.strokeStyle = "rgba(255,255,0,0.8)"
-    ctx.arc(this.x, this.y, (this.size-this.life)*20, 0, 2 * Math.PI)
-    ctx.stroke()
 
 
     this.life -= (this.size/50)*60/(fps)
@@ -89,7 +84,7 @@ class cirParticle{
     this.spawnpos = [player.x,player.y]
 
     ctx.beginPath()
-    ctx.lineWidth = this.options.Sinverse == undefined ? this.life*5 : (this.size-this.life)*5
+    ctx.lineWidth = this.options.Sinverse == undefined ? this.life*5 : (this.size-this.life+1)*5
     ctx.strokeStyle = (this.options.color == undefined ? "rgba(255,255,0,0.8)" : this.options.color)
 
     if(this.options.Dinverse == undefined){
