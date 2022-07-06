@@ -51,6 +51,7 @@ function getStrLengthOf(e){
 	return(JSON.stringify(e).length)
 }
 
+const concol = {"Black" : "\x1b[30m" ,"Red" : "\x1b[31m" ,"Green" : "\x1b[32m" ,"Yellow" : "\x1b[33m" ,"Blue" : "\x1b[34m" ,"Magenta" : "\x1b[35m" ,"Cyan" : "\x1b[36m" ,"White" : "\x1b[37m" ,"BBlack" : "\x1b[40m" ,"BRed" : "\x1b[41m" ,"BGreen" : "\x1b[42m" ,"BYellow" : "\x1b[43m" ,"BBlue" : "\x1b[44m" ,"BMagenta" : "\x1b[45m" ,"BCyan" : "\x1b[46m" ,"BWhite" : "\x1b[47m"}
 
 
 function testFunctionSpeed(opt,vars,func,p1,p2,p3,p4,p5,p6,p7,p8){
@@ -103,7 +104,6 @@ class cvents{
 	static call(x){
 
 	}
-
 
 }
 
@@ -2070,8 +2070,12 @@ function processClick(e){
 	} catch{
 		console.log(enDict,r)
 	}
-	let chunkPos = generatedChunks[dimension][e[1].x + "," + e[1].y]
+	let chunkPos
 
+
+
+	try{chunkPos = generatedChunks[dimension][e[1].x + "," + e[1].y]
+	} catch {console.log(concol.Red,e)}
 	let item = selectedSlotItems(e[0])
 
 	let a = parseInt(amountOfItems(e[0]))
@@ -4238,7 +4242,7 @@ function tickAtZero(str,pos){
 		return(true)
 	} else if (str = "SPW"){
 		summonNewMob("rampant",pos[0],pos[1])
-		return("SPW:7")
+		return("SPW:2")
 	}
 	return(false)
 }

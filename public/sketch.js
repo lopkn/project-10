@@ -1409,7 +1409,18 @@ function selfLog(e,c){
   chatProcess([">",pe,0,0])
 }
 
+function commandTabcut(type){
+  switch(type){
 
+    case "cx":
+      return(mouseCoords[0])
+      break;
+    case "cy":
+      return(mouseCoords[1])
+      break;
+
+  }
+}
 
 function commandingArrow(e){
   let a = ''
@@ -2239,7 +2250,7 @@ function UPDATEMAP(input){
   if(player.clientInfo.schmode == "on"){
     ctxm.fillStyle = "#000000"
     ctxm.fillRect(0,0,820,820)
-    // return;
+    return;
   }
 
 
