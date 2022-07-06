@@ -94,6 +94,21 @@ function ping(a){
 
 let perSeeds = {"O":new perlin(174.44),"T":new perlin(164.44)}
 
+
+class cvents{
+	static{
+		this.allCvents = ["Mtick","Tick","Turn"]
+	}
+
+	static call(x){
+
+	}
+
+
+}
+
+
+
 class mob{
 	constructor(type,x,y,id,dimension,stats,link){
 		this.entityType = type

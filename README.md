@@ -3,7 +3,7 @@
 join with link https://game-10.lopkn.unsown.top/ (almost always online)
 join the discord server with link https://discord.gg/RtP4GnM8
 
-FEATURES DONE (after creation of tdl)
+DONE (after creation of tdl)
 - Logins and accounts
 - Lighting & effect tables
 - player password change

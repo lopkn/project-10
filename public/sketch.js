@@ -291,7 +291,7 @@ case "Attack":
   }
 
 
-      
+      ctx.lineWidth *= 20/BlockPixels
 
       line(this.x+TrelativeCorrection[0],this.y+TrelativeCorrection[1],this.tx,this.ty)
       this.life -= 100/fps
@@ -331,6 +331,8 @@ var flash = 0
 var ZOOMSETTINGS = {"windowWidth":window.innerWidth, "windowHeight":window.innerHeight,"expectWidth":1560,"expectHeight":940}
 
 var allzoom = 1
+
+
 
 
 function windowRescale(e){
@@ -518,6 +520,10 @@ function sizeTell(e,n){
   var IimageLinkReferenceDict
   var consoleHelpResponses
   var MainHelpMenu
+
+  var CTX = {"ctx":ctx,"ctxm":ctxm,"menuCTX":menuCTX,"combatctx":combatctx,"invctx":invctx,"timerctx":timerctx}
+
+
 function configure(e){
 
 
