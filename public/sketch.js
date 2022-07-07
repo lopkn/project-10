@@ -1352,6 +1352,8 @@ function commandingPush(e){
 
     } else if(tempsplit[0] == "/process"){
       SentenceProcess(temp.substring(9))
+    } else if(tempsplit[0] == "/ping"){
+      pingCounter.start()
     }
 
 
