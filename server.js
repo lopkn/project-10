@@ -1154,7 +1154,7 @@ class player{
 		else if(i == "t"){
 			let item = this.Inventory[this.selectedSlot]
 			this.Inventory[this.selectedSlot] = ""
-			DropItems(this.x,this.y,[item],dimension)
+			DropItems(this.x,this.y,[item],this.dimension)
 			this.invrelay()
 
 		}else if(i == "p"){
