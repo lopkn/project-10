@@ -354,8 +354,8 @@ var allzoom = 1
 
 function windowRescale(e){
 
-  if(e != undefined && !isNaN(parseInt(e))){
-    allzoom = parseInt(e)
+  if(e != undefined && !isNaN(parseFloat(e))){
+    allzoom = parseFloat(e)
     document.body.style.zoom = allzoom
     return(allzoom)
     return;
