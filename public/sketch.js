@@ -301,7 +301,24 @@ case "Attack":
 
 }
 
+class pingCounter{
 
+  static ping = 0
+  static interval = 0
+
+  static start(){
+    this.ping = 0
+    socket.emit("CTsping",player.id)
+    this.interval = setInterval(() => {this.ping++},1)
+  }
+
+  static stop(){
+    clearInterval(this.interval)
+    console.log("PING : " + this.ping)
+    return(this.ping)
+  }
+
+}
 
 var fps = 20
 
@@ -460,6 +477,7 @@ socket.on("BeamRelay",BeamUpdate)
 socket.on("ParticleRelay",ParticleUpdate)
 socket.on("statusRelay",statusUpdate)
 socket.on("rarelay",rareprocess)
+socket.on("cTSping",()=>{selfLog(pingCounter.stop())})
 
 
 var PSDon = false

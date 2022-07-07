@@ -95,14 +95,12 @@ function ping(a){
 
 let perSeeds = {"O":new perlin(174.44),"T":new perlin(164.44)}
 
-
 class cvents{
-	static{
-		this.allCvents = ["Mtick","Tick","Turn"]
-	}
+	static allCvents = ["Mtick","Tick","Turn"]
+	
 
 	static call(x){
-
+		return this.allCvents
 	}
 
 }
@@ -1429,6 +1427,7 @@ var disconnected = []
 function newConnection(socket){
 	// socket.on('requestMap', sendMap)
 	socket.on('key', processKey)
+	socket.on('CTsping',(e)=>{io.to(e).emit("cTSping")})
 	socket.on('click', processClick)
 	socket.on('selectInventorySlot', selectSlot)
 	socket.on('AT',ACTIONPROCESS)
