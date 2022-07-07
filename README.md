@@ -90,6 +90,8 @@ TO DO LIST
 
 - item name and descriptions
 
+- backpacks
+
 - terrain randomness
 
 - entity menu

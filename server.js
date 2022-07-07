@@ -103,6 +103,10 @@ class cvents{
 		return this.allCvents
 	}
 
+	static dad(){
+		return("3")
+	}
+
 }
 
 
@@ -547,7 +551,7 @@ class mob{
 				enArr.splice(i,1)
 			}
 		}
-		delete enDict[this.id]
+		removeEntity(this.id)
 	}
 
 	kill(){				
@@ -617,7 +621,11 @@ this.chunk = CoordToChunk(this.x,this.y)
 	}
 }
 
-
+function removeEntity(id){
+	delete enDict[id]
+	console.log(id + " died")
+	console.log(enDict == undefined)
+}
 
 function calculatePathStep(x,y,tx,ty,d){
 
@@ -2067,7 +2075,8 @@ function processClick(e){
 	try{
 		dimension = enDict[r].dimension
 	} catch{
-		console.log(enDict,r)
+		fs.writeFile('./errorlog.json',JSON.stringify(enDict,null,4), function writeJSON(err){if(err)return console.log(err)})
+		console.log(r + "," + JSON.stringify(enDict).length)
 	}
 	let chunkPos
 
@@ -2076,7 +2085,7 @@ function processClick(e){
 	try{chunkPos = generatedChunks[dimension][e[1].x + "," + e[1].y]
 	} catch {console.log(concol.Red,e)}
 	let item = selectedSlotItems(e[0])
-
+	console.log(e)
 	let a = parseInt(amountOfItems(e[0]))
 
 	let att = TNEWATTRIBUTEOF(item,"B")

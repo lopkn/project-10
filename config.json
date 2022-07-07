@@ -142,5 +142,5 @@
 	},
 	"brackets":{"[":"]","{":"}","(":")","]":"c[","}":"c{",")":"c("},
 	"DefaultTabcuts":["/help","/schmode","/ping","/actxt","/scanmode","/login","/clickupdate","/keyholder","/commandto","/process","/stopsound","/playsound"],
-	"OpTabcuts":["/tp","/give","/set","/summon"]
+	"OpTabcuts":["/tp","/give","/set","/summon","/djump"]
 }
