@@ -328,6 +328,8 @@ var walker = {"x":20,"y":20}
 var ActionPrint = []
 
 document.body.style.webkitTransform =  "scale(1)"; 
+document.body.style.MozTransform = "scale(1)";
+document.body.style.MozTransformOrigin = "0 0";
 var mouseStatus = "canvas"
 var player;
 var currentlyPressedKeys = []
@@ -357,6 +359,8 @@ function windowRescale(e){
   if(e != undefined && !isNaN(parseFloat(e))){
     allzoom = parseFloat(e)
     document.body.style.zoom = allzoom
+    document.body.style.MozTransform = "scale("+allzoom+")";
+    document.body.style.MozTransformOrigin = "0 0";
     return(allzoom)
     return;
   }
