@@ -22,7 +22,16 @@ var allTickyBlocks = []
 const fs = require('fs');
 
 const process = require('process');
+
+
 console.log(`Process pid ${process.pid}`);
+
+process.on('uncaughtException',(err)=>{
+	fs.writeFileSync('./errorlog.json',JSON.stringify(enDict,null,4), function writeJSON(err){if(err)return console.log(err)})
+	console.log(concol.Red + "%s" + "\x1b[1m" ,"ERROR")
+	throw err
+})
+
 
 // const uuidv4 = require("uuid/dist/v4")
 var perlin2 = require('./perlin')
@@ -219,6 +228,9 @@ class mob{
     this.Cstats.hp = 30
 
     break;
+  case "entidy":
+  	this.Cstats.hp = 30
+  	this.Inventory = [randomItem(["",40,"In:2-A:1",7,"In:1-A:1",1]),randomItem(["",40,"In:2-A:1",7,"In:1-A:1",1])]
   default:
   	this.Cstats.hp = 100
 }
@@ -324,6 +336,21 @@ class mob{
 				myAction.push(tr)
 
 			}
+		}break;
+		case "entidy":{
+			// let moveAmount = Math.random()*20
+			// for(let i = 0; i < moveAmount; i++){
+			// 	let tr = randomItem(["w",2,"a",2,"s",2,"d",2,["com","001"],1,["com","002"],1,"",10])
+			// 	myAction.push(tr)
+
+			// }
+			let a = CoordToChunk(this.x+3,this.y)
+			let b = ["click",a,a.cx + a.cy*chunkSize+3]
+			let myActionChain = ["d","d","d","d","d","d","d","d","d","d","d","d","d","d"]
+			myActionChain.forEach((i)=>{myAction.push(i)})
+			
+
+
 		}break;
 		case "rampant":{
 			let moveAmount = Math.random()*5 + 14
@@ -2066,7 +2093,7 @@ function processClick(e){
 
 	let r = e[0]
 
-	if(r == undefined){
+	if(r == undefined || enDict[r] == undefined){
 		console.log("processClick: " + e)
 		return
 	}
@@ -2075,7 +2102,6 @@ function processClick(e){
 	try{
 		dimension = enDict[r].dimension
 	} catch{
-		fs.writeFile('./errorlog.json',JSON.stringify(enDict,null,4), function writeJSON(err){if(err)return console.log(err)})
 		console.log(r + "," + JSON.stringify(enDict).length)
 	}
 	let chunkPos
@@ -3291,6 +3317,12 @@ function tp(r,i1,i2){
 
 
 function summonCmd(p,name,x,y,id){
+	if(x == undefined || x == ""){
+		x = enDict[p].x
+	}
+	if(y == undefined || y == ""){
+		y = enDict[p].y
+	}
 	let r = getRelativity(p,x,y)
 	summonNewMob(name,r[0],r[1],id,enDict[p].dimension)
 
@@ -4573,7 +4605,6 @@ function sameFunctionOutputs(func,inputs){
   return(["true",foutputDict[func][1]])
 
 }
-
 
 
 
