@@ -50,6 +50,8 @@ DONE (after creation of tdl)
 
 TO DO LIST
 
+- add gitignore file
+
 - random block placements for structure generation	
 
 - shades layer
@@ -96,6 +98,8 @@ TO DO LIST
 
 - entity menu
 
+- number display for bars
+
 - try out using cache
 
 - try out WFC
@@ -111,6 +115,8 @@ TO DO LIST
 - structure generation distances
 
 - multitul breaks slabs
+
+- request animation frame
 
 - transparent blocks
 

@@ -36,7 +36,7 @@ process.on('uncaughtException',(err)=>{
 // const uuidv4 = require("uuid/dist/v4")
 var perlin2 = require('./perlin')
 var perlin = require('simplex-noise')
-var DEBUGGINGLOGS = {"ticktoggle":0,"combat":0}
+var DEBUGGINGLOGS = {"ticktoggle":0,"combat":0,"click":0}
 var SERVERCOUNTERS = {"ticks":0}
 
 
@@ -228,7 +228,7 @@ class mob{
     this.Cstats.hp = 30
 
     break;
-  case "entidy":
+  case "instance":
   	this.Cstats.hp = 30
   	this.Inventory = [randomItem(["",40,"In:2-A:1",7,"In:1-A:1",1]),randomItem(["",40,"In:2-A:1",7,"In:1-A:1",1])]
   default:
@@ -337,7 +337,7 @@ class mob{
 
 			}
 		}break;
-		case "entidy":{
+		case "instance":{
 			// let moveAmount = Math.random()*20
 			// for(let i = 0; i < moveAmount; i++){
 			// 	let tr = randomItem(["w",2,"a",2,"s",2,"d",2,["com","001"],1,["com","002"],1,"",10])
@@ -1598,8 +1598,22 @@ function allPlayersGenerateChunks(){
 }
 
 
+function nonPlayerProcess(timeAllowed){
+	let starttime = Date.now()
 
-//ticksearch
+	for(let i = 0; i < enArr.length; i++){
+			if(enDict[enArr[i]].entityType!="player"){
+				enDict[enArr[i]].nonPlayerActions()
+			}
+	}
+
+
+}
+
+
+
+
+//ticksearch & main loop/mainloop
 
 var TIME = 0
 
@@ -2006,7 +2020,7 @@ if(st[0] == "/"){
 
 	//unrecognized command
 	else{
-		console.log(strsplit)
+		console.log("invalid command:" + strsplit)
 		enDict[p].log("Invalid command.</br> If you think this should be a command, tell me your idea in discord. (lopkn#0019)","#FF0000")
 	}
 
@@ -2094,7 +2108,9 @@ function processClick(e){
 	let r = e[0]
 
 	if(r == undefined || enDict[r] == undefined){
-		console.log("processClick: " + e)
+		if(DEBUGGINGLOGS.click == 1){
+			console.log("processClick: " + e)
+		}
 		return
 	}
 
@@ -2111,7 +2127,6 @@ function processClick(e){
 	try{chunkPos = generatedChunks[dimension][e[1].x + "," + e[1].y]
 	} catch {console.log(concol.Red,e)}
 	let item = selectedSlotItems(e[0])
-	console.log(e)
 	let a = parseInt(amountOfItems(e[0]))
 
 	let att = TNEWATTRIBUTEOF(item,"B")
