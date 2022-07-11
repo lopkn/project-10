@@ -1601,11 +1601,12 @@ function allPlayersGenerateChunks(){
 function nonPlayerProcess(timeAllowed){
 	let starttime = Date.now()
 
-	for(let i = 0; i < enArr.length; i++){
+
+	for(let i = 0; i < enArr.length && Date.now() < starttime + timeAllowed; i++){
 			if(enDict[enArr[i]].entityType!="player"){
 				enDict[enArr[i]].nonPlayerActions()
 			}
-	}
+		}
 
 
 }

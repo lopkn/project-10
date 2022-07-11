@@ -46,11 +46,11 @@ DONE (after creation of tdl)
 - client side help command
 - actual structure generation
 - breakable slabs
+- add gitignore file
 
 
 TO DO LIST
 
-- add gitignore file
 
 - random block placements for structure generation	
 
