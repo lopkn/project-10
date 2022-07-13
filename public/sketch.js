@@ -21,7 +21,7 @@ class Player{
     this.chunk = {"x":0,"y":0}
     this.selectedSlot = 0
     this.Inventory = ["B:1-A:50","B:5-A:50","U:4-A:100","Sl:1-A:30",""]
-    this.clientInfo = {"MouseHolding":0,"sound":"on","tileRenderer":0,"blockOutlineColor":"#000000","scanmode":"off","clickUpdate":"on","schmode":"off","actionTextColor":"rgba(255,0,200,0.5)"}
+    this.clientInfo = {"MouseHolding":{"default":[false,0],"drag":[false]},"sound":"on","tileRenderer":0,"blockOutlineColor":"#000000","scanmode":"off","clickUpdate":"on","schmode":"off","actionTextColor":"rgba(255,0,200,0.5)"}
     this.serverSelctedSlot = 0
 
   }
@@ -1719,13 +1719,15 @@ document.addEventListener('keydown', (event) => {
 document.addEventListener('mouseup', (event) => {
 
   MCVs.held = "none"
-  player.clientInfo.MouseHolding = [false,0]
+  player.clientInfo.MouseHolding.default = [false,0]
+  player.clientInfo.MouseHolding.drag = [false]
 
 })
 
 document.addEventListener('mousedown', (event) => {
   // console.log(mouseX,mouseY,mouseCoords)
-  player.clientInfo.MouseHolding[0] = true
+  event.preventDefault();
+  player.clientInfo.MouseHolding.default = [true,0,mouseX,mouseY]
   if(player.clientInfo.clickUpdate == "on"){
   repeat()}
 
@@ -1873,13 +1875,26 @@ let MCVstate = {}
 function repeat(){
   CTX.td.fillStyle = "rgba(0,0,0,0)"
   CTX.td.clearRect(0, 0, 1560, 950)
-  if(player.clientInfo.MouseHolding[0]){
-    player.clientInfo.MouseHolding[1]+= fps
+  if(player.clientInfo.MouseHolding.default[0] && !player.clientInfo.MouseHolding.drag[0]){
+    let tamt = player.clientInfo.MouseHolding.default[1]/5
 
-    CTX.td.lineWidth = 20
-    CTX.td.strokeStyle = "rgba(255,0,0,"+player.clientInfo.MouseHolding[1]/600+")"
+    CTX.td.lineWidth = 10
+    CTX.td.strokeStyle = "rgba(255,0,0,"+tamt/4+")"
     CTX.td.beginPath()
-    CTX.td.arc(mouseX,mouseY,20,0,Math.PI*player.clientInfo.MouseHolding[1]/200)
+    CTX.td.arc(mouseX,mouseY,20,0,Math.PI*tamt)
+    CTX.td.stroke()
+    player.clientInfo.MouseHolding.default[1]+= 20/fps
+
+    if(player.clientInfo.MouseHolding.default[1] > 10){
+      player.clientInfo.MouseHolding.drag = [true,mouseX,mouseY]
+      // allParticles.push(new cirParticle(mouseX,mouseY,5))
+    }
+
+  } else if (player.clientInfo.MouseHolding.drag[0]){
+    CTX.td.lineWidth = 10
+    CTX.td.strokeStyle = "rgb(255,100,0)"
+    CTX.td.beginPath()
+    CTX.td.arc(mouseX,mouseY,20,0,Math.PI*2)
     CTX.td.stroke()
   }
   // for(let i = 0; i < 3; i++){allParticles.push( new CustomParticle(100,100,["rgba(0,0,0,1)"],"pixel",{"size":10,"width":3,"physics":{"type":"gravity","gravity":280,"vx":Math.random()*200-100,"vy":Math.random()*125-325,"ground":{"bottom":Math.random()*100+100,"restitution":Math.random()*-0.7+0.1}},"life":150}))}
