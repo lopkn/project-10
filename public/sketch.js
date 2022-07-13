@@ -21,7 +21,7 @@ class Player{
     this.chunk = {"x":0,"y":0}
     this.selectedSlot = 0
     this.Inventory = ["B:1-A:50","B:5-A:50","U:4-A:100","Sl:1-A:30",""]
-    this.clientInfo = {"sound":"on","tileRenderer":0,"blockOutlineColor":"#000000","scanmode":"off","clickUpdate":"on","schmode":"off","actionTextColor":"rgba(255,0,200,0.5)"}
+    this.clientInfo = {"MouseHolding":0,"sound":"on","tileRenderer":0,"blockOutlineColor":"#000000","scanmode":"off","clickUpdate":"on","schmode":"off","actionTextColor":"rgba(255,0,200,0.5)"}
     this.serverSelctedSlot = 0
 
   }
@@ -340,6 +340,7 @@ var InterfaceCanvas = document.getElementById("Interface")
 var menuCTX = InterfaceCanvas.getContext("2d")
 
 
+
 var mouseX = 0
 var mouseY = 0
 var ActionStore = []
@@ -543,7 +544,16 @@ function sizeTell(e,n){
   var consoleHelpResponses
   var MainHelpMenu
 
-  var CTX = {"ctx":ctx,"ctxm":ctxm,"menuCTX":menuCTX,"combatctx":combatctx,"invctx":invctx,"timerctx":timerctx}
+  var CTX = {
+    "td":document.getElementById("TopDisplay").getContext("2d"),
+    "ctx":ctx,
+    "ctxm":ctxm,
+    "menuCTX":menuCTX,
+    "combatctx":combatctx,
+    "invctx":invctx,
+    "timerctx":timerctx
+  }
+
 
 
 function configure(e){
@@ -1709,12 +1719,13 @@ document.addEventListener('keydown', (event) => {
 document.addEventListener('mouseup', (event) => {
 
   MCVs.held = "none"
-
+  player.clientInfo.MouseHolding = [false,0]
 
 })
 
 document.addEventListener('mousedown', (event) => {
   // console.log(mouseX,mouseY,mouseCoords)
+  player.clientInfo.MouseHolding[0] = true
   if(player.clientInfo.clickUpdate == "on"){
   repeat()}
 
@@ -1732,7 +1743,7 @@ document.addEventListener('mousedown', (event) => {
     } else if(onBarCheck[0] == 2) {
       MCVs.held = [onBarCheck[1],mouseX,mouseY]
     } else if(onBarCheck[0] == 3) {
-      // console.log("TEST")
+    
     ActionStore.push("switch:"+player.selectedSlot+"~"+onBarCheck[2])
     AActionStore.push(["swt",onBarCheck[2]])
     ActionPrint.push([200,200,"#FF00FF"])
@@ -1860,6 +1871,17 @@ let MCVstate = {}
 
 
 function repeat(){
+  CTX.td.fillStyle = "rgba(0,0,0,0)"
+  CTX.td.clearRect(0, 0, 1560, 950)
+  if(player.clientInfo.MouseHolding[0]){
+    player.clientInfo.MouseHolding[1]+= fps
+
+    CTX.td.lineWidth = 20
+    CTX.td.strokeStyle = "rgba(255,0,0,"+player.clientInfo.MouseHolding[1]/600+")"
+    CTX.td.beginPath()
+    CTX.td.arc(mouseX,mouseY,20,0,Math.PI*player.clientInfo.MouseHolding[1]/200)
+    CTX.td.stroke()
+  }
   // for(let i = 0; i < 3; i++){allParticles.push( new CustomParticle(100,100,["rgba(0,0,0,1)"],"pixel",{"size":10,"width":3,"physics":{"type":"gravity","gravity":280,"vx":Math.random()*200-100,"vy":Math.random()*125-325,"ground":{"bottom":Math.random()*100+100,"restitution":Math.random()*-0.7+0.1}},"life":150}))}
   if(MCVs.held != "none"){
 
