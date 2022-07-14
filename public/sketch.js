@@ -1720,6 +1720,11 @@ document.addEventListener('mouseup', (event) => {
 
   MCVs.held = "none"
   player.clientInfo.MouseHolding.default = [false,0]
+
+  if(player.clientInfo.MouseHolding.drag[2] != undefined){
+    console.log(player.clientInfo.MouseHolding.drag[2] )
+  }
+
   player.clientInfo.MouseHolding.drag = [false]
 
 })
@@ -1858,6 +1863,19 @@ function debugRect(x,y){
 }
 
 
+
+
+function dragging(){
+
+  let e = player.clientInfo.MouseHolding.drag
+
+  if(e[2][e[2].length-1][0] != mouseCoords[0] || e[2][e[2].length-1][1] != mouseCoords[1]){
+    e[2].push(mouseCoords)
+  }
+
+}
+
+
 var scrollTop = 0
 var scrollHorizontal = 0
 var mouseCoords = []
@@ -1886,7 +1904,7 @@ function repeat(){
     player.clientInfo.MouseHolding.default[1]+= 20/fps
 
     if(player.clientInfo.MouseHolding.default[1] > 10){
-      player.clientInfo.MouseHolding.drag = [true,mouseX,mouseY]
+      player.clientInfo.MouseHolding.drag = [true,[mouseX,mouseY],[mouseCoords]]
       // allParticles.push(new cirParticle(mouseX,mouseY,5))
     }
 
@@ -1896,6 +1914,7 @@ function repeat(){
     CTX.td.beginPath()
     CTX.td.arc(mouseX,mouseY,20,0,Math.PI*2)
     CTX.td.stroke()
+    dragging()
   }
   // for(let i = 0; i < 3; i++){allParticles.push( new CustomParticle(100,100,["rgba(0,0,0,1)"],"pixel",{"size":10,"width":3,"physics":{"type":"gravity","gravity":280,"vx":Math.random()*200-100,"vy":Math.random()*125-325,"ground":{"bottom":Math.random()*100+100,"restitution":Math.random()*-0.7+0.1}},"life":150}))}
   if(MCVs.held != "none"){

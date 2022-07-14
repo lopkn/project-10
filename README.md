@@ -51,6 +51,8 @@ DONE (after creation of tdl)
 
 TO DO LIST
 
+- custom cursor
+
 - fix overlapping entity combat
 
 - random block placements for structure generation	
