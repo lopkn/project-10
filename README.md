@@ -53,6 +53,8 @@ TO DO LIST
 
 - custom cursor
 
+- ctx input for particles and rendering
+
 - fix overlapping entity combat
 
 - random block placements for structure generation	

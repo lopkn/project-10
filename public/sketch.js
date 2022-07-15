@@ -1102,9 +1102,19 @@ var combatScreen = new Combat()
 /////////////////////////////////////////////////////
 
 
-
-
-
+class AllActions{
+  static create(text,actual,draw){
+    ActionStore.push(text)
+    AActionStore.push(actual)
+    ActionPrint.push(draw)
+  }
+  static remove(e){
+    if(e == undefined || e == "top"){
+      ActionStore.splice(ActionStore.length - 1)
+      AActionStore.splice(AActionStore.length -1)
+    }
+  }
+}
 
 
 function text(str){
@@ -1678,7 +1688,7 @@ document.addEventListener('keydown', (event) => {
   } else if(name == "Backspace"){
     let ee = ActionStore.splice(ActionStore.length-1,1)
     AActionStore.splice(AActionStore.length-1,1)
-    ActionPrint.splice(ActionPrint.length-1,1)
+    // ActionPrint.splice(ActionPrint.length-1,1)
         if(ee == "w"){
       walker.y += 1
     } else if(ee == "s"){
@@ -1722,7 +1732,12 @@ document.addEventListener('mouseup', (event) => {
   player.clientInfo.MouseHolding.default = [false,0]
 
   if(player.clientInfo.MouseHolding.drag[2] != undefined){
-    console.log(player.clientInfo.MouseHolding.drag[2] )
+    console.log(player.clientInfo.MouseHolding.drag[2])
+    let tempPrint = []
+    player.clientInfo.MouseHolding.drag[2].forEach((e)=>{
+      tempPrint.push([e[0]-player.x+20,e[1]-player.y+20,"#FF5F00"])
+    })
+    AllActions.create("drag",["drag",player.clientInfo.MouseHolding.drag[2]],tempPrint)
   }
 
   player.clientInfo.MouseHolding.drag = [false]
@@ -2021,13 +2036,22 @@ if(MCVs.ChestInv.Items.length > 0){
 
 
   for(let i = 0; i < ActionPrint.length; i++){
+
+    if(ActionPrint[i][0] == undefined){
+      continue;
+    }if(typeof(ActionPrint[i][0]) == "object"){
+
+      ActionPrint[i].forEach((tprint) => {
+
+        fill(tprint[2])
+        rect(tprint[0]*BlockPixels+5,tprint[1]*BlockPixels+5,BlockPixels-10,BlockPixels-10)
+      })
+      continue;
+
+    }
+
     fill(ActionPrint[i][2])
     rect(ActionPrint[i][0]*BlockPixels+5,ActionPrint[i][1]*BlockPixels+5,BlockPixels-10,BlockPixels-10)
-
-
-
-
-
   }
 
 

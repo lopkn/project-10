@@ -1,25 +1,25 @@
 {
     "lopkn": {
         "psswd": "123",
-        "x": -104,
-        "y": 119,
+        "x": 98,
+        "y": 84,
         "chunk": {
-            "x": -6,
-            "y": 5,
-            "cx": 16,
-            "cy": 19
+            "x": 4,
+            "y": 4,
+            "cx": 18,
+            "cy": 4
         },
-        "selectedSlot": 4,
+        "selectedSlot": 6,
         "dimension": "O",
         "keyholder": true,
         "Inventory": [
             "B:6-A:10",
             "U:6-A:1",
+            "I:0-A:10",
+            "I:1-A:10",
+            "U:13-A:879",
             "",
-            "",
-            "U:13-A:929",
-            "",
-            "U:8-A:965"
+            "U:8-A:956"
         ]
     },
     "sam": {
@@ -141,6 +141,26 @@
             "U:4-A:100",
             "U:13-A:1-Unb:0",
             "U:17-A:1-Unb:0",
+            ""
+        ]
+    },
+    "Mangomario": {
+        "psswd": "AAA",
+        "x": -101,
+        "y": 80,
+        "dimension": "O",
+        "chunk": {
+            "x": -6,
+            "y": 4,
+            "cx": 19,
+            "cy": 0
+        },
+        "selectedSlot": 2,
+        "Inventory": [
+            "",
+            "B:5-A:36",
+            "",
+            "U:4-A:74",
             ""
         ]
     }
