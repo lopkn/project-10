@@ -1768,7 +1768,11 @@ document.addEventListener('mouseup', (event) => {
   if(player.clientInfo.MouseHolding.drag[2] != undefined){
     console.log(player.clientInfo.MouseHolding.drag[2])
     
-    
+
+
+
+
+
   }
 
   player.clientInfo.MouseHolding.drag = [false]
@@ -1928,11 +1932,18 @@ function dragging(){
   }
 
   let tempPrint = []
+  let tempPrint2 = []
     player.clientInfo.MouseHolding.drag[2].forEach((e)=>{
       tempPrint.push([e[0]-player.x+20,e[1]-player.y+20,"#FF5F00"])
+      let a = CoordToChunk(e[0],e[1])
+      let b = a.cx + a.cy*chunkSize+3
+      tempPrint2.push([a,b])
     })
+ 
 
-  AllActions.edit("drag",["drag",player.clientInfo.MouseHolding.drag[2]],tempPrint)
+
+
+  AllActions.edit("drag",["drag",tempPrint2],tempPrint)
 
 }
 
@@ -1967,7 +1978,7 @@ function repeat(){
     if(player.clientInfo.MouseHolding.default[1] > 10){
       player.clientInfo.MouseHolding.drag = [true,[mouseX,mouseY],[mouseCoords]]
       AllActions.create("drag",["drag",player.clientInfo.MouseHolding.drag[2]],[])
-      // allParticles.push(new cirParticle(mouseX + player.x * 20,mouseY + mouseX + player.x * 20,5,{"ctx":CTX.td}))
+      allParticles.push(new cirParticle(mouseX,mouseY,5,{"ctx":CTX.td,"color":"#FF7700"}))
     }
 
   } else if (player.clientInfo.MouseHolding.drag[0]){

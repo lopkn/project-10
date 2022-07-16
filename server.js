@@ -848,7 +848,7 @@ class player{
 		this.chunk = {"x":0,"y":0}
 		this.selectedSlot = 0
 		this.dimension = "O"
-		this.Inventory = ["U:12-A:10","B:5-A:50","U:5-A:100","U:4-A:100",""]
+		this.Inventory = ["U:12-A:10","B:5-A:250","U:5-A:100","U:4-A:100",""]
 		this.effects = []
 		this.inCombat = false
 		this.followerTargeting = {}
@@ -1486,7 +1486,7 @@ function newConnection(socket){
 	if(clientIp == "::ffff:192.168.1.1" || clientIp == "::1" || clientIp == "::ffff:223.18.29.177"){
 		enDict[socket.id].keyholder = true
 		enDict[socket.id].log("Automatic keyholder! welcome back","#00FFFF")
-		enDict[socket.id].Inventory = ["U:12-A:10","B:5-A:50","U:5-A:100","U:4-A:100","U:13-A:1-Unb:0","U:17-A:1-Unb:0",""]
+		enDict[socket.id].Inventory = ["U:12-A:10","B:5-A:250","U:5-A:100","U:4-A:100","U:13-A:1-Unb:0","U:17-A:1-Unb:0",""]
 	}
 
 
@@ -1784,11 +1784,12 @@ var processees = {
 	"click":[],
 	"select":[],
 	"switch":[],
+	"drag":[],
 	"command":[],
 	"key":[],
 	"combat":[]
 }
-var processeeOrders = ["click","combat","key","command","select","switch"]
+var processeeOrders = ["click","combat","drag","key","command","select","switch"]
 
 function processPlayersActions(){
 	let mx = 0
@@ -1812,7 +1813,10 @@ function processPlayersActions(){
 		} else if(s[0] == "sel"){
 			//if action is select
 			processees["select"].push([q,s])
-		} else if(s[0] == "com" && CombatMoveUpdate(q)){
+		} else if(s[0] == "drag"){
+			//if action is drag
+			processees["drag"].push([q,s])
+		}  else if(s[0] == "com" && CombatMoveUpdate(q)){
 			processees["combat"].push([q,s])
 		} else if(s[0] == "swt" && CombatMoveUpdate(q)){
 			processees["switch"].push([q,s])
@@ -1837,6 +1841,7 @@ function processPlayersActions(){
 	processees = {
 	"click":[],
 	"select":[],
+	"drag":[],
 	"switch":[],
 	"command":[],
 	"key":[],
@@ -1873,7 +1878,7 @@ function getLongestPlayerAction(){
 
 
 function CompleteActionStep(p,s){
-	let r = findPlayerInArr(p)
+	// let r = findPlayerInArr(p)
 
 	if(typeof(s) == "string" && s.length == 1){
 		//if action is key
@@ -1891,6 +1896,14 @@ function CompleteActionStep(p,s){
 		} else if(s[0] == "sel"){
 			//if action is select
 			selectSlot([p,s[1]])
+		} else if(s[0] == "drag"){
+			//if action is drag
+
+			for(let i = 0; i < s[1].length; i++){
+				processClick([p,s[1][i][0],s[1][i][1]])
+			}
+
+			// processClick([p,s[1],s[2]])
 		} else if(s[0] == "swt"){
 			//if action is switch
 			enDict[p].switchItems("chest",s[1],enDict[p].selectedSlot)
