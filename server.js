@@ -2065,9 +2065,9 @@ function emitLightning(x,y,xx,yy,ty,dimension){
 
 function ParticleRelay(arr,dimension){
 
-	for(let i = 0; i < enArr.length; i++){
-		let enid = enArr[i]
-		if(enDict[enid].entityType == "player" && enDict[enid].dimension == dimension){
+	for(let i = 0; i < plArr.length; i++){
+		let enid = plArr[i]
+		if(enDict[enid].dimension == dimension){
 			io.to(enDict[enid].id).emit("ParticleRelay",arr)
 		}
 	}

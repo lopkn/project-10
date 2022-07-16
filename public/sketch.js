@@ -32,7 +32,7 @@ class Player{
 // var allExplosions = []
 
 class Explosion{
-  constructor(x,y,size,type,frame){
+  constructor(x,y,size,type,frame,tempctx){
     this.x = ((x+20-player.x) * BlockPixels + BlockPixelsHalf)
     this.y = ((y+20-player.y) * BlockPixels + BlockPixelsHalf)
     this.size = size
@@ -40,11 +40,14 @@ class Explosion{
     this.type = type
     this.frame = frame
     this.Sbeams = []
+
+    this.ctx = tempctx == undefined ? CTX.ctx : tempctx
+
     for(let i = 0; i < size; i++){
       this.Sbeams.push(new BeamSnake([x,y,x+Math.random()*6-3,y+Math.random()*6-3,"Explosion"],109,0.1))
     }
 
-    allParticles.push(new cirParticle(x,y,size))
+    allParticles.push(new cirParticle(this.x,this.y,size,{"ctx":ctx}))
 
   }
 
@@ -69,10 +72,11 @@ class cirParticle{
   constructor(x,y,life,options){
     this.life = life
     this.size = life
-    this.x = (x-player.x+renderBlocks)*BlockPixels + BlockPixelsHalf
-    this.y = (y-player.y+renderBlocks)*BlockPixels + BlockPixelsHalf
+    this.x = x
+    this.y = y
     this.spawnpos = [player.x,player.y]
     this.options = (options == undefined ? {} : options)
+    this.ctx = this.options.ctx == undefined ? CTX.ctx :this.options.ctx 
     this.lifedrain = (this.options.speed == undefined ? 1 : this.options.speed)
   }
   update(){
@@ -85,16 +89,16 @@ class cirParticle{
     this.y -= (player.y - this.spawnpos[1])*BlockPixels
     this.spawnpos = [player.x,player.y]
 
-    ctx.beginPath()
-    ctx.lineWidth = this.options.Sinverse == undefined ? this.life*5 : (this.size-this.life+1)*5
-    ctx.strokeStyle = (this.options.color == undefined ? "rgba(255,255,0,0.8)" : this.options.color)
+    this.ctx.beginPath()
+    this.ctx.lineWidth = this.options.Sinverse == undefined ? this.life*5 : (this.size-this.life+1)*5
+    this.ctx.strokeStyle = (this.options.color == undefined ? "rgba(255,255,0,0.8)" : this.options.color)
 
     if(this.options.Dinverse == undefined){
-      ctx.arc(this.x, this.y, (this.size-this.life)*20, 0, 2 * Math.PI)
+      this.ctx.arc(this.x, this.y, (this.size-this.life)*20, 0, 2 * Math.PI)
     } else {
-      ctx.arc(this.x, this.y, this.life*20, 0, 2 * Math.PI)
+      this.ctx.arc(this.x, this.y, this.life*20, 0, 2 * Math.PI)
     }
-    ctx.stroke()
+    this.ctx.stroke()
     this.life -= (this.size/50)*60/fps*this.lifedrain
   }
 }
@@ -1807,11 +1811,6 @@ document.addEventListener('mousedown', (event) => {
     ActionPrint.push([200,200,"#FF00FF"])
     }
 
-
-
-
-
-
     return;
   }
 
@@ -1968,7 +1967,7 @@ function repeat(){
     if(player.clientInfo.MouseHolding.default[1] > 10){
       player.clientInfo.MouseHolding.drag = [true,[mouseX,mouseY],[mouseCoords]]
       AllActions.create("drag",["drag",player.clientInfo.MouseHolding.drag[2]],[])
-      // allParticles.push(new cirParticle(mouseX,mouseY,5))
+      // allParticles.push(new cirParticle(mouseX + player.x * 20,mouseY + mouseX + player.x * 20,5,{"ctx":CTX.td}))
     }
 
   } else if (player.clientInfo.MouseHolding.drag[0]){
@@ -2032,47 +2031,47 @@ if(MCVs.ChestInv.Items.length > 0){
   
 
 
+  mouseStatusUpdate()
 
-
-  if(inRect(mouseX,mouseY,0,0,820,820)){
-    mouseStatus = "canvas"
-    scrollTop = window.scrollY
-    scrollHorizontal = window.scrollX
-    try{
-      mouseCoords = [Math.floor(mouseX/BlockPixels)-20+player.x,Math.floor(mouseY/BlockPixels)-20+player.y]
-    } catch{}
+  // if(inRect(mouseX,mouseY,0,0,820,820)){
+  //   mouseStatus = "canvas"
+  //   scrollTop = window.scrollY
+  //   scrollHorizontal = window.scrollX
+  //   try{
+  //     mouseCoords = [Math.floor(mouseX/BlockPixels)-20+player.x,Math.floor(mouseY/BlockPixels)-20+player.y]
+  //   } catch{}
   
-    fill("rgba(200,0,255,0.3)")
-    rectAtCoords(Math.floor(mouseX/BlockPixels),Math.floor(mouseY/BlockPixels))
-    if(player.clientInfo.scanmode == "on"){
-      fill("rgb(255,0,"+(flash*2550)+")")
-      textO(map[mouseCoords[0]+","+mouseCoords[1]],mouseX-30,mouseY-30)
-      textO(mouseCoords[0]+","+mouseCoords[1],mouseX-30,mouseY-60)
+  //   fill("rgba(200,0,255,0.3)")
+  //   rectAtCoords(Math.floor(mouseX/BlockPixels),Math.floor(mouseY/BlockPixels))
+  //   if(player.clientInfo.scanmode == "on"){
+  //     fill("rgb(255,0,"+(flash*2550)+")")
+  //     textO(map[mouseCoords[0]+","+mouseCoords[1]],mouseX-30,mouseY-30)
+  //     textO(mouseCoords[0]+","+mouseCoords[1],mouseX-30,mouseY-60)
 
-      for(let i = 0; i < players.length; i++){
+  //     for(let i = 0; i < players.length; i++){
 
-        if(players[i][0] == mouseCoords[0] && players[i][1] == mouseCoords[1]){
-          textO(players[i][3][2],mouseX-30,mouseY-90)
-        }
+  //       if(players[i][0] == mouseCoords[0] && players[i][1] == mouseCoords[1]){
+  //         textO(players[i][3][2],mouseX-30,mouseY-90)
+  //       }
 
-      }
-
-
-    }
+  //     }
 
 
-  } else if(inRect(mouseX,mouseY,0,825,820,50)){
-    mouseCoords = [Math.floor(mouseX/50)]
-    mouseStatus = "inventory" 
+  //   }
 
-    fillI("rgba(200,0,255,0.5)")
-    rectI(Math.floor(mouseX/50)*50,0,50,50)
+
+  // } else if(inRect(mouseX,mouseY,0,825,820,50)){
+  //   mouseCoords = [Math.floor(mouseX/50)]
+  //   mouseStatus = "inventory" 
+
+  //   fillI("rgba(200,0,255,0.5)")
+  //   rectI(Math.floor(mouseX/50)*50,0,50,50)
   
-  } else if(inRect(mouseX,mouseY,850,675,380,130)){
-    mouseStatus = "combatoptions"
-  } else {
-    mouseStatus = "outside"
-  }
+  // } else if(inRect(mouseX,mouseY,850,675,380,130)){
+  //   mouseStatus = "combatoptions"
+  // } else {
+  //   mouseStatus = "outside"
+  // }
 
 
 
@@ -2106,8 +2105,6 @@ if(MCVs.ChestInv.Items.length > 0){
 
 
 
-
-  // let l = backslashRemover(JSON.stringify(ActionStore))
   let l = ""
   for(let i = 0; i < ActionStore.length; i++){
     l += ",\"" + ActionStore[i] + "\""
@@ -2156,16 +2153,6 @@ if(MCVs.ChestInv.Items.length > 0){
     }
   }
 
-  // for(let i = 0; i < allExplosions.length; i++){
-  //   if(allExplosions[i].life <= 0){
-  //     allExplosions.splice(i,1)
-  //     i--
-  //   } else {
-  //     allExplosions[i].upDraw()
-  //   }
-
-
-  // }
 
   for(let i = allParticles.length-1; i >-1 ; i--){
 
@@ -2206,6 +2193,55 @@ if(MCVs.ChestInv.Items.length > 0){
 
 
 
+}
+
+var LocBoxes = {
+  "map":[0,0,820,820],
+  "inventory":[0,825,820,50],
+  "secondary":[850,675,380,130]
+
+}
+
+function mouseStatusUpdate(){
+    if(inRect(mouseX,mouseY,0,0,820,820)){
+    mouseStatus = "canvas"
+    scrollTop = window.scrollY
+    scrollHorizontal = window.scrollX
+    try{
+      mouseCoords = [Math.floor(mouseX/BlockPixels)-20+player.x,Math.floor(mouseY/BlockPixels)-20+player.y]
+    } catch{}
+  
+    fill("rgba(200,0,255,0.3)")
+    rectAtCoords(Math.floor(mouseX/BlockPixels),Math.floor(mouseY/BlockPixels))
+    if(player.clientInfo.scanmode == "on"){
+      fill("rgb(255,0,"+(flash*2550)+")")
+      textO(map[mouseCoords[0]+","+mouseCoords[1]],mouseX-30,mouseY-30)
+      textO(mouseCoords[0]+","+mouseCoords[1],mouseX-30,mouseY-60)
+
+      for(let i = 0; i < players.length; i++){
+
+        if(players[i][0] == mouseCoords[0] && players[i][1] == mouseCoords[1]){
+          textO(players[i][3][2],mouseX-30,mouseY-90)
+        }
+
+      }
+
+
+    }
+
+
+  } else if(inRect(mouseX,mouseY,0,825,820,50)){
+    mouseCoords = [Math.floor(mouseX/50)]
+    mouseStatus = "inventory" 
+
+    fillI("rgba(200,0,255,0.5)")
+    rectI(Math.floor(mouseX/50)*50,0,50,50)
+  
+  } else if(inRect(mouseX,mouseY,850,675,380,130)){
+    mouseStatus = "combatoptions"
+  } else {
+    mouseStatus = "outside"
+  }
 }
 
 
