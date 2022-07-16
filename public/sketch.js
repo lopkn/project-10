@@ -7,6 +7,8 @@ var renderingVariables = {"itemsize":{"B":40,"Sl":42,"U":42,"In":42}}
 
 var DEBUGGINGLOGS = {"Timeticker" : 0}
 
+
+
 var wholeScreenRender = {"alphaColors":[]}
 
 
@@ -300,6 +302,20 @@ case "Attack":
 
 
 }
+
+// class ACTIONLIMITER{
+//   static current = "none"
+
+//   static reset(){
+//     this.current = "none"
+//   }
+
+//   static
+
+// }
+
+var ACTIONLIMITER = "none"
+
 
 class pingCounter{
 
@@ -1108,6 +1124,13 @@ class AllActions{
     AActionStore.push(actual)
     ActionPrint.push(draw)
   }
+
+  static edit(text,actual,draw){
+    ActionStore[ActionStore.length-1] = text
+    AActionStore[AActionStore.length-1] = actual
+    ActionPrint[ActionPrint.length-1] = draw
+  }
+
   static remove(e){
     if(e == undefined || e == "top"){
       ActionStore.splice(ActionStore.length - 1)
@@ -1281,11 +1304,15 @@ function commandingPush(e){
       ActionStore[ActionStore.length-1] = ActionStore[ActionStore.length-1].substring(0,ActionStore[ActionStore.length-1].length - 1)
       AActionStore[AActionStore.length-1] = AActionStore[AActionStore.length-1].substring(0,AActionStore[AActionStore.length-1].length - 1)
     } else {
+      if(ACTIONLIMITER == "commanding"){
+        ACTIONLIMITER = "none"
+      }
       commanding = 0
       ActionStore.splice(ActionStore.length - 1)
       AActionStore.splice(AActionStore.length -1)
     }
   } else if(e == "Enter"){
+    ACTIONLIMITER = "none"
     commanding = 0
     textStoreIndex = -1
     textStore.splice(0,0,ActionStore[ActionStore.length-1])
@@ -1648,22 +1675,24 @@ document.addEventListener('keydown', (event) => {
     ActionStore.push(name)
     AActionStore.push(name)
 
-    if(name == "w" && AActionStore.length <= 2000){
+
+    if(name == "w" && ACTIONLIMITER == "none"){
       walker.y -= 1
       ActionPrint.push([walker.x,walker.y,"rgba(200,0,0,0.3)"])
-    } else if(name == "s"&& AActionStore.length <= 2000){
+    } else if(name == "s"&& ACTIONLIMITER == "none"){
       walker.y += 1
       ActionPrint.push([walker.x,walker.y,"rgba(200,0,0,0.3)"])
-    } else if(name == "d"&& AActionStore.length <= 2000){
+    } else if(name == "d"&& ACTIONLIMITER == "none"){
       walker.x += 1
       ActionPrint.push([walker.x,walker.y,"rgba(200,0,0,0.3)"])
-    } else if(name == "a"&& AActionStore.length <= 2000){
+    } else if(name == "a"&& ACTIONLIMITER == "none"){
       walker.x -= 1
       ActionPrint.push([walker.x,walker.y,"rgba(200,0,0,0.3)"])
     }
 
   } else if(name == "/"){
     if(commanding == 0){
+      ACTIONLIMITER = "commanding"
       commanding = 1
       ActionStore.push("/")
       AActionStore.push("/")
@@ -1679,13 +1708,14 @@ document.addEventListener('keydown', (event) => {
 
 
   } else if(commanding == 0 &&(name == "ArrowDown"|| name == "ArrowUp")){
+    ACTIONLIMITER = "commanding"
     commanding = 1
     ActionStore.push("/")
     AActionStore.push("/")
     commandingPush(name)
   } else if(commanding == 1 && (name.length == 1 || name == "Backspace" || name == "Enter"|| name == "ArrowDown"|| name == "ArrowUp")){
     commandingPush(name)
-  } else if(name == "Backspace"){
+  } else if(name == "Backspace" && ACTIONLIMITER == "none"){
     let ee = ActionStore.splice(ActionStore.length-1,1)
     AActionStore.splice(AActionStore.length-1,1)
     // ActionPrint.splice(ActionPrint.length-1,1)
@@ -1733,11 +1763,8 @@ document.addEventListener('mouseup', (event) => {
 
   if(player.clientInfo.MouseHolding.drag[2] != undefined){
     console.log(player.clientInfo.MouseHolding.drag[2])
-    let tempPrint = []
-    player.clientInfo.MouseHolding.drag[2].forEach((e)=>{
-      tempPrint.push([e[0]-player.x+20,e[1]-player.y+20,"#FF5F00"])
-    })
-    AllActions.create("drag",["drag",player.clientInfo.MouseHolding.drag[2]],tempPrint)
+    
+    
   }
 
   player.clientInfo.MouseHolding.drag = [false]
@@ -1783,7 +1810,7 @@ document.addEventListener('mousedown', (event) => {
   // allBeamSnakes.push(new BeamSnake([player.x,player.y,mouseCoords[0],mouseCoords[1],"DevLightning"],15,0.4))
   // allExplosions.push(new Explosion(mouseCoords[0],mouseCoords[1],10,1,5))
 
-  if(inRect(mouseX,mouseY,0,825,820,50)){
+  if(inRect(mouseX,mouseY,0,825,820,50)&& ACTIONLIMITER == "none"){
   if(player.selectedSlot == Math.floor(mouseX/50)){
     player.selectedSlot = -1
 
@@ -1805,7 +1832,7 @@ document.addEventListener('mousedown', (event) => {
 
 
 
-  if(mouseStatus == "canvas"){
+  if(mouseStatus == "canvas"&& ACTIONLIMITER == "none"){
     let a = CoordToChunk(mouseCoords[0],mouseCoords[1])
     let b = a.cx + a.cy*chunkSize+3
     // console.log([player.id,a,b])
@@ -1825,14 +1852,14 @@ document.addEventListener('mousedown', (event) => {
     }
   }
 
-  if(combatScreen.screenActive != 0 && inRect(mouseX,mouseY,850,675,380,130)){
+  if(combatScreen.screenActive != 0 && inRect(mouseX,mouseY,850,675,380,130)&& ACTIONLIMITER == "none"){
 
     let temp = Math.floor((mouseY-675)/32.5)
 
 
     combatScreen.optionClick(temp)
   }
-  if(inRect(mouseX,mouseY,1150,642.5,80,32.5)){
+  if(inRect(mouseX,mouseY,1150,642.5,80,32.5)&& ACTIONLIMITER == "none"){
     combatScreen.optionClick(4)
   }
 
@@ -1885,8 +1912,19 @@ function dragging(){
   let e = player.clientInfo.MouseHolding.drag
 
   if(e[2][e[2].length-1][0] != mouseCoords[0] || e[2][e[2].length-1][1] != mouseCoords[1]){
+    if(e[2][e[2].length-2] != undefined && (e[2][e[2].length-2][0] == mouseCoords[0] && e[2][e[2].length-2][1] == mouseCoords[1])){
+      player.clientInfo.MouseHolding.drag[2].splice([e[2].length-1],1)
+    }else{
     e[2].push(mouseCoords)
+    }
   }
+
+  let tempPrint = []
+    player.clientInfo.MouseHolding.drag[2].forEach((e)=>{
+      tempPrint.push([e[0]-player.x+20,e[1]-player.y+20,"#FF5F00"])
+    })
+
+  AllActions.edit("drag",["drag",player.clientInfo.MouseHolding.drag[2]],tempPrint)
 
 }
 
@@ -1920,6 +1958,7 @@ function repeat(){
 
     if(player.clientInfo.MouseHolding.default[1] > 10){
       player.clientInfo.MouseHolding.drag = [true,[mouseX,mouseY],[mouseCoords]]
+      AllActions.create("drag",["drag",player.clientInfo.MouseHolding.drag[2]],[])
       // allParticles.push(new cirParticle(mouseX,mouseY,5))
     }
 
