@@ -1671,21 +1671,21 @@ document.addEventListener('keydown', (event) => {
     event.preventDefault();
   }
 
-  if(name.length < 2 && name != "Shift" && name != "Backspace" && name != "/" && commanding == 0){
+  if(name.length < 2 && name != "Shift" && name != "Backspace" && name != "/" && commanding == 0 && ACTIONLIMITER == "none"){
     ActionStore.push(name)
     AActionStore.push(name)
 
 
-    if(name == "w" && ACTIONLIMITER == "none"){
+    if(name == "w"){
       walker.y -= 1
       ActionPrint.push([walker.x,walker.y,"rgba(200,0,0,0.3)"])
-    } else if(name == "s"&& ACTIONLIMITER == "none"){
+    } else if(name == "s"){
       walker.y += 1
       ActionPrint.push([walker.x,walker.y,"rgba(200,0,0,0.3)"])
-    } else if(name == "d"&& ACTIONLIMITER == "none"){
+    } else if(name == "d"){
       walker.x += 1
       ActionPrint.push([walker.x,walker.y,"rgba(200,0,0,0.3)"])
-    } else if(name == "a"&& ACTIONLIMITER == "none"){
+    } else if(name == "a"){
       walker.x -= 1
       ActionPrint.push([walker.x,walker.y,"rgba(200,0,0,0.3)"])
     }
@@ -1769,10 +1769,19 @@ document.addEventListener('mouseup', (event) => {
 
   player.clientInfo.MouseHolding.drag = [false]
 
+  if(ACTIONLIMITER == "clicking"){
+    ACTIONLIMITER = "none"
+  }
+
 })
 
 document.addEventListener('mousedown', (event) => {
   // console.log(mouseX,mouseY,mouseCoords)
+
+  if(ACTIONLIMITER == "none"){
+    ACTIONLIMITER = "clicking"
+  }
+
   event.preventDefault();
   player.clientInfo.MouseHolding.default = [true,0,mouseX,mouseY]
   if(player.clientInfo.clickUpdate == "on"){
@@ -1810,7 +1819,7 @@ document.addEventListener('mousedown', (event) => {
   // allBeamSnakes.push(new BeamSnake([player.x,player.y,mouseCoords[0],mouseCoords[1],"DevLightning"],15,0.4))
   // allExplosions.push(new Explosion(mouseCoords[0],mouseCoords[1],10,1,5))
 
-  if(inRect(mouseX,mouseY,0,825,820,50)&& ACTIONLIMITER == "none"){
+  if(inRect(mouseX,mouseY,0,825,820,50) && ACTIONLIMITER == "clicking"){
   if(player.selectedSlot == Math.floor(mouseX/50)){
     player.selectedSlot = -1
 
@@ -1832,7 +1841,7 @@ document.addEventListener('mousedown', (event) => {
 
 
 
-  if(mouseStatus == "canvas"&& ACTIONLIMITER == "none"){
+  if(mouseStatus == "canvas"&& ACTIONLIMITER == "clicking"){
     let a = CoordToChunk(mouseCoords[0],mouseCoords[1])
     let b = a.cx + a.cy*chunkSize+3
     // console.log([player.id,a,b])
@@ -1852,14 +1861,14 @@ document.addEventListener('mousedown', (event) => {
     }
   }
 
-  if(combatScreen.screenActive != 0 && inRect(mouseX,mouseY,850,675,380,130)&& ACTIONLIMITER == "none"){
+  if(combatScreen.screenActive != 0 && inRect(mouseX,mouseY,850,675,380,130)&& ACTIONLIMITER == "clicking"){
 
     let temp = Math.floor((mouseY-675)/32.5)
 
 
     combatScreen.optionClick(temp)
   }
-  if(inRect(mouseX,mouseY,1150,642.5,80,32.5)&& ACTIONLIMITER == "none"){
+  if(inRect(mouseX,mouseY,1150,642.5,80,32.5)&& ACTIONLIMITER == "clicking"){
     combatScreen.optionClick(4)
   }
 
