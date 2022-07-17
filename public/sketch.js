@@ -1786,17 +1786,24 @@ document.addEventListener('mouseup', (event) => {
 document.addEventListener('mousedown', (event) => {
   // console.log(mouseX,mouseY,mouseCoords)
 
-  if(ACTIONLIMITER == "none"){
+  mouseStatusUpdate()
+
+  event.preventDefault();
+  let clickedOn = "none"
+  // player.clientInfo.MouseHolding.default = [true,0,mouseX,mouseY,mouseStatus]
+  if(player.clientInfo.clickUpdate == "on"){
+    repeat()
+  }
+
+
+if(ACTIONLIMITER == "none"){
     ACTIONLIMITER = "clicking"
   }
 
-  event.preventDefault();
-  player.clientInfo.MouseHolding.default = [true,0,mouseX,mouseY]
-  if(player.clientInfo.clickUpdate == "on"){
-  repeat()}
-
   let onBarCheck = onBar(mouseX,mouseY)
   if( onBarCheck != "no"){
+
+    clickedOn = "bar"
 
     if(onBarCheck[0] == 1){
 
@@ -1823,6 +1830,7 @@ document.addEventListener('mousedown', (event) => {
   // allExplosions.push(new Explosion(mouseCoords[0],mouseCoords[1],10,1,5))
 
   if(inRect(mouseX,mouseY,0,825,820,50) && ACTIONLIMITER == "clicking"){
+    clickedOn = "inventory"
   if(player.selectedSlot == Math.floor(mouseX/50)){
     player.selectedSlot = -1
 
@@ -1845,6 +1853,9 @@ document.addEventListener('mousedown', (event) => {
 
 
   if(mouseStatus == "canvas"&& ACTIONLIMITER == "clicking"){
+
+    clickedOn = "canvas"
+
     let a = CoordToChunk(mouseCoords[0],mouseCoords[1])
     let b = a.cx + a.cy*chunkSize+3
     // console.log([player.id,a,b])
@@ -1866,15 +1877,21 @@ document.addEventListener('mousedown', (event) => {
 
   if(combatScreen.screenActive != 0 && inRect(mouseX,mouseY,850,675,380,130)&& ACTIONLIMITER == "clicking"){
 
+    clickedOn = "combat"
+
     let temp = Math.floor((mouseY-675)/32.5)
 
 
     combatScreen.optionClick(temp)
   }
   if(inRect(mouseX,mouseY,1150,642.5,80,32.5)&& ACTIONLIMITER == "clicking"){
+
+    clickedOn = "combat"
+
     combatScreen.optionClick(4)
   }
 
+  player.clientInfo.MouseHolding.default = [true,0,mouseX,mouseY,mouseStatus,clickedOn]
 
 })
 
@@ -1965,7 +1982,7 @@ let MCVstate = {}
 function repeat(){
   CTX.td.fillStyle = "rgba(0,0,0,0)"
   CTX.td.clearRect(0, 0, 1560, 950)
-  if(player.clientInfo.MouseHolding.default[0] && !player.clientInfo.MouseHolding.drag[0]){
+  if(player.clientInfo.MouseHolding.default[0] && !player.clientInfo.MouseHolding.drag[0] && player.clientInfo.MouseHolding.default[5] == "canvas"){
     let tamt = player.clientInfo.MouseHolding.default[1]/5
 
     CTX.td.lineWidth = 10
