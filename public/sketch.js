@@ -1767,12 +1767,6 @@ document.addEventListener('mouseup', (event) => {
 
   if(player.clientInfo.MouseHolding.drag[2] != undefined){
     console.log(player.clientInfo.MouseHolding.drag[2])
-    
-
-
-
-
-
   }
 
   player.clientInfo.MouseHolding.drag = [false]
@@ -1938,6 +1932,11 @@ function debugRect(x,y){
 
 function dragging(){
 
+  if(mouseStatus != "canvas"){
+    player.clientInfo.MouseHolding.drag = ["out"]
+    return;
+  }
+
   let e = player.clientInfo.MouseHolding.drag
 
   if(e[2][e[2].length-1][0] != mouseCoords[0] || e[2][e[2].length-1][1] != mouseCoords[1]){
@@ -1982,7 +1981,7 @@ let MCVstate = {}
 function repeat(){
   CTX.td.fillStyle = "rgba(0,0,0,0)"
   CTX.td.clearRect(0, 0, 1560, 950)
-  if(player.clientInfo.MouseHolding.default[0] && !player.clientInfo.MouseHolding.drag[0] && player.clientInfo.MouseHolding.default[5] == "canvas"){
+  if(player.clientInfo.MouseHolding.default[0] && player.clientInfo.MouseHolding.drag[0] === false && player.clientInfo.MouseHolding.default[5] == "canvas"){
     let tamt = player.clientInfo.MouseHolding.default[1]/5
 
     CTX.td.lineWidth = 10
@@ -1998,7 +1997,7 @@ function repeat(){
       allParticles.push(new cirParticle(mouseX,mouseY,5,{"ctx":CTX.td,"color":"#FF7700"}))
     }
 
-  } else if (player.clientInfo.MouseHolding.drag[0]){
+  } else if (player.clientInfo.MouseHolding.drag[0] === true){
     CTX.td.lineWidth = 10
     CTX.td.strokeStyle = "rgb(255,100,0)"
     CTX.td.beginPath()

@@ -9,17 +9,17 @@
             "cx": 18,
             "cy": 4
         },
-        "selectedSlot": 6,
+        "selectedSlot": 0,
         "dimension": "O",
         "keyholder": true,
         "Inventory": [
-            "B:6-A:10",
+            "B:6-A:7",
             "U:6-A:1",
             "I:0-A:10",
             "I:1-A:10",
             "U:13-A:879",
             "",
-            "U:8-A:956"
+            "U:8-A:955"
         ]
     },
     "sam": {
