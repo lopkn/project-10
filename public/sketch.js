@@ -269,8 +269,8 @@ case "Teleport":
 
     ctx.lineWidth = 25
     ctx.strokeStyle = ("rgb(0,"+this.life*3.5*(1-a)+",255)")
-    tposx = this.shooter[2]*0.1
-    tposy = this.shooter[3]*0.1
+    tposx = this.shooter[2]*2/fps
+    tposy = this.shooter[3]*2/fps
     line(this.shooter[0]+TrelativeCorrection[0],this.shooter[1]+TrelativeCorrection[1],tposx,tposy)
     this.shooter[0] += tposx
     this.shooter[1] += tposy
