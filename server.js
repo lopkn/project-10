@@ -651,7 +651,6 @@ this.chunk = CoordToChunk(this.x,this.y)
 function removeEntity(id){
 	delete enDict[id]
 	console.log(id + " died")
-	console.log(enDict == undefined)
 }
 
 function calculatePathStep(x,y,tx,ty,d){
@@ -2389,7 +2388,7 @@ function DropItems(x,y,arr,d,forced){
 	// let e2 = 3+((x%chunkSize)+(y%chunkSize)*chunkSize)
 	try{
 	tilename = tnewMap[dimension][cchunk[0]][cchunk[1]][2]} catch{
-		console.log(cchunk,x,y)
+		console.log("cerr dropi",cchunk,x,y)
 		let ccc = CoordToChunk(x,y)
 		GenerateChunk(ccc.x,ccc.y,dimension)
 		cchunk = CoordToMap(x,y,dimension)
@@ -2404,7 +2403,7 @@ function DropItems(x,y,arr,d,forced){
 
 		if(arr.length > 1){
 			try{
-			arr.splice(0,1)} catch {console.log(arr)}
+			arr.splice(0,1)} catch {console.log("cerr dropi2",arr)}
 			DropItems(x+Math.round(Math.random()*4-2),y+Math.round(Math.random()*4-2),arr,dimension)
 		}
 		return(true)
@@ -2813,7 +2812,7 @@ let player = enDict[p]
 function selectSlot(e){
 
 	if(enDict[e[0]] == undefined){
-		console.log(e[0])
+		console.log("cerr selslot",e[0])
 	} else {
 		enDict[e[0]].selectedSlot = (e[1])
 	}
@@ -3908,7 +3907,7 @@ function amountOfItems(p){
 	// let r = findPlayerInArr(p)
 	let player = enDict[p]
 
-	try{if(player.Inventory){}} catch {console.log(p)}
+	try{if(player.Inventory){}} catch {console.log("cerr amOI",p)}
 
   if(player.Inventory[player.selectedSlot] != undefined){
     let e = TNEWATTRIBUTEOF(player.Inventory[player.selectedSlot],"A")
