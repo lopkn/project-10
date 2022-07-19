@@ -23,7 +23,7 @@ class Player{
     this.chunk = {"x":0,"y":0}
     this.selectedSlot = 0
     this.Inventory = ["B:1-A:50","B:5-A:50","U:4-A:100","Sl:1-A:30",""]
-    this.clientInfo = {"MouseHolding":{"default":[false,0],"drag":[false]},"sound":"on","tileRenderer":0,"blockOutlineColor":"#000000","scanmode":"off","clickUpdate":"on","schmode":"off","actionTextColor":"rgba(255,0,200,0.5)"}
+    this.clientInfo = {"DragClock":1,"MouseHolding":{"default":[false,0],"drag":[false]},"sound":"on","tileRenderer":0,"blockOutlineColor":"#000000","scanmode":"off","clickUpdate":"on","schmode":"off","actionTextColor":"rgba(255,0,200,0.5)"}
     this.serverSelctedSlot = 0
 
   }
@@ -1387,6 +1387,12 @@ function commandingPush(e){
 
     } else if((tempsplit[0] == "/pushtabcuts")){
       socket.emit("tablearn",[wordTabDict,wordTabArr,"force",tempsplit[1]])
+    } else if((tempsplit[0] == "/dragclock")){
+      let ti = parseInt(tempsplit[1])
+      if(!isNaN(ti)){
+        player.clientInfo.DragClock = ti
+      }
+
     } else if(tempsplit[0] == "/help" || tempsplit[0] == "/h"){
 
       helpCommand(tempsplit)
@@ -1985,13 +1991,13 @@ function repeat(){
     let tamt = player.clientInfo.MouseHolding.default[1]/5
 
     CTX.td.lineWidth = 10
-    CTX.td.strokeStyle = "rgba(255,0,0,"+tamt/4+")"
+    CTX.td.strokeStyle = "rgba(255,0,0,"+(tamt/4)/player.clientInfo.DragClock+")"
     CTX.td.beginPath()
-    CTX.td.arc(mouseX,mouseY,20,0,Math.PI*tamt)
+    CTX.td.arc(mouseX,mouseY,20,0,Math.PI*tamt/player.clientInfo.DragClock)
     CTX.td.stroke()
     player.clientInfo.MouseHolding.default[1]+= 20/fps
 
-    if(player.clientInfo.MouseHolding.default[1] > 10){
+    if(player.clientInfo.MouseHolding.default[1] > 10 * player.clientInfo.DragClock){
       player.clientInfo.MouseHolding.drag = [true,[mouseX,mouseY],[mouseCoords]]
       AllActions.create("drag",["drag",player.clientInfo.MouseHolding.drag[2]],[])
       allParticles.push(new cirParticle(mouseX,mouseY,5,{"ctx":CTX.td,"color":"#FF7700"}))
