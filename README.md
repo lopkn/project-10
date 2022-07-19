@@ -46,6 +46,7 @@ DONE (after creation of tdl)
 - client side help command
 - actual structure generation
 - breakable slabs
+- ctx input for particles and rendering
 - add gitignore file
 
 
@@ -53,7 +54,7 @@ TO DO LIST
 
 - custom cursor
 
-- ctx input for particles and rendering
+- player inventory drop
 
 - fix overlapping entity combat
 

@@ -1614,7 +1614,7 @@ function nonPlayerProcess(timeAllowed){
 
 
 //ticksearch & main loop/mainloop
-
+var ACTIONLOGS = []
 var TIME = 0
 
 var TickLimit = 70
@@ -1644,6 +1644,7 @@ function doSomething(){
 	} else if(TIME == TickLimit){
 
 		TIME = getLongestPlayerAction() * -5
+		ACTIONLOGS.push(processees)
 		tickAllBlocks()
 	}
 	if(TIME < 0 && TIME % 5 === 0){
