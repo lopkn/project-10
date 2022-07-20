@@ -45,6 +45,17 @@ class Explosion{
 
     for(let i = 0; i < size; i++){
       this.Sbeams.push(new BeamSnake([x,y,x+Math.random()*6-3,y+Math.random()*6-3,"Explosion"],109,0.1))
+
+      for(let j = 0; j < 3; j++){
+        allParticles.push(new CustomParticle(this.x/2,this.y/2,
+          ["","rgba(255,"+Math.random()*255+",0,0.2)","",
+          "rgba(255,"+Math.random()*255+",0,0.2)","rgba(255,"+Math.random()*255+",0,1)","rgba(255,"+Math.random()*255+",0,0.2)",
+          "","rgba(255,"+Math.random()*255+",0,0.2)",""]
+          ,"pixel",{"size":3,"width":3,"physics":{
+            "type":"gravity","gravity":280,"vx":Math.random()*200-100,"vy":Math.random()*125-325,"ground":{
+              "bottom":Math.random()*100+this.y/2,"restitution":Math.random()*-0.7+0.1}},"life":150+Math.random()*200}))
+      }
+
     }
 
     allParticles.push(new cirParticle(this.x,this.y,size,{"ctx":ctx}))
@@ -1388,7 +1399,7 @@ function commandingPush(e){
     } else if((tempsplit[0] == "/pushtabcuts")){
       socket.emit("tablearn",[wordTabDict,wordTabArr,"force",tempsplit[1]])
     } else if((tempsplit[0] == "/dragclock")){
-      let ti = parseInt(tempsplit[1])
+      let ti = parseFloat(tempsplit[1])
       if(!isNaN(ti)){
         player.clientInfo.DragClock = ti
       }
@@ -1985,6 +1996,7 @@ let MCVstate = {}
 
 
 function repeat(){
+
   CTX.td.fillStyle = "rgba(0,0,0,0)"
   CTX.td.clearRect(0, 0, 1560, 950)
   if(player.clientInfo.MouseHolding.default[0] && player.clientInfo.MouseHolding.drag[0] === false && player.clientInfo.MouseHolding.default[5] == "canvas"){
