@@ -1041,7 +1041,10 @@ class player{
 
 		if(this.Cstats.hp <= 0 ){
 			io.to(this.id).emit("DeathScreen")
-			this.Cstats.hp = -141924801284
+			DropItems(this.x,this.y,JSON.parse(JSON.stringify(this.Inventory)),this.dimension)
+		  console.log(this.Inventory)
+
+			this.heal = ()=>{}
 			return(true)
 
 		}
@@ -2121,7 +2124,7 @@ function processClick(e){
 
 	let r = e[0]
 
-	if(r == undefined || enDict[r] == undefined){
+	if(r == undefined || enDict[r] == undefined || enDict[r].Cstats.hp <= 0){
 		if(DEBUGGINGLOGS.click == 1){
 			console.log("processClick: " + e)
 		}
