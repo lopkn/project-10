@@ -47,12 +47,12 @@ class Explosion{
       this.Sbeams.push(new BeamSnake([x,y,x+Math.random()*6-3,y+Math.random()*6-3,"Explosion"],109,0.1))
 
       for(let j = 0; j < 3; j++){
-        allParticles.push(new CustomParticle(this.x/2,this.y/2,
+        allParticles.push(new CustomParticle(this.x/2+Math.random()*10-5,this.y/2+Math.random()*10-5,
           ["","rgba(255,"+Math.random()*255+",0,0.2)","",
           "rgba(255,"+Math.random()*255+",0,0.2)","rgba(255,"+Math.random()*255+",0,1)","rgba(255,"+Math.random()*255+",0,0.2)",
           "","rgba(255,"+Math.random()*255+",0,0.2)",""]
           ,"pixel",{"size":3,"width":3,"physics":{
-            "type":"gravity","gravity":280,"vx":Math.random()*200-100,"vy":Math.random()*125-325,"ground":{
+            "type":"gravity","gravity":280,"vx":Math.random()*400-200,"vy":Math.random()*125-325,"ground":{
               "bottom":Math.random()*100+this.y/2,"restitution":Math.random()*-0.7+0.1}},"life":150+Math.random()*200}))
       }
 
@@ -1210,6 +1210,7 @@ function fillI(i){
   invctx.fillStyle = i
 }
 function textI(str,x,y){
+  invctx.font = "13px Monaco"
   invctx.fillText(str,x,y)
 }
 
@@ -1502,7 +1503,14 @@ function selfLog(e,c){
   chatProcess([">",pe,0,0])
 }
 
-function commandTabcut(type){
+function commandTabcut(str,split){
+
+  let cmd = split[0]
+  
+
+}
+
+function commandTabcutOptions(type){
   switch(type){
 
     case "cx":
@@ -1511,7 +1519,12 @@ function commandTabcut(type){
     case "cy":
       return(mouseCoords[1])
       break;
-
+    case "rcx":
+      return(mouseCoords[0]-player.x)
+      break;
+    case "rcy":
+      return(mouseCoords[1]-player.y)
+      break;
   }
 }
 
@@ -1540,7 +1553,7 @@ var wordTabDict = {}
 var wordTabArr = []
 var currentTabSuggestion = ["",""]
 
-learnTabWord(["hello","/help","/schmode","/actxt","/scanmode","/login","/clickupdate","/keyholder","/commandto","/process"],3)
+learnTabWord(["hello","/help","/schmode","/ping","/actxt","/scanmode","/dragclock","/login","/clickupdate","/keyholder","/commandto","/process","/stopsound","/playsound"],3)
 
 function learnTabWord(input,score){
   if(score == undefined){
@@ -1635,12 +1648,19 @@ function tabPurifiedStr(str){
   return(outstr)
 }
 
-function processTab(str){
+function processTab(str,cmd){
+
+
 
   let strsplit = str.split(" ")
   let unlowered = strsplit[strsplit.length-1]
   let endword = unlowered.toLowerCase()
   let resultantArr = eliminateArr(endword,wordTabArr,0)
+
+  if(cmd){
+    let a = commandTabcut(str,strsplit)
+    return(a);
+  }
 
   let fout = ["",0]
 
@@ -2171,7 +2191,11 @@ if(MCVs.ChestInv.Items.length > 0){
     let prtsuggest = ""
     let ac = ActionStore[ActionStore.length-1]
     if(currentTabSuggestion[0] != ac){
-      currentTabSuggestion = [ac,processTab(ac)]
+      if(ac[0] != "/"){
+        currentTabSuggestion = [ac,processTab(ac)]
+      } else {
+        currentTabSuggestion = [ac,processTab(ac,true)]
+      }
     }
     prtsuggest = currentTabSuggestion[1][0]
     ctx.font = "20px Arial"
@@ -2413,7 +2437,7 @@ function InvDraw(){
   let e = amountOfItems()
   if(e != "none"){
   fillI("#FFFFFF")
-  textI(e,35+player.selectedSlot*50,45)}}catch(err){}
+  textI(e,-9*((e+",").length - 1)+50+player.selectedSlot*50,45)}}catch(err){}
 }
 
 

@@ -48,6 +48,7 @@ DONE (after creation of tdl)
 - breakable slabs
 - ctx input for particles and rendering
 - add gitignore file
+- structure generation distances
 
 
 TO DO LIST
@@ -61,6 +62,10 @@ TO DO LIST
 - random block placements for structure generation	
 
 - shades layer
+
+- energy update
+
+- join screen
 
 - command syntax autofill
 
@@ -117,8 +122,6 @@ TO DO LIST
 - enviornmental damage
 
 - enviornmental turn management
-
-- structure generation distances
 
 - multitul breaks slabs
 

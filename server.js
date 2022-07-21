@@ -1042,9 +1042,9 @@ class player{
 		if(this.Cstats.hp <= 0 ){
 			io.to(this.id).emit("DeathScreen")
 			DropItems(this.x,this.y,JSON.parse(JSON.stringify(this.Inventory)),this.dimension)
-		  console.log(this.Inventory)
 
 			this.heal = ()=>{}
+			this.kill = ()=>{}
 			return(true)
 
 		}
