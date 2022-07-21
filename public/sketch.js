@@ -1665,7 +1665,7 @@ function tabPurifiedStr(str){
   return(outstr)
 }
 
-function processTab(str,cmd){
+function processTab(str){
 
 
 
@@ -1674,7 +1674,7 @@ function processTab(str,cmd){
   let endword = unlowered.toLowerCase()
   let resultantArr = eliminateArr(endword,wordTabArr,0)
 
-  if(cmd){
+  if(str[0] == "/"){
     let a = [commandTabcut(str,strsplit),100]
     if(a[0] != undefined){
     return(a);}
@@ -1794,7 +1794,12 @@ document.addEventListener('keydown', (event) => {
    
     let tabsuggest = processTab(ActionStore[ActionStore.length-1])
 
+    console.log("hi1",tabsuggest)
+
     if(tabsuggest[0] != ""){
+
+      console.log("hi")
+
       let sp = ActionStore[ActionStore.length-1].split(" ")
       sp.pop()
       sp.push(tabsuggest[0])
@@ -2209,11 +2214,7 @@ if(MCVs.ChestInv.Items.length > 0){
     let prtsuggest = ""
     let ac = ActionStore[ActionStore.length-1]
     if(currentTabSuggestion[0] != ac){
-      if(ac[0] != "/"){
-        currentTabSuggestion = [ac,processTab(ac)]
-      } else {
-        currentTabSuggestion = [ac,processTab(ac,true)]
-      }
+      currentTabSuggestion = [ac,processTab(ac)]
     }
     prtsuggest = currentTabSuggestion[1][0]
     ctx.font = "20px Arial"
