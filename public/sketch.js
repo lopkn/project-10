@@ -1506,7 +1506,24 @@ function selfLog(e,c){
 function commandTabcut(str,split){
 
   let cmd = split[0]
+  let cmdat = split.length
   
+  switch(cmd){
+    case "/set":
+    case "/tp":
+
+      if(cmdat == 2){
+        return(commandTabcutOptions("rcx"))
+      }
+      if(cmdat == 3){
+        return(commandTabcutOptions("rcy"))
+      }
+
+      break;  
+
+
+
+  }
 
 }
 
@@ -1520,10 +1537,10 @@ function commandTabcutOptions(type){
       return(mouseCoords[1])
       break;
     case "rcx":
-      return(mouseCoords[0]-player.x)
+      return("="+(mouseCoords[0]-player.x))
       break;
     case "rcy":
-      return(mouseCoords[1]-player.y)
+      return("="+(mouseCoords[1]-player.y))
       break;
   }
 }
@@ -1658,8 +1675,9 @@ function processTab(str,cmd){
   let resultantArr = eliminateArr(endword,wordTabArr,0)
 
   if(cmd){
-    let a = commandTabcut(str,strsplit)
-    return(a);
+    let a = [commandTabcut(str,strsplit),100]
+    if(a[0] != undefined){
+    return(a);}
   }
 
   let fout = ["",0]
