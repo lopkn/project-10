@@ -1511,6 +1511,7 @@ function commandTabcut(str,split){
   switch(cmd){
     case "/set":
     case "/tp":
+    case "/teleport":
 
       if(cmdat == 2){
         return(commandTabcutOptions("rcx"))
@@ -1523,6 +1524,7 @@ function commandTabcut(str,split){
 
     case "/summon":
     case "/fgoto":
+    case "/commandto":
       if(cmdat == 3){
         return(commandTabcutOptions("rcx"))
       }
