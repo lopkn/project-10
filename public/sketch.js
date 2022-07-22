@@ -1521,6 +1521,16 @@ function commandTabcut(str,split){
 
       break;  
 
+    case "/summon":
+    case "/fgoto":
+      if(cmdat == 3){
+        return(commandTabcutOptions("rcx"))
+      }
+      if(cmdat == 4){
+        return(commandTabcutOptions("rcy"))
+      }
+      break;
+
 
 
   }
@@ -3576,7 +3586,7 @@ class CustomParticle{
 
     this.x -= (player.x - this.spawnpos[0])*BlockPixels
     this.y -= (player.y - this.spawnpos[1])*BlockPixels
-    this.spawnpos = [player.x,player.y]
+
     if(this.physicsdict.type == "vector"){
       this.x += this.physicsdict.vx/fps
       this.y += this.physicsdict.vy/fps
@@ -3589,6 +3599,9 @@ class CustomParticle{
 
     if(this.physicsdict.ground != undefined){
       if(this.physicsdict.ground.bottom != undefined){
+
+        this.physicsdict.ground.bottom -= (player.y - this.spawnpos[1])*BlockPixels
+
         if(this.physicsdict.ground.slope == undefined){
         if(this.y > this.physicsdict.ground.bottom){
           this.physicsdict.vy *= this.physicsdict.ground.restitution
@@ -3609,6 +3622,8 @@ class CustomParticle{
 
 
     this.life -= 20/fps
+
+    this.spawnpos = [player.x,player.y]
     return(this.render())
   }
 
