@@ -1604,22 +1604,27 @@ function allPlayersGenerateChunks(){
 
 class timeAllowedFunctions{
 
-	static nppVars = {"counter":0}
+	static nppVars = {"counter":0,"done":false}
 
 	static nonPlayerProcess(timeAllowed){
+	if(this.nppVars.done){
+		return(true)
+	}
 	let starttime = Date.now()
 	let tcounter = this.nppVars
-
 
 	for(;tcounter.counter < enArr.length && Date.now() < starttime + timeAllowed; tcounter.counter++){
 			if(enDict[enArr[tcounter.counter]].entityType!="player"){
 				enDict[enArr[tcounter.counter]].nonPlayerActions()
 			}
 		}
-	if(tcounter.counter == enArr.length){
+	if(tcounter.counter >= enArr.length){
 		tcounter.counter = 0
+		tcounter.done = true
 		return(true)
-	} else {return(tcounter.counter)}
+	} else {
+		console.log(tcounter.counter)
+		return(tcounter.counter)}
 
 
 	}
@@ -1634,11 +1639,14 @@ var ACTIONLOGS = []
 var TIME = 0
 
 var TickLimit = 70
+var serverTickWait = 50
 
-function doSomething(){
+function doSomething(startTime){
 	if(TIME < TickLimit-10){
 		TIME += 1
 		io.emit('TIME',TIME)
+		if(TIME > 0){
+		timeAllowedFunctions.nonPlayerProcess(startTime+serverTickWait-Date.now()-10)}
 	} else if(TIME == TickLimit-10){
 		allPlayersGenerateChunks()
 		TIME += 1
@@ -1648,13 +1656,8 @@ function doSomething(){
 		console.log("tick")
 	}
 
-		// for(let i = 0; i < enArr.length; i++){
-		// 	if(enDict[enArr[i]].entityType!="player"){
-		// 		enDict[enArr[i]].nonPlayerActions()
-		// 	}
-		// }
 		timeAllowedFunctions.nonPlayerProcess(Infinity)
-
+		timeAllowedFunctions.nppVars.done = false
 
 	} else if(TIME < TickLimit){
 		TIME += 1
@@ -1714,9 +1717,10 @@ function doSomething(){
 
 
 
-setInterval(function(){ 
-    doSomething()
-}, 50);
+setInterval(()=>{
+	let a = Date.now() 
+    doSomething(a)
+}, serverTickWait);
 
 
 setInterval(function(){if(startPing == 1){pping++}},1)
