@@ -1623,7 +1623,6 @@ class timeAllowedFunctions{
 		tcounter.done = true
 		return(true)
 	} else {
-		console.log(tcounter.counter)
 		return(tcounter.counter)}
 
 
@@ -1631,6 +1630,86 @@ class timeAllowedFunctions{
 }
 
 
+function temptest(){
+	let final = TAF2.PMEM("final",0)
+	for(let i = TAF2.checkpoints1.a; i < 148; i++){
+
+
+		if(TAF2.checkPoint("end","a",i)){
+			TAF2.memories1.final = final
+			
+			return(["checked",final])
+		}
+
+		let tout = temptest4()
+		if(tout[0] == "checked"){
+			TAF2.memories1.final = final
+			return([tout,final])
+		}
+		final += tout
+
+		
+	}
+	delete TAF2.memories1.final
+	TAF2.checkpoints1.a = 0
+	return(final)
+}
+function temptest4(){
+	let final = TAF2.PMEM("final2",0)
+	for(let j = TAF2.checkpoints1.b; j < 1; j++){
+		if(TAF2.checkPoint("end","b",j)){
+			TAF2.memories1.final2 = final
+			return(["checked",final])
+		}
+		final += Math.pow(Math.PI,Math.PI)
+	}
+	delete TAF2.memories1.final2
+	TAF2.checkpoints1.b = 0
+	return(final)
+}
+
+
+
+
+
+
+function temptest2(){
+	let final = 0
+	for(let j = 0; j < 1; j++){
+		final += Math.pow(Math.PI,Math.PI)
+	}
+	return(final)
+}
+function temptest3(){
+	let final = 0
+	for(let i = 0; i < 148; i++){
+		final += temptest2()
+	}
+	return(final)
+}
+
+
+class TAF2{
+	static checkpoints1 = {"a":0,"b":0}
+	static memories1 = {}
+
+	static PMEM(mem,startup){
+		if(this.memories1[mem] != undefined){
+			return(this.memories1[mem])
+		}
+		this.memories1[mem] = startup
+		return(startup)
+	}
+
+
+	static checkPoint(a,b,c){
+		this.checkpoints1[b] = c
+		if(Math.random()<0.01){
+			return(true)
+		}
+		return(false)
+	}
+}
 
 
 
