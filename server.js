@@ -1600,18 +1600,31 @@ function allPlayersGenerateChunks(){
 }
 
 
-function nonPlayerProcess(timeAllowed){
+
+
+class timeAllowedFunctions{
+
+	static nppVars = {"counter":0}
+
+	static nonPlayerProcess(timeAllowed){
 	let starttime = Date.now()
+	let tcounter = this.nppVars
 
 
-	for(let i = 0; i < enArr.length && Date.now() < starttime + timeAllowed; i++){
-			if(enDict[enArr[i]].entityType!="player"){
-				enDict[enArr[i]].nonPlayerActions()
+	for(;tcounter.counter < enArr.length && Date.now() < starttime + timeAllowed; tcounter.counter++){
+			if(enDict[enArr[tcounter.counter]].entityType!="player"){
+				enDict[enArr[tcounter.counter]].nonPlayerActions()
 			}
 		}
+	if(tcounter.counter == enArr.length){
+		tcounter.counter = 0
+		return(true)
+	} else {return(tcounter.counter)}
 
 
+	}
 }
+
 
 
 
@@ -1635,11 +1648,12 @@ function doSomething(){
 		console.log("tick")
 	}
 
-		for(let i = 0; i < enArr.length; i++){
-			if(enDict[enArr[i]].entityType!="player"){
-				enDict[enArr[i]].nonPlayerActions()
-			}
-		}
+		// for(let i = 0; i < enArr.length; i++){
+		// 	if(enDict[enArr[i]].entityType!="player"){
+		// 		enDict[enArr[i]].nonPlayerActions()
+		// 	}
+		// }
+		timeAllowedFunctions.nonPlayerProcess(Infinity)
 
 
 	} else if(TIME < TickLimit){
@@ -4361,18 +4375,6 @@ function explosion(x,y,size,d){
 			}
 
 			breakBlockBy(attemptx,attempty,dimension,breakby,breakoptions)
-
-			// let bbb = TNEWbreakBlockBy(tbstr,breakby)
-			// if(bbb == "remove"){
-			// 	let temparr = BreakBlock(tnewMap[dimension][tctm[0]][tctm[1]][2],"block",attemptx,attempty,dimension)
-			// 	tnewMap[dimension][tctm[0]][tctm[1]][2] = temparr[0]
-			// 	if(tempdist != 0){
-			// 		DropItems(attemptx,attempty,temparr[1],dimension)
-			// 	}
-
-			// } else {
-			// 	tnewMap[dimension][tctm[0]][tctm[1]][2] = bbb
-			// }
 
 
 		}

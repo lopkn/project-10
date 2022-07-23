@@ -49,13 +49,12 @@ DONE (after creation of tdl)
 - ctx input for particles and rendering
 - add gitignore file
 - structure generation distances
+- player inventory drop
 
 
 TO DO LIST
 
 - custom cursor
-
-- player inventory drop
 
 - fix overlapping entity combat
 

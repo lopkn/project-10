@@ -23,7 +23,16 @@ class Player{
     this.chunk = {"x":0,"y":0}
     this.selectedSlot = 0
     this.Inventory = ["B:1-A:50","B:5-A:50","U:4-A:100","Sl:1-A:30",""]
-    this.clientInfo = {"DragClock":1,"MouseHolding":{"default":[false,0],"drag":[false]},"sound":"on","tileRenderer":0,"blockOutlineColor":"#000000","scanmode":"off","clickUpdate":"on","schmode":"off","actionTextColor":"rgba(255,0,200,0.5)"}
+    this.clientInfo = {
+      "DragClock":1,
+      "MouseHolding":{"default":[false,0],"drag":[false]},
+      "sound":"on","tileRenderer":0,
+      "blockOutlineColor":"#000000",
+      "scanmode":"off",
+      "clickUpdate":"on",
+      "schmode":"off",
+      "actionTextColor":["rgba(255,0,200,0.5)","rgba(0,0,0,0.2)"]
+    }
     this.serverSelctedSlot = 0
 
   }
@@ -1194,9 +1203,11 @@ function textO(str,x,y){
 
 function textOs(str,x,y){
   ctx.font = "30px Monaco"
+  ctx.lineWidth = 1
   let cstr = seperateStringSpecial(str)
   let raise = cstr.length - 1
   for(let i = raise; i > -1 ; i--){
+    ctx.strokeText(cstr[i],x,y + (i*23) - (raise*20),820)
     ctx.fillText(cstr[i],x,y + (i*23) - (raise*20),820)
   }
 
@@ -1388,7 +1399,18 @@ function commandingPush(e){
       }
 
     } else if((tempsplit[0] == "/actxt" ||tempsplit[0] == "/actiontext" )){
-      player.clientInfo.actionTextColor = tempsplit[1]
+
+      if(tempsplit[2] == undefined){
+        player.clientInfo.actionTextColor[0] = tempsplit[1]
+      } else{
+
+        if(tempsplit[1] == "outline" || tempsplit[1] == "out"){
+          player.clientInfo.actionTextColor[1] = tempsplit[2]
+        } else {
+          player.clientInfo.actionTextColor[0] = tempsplit[2]
+        }
+
+      }
     } else if((tempsplit[0] == "/coinflip")){
 
       if(Math.random() > 0.5){
@@ -1514,10 +1536,10 @@ function commandTabcut(str,split){
     case "/teleport":
 
       if(cmdat == 2){
-        return(commandTabcutOptions("rcx"))
+        return([commandTabcutOptions("rcx"),true])
       }
       if(cmdat == 3){
-        return(commandTabcutOptions("rcy"))
+        return([commandTabcutOptions("rcy"),true])
       }
 
       break;  
@@ -1526,10 +1548,10 @@ function commandTabcut(str,split){
     case "/fgoto":
     case "/commandto":
       if(cmdat == 3){
-        return(commandTabcutOptions("rcx"))
+        return([commandTabcutOptions("rcx"),true])
       }
       if(cmdat == 4){
-        return(commandTabcutOptions("rcy"))
+        return([commandTabcutOptions("rcy"),true])
       }
       break;
 
@@ -1687,8 +1709,9 @@ function processTab(str){
   let resultantArr = eliminateArr(endword,wordTabArr,0)
 
   if(str[0] == "/"){
-    let a = [commandTabcut(str,strsplit),100]
-    if(a[0] != undefined){
+    let b = commandTabcut(str,strsplit)
+    if(b != undefined){
+    let a = [b[0],100,b[1]]
     return(a);}
   }
 
@@ -2213,9 +2236,10 @@ if(MCVs.ChestInv.Items.length > 0){
 
 
   ctx.textAlign = "center"
-  fill(player.clientInfo.actionTextColor)
-
+  fill(player.clientInfo.actionTextColor[0])
+  ctx.strokeStyle = [player.clientInfo.actionTextColor[1]]
   textOs(l,410,370)
+
   ctx.textAlign = "start"
   if(commanding == 1){
     fill("#FF4F00")
@@ -2225,11 +2249,14 @@ if(MCVs.ChestInv.Items.length > 0){
 
     let prtsuggest = ""
     let ac = ActionStore[ActionStore.length-1]
-    if(currentTabSuggestion[0] != ac){
+    if(currentTabSuggestion[0] != ac || currentTabSuggestion[1][2]){
       currentTabSuggestion = [ac,processTab(ac)]
     }
     prtsuggest = currentTabSuggestion[1][0]
     ctx.font = "20px Arial"
+    ctx.strokeStyle = "#002000"
+    ctx.lineWidth = 1
+    ctx.strokeText(prtsuggest,330,495)
     fill("#FFFF00")
     ctx.fillText(prtsuggest,330,495)
 
