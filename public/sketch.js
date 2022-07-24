@@ -2416,7 +2416,7 @@ function tick(){
   timerUpdate(clockmax,1)
 
 
-  if(commanding  == 0){
+  if(commanding  == 0 && player.clientInfo.MouseHolding.drag[0]===false){
     ActionStore = []
     ActionPrint = []
     walker = {"x":20,"y":20}
@@ -2425,7 +2425,7 @@ function tick(){
     AActionStore = []
   } else {
     ActionStore = [ActionStore[ActionStore.length-1]]
-    ActionPrint = []
+    ActionPrint = [ActionStore[ActionPrint.length-1]]
     walker = {"x":20,"y":20}
     let back = AActionStore.splice(AActionStore.length-1,1) 
     AActionStore.splice(0,0,player.id)

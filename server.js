@@ -1637,7 +1637,6 @@ function temptest(){
 
 		if(TAF2.checkPoint("end","a",i)){
 			TAF2.memories1.final = final
-			
 			return(["checked",final])
 		}
 
@@ -1708,6 +1707,10 @@ class TAF2{
 			return(true)
 		}
 		return(false)
+	}
+
+	static discardQ(e){
+
 	}
 }
 
