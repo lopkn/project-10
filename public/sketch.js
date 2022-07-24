@@ -725,7 +725,6 @@ function joinSuccess(m){
 
 
 onmousemove = function(e){mouseX = (e.clientX - 5*allzoom +scrollX)/allzoom; mouseY = (e.clientY - 2*allzoom + scrollY)/allzoom}
-ondrag = function(e){}
 
 
 var sounds = {"music.R10":"tl-music/R10-4Discovery.mp3"}
@@ -1856,6 +1855,12 @@ document.addEventListener('keydown', (event) => {
 
 
 
+document.addEventListener('mouseleave', (e) => {
+  mouseX = (e.clientX - 5*allzoom +scrollX)/allzoom
+  mouseY = (e.clientY - 2*allzoom + scrollY)/allzoom
+  mouseStatusUpdate()
+  mouseStatus = "outside"
+})
 
 
 document.addEventListener('mouseup', (event) => {
@@ -1876,7 +1881,6 @@ document.addEventListener('mouseup', (event) => {
 })
 
 document.addEventListener('mousedown', (event) => {
-  // console.log(mouseX,mouseY,mouseCoords)
 
   mouseStatusUpdate()
 
@@ -2042,6 +2046,7 @@ function dragging(){
       player.clientInfo.MouseHolding.drag[2].splice([e[2].length-1],1)
     }else{
     e[2].push(mouseCoords)
+    // console.log(mouseCoords)
     }
   }
 
@@ -2090,7 +2095,7 @@ function repeat(){
     CTX.td.stroke()
     player.clientInfo.MouseHolding.default[1]+= 20/fps
 
-    if(player.clientInfo.MouseHolding.default[1] > 10 * player.clientInfo.DragClock){
+    if(player.clientInfo.MouseHolding.default[1] > 10 * player.clientInfo.DragClock && mouseStatus == "canvas"){
       player.clientInfo.MouseHolding.drag = [true,[mouseX,mouseY],[mouseCoords]]
       AllActions.create("drag",["drag",player.clientInfo.MouseHolding.drag[2]],[])
       allParticles.push(new cirParticle(mouseX,mouseY,5,{"ctx":CTX.td,"color":"#FF7700"}))
