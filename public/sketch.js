@@ -1853,7 +1853,15 @@ document.addEventListener('keydown', (event) => {
 
 }, false);
 
+document.addEventListener("touchmove", function(event) {
+    event.preventDefault();
+    event.stopPropagation();
+}, false);
 
+document.addEventListener('gesturestart', function(e) {
+    e.preventDefault();
+    return false;
+  });
 
 document.addEventListener('mouseleave', (e) => {
   mouseX = (e.clientX - 5*allzoom +scrollX)/allzoom
@@ -1882,8 +1890,10 @@ document.addEventListener('mouseup', (event) => {
 
 document.addEventListener('mousedown', (event) => {
 
-  mouseStatusUpdate()
 
+
+
+  mouseStatusUpdate()
   event.preventDefault();
   let clickedOn = "none"
   // player.clientInfo.MouseHolding.default = [true,0,mouseX,mouseY,mouseStatus]
