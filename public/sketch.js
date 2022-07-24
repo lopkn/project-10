@@ -83,6 +83,9 @@ class Explosion{
 
 
     this.life -= (this.size/50)*60/(fps)
+    if(this.life <= 0){
+      return("kill")
+    }
   }
 
 
