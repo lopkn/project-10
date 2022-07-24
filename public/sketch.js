@@ -2185,53 +2185,6 @@ if(MCVs.ChestInv.Items.length > 0){
 
   mouseStatusUpdate()
 
-  // if(inRect(mouseX,mouseY,0,0,820,820)){
-  //   mouseStatus = "canvas"
-  //   scrollTop = window.scrollY
-  //   scrollHorizontal = window.scrollX
-  //   try{
-  //     mouseCoords = [Math.floor(mouseX/BlockPixels)-20+player.x,Math.floor(mouseY/BlockPixels)-20+player.y]
-  //   } catch{}
-  
-  //   fill("rgba(200,0,255,0.3)")
-  //   rectAtCoords(Math.floor(mouseX/BlockPixels),Math.floor(mouseY/BlockPixels))
-  //   if(player.clientInfo.scanmode == "on"){
-  //     fill("rgb(255,0,"+(flash*2550)+")")
-  //     textO(map[mouseCoords[0]+","+mouseCoords[1]],mouseX-30,mouseY-30)
-  //     textO(mouseCoords[0]+","+mouseCoords[1],mouseX-30,mouseY-60)
-
-  //     for(let i = 0; i < players.length; i++){
-
-  //       if(players[i][0] == mouseCoords[0] && players[i][1] == mouseCoords[1]){
-  //         textO(players[i][3][2],mouseX-30,mouseY-90)
-  //       }
-
-  //     }
-
-
-  //   }
-
-
-  // } else if(inRect(mouseX,mouseY,0,825,820,50)){
-  //   mouseCoords = [Math.floor(mouseX/50)]
-  //   mouseStatus = "inventory" 
-
-  //   fillI("rgba(200,0,255,0.5)")
-  //   rectI(Math.floor(mouseX/50)*50,0,50,50)
-  
-  // } else if(inRect(mouseX,mouseY,850,675,380,130)){
-  //   mouseStatus = "combatoptions"
-  // } else {
-  //   mouseStatus = "outside"
-  // }
-
-
-
-
-
-
-
-
 
 
   for(let i = 0; i < ActionPrint.length; i++){
@@ -2348,8 +2301,12 @@ if(MCVs.ChestInv.Items.length > 0){
   }
 
 
+  DFUNC()
+
 
 }
+
+function DFUNC(){}
 
 var LocBoxes = {
   "map":[0,0,820,820],
