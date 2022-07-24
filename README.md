@@ -50,11 +50,15 @@ DONE (after creation of tdl)
 - add gitignore file
 - structure generation distances
 - player inventory drop
+- a bit of mobile support
+- dragging
 
 
 TO DO LIST
 
 - custom cursor
+
+- drag moving and drag permissions update
 
 - fix overlapping entity combat
 
@@ -64,11 +68,9 @@ TO DO LIST
 
 - energy update
 
-- join screen
+- join/loading screen
 
 - command syntax autofill
-
-- mobile support
 
 - auto rescale event
 

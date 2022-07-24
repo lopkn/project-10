@@ -31,7 +31,8 @@ class Player{
       "scanmode":"off",
       "clickUpdate":"on",
       "schmode":"off",
-      "actionTextColor":["rgba(255,0,200,0.5)","rgba(0,0,0,0.2)"]
+      "actionTextColor":["rgba(255,0,200,0.5)","rgba(0,0,0,0.2)"],
+      "autorescale":"on"
     }
     this.serverSelctedSlot = 0
 
@@ -1452,6 +1453,9 @@ function commandingPush(e){
       SentenceProcess(temp.substring(9))
     } else if(tempsplit[0] == "/ping"){
       pingCounter.start()
+    } else if((tempsplit[0] == "/autorescale" ||tempsplit[0] == "/autoresize" )){
+      player.clientInfo.autorescale = tempsplit[1]
+
     }
 
 
@@ -1756,6 +1760,11 @@ function eliminateArr(str,arr,pos){
 
 }
 
+
+addEventListener('resize', (event) => {
+  if(player.clientInfo.autorescale == "on"){
+  windowRescale()}
+})
 
 
 let commanding = 0
@@ -2092,6 +2101,8 @@ let MCVstate = {}
 
 
 function repeat(){
+
+
 
   CTX.td.fillStyle = "rgba(0,0,0,0)"
   CTX.td.clearRect(0, 0, 1560, 950)
@@ -2443,12 +2454,17 @@ function tick(){
     AActionStore = []
   } else {
     ActionStore = [ActionStore[ActionStore.length-1]]
-    ActionPrint = [ActionStore[ActionPrint.length-1]]
+
+    if(commanding != 0){
+      ActionPrint = []
+    } else {
+      ActionPrint = [ActionPrint[ActionPrint.length-1]]
+    }
     walker = {"x":20,"y":20}
     let back = AActionStore.splice(AActionStore.length-1,1) 
     AActionStore.splice(0,0,player.id)
     socket.emit('AT',AActionStore)
-    console.log(AActionStore)
+    console.log(AActionStore,ActionStore)
     AActionStore = [back[0]]
   }
 }
