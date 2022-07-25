@@ -2,6 +2,9 @@ let camera_button = document.querySelector("#start-camera");
 let video = document.querySelector("#video");
 let click_button = document.querySelector("#click-photo");
 let canvas = document.querySelector("#canvas");
+let image = document.querySelector("#image")
+// Access-Control-Allow-Origin "*"
+image.crossOrigin = "Anonymous";
 
 camera_button.addEventListener('click', async function() {
     let stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
@@ -12,18 +15,48 @@ click_button.addEventListener('click', function() {
     canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
     let image_data_url = canvas.toDataURL('image/jpeg');
 
+    canvas.getContext('2d').drawImage(image,0,0,canvas.width,canvas.height)
+
     // data url of the image
     setTimeout(()=>{
     let a = canvas.getContext('2d').getImageData(mouseX,mouseY,1,1).data
-    console.log(a);
     PARR(a[0],a[1],a[2],mouseX,mouseY)
+    console.log(a);
+    
     },1000)
     
 });
 allzoom = 1
 onmousemove = function(e){mouseX = (e.clientX *allzoom)/allzoom; mouseY = (e.clientY *allzoom)/allzoom}
 
-let errorrange = [50,50,50]
+let errorrange = [20,20,20]
+
+function RARR(NO){
+
+    let discArr = {}
+
+    for(let i = 0; i < NO; i++){
+        let tx = 9
+        let ty = 0
+        let chec = 0
+        while(chec < 124000){
+         tx = Math.floor(Math.random()*canvas.width)
+         ty = Math.floor(Math.random()*canvas.height)
+        chec ++
+            if(discArr[SC(tx,ty)] == undefined){
+                break;
+            }
+
+        } 
+        console.log(tx,ty)
+        let a = canvas.getContext('2d').getImageData(tx,ty,1,1).data
+        let aa = PARR(a[0],a[1],a[2],tx,ty)
+        let aaa = Object.keys(aa)
+        aaa.forEach((e)=>{discArr[e] = true})
+    }
+
+
+}
 
 function PARR(r,g,b,x,y){
     let finalDict = {}
@@ -31,17 +64,24 @@ function PARR(r,g,b,x,y){
     let checksurround = [[x,y]]
     let nextchecksurround = []
 
-    for(let checks = 0; checks < 2; checks++){
+    for(let checks = 0; checks < 600; checks++){
 
         for(let i = 0; i < checksurround.length; i++){
 
+            // console.log("HII")
+
             let c = retlocs(checksurround[i][0],checksurround[i][1])
             for(let j = 0; j < 4; j++){
+                    
+                if(finalDict[SC(c[j][0],c[j][1])] != undefined){
+                    continue;
+                }
+
                 let ced = getpix(c[j][0],c[j][1],[r,g,b])
                 finalDict[SC(c[j][0],c[j][1])] = ced
                 if(ced[3] != "stop"){
                     nextchecksurround.push([c[j][0],c[j][1]])
-                    console.log(c[j][0],c[j][1])
+                    // console.log(c[j][0],c[j][1])
                 }
 
             }
@@ -69,6 +109,7 @@ function PARR(r,g,b,x,y){
 
 
     console.log(finalDict)
+    return(finalDict)
 
 }
 
