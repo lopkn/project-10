@@ -162,6 +162,69 @@ class BeamSnake{
 
 }
 
+function serverLightning2(original,steps,random){
+
+  let foutSteps = {"1":[original]}
+  let rfoutSteps = {"1":[original]}
+  let stepAt = 1
+
+  for(let i = 0; i < steps; i++){
+
+    foutSteps[stepAt+1] = []
+    rfoutSteps[stepAt+1] = []
+
+    foutSteps[stepAt].forEach((e)=>{
+
+      let vx = e[2] - e[0]
+      let vy = e[3] - e[1]
+
+      vx += Math.random()*random - random/2
+      vy += Math.random()*random - random/2
+
+      let tnewBeam = [e[2],e[3],e[2] + vx,e[3]+vy]
+      stepAt += 1
+      foutSteps[stepAt].push(tnewBeam)
+      let tnewBeam2 = [Math.round(e[2]),Math.round(e[3]),Math.round(e[2]+vx),Math.round(e[3]+vy)]
+      rfoutSteps[stepAt].push(tnewBeam2)
+
+    })
+
+
+  }
+
+  return(rfoutSteps)
+
+}
+
+
+class ABeamSnake{
+
+  constructor(sin,sin2){
+     this.dict = sin
+     this.totalSteps = Object.keys(sin).length
+     this.life = 0
+     this.beamDur = sin2.dur
+     this.steps = 0
+  }
+
+  update(){
+    this.life += 20/fps
+
+    if(this.life > this.beamDur * this.steps){
+      this.steps += 1
+      if(this.steps > this.totalSteps){
+        return("kill")
+      }
+
+      this.dict[this.steps].forEach((e)=>{
+        animationBeams.push(new Beam(e[0],e[1],e[2],e[3],"DevLightning"))
+      })
+    }
+
+  }
+
+
+}
 
 
 class Beam{
@@ -1705,6 +1768,18 @@ function tabPurifiedStr(str){
   return(outstr)
 }
 
+function processTabDict(str,dict,mode){
+
+  if(mode = "add"){
+    if(dict[str] == undefined){
+      dict[str] = {"score":str.length}
+    } else {
+
+    }
+  }
+
+}
+
 function processTab(str){
 
 
@@ -2384,6 +2459,8 @@ let a = e[1]
   } else if (e[0] == "Explosion"){
 
     allParticles.push(new Explosion(a[0],a[1],a[2],1,a[2]))
+  } else if(e[0] == "DevServerLightning"){
+    allParticles.push(new ABeamSnake(e[1],e[2]))
   }
 
 

@@ -2170,7 +2170,9 @@ function generateStructureCmd(p,s,x,y,d,o){
 	generateStructure(s,parseInt(x),parseInt(y),d,JSON.parse(o))
 }
 
-
+function emitServerLightning(i1,i2){
+	ParticleRelay(["DevServerLightning",i1,i2],dimension)
+}
 
 function emitLightning(x,y,xx,yy,ty,dimension){
 	let xa = x + (xx-x)/7
@@ -2425,7 +2427,16 @@ function processClick(e){
 			let staffInfo = CURRENTCONFIGS.IutilityReferenceDict[utilityNum].staff
 			
 			if(staffInfo.type == "lightning" && a > 0){
-				emitLightning(enDict[r].x,enDict[r].y,decodedXY.x,decodedXY.y,"DevLightning",dimension)
+				if(utilityNum == 7){
+					emitLightning(enDict[r].x,enDict[r].y,decodedXY.x,decodedXY.y,"DevLightning",dimension)
+				} else {
+
+					let tlight = serverLightning2([enDict[r].x,enDict[r].y,decodedXY.x,decodedXY.y],5,2)
+
+
+
+					emitServerLightning(tlight,{"dur":5})
+				}
 				processItemUsage(r,"utility")
 			}
 			else if(staffInfo.type == "explosive" && a > 0){
@@ -4481,6 +4492,40 @@ function explosion(x,y,size,d){
 
 }
 
+
+function serverLightning2(original,steps,random){
+
+	let foutSteps = {"1":[original]}
+	let rfoutSteps = {"1":[original]}
+	let stepAt = 1
+
+	for(let i = 0; i < steps; i++){
+
+		foutSteps[stepAt+1] = []
+		rfoutSteps[stepAt+1] = []
+
+		foutSteps[stepAt].forEach((e)=>{
+
+			let vx = e[2] - e[0]
+			let vy = e[3] - e[1]
+
+			vx += Math.random()*random - random/2
+			vy += Math.random()*random - random/2
+
+			let tnewBeam = [e[2],e[3],e[2] + vx,e[3]+vy]
+			stepAt += 1
+			foutSteps[stepAt].push(tnewBeam)
+			let tnewBeam2 = [Math.round(e[2]),Math.round(e[3]),Math.round(e[2]+vx),Math.round(e[3]+vy)]
+			rfoutSteps[stepAt].push(tnewBeam2)
+
+		})
+
+
+	}
+
+	return(rfoutSteps)
+
+}
 
 function serverLightning(original,steps,random,lightning,decay){
     let currentBeams = [original]

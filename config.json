@@ -58,7 +58,8 @@
 		"14":{"type":"staff","staff":{"type":"summoning","mob":"minion"},"attack":["swing",1,0.3]},
 		"15":{"type":"staff","staff":{"type":"summoning","mob":"hunter","following":true},"attack":["swing",1,0.3]},
 		"16":{"type":"staff","staff":{"type":"summoning","mob":"hunter"},"attack":["swing",1,0.3]},
-		"17":{"type":"staff","staff":{"type":"explosive","size":14},"attack":["obliterate",10,5]}
+		"17":{"type":"staff","staff":{"type":"explosive","size":14},"attack":["obliterate",10,5]},
+		"18":{"type":"staff","staff":{"type":"lightning"},"attack":["spark beam",2,5]}
 
 	},
 
@@ -70,7 +71,7 @@
 
 	"IimageLinkReferenceDict":{
 		"B":{"10":8},
-		"U":{"14":12,"16":15,"17":8},
+		"U":{"14":12,"16":15,"17":8,"18":7},
 		"Sl":{},
 		"In":{}
 	},
