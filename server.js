@@ -1488,7 +1488,7 @@ function newConnection(socket){
 	if(clientIp == "::ffff:192.168.1.1" || clientIp == "::1" || clientIp == "::ffff:223.18.29.177"){
 		enDict[socket.id].keyholder = true
 		enDict[socket.id].log("Automatic keyholder! welcome back","#00FFFF")
-		enDict[socket.id].Inventory = ["U:12-A:10","B:5-A:250","U:5-A:100","U:4-A:100","U:13-A:1-Unb:0","U:17-A:1-Unb:0",""]
+		enDict[socket.id].Inventory = ["U:12-A:10","B:5-A:250","U:18-A:100","U:4-A:100","U:13-A:1-Unb:0","U:17-A:1-Unb:0",""]
 	}
 
 
@@ -2431,11 +2431,13 @@ function processClick(e){
 					emitLightning(enDict[r].x,enDict[r].y,decodedXY.x,decodedXY.y,"DevLightning",dimension)
 				} else {
 
-					let tlight = serverLightning2([enDict[r].x,enDict[r].y,decodedXY.x,decodedXY.y],5,2)
+					let tnormalized = vectorNormalize([enDict[r].x,enDict[r].y,decodedXY.x,decodedXY.y],2)
+
+					let tlight = serverLightning2(tnormalized,5,2)
 
 
 
-					emitServerLightning(tlight,{"dur":5})
+					emitServerLightning(tlight,{"dur":1})
 				}
 				processItemUsage(r,"utility")
 			}
@@ -4492,11 +4494,29 @@ function explosion(x,y,size,d){
 
 }
 
+function vectorNormalize(original,multiplier){
+
+	if(multiplier == undefined){
+		multiplier = 1
+	}
+
+	let tx = original[2] - original[0]
+	let ty = original[3] - original[1]
+
+	let d = Math.sqrt(tx*tx+ty*ty)
+
+	tx = tx*multiplier/d
+	ty = ty*multiplier/d
+
+	return([original[0],original[1],original[0]+tx,original[1]+ty])
+
+}
+
 
 function serverLightning2(original,steps,random){
 
 	let foutSteps = {"1":[original]}
-	let rfoutSteps = {"1":[original]}
+	let rfoutSteps = {"1":[[Math.round(original[0]),Math.round(original[1]),Math.round(original[2]),Math.round(original[3])]]}
 	let stepAt = 1
 
 	for(let i = 0; i < steps; i++){
@@ -4522,6 +4542,7 @@ function serverLightning2(original,steps,random){
 
 
 	}
+
 
 	return(rfoutSteps)
 

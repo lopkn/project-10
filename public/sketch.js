@@ -210,7 +210,7 @@ class ABeamSnake{
   update(){
     this.life += 20/fps
 
-    if(this.life > this.beamDur * this.steps){
+    while(this.life > this.beamDur * this.steps){
       this.steps += 1
       if(this.steps > this.totalSteps){
         return("kill")
