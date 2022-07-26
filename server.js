@@ -4505,6 +4505,10 @@ function vectorNormalize(original,multiplier){
 
 	let d = Math.sqrt(tx*tx+ty*ty)
 
+	if(d == 0){
+		return(original)
+	}
+
 	tx = tx*multiplier/d
 	ty = ty*multiplier/d
 

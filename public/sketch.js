@@ -791,7 +791,10 @@ function joinSuccess(m){
 onmousemove = function(e){mouseX = (e.clientX - 5*allzoom +scrollX)/allzoom; mouseY = (e.clientY - 2*allzoom + scrollY)/allzoom}
 
 
-var sounds = {"music.R10":"tl-music/R10-4Discovery.mp3"}
+var sounds = {
+  "music.R10":"tl-music/R10-4Discovery.mp3",
+  "music.R11":"tl-music/R11-Menu.mp3"
+}
 var currentSounds = []
 
 
