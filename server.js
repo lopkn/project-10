@@ -4494,6 +4494,39 @@ function explosion(x,y,size,d){
 
 }
 
+function arrayBoundingBox(arr,type){
+
+	if(type = "notArr"){
+
+	}
+
+	let maxx
+	let maxy
+	let minx
+	let miny
+
+	arr.forEach((e)=>{
+
+		if(e[0] > maxx){
+			maxx = e[0]
+		}
+		if(e[0] < minx){
+			minx = e[0]
+		}
+		if(e[1] > maxy){
+			maxy = e[1]
+		}
+		if(e[1] < miny){
+			miny = e[1]
+		}
+
+	})
+
+	return([maxx,minx,maxy,miny])
+
+}
+
+
 function vectorNormalize(original,multiplier){
 
 	if(multiplier == undefined){
