@@ -2459,7 +2459,7 @@ function processClick(e){
 							let en = enDict[e]
 							if(en.x == x && en.y == y && en.dimension == td){
 
-								en.damage(5)
+								en.damage(Math.floor(Math.random()*10 + 10))
 								ParticleRelay(["Apar",["Circle",[x,y,3]],dur],td)
 							}
 						})
