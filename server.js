@@ -104,16 +104,38 @@ function ping(a){
 
 let perSeeds = {"O":new perlin(174.44),"T":new perlin(164.44)}
 
-class cvents{
-	static allCvents = ["Mtick","Tick","Turn"]
-	
 
-	static call(x){
-		return this.allCvents
+// main events
+
+class cvents{
+	static allCvents = ["AMtick","WMtick","Tick","Turn"]
+	static CventsDict = {
+		"Mtick":this.AMtick,
+		"WMtick":this.WMtick,
+		"Tick":this.Tick,
+		"Turn":this.Turn
 	}
 
-	static dad(){
-		return("3")
+	static call(x){
+
+		this.CventsDict[x]()
+
+	}
+
+	static AMtick(){
+		
+	}
+
+	static WMtick(){
+
+	}
+
+	static Tick(){
+
+	}
+
+	static Turn(){
+
 	}
 
 }
@@ -1846,9 +1868,7 @@ function allEffectTick(){
 function allPlayersSendBeams(){
 	for(let i = 0 ; i < plArr.length; i++){
 		let enid = plArr[i]
-		// if(enDict[enid].entityType == "player"){
-			enDict[enid].sendBeam()
-		// }
+		enDict[enid].sendBeam()
 	}
 
 	relayBeams = []
@@ -2181,7 +2201,7 @@ function emitLightning(x,y,xx,yy,ty,dimension){
 }
 
 
-function ParticleRelay(arr,dimension){
+function ParticleRelay(arr,dimension,bounding){
 
 	for(let i = 0; i < plArr.length; i++){
 		let enid = plArr[i]
@@ -2433,11 +2453,24 @@ function processClick(e){
 
 					let tnormalized = vectorNormalize([enDict[r].x,enDict[r].y,decodedXY.x,decodedXY.y],2)
 
-					let tlight = serverLightning2(tnormalized,5,2)
+					let tf = (x,y)=>{
+						let td = dimension
+						enArr.forEach((e)=>{
+							let en = enDict[e]
+							if(en.x == x && en.y == y && en.dimension == td){
+
+								en.damage(5)
+								ParticleRelay(["Circle",[x,y]],td)
+							}
+						})
+					}
+
+
+					let tlight = serverLightning2(tnormalized,5,2,{"dur":1},tf)
 
 
 
-					emitServerLightning(tlight,{"dur":1})
+					emitServerLightning(tlight[0],tlight[1])
 				}
 				processItemUsage(r,"utility")
 			}
@@ -4550,10 +4583,11 @@ function vectorNormalize(original,multiplier){
 }
 
 
-function serverLightning2(original,steps,random){
+function serverLightning2(original,steps,random,options,hitFunc){
 
 	let foutSteps = {"1":[original]}
 	let rfoutSteps = {"1":[[Math.round(original[0]),Math.round(original[1]),Math.round(original[2]),Math.round(original[3])]]}
+	hitFunc(Math.round(original[2]),Math.round(original[3]))
 	let stepAt = 1
 
 	for(let i = 0; i < steps; i++){
@@ -4570,6 +4604,7 @@ function serverLightning2(original,steps,random){
 			vy += Math.random()*random - random/2
 
 			let tnewBeam = [e[2],e[3],e[2] + vx,e[3]+vy]
+			hitFunc(Math.round(e[2]+vx),Math.round(e[3]+vy))
 			stepAt += 1
 			foutSteps[stepAt].push(tnewBeam)
 			let tnewBeam2 = [Math.round(e[2]),Math.round(e[3]),Math.round(e[2]+vx),Math.round(e[3]+vy)]
@@ -4581,7 +4616,7 @@ function serverLightning2(original,steps,random){
 	}
 
 
-	return(rfoutSteps)
+	return([rfoutSteps,options])
 
 }
 

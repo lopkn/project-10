@@ -94,6 +94,8 @@ class Explosion{
 
 class cirParticle{
   constructor(x,y,life,options){
+
+    //pxper coordinates
     this.life = life
     this.size = life
     this.x = x
@@ -1963,9 +1965,9 @@ document.addEventListener('mouseup', (event) => {
   MCVs.held = "none"
   player.clientInfo.MouseHolding.default = [false,0]
 
-  if(player.clientInfo.MouseHolding.drag[2] != undefined){
-    console.log(player.clientInfo.MouseHolding.drag[2])
-  }
+  // if(player.clientInfo.MouseHolding.drag[2] != undefined){
+  //   xonsole.log(player.clientInfo.MouseHolding.drag[2])
+  // }
 
   player.clientInfo.MouseHolding.drag = [false]
 
@@ -2143,7 +2145,7 @@ function dragging(){
       player.clientInfo.MouseHolding.drag[2].splice([e[2].length-1],1)
     }else{
     e[2].push(mouseCoords)
-    // console.log(mouseCoords)
+    // xonsole.log(mouseCoords)
     }
   }
 
@@ -2160,7 +2162,7 @@ function dragging(){
 
 
   AllActions.edit("drag",["drag",tempPrint2],tempPrint)
-
+  //xonsole.log(["drag",tempPrint2])
 }
 
 
@@ -2196,7 +2198,12 @@ function repeat(){
 
     if(player.clientInfo.MouseHolding.default[1] > 10 * player.clientInfo.DragClock && mouseStatus == "canvas"){
       player.clientInfo.MouseHolding.drag = [true,[mouseX,mouseY],[mouseCoords]]
-      AllActions.create("drag",["drag",player.clientInfo.MouseHolding.drag[2]],[])
+
+      let ta = CoordToChunk(mouseCoords[0],mouseCoords[1])
+      let tb = ta.cx + ta.cy*chunkSize+3
+
+      AllActions.create("drag",["drag",[[ta,tb]]],[])
+      //xonsole.log(["drag",[ta,tb]])
       allParticles.push(new cirParticle(mouseX,mouseY,5,{"ctx":CTX.td,"color":"#FF7700"}))
     }
 
@@ -2464,6 +2471,10 @@ let a = e[1]
     allParticles.push(new Explosion(a[0],a[1],a[2],1,a[2]))
   } else if(e[0] == "DevServerLightning"){
     allParticles.push(new ABeamSnake(e[1],e[2]))
+  }
+  //experimental or temporary
+  else if(e[0] == "Circle"){
+    allParticles.push(new cirParticle(((a[0]+20-player.x) * BlockPixels + BlockPixelsHalf),((a[1]+20-player.y) * BlockPixels + BlockPixelsHalf),5))
   }
 
 
