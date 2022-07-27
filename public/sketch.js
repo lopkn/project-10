@@ -198,6 +198,22 @@ function serverLightning2(original,steps,random){
 
 }
 
+class AAparticle{
+
+  constructor(a,e){
+    this.A = a
+    this.e = e
+    this.life = 0
+  }
+
+  update(){
+    this.life += 20/fps
+    if(this.life > this.A){
+      ParticleUpdate(this.e)
+      return("kill")
+    }
+  }
+}
 
 class ABeamSnake{
 
@@ -2474,7 +2490,9 @@ let a = e[1]
   }
   //experimental or temporary
   else if(e[0] == "Circle"){
-    allParticles.push(new cirParticle(((a[0]+20-player.x) * BlockPixels + BlockPixelsHalf),((a[1]+20-player.y) * BlockPixels + BlockPixelsHalf),5))
+    allParticles.push(new cirParticle(((a[0]+20-player.x) * BlockPixels + BlockPixelsHalf),((a[1]+20-player.y) * BlockPixels + BlockPixelsHalf),a[2]))
+  } else if(e[0] == "Apar"){
+    allParticles.push(new AAparticle(e[2],e[1]))
   }
 
 

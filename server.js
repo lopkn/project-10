@@ -2453,20 +2453,20 @@ function processClick(e){
 
 					let tnormalized = vectorNormalize([enDict[r].x,enDict[r].y,decodedXY.x,decodedXY.y],2)
 
-					let tf = (x,y)=>{
+					let tf = (x,y,dur)=>{
 						let td = dimension
 						enArr.forEach((e)=>{
 							let en = enDict[e]
 							if(en.x == x && en.y == y && en.dimension == td){
 
 								en.damage(5)
-								ParticleRelay(["Circle",[x,y]],td)
+								ParticleRelay(["Apar",["Circle",[x,y,3]],dur],td)
 							}
 						})
 					}
 
 
-					let tlight = serverLightning2(tnormalized,5,2,{"dur":1},tf)
+					let tlight = serverLightning2(tnormalized,7,2,{"dur":2},tf)
 
 
 
@@ -4604,7 +4604,7 @@ function serverLightning2(original,steps,random,options,hitFunc){
 			vy += Math.random()*random - random/2
 
 			let tnewBeam = [e[2],e[3],e[2] + vx,e[3]+vy]
-			hitFunc(Math.round(e[2]+vx),Math.round(e[3]+vy))
+			hitFunc(Math.round(e[2]+vx),Math.round(e[3]+vy),options.dur*(i+1))
 			stepAt += 1
 			foutSteps[stepAt].push(tnewBeam)
 			let tnewBeam2 = [Math.round(e[2]),Math.round(e[3]),Math.round(e[2]+vx),Math.round(e[3]+vy)]
