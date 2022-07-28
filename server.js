@@ -1510,7 +1510,8 @@ function newConnection(socket){
 	if(clientIp == "::ffff:192.168.1.1" || clientIp == "::1" || clientIp == "::ffff:223.18.29.177"){
 		enDict[socket.id].keyholder = true
 		enDict[socket.id].log("Automatic keyholder! welcome back","#00FFFF")
-		enDict[socket.id].Inventory = ["U:12-A:10","B:5-A:250","U:18-A:100","U:4-A:100","U:13-A:1-Unb:0","U:17-A:1-Unb:0",""]
+		enDict[socket.id].Inventory = ["U:12-A:1-Unb:0","B:5-A:250","U:18-A:100-Unb:0","U:4-A:100-Unb:0","U:13-A:1-Unb:0","U:17-A:1-Unb:0",""]
+		enDict[socket.id].entityStats.summoning += 100
 	}
 
 
@@ -2459,14 +2460,14 @@ function processClick(e){
 							let en = enDict[e]
 							if(en.x == x && en.y == y && en.dimension == td){
 
-								en.damage(Math.floor(Math.random()*10 + 10))
+								en.damage(Math.floor(Math.random()*11 + 10))
 								ParticleRelay(["Apar",["Circle",[x,y,3]],dur],td)
 							}
 						})
 					}
 
 
-					let tlight = serverLightning2(tnormalized,7,2,{"dur":2},tf)
+					let tlight = serverLightning2(tnormalized,7,0.5,{"dur":0},tf)
 
 
 
