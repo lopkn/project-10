@@ -2463,6 +2463,10 @@ function processClick(e){
 								en.damage(Math.floor(Math.random()*11 + 10))
 								ParticleRelay(["Apar",["Circle",[x,y,3]],dur],td)
 							}
+
+							if(breakBlockBy(x,y,td,Math.random()*20+20,{"type":"all"}) != "no block"){
+								ParticleRelay(["Apar",["Circle",[x,y,2]],dur],td)
+							}
 						})
 					}
 

@@ -52,6 +52,8 @@ DONE (after creation of tdl)
 - player inventory drop
 - a bit of mobile support
 - dragging
+- server generated lightning beams
+- automatic rescaling
 
 
 TO DO LIST
@@ -68,21 +70,17 @@ TO DO LIST
 
 - energy update
 
+- data amount bar
+
 - join/loading screen
 
 - command syntax autofill
-
-- auto rescale event
 
 - blood and ash tiles
 
 - particles and fire
 
 - particles class merge
-
-- ctx dictionary
-
-- server generated lightning beams
 
 - dungeons
 
@@ -112,7 +110,7 @@ TO DO LIST
 
 - number display for bars
 
-- try out using cache
+- try out using cache and cookies
 
 - try out WFC
 
@@ -123,8 +121,6 @@ TO DO LIST
 - enviornmental damage
 
 - enviornmental turn management
-
-- multitul breaks slabs
 
 - request animation frame
 
