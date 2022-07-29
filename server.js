@@ -108,12 +108,13 @@ let perSeeds = {"O":new perlin(174.44),"T":new perlin(164.44)}
 // main events
 
 class cvents{
-	static allCvents = ["AMtick","WMtick","Tick","Turn"]
+	static allCvents = ["AMtick","WMtick","Tick","Turn","ATick"]
 	static CventsDict = {
 		"Mtick":this.AMtick,
 		"WMtick":this.WMtick,
 		"Tick":this.Tick,
-		"Turn":this.Turn
+		"Turn":this.Turn,
+		"ATick":this.ATick
 	}
 
 	static call(x){
@@ -136,6 +137,10 @@ class cvents{
 
 	static Turn(){
 
+	}
+
+	static ATick(){
+		naturalMobSpawn(10,"hunter")
 	}
 
 }
@@ -854,13 +859,19 @@ function isBlockage(x,y,d){
 
 
 
-
+var StartingPlayerSight = {}
+for(let i = -20; i < 21;i++){
+	for(let j = -20; j < 21;j++){
+		StartingPlayerSight[i+","+j] = true
+	}	
+}
 
 //================================ ------ =======================================================================
 //================================ PLAYER =======================================================================
 //================================ ------ =======================================================================
 class player{
 	constructor(id){
+		this.sight = StartingPlayerSight
 		this.entityType = "player"
 		this.id = id
 		usedIDs[id] = true
@@ -895,6 +906,9 @@ class player{
 			"summoning" : 10
 
 		}
+
+
+
 		
 	}
 
@@ -1785,6 +1799,9 @@ function doSomething(startTime){
 		}
 
 	}else if(TIME == 0){
+
+		cvents.call("ATick")
+
 		ProcessStep = 1
 		for(let i = enArr.length -1; i > -1; i--){
 			let enid = enArr[i]
@@ -1813,8 +1830,6 @@ function doSomething(startTime){
 		allEffectTick()
 		
 		disconnect()
-
-
 
 	}
 	
@@ -2464,10 +2479,11 @@ function processClick(e){
 								ParticleRelay(["Apar",["Circle",[x,y,3]],dur],td)
 							}
 
-							if(breakBlockBy(x,y,td,Math.random()*20+20,{"type":"all"}) != "no block"){
+							
+						})
+					if(breakBlockBy(x,y,td,Math.random()*20+20,{"type":"all"}) != "no block"){
 								ParticleRelay(["Apar",["Circle",[x,y,2]],dur],td)
 							}
-						})
 					}
 
 
@@ -3539,9 +3555,24 @@ function summonNewMob(name,x,y,id,d,stats){
 
 }
 
+function inAnyPlayerSight(x,y,d){
+	let fout = []
+	plArr.forEach((e)=>{
+		let en = enDict[e]
+		if(en.dimension == d && en.sight[(x-en.x) + "," + (y-en.y)] === true){
+			fout.push(e)
+		}
+	})
 
+	if(fout.length == 0){
+		return(false)
+	}
+
+	return(fout)
+}
 
 function naturalMobSpawn(ampp,mob){
+	let summonAmount = 0
 	for(let j = 0; j < plArr.length; j++){
 	for(let i = 0; i < ampp; i++){
 
@@ -3549,11 +3580,15 @@ function naturalMobSpawn(ampp,mob){
 		let ty = Math.floor(Math.random()*100-50)
 
 		if((tx > 20 || tx < 0) && (ty > 20 || ty < 0) && !isBlockage(enDict[plArr[j]].x+tx,enDict[plArr[j]].y+ty,enDict[plArr[j]].dimension)){
-			summonNewMob(mob,enDict[plArr[j]].x+tx,enDict[plArr[j]].y+ty,"rand",enDict[plArr[j]].dimension)
+			if(inAnyPlayerSight(enDict[plArr[j]].x+tx,enDict[plArr[j]].y+ty,enDict[plArr[j]].dimension) === false){
+				summonNewMob(mob,enDict[plArr[j]].x+tx,enDict[plArr[j]].y+ty,"rand",enDict[plArr[j]].dimension)
+				summonAmount++
+			}
 		}
 
 	}
 	}
+	return(summonAmount)
 }
 
 

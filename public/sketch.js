@@ -69,7 +69,9 @@ class Explosion{
     }
 
     allParticles.push(new cirParticle(this.x,this.y,size,{"ctx":ctx}))
-
+    for(let i = 0; i < 3; i++){
+    allParticles.push(new AAparticle(Math.random()*size/2,["PxCircle",[Math.random()*size*20-10*size+this.x,this.y+Math.random()*size*20-10*size,Math.random()*size/4+size/4]]))
+  }
   }
 
   update(){
@@ -2491,7 +2493,9 @@ let a = e[1]
   //experimental or temporary
   else if(e[0] == "Circle"){
     allParticles.push(new cirParticle(((a[0]+20-player.x) * BlockPixels + BlockPixelsHalf),((a[1]+20-player.y) * BlockPixels + BlockPixelsHalf),a[2]))
-  } else if(e[0] == "Apar"){
+  }else if(e[0] == "PxCircle"){
+    allParticles.push(new cirParticle(a[0],a[1],a[2]))
+  }else if(e[0] == "Apar"){
     allParticles.push(new AAparticle(e[2],e[1]))
   }
 
@@ -3644,7 +3648,7 @@ function onBar(x,y){
       return([2,MCVs.allBars[i]])
 
 
-    }}
+    }
 
     if(MCVs[MCVs.allBars[i]].clickAreas != undefined && MCVs[MCVs.allBars[i]].clickAreas.length > 0){
       for(let j = 0; j < MCVs[MCVs.allBars[i]].clickAreas.length; j++){
@@ -3656,7 +3660,7 @@ function onBar(x,y){
         }
       }
     }
-
+  }
 
   }
 
