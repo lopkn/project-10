@@ -1398,16 +1398,20 @@ function retInsideLine(x,y,x1,y1){
 	let slope = (y1-y)/(dx)
 	let dist = distance(x,y,x1,y1)
 
-	for(let i = 1; i < 21; i++){
-		let e = x+i*dx/20
-		fout.push([Math.round(e),Math.round(y + (e-x)*slope)])
+	for(let i = 1; i < dist; i++){
+		let e = x+i*dx/dist
+		let tout = [Math.round(e),Math.round(y + (e-x)*slope)]
+		if(fout[0] == undefined||fout[fout.length-1][0] != tout[0] ||fout[fout.length-1][1] != tout[1]){
+		fout.push(tout)}
 	}
 
 
 	} else {
 		slope = y1 > y ? 1 : -1
-		for(let i = 1; i < 21; i++){
-		fout.push([x,y + i*slope])
+		for(let i = 1; i < Math.abs(y1-y)+1; i++){
+		let tout = [x,y + i*slope]
+		if(fout[0] == undefined||fout[fout.length-1][0] != tout[0] ||fout[fout.length-1][1] != tout[1]){
+		fout.push(tout)}
 		}
 	}
 

@@ -2948,6 +2948,39 @@ function bracketLevels(str){
 
 }
 
+// DFUNC = ()=>{
+//     let r = retInsideLine(20,20,mouseCoords[0]-player.x+20,mouseCoords[1]-player.y+20)
+//     CTX.ctx.fillStyle = "rgba(255,0,0,0.5)"    
+//     r.forEach((e)=>{rectAtCoords(e[0],e[1])})
+// }
+function retInsideLine(x,y,x1,y1){
+  let fout = []
+  let dx = x1 - x
+  if(dx != 0){
+  let slope = (y1-y)/(dx)
+  let dist = distance(x,y,x1,y1)
+
+  for(let i = 1; i < dist; i++){
+    let e = x+i*dx/dist
+    let tout = [Math.round(e),Math.round(y + (e-x)*slope)]
+    if(fout[0] == undefined||fout[fout.length-1][0] != tout[0] ||fout[fout.length-1][1] != tout[1]){
+    fout.push(tout)}
+  }
+
+
+  } else {
+    slope = y1 > y ? 1 : -1
+    for(let i = 1; i < Math.abs(y1-y)+1; i++){
+    let tout = [x,y + i*slope]
+    if(fout[0] == undefined||fout[fout.length-1][0] != tout[0] ||fout[fout.length-1][1] != tout[1]){
+    fout.push(tout)}
+    }
+  }
+
+  return(fout)
+
+}
+
 function bracketCompressionProcess(str,arr,parseLevel){
 
   let outStr = ""
