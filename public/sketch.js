@@ -69,9 +69,9 @@ class Explosion{
     }
 
     allParticles.push(new cirParticle(this.x,this.y,size,{"ctx":ctx}))
-    for(let i = 0; i < 3; i++){
-    allParticles.push(new AAparticle(Math.random()*size/2,["PxCircle",[Math.random()*size*20-10*size+this.x,this.y+Math.random()*size*20-10*size,Math.random()*size/4+size/4]]))
-  }
+  //   for(let i = 0; i < 3; i++){
+  //   allParticles.push(new AAparticle(Math.random()*size/2,["PxCircle",[Math.random()*size*20-10*size+this.x,this.y+Math.random()*size*20-10*size,Math.random()*size/4+size/4]]))
+  // }
   }
 
   update(){
