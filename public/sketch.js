@@ -497,6 +497,9 @@ var ActionPrint = []
 document.body.style.webkitTransform =  "scale(1)"; 
 document.body.style.MozTransform = "scale(1)";
 document.body.style.MozTransformOrigin = "0 0";
+
+window.onscroll = "lolno"
+
 var mouseStatus = "canvas"
 var player;
 var currentlyPressedKeys = []
@@ -550,7 +553,7 @@ function windowRescale(e){
 
 
   allzoom = zoomScale
-  document.body.style.zoom= allzoom
+  document.body.style.zoom = allzoom
   return(zoomScale)
 
 }
@@ -1634,9 +1637,19 @@ function commandingPush(e){
       player.clientInfo.autorescale = tempsplit[1]
 
     } else if(tempsplit[0] == "/scookie"){
-      document.cookie = JSON.stringify(player.clientInfo)
+      let str = JSON.stringify(player.clientInfo)
+      document.cookie = str
+      selfLog("Stored string with length: "+str.length)
     } else if(tempsplit[0] == "/gcookie" || tempsplit[0] == "/gc"){
+      if(document.cookie.length > 2){
       player.clientInfo = JSON.parse(document.cookie)
+      selfLog("successfully retrieved data")
+      } else {
+        selfLog("file not found","red")
+      }
+    } else if(tempsplit[0] == "/dcookie"){
+      document.cookie = "{}";
+      selfLog("Your cookies has been turned to the string {}. If you know how to delete a cookie yousing js, tell me how.","red")
     }
 
 
