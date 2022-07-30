@@ -26,7 +26,8 @@ class Player{
     this.clientInfo = {
       "DragClock":1,
       "MouseHolding":{"default":[false,0],"drag":[false]},
-      "sound":"on","tileRenderer":0,
+      "sound":"on",
+      "tileRenderer":0,
       "blockOutlineColor":"#000000",
       "scanmode":"off",
       "clickUpdate":"on",
@@ -1632,6 +1633,10 @@ function commandingPush(e){
     } else if((tempsplit[0] == "/autorescale" ||tempsplit[0] == "/autoresize" )){
       player.clientInfo.autorescale = tempsplit[1]
 
+    } else if(tempsplit[0] == "/scookie"){
+      document.cookie = JSON.stringify(player.clientInfo)
+    } else if(tempsplit[0] == "/gcookie" || tempsplit[0] == "/gc"){
+      player.clientInfo = JSON.parse(document.cookie)
     }
 
 
