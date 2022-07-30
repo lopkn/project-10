@@ -69,9 +69,9 @@ class Explosion{
     }
 
     allParticles.push(new cirParticle(this.x,this.y,size,{"ctx":ctx}))
-  //   for(let i = 0; i < 3; i++){
-  //   allParticles.push(new AAparticle(Math.random()*size/2,["PxCircle",[Math.random()*size*20-10*size+this.x,this.y+Math.random()*size*20-10*size,Math.random()*size/4+size/4]]))
-  // }
+    for(let i = 0; i < 3; i++){
+      allParticles.push(new AAparticle(Math.random()*size/2,["PxCircle",[Math.random()*size*20-10*size+this.x,this.y+Math.random()*size*20-10*size,Math.random()*size/4+size/4]]))
+    }
   }
 
   update(){
@@ -592,25 +592,26 @@ display2.style.left = "850px"
 
 socket = io.connect('/');
 
-socket.on('sendWhenJoin',joinSuccess)
-socket.on('relay',relayPlayer)
-socket.on('chatUpdate',updateChat)
-socket.on('mapUpdate2',UPDATEMAP)
-socket.on('invrelay',updateInv)
-socket.on('TIME',timeUpdate)
-socket.on('TICK',tick)
-socket.on("DeathScreen",deathScreen)
-socket.on('PING',returnPing)
-socket.on("chat",chatProcess)
-socket.on("comrelay",combatProcess)
-socket.on("combatText",combatText)
-socket.on("config",configure)
-socket.on("BeamRelay",BeamUpdate)
-socket.on("ParticleRelay",ParticleUpdate)
-socket.on("statusRelay",statusUpdate)
-socket.on("rarelay",rareprocess)
-socket.on("cTSping",()=>{selfLog(pingCounter.stop())})
+socket.on('sendWhenJoin',(e)=>{joinSuccess(e)})
+socket.on('relay',(e)=>{relayPlayer(e)})
+socket.on('chatUpdate',(e)=>{updateChat(e)})
+socket.on('mapUpdate2',(e)=>{UPDATEMAP(e)})
+socket.on('invrelay',(e)=>{updateInv(e)})
+socket.on('TIME',(e)=>{timeUpdate(e)})
+socket.on('TICK',(e)=>{tick(e)})
+socket.on("DeathScreen",(e)=>{deathScreen(e)})
+socket.on('PING',(e)=>{returnPing(e)})
+socket.on("chat",(e)=>{chatProcess(e)})
+socket.on("comrelay",(e)=>{combatProcess(e)})
+socket.on("combatText",(e)=>{combatText(e)})
+socket.on("config",(e)=>{configure(e)})
+socket.on("BeamRelay",(e)=>{BeamUpdate(e)})
+socket.on("ParticleRelay",(e)=>{ParticleUpdate(e)})
+socket.on("statusRelay",(e)=>{statusUpdate(e)})
+socket.on("rarelay",(e)=>{rareprocess(e)})
+socket.on("cTSping",(e)=>{selfLog(pingCounter.stop())})
 
+socket.onAny((name,e)=>{cPackets.doOnAll(e,name)})
 
 var PSDon = false
 function PacketSizeDebuggerToggle(){
@@ -621,35 +622,91 @@ function PacketSizeDebuggerToggle(){
   }
 }
 
-function PacketSizeDebugger(){
-  socket.on('sendWhenJoin', (e) =>{sizeTell(e,"1")})
-  socket.on('relay',(e) =>{sizeTell(e,"2")})
-  socket.on('chatUpdate',(e) =>{sizeTell(e,"3")})
-  socket.on('mapUpdate2',(e) =>{sizeTell(e,"4")})
-  socket.on('invrelay',(e) =>{sizeTell(e,"5")})
-  socket.on('TIME',(e) =>{sizeTell(e,"6")})
-  socket.on('TICK',(e) =>{sizeTell(e,"7")})
-  socket.on("DeathScreen",(e) =>{sizeTell(e,"8")})
-  socket.on('PING',(e) =>{sizeTell(e,"9")})
-  socket.on("chat",(e) =>{sizeTell(e,"0")})
-  socket.on("comrelay",(e) =>{sizeTell(e,"11")})
-  socket.on("combatText",(e) =>{sizeTell(e,"12")})
-  socket.on("config",(e) =>{sizeTell(e,"13")})
-  socket.on("BeamRelay",(e) =>{sizeTell(e,"14")})
-  socket.on("ParticleRelay",(e) =>{sizeTell(e,"15")})
-  socket.on("statusRelay",(e) =>{sizeTell(e,"16")})
-  socket.on("rarelay",(e)=>{sizeTell(e,"17")})
-}
 
-function sizeTell(e,n){
-  if(PSDon){
-    try{
-    console.log(n+"-"+JSON.stringify(e).length)}
-    catch{
-      console.log(n+"=err="+e)
+class cPackets{
+  static stats = {
+  'sendWhenJoin':0, 
+  'relay':0,
+  'chatUpdate':0,
+  'mapUpdate2':0,
+  'invrelay':0,
+  'TIME':0,
+  'TICK':0,
+  "DeathScreen":0,
+  'PING':0,
+  "chat":0,
+  "comrelay":0,
+  "combatText":0,
+  "config":0,
+  "BeamRelay":0,
+  "ParticleRelay":0,
+  "statusRelay":0,
+  "rarelay":0
+  }
+  static Lstats = {
+  'sendWhenJoin':0, 
+  'relay':0,
+  'chatUpdate':0,
+  'mapUpdate2':0,
+  'invrelay':0,
+  'TIME':0,
+  'TICK':0,
+  "DeathScreen":0,
+  'PING':0,
+  "chat":0,
+  "comrelay":0,
+  "combatText":0,
+  "config":0,
+  "BeamRelay":0,
+  "ParticleRelay":0,
+  "statusRelay":0,
+  "rarelay":0
+  }
+
+  static doOnAll(e,n){
+    if(e == undefined){
+      this.stats[n] += 9
+      this.Lstats[n] = 9
+    } else{
+      let len = JSON.stringify(e).length
+      this.stats[n] += len
+      this.Lstats[n] = len
     }
   }
+
+
 }
+
+
+// function PacketSizeDebugger(){
+//   socket.on('sendWhenJoin', (e) =>{sizeTell(e,"1")})
+//   socket.on('relay',(e) =>{sizeTell(e,"2")})
+//   socket.on('chatUpdate',(e) =>{sizeTell(e,"3")})
+//   socket.on('mapUpdate2',(e) =>{sizeTell(e,"4")})
+//   socket.on('invrelay',(e) =>{sizeTell(e,"5")})
+//   socket.on('TIME',(e) =>{sizeTell(e,"6")})
+//   socket.on('TICK',(e) =>{sizeTell(e,"7")})
+//   socket.on("DeathScreen",(e) =>{sizeTell(e,"8")})
+//   socket.on('PING',(e) =>{sizeTell(e,"9")})
+//   socket.on("chat",(e) =>{sizeTell(e,"0")})
+//   socket.on("comrelay",(e) =>{sizeTell(e,"11")})
+//   socket.on("combatText",(e) =>{sizeTell(e,"12")})
+//   socket.on("config",(e) =>{sizeTell(e,"13")})
+//   socket.on("BeamRelay",(e) =>{sizeTell(e,"14")})
+//   socket.on("ParticleRelay",(e) =>{sizeTell(e,"15")})
+//   socket.on("statusRelay",(e) =>{sizeTell(e,"16")})
+//   socket.on("rarelay",(e)=>{sizeTell(e,"17")})
+// }
+
+// function sizeTell(e,n){
+//   if(PSDon){
+//     try{
+//     console.log(n+"-"+JSON.stringify(e).length)}
+//     catch{
+//       console.log(n+"=err="+e)
+//     }
+//   }
+// }
 
 
 
@@ -3683,7 +3740,7 @@ function onBar(x,y){
 
     }
 
-    if(MCVs[MCVs.allBars[i]].clickAreas != undefined && MCVs[MCVs.allBars[i]].clickAreas.length > 0){
+    if(MCVs[MCVs.allBars[i]].maxed && MCVs[MCVs.allBars[i]].clickAreas != undefined && MCVs[MCVs.allBars[i]].clickAreas.length > 0){
       for(let j = 0; j < MCVs[MCVs.allBars[i]].clickAreas.length; j++){
 
         let tarr = MCVs[MCVs.allBars[i]].clickAreas[j]

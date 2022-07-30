@@ -3428,7 +3428,7 @@ function give(p,amount,item){
 function ArrLoc(p){
 	for(let i = 0; i < plArr.length; i++){
 		if(plArr[i] == p){
-			enDict[p].log("you are player "+i+" => " + p,cmdc.success)
+			enDict[p].log("you are player "+i+"/"+(plArr.length-1)+"/"+(enArr.length-1)+" => " + p,cmdc.success)
 		}
 	}
 	
