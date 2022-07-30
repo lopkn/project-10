@@ -633,17 +633,20 @@ socket = io.connect('/');
 
 socket.on('sendWhenJoin',(e)=>{joinSuccess(e)})
 socket.on("config",(e)=>{configure(e)})
+socket.on('chatUpdate',(e)=>{updateChat(e)})
+socket.on('relay',(e)=>{relayPlayer(e)})
+socket.on("chat",(e)=>{chatProcess(e)})
 
 function STARTGAME(){
-socket.on('relay',(e)=>{relayPlayer(e)})
-socket.on('chatUpdate',(e)=>{updateChat(e)})
+
+
 socket.on('mapUpdate2',(e)=>{UPDATEMAP(e)})
 socket.on('invrelay',(e)=>{updateInv(e)})
 socket.on('TIME',(e)=>{timeUpdate(e)})
 socket.on('TICK',(e)=>{tick(e)})
 socket.on("DeathScreen",(e)=>{deathScreen(e)})
 socket.on('PING',(e)=>{returnPing(e)})
-socket.on("chat",(e)=>{chatProcess(e)})
+
 socket.on("comrelay",(e)=>{combatProcess(e)})
 socket.on("combatText",(e)=>{combatText(e)})
 
