@@ -5,7 +5,7 @@ var BlockPixelsHalf = 10
 
 var renderingVariables = {"itemsize":{"B":40,"Sl":42,"U":42,"In":42}}
 
-var DEBUGGINGLOGS = {"Timeticker" : 0}
+var DEBUGGINGLOGS = {"Timeticker" : 0,"TickWaiter":false}
 
 
 
@@ -425,6 +425,45 @@ case "Attack":
 
 // }
 
+
+class gameStarter{
+  static conditions = {
+    "loaded":false,
+    "escaped":false,
+    "allclear":false
+  }
+
+  static updateConditions(s,e){
+    this.conditions[s] = e
+    let obj = Object.keys(this.conditions)
+    this.conditions.allclear = undefined
+    for(let i = 0; i < obj.length-1; i++){
+      if(!this.conditions[obj[i]] && obj[i] != "allclear"){
+        this.conditions.allclear = false
+      }
+    }
+    if(this.conditions.allclear !== false){
+      this.conditions.allclear = true
+    }
+  }
+
+  static trystart(){
+    if(this.conditions.allclear){
+       clearInterval(unescapeAnimation)
+    clearInterval(canvasAnimation)
+    STARTGAME()
+    canvasAnimation = setInterval(function(){ 
+        repeat()
+        CLOCKNUMBER++
+      }, 100/(fps/10));
+      return(true)
+    }
+    return(false)
+  }
+
+}
+
+
 var ACTIONLIMITER = "none"
 
 
@@ -593,6 +632,9 @@ display2.style.left = "850px"
 socket = io.connect('/');
 
 socket.on('sendWhenJoin',(e)=>{joinSuccess(e)})
+socket.on("config",(e)=>{configure(e)})
+
+function STARTGAME(){
 socket.on('relay',(e)=>{relayPlayer(e)})
 socket.on('chatUpdate',(e)=>{updateChat(e)})
 socket.on('mapUpdate2',(e)=>{UPDATEMAP(e)})
@@ -604,23 +646,16 @@ socket.on('PING',(e)=>{returnPing(e)})
 socket.on("chat",(e)=>{chatProcess(e)})
 socket.on("comrelay",(e)=>{combatProcess(e)})
 socket.on("combatText",(e)=>{combatText(e)})
-socket.on("config",(e)=>{configure(e)})
+
 socket.on("BeamRelay",(e)=>{BeamUpdate(e)})
 socket.on("ParticleRelay",(e)=>{ParticleUpdate(e)})
 socket.on("statusRelay",(e)=>{statusUpdate(e)})
 socket.on("rarelay",(e)=>{rareprocess(e)})
-socket.on("cTSping",(e)=>{selfLog(pingCounter.stop())})
+socket.on("cTSping",(e)=>{selfLog(pingCounter.stop())})}
 
 socket.onAny((name,e)=>{cPackets.doOnAll(e,name)})
 
-var PSDon = false
-function PacketSizeDebuggerToggle(){
-  if(PSDon){
-    PSDon = false
-  } else {
-    PSDon = true
-  }
-}
+
 
 
 class cPackets{
@@ -678,35 +713,7 @@ class cPackets{
 }
 
 
-// function PacketSizeDebugger(){
-//   socket.on('sendWhenJoin', (e) =>{sizeTell(e,"1")})
-//   socket.on('relay',(e) =>{sizeTell(e,"2")})
-//   socket.on('chatUpdate',(e) =>{sizeTell(e,"3")})
-//   socket.on('mapUpdate2',(e) =>{sizeTell(e,"4")})
-//   socket.on('invrelay',(e) =>{sizeTell(e,"5")})
-//   socket.on('TIME',(e) =>{sizeTell(e,"6")})
-//   socket.on('TICK',(e) =>{sizeTell(e,"7")})
-//   socket.on("DeathScreen",(e) =>{sizeTell(e,"8")})
-//   socket.on('PING',(e) =>{sizeTell(e,"9")})
-//   socket.on("chat",(e) =>{sizeTell(e,"0")})
-//   socket.on("comrelay",(e) =>{sizeTell(e,"11")})
-//   socket.on("combatText",(e) =>{sizeTell(e,"12")})
-//   socket.on("config",(e) =>{sizeTell(e,"13")})
-//   socket.on("BeamRelay",(e) =>{sizeTell(e,"14")})
-//   socket.on("ParticleRelay",(e) =>{sizeTell(e,"15")})
-//   socket.on("statusRelay",(e) =>{sizeTell(e,"16")})
-//   socket.on("rarelay",(e)=>{sizeTell(e,"17")})
-// }
 
-// function sizeTell(e,n){
-//   if(PSDon){
-//     try{
-//     console.log(n+"-"+JSON.stringify(e).length)}
-//     catch{
-//       console.log(n+"=err="+e)
-//     }
-//   }
-// }
 
 
 
@@ -715,6 +722,7 @@ class cPackets{
 
   var CLOCKNUMBER = 0
   var clockmax = 60
+  var tickWait = [0,Date.now()]
 
 
   var BLOCKSALL
@@ -724,9 +732,15 @@ class cPackets{
   var ImgReferenceDict
   var EntityReferenceDict
   var canvasAnimation
+  var unescapeAnimation
   var IimageLinkReferenceDict
   var consoleHelpResponses
   var MainHelpMenu
+
+  unescapeAnimation = setInterval(()=>{
+    unescapeRepeat()
+    gameStarter.trystart()
+  },100/(fps/10))
 
   var CTX = {
     "td":document.getElementById("TopDisplay").getContext("2d"),
@@ -738,6 +752,7 @@ class cPackets{
     "timerctx":timerctx
   }
 
+function unescapeRepeat(){}
 
 
 function configure(e){
@@ -753,12 +768,14 @@ function configure(e){
    IimageLinkReferenceDict = e[6]
    consoleHelpResponses = e[7][0]
    MainHelpMenu = e[7][1]
-   console.log(e[7])
-  clearInterval(canvasAnimation)
-  canvasAnimation = setInterval(function(){ 
-        repeat()
-        CLOCKNUMBER++
-      }, 100/(fps/10));
+   
+
+   gameStarter.updateConditions("loaded",true)
+   gameStarter.updateConditions("escaped",true)
+
+   gameStarter.trystart()
+
+  
 
 
 
@@ -799,7 +816,8 @@ function rareprocess(e){
 
   switch(rtype){
     case "ticklim":
-    clockmax = e[1]
+      clockmax = e[1][0]
+      tickWait[0] = e[1][1]
     break;
     case "purge":
     map = {}
@@ -814,12 +832,24 @@ function rareprocess(e){
 
 }
 
+function tickWaiter(e){
+  let n = Date.now()
+  let d = (n-tickWait[1])-tickWait[0]
+  if(d > 10 && e != clockmax && e != 1){
+    console.log("WAIT821: " + d + "=" + e)
+  }
+  tickWait[1] = Date.now()
+}
+
 
 function timerUpdate(e,flash){
 
-  if(e - DEBUGGINGLOGS.Timeticker > 1){
-    console.log (e,DEBUGGINGLOGS.Timeticker)
-  }
+  // if(e - DEBUGGINGLOGS.Timeticker > 1){
+  //   console.log (e,DEBUGGINGLOGS.Timeticker)
+  // }
+  if(DEBUGGINGLOGS.TickWaiter){
+  tickWaiter(e)}
+
   DEBUGGINGLOGS.Timeticker = e
 
   timerctx.fillStyle = "#000000"
@@ -1978,7 +2008,7 @@ document.addEventListener('keydown', (event) => {
   } else if(name == "Backspace" && ACTIONLIMITER == "none"){
     let ee = ActionStore.splice(ActionStore.length-1,1)
     AActionStore.splice(AActionStore.length-1,1)
-    // ActionPrint.splice(ActionPrint.length-1,1)
+    ActionPrint.splice(ActionPrint.length-1,1)
         if(ee == "w"){
       walker.y += 1
     } else if(ee == "s"){
@@ -2129,7 +2159,7 @@ if(ACTIONLIMITER == "none"){
     let a = CoordToChunk(mouseCoords[0],mouseCoords[1])
     let b = a.cx + a.cy*chunkSize+3
     // console.log([player.id,a,b])
-    ActionStore.push("click:"+mouseCoords[0]+","+mouseCoords[1])
+    ActionStore.push("click:"+(Math.floor(mouseX/BlockPixels)-20)+","+(Math.floor(mouseY/BlockPixels)-20))
     // console.log(ee,a,b)
 
     animationBeams.push(new Beam(player.x,player.y,mouseCoords[0],mouseCoords[1],"client"))

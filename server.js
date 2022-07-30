@@ -1283,27 +1283,7 @@ class player{
 		}
 
 
-		// let unneeded = 0
-		// for(let i = this.x-26; i < this.x+26; i++){
-		// 	for(let j = this.y-26; j < this.y+26; j++){
-		// 		let ctm = CoordToMap(i,j,this.dimension)
-		// 		if(ctm[0] == undefined){
-		// 			unneeded += 1
-		// 			continue;
-		// 		}
-		// 		let tblock = tnewMap[this.dimension][ctm[0]][ctm[1]]
-
-		// 		let	blockStr = tblock[2]
-		// 		let coordstr = (i+","+j)
-		// 		if(blockStr != this.temporalMap[coordstr]){
-		// 			tmap2[coordstr] = blockStr
-		// 		}
-		// 		this.temporalMap[coordstr] = blockStr
-
-
-		// 	}
-		// }
-
+	
 
 
 
@@ -1534,7 +1514,7 @@ function newConnection(socket){
 
 
 	io.to(socket.id).emit('sendWhenJoin', socket.id)
-	io.to(socket.id).emit("rarelay",["ticklim",TickLimit-10])
+	io.to(socket.id).emit("rarelay",["ticklim",[TickLimit-10,serverTickWait]])
 	enDict[socket.id].relay2()
 	
 	    socket.on('disconnect',function(){disconnected.push(socket)});
@@ -2626,6 +2606,20 @@ function helpCommand(e,p){
 }
 
 
+// BR block reference
+// EC exact coordinate
+// RC relative coordinate
+function MasterCoordTranslator(x,y,d,options){
+	
+}
+
+function anBreakBlock(x,y,d,options){
+
+	let tctm = CoordToMap(x,y,d)
+	let str = tnewMap[d][tctm[0]][tctm[1]][2]
+
+
+}
 
 
 function breakBlockBy(x,y,d,a,options){
@@ -4454,7 +4448,6 @@ function tickAllBlocks(){
 			let tdestr
 			
 			tdestr = deductStrAtt(tsplit1[j])
-			
 			if(tdestr.split(":")[1] == "0"){
 				tempRemove = tickAtZero(tdestr.split(":")[0],allTickyBlocks[i])
 			}

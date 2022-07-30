@@ -60,6 +60,8 @@ TO DO LIST
 
 - custom cursor
 
+- map updater entities
+
 - drag moving and drag permissions update
 
 - fix overlapping entity combat
