@@ -1625,28 +1625,50 @@ function allPlayersGenerateChunks(){
 
 class timeAllowedFunctions{
 
+	static taf3done = {}
+
 	static nppVars = {"counter":0,"done":false}
 
-	static nonPlayerProcess(timeAllowed){
-	if(this.nppVars.done){
-		return(true)
-	}
-	let starttime = Date.now()
-	let tcounter = this.nppVars
+	// static nonPlayerProcess(timeAllowed){
+	// if(this.nppVars.done){
+	// 	return(true)
+	// }
+	// let starttime = Date.now()
+	// let tcounter = this.nppVars
 
-	for(;tcounter.counter < enArr.length && Date.now() < starttime + timeAllowed; tcounter.counter++){
-			if(enDict[enArr[tcounter.counter]].entityType!="player"){
-				enDict[enArr[tcounter.counter]].nonPlayerActions()
+	// for(;tcounter.counter < enArr.length && Date.now() < starttime + timeAllowed; tcounter.counter++){
+	// 		if(enDict[enArr[tcounter.counter]].entityType!="player"){
+	// 			enDict[enArr[tcounter.counter]].nonPlayerActions()
+	// 		}
+	// 	}
+	// if(tcounter.counter >= enArr.length){
+	// 	tcounter.counter = 0
+	// 	tcounter.done = true
+	// 	return(true)
+	// } else {
+	// 	return(tcounter.counter)}
+
+
+	// }
+
+	static nonPlayerProcess2(t){
+		if(this.taf3done.npp2){return(true)}
+		if(TAF3.declare("npp2")){
+			TAF3.memories.npp2 = {
+				"i":0
 			}
 		}
-	if(tcounter.counter >= enArr.length){
-		tcounter.counter = 0
-		tcounter.done = true
+		let tpass = TAF3.memories.npp2
+		for(;tpass.i < enArr.length; tpass.i++){
+			if(TAF3.checktime(t)){return("!CHECK!")}//checkpoint
+			if(enDict[enArr[tpass.i]].entityType!="player"){
+				enDict[enArr[tpass.i]].nonPlayerActions(t)
+			}
+		}
+
+		TAF3.del()
+		this.taf3done.npp2 = true
 		return(true)
-	} else {
-		return(tcounter.counter)}
-
-
 	}
 }
 
@@ -1708,6 +1730,53 @@ function temptest3(){
 	return(final)
 }
 
+function ttest1(t){
+	if(TAF3.declare("tt")){
+		TAF3.memories.tt = {
+			"i":0,
+			"fin":0
+		}
+	}
+	
+	let tpass = TAF3.memories.tt
+
+	for(;tpass.i < 200000; tpass.i++){
+		if(TAF3.checktime(t)){return("!CHECK!")}//checkpoint
+		tpass.fin += tpass.i
+	}
+
+	let r = tpass.fin
+	TAF3.del()
+	return(r)
+}
+
+
+class TAF3{
+	static memories = {}
+	static nowspace = ""
+
+	static declare(space){
+		this.nowspace = space
+		if(this.memories[space] == undefined){
+			this.memories[space] = {}
+			return(true)
+		}
+		return(false)
+	}
+
+	static checktime(t,dict){
+		if(Date.now() > t){
+			return(true)
+		}
+		return(false)
+	}
+
+
+	static del(){
+		delete this.memories[this.nowspace]
+	}
+
+}
 
 class TAF2{
 	static checkpoints1 = {"a":0,"b":0}
@@ -1749,7 +1818,9 @@ function doSomething(startTime){
 		TIME += 1
 		io.emit('TIME',TIME)
 		if(TIME > 0){
-		timeAllowedFunctions.nonPlayerProcess(startTime+serverTickWait-Date.now()-10)}
+			// timeAllowedFunctions.nonPlayerProcess(startTime+serverTickWait-Date.now()-10)
+			timeAllowedFunctions.nonPlayerProcess2(startTime)
+		}
 	} else if(TIME == TickLimit-10){
 		allPlayersGenerateChunks()
 		TIME += 1
@@ -1759,8 +1830,9 @@ function doSomething(startTime){
 		console.log("tick")
 	}
 
-		timeAllowedFunctions.nonPlayerProcess(Infinity)
+		timeAllowedFunctions.nonPlayerProcess2(Infinity)
 		timeAllowedFunctions.nppVars.done = false
+		timeAllowedFunctions.taf3done.npp2 = false
 
 	} else if(TIME < TickLimit){
 		TIME += 1
@@ -1822,8 +1894,7 @@ function doSomething(startTime){
 
 
 setInterval(()=>{
-	let a = Date.now() 
-    doSomething(a)
+    doSomething(Date.now()+serverTickWait)
 }, serverTickWait);
 
 
@@ -3577,7 +3648,7 @@ function naturalMobSpawn(ampp,mob){
 		let tx = Math.floor(Math.random()*100-50)
 		let ty = Math.floor(Math.random()*100-50)
 
-		if((tx > 20 || tx < 0) && (ty > 20 || ty < 0) && !isBlockage(enDict[plArr[j]].x+tx,enDict[plArr[j]].y+ty,enDict[plArr[j]].dimension)){
+		if(!isBlockage(enDict[plArr[j]].x+tx,enDict[plArr[j]].y+ty,enDict[plArr[j]].dimension)){
 			if(inAnyPlayerSight(enDict[plArr[j]].x+tx,enDict[plArr[j]].y+ty,enDict[plArr[j]].dimension) === false){
 				summonNewMob(mob,enDict[plArr[j]].x+tx,enDict[plArr[j]].y+ty,"rand",enDict[plArr[j]].dimension)
 				summonAmount++

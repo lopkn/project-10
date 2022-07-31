@@ -658,7 +658,9 @@ socket.on("BeamRelay",(e)=>{BeamUpdate(e)})
 socket.on("ParticleRelay",(e)=>{ParticleUpdate(e)})
 socket.on("statusRelay",(e)=>{statusUpdate(e)})
 socket.on("rarelay",(e)=>{rareprocess(e)})
-socket.on("cTSping",(e)=>{selfLog(pingCounter.stop())})}
+socket.on("cTSping",(e)=>{selfLog(pingCounter.stop())})
+STARTGAME = ()=>{console.log("ALREADY STARTED")}
+}
 
 socket.onAny((name,e)=>{cPackets.doOnAll(e,name)})
 
