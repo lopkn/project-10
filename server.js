@@ -4622,9 +4622,9 @@ function explosion(x,y,size,d){
 		attempty = y+Math.round(Math.random()*size*2-size)
 	}
 
-	for(let i = 0; i < enArr.length; i++){
-		let enid = enArr[i]
 
+	for(let i = enArr.length - 1; i > -1 ; i--){
+		let enid = enArr[i]
 		let a = distance(enDict[enid].x,enDict[enid].y,x,y)
 		if(enDict[enid].dimension == dimension && a <= size){
 			enDict[enid].damage(Math.floor((size-a)*20))

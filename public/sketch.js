@@ -24,8 +24,6 @@ class Player{
     this.selectedSlot = 0
     this.Inventory = ["B:1-A:50","B:5-A:50","U:4-A:100","Sl:1-A:30",""]
     this.clientInfo = {
-      "DragClock":1,
-      "MouseHolding":{"default":[false,0],"drag":[false]},
       "sound":"on",
       "tileRenderer":0,
       "blockOutlineColor":"#000000",
@@ -1486,6 +1484,7 @@ function inListR(inp,arr){
 
 var textStore = []
 var textStoreIndex = -1
+var draginf = {"DragClock":1,"MouseHolding":{"default":[false,0],"drag":[false]}}
 
 
 function commandingPush(e){
@@ -1609,7 +1608,7 @@ function commandingPush(e){
     } else if((tempsplit[0] == "/dragclock")){
       let ti = parseFloat(tempsplit[1])
       if(!isNaN(ti)){
-        player.clientInfo.DragClock = ti
+        draginf.DragClock = ti
       }
 
     } else if(tempsplit[0] == "/help" || tempsplit[0] == "/h"){
@@ -2091,13 +2090,13 @@ document.addEventListener('mouseleave', (e) => {
 document.addEventListener('mouseup', (event) => {
 
   MCVs.held = "none"
-  player.clientInfo.MouseHolding.default = [false,0]
+  draginf.MouseHolding.default = [false,0]
 
-  // if(player.clientInfo.MouseHolding.drag[2] != undefined){
-  //   xonsole.log(player.clientInfo.MouseHolding.drag[2])
+  // if(draginf.MouseHolding.drag[2] != undefined){
+  //   xonsole.log(draginf.MouseHolding.drag[2])
   // }
 
-  player.clientInfo.MouseHolding.drag = [false]
+  draginf.MouseHolding.drag = [false]
 
   if(ACTIONLIMITER == "clicking"){
     ACTIONLIMITER = "none"
@@ -2113,7 +2112,7 @@ document.addEventListener('mousedown', (event) => {
   mouseStatusUpdate()
   event.preventDefault();
   let clickedOn = "none"
-  // player.clientInfo.MouseHolding.default = [true,0,mouseX,mouseY,mouseStatus]
+  // draginf.MouseHolding.default = [true,0,mouseX,mouseY,mouseStatus]
   if(player.clientInfo.clickUpdate == "on"){
     repeat()
   }
@@ -2214,7 +2213,7 @@ if(ACTIONLIMITER == "none"){
     combatScreen.optionClick(4)
   }
 
-  player.clientInfo.MouseHolding.default = [true,0,mouseX,mouseY,mouseStatus,clickedOn]
+  draginf.MouseHolding.default = [true,0,mouseX,mouseY,mouseStatus,clickedOn]
 
 })
 
@@ -2262,15 +2261,15 @@ function debugRect(x,y){
 function dragging(){
 
   if(mouseStatus != "canvas"){
-    player.clientInfo.MouseHolding.drag = ["out"]
+    draginf.MouseHolding.drag = ["out"]
     return;
   }
 
-  let e = player.clientInfo.MouseHolding.drag
+  let e = draginf.MouseHolding.drag
 
   if(e[2][e[2].length-1][0] != mouseCoords[0] || e[2][e[2].length-1][1] != mouseCoords[1]){
     if(e[2][e[2].length-2] != undefined && (e[2][e[2].length-2][0] == mouseCoords[0] && e[2][e[2].length-2][1] == mouseCoords[1])){
-      player.clientInfo.MouseHolding.drag[2].splice([e[2].length-1],1)
+      draginf.MouseHolding.drag[2].splice([e[2].length-1],1)
     }else{
     e[2].push(mouseCoords)
     // xonsole.log(mouseCoords)
@@ -2279,7 +2278,7 @@ function dragging(){
 
   let tempPrint = []
   let tempPrint2 = []
-    player.clientInfo.MouseHolding.drag[2].forEach((e)=>{
+    draginf.MouseHolding.drag[2].forEach((e)=>{
       tempPrint.push([e[0]-player.x+20,e[1]-player.y+20,"#FF5F00"])
       let a = CoordToChunk(e[0],e[1])
       let b = a.cx + a.cy*chunkSize+3
@@ -2314,18 +2313,18 @@ function repeat(){
 
   CTX.td.fillStyle = "rgba(0,0,0,0)"
   CTX.td.clearRect(0, 0, 1560, 950)
-  if(player.clientInfo.MouseHolding.default[0] && player.clientInfo.MouseHolding.drag[0] === false && player.clientInfo.MouseHolding.default[5] == "canvas"){
-    let tamt = player.clientInfo.MouseHolding.default[1]/5
+  if(draginf.MouseHolding.default[0] && draginf.MouseHolding.drag[0] === false && draginf.MouseHolding.default[5] == "canvas"){
+    let tamt = draginf.MouseHolding.default[1]/5
 
     CTX.td.lineWidth = 10
-    CTX.td.strokeStyle = "rgba(255,0,0,"+(tamt/4)/player.clientInfo.DragClock+")"
+    CTX.td.strokeStyle = "rgba(255,0,0,"+(tamt/4)/draginf.DragClock+")"
     CTX.td.beginPath()
-    CTX.td.arc(mouseX,mouseY,20,0,Math.PI*tamt/player.clientInfo.DragClock)
+    CTX.td.arc(mouseX,mouseY,20,0,Math.PI*tamt/draginf.DragClock)
     CTX.td.stroke()
-    player.clientInfo.MouseHolding.default[1]+= 20/fps
+    draginf.MouseHolding.default[1]+= 20/fps
 
-    if(player.clientInfo.MouseHolding.default[1] > 10 * player.clientInfo.DragClock && mouseStatus == "canvas"){
-      player.clientInfo.MouseHolding.drag = [true,[mouseX,mouseY],[mouseCoords]]
+    if(draginf.MouseHolding.default[1] > 10 * draginf.DragClock && mouseStatus == "canvas"){
+      draginf.MouseHolding.drag = [true,[mouseX,mouseY],[mouseCoords]]
 
       let ta = CoordToChunk(mouseCoords[0],mouseCoords[1])
       let tb = ta.cx + ta.cy*chunkSize+3
@@ -2335,7 +2334,7 @@ function repeat(){
       allParticles.push(new cirParticle(mouseX,mouseY,5,{"ctx":CTX.td,"color":"#FF7700"}))
     }
 
-  } else if (player.clientInfo.MouseHolding.drag[0] === true){
+  } else if (draginf.MouseHolding.drag[0] === true){
     CTX.td.lineWidth = 10
     CTX.td.strokeStyle = "rgb(255,100,0)"
     CTX.td.beginPath()
@@ -2625,7 +2624,7 @@ function tick(){
   timerUpdate(clockmax,1)
 
 
-  if(commanding  == 0 && player.clientInfo.MouseHolding.drag[0]===false){
+  if(commanding  == 0 && draginf.MouseHolding.drag[0]===false){
     ActionStore = []
     ActionPrint = []
     walker = {"x":20,"y":20}
