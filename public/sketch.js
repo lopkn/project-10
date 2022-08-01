@@ -92,6 +92,82 @@ class Explosion{
 
 
 }
+function vectorNormalize(original,multiplier){
+
+  if(multiplier == undefined){
+    multiplier = 1
+  }
+
+  let tx = original[2] - original[0]
+  let ty = original[3] - original[1]
+
+  let d = Math.sqrt(tx*tx+ty*ty)
+
+  if(d == 0){
+    return(original)
+  }
+
+  tx = tx*multiplier/d
+  ty = ty*multiplier/d
+
+  return([original[0],original[1],original[0]+tx,original[1]+ty])
+
+}
+
+class lineParticle{
+  constructor(x,y,tx,ty,options){
+    this.x = x
+    this.y = y
+    this.tx = tx
+    this.ty = ty
+    this.spawnpos = [player.x,player.y]
+    this.options = options == undefined?{}:options
+    this.ctx = this.options.ctx == undefined ? CTX.ctx :this.options.ctx 
+    this.speed = (this.options.speed == undefined ? 1 : this.options.speed)
+    this.width = (this.options.width == undefined ? 1 : this.options.width)
+    this.phase = 0
+    let n = vectorNormalize([x,y,tx,ty],1)
+    this.vec = [n[2]-x,n[3]-y]
+    this.dist = distance(x,y,tx,ty)
+    this.progress = [x,y,x,y]
+    this.color = (this.options.color == undefined ? "rgb(255,255,255)" : this.options.color)
+    this.counter = 0
+  }
+  update(){
+    if(this.phase == 2){
+      return("kill")
+    }
+    this.x -= (player.x - this.spawnpos[0])*BlockPixels
+    this.y -= (player.y - this.spawnpos[1])*BlockPixels
+    this.spawnpos = [player.x,player.y]
+
+
+    if(this.phase == 0){
+      this.progress[2] += this.vec[0]*this.dist*this.speed
+      this.progress[3] += this.vec[1]*this.dist*this.speed
+      this.counter += 1
+      if(distance(this.progress[2],this.progress[3],this.progress[0],this.progress[1]) > this.dist){
+        this.progress[2] = this.tx
+        this.progress[3] = this.ty
+        this.phase = 1
+      }
+    } else {
+      this.counter--
+      this.progress[0] += this.vec[0]*this.dist*this.speed
+      this.progress[1] += this.vec[1]*this.dist*this.speed
+      if(this.counter <= 1){
+        this.phase = 2
+      }
+    }
+
+    this.ctx.beginPath()
+    this.ctx.lineWidth = this.width
+    this.ctx.strokeStyle = this.color
+    this.ctx.moveTo(this.progress[0],this.progress[1])
+    this.ctx.lineTo(this.progress[2],this.progress[3])
+    this.ctx.stroke()
+  }
+}
 
 class cirParticle{
   constructor(x,y,life,options){
@@ -624,14 +700,11 @@ display.style.position = "absolute";
 display.style.top = "0px"
 display.style.left = "850px"
 
-var display2 = document.getElementById("text2")
-display2.innerHTML = "DISPLAY"
-display2.style.position = "absolute";
-display2.style.top = "0px"
-display2.style.left = "850px"
 
 
 socket = io.connect('/');
+const GAMESESSION = "G10"
+socket.emit("JOINGAME",GAMESESSION)
 
 socket.on('sendWhenJoin',(e)=>{joinSuccess(e)})
 socket.on("config",(e)=>{configure(e)})

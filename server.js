@@ -26,6 +26,9 @@ const process = require('process');
 
 console.log(`Process pid ${process.pid}`);
 
+const concol = {"Black" : "\x1b[30m" ,"Red" : "\x1b[31m" ,"Green" : "\x1b[32m" ,"Yellow" : "\x1b[33m" ,"Blue" : "\x1b[34m" ,"Magenta" : "\x1b[35m" ,"Cyan" : "\x1b[36m" ,"White" : "\x1b[37m" ,"BBlack" : "\x1b[40m" ,"BRed" : "\x1b[41m" ,"BGreen" : "\x1b[42m" ,"BYellow" : "\x1b[43m" ,"BBlue" : "\x1b[44m" ,"BMagenta" : "\x1b[45m" ,"BCyan" : "\x1b[46m" ,"BWhite" : "\x1b[47m"}
+
+
 process.on('uncaughtException',(err)=>{
 	fs.writeFileSync('./errorlog.json',JSON.stringify(enDict,null,4), function writeJSON(err){if(err)return console.log(err)})
 	console.log(concol.Red + "%s" + "\x1b[1m" ,"ERROR")
@@ -60,7 +63,6 @@ function getStrLengthOf(e){
 	return(JSON.stringify(e).length)
 }
 
-const concol = {"Black" : "\x1b[30m" ,"Red" : "\x1b[31m" ,"Green" : "\x1b[32m" ,"Yellow" : "\x1b[33m" ,"Blue" : "\x1b[34m" ,"Magenta" : "\x1b[35m" ,"Cyan" : "\x1b[36m" ,"White" : "\x1b[37m" ,"BBlack" : "\x1b[40m" ,"BRed" : "\x1b[41m" ,"BGreen" : "\x1b[42m" ,"BYellow" : "\x1b[43m" ,"BBlue" : "\x1b[44m" ,"BMagenta" : "\x1b[45m" ,"BCyan" : "\x1b[46m" ,"BWhite" : "\x1b[47m"}
 
 
 function testFunctionSpeed(opt,vars,func,p1,p2,p3,p4,p5,p6,p7,p8){
@@ -1483,6 +1485,11 @@ var disconnected = []
 
 function newConnection(socket){
 	// socket.on('requestMap', sendMap)
+	socket.on("JOINGAME",(e)=>{joinGame(e,socket)})
+}
+
+function joinGame(game,socket){
+	if(game == "G10"){
 	socket.on('key', processKey)
 	socket.on('CTsping',(e)=>{io.to(e).emit("cTSping")})
 	socket.on('click', processClick)
@@ -1490,7 +1497,7 @@ function newConnection(socket){
 	socket.on('AT',ACTIONPROCESS)
 	socket.on("tablearn",tablearn)
 	socket.on("returnPing",STOPPING)
-	console.log(socket.id + " has joined at " + Date())
+	console.log(socket.id + " has joined G10 at " + Date())
 
 	let clientIp = socket.request.connection.remoteAddress
 
@@ -1517,10 +1524,14 @@ function newConnection(socket){
 	io.to(socket.id).emit("rarelay",["ticklim",[TickLimit-10,serverTickWait]])
 	enDict[socket.id].relay2()
 	
-	    socket.on('disconnect',function(){disconnected.push(socket)});
+	    socket.on('disconnect',function(){disconnected.push(socket)});}
+
+
+
+	else if(game == "G10.1"){
+		io.to(socket.id).emit("acknowledge",socket.id)
+	}
 }
-
-
 
 	
 
