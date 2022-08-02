@@ -1490,6 +1490,7 @@ function newConnection(socket){
 
 function joinGame(game,socket){
 	if(game == "G10"){
+		socket.join("G10")
 	socket.on('key', processKey)
 	socket.on('CTsping',(e)=>{io.to(e).emit("cTSping")})
 	socket.on('click', processClick)
@@ -1529,6 +1530,7 @@ function joinGame(game,socket){
 
 
 	else if(game == "G10.1"){
+		socket.join("G10.1")
 		io.to(socket.id).emit("acknowledge",socket.id)
 	}
 }
@@ -1827,7 +1829,7 @@ var serverTickWait = 50
 function doSomething(startTime){
 	if(TIME < TickLimit-10){
 		TIME += 1
-		io.emit('TIME',TIME)
+		io.to("G10").emit('TIME',TIME)
 		if(TIME > 0){
 			// timeAllowedFunctions.nonPlayerProcess(startTime+serverTickWait-Date.now()-10)
 			timeAllowedFunctions.nonPlayerProcess2(startTime)
@@ -1835,7 +1837,7 @@ function doSomething(startTime){
 	} else if(TIME == TickLimit-10){
 		allPlayersGenerateChunks()
 		TIME += 1
-		io.emit('TICK')
+		io.to("G10").emit('TICK')
 		SERVERCOUNTERS.ticks += 1
 		if(DEBUGGINGLOGS.ticktoggle == 1){
 		console.log("tick")
@@ -1914,7 +1916,7 @@ setInterval(function(){if(startPing == 1){pping++}},1)
 
 function TicklimUpdate(e){
 	TickLimit = e + 10
-	io.emit("rarelay",["ticklim",e])
+	io.to("G10").emit("rarelay",["ticklim",e])
 }
 
 function tellPerlin(x,y,d){
