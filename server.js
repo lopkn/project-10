@@ -4525,6 +4525,13 @@ function tickAllBlocks(){
 
 		let tickAtt = removeOutterBracket(TNEWATTRIBUTEOF(blockStr,"Tk"))
 
+		if(NATTRIBUTEOF(blockStr,"Tk") == "NONE" || NATTRIBUTEOF(blockStr,"Tk") == "[]"){
+			tnewMap[dimension][tempctm[0]][tempctm[1]][2] = removeAttributeOf(blockStr,"Tk")
+			allTickyBlocks.splice(i,1)
+			continue
+		}
+
+
 		let tsplit1 = tickAtt.split("-")
 		let outtick = ""
 		for(let j = tsplit1.length-1; j > -1; j--){
@@ -4532,6 +4539,7 @@ function tickAllBlocks(){
 			let tdestr
 			
 			tdestr = deductStrAtt(tsplit1[j])
+
 			if(tdestr.split(":")[1] == "0"){
 				tempRemove = tickAtZero(tdestr.split(":")[0],allTickyBlocks[i])
 			}

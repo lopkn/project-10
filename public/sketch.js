@@ -24,6 +24,7 @@ class Player{
     this.selectedSlot = 0
     this.Inventory = ["B:1-A:50","B:5-A:50","U:4-A:100","Sl:1-A:30",""]
     this.clientInfo = {
+      "cookieAuto":"on",
       "sound":"on",
       "tileRenderer":0,
       "blockOutlineColor":"#000000",
@@ -527,6 +528,9 @@ class gameStarter{
        clearInterval(unescapeAnimation)
     clearInterval(canvasAnimation)
     STARTGAME()
+
+   
+
     canvasAnimation = setInterval(function(){ 
         repeat()
         CLOCKNUMBER++
@@ -971,6 +975,11 @@ function timerUpdate(e,flash){
 function joinSuccess(m){
     console.log(m)
     player = new Player(m)
+     let tc = JSON.parse(document.cookie)
+    if(tc != undefined && tc.cookieAuto == "on"){
+      player.clientInfo = tc
+      selfLog("autoloaded save")
+    }
 }
 
 
@@ -1710,20 +1719,22 @@ function commandingPush(e){
     } else if((tempsplit[0] == "/autorescale" ||tempsplit[0] == "/autoresize" )){
       player.clientInfo.autorescale = tempsplit[1]
 
-    } else if(tempsplit[0] == "/scookie"){
+    } else if(tempsplit[0] == "/scookie" || tempsplit[0] == "save"){
       let str = JSON.stringify(player.clientInfo)
       document.cookie = str
       selfLog("Stored string with length: "+str.length)
-    } else if(tempsplit[0] == "/gcookie" || tempsplit[0] == "/gc"){
+    } else if(tempsplit[0] == "/gcookie" || tempsplit[0] == "load" || tempsplit[0] == "/gc"){
       if(document.cookie.length > 2){
       player.clientInfo = JSON.parse(document.cookie)
       selfLog("successfully retrieved data")
       } else {
         selfLog("file not found","red")
       }
-    } else if(tempsplit[0] == "/dcookie"){
+    } else if(tempsplit[0] == "/dcookie" || tempsplit[0] == "deletesave"){
       document.cookie = "{}";
       selfLog("Your cookies has been turned to the string {}. If you know how to delete a cookie yousing js, tell me how.","red")
+    } else if(tempsplit[0] == "/autoload"){
+      player.clientInfo.cookieAuto = tempsplit[1]
     }
 
 
@@ -1803,7 +1814,7 @@ function commandTabcut(str,split){
 
   let cmd = split[0]
   let cmdat = split.length
-  
+  let curwrd = split[cmdat-1]
   switch(cmd){
     case "/set":
     case "/tp":
@@ -1819,8 +1830,11 @@ function commandTabcut(str,split){
       break;  
 
     case "/summon":
-    case "/fgoto":
     case "/commandto":
+    case "/fgoto":
+      if(cmdat == 2){
+        return([commandTabcutOptions("mob",curwrd),false])
+      }
       if(cmdat == 3){
         return([commandTabcutOptions("rcx"),true])
       }
@@ -1829,13 +1843,18 @@ function commandTabcut(str,split){
       }
       break;
 
-
+    case "/clickupdate":
+    case "/schmode":
+      if(cmdat == 2){
+        return([commandTabcutOptions("onoff",curwrd),false])
+      }
+      break;
 
   }
 
 }
 
-function commandTabcutOptions(type){
+function commandTabcutOptions(type,str){
   switch(type){
 
     case "cx":
@@ -1850,6 +1869,13 @@ function commandTabcutOptions(type){
     case "rcy":
       return("="+(mouseCoords[1]-player.y))
       break;
+    case "onoff":
+      return(eliminateArr2(str,["on","off"],0)[0])
+      break;
+    case "mob":
+      return(eliminateArr2(str,["instance","preponderant","rampant","zombie","minion","hunter","verdant"],0)[0])
+      break;
+
   }
 }
 
@@ -1878,7 +1904,13 @@ var wordTabDict = {}
 var wordTabArr = []
 var currentTabSuggestion = ["",""]
 
-learnTabWord(["hello","/help","/schmode","/ping","/actxt","/scanmode","/dragclock","/login","/clickupdate","/keyholder","/commandto","/process","/stopsound","/playsound"],3)
+learnTabWord(["hello",
+  "/help","/schmode","/ping",
+  "/actxt","/scanmode","/dragclock",
+  "/login","/clickupdate","/keyholder",
+  "/commandto","/process","/stopsound",
+  "/playsound","/save","/load",
+  "/deletesave","/autoload"],3)
 
 function learnTabWord(input,score){
   if(score == undefined){
@@ -2040,6 +2072,27 @@ function eliminateArr(str,arr,pos){
 
 }
 
+function eliminateArr2(str,arr,pos){
+
+  if(str == ""){
+    return(arr)
+  }
+
+  let outarr = []
+
+  for(let i = 0; i < arr.length; i++){
+    if(str[0] == arr[i][pos]){
+      outarr.push(arr[i])
+    }
+  }
+  if(str.length > 1){
+    return(eliminateArr(str.substring(1),outarr,pos+1))
+  } else {
+    return(outarr)
+  }
+
+}
+
 
 addEventListener('resize', (event) => {
   if(player.clientInfo.autorescale == "on"){
@@ -2120,11 +2173,7 @@ document.addEventListener('keydown', (event) => {
    
     let tabsuggest = processTab(ActionStore[ActionStore.length-1])
 
-    console.log("hi1",tabsuggest)
-
     if(tabsuggest[0] != ""){
-
-      console.log("hi")
 
       let sp = ActionStore[ActionStore.length-1].split(" ")
       sp.pop()
