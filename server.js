@@ -1518,6 +1518,7 @@ function joinGame(game,socket){
 		enDict[socket.id].log("Automatic keyholder! welcome back","#00FFFF")
 		enDict[socket.id].Inventory = ["U:12-A:1-Unb:0","B:5-A:250","U:18-A:100-Unb:0","U:4-A:100-Unb:0","U:13-A:1-Unb:0","U:17-A:1-Unb:0",""]
 		enDict[socket.id].entityStats.summoning += 100
+		io.to(socket.id).emit("rarelay",["op"])
 	}
 
 

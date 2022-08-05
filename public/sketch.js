@@ -910,9 +910,13 @@ function rareprocess(e){
     wordTabDict = e[1].dict
     wordTabArr = e[1].arr
     break;
-
+    case "op":
+    learnTabWord([
+      "/summon","/set","/teleport",
+      "/ticklim"
+      ],3)
+    break;
   }
-
 
 }
 
