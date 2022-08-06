@@ -2233,6 +2233,7 @@ if(st[0] == "/"){
 		else if(strsplit[0] == "keyholder" || strsplit[0] == "kh"){
 			if(strsplit[1] == consoleKey){
 				enDict[p].keyholder = true
+				io.to(p).emit("rarelay",["op"])
 				enDict[p].log("you are now a keyholder",cmdc.success)
 			} else {
 				enDict[p].log("wrong key!",cmdc.error)
