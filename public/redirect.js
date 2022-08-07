@@ -13,6 +13,8 @@ if(a == 0){
   loadScript("sketch.js")
 } else if(a == 1){
   loadScript("OG1.js")
+} else if(a == 2){
+  loadScript("ceator/creator.js")
 } else {
   console.log(a)
 }
