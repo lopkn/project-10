@@ -106,8 +106,20 @@ let blocksCollum = window.prompt("blocksheight")
 
 let blocksize = mainCanvas.width/blocksRow
 
+ondrag = (e)=>{mouseX = e.clientX; mouseY = e.clientY}
+
 mainCTX.fillStyle = "#FFFFFF"
 mainCTX.fillRect(0,0,840,840)
+
+document.addEventListener("mousedown",(e)=>{
+  mouseX = e.clientX
+  mouseY = e.clientY
+
+  mainCTX.fillStyle = "#00FF00"
+  mainCTX.fillRect(mouseX-5,mouseY-5,10,10)
+
+})
+
 
 
 
