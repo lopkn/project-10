@@ -105,18 +105,30 @@ let blocksRow = window.prompt("blockwidth")
 let blocksCollum = window.prompt("blocksheight")
 
 let blocksize = mainCanvas.width/blocksRow
+if(mainCanvas.height/blocksCollum < blocksize){
+  blocksize = mainCanvas.height/blocksCollum
+}
 
-ondrag = (e)=>{mouseX = e.clientX; mouseY = e.clientY}
+
+  // for(let i = 0;)
+
+
+onmousemove = (e)=>{mouseX = (e.clientX - 5); mouseY = (e.clientY - 2)}
+
 
 mainCTX.fillStyle = "#FFFFFF"
 mainCTX.fillRect(0,0,840,840)
 
 document.addEventListener("mousedown",(e)=>{
-  mouseX = e.clientX
-  mouseY = e.clientY
 
   mainCTX.fillStyle = "#00FF00"
-  mainCTX.fillRect(mouseX-5,mouseY-5,10,10)
+  // mainCTX.fillRect(mouseX-5,mouseY-5,10,10)
+
+  let cx = Math.floor(mouseX/blocksize)
+  let cy = Math.floor(mouseY/blocksize)
+
+  mainCTX.fillRect(cx*blocksize,cy*blocksize,blocksize,blocksize)
+
 
 })
 
