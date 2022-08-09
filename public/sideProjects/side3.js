@@ -52,6 +52,21 @@ class car{
 
   }
 
+  loop(){
+    if(this.x > 840){
+      this.x = 0
+    }
+    if(this.x < 0){
+      this.x = 840
+    }
+    if(this.y < 0){
+      this.y = 840
+    }
+    if(this.y > 840){
+      this.y = 0
+    }
+  }
+
   draw(){
     mainCTX.strokeStyle = this.color
     renderQuad(this.quad)
@@ -248,6 +263,7 @@ function repeat(){
     let a = allVehicles[e]
     a.update()
     a.updateQuadPoints()
+    a.loop()
     a.draw()
   })
 }
