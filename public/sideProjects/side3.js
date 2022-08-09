@@ -24,7 +24,7 @@ class car{
     this.vy = 0
     this.vx = 0
 
-    this.d = [0,1]
+    this.d = [0,-1]
 
     this.ill = false
     this.irr = false
@@ -34,10 +34,19 @@ class car{
     this.ir = 0
     this.if = 0
     this.ib = 0
+    this.masterVelocityMul = 0.9
   }
 
   turn(x){
     //s0 = 0
+    x = x/(distance(0,0,this.vx,this.vy)+1)
+    if(x > 0.1){
+      x = 0.1
+    }
+    if(x < -0.1){
+      x = -0.1
+    }
+
     let finx = this.d[0]*Math.cos(x)-this.d[1]*Math.sin(x)
     let finy = this.d[0]*Math.sin(x)+this.d[1]*Math.cos(x)
     this.d = [finx,finy]
@@ -70,12 +79,17 @@ class car{
   draw(){
     mainCTX.strokeStyle = this.color
     renderQuad(this.quad)
+    mainCTX.beginPath()
+    mainCTX.strokeStyle = "#FFFFFF"
+    mainCTX.moveTo(this.x,this.y)
+    mainCTX.lineTo(this.x+this.vx*2,this.y+this.vy*2)
+    mainCTX.stroke()
   }
 
   update(){
 
-    this.vx *= 0.9
-    this.vy *= 0.9
+    this.vx *= 0.95
+    this.vy *= 0.95 
 
     this.x += this.vx
     this.y += this.vy
@@ -86,7 +100,7 @@ class car{
     if(e == "activate"){
       if(!this.ill){
         this.ill = true
-        this.il = setInterval(()=>{this.turn(0.05)},10)
+        this.il = setInterval(()=>{this.turn(0.5)},10)
       }
     } else {
       this.ill = false
@@ -98,7 +112,7 @@ class car{
     if(e == "activate"){
       if(!this.irr){
         this.irr = true
-        this.ir = setInterval(()=>{this.turn(-0.05)},10)
+        this.ir = setInterval(()=>{this.turn(-0.5)},10)
       }
     } else {
       this.irr = false
@@ -110,7 +124,8 @@ class car{
     if(e == "activate"){
       if(!this.iff){
         this.iff = true
-        this.if = setInterval(()=>{this.vx += this.d[0]; this.vy += this.d[1]},10)
+        this.if = setInterval(()=>{this.vx += this.d[0]* this.masterVelocityMul;
+         this.vy += this.d[1]* this.masterVelocityMul},10)
       }
     } else {
       this.iff = false
@@ -122,7 +137,8 @@ class car{
     if(e == "activate"){
       if(!this.ibb){
         this.ibb = true
-        this.ib = setInterval(()=>{this.vx -= this.d[0]; this.vy -= this.d[1]},10)
+        this.ib = setInterval(()=>{this.vx -= this.d[0]* this.masterVelocityMul;
+         this.vy -= this.d[1]* this.masterVelocityMul},10)
       }
     } else {
       this.ibb = false
@@ -132,6 +148,12 @@ class car{
 
 }
 
+
+function distance(x,y,x2,y2){
+  let a = x-x2
+  let b = y-y2
+  return(Math.sqrt(a*a+b*b))
+}
 
 function vectorNormalize2(original,multiplier){
 
@@ -179,6 +201,7 @@ function vectorNormalize(original,multiplier){
 
 function renderQuad(arr){
   mainCTX.beginPath()
+  mainCTX.lineWidth = 3
   mainCTX.moveTo(arr[0][0],arr[0][1])
   mainCTX.lineTo(arr[1][0],arr[1][1])
   mainCTX.lineTo(arr[2][0],arr[2][1])
@@ -210,7 +233,7 @@ function createCar(a,b,c,d,e){
 }
 
 createCar("#FF0000",400,400,8,12)
-createCar("#0000FF",440,400,8,12)
+createCar("#00FFFF",440,400,8,12)
 
 document.addEventListener("mousedown",(e)=>{
 
