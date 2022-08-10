@@ -31,10 +31,11 @@ class car{
     this.iff = false
     this.ibb = false
     this.il = 0
+    this.acceleration = 15
     this.ir = 0
     this.if = 0
     this.ib = 0
-    this.masterVelocityMul = 0.9
+    this.masterVelocityMul = 0.5
   }
 
   turn(x){
@@ -79,10 +80,15 @@ class car{
   draw(){
     mainCTX.strokeStyle = this.color
     renderQuad(this.quad)
+    // mainCTX.beginPath()
+    // mainCTX.strokeStyle = "#FFFFFF"
+    // mainCTX.moveTo(this.x,this.y)
+    // mainCTX.lineTo(this.x+this.vx*2,this.y+this.vy*2)
+    // mainCTX.stroke()
     mainCTX.beginPath()
     mainCTX.strokeStyle = "#FFFFFF"
     mainCTX.moveTo(this.x,this.y)
-    mainCTX.lineTo(this.x+this.vx*2,this.y+this.vy*2)
+    mainCTX.lineTo(this.x+this.d[0]*13,this.y+this.d[1]*13)
     mainCTX.stroke()
   }
 
@@ -124,12 +130,16 @@ class car{
     if(e == "activate"){
       if(!this.iff){
         this.iff = true
-        this.if = setInterval(()=>{this.vx += this.d[0]* this.masterVelocityMul;
-         this.vy += this.d[1]* this.masterVelocityMul},10)
+        this.if = setInterval(()=>{this.vx += this.d[0]* this.masterVelocityMul*this.acceleration/50;
+         this.vy += this.d[1]* this.masterVelocityMul*this.acceleration/50;
+         if(this.acceleration < 50){
+          this.acceleration += 0.5
+         }},10)
       }
     } else {
       this.iff = false
       clearInterval(this.if)
+      this.acceleration = 15
     }
   }
 
