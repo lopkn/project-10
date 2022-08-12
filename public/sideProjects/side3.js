@@ -41,11 +41,11 @@ class car{
   turn(x){
     //s0 = 0
     x = x/(distance(0,0,this.vx,this.vy)+1)
-    if(x > 0.1){
-      x = 0.1
+    if(x > 0.06){
+      x = 0.06
     }
-    if(x < -0.1){
-      x = -0.1
+    if(x < -0.06){
+      x = -0.06
     }
 
     let finx = this.d[0]*Math.cos(x)-this.d[1]*Math.sin(x)
