@@ -4730,19 +4730,26 @@ function serverLightning2(original,steps,random,options,hitFunc){
 
 			let vx = e[2] - e[0]
 			let vy = e[3] - e[1]
+			let splitLoop = 1
+			while(splitLoop > 0){
+				
+				vx += Math.random()*random - random/2
+				vy += Math.random()*random - random/2
 
-			vx += Math.random()*random - random/2
-			vy += Math.random()*random - random/2
+				let tnewBeam = [e[2],e[3],e[2] + vx,e[3]+vy]
+				hitFunc(Math.round(e[2]+vx),Math.round(e[3]+vy),options.dur*(i+1))
+				
+				if(Math.random() > 0.9){splitLoop++}
 
-			let tnewBeam = [e[2],e[3],e[2] + vx,e[3]+vy]
-			hitFunc(Math.round(e[2]+vx),Math.round(e[3]+vy),options.dur*(i+1))
-			stepAt += 1
-			foutSteps[stepAt].push(tnewBeam)
-			let tnewBeam2 = [Math.round(e[2]),Math.round(e[3]),Math.round(e[2]+vx),Math.round(e[3]+vy)]
-			rfoutSteps[stepAt].push(tnewBeam2)
+				foutSteps[stepAt+1].push(tnewBeam)
+				let tnewBeam2 = [Math.round(e[2]),Math.round(e[3]),Math.round(e[2]+vx),Math.round(e[3]+vy)]
+				rfoutSteps[stepAt+1].push(tnewBeam2)
+				splitLoop -= 1
+			}
+			
 
 		})
-
+stepAt += 1
 
 	}
 
