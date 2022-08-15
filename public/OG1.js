@@ -87,10 +87,17 @@ function pointLineCollision(x1,y1,x2,y2,x3,y3,x4,y4){
     let xc = 0
     
     xc = (-slopeL2*x3 + y3 + slopeL1*x1 - y1)/(slopeL1-slopeL2)
-    if(isNaN(xc)){xc = x1}
+    if(isNaN(xc)){if(slopeL1 == Infinity || slopeL1 == -Infinity){
+      xc = x1
+    } else {
+      xc = x3
+    }}
     yc = (xc-x1)*slopeL1+y1
     if(isNaN(yc)){yc = (xc-x3)*slopeL2+y3}
-    return([xc,yc])
+    let cola = pointInLine(xc,yc,x1,y1,x2,y2)
+    let colb = pointInLine(xc,yc,x3,y3,x4,y4)
+    let colc = (cola&&colb)
+    return([xc,yc,cola,colb,colc])
   } else {
     return("none")
   }
