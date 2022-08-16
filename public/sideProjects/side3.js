@@ -35,7 +35,7 @@ class car{
     this.ir = 0
     this.if = 0
     this.ib = 0
-    this.masterVelocityMul = 0.5
+    this.masterVelocityMul = 0.7
   }
 
   turn(x){
