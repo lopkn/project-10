@@ -109,6 +109,13 @@ if(mainCanvas.height/blocksCollum < blocksize){
   blocksize = mainCanvas.height/blocksCollum
 }
 
+let structureDict = {}
+
+for(let i = 0; i < blocksRow;i++){
+  for(let j = 0; j < blocksCollum;j++){
+    structureDict[i+","+j] = ""
+  }
+}
 
   // for(let i = 0;)
 
@@ -119,6 +126,8 @@ onmousemove = (e)=>{mouseX = (e.clientX - 5); mouseY = (e.clientY - 2)}
 mainCTX.fillStyle = "#FFFFFF"
 mainCTX.fillRect(0,0,840,840)
 
+var currentlySelectedBlock = "G:0"
+
 document.addEventListener("mousedown",(e)=>{
 
   mainCTX.fillStyle = "#00FF00"
@@ -127,7 +136,19 @@ document.addEventListener("mousedown",(e)=>{
   let cx = Math.floor(mouseX/blocksize)
   let cy = Math.floor(mouseY/blocksize)
 
-  mainCTX.fillRect(cx*blocksize,cy*blocksize,blocksize,blocksize)
+  structureDict[cx+","+cy] = currentlySelectedBlock
+
+  let s = Object.keys(structureDict)
+
+  s.forEach((e)=>{
+    let split = e.split(",")
+    let tcx = parseInt(split[0])
+    let tcy = parseInt(split[1])
+    mainCTX.fillStyle = colorFunction(structureDict[e])
+    mainCTX.fillRect(tcx*blocksize,tcy*blocksize,blocksize,blocksize)
+  })
+
+  // mainCTX.fillRect(cx*blocksize,cy*blocksize,blocksize,blocksize)
 
 
 })
@@ -135,7 +156,13 @@ document.addEventListener("mousedown",(e)=>{
 
 
 
-
+function colorFunction(e){
+  if(e == ""){
+    return("#303030")
+  } else {
+    return("#00FF00")
+  }
+}
 
 
 
