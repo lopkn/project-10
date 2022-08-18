@@ -159,9 +159,25 @@ document.addEventListener("mousedown",(e)=>{
 function colorFunction(e){
   if(e == ""){
     return("#303030")
-  } else {
+  } else if(e == "G:1"){
+    return("#B96A04")
+  } else{
     return("#00FF00")
   }
+
+
+  // "BLOCKSALL":{
+  //   "1":{"0":["#B96A04"],"1":"Oak Wood","2":100},
+  //   "2":{"0":["#8C8C8C"],"1":"Stone","2":400},
+  //   "3":{"0":["#A95A00"],"1":"Oak Tree Wood","2":400},
+  //   "4":{"0":["Gold Ore"],"1":"Gold Ore","2":400},
+  //   "5":{"0":["#00FFFF"],"1":"Diamond Block","2":800},
+  //   "6":{"0":["Diamond Ore"],"1":"Diamond Ore","2":200},
+  //   "7":{"0":["Glass Block"],"1":"Glass Block","2":50},
+  //   "8":{"0":["#703000"],"1":"Explosive","2":20,"datt":{"att":"Tk:[XPL:2]","tk":true}},
+  //   "9":{"0":["#FF00FF"],"1":"Wooden Chest","2":100,"datt":{"att":"Ch:[=]"}},
+  //   "10":{"0":["#703000"],"1":"Fast Explosive","2":20,"datt":{"att":"Tk:[XPL:1]","tk":true}}
+  // }
 }
 
 
