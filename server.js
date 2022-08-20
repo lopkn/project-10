@@ -5094,14 +5094,13 @@ class shooter2C{
 
 						let f = 0
 						let fd = Infinity
-						for(let i = 0; i < colsave.length; i++){
-							let tempdist= distance(colsave[i][0][0],colsave[i][0][1],i.x,i.y)
+						for(let I = 0; I < colsave.length; I++){
+							let tempdist = distance(colsave[I][0][0],colsave[I][0][1],i.x,i.y)
 							if(tempdist<fd){
 								fd = tempdist
-								f = i
+								f = I
 							}
 						}
-						console.log(f,colsave)
 						let tj = colsave[f][1]
 						let tcol = colsave[f][0]
 					lastCol = tj
@@ -5241,3 +5240,4 @@ function vectorNormal(x1,y1,x2,y2){
 
 
 shooter2C.walls.push({"x1":500,"y1":100,"x2":450,"y2":400})
+shooter2C.walls.push({"x1":400,"y1":100,"x2":350,"y2":400})
