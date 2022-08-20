@@ -1533,6 +1533,11 @@ function joinGame(game,socket){
 	else if(game == "G10.1"){
 		socket.join("G10.1")
 		io.to(socket.id).emit("acknowledge",socket.id)
+	} else if(game == "G10.2"){
+		socket.join("G10.2")
+		io.to(socket.id).emit("acknowledge G10.2",socket.id)
+		shooter2C.initiatePlayer(socket.id)
+		socket.on("click",(e)=>{shooter2C.playerClick(e[0],e[1],e[2]);})
 	}
 }
 
@@ -1908,7 +1913,9 @@ function doSomething(startTime){
 
 
 setInterval(()=>{
-    doSomething(Date.now()+serverTickWait)
+	let ttime = Date.now()+serverTickWait
+    doSomething(ttime)
+    shooter2doSomething(Date.now()+serverTickWait)
 }, serverTickWait);
 
 
@@ -5006,12 +5013,231 @@ function sameFunctionOutputs(func,inputs){
 
 
 
-//game functions end//===============================================================================
+//game10 functions end//===============================================================================
 
 
 exports.add = function(i, j) {
   return i + j;
 };
 
+//shooter2 functions start//======================
 
 
+class shooter2C{
+	static walls = []
+	static bullets = []
+	//{x,y,vx,vy,tailLength,tail[l,x,y,tx,ty],life}
+	static players = {}
+
+	static drawers = []
+
+
+	static pushBullet(x,y,vx,vy){
+		this.bullets.push({"x":x,"y":y,"vx":vx,"vy":vy,"tailLength":20,"tail":[],"life":20})
+	}
+
+	static playerClick(id,x,y){
+		let p = this.players[id]
+		let n = vectorNormalize([0,0,x-p.x,y-p.y])
+		this.pushBullet(p.x,p.y,n[2]*600,n[3]*600)
+	}
+
+	static initiatePlayer(id){
+		this.players[id] = {"x":0,"y":0,"hp":100,"id":id}
+	}
+
+	static repeat(){
+		this.drawers = []
+		// let wallsArr = Object.keys(this.walls)
+		for(let k = this.bullets.length-1; k > -1; k--){
+			let B = this.bullets[k]
+			B.life--
+			if(B.life < 0){
+				this.bullets.splice(k,1)
+				continue;
+			}
+			let coled = true
+			let acoled = false
+			let i = JSON.parse(JSON.stringify(B))
+			let counter = 21
+
+			let lastCol = -1
+			while(coled && counter > 0){
+				counter --
+				coled = false
+				let colsave = []
+				for(let j = 0; j < this.walls.length; j++){
+					if(j == lastCol){
+						continue;
+					}
+					let e = this.walls[j]
+					let col = this.p5re(i.x,i.y,i.x+i.vx,i.y+i.vy,e.x1,e.y1,e.x2,e.y2)
+					if(col != "noCol"){
+						colsave.push([col,j])
+						acoled = true
+						coled = true
+					}
+				}
+
+
+				if(coled){
+					if(colsave.length == 1){
+						let tj = colsave[0][1]
+						let tcol = colsave[0][0]
+					lastCol = tj
+						B.tail.push([i.tailLength,i.x,i.y,tcol[0],tcol[1]])
+						i.x = tcol[0]
+						i.y = tcol[1]
+						i.vx = tcol[2]-tcol[0]
+						i.vy = tcol[3]-tcol[1]
+					} else {
+
+						let f = 0
+						let fd = Infinity
+						for(let i = 0; i < colsave.length; i++){
+							let tempdist= distance(colsave[i][0][0],colsave[i][0][1],i.x,i.y)
+							if(tempdist<fd){
+								fd = tempdist
+								f = i
+							}
+						}
+						console.log(f,colsave)
+						let tj = colsave[f][1]
+						let tcol = colsave[f][0]
+					lastCol = tj
+						B.tail.push([i.tailLength,i.x,i.y,tcol[0],tcol[1]])
+						i.x = tcol[0]
+						i.y = tcol[1]
+						i.vx = tcol[2]-tcol[0]
+						i.vy = tcol[3]-tcol[1]
+					}
+				}
+
+			}
+
+			if(counter == 0){
+				console.log("crashed here")
+			}
+
+			B.tail.push([i.tailLength,i.x,i.y,i.x+i.vx,i.y+i.vy])
+	
+			let bspeed = distance(0,0,B.vx,B.vy)
+
+			let vnorm = vectorNormalize([0,0,i.vx,i.vy])
+			B.x = i.x + i.vx
+			B.y = i.y + i.vy
+			B.vx = vnorm[2] * bspeed
+			B.vy = vnorm[3] * bspeed
+		
+
+			for(let r = B.tail.length-1; r > -1; r--){
+				let t = B.tail[r]
+				t[0]--
+				if(t[0] < 0){
+					B.tail.splice(r,1)
+					continue;
+				}
+
+				this.drawers.push(B.tail[r]) 
+
+			}
+
+		}
+
+		this.send()
+
+	}
+
+	static send(){
+		io.to("G10.2").emit("drawers",[this.drawers,this.walls])
+		// io.to("G10.2").emit("walls",this.walls)
+	}
+
+	static pointLineCollision(x1,y1,x2,y2,x3,y3,x4,y4){
+  let slopeL1 = (y2-y1)/(x2-x1)
+  let slopeL2 = (y4-y3)/(x4-x3)
+  if(slopeL1 != slopeL2){
+    
+
+    let yc = 0
+    let xc = 0
+    
+    xc = (-slopeL2*x3 + y3 + slopeL1*x1 - y1)/(slopeL1-slopeL2)
+    if(isNaN(xc)){if(slopeL1 == Infinity || slopeL1 == -Infinity){
+      xc = x1
+    } else {
+      xc = x3
+    }}
+    yc = (xc-x1)*slopeL1+y1
+    if(isNaN(yc)){yc = (xc-x3)*slopeL2+y3}
+    let cola = pointInLine(xc,yc,x1,y1,x2,y2)
+    let colb = pointInLine(xc,yc,x3,y3,x4,y4)
+    let colc = (cola&&colb)
+    return([xc,yc,cola,colb,colc])
+  } else {
+    return("none")
+  }
+}
+
+	static p5re(MX,MY,px2,py2,MA,MB,MC,MD){
+
+  let a = this.pointLineCollision(MX,MY,px2,py2,MA,MB,MC,MD)
+  // stroke(a[2]===true?"#00FF00":"#000000")
+  // line(MX,MY,mouseX,mouseY)
+  // stroke(a[3]===true?"#00FF00":"#000000")
+  // line(MA,MB,MC,MD)
+  // stroke(a[4]===true?"#00FF00":"#000000")
+  
+  // let n = vectorNormal(MX,MY,px2,py2)
+  
+		if(a[4]){
+    let nn = vectorNormal(MA,MB,MC,MD)    
+    let nv = [px2-a[0],py2-a[1]]
+
+    
+    let nv1 = [nv[0] * nn[2], nv[1] * nn[3]]
+
+    // stroke("#FF0000")
+
+    // line(400,400,400+nv[0]*2,400+nv[1]*2)
+    
+   
+    
+    let mult = 2 * (nv[0] * nn[0] + nv[1] * nn[1])
+    let nn2 = [nv[0]-nn[0]*mult,nv[1]-nn[1]*mult]
+    
+    // line(a[0],a[1],a[0]+nn2[0],a[1]+nn2[1])
+    
+    	return([a[0],a[1],a[0]+nn2[0],a[1]+nn2[1]])
+    
+  	} else {
+  		return("noCol")
+  	}
+	}
+}
+
+
+function shooter2doSomething(d){
+	shooter2C.repeat()
+}
+
+function pointInLine(px,py,x1,y1,x2,y2){
+  let extremelySmall = 0.000000001
+  if((px <= x1 + extremelySmall && px >= x2 - extremelySmall )||(px >= x1 - extremelySmall && px <= x2 + extremelySmall)){
+    if((py <= y1 + extremelySmall && py >= y2  - extremelySmall)||(py >= y1 - extremelySmall && py <= y2 + extremelySmall)){
+      return(true)
+    }
+  }
+  return(false)
+}
+
+function vectorNormal(x1,y1,x2,y2){
+  let d = distance(x1,y1,x2,y2)
+  let dx = (x2-x1)/d
+  let dy = (y2-y1)/d
+  return([-dy,dx,dy,-dx])
+}
+
+
+
+shooter2C.walls.push({"x1":500,"y1":100,"x2":450,"y2":400})
