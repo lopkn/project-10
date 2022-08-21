@@ -1538,6 +1538,7 @@ function joinGame(game,socket){
 		io.to(socket.id).emit("acknowledge G10.2",socket.id)
 		shooter2C.initiatePlayer(socket.id)
 		socket.on("click",(e)=>{shooter2C.playerClick(e[0],e[1],e[2]);})
+		socket.on("placeWall",(e)=>{shooter2C.placeWall(e[0],e[1],e[2],e[3])})
 	}
 }
 
@@ -5024,30 +5025,47 @@ exports.add = function(i, j) {
 
 
 class shooter2C{
-	static walls = []
+	static walls = {}
 	static bullets = []
 	//{x,y,vx,vy,tailLength,tail[l,x,y,tx,ty],life}
 	static players = {}
 
 	static drawers = []
+	static wallPushers = {}
 
+	static nuuIDGEN = 0
 
 	static pushBullet(x,y,vx,vy){
-		this.bullets.push({"x":x,"y":y,"vx":vx,"vy":vy,"tailLength":20,"tail":[],"life":20})
+		this.bullets.push({"type":"norm","x":x,"y":y,"vx":vx,"vy":vy,"tailLength":20,"tail":[],"life":20000})
 	}
 
 	static playerClick(id,x,y){
 		let p = this.players[id]
-		let n = vectorNormalize([0,0,x-p.x,y-p.y])
-		this.pushBullet(p.x,p.y,n[2]*600,n[3]*600)
+		let n = vectorNormalize([p.x,p.y,x+p.x-410,y+p.y-410])
+
+		this.pushBullet(p.x,p.y,(n[2]-p.x)*60,(n[3]-p.y)*60)
+	}
+
+	static getNewNUUID(){
+		this.nuuIDGEN++
+		return(this.nuuIDGEN)
 	}
 
 	static initiatePlayer(id){
-		this.players[id] = {"x":0,"y":0,"hp":100,"id":id}
+		this.players[id] = {"x":410,"y":410,"hp":100,"id":id}
+		this.sendAllWombjects(id)
+	}
+
+	static sendAllWombjects(plid){
+		io.to(plid).emit("CROBJECT",[this.walls,this.players])
 	}
 
 	static repeat(){
 		this.drawers = []
+
+		io.to("G10.2").emit("upwalls",this.wallPushers)
+		this.wallPushers = {}
+
 		// let wallsArr = Object.keys(this.walls)
 		for(let k = this.bullets.length-1; k > -1; k--){
 			let B = this.bullets[k]
@@ -5059,18 +5077,19 @@ class shooter2C{
 			let coled = true
 			let acoled = false
 			let i = JSON.parse(JSON.stringify(B))
-			let counter = 21
+			let counter = 201
 
 			let lastCol = -1
+			let wallsArr = Object.keys(this.walls)
 			while(coled && counter > 0){
 				counter --
 				coled = false
 				let colsave = []
-				for(let j = 0; j < this.walls.length; j++){
+				for(let j = 0; j < wallsArr.length; j++){
 					if(j == lastCol){
 						continue;
 					}
-					let e = this.walls[j]
+					let e = this.walls[wallsArr[j]]
 					let col = this.p5re(i.x,i.y,i.x+i.vx,i.y+i.vy,e.x1,e.y1,e.x2,e.y2)
 					if(col != "noCol"){
 						colsave.push([col,j])
@@ -5085,7 +5104,7 @@ class shooter2C{
 						let tj = colsave[0][1]
 						let tcol = colsave[0][0]
 					lastCol = tj
-						B.tail.push([i.tailLength,i.x,i.y,tcol[0],tcol[1]])
+						this.drawers.push([i.type,i.tailLength,i.x,i.y,tcol[0],tcol[1]])
 						i.x = tcol[0]
 						i.y = tcol[1]
 						i.vx = tcol[2]-tcol[0]
@@ -5104,7 +5123,7 @@ class shooter2C{
 						let tj = colsave[f][1]
 						let tcol = colsave[f][0]
 					lastCol = tj
-						B.tail.push([i.tailLength,i.x,i.y,tcol[0],tcol[1]])
+						this.drawers.push([i.type,i.tailLength,i.x,i.y,tcol[0],tcol[1]])
 						i.x = tcol[0]
 						i.y = tcol[1]
 						i.vx = tcol[2]-tcol[0]
@@ -5118,7 +5137,8 @@ class shooter2C{
 				console.log("crashed here")
 			}
 
-			B.tail.push([i.tailLength,i.x,i.y,i.x+i.vx,i.y+i.vy])
+			// B.tail.push([i.tailLength,i.x,i.y,i.x+i.vx,i.y+i.vy])
+			this.drawers.push([i.type,i.tailLength,i.x,i.y,i.x+i.vx,i.y+i.vy])
 	
 			let bspeed = distance(0,0,B.vx,B.vy)
 
@@ -5129,17 +5149,17 @@ class shooter2C{
 			B.vy = vnorm[3] * bspeed
 		
 
-			for(let r = B.tail.length-1; r > -1; r--){
-				let t = B.tail[r]
-				t[0]--
-				if(t[0] < 0){
-					B.tail.splice(r,1)
-					continue;
-				}
+			// for(let r = B.tail.length-1; r > -1; r--){
+			// 	let t = B.tail[r]
+			// 	t[0]--
+			// 	if(t[0] < 0){
+			// 		B.tail.splice(r,1)
+			// 		continue;
+			// 	}
 
-				this.drawers.push(B.tail[r]) 
+			// 	this.drawers.push(B.tail[r]) 
 
-			}
+			// }
 
 		}
 
@@ -5148,8 +5168,17 @@ class shooter2C{
 	}
 
 	static send(){
-		io.to("G10.2").emit("drawers",[this.drawers,this.walls])
+		io.to("G10.2").emit("drawers",[this.drawers])
 		// io.to("G10.2").emit("walls",this.walls)
+	}
+
+	static placeWall(x1,y1,x2,y2){
+		let a = this.getNewNUUID()
+		this.walls[a] = {"x1":x1,"y1":y1,"x2":x2,"y2":y2}
+		this.updateWall(a)
+	}
+	static updateWall(nuuid){
+		this.wallPushers[nuuid] = this.walls[nuuid]
 	}
 
 	static pointLineCollision(x1,y1,x2,y2,x3,y3,x4,y4){
@@ -5239,5 +5268,3 @@ function vectorNormal(x1,y1,x2,y2){
 
 
 
-shooter2C.walls.push({"x1":500,"y1":100,"x2":450,"y2":400})
-shooter2C.walls.push({"x1":400,"y1":100,"x2":350,"y2":400})
