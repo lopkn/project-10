@@ -16,6 +16,8 @@ class player{
 	static weapon = "norm"
 	static snapping = false
 	static gridSize = 80
+	static weaponCounter = 1
+	static weaponDict = {"1":"norm","2":"scat","3":"lazr"}
 }
 class map{
 	
@@ -77,7 +79,10 @@ function tick(){
 		let e = map.bullets[i]
 		mainCTX.beginPath()
 		mainCTX.lineWidth = (e[1]+1)
-		mainCTX.strokeStyle = "#FFFF00"
+		if(e[0] == "norm" || e[0] == "scat"){
+		mainCTX.strokeStyle = "#FFFF00"} else if(e[0] == "lazr"){
+			mainCTX.strokeStyle = "#00FFFF"
+		}
 		mainCTX.moveTo(e[2]-cameraX,e[3]-cameraY)
 		mainCTX.lineTo(e[4]-cameraX,e[5]-cameraY)
 		mainCTX.stroke()
@@ -138,9 +143,19 @@ document.addEventListener("keydown",(e)=>{
   }
   keyHolds[key] = "a"
 
-  if(key == "e"){
-  	placing = [true,mouseX+cameraX,mouseY+cameraY]
-  }
+  switch(key){
+  	case "r":
+  		placing = [true,mouseX+cameraX,mouseY+cameraY]
+  		break;
+    case "q":
+  		player.weaponCounter -= 1
+  		player.weapon = player.weaponDict[player.weaponCounter]
+  		break;
+  	case "e":
+  		player.weaponCounter += 1
+  		player.weapon = player.weaponDict[player.weaponCounter]
+  		break;
+  }  
 
 
 })
@@ -149,7 +164,7 @@ document.addEventListener("keyup",(e)=>{
   e.preventDefault()
   let key = e.key
   delete keyHolds[key]
-  if(key == "e"){
+  if(key == "r"){
   	if(player.snapping){
   		socket.emit("placeWall",[placing[1]-(placing[1]%player.gridSize),placing[2]-(placing[2]%player.gridSize),mouseX+cameraX-((mouseX+cameraX)%player.gridSize),mouseY+cameraY-((mouseY+cameraY)%player.gridSize)])
   	} else {

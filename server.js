@@ -5036,8 +5036,8 @@ class shooter2C{
 
 	static nuuIDGEN = 0
 
-	static pushBullet(x,y,vx,vy){
-		this.bullets.push({"type":"norm","x":x,"y":y,"vx":vx,"vy":vy,"tailLength":20,"tail":[],"life":2000})
+	static pushBullet(x,y,vx,vy,id){
+		this.bullets.push({"shooter":id,"type":"norm","x":x,"y":y,"vx":vx,"vy":vy,"tailLength":10,"tail":[],"life":2000})
 	}
 
 	static playerClick(id,x,y,w){
@@ -5045,14 +5045,17 @@ class shooter2C{
 		let n = vectorNormalize([p.x,p.y,x+p.x-410,y+p.y-410])
 		switch(w){
 			case "norm":
-				this.pushBullet(p.x,p.y,(n[2]-p.x)*160,(n[3]-p.y)*160)
+				this.pushBullet(p.x,p.y,(n[2]-p.x)*160,(n[3]-p.y)*160,id)
 				break;
 			case "scat":
 			for(let i = 0; i < 5; i++){
-				this.bullets.push({"type":"norm","x":p.x,"y":p.y,"vx":(n[2]-p.x)*110+Math.random()*40-20,"vy":(n[3]-p.y)*110+Math.random()*40-20,"tailLength":10,"tail":[],"life":2000})
+				this.bullets.push({"shooter":id,"type":"scat","x":p.x,"y":p.y,"vx":(n[2]-p.x)*110+Math.random()*40-20,"vy":(n[3]-p.y)*110+Math.random()*40-20,"tailLength":6,"tail":[],"life":2000})
 				// this.pushBullet(p.x,p.y,(n[2]-p.x)*160,(n[3]-p.y)*160)
 			}
 				break;
+			case "lazr":
+				this.bullets.push({"shooter":id,"type":"lazr","x":p.x,"y":p.y,"vx":(n[2]-p.x)*1110,"vy":(n[3]-p.y)*1110,"tailLength":20,"tail":[],"life":200})
+				break
 		}
 	}
 
@@ -5069,14 +5072,42 @@ class shooter2C{
 		this.updateWall(a)
 	}
 	static initiatePlayer(id){
-		this.players[id] = {"x":410,"y":410,"vx":0,"vy":0,"hp":100,"id":id,"keys":{}}
+
+		this.players[id] = {"boidyVect":[[0,-40],[30,30],[-30,30]],"boidy":[],"x":410,"y":410,"vx":0,"vy":0,"hp":100,"id":id,"keys":{}}
+
+		let a = this.getNewNUUID()
+		this.walls[a] = {"plid":id,"type":"player","x1":410,"y1":390,"x2":395,"y2":425,"hp":1000}
+		this.updateWall(a)
+		this.players[id].boidy.push(a)
+		 a = this.getNewNUUID()
+		 this.players[id].boidy.push(a)
+		this.walls[a] = {"plid":id,"type":"player","x1":425,"y1":425,"x2":395,"y2":425,"hp":1000}
+		this.updateWall(a)
+		 a = this.getNewNUUID()
+		 this.players[id].boidy.push(a)
+		this.walls[a] = {"plid":id,"type":"player","x1":410,"y1":390,"x2":425,"y2":425,"hp":1000}
+		this.updateWall(a)
+
 		this.sendAllWombjects(id)
 	}
 
 	static playerVelUpdate(){
+
+
+
 		let objt = Object.keys(this.players)
 		for(let i = 0; i < objt.length; i++){
 			let p = this.players[objt[i]]
+			let cont = false
+			p.boidy.forEach((BOI)=>{
+				if(this.walls[BOI] == undefined){
+					cont = true
+				}
+			})
+			if(cont){
+				continue
+			}
+
 			let tv = [0,0]
 			if(p.keys.w == "a"){
 				tv[1] -= 1.5
@@ -5099,12 +5130,34 @@ class shooter2C{
 			p.x += p.vx
 			p.y += p.vy
 
+			for(let k = 0; k < p.boidyVect.length; k++){
+				this.walls[p.boidy[k]].x1 = p.boidyVect[k][0] + p.x
+				this.walls[p.boidy[k]].y1 = p.boidyVect[k][1] + p.y
+				let K = k+1
+				if(K == p.boidyVect.length){
+					K = 0
+				}
+				this.walls[p.boidy[k]].x2 = p.boidyVect[K][0] + p.x
+				this.walls[p.boidy[k]].y2 = p.boidyVect[K][1] + p.y
+			}
+
+			p.boidy.forEach((B)=>{
+				this.updateWall(B)
+			})
+
 			io.to(objt[i]).emit("cameraUp",[p.x,p.y])
 		}
 	}
 
 	static sendAllWombjects(plid){
 		io.to(plid).emit("CROBJECT",[this.walls,this.players])
+	}
+
+	static wallSameTeamBullet(bullet,wall){
+		if(bullet.shooter == wall.plid){
+			return(true)
+		}
+		return(false)
 	}
 
 	static repeat(){
@@ -5139,7 +5192,8 @@ class shooter2C{
 				coled = false
 				let colsave = []
 				for(let j = 0; j < wallsArr.length; j++){
-					if(wallsArr[j] == lastCol || this.walls[wallsArr[j]] == undefined){
+					let w = this.walls[wallsArr[j]]
+					if(wallsArr[j] == lastCol || w == undefined || this.wallSameTeamBullet(B,w)){
 						continue;
 					}
 					let e = this.walls[wallsArr[j]]
@@ -5174,6 +5228,8 @@ class shooter2C{
 					// 	i.y = tcol[1]
 					// }
 					 // }else {
+
+					 	B.shooter = ""
 
 
 						let f = 0
