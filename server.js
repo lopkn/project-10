@@ -1537,8 +1537,9 @@ function joinGame(game,socket){
 		socket.join("G10.2")
 		io.to(socket.id).emit("acknowledge G10.2",socket.id)
 		shooter2C.initiatePlayer(socket.id)
-		socket.on("click",(e)=>{shooter2C.playerClick(e[0],e[1],e[2]);})
+		socket.on("click",(e)=>{shooter2C.playerClick(e[0],e[1],e[2],e[3]);})
 		socket.on("placeWall",(e)=>{shooter2C.placeWall(e[0],e[1],e[2],e[3])})
+		socket.on("keys",(e)=>{shooter2C.playerKeyUpdate(e)})
 	}
 }
 
@@ -5036,24 +5037,70 @@ class shooter2C{
 	static nuuIDGEN = 0
 
 	static pushBullet(x,y,vx,vy){
-		this.bullets.push({"type":"norm","x":x,"y":y,"vx":vx,"vy":vy,"tailLength":20,"tail":[],"life":20000})
+		this.bullets.push({"type":"norm","x":x,"y":y,"vx":vx,"vy":vy,"tailLength":20,"tail":[],"life":2000})
 	}
 
-	static playerClick(id,x,y){
+	static playerClick(id,x,y,w){
 		let p = this.players[id]
 		let n = vectorNormalize([p.x,p.y,x+p.x-410,y+p.y-410])
-
-		this.pushBullet(p.x,p.y,(n[2]-p.x)*60,(n[3]-p.y)*60)
+		switch(w){
+			case "norm":
+				this.pushBullet(p.x,p.y,(n[2]-p.x)*160,(n[3]-p.y)*160)
+				break;
+			case "scat":
+			for(let i = 0; i < 5; i++){
+				this.bullets.push({"type":"norm","x":p.x,"y":p.y,"vx":(n[2]-p.x)*110+Math.random()*40-20,"vy":(n[3]-p.y)*110+Math.random()*40-20,"tailLength":10,"tail":[],"life":2000})
+				// this.pushBullet(p.x,p.y,(n[2]-p.x)*160,(n[3]-p.y)*160)
+			}
+				break;
+		}
 	}
 
 	static getNewNUUID(){
 		this.nuuIDGEN++
 		return(this.nuuIDGEN)
 	}
-
+	static placeWall(x1,y1,x2,y2){
+		if(distance(x1,y1,x2,y2) < 10){
+			return
+		}
+		let a = this.getNewNUUID()
+		this.walls[a] = {"type":"norm","x1":x1,"y1":y1,"x2":x2,"y2":y2,"hp":1000}
+		this.updateWall(a)
+	}
 	static initiatePlayer(id){
-		this.players[id] = {"x":410,"y":410,"hp":100,"id":id}
+		this.players[id] = {"x":410,"y":410,"vx":0,"vy":0,"hp":100,"id":id,"keys":{}}
 		this.sendAllWombjects(id)
+	}
+
+	static playerVelUpdate(){
+		let objt = Object.keys(this.players)
+		for(let i = 0; i < objt.length; i++){
+			let p = this.players[objt[i]]
+			let tv = [0,0]
+			if(p.keys.w == "a"){
+				tv[1] -= 1.5
+			}
+			if(p.keys.a == "a"){
+				tv[0] -= 1.5
+			}
+			if(p.keys.s == "a"){
+				tv[1] += 1.5
+			}
+			if(p.keys.d == "a"){
+				tv[0] += 1.5
+			}
+		
+			p.vx += tv[0]
+			p.vy += tv[1]
+			p.vx *= 0.97
+			p.vy *= 0.97
+
+			p.x += p.vx
+			p.y += p.vy
+
+			io.to(objt[i]).emit("cameraUp",[p.x,p.y])
+		}
 	}
 
 	static sendAllWombjects(plid){
@@ -5062,9 +5109,12 @@ class shooter2C{
 
 	static repeat(){
 		this.drawers = []
-
-		io.to("G10.2").emit("upwalls",this.wallPushers)
+		if(Object.keys(this.wallPushers).length > 0){
+			io.to("G10.2").emit("upwalls",this.wallPushers)
+		}
 		this.wallPushers = {}
+
+		this.playerVelUpdate()
 
 		// let wallsArr = Object.keys(this.walls)
 		for(let k = this.bullets.length-1; k > -1; k--){
@@ -5076,23 +5126,26 @@ class shooter2C{
 			}
 			let coled = true
 			let acoled = false
-			let i = JSON.parse(JSON.stringify(B))
+			
 			let counter = 201
 
 			let lastCol = -1
+			let i = JSON.parse(JSON.stringify(B))
 			let wallsArr = Object.keys(this.walls)
+			let bspeed = distance(0,0,B.vx,B.vy)
 			while(coled && counter > 0){
+
 				counter --
 				coled = false
 				let colsave = []
 				for(let j = 0; j < wallsArr.length; j++){
-					if(j == lastCol){
+					if(wallsArr[j] == lastCol || this.walls[wallsArr[j]] == undefined){
 						continue;
 					}
 					let e = this.walls[wallsArr[j]]
 					let col = this.p5re(i.x,i.y,i.x+i.vx,i.y+i.vy,e.x1,e.y1,e.x2,e.y2)
 					if(col != "noCol"){
-						colsave.push([col,j])
+						colsave.push([col,wallsArr[j]])
 						acoled = true
 						coled = true
 					}
@@ -5100,18 +5153,31 @@ class shooter2C{
 
 
 				if(coled){
-					if(colsave.length == 1){
-						let tj = colsave[0][1]
-						let tcol = colsave[0][0]
-					lastCol = tj
-						this.drawers.push([i.type,i.tailLength,i.x,i.y,tcol[0],tcol[1]])
-						i.x = tcol[0]
-						i.y = tcol[1]
-						i.vx = tcol[2]-tcol[0]
-						i.vy = tcol[3]-tcol[1]
-					} else {
+					// if(colsave.length == 1){
+					// 	let tj = colsave[0][1]
+					// 	let tcol = colsave[0][0]
+					// lastCol = tj
+					// let DAM = this.damageWall(tj,i.vx,i.vy)
+					// if(DAM){
+					// 	this.drawers.push([i.type,i.tailLength,i.x,i.y,tcol[0],tcol[1]])
+					// 	i.x = tcol[0]
+					// 	i.y = tcol[1]
+					// 	i.vx = 0.6*(tcol[2]-tcol[0])
+					// 	i.vy = 0.6*(tcol[3]-tcol[1])
+					// 	bspeed *= 0.6
+					// } else {
+					// 	this.drawers.push([i.type,i.tailLength,i.x,i.y,tcol[0],tcol[1]])
+					// 	i.vx = (i.vx - (tcol[0] - i.x)) * 0.3
+					// 	i.vy = (i.vy - (tcol[1] - i.y)) * 0.3
+					// 	bspeed *= 0.3
+					// 	i.x = tcol[0]
+					// 	i.y = tcol[1]
+					// }
+					 // }else {
+
 
 						let f = 0
+					if(colsave.length != 1){
 						let fd = Infinity
 						for(let I = 0; I < colsave.length; I++){
 							let tempdist = distance(colsave[I][0][0],colsave[I][0][1],i.x,i.y)
@@ -5120,15 +5186,27 @@ class shooter2C{
 								f = I
 							}
 						}
+					}
 						let tj = colsave[f][1]
 						let tcol = colsave[f][0]
 					lastCol = tj
+					let DAM = this.damageWall(tj,i.vx,i.vy)
+					if(DAM){
 						this.drawers.push([i.type,i.tailLength,i.x,i.y,tcol[0],tcol[1]])
 						i.x = tcol[0]
 						i.y = tcol[1]
-						i.vx = tcol[2]-tcol[0]
-						i.vy = tcol[3]-tcol[1]
+						i.vx = 0.6*(tcol[2]-tcol[0])
+						i.vy = 0.6*(tcol[3]-tcol[1])
+						bspeed *= 0.6
+					} else {
+						this.drawers.push([i.type,i.tailLength,i.x,i.y,tcol[0],tcol[1]])
+						i.vx = (i.vx - (tcol[0] - i.x)) * 0.3
+						i.vy = (i.vy - (tcol[1] - i.y)) * 0.3
+						bspeed *= 0.3
+						i.x = tcol[0]
+						i.y = tcol[1]
 					}
+				// }
 				}
 
 			}
@@ -5140,14 +5218,27 @@ class shooter2C{
 			// B.tail.push([i.tailLength,i.x,i.y,i.x+i.vx,i.y+i.vy])
 			this.drawers.push([i.type,i.tailLength,i.x,i.y,i.x+i.vx,i.y+i.vy])
 	
-			let bspeed = distance(0,0,B.vx,B.vy)
+			
 
 			let vnorm = vectorNormalize([0,0,i.vx,i.vy])
 			B.x = i.x + i.vx
 			B.y = i.y + i.vy
 			B.vx = vnorm[2] * bspeed
 			B.vy = vnorm[3] * bspeed
-		
+			
+			if(B.type == "norm"){
+				B.vx *= 0.95
+				B.vy *= 0.95
+				let sp = B.vx*B.vx + B.vy*B.vy 
+				// if(sp < 500){
+				// 	B.vx *= 0.95
+				// 	B.vy *= 0.95
+				// }
+				if(B.life > 6 && ( sp < 1)){
+					B.life = 5
+				}
+			}
+
 
 			// for(let r = B.tail.length-1; r > -1; r--){
 			// 	let t = B.tail[r]
@@ -5166,18 +5257,24 @@ class shooter2C{
 		this.send()
 
 	}
-
+	static damageWall(wid,vx,vy){
+		this.walls[wid].hp -= 0.005*(vx*vx+vy*vy)
+		if(this.walls[wid].hp < 0){
+			delete this.walls[wid]
+			this.wallPushers[wid] = "_DEL"
+			return(false)
+		}
+		this.updateWall(wid)
+		return(true)
+	}
 	static send(){
 		io.to("G10.2").emit("drawers",[this.drawers])
 		// io.to("G10.2").emit("walls",this.walls)
 	}
 
-	static placeWall(x1,y1,x2,y2){
-		let a = this.getNewNUUID()
-		this.walls[a] = {"x1":x1,"y1":y1,"x2":x2,"y2":y2}
-		this.updateWall(a)
-	}
+
 	static updateWall(nuuid){
+
 		this.wallPushers[nuuid] = this.walls[nuuid]
 	}
 
@@ -5206,6 +5303,10 @@ class shooter2C{
     return("none")
   }
 }
+
+	static playerKeyUpdate(e){
+		this.players[e[0]].keys = e[1]
+	}
 
 	static p5re(MX,MY,px2,py2,MA,MB,MC,MD){
 
