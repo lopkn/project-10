@@ -5043,6 +5043,7 @@ class shooter2C{
 	static playerClick(id,x,y,w){
 		let p = this.players[id]
 		let n = vectorNormalize([p.x,p.y,x+p.x-410,y+p.y-410])
+		p.rotation = [n[2]-p.x,n[3]-p.y]
 		switch(w){
 			case "norm":
 				this.pushBullet(p.x,p.y,(n[2]-p.x)*160,(n[3]-p.y)*160,id)
@@ -5073,7 +5074,7 @@ class shooter2C{
 	}
 	static initiatePlayer(id){
 
-		this.players[id] = {"boidyVect":[[0,-40],[30,30],[-30,30]],"boidy":[],"x":410,"y":410,"vx":0,"vy":0,"hp":100,"id":id,"keys":{}}
+		this.players[id] = {"rotation":[0,1],"boidyVect":[[0,-40],[30,30],[-30,30]],"boidy":[],"x":410,"y":410,"vx":0,"vy":0,"hp":100,"id":id,"keys":{}}
 
 		let a = this.getNewNUUID()
 		this.walls[a] = {"plid":id,"type":"player","x1":410,"y1":390,"x2":395,"y2":425,"hp":1000}
@@ -5130,15 +5131,51 @@ class shooter2C{
 			p.x += p.vx
 			p.y += p.vy
 
+			// //[0,1] 1,1
+			// a*B , b*B
+			// //[0,-1] -1,-1
+			// a*B , b*B
+			// //[1,0] 1,-1
+			// a*A - b*B , b*B - b * A
+			// //[-1,0] -1,1
+
+			// // [0,1] 1,2
+			// a * B + b * A
+			// b * B - a * A
+			// // [0,-1] -1, -2
+			// a * B			
+			// b * B
+			// // [1,0] 2,-1
+			// b * A
+			// - a * A or a*A-b*A
+			// // [-1,0] -2,1
+			// b * A 
+			// 1 2 [-1,0] 1
+			// -a * A or a*A + b*A 
+
+
+			// a * B + b * A
+			// b * B - a * A
+
+			//[0,1] 3,2
+			//[1,0] 2,-3
+			//[0,-1] -3,-2
+			//[-1,0] -2,3
+
 			for(let k = 0; k < p.boidyVect.length; k++){
-				this.walls[p.boidy[k]].x1 = p.boidyVect[k][0] + p.x
-				this.walls[p.boidy[k]].y1 = p.boidyVect[k][1] + p.y
+				// this.walls[p.boidy[k]].x1 = ((p.boidyVect[k][0] + p.x) * p.rotation[1] + (p.boidyVect[k][1] + p.y) * p.rotation[0])
+				// this.walls[p.boidy[k]].y1 = ((p.boidyVect[k][1] + p.y) * p.rotation[1] - (p.boidyVect[k][0] + p.x) * p.rotation[0])
+				this.walls[p.boidy[k]].x1 = ((p.boidyVect[k][0] * p.rotation[1] + p.boidyVect[k][1] * p.rotation[0]) + p.x)
+				this.walls[p.boidy[k]].y1 = ((p.boidyVect[k][1] * p.rotation[1] - p.boidyVect[k][0] * p.rotation[0]) + p.y)
 				let K = k+1
 				if(K == p.boidyVect.length){
 					K = 0
 				}
-				this.walls[p.boidy[k]].x2 = p.boidyVect[K][0] + p.x
-				this.walls[p.boidy[k]].y2 = p.boidyVect[K][1] + p.y
+				// this.walls[p.boidy[k]].x2 = ((p.boidyVect[K][0] + p.x) * p.rotation[1] + (p.boidyVect[K][1] + p.y) * p.rotation[0])
+				// this.walls[p.boidy[k]].y2 = ((p.boidyVect[K][1] + p.y) * p.rotation[1] - (p.boidyVect[K][0] + p.x) * p.rotation[0])
+				this.walls[p.boidy[k]].x2 = ((p.boidyVect[K][0] * p.rotation[1] + p.boidyVect[K][1] * p.rotation[0]) + p.x)
+				this.walls[p.boidy[k]].y2 = ((p.boidyVect[K][1] * p.rotation[1] - p.boidyVect[K][0] * p.rotation[0]) + p.y)
+				
 			}
 
 			p.boidy.forEach((B)=>{
@@ -5282,7 +5319,7 @@ class shooter2C{
 			B.vx = vnorm[2] * bspeed
 			B.vy = vnorm[3] * bspeed
 			
-			if(B.type == "norm"){
+			if(B.type == "norm" || B.type == "scat"){
 				B.vx *= 0.95
 				B.vy *= 0.95
 				let sp = B.vx*B.vx + B.vy*B.vy 
