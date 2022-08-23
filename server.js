@@ -1540,6 +1540,7 @@ function joinGame(game,socket){
 		socket.on("click",(e)=>{shooter2C.playerClick(e[0],e[1],e[2],e[3]);})
 		socket.on("placeWall",(e)=>{shooter2C.placeWall(e[0],e[1],e[2],e[3])})
 		socket.on("keys",(e)=>{shooter2C.playerKeyUpdate(e)})
+		socket.on('disconnect',()=>{shooter2C.disconnect(socket)})
 	}
 }
 
@@ -5064,30 +5065,53 @@ class shooter2C{
 		this.nuuIDGEN++
 		return(this.nuuIDGEN)
 	}
-	static placeWall(x1,y1,x2,y2){
-		if(distance(x1,y1,x2,y2) < 10){
+	static placeWall(x1,y1,x2,y2,type,options){
+		
+		if(type == undefined){
+			type = "norm"
+		}
+		if(distance(x1,y1,x2,y2) < 40 && type=="norm"){
 			return
 		}
+
 		let a = this.getNewNUUID()
-		this.walls[a] = {"type":"norm","x1":x1,"y1":y1,"x2":x2,"y2":y2,"hp":1000}
-		this.updateWall(a)
+		switch(type){
+			case "norm":
+				this.walls[a] = {
+					"type":"norm","x1":x1,"y1":y1,"x2":x2,"y2":y2,
+					"hp":1000,"midpt":midPointOfLine(x1,y1,x2,y2),
+					"defense":1,
+					"frad":fastdistance(x1,y1,x2,y2)/2
+				}
+				this.updateWall(a)
+				break;
+			case "player":
+				this.walls[a] = {"plid":options.id,"type":"player","x1":x1,"y1":y1,"x2":x2,"y2":y2,"hp":1000,
+					"defense":0.5,"midpt":midPointOfLine(x1,y1,x2,y2),
+					"frad":fastdistance(x1,y1,x2,y2)/2
+				}
+				this.updateWall(a)
+				break;
+		}
+		return(a)
 	}
 	static initiatePlayer(id){
 
 		this.players[id] = {"rotation":[0,1],"boidyVect":[[0,-40],[30,30],[-30,30]],"boidy":[],"x":410,"y":410,"vx":0,"vy":0,"hp":100,"id":id,"keys":{}}
 
-		let a = this.getNewNUUID()
-		this.walls[a] = {"plid":id,"type":"player","x1":410,"y1":390,"x2":395,"y2":425,"hp":1000}
-		this.updateWall(a)
+		// let a = this.getNewNUUID()
+		// this.walls[a] = {"plid":id,"type":"player","x1":410,"y1":390,"x2":395,"y2":425,"hp":1000}
+		// this.updateWall(a)
+		let a = this.placeWall(410,390,395,425,"player",{"id":id})
 		this.players[id].boidy.push(a)
-		 a = this.getNewNUUID()
+		 a = this.placeWall(425,425,395,425,"player",{"id":id})
 		 this.players[id].boidy.push(a)
-		this.walls[a] = {"plid":id,"type":"player","x1":425,"y1":425,"x2":395,"y2":425,"hp":1000}
-		this.updateWall(a)
-		 a = this.getNewNUUID()
+		// this.walls[a] = {"plid":id,"type":"player","x1":425,"y1":425,"x2":395,"y2":425,"hp":1000}
+		// this.updateWall(a)
+		 a = this.placeWall(410,390,425,425,"player",{"id":id})
 		 this.players[id].boidy.push(a)
-		this.walls[a] = {"plid":id,"type":"player","x1":410,"y1":390,"x2":425,"y2":425,"hp":1000}
-		this.updateWall(a)
+		// this.walls[a] = {"plid":id,"type":"player","x1":410,"y1":390,"x2":425,"y2":425,"hp":1000}
+		// this.updateWall(a)
 
 		this.sendAllWombjects(id)
 	}
@@ -5401,6 +5425,10 @@ class shooter2C{
 		this.players[e[0]].keys = e[1]
 	}
 
+	static disconnect(s){
+		delete this.players[s.id]
+	}
+
 	static p5re(MX,MY,px2,py2,MA,MB,MC,MD){
 
   let a = this.pointLineCollision(MX,MY,px2,py2,MA,MB,MC,MD)
@@ -5451,6 +5479,10 @@ function pointInLine(px,py,x1,y1,x2,y2){
     }
   }
   return(false)
+}
+
+function midPointOfLine(x1,y1,x2,y2){
+	return([(x1+x2)/2,(y1+y2)/2])
 }
 
 function vectorNormal(x1,y1,x2,y2){

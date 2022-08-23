@@ -9,10 +9,15 @@ socket.on("acknowledge G10.2",acknowledge)
 socket.on("CROBJECT",(e)=>{crobject(e)})
 socket.on("upwalls",upwalls)
 socket.on("cameraUp",(e)=>{cameraX = e[0]-410;cameraY = e[1]-410})
+
+socket.onAny((n,e)=>{player.dataNodes.push([n,JSON.stringify(e).length,Date.now()])})
+
+
 var ID = ""
 var cameraX = 0
 var cameraY = 0
 class player{
+	static dataNodes = []
 	static weapon = "norm"
 	static snapping = false
 	static gridSize = 80
@@ -53,6 +58,40 @@ function crobject(e){
 function tick(){
 	socket.emit("keys",[ID,keyHolds])
 	mainCTX.clearRect(0,0,840,840)
+
+
+	
+	let nodeDate = Date.now()
+	for(let i = player.dataNodes.length-1; i > -1 ; i--){
+		let n = player.dataNodes[i]
+		if(nodeDate-n[2] > 2000){
+			player.dataNodes.splice(i,1)
+			continue
+		}
+		switch(n[0]){
+			case "cameraUp":
+				mainCTX.strokeStyle = "#FF0000"
+				break;
+			case "upwalls":
+				mainCTX.strokeStyle = "#00FF00"
+				break;
+			case "drawers":
+				mainCTX.strokeStyle = "#FF00FF"
+				break;
+			case "CROBJECT":
+				mainCTX.strokeStyle = "#FFFF00"
+				break;
+		}
+		
+		mainCTX.lineWidth = 3
+		mainCTX.beginPath()
+		mainCTX.moveTo((nodeDate-n[2])/2,n[1]/10)
+		mainCTX.lineTo((nodeDate-n[2])/2,0)
+		mainCTX.stroke()
+		// console.log(lastNode,nodeDate)
+	}
+
+	
 
 	let CXR = player.gridSize-(cameraX%player.gridSize)
 	let CYR = player.gridSize-(cameraY%player.gridSize)
