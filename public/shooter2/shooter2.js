@@ -32,7 +32,7 @@ class player{
 	static snapping = false
 	static gridSize = 80
 	static weaponCounter = 1
-	static weaponDict = {"1":"norm","2":"scat","3":"lazr"}
+	static weaponDict = {"1":"norm","2":"scat","3":"lazr","4":"cnon"}
 }
 class map{
 	
@@ -127,8 +127,11 @@ function tick(){
 		}
 		let e = map.bullets[i]
 		mainCTX.beginPath()
-		mainCTX.lineWidth = (e[1]+1)
-		if(e[0] == "norm" || e[0] == "scat"){
+		if(e[6]==undefined){
+			e[6] = {}
+		}
+		mainCTX.lineWidth = (e[1]+1) * (e[6].tailmult == undefined?1:e[6].tailmult)
+		if(e[0] == "norm" || e[0] == "scat" || e[0] == "cnon"){
 		mainCTX.strokeStyle = "#FFFF00"} else if(e[0] == "lazr"){
 			mainCTX.strokeStyle = "#00FFFF"
 		}

@@ -5051,6 +5051,10 @@ class shooter2C{
 				this.bullets.push({"shooter":id,"type":"lazr","x":x,"y":y,"vx":vx,"vy":vy,
 					"tailLength":20,"lingerance":20,"tail":[],"life":200})
 				break;
+			case "cnon":
+				this.bullets.push({"shooter":id,"type":"cnon","x":x,"y":y,"vx":vx,"vy":vy,
+					"tailLength":10,"lingerance":10,"tail":[],"life":200,"extra":{"tailmult":3}})
+				break;
 
 		}
 	}
@@ -5075,7 +5079,12 @@ class shooter2C{
 				// 	"vx":(n[2]-p.x)*1110,"vy":(n[3]-p.y)*1110,"tailLength":20,
 				// 	"lingerance":20,"tail":[],"life":200})
 				this.pushBullet(p.x,p.y,(n[2]-p.x)*1100,(n[3]-p.y)*1100,id,"lazr")
-				break
+				break;
+			case "cnon":
+				p.vx -= (n[2]-p.x)*10
+				p.vy -= (n[3]-p.y)*10
+				this.pushBullet(p.x,p.y,(n[2]-p.x)*100,(n[3]-p.y)*100,id,"cnon")
+				break;
 		}
 	}
 
@@ -5341,14 +5350,14 @@ class shooter2C{
 					lastCol = tj
 					let DAM = this.damageWall(tj,i.vx,i.vy)
 					if(DAM){
-						this.drawers.push([i.type,i.tailLength,i.x,i.y,tcol[0],tcol[1]])
+						this.drawers.push([i.type,i.tailLength,i.x,i.y,tcol[0],tcol[1],i.extra])
 						i.x = tcol[0]
 						i.y = tcol[1]
 						i.vx = 0.6*(tcol[2]-tcol[0])
 						i.vy = 0.6*(tcol[3]-tcol[1])
 						bspeed *= 0.6
 					} else {
-						this.drawers.push([i.type,i.tailLength,i.x,i.y,tcol[0],tcol[1]])
+						this.drawers.push([i.type,i.tailLength,i.x,i.y,tcol[0],tcol[1],i.extra])
 						i.vx = (i.vx - (tcol[0] - i.x)) * 0.3
 						i.vy = (i.vy - (tcol[1] - i.y)) * 0.3
 						bspeed *= 0.3
@@ -5365,7 +5374,7 @@ class shooter2C{
 			}
 
 			// B.tail.push([i.tailLength,i.x,i.y,i.x+i.vx,i.y+i.vy])
-			this.drawers.push([i.type,i.tailLength,i.x,i.y,i.x+i.vx,i.y+i.vy])
+			this.drawers.push([i.type,i.tailLength,i.x,i.y,i.x+i.vx,i.y+i.vy,i.extra])
 	
 			
 
