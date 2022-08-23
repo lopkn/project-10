@@ -5037,8 +5037,22 @@ class shooter2C{
 
 	static nuuIDGEN = 0
 
-	static pushBullet(x,y,vx,vy,id){
-		this.bullets.push({"shooter":id,"type":"norm","x":x,"y":y,"vx":vx,"vy":vy,"tailLength":10,"tail":[],"life":2000})
+	static pushBullet(x,y,vx,vy,id,type){
+		switch(type){
+			case "norm":
+				this.bullets.push({"shooter":id,"type":"norm","x":x,"y":y,"vx":vx,"vy":vy,
+					"lingerance":10,"tailLength":10,"tail":[],"life":2000})
+				break;
+			case "scat":
+				this.bullets.push({"shooter":id,"type":"scat","x":x,"y":y,"vx":vx,"vy":vy,
+					"tailLength":6,"lingerance":6,"tail":[],"life":2000})
+				break;
+			case "lazr":
+				this.bullets.push({"shooter":id,"type":"lazr","x":x,"y":y,"vx":vx,"vy":vy,
+					"tailLength":20,"lingerance":20,"tail":[],"life":200})
+				break;
+
+		}
 	}
 
 	static playerClick(id,x,y,w){
@@ -5047,16 +5061,20 @@ class shooter2C{
 		p.rotation = [n[2]-p.x,n[3]-p.y]
 		switch(w){
 			case "norm":
-				this.pushBullet(p.x,p.y,(n[2]-p.x)*160,(n[3]-p.y)*160,id)
+				this.pushBullet(p.x,p.y,(n[2]-p.x)*160,(n[3]-p.y)*160,id,"norm")
 				break;
 			case "scat":
 			for(let i = 0; i < 5; i++){
-				this.bullets.push({"shooter":id,"type":"scat","x":p.x,"y":p.y,"vx":(n[2]-p.x)*110+Math.random()*40-20,"vy":(n[3]-p.y)*110+Math.random()*40-20,"tailLength":6,"tail":[],"life":2000})
-				// this.pushBullet(p.x,p.y,(n[2]-p.x)*160,(n[3]-p.y)*160)
+				// this.bullets.push({"shooter":id,"type":"scat","x":p.x,"y":p.y,"vx":(n[2]-p.x)*110+Math.random()*40-20,"vy":(n[3]-p.y)*110+Math.random()*40-20,
+				// 	"tailLength":6,"lingerance":6,"tail":[],"life":2000})
+				this.pushBullet(p.x,p.y,(n[2]-p.x)*110+Math.random()*40-20,(n[3]-p.y)*110+Math.random()*40-20,id,"scat")
 			}
 				break;
 			case "lazr":
-				this.bullets.push({"shooter":id,"type":"lazr","x":p.x,"y":p.y,"vx":(n[2]-p.x)*1110,"vy":(n[3]-p.y)*1110,"tailLength":20,"tail":[],"life":200})
+				// this.bullets.push({"shooter":id,"type":"lazr","x":p.x,"y":p.y,
+				// 	"vx":(n[2]-p.x)*1110,"vy":(n[3]-p.y)*1110,"tailLength":20,
+				// 	"lingerance":20,"tail":[],"life":200})
+				this.pushBullet(p.x,p.y,(n[2]-p.x)*1100,(n[3]-p.y)*1100,id,"lazr")
 				break
 		}
 	}
@@ -5081,14 +5099,14 @@ class shooter2C{
 					"type":"norm","x1":x1,"y1":y1,"x2":x2,"y2":y2,
 					"hp":1000,"midpt":midPointOfLine(x1,y1,x2,y2),
 					"defense":1,
-					"frad":fastdistance(x1,y1,x2,y2)/2
+					"frad":distance(x1,y1,x2,y2)/2
 				}
 				this.updateWall(a)
 				break;
 			case "player":
-				this.walls[a] = {"plid":options.id,"type":"player","x1":x1,"y1":y1,"x2":x2,"y2":y2,"hp":1000,
+				this.walls[a] = {"frad":600,"plid":options.id,"type":"player","x1":x1,"y1":y1,"x2":x2,"y2":y2,"hp":1000,
 					"defense":0.5,"midpt":midPointOfLine(x1,y1,x2,y2),
-					"frad":fastdistance(x1,y1,x2,y2)/2
+					"frad":distance(x1,y1,x2,y2)/2
 				}
 				this.updateWall(a)
 				break;
@@ -5219,6 +5237,20 @@ class shooter2C{
 			return(true)
 		}
 		return(false)
+	}
+
+
+	static fdistClose(pl,en){
+		let plr = pl.frad
+		let plvr = Math.sqrt(pl.vx*pl.vx + pl.vy*pl.vy)
+		let enr = en.frad
+		let enli = en.lingerance == undefined ? 1 : en.lingerance
+
+		let FBDIST = plr+plvr*enli+enr
+		if(distance(pl.x,pl.y,en.midpt[0],en.midpt[1]) <= FBDIST){
+			return(false)
+		}
+		return(true)
 	}
 
 	static repeat(){

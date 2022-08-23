@@ -10,13 +10,23 @@ socket.on("CROBJECT",(e)=>{crobject(e)})
 socket.on("upwalls",upwalls)
 socket.on("cameraUp",(e)=>{cameraX = e[0]-410;cameraY = e[1]-410})
 
-socket.onAny((n,e)=>{player.dataNodes.push([n,JSON.stringify(e).length,Date.now()])})
-
+function ALTF3(){
+	altf3 = (n,e)=>{player.dataNodes.push([n,JSON.stringify(e).length,Date.now()])}
+	socket.onAny((n,e)=>{altf3(n,e)})
+}
+function altf3(n,e){
+	player.dataNodes.push([n,JSON.stringify(e).length,Date.now()])
+}
+function unALTF3(){
+	altf3 = ()=>{}
+	player.dataNodes = []
+}
 
 var ID = ""
 var cameraX = 0
 var cameraY = 0
 class player{
+	static debugging = false
 	static dataNodes = []
 	static weapon = "norm"
 	static snapping = false
@@ -194,8 +204,17 @@ document.addEventListener("keydown",(e)=>{
   		player.weaponCounter += 1
   		player.weapon = player.weaponDict[player.weaponCounter]
   		break;
+  	case "F3":
+  		if(!player.debugging){
+  			ALTF3()
+  			player.debugging = true
+  		} else {
+  			player.debugging = false
+  			unALTF3()
+  		}
+  		break;
   }  
-
+  console.log(key)
 
 })
 
