@@ -29,10 +29,13 @@ class player{
 	static debugging = false
 	static dataNodes = []
 	static weapon = "norm"
+	static wall = "norm"
 	static snapping = false
 	static gridSize = 80
 	static weaponCounter = 1
 	static weaponDict = {"1":"norm","2":"scat","3":"lazr","4":"cnon"}
+	static wallCounter = 1
+	static wallDict = {"1":"norm","2":"bhol"}
 }
 class map{
 	
@@ -139,15 +142,28 @@ function tick(){
 		mainCTX.lineTo(e[4]-cameraX,e[5]-cameraY)
 		mainCTX.stroke()
 	}
+
+
 	let wallsArr = Object.keys(map.walls)
 	for(let j = 0 ; j < wallsArr.length; j++){
 		let i = map.walls[wallsArr[j]]
+		if(i.type == "norm" || i.type == "player"){
 		mainCTX.beginPath()
 		mainCTX.lineWidth = 3
 		mainCTX.strokeStyle = "rgba(255,255,255,"+(i.hp/2000+0.5)+")"
 		mainCTX.moveTo(i.x1-cameraX,i.y1-cameraY)
 		mainCTX.lineTo(i.x2-cameraX,i.y2-cameraY)
 		mainCTX.stroke()
+		} else if(i.type == "bhol"){
+			mainCTX.beginPath()
+			mainCTX.lineWidth = 3
+			mainCTX.strokeStyle = "#FF0000"
+			mainCTX.moveTo(i.x-i.radius-cameraX,i.y-cameraY)
+			mainCTX.lineTo(i.x+i.radius-cameraX,i.y-cameraY)
+			mainCTX.moveTo(i.x-cameraX,i.y-i.radius-cameraY)
+			mainCTX.lineTo(i.x-cameraX,i.y+i.radius-cameraY)
+			mainCTX.stroke()
+		}
 	}
 }
 
@@ -207,6 +223,14 @@ document.addEventListener("keydown",(e)=>{
   		player.weaponCounter += 1
   		player.weapon = player.weaponDict[player.weaponCounter]
   		break;
+  	case "z":
+  		player.wallCounter -= 1
+  		player.wall = player.wallDict[player.wallCounter]
+  		break;
+  	case "c":
+  		player.wallCounter += 1
+  		player.wall = player.wallDict[player.wallCounter]
+  		break;
   	case "F3":
   		if(!player.debugging){
   			ALTF3()
@@ -229,7 +253,7 @@ document.addEventListener("keyup",(e)=>{
   	if(player.snapping){
   		socket.emit("placeWall",[placing[1]-(placing[1]%player.gridSize),placing[2]-(placing[2]%player.gridSize),mouseX+cameraX-((mouseX+cameraX)%player.gridSize),mouseY+cameraY-((mouseY+cameraY)%player.gridSize)])
   	} else {
-  	socket.emit("placeWall",[placing[1],placing[2],mouseX+cameraX,mouseY+cameraY])}
+  	socket.emit("placeWall",[placing[1],placing[2],mouseX+cameraX,mouseY+cameraY,player.wall])}
   	placing = [false]
   }
 

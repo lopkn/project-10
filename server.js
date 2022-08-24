@@ -1538,7 +1538,7 @@ function joinGame(game,socket){
 		io.to(socket.id).emit("acknowledge G10.2",socket.id)
 		shooter2C.initiatePlayer(socket.id)
 		socket.on("click",(e)=>{shooter2C.playerClick(e[0],e[1],e[2],e[3]);})
-		socket.on("placeWall",(e)=>{shooter2C.placeWall(e[0],e[1],e[2],e[3])})
+		socket.on("placeWall",(e)=>{shooter2C.placeWall(e[0],e[1],e[2],e[3],e[4])})
 		socket.on("keys",(e)=>{shooter2C.playerKeyUpdate(e)})
 		socket.on('disconnect',()=>{shooter2C.disconnect(socket)})
 	}
@@ -5114,9 +5114,18 @@ class shooter2C{
 				this.updateWall(a)
 				break;
 			case "player":
-				this.walls[a] = {"frad":600,"plid":options.id,"type":"player","x1":x1,"y1":y1,"x2":x2,"y2":y2,"hp":1000,
+				this.walls[a] = {"frad":distance(x1,y1,x2,y2)/2,"plid":options.id,"type":"player","x1":x1,"y1":y1,"x2":x2,"y2":y2,"hp":1000,
 					"defense":0.5,"midpt":midPointOfLine(x1,y1,x2,y2),
 					"frad":distance(x1,y1,x2,y2)/2
+				}
+				this.updateWall(a)
+				break;
+			case "bhol":
+				this.walls[a] = {
+					"type":"bhol","x":x1,"y":y1,"radius":100,"velmult":0.95,
+					"midpt":[x1,y1],"handle":"bhol",
+					"defense":1,
+					"frad":x2
 				}
 				this.updateWall(a)
 				break;
@@ -5185,36 +5194,6 @@ class shooter2C{
 			p.x += p.vx
 			p.y += p.vy
 
-			// //[0,1] 1,1
-			// a*B , b*B
-			// //[0,-1] -1,-1
-			// a*B , b*B
-			// //[1,0] 1,-1
-			// a*A - b*B , b*B - b * A
-			// //[-1,0] -1,1
-
-			// // [0,1] 1,2
-			// a * B + b * A
-			// b * B - a * A
-			// // [0,-1] -1, -2
-			// a * B			
-			// b * B
-			// // [1,0] 2,-1
-			// b * A
-			// - a * A or a*A-b*A
-			// // [-1,0] -2,1
-			// b * A 
-			// 1 2 [-1,0] 1
-			// -a * A or a*A + b*A 
-
-
-			// a * B + b * A
-			// b * B - a * A
-
-			//[0,1] 3,2
-			//[1,0] 2,-3
-			//[0,-1] -3,-2
-			//[-1,0] -2,3
 
 			for(let k = 0; k < p.boidyVect.length; k++){
 				// this.walls[p.boidy[k]].x1 = ((p.boidyVect[k][0] + p.x) * p.rotation[1] + (p.boidyVect[k][1] + p.y) * p.rotation[0])
@@ -5298,26 +5277,34 @@ class shooter2C{
 			let i = JSON.parse(JSON.stringify(B))
 			let wallsArr = Object.keys(this.walls)
 			let bspeed = distance(0,0,B.vx,B.vy)
+			let unhandledWalls = []
 			while(coled && counter > 0){
 
 				counter --
 				coled = false
 				let colsave = []
+				
 				for(let j = 0; j < wallsArr.length; j++){
 					let w = this.walls[wallsArr[j]]
-					if(wallsArr[j] == lastCol || w == undefined || this.wallSameTeamBullet(B,w)){
-						continue;
-					}
-					let e = this.walls[wallsArr[j]]
-					// let col = this.p5re(i.x,i.y,i.x+i.vx,i.y+i.vy,e.x1,e.y1,e.x2,e.y2)
-					let col = this.pointLineCollision(i.x,i.y,i.x+i.vx,i.y+i.vy,e.x1,e.y1,e.x2,e.y2)
-					if(col[4]){
-						colsave.push([col,wallsArr[j],[i.x+i.vx,i.y+i.vy]])
-						acoled = true
-						coled = true
-					}
+
+					if(w?.handle == undefined){
+							if(wallsArr[j] == lastCol || w == undefined || this.wallSameTeamBullet(B,w)){
+								continue;
+							}
+							let e = this.walls[wallsArr[j]]
+							// let col = this.p5re(i.x,i.y,i.x+i.vx,i.y+i.vy,e.x1,e.y1,e.x2,e.y2)
+							let col = this.pointLineCollision(i.x,i.y,i.x+i.vx,i.y+i.vy,e.x1,e.y1,e.x2,e.y2)
+							if(col[4]){
+								colsave.push([col,wallsArr[j],[i.x+i.vx,i.y+i.vy]])
+								acoled = true
+								coled = true
+							}
+
+					}else{unhandledWalls.push(wallsArr[j])}
 				}
 
+
+			
 
 				if(coled){
 
@@ -5365,6 +5352,20 @@ class shooter2C{
 				console.log("crashed here")
 			}
 
+			for(let t = 0; t < unhandledWalls.length; t++){
+					let w = this.walls[unhandledWalls[t]]
+					switch(w.handle){
+						case "bhol":
+							if(distance(B.x,B.y,w.x,w.y) < w.radius){
+								i.vx += (w.x-B.x)
+								i.vy += (w.y-B.y)
+								bspeed *= w.velmult
+							}
+							break;
+					}
+				}
+
+
 			// B.tail.push([i.tailLength,i.x,i.y,i.x+i.vx,i.y+i.vy])
 			this.drawers.push([i.type,i.tailLength,i.x,i.y,i.x+i.vx,i.y+i.vy,i.extra])
 	
@@ -5379,16 +5380,18 @@ class shooter2C{
 			// if(B.type == "norm" || B.type == "scat" || B.type == "cnon"){
 				B.vx *= B.slowd
 				B.vy *= B.slowd
-				let sp = B.vx*B.vx + B.vy*B.vy 
+	
+			// }
+
+				
+			let sp = B.vx*B.vx + B.vy*B.vy 
 
 				if(B.life > 6 && ( sp < 1)){
 					B.life = 5
 				}
-			// }
-
-
-
 		}
+
+
 
 		this.send()
 
