@@ -5041,19 +5041,20 @@ class shooter2C{
 		switch(type){
 			case "norm":
 				this.bullets.push({"shooter":id,"type":"norm","x":x,"y":y,"vx":vx,"vy":vy,
-					"lingerance":10,"tailLength":10,"tail":[],"life":2000})
+					"lingerance":10,"tailLength":10,"tail":[],"life":2000,"slowd":0.95})
 				break;
 			case "scat":
 				this.bullets.push({"shooter":id,"type":"scat","x":x,"y":y,"vx":vx,"vy":vy,
-					"tailLength":6,"lingerance":6,"tail":[],"life":2000})
+					"tailLength":6,"lingerance":6,"tail":[],"life":2000,"slowd":0.95})
 				break;
 			case "lazr":
 				this.bullets.push({"shooter":id,"type":"lazr","x":x,"y":y,"vx":vx,"vy":vy,
-					"tailLength":20,"lingerance":20,"tail":[],"life":200})
+					"tailLength":20,"dmgmult":0.1,"lingerance":20,"tail":[],"life":200,"slowd":1})
 				break;
 			case "cnon":
 				this.bullets.push({"shooter":id,"type":"cnon","x":x,"y":y,"vx":vx,"vy":vy,
-					"tailLength":10,"lingerance":10,"tail":[],"life":200,"extra":{"tailmult":3}})
+					"tailLength":10,"lingerance":10,"tail":[],"life":200,
+					"slowd":1,"dmgmult":9,"extra":{"tailmult":3}})
 				break;
 
 		}
@@ -5253,13 +5254,19 @@ class shooter2C{
 		let plr = pl.frad
 		let plvr = Math.sqrt(pl.vx*pl.vx + pl.vy*pl.vy)
 		let enr = en.frad
-		let enli = en.lingerance == undefined ? 1 : en.lingerance
+		let enli = en.lingerance ? en.lingerance : 1
+
+		
 
 		let FBDIST = plr+plvr*enli+enr
 		if(distance(pl.x,pl.y,en.midpt[0],en.midpt[1]) <= FBDIST){
 			return(false)
 		}
 		return(true)
+	}
+
+	static speedCurveCalc(f){
+		// (o+a)*r
 	}
 
 	static repeat(){
@@ -5299,9 +5306,10 @@ class shooter2C{
 						continue;
 					}
 					let e = this.walls[wallsArr[j]]
-					let col = this.p5re(i.x,i.y,i.x+i.vx,i.y+i.vy,e.x1,e.y1,e.x2,e.y2)
-					if(col != "noCol"){
-						colsave.push([col,wallsArr[j]])
+					// let col = this.p5re(i.x,i.y,i.x+i.vx,i.y+i.vy,e.x1,e.y1,e.x2,e.y2)
+					let col = this.pointLineCollision(i.x,i.y,i.x+i.vx,i.y+i.vy,e.x1,e.y1,e.x2,e.y2)
+					if(col[4]){
+						colsave.push([col,wallsArr[j],[i.x+i.vx,i.y+i.vy]])
 						acoled = true
 						coled = true
 					}
@@ -5309,27 +5317,6 @@ class shooter2C{
 
 
 				if(coled){
-					// if(colsave.length == 1){
-					// 	let tj = colsave[0][1]
-					// 	let tcol = colsave[0][0]
-					// lastCol = tj
-					// let DAM = this.damageWall(tj,i.vx,i.vy)
-					// if(DAM){
-					// 	this.drawers.push([i.type,i.tailLength,i.x,i.y,tcol[0],tcol[1]])
-					// 	i.x = tcol[0]
-					// 	i.y = tcol[1]
-					// 	i.vx = 0.6*(tcol[2]-tcol[0])
-					// 	i.vy = 0.6*(tcol[3]-tcol[1])
-					// 	bspeed *= 0.6
-					// } else {
-					// 	this.drawers.push([i.type,i.tailLength,i.x,i.y,tcol[0],tcol[1]])
-					// 	i.vx = (i.vx - (tcol[0] - i.x)) * 0.3
-					// 	i.vy = (i.vy - (tcol[1] - i.y)) * 0.3
-					// 	bspeed *= 0.3
-					// 	i.x = tcol[0]
-					// 	i.y = tcol[1]
-					// }
-					 // }else {
 
 					 	B.shooter = ""
 
@@ -5348,8 +5335,10 @@ class shooter2C{
 						let tj = colsave[f][1]
 						let tcol = colsave[f][0]
 					lastCol = tj
-					let DAM = this.damageWall(tj,i.vx,i.vy)
+					let DAM = this.damageWall(tj,B)
 					if(DAM){
+						let tw = this.walls[tj]
+						tcol = this.p5rre(tcol,colsave[f][2][0],colsave[f][2][1],tw.x1,tw.y1,tw.x2,tw.y2)
 						this.drawers.push([i.type,i.tailLength,i.x,i.y,tcol[0],tcol[1],i.extra])
 						i.x = tcol[0]
 						i.y = tcol[1]
@@ -5384,39 +5373,27 @@ class shooter2C{
 			B.vx = vnorm[2] * bspeed
 			B.vy = vnorm[3] * bspeed
 			
-			if(B.type == "norm" || B.type == "scat"){
-				B.vx *= 0.95
-				B.vy *= 0.95
+			// if(B.type == "norm" || B.type == "scat" || B.type == "cnon"){
+				B.vx *= B.slowd
+				B.vy *= B.slowd
 				let sp = B.vx*B.vx + B.vy*B.vy 
-				// if(sp < 500){
-				// 	B.vx *= 0.95
-				// 	B.vy *= 0.95
-				// }
+
 				if(B.life > 6 && ( sp < 1)){
 					B.life = 5
 				}
-			}
-
-
-			// for(let r = B.tail.length-1; r > -1; r--){
-			// 	let t = B.tail[r]
-			// 	t[0]--
-			// 	if(t[0] < 0){
-			// 		B.tail.splice(r,1)
-			// 		continue;
-			// 	}
-
-			// 	this.drawers.push(B.tail[r]) 
-
 			// }
+
+
 
 		}
 
 		this.send()
 
 	}
-	static damageWall(wid,vx,vy){
-		this.walls[wid].hp -= 0.005*(vx*vx+vy*vy)
+	static damageWall(wid,b){
+		let vy = b.vy
+		let vx = b.vx
+		this.walls[wid].hp -= 0.005*(vx*vx+vy*vy)*(b.dmgmult?b.dmgmult:1)
 		if(this.walls[wid].hp < 0){
 			delete this.walls[wid]
 			this.wallPushers[wid] = "_DEL"
@@ -5427,7 +5404,6 @@ class shooter2C{
 	}
 	static send(){
 		io.to("G10.2").emit("drawers",[this.drawers])
-		// io.to("G10.2").emit("walls",this.walls)
 	}
 
 
@@ -5473,13 +5449,7 @@ class shooter2C{
 	static p5re(MX,MY,px2,py2,MA,MB,MC,MD){
 
   let a = this.pointLineCollision(MX,MY,px2,py2,MA,MB,MC,MD)
-  // stroke(a[2]===true?"#00FF00":"#000000")
-  // line(MX,MY,mouseX,mouseY)
-  // stroke(a[3]===true?"#00FF00":"#000000")
-  // line(MA,MB,MC,MD)
-  // stroke(a[4]===true?"#00FF00":"#000000")
-  
-  // let n = vectorNormal(MX,MY,px2,py2)
+
   
 		if(a[4]){
     let nn = vectorNormal(MA,MB,MC,MD)    
@@ -5487,13 +5457,24 @@ class shooter2C{
 
     
     let nv1 = [nv[0] * nn[2], nv[1] * nn[3]]
-
-    // stroke("#FF0000")
-
-    // line(400,400,400+nv[0]*2,400+nv[1]*2)
+    let mult = 2 * (nv[0] * nn[0] + nv[1] * nn[1])
+    let nn2 = [nv[0]-nn[0]*mult,nv[1]-nn[1]*mult]
     
-   
+    // line(a[0],a[1],a[0]+nn2[0],a[1]+nn2[1])
     
+    	return([a[0],a[1],a[0]+nn2[0],a[1]+nn2[1]])
+    
+  	} else {
+  		return("noCol")
+  	}
+	}
+	static p5rre(a,px2,py2,MA,MB,MC,MD){
+		if(a[4]){
+    let nn = vectorNormal(MA,MB,MC,MD)    
+    let nv = [px2-a[0],py2-a[1]]
+
+    
+    let nv1 = [nv[0] * nn[2], nv[1] * nn[3]]
     let mult = 2 * (nv[0] * nn[0] + nv[1] * nn[1])
     let nn2 = [nv[0]-nn[0]*mult,nv[1]-nn[1]*mult]
     
