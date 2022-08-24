@@ -5163,20 +5163,22 @@ class shooter2C{
 
 			let tv = [0,0]
 			if(p.keys.w == "a"){
-				tv[1] -= 1.5
+				tv[1] -= 1
 			}
 			if(p.keys.a == "a"){
-				tv[0] -= 1.5
+				tv[0] -= 1
 			}
 			if(p.keys.s == "a"){
-				tv[1] += 1.5
+				tv[1] += 1
 			}
 			if(p.keys.d == "a"){
-				tv[0] += 1.5
+				tv[0] += 1
 			}
+
+			let ttv = vectorNormalize([0,0,tv[0],tv[1]])
 		
-			p.vx += tv[0]
-			p.vy += tv[1]
+			p.vx += ttv[2]*1.5
+			p.vy += ttv[3]*1.5
 			p.vx *= 0.97
 			p.vy *= 0.97
 
@@ -5267,6 +5269,7 @@ class shooter2C{
 
 	static speedCurveCalc(f){
 		// (o+a)*r
+
 	}
 
 	static repeat(){
