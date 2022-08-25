@@ -5122,7 +5122,7 @@ class shooter2C{
 				break;
 			case "bhol":
 				this.walls[a] = {
-					"type":"bhol","x":x1,"y":y1,"radius":100,"velmult":0.95,
+					"type":"bhol","x":x1,"y":y1,"radius":160,"velmult":0.95,
 					"midpt":[x1,y1],"handle":"bhol",
 					"defense":1,
 					"frad":x2
