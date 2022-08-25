@@ -5268,27 +5268,41 @@ class shooter2C{
 				this.bullets.splice(k,1)
 				continue;
 			}
-			let coled = true
-			let acoled = false
+			let coled = "dn"
+
 			
 			let counter = 201
 
-			let lastCol = -1
+			let lastCol = {}
 			let i = JSON.parse(JSON.stringify(B))
 			let wallsArr = Object.keys(this.walls)
 			let bspeed = distance(0,0,B.vx,B.vy)
-			let unhandledWalls = []
-			while(coled && counter > 0){
+			// let unhandledWalls = []
+			while(coled != "stop" && counter > 0){
 
 				counter --
-				coled = false
+				coled = "stop"
 				let colsave = []
 				
 				for(let j = 0; j < wallsArr.length; j++){
 					let w = this.walls[wallsArr[j]]
 
+					if(lastCol[wallsArr[j]] != undefined){
+								let LC = lastCol[wallsArr[j]]
+								if(LC == "single"){
+										delete lastCol[wallsArr[j]]
+										continue;
+
+									}
+									else if(LC == "infinite"){
+										continue;
+			
+								}
+							}
+
 					if(w?.handle == undefined){
-							if(wallsArr[j] == lastCol || w == undefined || this.wallSameTeamBullet(B,w)){
+							
+							if( w == undefined || this.wallSameTeamBullet(B,w)){
 								continue;
 							}
 							let e = this.walls[wallsArr[j]]
@@ -5296,17 +5310,28 @@ class shooter2C{
 							let col = this.pointLineCollision(i.x,i.y,i.x+i.vx,i.y+i.vy,e.x1,e.y1,e.x2,e.y2)
 							if(col[4]){
 								colsave.push([col,wallsArr[j],[i.x+i.vx,i.y+i.vy]])
-								acoled = true
-								coled = true
+								coled = "c1"
 							}
 
-					}else{unhandledWalls.push(wallsArr[j])}
+					}else{
+							switch(w.handle){
+								case "bhol":
+									if(distance(B.x,B.y,w.x,w.y) < w.radius){
+										i.vx += (w.x-B.x)
+										i.vy += (w.y-B.y)
+										bspeed *= w.velmult
+										coled = "dn"
+										lastCol[wallsArr[j]] = "infinite"
+									}
+									break;
+							}
+					}
 				}
 
 
 			
 
-				if(coled){
+				if(coled == "c1"){
 
 					 	B.shooter = ""
 
@@ -5324,7 +5349,7 @@ class shooter2C{
 					}
 						let tj = colsave[f][1]
 						let tcol = colsave[f][0]
-					lastCol = tj
+					lastCol[tj] = "single"
 					let DAM = this.damageWall(tj,B)
 					if(DAM){
 						let tw = this.walls[tj]
@@ -5352,18 +5377,7 @@ class shooter2C{
 				console.log("crashed here")
 			}
 
-			for(let t = 0; t < unhandledWalls.length; t++){
-					let w = this.walls[unhandledWalls[t]]
-					switch(w.handle){
-						case "bhol":
-							if(distance(B.x,B.y,w.x,w.y) < w.radius){
-								i.vx += (w.x-B.x)
-								i.vy += (w.y-B.y)
-								bspeed *= w.velmult
-							}
-							break;
-					}
-				}
+
 
 
 			// B.tail.push([i.tailLength,i.x,i.y,i.x+i.vx,i.y+i.vy])
