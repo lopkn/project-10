@@ -5123,7 +5123,7 @@ class shooter2C{
 			case "bhol":
 				this.walls[a] = {
 					"type":"bhol","x":x1,"y":y1,"radius":160,"velmult":0.95,
-					"midpt":[x1,y1],"handle":"bhol",
+					"midpt":[x1,y1],"handle":"bhol","hp":4000
 					"defense":1,
 					"frad":x2
 				}
@@ -5319,6 +5319,7 @@ class shooter2C{
 									if(distance(B.x,B.y,w.x,w.y) < w.radius){
 										i.vx += (w.x-B.x)
 										i.vy += (w.y-B.y)
+										w.hp -= 1
 										bspeed *= w.velmult
 										coled = "dn"
 										lastCol[wallsArr[j]] = "infinite"
