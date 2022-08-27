@@ -5123,7 +5123,7 @@ class shooter2C{
 			case "bhol":
 				this.walls[a] = {
 					"type":"bhol","x":x1,"y":y1,"radius":160,"velmult":0.95,
-					"midpt":[x1,y1],"handle":"bhol","hp":4000
+					"midpt":[x1,y1],"handle":"bhol","hp":4000,
 					"defense":1,
 					"frad":x2
 				}
@@ -5319,7 +5319,7 @@ class shooter2C{
 									if(distance(B.x,B.y,w.x,w.y) < w.radius){
 										i.vx += (w.x-B.x)
 										i.vy += (w.y-B.y)
-										w.hp -= 1
+										this.damageWall(wallsArr[j],B)
 										bspeed *= w.velmult
 										coled = "dn"
 										lastCol[wallsArr[j]] = "infinite"
@@ -5412,6 +5412,7 @@ class shooter2C{
 
 	}
 	static damageWall(wid,b){
+		if(this.walls[wid].type == "norm"){
 		let vy = b.vy
 		let vx = b.vx
 		this.walls[wid].hp -= 0.005*(vx*vx+vy*vy)*(b.dmgmult?b.dmgmult:1)
@@ -5422,6 +5423,16 @@ class shooter2C{
 		}
 		this.updateWall(wid)
 		return(true)
+		} else if(this.walls[wid].type == "bhol"){
+		this.walls[wid].hp -= 1
+		if(this.walls[wid].hp < 0){
+			delete this.walls[wid]
+			this.wallPushers[wid] = "_DEL"
+			return(false)
+		}
+		this.updateWall(wid)
+		return(true)
+		}
 	}
 	static send(){
 		io.to("G10.2").emit("drawers",[this.drawers])
