@@ -142,7 +142,7 @@ class cvents{
 	}
 
 	static ATick(){
-		naturalMobSpawn(10,"hunter")
+		// naturalMobSpawn(10,"hunter")
 	}
 
 }
@@ -5412,7 +5412,7 @@ class shooter2C{
 
 	}
 	static damageWall(wid,b){
-		if(this.walls[wid].type == "norm"){
+		if(this.walls[wid].type == "norm" || this.walls[wid].type == "player"){
 		let vy = b.vy
 		let vx = b.vx
 		this.walls[wid].hp -= 0.005*(vx*vx+vy*vy)*(b.dmgmult?b.dmgmult:1)
@@ -5424,6 +5424,7 @@ class shooter2C{
 		this.updateWall(wid)
 		return(true)
 		} else if(this.walls[wid].type == "bhol"){
+			b.shooter = ""
 		this.walls[wid].hp -= 1
 		if(this.walls[wid].hp < 0){
 			delete this.walls[wid]
