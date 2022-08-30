@@ -1734,7 +1734,7 @@ function commandingPush(e){
       } else {
         selfLog("file not found","red")
       }
-    } else if(tempsplit[0] == "/dcookie" || tempsplit[0] == "deletesave"){
+    } else if(tempsplit[0] == "/dcookie" || tempsplit[0] == "/deletesave"){
       document.cookie = "{}";
       selfLog("Your cookies has been turned to the string {}. If you know how to delete a cookie yousing js, tell me how.","red")
     } else if(tempsplit[0] == "/autoload"){

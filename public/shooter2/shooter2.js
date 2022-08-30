@@ -35,7 +35,7 @@ class player{
 	static weaponCounter = 1
 	static weaponDict = {"1":"norm","2":"scat","3":"lazr","4":"cnon"}
 	static wallCounter = 1
-	static wallDict = {"1":"norm","2":"bhol"}
+	static wallDict = {"1":"norm","2":"bhol","3":"ghol"}
 }
 class map{
 	
@@ -154,10 +154,10 @@ function tick(){
 		mainCTX.moveTo(i.x1-cameraX,i.y1-cameraY)
 		mainCTX.lineTo(i.x2-cameraX,i.y2-cameraY)
 		mainCTX.stroke()
-		} else if(i.type == "bhol"){
+		} else if(i.type == "bhol" || i.type == "ghol"){
 			mainCTX.beginPath()
 			mainCTX.lineWidth = 3
-			mainCTX.strokeStyle = "#FF0000"
+			mainCTX.strokeStyle = i.type == "bhol"?"#FF0000":"#0000FF"
 			mainCTX.moveTo(i.x-i.radius-cameraX,i.y-cameraY)
 			mainCTX.lineTo(i.x+i.radius-cameraX,i.y-cameraY)
 			mainCTX.moveTo(i.x-cameraX,i.y-i.radius-cameraY)
