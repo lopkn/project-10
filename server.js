@@ -5131,7 +5131,7 @@ class shooter2C{
 				break;
 			case "ghol":
 				this.walls[a] = {
-					"type":"ghol","x":x1,"y":y1,"radius":460,"velmult":0.999,
+					"type":"ghol","x":x1,"y":y1,"radius":460,"velmult":0.98,
 					"midpt":[x1,y1],"handle":"ghol","hp":4000,
 					"defense":1,
 					"frad":x2
@@ -5336,13 +5336,16 @@ class shooter2C{
 									break;
 								case "ghol":
 									if(distance(B.x,B.y,w.x,w.y) < w.radius){
-										let ad = 1000/distance(w.x,w.y,B.x,B.y)
+										let td = distance(w.x,w.y,B.x,B.y)
+										let ad = 1000000/(td*td)
 										let nor = vectorNormalize([0,0,w.x-B.x,w.y-B.y])
+										ad = ad>50?50:ad
 										i.vx += nor[2]*ad
 										i.vy += nor[3]*ad
 										// bspeed += ad
 										this.damageWall(wallsArr[j],B)
-										bspeed *= w.velmult
+										// if(td > 50){
+										// bspeed *= w.velmult}
 										coled = "dn"
 										lastCol[wallsArr[j]] = "infinite"
 									}
@@ -5456,7 +5459,7 @@ class shooter2C{
 		this.updateWall(wid)
 		return(true)
 		} else if(this.walls[wid].type == "ghol"){
-			b.shooter = ""
+			// b.shooter = ""
 		this.walls[wid].hp -= 1
 		if(this.walls[wid].hp < 0){
 			delete this.walls[wid]
