@@ -169,6 +169,12 @@ function tick(){
 	// mainCTX.fillRect(mouseX+player.gridSize/2-5,mouseY+player.gridSize/2-5,10,10)
 	// mainCTX.fillRect(mouseX+cameraX+player.gridSize/2-(Math.abs((mouseX+cameraX+player.gridSize/2)%player.gridSize))-5-cameraX,
 		// mouseY+cameraY+player.gridSize/2-(Math.abs((mouseY+cameraY+player.gridSize/2)%player.gridSize))-5-cameraY,10,10)
+	mainCTX.fillStyle = "rgba("+(200+Math.random()*55)+",0,0,"+(Math.random()*0.2+0.8)+")"
+	mainCTX.font = "bold 23px Courier New"
+	mainCTX.fillText("weapon: "+player.weaponCounter+" - "+player.weapon,20,800)
+	mainCTX.fillText("building: "+player.wallCounter+" - "+player.wall,280,800)
+	mainCTX.fillText("snapping: "+(player.snapping?"on":"off"),560,800)
+	
 }
 
 
@@ -234,6 +240,9 @@ document.addEventListener("keydown",(e)=>{
   	case "c":
   		player.wallCounter += 1
   		player.wall = player.wallDict[player.wallCounter]
+  		break;
+  	case "p":
+  		player.snapping = !player.snapping
   		break;
   	case "F3":
   		if(!player.debugging){
