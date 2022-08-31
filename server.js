@@ -5580,5 +5580,18 @@ function vectorNormal(x1,y1,x2,y2){
   return([-dy,dx,dy,-dx])
 }
 
+class LuuidGenerator{
+	static counter = 0
+
+	static generate(){
+
+		let hexstr = this.counter.toString(16)
+		while(hexstr.length < 10){
+			hexstr = "0"+hexstr
+		}
+		this.counter ++
+		return(hexstr)
+	}
+}
 
 

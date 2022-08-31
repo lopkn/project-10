@@ -280,7 +280,7 @@ document.addEventListener("keyup",(e)=>{
   		if(my < 0){
   			my -= player.gridSize
   		}
-  		socket.emit("placeWall",[placing[1]-(placing[1]%player.gridSize),placing[2]-(placing[2]%player.gridSize),mx-(mx%player.gridSize),my-(my%player.gridSize)])
+  		socket.emit("placeWall",[placing[1]-(placing[1]%player.gridSize),placing[2]-(placing[2]%player.gridSize),mx-(mx%player.gridSize),my-(my%player.gridSize),player.wall])
   	} else {
   	socket.emit("placeWall",[placing[1],placing[2],mouseX+cameraX,mouseY+cameraY,player.wall])}
   	placing = [false]
