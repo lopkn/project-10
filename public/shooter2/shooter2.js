@@ -33,7 +33,7 @@ class player{
 	static snapping = false
 	static gridSize = 80
 	static weaponCounter = 1
-	static weaponDict = {"1":"norm","2":"scat","3":"lazr","4":"cnon"}
+	static weaponDict = {"1":"norm","2":"scat","3":"lazr","4":"cnon","5":"heal"}
 	static wallCounter = 1
 	static wallDict = {"1":"norm","2":"bhol","3":"ghol"}
 }
@@ -137,6 +137,8 @@ function tick(){
 		if(e[0] == "norm" || e[0] == "scat" || e[0] == "cnon"){
 		mainCTX.strokeStyle = "#FFFF00"} else if(e[0] == "lazr"){
 			mainCTX.strokeStyle = "#00FFFF"
+		} else if(e[0] == "heal"){
+			mainCTX.strokeStyle = "#FF0000"
 		}
 		mainCTX.moveTo(e[2]-cameraX,e[3]-cameraY)
 		mainCTX.lineTo(e[4]-cameraX,e[5]-cameraY)

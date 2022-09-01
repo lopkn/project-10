@@ -5057,6 +5057,11 @@ class shooter2C{
 					"slowd":1,"dmgmult":9,"extra":{"tailmult":3}})
 				break;
 
+			case "heal":
+				this.bullets.push({"shooter":id,"type":"heal","x":x,"y":y,"vx":vx,"vy":vy,
+					"lingerance":2,"dmgmult":-1,"tailLength":2,"tail":[],"life":2000,"slowd":0.95})
+				break;
+
 		}
 	}
 
@@ -5086,6 +5091,9 @@ class shooter2C{
 				p.vy -= (n[3]-p.y)*10
 				this.pushBullet(p.x,p.y,(n[2]-p.x)*100,(n[3]-p.y)*100,id,"cnon")
 				break;
+			case "heal":
+				this.pushBullet(p.x,p.y,(n[2]-p.x)*160,(n[3]-p.y)*160,id,"heal")
+				break;
 		}
 	}
 
@@ -5093,7 +5101,7 @@ class shooter2C{
 		this.nuuIDGEN++
 		return(this.nuuIDGEN)
 	}
-	static placeWall(x1,y1,x2,y2,type,options){
+	static placeWall(x1,y1,x2,y2,type,options,special){
 		
 		if(type == undefined){
 			type = "norm"
@@ -5111,14 +5119,12 @@ class shooter2C{
 					"defense":1,
 					"frad":distance(x1,y1,x2,y2)/2
 				}
-				this.updateWall(a)
 				break;
 			case "player":
 				this.walls[a] = {"frad":distance(x1,y1,x2,y2)/2,"plid":options.id,"type":"player","x1":x1,"y1":y1,"x2":x2,"y2":y2,"hp":1000,
 					"defense":0.5,"midpt":midPointOfLine(x1,y1,x2,y2),
 					"frad":distance(x1,y1,x2,y2)/2
 				}
-				this.updateWall(a)
 				break;
 			case "bhol":
 				this.walls[a] = {
@@ -5127,7 +5133,6 @@ class shooter2C{
 					"defense":1,
 					"frad":x2
 				}
-				this.updateWall(a)
 				break;
 			case "ghol":
 				this.walls[a] = {
@@ -5136,28 +5141,35 @@ class shooter2C{
 					"defense":1,
 					"frad":x2
 				}
-				this.updateWall(a)
 				break;
 		}
+
+		if(special != undefined){
+			let targs = Object.keys(special)
+			targs.forEach((e)=>{
+				this.walls[a][e] = special[e]
+			})
+		}
+
+		this.updateWall(a)
 		return(a)
 	}
-	static initiatePlayer(id){
+	static initiatePlayer(id,type){
 
-		this.players[id] = {"rotation":[0,1],"boidyVect":[[0,-40],[30,30],[-30,30]],"boidy":[],"x":410,"y":410,"vx":0,"vy":0,"hp":100,"id":id,"keys":{}}
+		if(type == undefined || type == "ntri"){
 
-		// let a = this.getNewNUUID()
-		// this.walls[a] = {"plid":id,"type":"player","x1":410,"y1":390,"x2":395,"y2":425,"hp":1000}
-		// this.updateWall(a)
+		this.players[id] = {"rotation":[0,1],"boidyVect":[[0,-40,"next"],[30,30,"next"],[-30,30,"next"]],"boidy":[],"x":410,"y":410,"vx":0,"vy":0,"hp":100,"id":id,"keys":{}}
+
 		let a = this.placeWall(410,390,395,425,"player",{"id":id})
 		this.players[id].boidy.push(a)
 		 a = this.placeWall(425,425,395,425,"player",{"id":id})
 		 this.players[id].boidy.push(a)
-		// this.walls[a] = {"plid":id,"type":"player","x1":425,"y1":425,"x2":395,"y2":425,"hp":1000}
-		// this.updateWall(a)
+
 		 a = this.placeWall(410,390,425,425,"player",{"id":id})
 		 this.players[id].boidy.push(a)
-		// this.walls[a] = {"plid":id,"type":"player","x1":410,"y1":390,"x2":425,"y2":425,"hp":1000}
-		// this.updateWall(a)
+		} else if(type == "shld") {
+			this.players[id].boidy.push(this.placeWall(0,0,0,0,"player",{"id":id},{"defense":10}))
+		}
 
 		this.sendAllWombjects(id)
 	}
@@ -5205,19 +5217,22 @@ class shooter2C{
 
 
 			for(let k = 0; k < p.boidyVect.length; k++){
-				// this.walls[p.boidy[k]].x1 = ((p.boidyVect[k][0] + p.x) * p.rotation[1] + (p.boidyVect[k][1] + p.y) * p.rotation[0])
-				// this.walls[p.boidy[k]].y1 = ((p.boidyVect[k][1] + p.y) * p.rotation[1] - (p.boidyVect[k][0] + p.x) * p.rotation[0])
+				if(p.boidyVect[k][2] == "next"){
 				this.walls[p.boidy[k]].x1 = ((p.boidyVect[k][0] * p.rotation[1] + p.boidyVect[k][1] * p.rotation[0]) + p.x)
 				this.walls[p.boidy[k]].y1 = ((p.boidyVect[k][1] * p.rotation[1] - p.boidyVect[k][0] * p.rotation[0]) + p.y)
 				let K = k+1
 				if(K == p.boidyVect.length){
 					K = 0
 				}
-				// this.walls[p.boidy[k]].x2 = ((p.boidyVect[K][0] + p.x) * p.rotation[1] + (p.boidyVect[K][1] + p.y) * p.rotation[0])
-				// this.walls[p.boidy[k]].y2 = ((p.boidyVect[K][1] + p.y) * p.rotation[1] - (p.boidyVect[K][0] + p.x) * p.rotation[0])
+				
 				this.walls[p.boidy[k]].x2 = ((p.boidyVect[K][0] * p.rotation[1] + p.boidyVect[K][1] * p.rotation[0]) + p.x)
 				this.walls[p.boidy[k]].y2 = ((p.boidyVect[K][1] * p.rotation[1] - p.boidyVect[K][0] * p.rotation[0]) + p.y)
-				
+				} else {
+				this.walls[p.boidy[k]].x1 = ((p.boidyVect[k][0] * p.rotation[1] + p.boidyVect[k][1] * p.rotation[0]) + p.x)
+				this.walls[p.boidy[k]].y1 = ((p.boidyVect[k][1] * p.rotation[1] - p.boidyVect[k][0] * p.rotation[0]) + p.y)
+				this.walls[p.boidy[k]].x2 = ((p.boidyVect[k][2] * p.rotation[1] + p.boidyVect[k][2] * p.rotation[0]) + p.x)
+				this.walls[p.boidy[k]].y2 = ((p.boidyVect[k][3] * p.rotation[1] - p.boidyVect[k][3] * p.rotation[0]) + p.y)
+				}
 			}
 
 			p.boidy.forEach((B)=>{
@@ -5342,7 +5357,7 @@ class shooter2C{
 										ad = ad>50?50:ad
 										i.vx += nor[2]*ad
 										i.vy += nor[3]*ad
-										// bspeed += ad
+										// bspeed += distance(B.x,B.y,B.vx+nor[2]*ad,B.vy+nor[2]*ad)-bspeed
 										this.damageWall(wallsArr[j],B)
 										// if(td > 50){
 										// bspeed *= w.velmult}
@@ -5440,7 +5455,7 @@ class shooter2C{
 		if(this.walls[wid].type == "norm" || this.walls[wid].type == "player"){
 		let vy = b.vy
 		let vx = b.vx
-		this.walls[wid].hp -= 0.005*(vx*vx+vy*vy)*(b.dmgmult?b.dmgmult:1)
+		this.walls[wid].hp -= 0.005*(vx*vx+vy*vy)*(b.dmgmult?b.dmgmult:1)/this.walls[wid].defense
 		if(this.walls[wid].hp < 0){
 			delete this.walls[wid]
 			this.wallPushers[wid] = "_DEL"
