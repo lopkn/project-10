@@ -876,9 +876,9 @@ let flashpoint = 10
 function updateChat(){
   let tempa ="<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>"
 
-  if(player != undefined && player.clientInfo.schmode == "on"){
-    tempa +="<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>"
-  }
+  // if(player != undefined && player.clientInfo.schmode == "on"){
+  //   tempa +="<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>"
+  // }
 
   text(tempa+ChatBox)
 }
@@ -1496,8 +1496,226 @@ function textI(str,x,y){
 
 ////////////////////////////////////////////////////
 
+//==SCHMEM===SCHMEM==SCHMEM===SCHMEM==SCHMEM===SCHMEM==SCHMEM===SCHMEM==//
+//==SCHMEM===SCHMEM==SCHMEM===SCHMEM==SCHMEM===SCHMEM==SCHMEM===SCHMEM==//
+
+class SCHMEM{
+  static masterDict = {}
+  static UUIDC = 0
+
+  static highlightersArr = ["is","are","isn't","isnt","is not","aren't","arent","are not"]
+  static highlighters = {
+    "is":{"tags":["?=","Sl"]}, //pr
+    "are":{"tags":["?=","Pl"]}, //pr
+    "isn't":{"tags":["!?=","Sl"]},  //pr
+    "isnt":{"refer":"isn't"},
+    "is not":{"refer":"isn't"},
+    "aren't":{"tags":["!?=","Pl"]},  //pr
+    "arent":{"refer":"aren't"},
+    "are not":{"refer":"aren't"}
+  }
+
+  static wordBank = {
+    // "word":{"APPRS":{"12",5},{"13":0}}
+  }
+
+  static tagBank = {
+    // "tag":{"APPRS":{"12":100},{"13":100}}
+  }
+
+  static crusing = true
 
 
+  static writeMemF(str,id){
+    if(id == undefined){
+      id = this.UUIDC
+    this.masterDict[this.UUIDC] = [str,{"F":true}]
+    selfLog("wrote ["+str+"] to mem ["+this.UUIDC+"]","#FFFFFF")
+    this.UUIDC++
+    } else {
+      this.masterDict[id] = [str,{"F":true}]
+      
+    selfLog("wrote ["+str+"] to mem ["+id+"]","#FFFFFF")
+    }
+
+    this.tagBankAdd("F",id)
+
+    if(this.crusing){
+      let strsplit = str.split(" ")
+      strsplit.forEach((e,i)=>{
+        this.wordBankAdd(e,id,i)
+      })
+    }
+
+  }
+
+  static writeMem(str,type,id){
+  if(type == "F" || type == "f" || type == "forced" || type == "force"){
+      this.writeMemF(str,id)
+    } else {
+      if(id == undefined){
+        id = this.UUIDC
+        this.UUIDC++
+      }
+      if(this.masterDict[id] == undefined){
+        this.masterDict[id] = []
+      }
+      if(str == "" || str == undefined){
+        str = this.masterDict[id][0]
+      } else {
+        let strsplit = this.masterDict[id][0].split(" ")
+        strsplit.forEach((e,i)=>{
+          this.wordBankRemove(e,id,i)
+        })
+
+
+       if(this.crusing){
+            strsplit = str.split(" ")
+            strsplit.forEach((e,i)=>{
+              this.wordBankAdd(e,id,i)
+            })
+          }
+
+        
+
+      }
+      this.masterDict[id][0] = str
+      console.log(this.masterDict[id][1])
+      this.masterDict[id][1][type] = true
+      this.tagBankAdd(type,id)
+      selfLog("W/C: ["+str+"]-["+type+"]","#FFFF50")
+    }
+
+  }
+
+  static highlightComparer(str,highlight){
+    let out = []
+    for(let j = 0; j < highlight.length; j++){
+      let e = highlight[j]
+      let l = e.length
+      for(let i = 0; i < str.length-l+1; i++){
+        if((str[i+l] == undefined || str[i+l] == ' ' )&&(str[i-1] == undefined || str[i-1] == ' ' )&&str.substring(i).substring(l,0) == e){
+          out.push([e,i])
+        }
+      }
+    }
+    return(out)
+  }
+  static specialTypeProcess(id){
+    let w = this.masterDict[id]
+
+    let TOUT1 = this.highlightComparer(w[0],Object.keys(this.highlighters))
+
+    TOUT1.forEach((e,i)=>{
+      if(this.highlighters[e[0]].refer != undefined){
+        e[0] = this.highlighters[e[0]].refer
+      }
+      TOUT1[i][2] = this.highlighters[e[0]]
+    })
+
+    TOUT1.forEach((e,i)=>{
+      e[2].tags.forEach((e)=>{
+        w[1][e] = true
+        this.tagBankAdd(e,id)
+      })
+    })
+
+
+  }
+
+  static delMem(id,type){
+    if(type == undefined){
+      selfLog("DEL: id-"+id+",str-"+this.masterDict[id][0]+",tags-"+JSON.stringify(Object.keys(this.masterDict[id][1])),"#FF5050")
+      Object.keys(this.masterDict[id][1]).forEach((e)=>{this.tagBankRemove(e,id)})
+      let strsplit = this.masterDict[id][0].split(" ")
+        strsplit.forEach((e,i)=>{
+          this.wordBankRemove(e,id,i)
+        })
+      delete this.masterDict[id]
+
+    } else {
+      selfLog("DEL: type-"+type+" of str-"+this.masterDict[id][0]+",id-"+id,"#FF5050")
+      delete this.tagBank[type][id]
+      delete this.masterDict[id][1][type]
+    }
+  }
+
+ 
+
+  static tagBankAdd(tag,id,weight){
+    if(this.tagBank[tag] == undefined){
+      this.tagBank[tag] = {}
+    }
+    this.tagBank[tag][id] = weight?weight:100
+  }
+
+  static tagBankRemove(tag,id){
+    delete this.tagBank[tag][id]
+    if(Object.keys(this.tagBank[tag]).length < 1){
+      delete this.tagBank[tag]
+    }
+  }
+
+  static wordBankAdd(word,id,weight){
+    if(this.wordBank[word] == undefined){
+      this.wordBank[word] = {}
+    }
+    this.wordBank[word][id] = weight==undefined?100:weight
+  }
+
+  static wordBankRemove(word,id,weight){
+    if(weight == undefined){weight = -Infinity}
+    
+    this.wordBank[word][id] -= weight
+    if(this.wordBank[word][id] < 1){
+      delete this.wordBank[word][id]
+      if(Object.keys(this.wordBank[word]).length < 1){
+        delete this.wordBank[word]
+      }
+      return
+    }
+
+  }
+
+  static getMem(type,vars){
+    let outstr = ""
+    if(type == "w"){
+      outstr += "WORD - "+vars
+      if(this.wordBank[vars] != undefined){
+        let objk = Object.keys(this.wordBank[vars])
+        objk.forEach((e)=>{
+          outstr += "</br>"+this.masterDict[e][0]
+        })
+      }
+    } else if(type == "t"){
+      outstr += "TAG - "+vars
+      if(this.tagBank[vars] != undefined){
+        let objk = Object.keys(this.tagBank[vars])
+        objk.forEach((e)=>{
+          outstr += "</br>"+this.masterDict[e][0]
+        })
+      }
+    }
+    return(outstr)
+  }
+
+}
+
+ // static editMem(etype,vars){
+ //    switch(etype){
+ //      case "type":
+ //      case "t":
+ //        this.masterDict[vars.id][1][vars.type] = true
+ //        break;
+ //      case "s":
+ //      case "str":
+ //        this.masterDict[vars.id][vars.type] = vars.str
+ //        break;
+ //    }
+ //  }
+//==SCHMEM===SCHMEM==SCHMEM===SCHMEM==SCHMEM===SCHMEM==SCHMEM===SCHMEM==//
+//==SCHMEM===SCHMEM==SCHMEM===SCHMEM==SCHMEM===SCHMEM==SCHMEM===SCHMEM==//
+////////////////////////////////////////////////////
 function seperateStringSpecial(str){
   let outarr = []
   let pushstr = ""
@@ -1619,7 +1837,7 @@ function commandingPush(e){
 
 
     //=================CLIENT COMMANDS ================
-
+    let ISPLCMD = true
     if(tempsplit[0] == "/fps" && isNaN(temp2)==false){
       fps = temp2
       clearInterval(canvasAnimation)
@@ -1739,6 +1957,52 @@ function commandingPush(e){
       selfLog("Your cookies has been turned to the string {}. If you know how to delete a cookie yousing js, tell me how.","red")
     } else if(tempsplit[0] == "/autoload"){
       player.clientInfo.cookieAuto = tempsplit[1]
+    } else {
+      switch(tempsplit[0]){
+        case "/M":
+          SCHMEM.writeMemF(temp.substring(3))
+          break;
+        case "/m":
+        case "/mem":
+          let tst = tempsplit[1]
+          let tstl = tempsplit[1].length
+          let apst = 4+tstl+(tempsplit[0] == "/mem"?2:0)
+          
+
+          if(tempsplit[1] == "-" || tempsplit[1][0] != "-"){
+            SCHMEM.writeMemF(temp.substring(apst-tstl-1))
+            console.log(apst)
+            break;
+          }
+          if(tempsplit[1][0] == "-"){
+            if(tempsplit[1].substring(1) == "m"){
+              tstl += tempsplit[2].length + 6 + tempsplit[3].length
+              console.log(temp.substring(tstl),tstl)
+              SCHMEM.writeMem(temp.substring(tstl),tempsplit[3],tempsplit[2])
+              break;
+            }
+            if(tempsplit[1].substring(1) == "d"){
+              SCHMEM.delMem(tempsplit[2],tempsplit[3])
+            }
+          }
+          break;
+        case "/gm":
+          if(tempsplit[1] != undefined){
+            selfLog("GETMEM: "+SCHMEM.masterDict[tempsplit[1]][0] + "</br>TYPES: "+JSON.stringify(Object.keys(SCHMEM.masterDict[tempsplit[1]][1])),"#FFFFFF")
+          }else{
+            selfLog("GETMEMALL: "+JSON.stringify(SCHMEM.masterDict),"#FFFFFF")
+          }
+          break;
+        case "/gmem":
+        let otpt = ""
+          if(tempsplit[1][0] == "-"){
+            otpt = SCHMEM.getMem(tempsplit[1][1],tempsplit[2])
+          }
+          selfLog("GETMEMSPE: "+otpt,"#FFFFFF")
+          break;
+        default:
+          ISPLCMD = false
+      }
     }
 
 
@@ -1748,7 +2012,7 @@ function commandingPush(e){
   //=================CLIENT COMMANDS ================
 
 
-     else {
+     if(!ISPLCMD) {
 
     AActionStore[AActionStore.length -1] = "$" + temp
     }
@@ -3264,6 +3528,73 @@ function strHas(str,has){
     }
   }
   return(false)
+
+}
+
+function brackedator(str,option){
+
+  let tempbrackedate = []
+  let tempbasestring = ""
+
+  let outbases = []
+  let outbaselinks = []
+  let outeffect = "base"
+  let ttout = ""
+  let BRKS = {"[":"]","{":"}","(":")","]":"c[","}":"c{",")":"c("}
+
+  for(let i = 0; i < str.length; i++){
+    let brconfig =  BRKS[str[i]]
+    if(brconfig != undefined){
+      
+      if(brconfig[0] == "c"){
+
+        if(tempbrackedate[tempbrackedate.length-1] == brconfig.substring(1)){
+          tempbrackedate.pop()
+        } else {
+          return("BRACKETS NOT MATCHING")
+        }
+
+      } else {
+        tempbrackedate.push(str[i])
+      }
+
+    } else if(tempbrackedate.length == 0){
+      tempbasestring += str[i]
+
+    }
+
+
+    if(tempbrackedate.length == 0&&str[i] == ":"){
+        outeffect == "link"
+        outbases.push(ttout)
+        ttout = ""
+      }else if(tempbrackedate.length == 0&&str[i] == "-"){
+        outeffect == "base"
+        outbaselinks.push(ttout)
+        ttout = ""
+      } else {
+          ttout += str[i]
+      }
+
+  }
+  outbaselinks.push(ttout)
+
+  if(option == undefined || option == "normal"){
+    let outdict = {}
+    for(let i = 0; i < outbases.length; i++){
+      outdict[outbases[i]] = outbaselinks[i]
+    }
+    return(outdict)
+
+  } else if(option == "debug1"){
+
+
+    return(tempbasestring)
+
+
+  } else if(option == "debug2"){
+    return([outbases,outbaselinks])
+  }
 
 }
 
