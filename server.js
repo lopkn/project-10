@@ -5067,6 +5067,9 @@ class shooter2C{
 
 	static playerClick(id,x,y,w){
 		let p = this.players[id]
+		if(p.reloading > 0){
+			return;
+		}
 		let n = vectorNormalize([p.x,p.y,x+p.x-410,y+p.y-410])
 		p.rotation = [n[2]-p.x,n[3]-p.y]
 		switch(w){
@@ -5095,6 +5098,7 @@ class shooter2C{
 				this.pushBullet(p.x,p.y,(n[2]-p.x)*160,(n[3]-p.y)*160,id,"heal")
 				break;
 		}
+		p.reloading += 10;
 	}
 
 	static getNewNUUID(){
@@ -5158,7 +5162,7 @@ class shooter2C{
 
 		if(type == undefined || type == "ntri"){
 
-		this.players[id] = {"rotation":[0,1],"boidyVect":[[0,-40,"next"],[30,30,"next"],[-30,30,"next"]],"boidy":[],"x":410,"y":410,"vx":0,"vy":0,"hp":100,"id":id,"keys":{}}
+		this.players[id] = {"reloading":0,"rotation":[0,1],"boidyVect":[[0,-40,"next"],[30,30,"next"],[-30,30,"next"]],"boidy":[],"x":410,"y":410,"vx":0,"vy":0,"hp":100,"id":id,"keys":{}}
 
 		let a = this.placeWall(410,390,395,425,"player",{"id":id})
 		this.players[id].boidy.push(a)
@@ -5181,6 +5185,9 @@ class shooter2C{
 		let objt = Object.keys(this.players)
 		for(let i = 0; i < objt.length; i++){
 			let p = this.players[objt[i]]
+			if(p.reloading > 0){
+				p.reloading -= 1
+			}
 			let cont = false
 			p.boidy.forEach((BOI)=>{
 				if(this.walls[BOI] == undefined){
