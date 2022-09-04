@@ -5098,7 +5098,7 @@ class shooter2C{
 				this.pushBullet(p.x,p.y,(n[2]-p.x)*160,(n[3]-p.y)*160,id,"heal")
 				break;
 		}
-		p.reloading += 10;
+		p.reloading += 5;
 	}
 
 	static getNewNUUID(){
