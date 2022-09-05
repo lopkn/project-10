@@ -5,24 +5,7 @@ var client = new discord.Client();
 var prefix = "/lb"
 var MODE = "normal"
 
-// const fs = require('fs')
-// var memoryFile1 = require('./memoryBank')
-// var breaker = require('./sentenceBreaker')
-// var definer = require('./definer')
-// var memman = require('./memanager')
-// var collapser = require('./collapser')
-// var ver = require('./verifier')
-// var joiner = require('./joiner')
 
-
-
-// var memory1 = memoryFile1.mem
-// var memoryArrangement = memoryFile1.ar
-
-// function updateMem(){
-// 	memoryFile1 = require('./memoryBank')
-// 	memory1 = memoryFile1.mem
-// 	memoryArrangement = memoryFile1.ar
 
 
 

@@ -171,12 +171,15 @@ function tick(){
 	// mainCTX.fillRect(mouseX+player.gridSize/2-5,mouseY+player.gridSize/2-5,10,10)
 	// mainCTX.fillRect(mouseX+cameraX+player.gridSize/2-(Math.abs((mouseX+cameraX+player.gridSize/2)%player.gridSize))-5-cameraX,
 		// mouseY+cameraY+player.gridSize/2-(Math.abs((mouseY+cameraY+player.gridSize/2)%player.gridSize))-5-cameraY,10,10)
-	mainCTX.fillStyle = "rgba("+(200+Math.random()*55)+",0,0,"+(Math.random()*0.2+0.8)+")"
+		let ala = Math.random()
+		let alb = Math.random()
+	mainCTX.fillStyle = "rgba("+(200+ala*55)+",0,0,"+(alb*0.2+0.8)+")"
 	mainCTX.font = "bold 23px Courier New"
 	mainCTX.fillText("weapon: "+player.weaponCounter+" - "+player.weapon,20,800)
 	mainCTX.fillText("building: "+player.wallCounter+" - "+player.wall,280,800)
 	mainCTX.fillText("snapping: "+(player.snapping?"on":"off"),560,800)
-	
+	mainCTX.fillStyle = "rgba(0,"+(150+ala*55)+",0,"+(alb*0.2+0.8)+")"
+	mainCTX.fillText("position: "+Math.floor(cameraX/20)+" "+Math.floor(cameraY/20),20,770)
 }
 
 

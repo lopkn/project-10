@@ -979,7 +979,9 @@ function timerUpdate(e,flash){
 function joinSuccess(m){
     console.log(m)
     player = new Player(m)
+    try{
      let tc = JSON.parse(document.cookie)
+    } catch {return}
     if(tc != undefined && tc.cookieAuto == "on"){
       player.clientInfo = tc
       selfLog("autoloaded save")

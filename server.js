@@ -5045,7 +5045,7 @@ class shooter2C{
 				break;
 			case "scat":
 				this.bullets.push({"shooter":id,"type":"scat","x":x,"y":y,"vx":vx,"vy":vy,
-					"tailLength":6,"lingerance":6,"tail":[],"life":2000,"slowd":0.95})
+					"tailLength":6,"dmgmult":3,"lingerance":6,"tail":[],"life":2000,"slowd":0.95})
 				break;
 			case "lazr":
 				this.bullets.push({"shooter":id,"type":"lazr","x":x,"y":y,"vx":vx,"vy":vy,
@@ -5072,6 +5072,7 @@ class shooter2C{
 		}
 		let n = vectorNormalize([p.x,p.y,x+p.x-410,y+p.y-410])
 		p.rotation = [n[2]-p.x,n[3]-p.y]
+		let reload = 0
 		switch(w){
 			case "norm":
 				this.pushBullet(p.x,p.y,(n[2]-p.x)*160,(n[3]-p.y)*160,id,"norm")
@@ -5098,7 +5099,7 @@ class shooter2C{
 				this.pushBullet(p.x,p.y,(n[2]-p.x)*160,(n[3]-p.y)*160,id,"heal")
 				break;
 		}
-		p.reloading += 5;
+		p.reloading += reload;
 	}
 
 	static getNewNUUID(){
