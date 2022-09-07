@@ -5,5 +5,25 @@
     },
     "baebe": {
         "t": []
+    },
+    "/lb": {
+        "r": "it’s a backslash you mumbling idiot",
+        "t": []
+    },
+    "hi": {
+        "r": "hi",
+        "t": []
+    },
+    "how r u": {
+        "r": "good",
+        "t": []
+    },
+    "woah": {
+        "r": "what",
+        "t": []
+    },
+    "CA365 is great ": {
+        "r": " yes",
+        "t": []
     }
 }

@@ -35,7 +35,7 @@ class player{
 	static weaponCounter = 1
 	static weaponDict = {"1":"norm","2":"scat","3":"lazr","4":"cnon","5":"heal"}
 	static wallCounter = 1
-	static wallDict = {"1":"norm","2":"bhol","3":"ghol"}
+	static wallDict = {"1":"norm","2":"bhol","3":"ghol","4":"body"}
 }
 class map{
 	
@@ -285,9 +285,9 @@ document.addEventListener("keyup",(e)=>{
   		if(my < 0){
   			my -= player.gridSize
   		}
-  		socket.emit("placeWall",[placing[1]-(placing[1]%player.gridSize),placing[2]-(placing[2]%player.gridSize),mx-(mx%player.gridSize),my-(my%player.gridSize),player.wall])
+  		socket.emit("placeWall",[placing[1]-(placing[1]%player.gridSize),placing[2]-(placing[2]%player.gridSize),mx-(mx%player.gridSize),my-(my%player.gridSize),player.wall,ID])
   	} else {
-  	socket.emit("placeWall",[placing[1],placing[2],mouseX+cameraX,mouseY+cameraY,player.wall])}
+  	socket.emit("placeWall",[placing[1],placing[2],mouseX+cameraX,mouseY+cameraY,player.wall,ID])}
   	placing = [false]
   }
 

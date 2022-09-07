@@ -1538,7 +1538,7 @@ function joinGame(game,socket){
 		io.to(socket.id).emit("acknowledge G10.2",socket.id)
 		shooter2C.initiatePlayer(socket.id)
 		socket.on("click",(e)=>{shooter2C.playerClick(e[0],e[1],e[2],e[3]);})
-		socket.on("placeWall",(e)=>{shooter2C.placeWall(e[0],e[1],e[2],e[3],e[4])})
+		socket.on("placeWall",(e)=>{shooter2C.placeWall(e[0],e[1],e[2],e[3],e[4],e[5]==undefined?undefined:{id:e[5]})})
 		socket.on("keys",(e)=>{shooter2C.playerKeyUpdate(e)})
 		socket.on('disconnect',()=>{shooter2C.disconnect(socket)})
 	}
@@ -1915,6 +1915,24 @@ function doSomething(startTime){
 
 
 
+var shooter2doSomething = (d)=>{
+	shooter2C.repeat()
+}
+class MAINGAMETOGGLES{
+	static games = {
+		"sc2":true
+	}
+	static sc2(){
+		
+		if(!this.games.sc2){
+			shooter2doSomething = (d)=>{
+			shooter2C.repeat()
+		}} else {
+			shooter2doSomething = ()=>{}
+		}
+		this.games.sc2 = !this.games.sc2
+	}
+}
 setInterval(()=>{
 	let ttime = Date.now()+serverTickWait
     doSomething(ttime)
@@ -5131,6 +5149,14 @@ class shooter2C{
 					"frad":distance(x1,y1,x2,y2)/2
 				}
 				break;
+			case "body":
+			this.walls[a] = {"frad":distance(x1,y1,x2,y2)/2,"plid":options.id,"type":"player","x1":0,"y1":0,"x2":0,"y2":0,"hp":1000,
+					"defense":0.2,"midpt":midPointOfLine(x1,y1,x2,y2),
+					"frad":distance(x1,y1,x2,y2)/2
+				}
+				break;
+				this.players[options.id].boidyVect.push([x1,y1,x2,y2])
+				this.players[options.id].boidy.push[a]
 			case "bhol":
 				this.walls[a] = {
 					"type":"bhol","x":x1,"y":y1,"radius":160,"velmult":0.95,
@@ -5163,7 +5189,7 @@ class shooter2C{
 
 		if(type == undefined || type == "ntri"){
 
-		this.players[id] = {"reloading":0,"rotation":[0,1],"boidyVect":[[0,-40,"next"],[30,30,"next"],[-30,30,"next"]],"boidy":[],"x":410,"y":410,"vx":0,"vy":0,"hp":100,"id":id,"keys":{}}
+		this.players[id] = {"reloading":0,"rotation":[0,1],"boidyVect":[[0,-40,30,30],[30,30,-30,30],[-30,30,0,-40]],"boidy":[],"x":410,"y":410,"vx":0,"vy":0,"hp":100,"id":id,"keys":{}}
 
 		let a = this.placeWall(410,390,395,425,"player",{"id":id})
 		this.players[id].boidy.push(a)
@@ -5238,8 +5264,8 @@ class shooter2C{
 				} else {
 				this.walls[p.boidy[k]].x1 = ((p.boidyVect[k][0] * p.rotation[1] + p.boidyVect[k][1] * p.rotation[0]) + p.x)
 				this.walls[p.boidy[k]].y1 = ((p.boidyVect[k][1] * p.rotation[1] - p.boidyVect[k][0] * p.rotation[0]) + p.y)
-				this.walls[p.boidy[k]].x2 = ((p.boidyVect[k][2] * p.rotation[1] + p.boidyVect[k][2] * p.rotation[0]) + p.x)
-				this.walls[p.boidy[k]].y2 = ((p.boidyVect[k][3] * p.rotation[1] - p.boidyVect[k][3] * p.rotation[0]) + p.y)
+				this.walls[p.boidy[k]].x2 = ((p.boidyVect[k][2] * p.rotation[1] + p.boidyVect[k][3] * p.rotation[0]) + p.x)
+				this.walls[p.boidy[k]].y2 = ((p.boidyVect[k][3] * p.rotation[1] - p.boidyVect[k][2] * p.rotation[0]) + p.y)
 				}
 			}
 
@@ -5578,9 +5604,6 @@ class shooter2C{
 }
 
 
-function shooter2doSomething(d){
-	shooter2C.repeat()
-}
 
 function pointInLine(px,py,x1,y1,x2,y2){
   let extremelySmall = 0.000000001

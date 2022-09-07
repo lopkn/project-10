@@ -30,19 +30,28 @@ class handler2s{
 }
 process.on('uncaughtException',(err)=>{
 	fs.writeFileSync('./memh2.json',JSON.stringify(handler2s.memr,null,4), function writeJSON(err){if(err)return console.log(err)})
-	fs.writeFileSync('./hellMem.json',JSON.stringify(handler2s.hellMem,null,4), function writeJSON(err){if(err)return console.log(err)})
+	fs.writeFileSync('./hellMem.json',JSON.stringify(hl.hellMem,null,4), function writeJSON(err){if(err)return console.log(err)})
 	console.log("\x1b[31m%s\x1b[1m" ,"ERROR")
 	throw err
 })
 
 function handler2(msg){
+
 	if(msg.author.id == client.user.id){return}
+
+		if(hasEmoji(msg.content)){
+			msg.delete()
+			msg.channel.send("No. Emojis.")
+			return;
+		}
+
 	if(msg.content[0] == "\\" && msg.content[1] == "l" && msg.content[2] == "b"){
 		let cont = msg.content.substring(3)
 		let content = cont.substring(1)
 		if(cont == "w"){
 			fs.writeFileSync('./memh2.json',JSON.stringify(handler2s.memr,null,4), function writeJSON(err){if(err)return console.log(err)})
-			msg.channel.send("saved!")
+			fs.writeFileSync('./hellMem.json',JSON.stringify(hl.hellMem,null,4), function writeJSON(err){if(err)return console.log(err)})
+			cns(msg,"saved!")
 			return;
 		}
 
@@ -59,19 +68,19 @@ function handler2(msg){
 			msg.author.send(handler2s.verif)
 		}
 
-		msg.channel.send(split[0] + " => " + split[2])
+		cns(msg,split[0] + " => " + split[2])
 		} else{
-			msg.channel.send("fk off")
+			cns(msg,"fk off")
 		}
 	} else if(msg.content[0] == "\\" && msg.content[1] == "l"){
 		hellHand(msg)
 	} else {
 		if(handler2s.memr[msg.content] != undefined){
-			msg.channel.send(handler2s.memr[msg.content].r)
+			cns(msg,handler2s.memr[msg.content].r)
 		} else {
 			let ocont = msg.content.toLowerCase()
 			if(handler2s.memr[ocont] != undefined){
-				msg.channel.send(handler2s.memr[ocont].r)
+				cns(msg,handler2s.memr[ocont].r)
 			}
 		}
 	}
@@ -84,7 +93,7 @@ function msgOut(msg){
 		return
 	}
 	if(handout.tags.length < 1){
-	msg.channel.send(handout.r)}
+	cns(msg,handout.r)}
 
 }
 class hl{
@@ -96,14 +105,16 @@ class hl{
 		return(this.idCounter-1)
 	}
 	static newVerif(){
-		this.verif = Math.floor(Math.random()*100)
-		console.log("h2verif: "+this.verif)
+		this.verif = Math.floor(Math.random()*100000)
+		console.log("hl2verif: "+this.verif)
 	}
 }
+hl.newVerif()
 
 function hellHand(msg){
+
 	let content = msg.content.substring(3)
-	msg.channel.send(content)
+	cns(msg,content)
 	let split = content.split("=")
 	//[Operation,id,type,question,answer]
 	let operation = split[0]
@@ -113,6 +124,13 @@ function hellHand(msg){
 	let answer = strEnterReplacer(split[4])
 
 	if(operation == "w"){
+		if(split[5] != hl.verif && msg.author.id != "468988026853523457"){
+			cns(msg,"No.")
+			return
+		}
+		if(split[5] == hl.verif){
+			hl.newVerif()
+		}
 		if(rid == undefined || rid == ""){
 			rid = hl.idCountUp()
 		}
@@ -126,15 +144,18 @@ function hellHand(msg){
 		}
 			hl.hellMem.idref[qtype][rid] = true
 
+	} else if(operation == "log"){
+		cns(msg.content)
+		console.log(msg.content,msg.content==":ninja:")
 	}else if(operation == "h"){
-		msg.channel.send("Operation=id=type=question=answer")
+		cns(msg,"Operation=id=type=question=answer")
 	} else if(operation == "q"){
 		if(rid != undefined && rid != ""){
 			if(hl.hellMem.r[rid] == undefined){
-				msg.channel.send("unexistant ID")
+				cns(msg,"unexistant ID")
 				return;
 			}
-			msg.channel.send(hl.hellMem.r[rid].type+": "+hl.hellMem.r[rid].q + "\n ||"+hl.hellMem.r[rid].a+"||")
+			cns(msg,rid+"-"+hl.hellMem.r[rid].type+": "+hl.hellMem.r[rid].q + "\n ||"+hl.hellMem.r[rid].a+"||")
 			return;
 		}
 		if(qtype == undefined || qtype == ""){
@@ -142,18 +163,51 @@ function hellHand(msg){
 		}
 		if(qtype == "random" || qtype == "r"){
 			let aid = Math.floor(Math.random()*hl.idCounter)
-			msg.channel.send(hl.hellMem.r[aid].type+": "+hl.hellMem.r[aid].q + "\n ||"+hl.hellMem.r[aid].a+"||")
+			cns(msg,aid+"-"+hl.hellMem.r[aid].type+": "+hl.hellMem.r[aid].q + "\n ||"+hl.hellMem.r[aid].a+"||")
 			return;
 		} else {
 			let aaid = Math.floor(Math.random()*(Object.keys(hl.hellMem.idref[qtype]).length))
 			let aid = Object.keys(hl.hellMem.idref[qtype])[aaid]
-			msg.channel.send(hl.hellMem.r[aid].type+": "+hl.hellMem.r[aid].q + "\n ||"+hl.hellMem.r[aid].a+"||")
+			cns(msg,aid+"-"+hl.hellMem.r[aid].type+": "+hl.hellMem.r[aid].q + "\n ||"+hl.hellMem.r[aid].a+"||")
 			return;
+		}
+	} else if(operation == "s"){
+		hl.hellMem.suggestions.push([msg.author.id,msg.author.username,rid])
+		cns(msg,msg.author.username + " S=> " + rid)
+	} else if(operation == "rs"){
+		if(rid == undefined || rid == ""){
+			if(hl.hellMem.suggestions[hl.hellMem.suggestions.length-1] == undefined){return}
+			cns(msg,hl.hellMem.suggestions[hl.hellMem.suggestions.length-1])
+		} else if(rid == "r"){
+			if(split[2] != hl.verif && msg.author.id != "468988026853523457"){
+				return;
+			}
+			hl.hellMem.suggestions.splice(hl.hellMem.suggestions.length-1,1)
+		} else {
+			if(!isNaN(parseInt(rid))){
+				cns(msg,hl.hellMem.suggestions[hl.hellMem.suggestions.length-1-parseInt(rid)])
+			}
 		}
 	}
 
 }
 
+
+function hasEmoji(str) {
+    var ranges = [
+        '(?:[\u2700-\u27bf]|(?:\ud83c[\udde6-\uddff]){2}|[\ud800-\udbff][\udc00-\udfff]|[\u0023-\u0039]\ufe0f?\u20e3|\u3299|\u3297|\u303d|\u3030|\u24c2|\ud83c[\udd70-\udd71]|\ud83c[\udd7e-\udd7f]|\ud83c\udd8e|\ud83c[\udd91-\udd9a]|\ud83c[\udde6-\uddff]|[\ud83c[\ude01-\ude02]|\ud83c\ude1a|\ud83c\ude2f|[\ud83c[\ude32-\ude3a]|[\ud83c[\ude50-\ude51]|\u203c|\u2049|[\u25aa-\u25ab]|\u25b6|\u25c0|[\u25fb-\u25fe]|\u00a9|\u00ae|\u2122|\u2139|\ud83c\udc04|[\u2600-\u26FF]|\u2b05|\u2b06|\u2b07|\u2b1b|\u2b1c|\u2b50|\u2b55|\u231a|\u231b|\u2328|\u23cf|[\u23e9-\u23f3]|[\u23f8-\u23fa]|\ud83c\udccf|\u2934|\u2935|[\u2190-\u21ff])' // U+1F680 to U+1F6FF
+    ];
+    if (str.match(ranges.join('|'))) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+function cns(msg,str){
+	if(str != undefined){
+	msg.channel.send(str)}
+}
 
 function strEnterReplacer(str){
 
