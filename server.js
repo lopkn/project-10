@@ -1538,7 +1538,7 @@ function joinGame(game,socket){
 		io.to(socket.id).emit("acknowledge G10.2",socket.id)
 		shooter2C.initiatePlayer(socket.id)
 		socket.on("click",(e)=>{shooter2C.playerClick(e[0],e[1],e[2],e[3]);})
-		socket.on("placeWall",(e)=>{shooter2C.placeWall(e[0],e[1],e[2],e[3],e[4],e[5]==undefined?undefined:{id:e[5]})})
+		socket.on("placeWall",(e)=>{shooter2C.placeWall(e[0],e[1],e[2],e[3],e[4],e[4]=="body"?{id:e[5]}:undefined);console.log(e)})
 		socket.on("keys",(e)=>{shooter2C.playerKeyUpdate(e)})
 		socket.on('disconnect',()=>{shooter2C.disconnect(socket)})
 	}
@@ -5150,13 +5150,14 @@ class shooter2C{
 				}
 				break;
 			case "body":
-			this.walls[a] = {"frad":distance(x1,y1,x2,y2)/2,"plid":options.id,"type":"player","x1":0,"y1":0,"x2":0,"y2":0,"hp":1000,
+			this.walls[a] = {"frad":distance(x1,y1,x2,y2)/2,"plid":options.id,"type":"body","x1":0,"y1":0,"x2":0,"y2":0,"hp":1000,
 					"defense":0.2,"midpt":midPointOfLine(x1,y1,x2,y2),
 					"frad":distance(x1,y1,x2,y2)/2
 				}
+				let pp = this.players[options.id]
+				this.players[options.id].boidyVect.push([x1-pp.x,y1-pp.y,x2-pp.x,y2-pp.y])
+				this.players[options.id].boidy.push(a)
 				break;
-				this.players[options.id].boidyVect.push([x1,y1,x2,y2])
-				this.players[options.id].boidy.push[a]
 			case "bhol":
 				this.walls[a] = {
 					"type":"bhol","x":x1,"y":y1,"radius":160,"velmult":0.95,
@@ -5486,7 +5487,7 @@ class shooter2C{
 
 	}
 	static damageWall(wid,b){
-		if(this.walls[wid].type == "norm" || this.walls[wid].type == "player"){
+		if(this.walls[wid].type == "norm" || this.walls[wid].type == "player" || this.walls[wid].type == "body"){
 		let vy = b.vy
 		let vx = b.vx
 		this.walls[wid].hp -= 0.005*(vx*vx+vy*vy)*(b.dmgmult?b.dmgmult:1)/this.walls[wid].defense

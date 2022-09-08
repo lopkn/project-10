@@ -149,7 +149,7 @@ function tick(){
 	let wallsArr = Object.keys(map.walls)
 	for(let j = 0 ; j < wallsArr.length; j++){
 		let i = map.walls[wallsArr[j]]
-		if(i.type == "norm" || i.type == "player"){
+		if(i.type == "norm" || i.type == "player" || i.type == "body"){
 		mainCTX.beginPath()
 		mainCTX.lineWidth = 3
 		mainCTX.strokeStyle = "rgba(255,255,255,"+(i.hp/2000+0.5)+")"
