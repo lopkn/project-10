@@ -2,10 +2,23 @@
     "idref": {
         "bio": {
             "0": true,
-            "1": true
+            "1": true,
+            "5": true,
+            "6": true,
+            "7": true
         },
         "math": {
             "2": true
+        },
+        "phy": {
+            "3": true
+        },
+        "physics": {
+            "4": true
+        },
+        "chem": {
+            "8": true,
+            "9": true
         }
     },
     "r": {
@@ -23,8 +36,43 @@
             "type": "math",
             "q": "What are the assumptions behind modeling something as a point?",
             "a": "wt"
+        },
+        "3": {
+            "type": "phy",
+            "q": "why do metals emit photoelectrons when hit with UV light but not Visible light?",
+            "a": "Because the energy of each individual UV light photon is enough to overcome the work function of the metal, but the energy of each individual visible light photon is not enough to overcome the work function of the metal, so it does not release any electrons."
+        },
+        "4": {
+            "type": "physics",
+            "q": "what is the work function of a metal?",
+            "a": "The minimum energy required to release a photoelectron from the metal surface"
+        },
+        "5": {
+            "type": "bio",
+            "q": "why is magnesium important for a plant?",
+            "a": "it is used for chlorophyll for photosynthesis of the plant"
+        },
+        "6": {
+            "type": "bio",
+            "q": "why is nitrogen important for a plant?",
+            "a": "nitrogen is used for making proteins, so the plant can make DNA or Hormones"
+        },
+        "7": {
+            "type": "bio",
+            "q": "what is the monomer unit of cellulose?",
+            "a": "beta 1,4 glucose"
+        },
+        "8": {
+            "type": "chem",
+            "q": "Ionic radius down a group Increases or decreases?",
+            "a": "increases"
+        },
+        "9": {
+            "type": "chem",
+            "q": "reactivity of elements down a group increases or decreases?",
+            "a": "increases"
         }
     },
-    "counter": 2,
+    "counter": 10,
     "suggestions": []
 }

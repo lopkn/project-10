@@ -34,6 +34,14 @@ process.on('uncaughtException',(err)=>{
 	console.log("\x1b[31m%s\x1b[1m" ,"ERROR")
 	throw err
 })
+class emojisdeleter{
+	static counter = 0
+	static newEmojiDelete(){
+		this.counter++
+		setTimeout(()=>{this.counter--},30000)
+	}
+}
+
 
 function handler2(msg){
 
@@ -41,7 +49,10 @@ function handler2(msg){
 
 		if(hasEmoji(msg.content)){
 			msg.delete()
-			msg.channel.send("No. Emojis.")
+			if(emojisdeleter.counter <= 3){
+				emojisdeleter.newEmojiDelete()
+				try{cns(msg,"No. Emojis.")}catch{}
+			}
 			return;
 		}
 
@@ -99,10 +110,9 @@ function msgOut(msg){
 class hl{
 	static verif = 0
 	static hellMem = require('./hellMem')
-	static idCounter = this.hellMem.counter
 	static idCountUp(){
-		this.idCounter++
-		return(this.idCounter-1)
+		this.hellMem.counter++
+		return(this.hellMem.counter-1)
 	}
 	static newVerif(){
 		this.verif = Math.floor(Math.random()*100000)
@@ -162,7 +172,7 @@ function hellHand(msg){
 			qtype = "r"
 		}
 		if(qtype == "random" || qtype == "r"){
-			let aid = Math.floor(Math.random()*hl.idCounter)
+			let aid = Math.floor(Math.random()*hl.hellMem.counter)
 			cns(msg,aid+"-"+hl.hellMem.r[aid].type+": "+hl.hellMem.r[aid].q + "\n ||"+hl.hellMem.r[aid].a+"||")
 			return;
 		} else {
@@ -206,7 +216,8 @@ function hasEmoji(str) {
 
 function cns(msg,str){
 	if(str != undefined){
-	msg.channel.send(str)}
+		msg.channel.send(str).catch(()=>{})
+	}	
 }
 
 function strEnterReplacer(str){
