@@ -18,7 +18,9 @@
         },
         "chem": {
             "8": true,
-            "9": true
+            "9": true,
+            "10": true,
+            "11": true
         }
     },
     "r": {
@@ -71,8 +73,18 @@
             "type": "chem",
             "q": "reactivity of elements down a group increases or decreases?",
             "a": "increases"
+        },
+        "10": {
+            "type": "chem",
+            "q": "at 1 atm pressure, room temperature, how much room does 1mol of carbon dioxide occupy?",
+            "a": "24dm^3"
+        },
+        "11": {
+            "type": "chem",
+            "q": "2.43 grams of Mg is burnt with excess oxygen. What is the mass of the Magnesium oxide produced\natomic mass of Oxygen = 16 and atomic mass of Magnesium = 24",
+            "a": "find the mols of Mg, 2.43/24 = 0.10125mol, so the final mass is 0.10123 * (24+16) = 4.05 grams"
         }
     },
-    "counter": 10,
+    "counter": 12,
     "suggestions": []
 }
