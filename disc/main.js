@@ -38,7 +38,7 @@ class emojisdeleter{
 	static counter = 0
 	static newEmojiDelete(){
 		this.counter++
-		setTimeout(()=>{this.counter--},30000)
+		setTimeout(()=>{this.counter--},10000)
 	}
 }
 
@@ -49,7 +49,7 @@ function handler2(msg){
 
 		if(hasEmoji(msg.content)){
 			msg.delete()
-			if(emojisdeleter.counter <= 3){
+			if(emojisdeleter.counter <= 2){
 				emojisdeleter.newEmojiDelete()
 				try{cns(msg,"No. Emojis.")}catch{}
 			}
