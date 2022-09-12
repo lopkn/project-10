@@ -59,6 +59,11 @@ function lobby(){
 }
 lobby()
 
+function bloatRect(x,y,w,h,bloat,col){
+  mainCTX.fillStyle = col
+  mainCTX.fillRect(x-bloat,y-bloat,w+bloat+bloat,w+bloat+bloat)
+}
+
 
 var MRef = {"MTS":800}
 
@@ -75,7 +80,7 @@ class game{
     this.state = "started"
 
 
-    let deleteButtonsArr = ["b1"]
+    let deleteButtonsArr = ["b1","t1"]
     deleteButtonsArr.forEach((e)=>{
       document.getElementById(e).remove()
     })
@@ -161,6 +166,9 @@ function repeat(){
       mainCTX.fillStyle = tileInfo.color
       mainCTX.fillRect(MRef.MTS*coord[0],MRef.MTS*coord[1],MRef.MTS,MRef.MTS)
     })
+
+    bloatRect(MRef.MTS,MRef.MTS,MRef.MTS,MRef.MTS,2,"white")
+
 
   }
 }
