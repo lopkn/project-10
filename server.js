@@ -1541,6 +1541,11 @@ function joinGame(game,socket){
 		socket.on("placeWall",(e)=>{shooter2C.placeWall(e[0],e[1],e[2],e[3],e[4],e[4]=="body"?{id:e[5]}:undefined);console.log(e)})
 		socket.on("keys",(e)=>{shooter2C.playerKeyUpdate(e)})
 		socket.on('disconnect',()=>{shooter2C.disconnect(socket)})
+	} else if(game == "G10.3"){
+		socket.join("G10.3")
+		io.to(socket.id).emit("acknowledge G10.3",socket.id)
+		socket.on("jointeam",(e)=>{re8.initiatePlayer(e,socket)})
+		socket.on("startRoom",(e)=>{re8.startRoom(e)})
 	}
 }
 
@@ -1824,6 +1829,10 @@ class TAF2{
 	static discardQ(e){
 
 	}
+}
+
+class TAF4{
+	static undone = {}
 }
 
 
@@ -5642,3 +5651,59 @@ class LuuidGenerator{
 }
 
 
+class re8{
+	static players = {}
+	static rooms = {}
+	static referencer = {"color":{"r":"#A00000","b":"#0000A0","y":"#A0A000","o":"#A04000","p":"#0060C0"}}
+
+
+	static initiatePlayer(e,socket){
+		if(this.players[e[1]]== undefined ){
+			let split = e[0].split("-")
+			this.players[e[1]] = {
+				"id":e[1],
+				"color":DFNorm(this.referencer.color,split[2]),
+				"team":split[1],
+				"room":split[0].split(":")[0]
+			}
+			let n = split[0].split(":")[0]
+			if(this.rooms[n]==undefined){
+				this.rooms[n] = {"name":n,
+				"type":split[0].split(":")[1],"started":false,"players":{},"map":{}}
+			}
+			
+			if(this.rooms[n].started===false){
+				socket.join(n)
+				this.rooms[n].players[e[1]] = this.players[e[1]]
+				io.to(n).emit("joinedRoom",this.rooms[n])
+			}
+		}
+	}
+
+
+	static startRoom(e){
+		if(this.rooms[this.players[e.id].room].started === false){
+			let tr = this.rooms[this.players[e.id].room]
+			tr.started = true
+			let map = {"width":15,"height":15}
+			for(let i = 0; i < map.width; i++){
+				for(let j = 0; j < map.height; j++){
+					map[i+","+j] = this.generateTile("grass","rgb(0,"+Math.random()*255+",0)")
+				}
+			}
+			io.to(this.players[e.id].room).emit("startGame",{"map":map})
+		}
+	}
+
+	static generateTile(n,c){
+		return({"ground":n,"color":c})
+	}
+
+}
+
+function DFNorm(dict,val){
+	if(dict[val] == undefined){
+		return(dict.default)
+	}
+	return(dict[val])
+}
