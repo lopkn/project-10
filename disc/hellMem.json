@@ -5,7 +5,9 @@
             "1": true,
             "5": true,
             "6": true,
-            "7": true
+            "7": true,
+            "12": true,
+            "13": true
         },
         "math": {
             "2": true
@@ -83,8 +85,18 @@
             "type": "chem",
             "q": "2.43 grams of Mg is burnt with excess oxygen. What is the mass of the Magnesium oxide produced\natomic mass of Oxygen = 16 and atomic mass of Magnesium = 24",
             "a": "find the mols of Mg, 2.43/24 = 0.10125mol, so the final mass is 0.10123 * (24+16) = 4.05 grams"
+        },
+        "12": {
+            "type": "bio",
+            "q": "what is the meaning of the zone of inhibition?",
+            "a": "the zone of inhibition is where in a microbial culture the microbes cannot grow so it appears clear."
+        },
+        "13": {
+            "type": "bio",
+            "q": "what are aseptic techniques and why are they important when growing bacteria in the lab?",
+            "a": "Aseptic techniques are used to keep appliances and tools sterile so they are not contaminated with bacteria. It is used to control the growth of bacteria and eliminate the chance of unwanted bacteria growth.\nImportant for preventing spread of bacteria/contamination"
         }
     },
-    "counter": 12,
+    "counter": 14,
     "suggestions": []
 }
