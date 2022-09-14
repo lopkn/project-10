@@ -7,7 +7,14 @@
             "6": true,
             "7": true,
             "12": true,
-            "13": true
+            "13": true,
+            "14": true,
+            "15": true,
+            "16": true,
+            "17": true,
+            "18": true,
+            "19": true,
+            "20": true
         },
         "math": {
             "2": true
@@ -22,7 +29,13 @@
             "8": true,
             "9": true,
             "10": true,
-            "11": true
+            "11": true,
+            "21": true,
+            "22": true,
+            "23": true,
+            "24": true,
+            "25": true,
+            "26": true
         }
     },
     "r": {
@@ -95,8 +108,73 @@
             "type": "bio",
             "q": "what are aseptic techniques and why are they important when growing bacteria in the lab?",
             "a": "Aseptic techniques are used to keep appliances and tools sterile so they are not contaminated with bacteria. It is used to control the growth of bacteria and eliminate the chance of unwanted bacteria growth.\nImportant for preventing spread of bacteria/contamination"
+        },
+        "14": {
+            "type": "bio",
+            "q": "what is the purpose of phase 1 clinical trials of drugs",
+            "a": "to see if the drugs have unwanted side effects. (usually the drugs are given in small doses)"
+        },
+        "15": {
+            "type": "bio",
+            "q": "are the dosages of drugs used for animal tests higher or lower than for humans in clinical trials?",
+            "a": "the animals recieve much higher dosages of drugs to magnify side effects for observation"
+        },
+        "16": {
+            "type": "bio",
+            "q": "how are the following tests arranged?\n1: preclinical tests\n2: clinical tests\n3: early phase research",
+            "a": "312"
+        },
+        "17": {
+            "type": "bio",
+            "q": "What is the purpose of early phase research of drugs and how is it done?",
+            "a": "early phase research is done usually by computer models or cell cultures and gathering past data on chemicals of the drugs to try and predict the effects of the drugs"
+        },
+        "18": {
+            "type": "bio",
+            "q": "what are the limitations of using animals for drug tests?",
+            "a": "The test results may not represent the true effects that would show up for humans."
+        },
+        "19": {
+            "type": "bio",
+            "q": "How are preclinical tests for drugs done and what is the purpose?",
+            "a": "preclinical tests for drugs are usually done by giving drugs to lab animals and examining the effects of the drugs on whole to see the potential side effects without harming any humans"
+        },
+        "20": {
+            "type": "bio",
+            "q": "what are the meanings of (a) Endocytosis (b) Phagocytosis (c) Pinocytosis",
+            "a": "(a) Intake of materials through a cells membrane\n(b) Intake of large particles through a cells membrane\n(c) Intake of liquids through a cells membrane"
+        },
+        "21": {
+            "type": "chem",
+            "q": "Metal oxide + water -> ?\nCuO + H2O -> ?",
+            "a": "metal hydroxide\nCa(OH)2"
+        },
+        "22": {
+            "type": "chem",
+            "q": "Metal oxide + acid -> ?",
+            "a": "salt + water"
+        },
+        "23": {
+            "type": "chem",
+            "q": "Metal hydroxide + acid -> ?",
+            "a": "salt + water"
+        },
+        "24": {
+            "type": "chem",
+            "q": "are group II hydroxides more or less soluable down a group?",
+            "a": "more"
+        },
+        "25": {
+            "type": "chem",
+            "q": "what do group II hydroxides appear as when not soluable?",
+            "a": "white precipitate"
+        },
+        "26": {
+            "type": "chem",
+            "q": "Magnesium hydroxide is used in medicine for?",
+            "a": "neutralizing stomach acid (HCL) and treat constipation"
         }
     },
-    "counter": 14,
+    "counter": 27,
     "suggestions": []
 }

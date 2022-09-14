@@ -153,6 +153,7 @@ function hellHand(msg){
 			hl.hellMem.idref[qtype] = {}
 		}
 			hl.hellMem.idref[qtype][rid] = true
+			msg.channel.send("wrote at ["+rid+"]")
 
 	} else if(operation == "log"){
 		cns(msg.content)
