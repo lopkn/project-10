@@ -64,6 +64,18 @@ function bloatRect(x,y,w,h,bloat,col){
   mainCTX.fillRect(x-bloat,y-bloat,w+bloat+bloat,w+bloat+bloat)
 }
 
+function boarderRect(x,y,w,h,bloat,col){
+  mainCTX.lineWidth = bloat
+  mainCTX.strokeStyle = col
+  mainCTX.beginPath()
+  mainCTX.moveTo(x,y)
+  mainCTX.lineTo(x+w,y)
+  mainCTX.lineTo(x+w,y+h)
+  mainCTX.lineTo(x,y+h)
+  mainCTX.lineTo(x,y)
+  mainCTX.stroke();
+}
+
 
 var MRef = {"MTS":800}
 
@@ -167,7 +179,7 @@ function repeat(){
       mainCTX.fillRect(MRef.MTS*coord[0],MRef.MTS*coord[1],MRef.MTS,MRef.MTS)
     })
 
-    bloatRect(MRef.MTS,MRef.MTS,MRef.MTS,MRef.MTS,2,"white")
+    boarderRect(MRef.MTS,MRef.MTS,MRef.MTS,MRef.MTS,2,"white")
 
 
   }

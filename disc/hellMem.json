@@ -35,7 +35,16 @@
             "23": true,
             "24": true,
             "25": true,
-            "26": true
+            "26": true,
+            "27": true,
+            "28": true,
+            "29": true,
+            "30": true,
+            "31": true,
+            "32": true,
+            "33": true,
+            "34": true,
+            "35": true
         }
     },
     "r": {
@@ -173,8 +182,53 @@
             "type": "chem",
             "q": "Magnesium hydroxide is used in medicine for?",
             "a": "neutralizing stomach acid (HCL) and treat constipation"
+        },
+        "27": {
+            "type": "chem",
+            "q": "what is Calcium hydroxide is also known as?\n what compound does calcium hydroxide test for and what would be observed?",
+            "a": "It is also known as limewater.\nLimewater tests for carbon dioxide. The solution turns cloudy because white calcium carbonate is produced."
+        },
+        "28": {
+            "type": "chem",
+            "q": "Although Barium should be extremely reactive, when added to sulphuric acid it reacts slowly. Explain",
+            "a": "The insoluable Barium Sulphate (BaSO4)(solid) is formed at the outter layer of the barium and prevents further reaction of the Barium metal."
+        },
+        "29": {
+            "type": "chem",
+            "q": "Does the thermal stability of Group I & Group II carbonates increase or decrease down the group?",
+            "a": "increase"
+        },
+        "30": {
+            "type": "chem",
+            "q": "Thermal decomposition is defined as?",
+            "a": "the use of heat to break down a reactant"
+        },
+        "31": {
+            "type": "chem",
+            "q": "Polarizing power is defined as?\ndoes it decrease or increase down a group and why?",
+            "a": "The ability to distort the neighboring atoms electrons(or easier, distort the bonding)\nIt decreases down a group because when the size of an atom increases it weakens the polarizing power."
+        },
+        "32": {
+            "type": "chem",
+            "q": "why do Group I carbonates not decompose other than Lithium Carbonate?",
+            "a": "Lithium carbonate has a small enough atomic radius, so it has enough polarizing power to distort the bond.\nLi2CO3 + [heat] -> Li2O + CO2"
+        },
+        "33": {
+            "type": "chem",
+            "q": "what is the general equation for thermal decomposition of Group II nitrates?",
+            "a": "Metal Nitrate + [heat] -> Metal Oxide + Oxygen + Nitrogen Dioxide (NO2)"
+        },
+        "34": {
+            "type": "chem",
+            "q": "explain the general trend in thermal stability for group I and group II Nitrates and carbonates",
+            "a": "Smaller size of metal ions means greater charge density so there is higher polarising power thus distorting and weakening the bond"
+        },
+        "35": {
+            "type": "chem",
+            "q": "what is the general equation of Group I nitrates?",
+            "a": "Metal Nitrate + [heat] -> Metal Nitrate(III) salt + Oxygen | (metal nitrate3 salt is for Na is NaNO2)"
         }
     },
-    "counter": 27,
+    "counter": 36,
     "suggestions": []
 }
