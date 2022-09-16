@@ -85,6 +85,8 @@ function handler2(msg){
 		}
 	} else if(msg.content[0] == "\\" && msg.content[1] == "l"){
 		hellHand(msg)
+	} else if(msg.content[0] == "\\" && msg.content[1] == "p"){
+		pokerHand(msg)
 	} else {
 		if(handler2s.memr[msg.content] != undefined){
 			cns(msg,handler2s.memr[msg.content].r)
@@ -240,6 +242,196 @@ function strReplacer(str,a,b){
 function strEnterReplacer(str){
 	return(strReplacer(strReplacer(str,"{i}","="),"{e}","\n"))
 }
+
+
+class PDEK{
+
+	static deck = [{"id":0,"name":"ace of diamonds","house":[0,"diamonds"],"number":[0,"ace"],"folded":false},{"id":1,"name":"ace of clubs","house":[1,"clubs"],"number":[0,"ace"],"folded":false},{"id":2,"name":"ace of hearts","house":[2,"hearts"],"number":[0,"ace"],"folded":false},{"id":3,"name":"ace of spades","house":[3,"spades"],"number":[0,"ace"],"folded":false},{"id":4,"name":"2 of diamonds","house":[0,"diamonds"],"number":[1,2],"folded":false},{"id":5,"name":"2 of clubs","house":[1,"clubs"],"number":[1,2],"folded":false},{"id":6,"name":"2 of hearts","house":[2,"hearts"],"number":[1,2],"folded":false},{"id":7,"name":"2 of spades","house":[3,"spades"],"number":[1,2],"folded":false},{"id":8,"name":"3 of diamonds","house":[0,"diamonds"],"number":[2,3],"folded":false},{"id":9,"name":"3 of clubs","house":[1,"clubs"],"number":[2,3],"folded":false},{"id":10,"name":"3 of hearts","house":[2,"hearts"],"number":[2,3],"folded":false},{"id":11,"name":"3 of spades","house":[3,"spades"],"number":[2,3],"folded":false},{"id":12,"name":"4 of diamonds","house":[0,"diamonds"],"number":[3,4],"folded":false},{"id":13,"name":"4 of clubs","house":[1,"clubs"],"number":[3,4],"folded":false},{"id":14,"name":"4 of hearts","house":[2,"hearts"],"number":[3,4],"folded":false},{"id":15,"name":"4 of spades","house":[3,"spades"],"number":[3,4],"folded":false},{"id":16,"name":"5 of diamonds","house":[0,"diamonds"],"number":[4,5],"folded":false},{"id":17,"name":"5 of clubs","house":[1,"clubs"],"number":[4,5],"folded":false},{"id":18,"name":"5 of hearts","house":[2,"hearts"],"number":[4,5],"folded":false},{"id":19,"name":"5 of spades","house":[3,"spades"],"number":[4,5],"folded":false},{"id":20,"name":"6 of diamonds","house":[0,"diamonds"],"number":[5,6],"folded":false},{"id":21,"name":"6 of clubs","house":[1,"clubs"],"number":[5,6],"folded":false},{"id":22,"name":"6 of hearts","house":[2,"hearts"],"number":[5,6],"folded":false},{"id":23,"name":"6 of spades","house":[3,"spades"],"number":[5,6],"folded":false},{"id":24,"name":"7 of diamonds","house":[0,"diamonds"],"number":[6,7],"folded":false},{"id":25,"name":"7 of clubs","house":[1,"clubs"],"number":[6,7],"folded":false},{"id":26,"name":"7 of hearts","house":[2,"hearts"],"number":[6,7],"folded":false},{"id":27,"name":"7 of spades","house":[3,"spades"],"number":[6,7],"folded":false},{"id":28,"name":"8 of diamonds","house":[0,"diamonds"],"number":[7,8],"folded":false},{"id":29,"name":"8 of clubs","house":[1,"clubs"],"number":[7,8],"folded":false},{"id":30,"name":"8 of hearts","house":[2,"hearts"],"number":[7,8],"folded":false},{"id":31,"name":"8 of spades","house":[3,"spades"],"number":[7,8],"folded":false},{"id":32,"name":"9 of diamonds","house":[0,"diamonds"],"number":[8,9],"folded":false},{"id":33,"name":"9 of clubs","house":[1,"clubs"],"number":[8,9],"folded":false},{"id":34,"name":"9 of hearts","house":[2,"hearts"],"number":[8,9],"folded":false},{"id":35,"name":"9 of spades","house":[3,"spades"],"number":[8,9],"folded":false},{"id":36,"name":"10 of diamonds","house":[0,"diamonds"],"number":[9,10],"folded":false},{"id":37,"name":"10 of clubs","house":[1,"clubs"],"number":[9,10],"folded":false},{"id":38,"name":"10 of hearts","house":[2,"hearts"],"number":[9,10],"folded":false},{"id":39,"name":"10 of spades","house":[3,"spades"],"number":[9,10],"folded":false},{"id":40,"name":"jack of diamonds","house":[0,"diamonds"],"number":[10,"jack"],"folded":false},{"id":41,"name":"jack of clubs","house":[1,"clubs"],"number":[10,"jack"],"folded":false},{"id":42,"name":"jack of hearts","house":[2,"hearts"],"number":[10,"jack"],"folded":false},{"id":43,"name":"jack of spades","house":[3,"spades"],"number":[10,"jack"],"folded":false},{"id":44,"name":"queen of diamonds","house":[0,"diamonds"],"number":[11,"queen"],"folded":false},{"id":45,"name":"queen of clubs","house":[1,"clubs"],"number":[11,"queen"],"folded":false},{"id":46,"name":"queen of hearts","house":[2,"hearts"],"number":[11,"queen"],"folded":false},{"id":47,"name":"queen of spades","house":[3,"spades"],"number":[11,"queen"],"folded":false},{"id":48,"name":"king of diamonds","house":[0,"diamonds"],"number":[12,"king"],"folded":false},{"id":49,"name":"king of clubs","house":[1,"clubs"],"number":[12,"king"],"folded":false},{"id":50,"name":"king of hearts","house":[2,"hearts"],"number":[12,"king"],"folded":false},{"id":51,"name":"king of spades","house":[3,"spades"],"number":[12,"king"],"folded":false}] 
+	static players = {}
+
+	static table = []
+
+	static channel = 0
+
+	static shuffle(time){
+
+		let endTime = time*1000+Date.now()
+
+		while(Date.now() < endTime){
+			let r1 = Math.floor(Math.random()*this.deck.length)
+			let r2 = Math.floor(Math.random()*this.deck.length)
+
+			let c1 = JSON.parse(JSON.stringify(this.deck[r1]))
+			let c2 = JSON.parse(JSON.stringify(this.deck[r2]))
+
+			this.deck[r1] = c2
+			this.deck[r2] = c1
+
+		}
+
+	}
+
+	static hasCard(arrCard,id){
+
+		let r = false
+		arrCard.forEach((e,i)=>{
+			if(e.id == id){
+				r = [true,e,i]
+			}
+		})
+		return(r)
+	}
+
+	static newObject(o){
+		return(JSON.parse(JSON.stringify(o)))
+	}
+	static unfold(o){
+		o.folded = false
+		return(o)
+	}
+
+}
+
+
+function pokerHand(msg){
+
+	let content = msg.content.substring(3)
+	let split = content.split(" ")
+
+	if(PDEK.channel === 0){
+		PDEK.channel = msg.channel
+		msg.channel.send("set as main channel")
+	}
+
+	if(split[0] == "join" && split[1] != undefined && split[1] != ""){
+		if(PDEK.players[msg.author.id] != undefined){
+			cns(msg,"you already joined, changing your name.")
+			PDEK.players[msg.author.id].name = split[1]
+		} else {
+			cns(msg,"joining as player "+split[1])
+			PDEK.players[msg.author.id] = {"name":split[1],"id":msg.author.id,"cards":[]}
+		}
+	}
+
+	if(split[0] == "shuffle"){
+		msg.channel.send("shuffled for 3 seconds")
+		PDEK.shuffle(3)
+	}else if(split[0] == "channel"){
+		if(PDEK.channel !== 0){
+			PDEK.channel.send("switching main channel!")
+		}
+		PDEK.channel = msg.channel
+		msg.channel.send("main channel switched here!")
+	}
+
+	//player join needed
+	if(PDEK.players[msg.author.id] == undefined){
+		return;
+	}
+	let P = PDEK.players[msg.author.id]
+	let D = PDEK.deck
+	if(split[0] == "draw"){
+
+		let no = 1
+		if(!isNaN(parseInt(split[1]))){
+			no = parseInt(split[1])
+		}
+
+
+		let CAN = 0
+		if(no > 1){
+			let aout = ""
+			for(let i = 0; i < no; i++){
+					let cardno = D.length-1
+					if(cardno == 0){
+						aout += "No more cards in deck \n"
+						CAN++
+						continue;
+					}
+					P.cards.push(D[cardno])
+					aout += "Drew card: "+PDEK.deck[cardno].name +" <= "+PDEK.deck[cardno].id+ "\n"
+					PDEK.deck.splice(cardno,1)
+				}
+				msg.author.send(aout)
+			} else {
+				let cardno = D.length-1
+				if(cardno == 0){
+					msg.author.send("No more cards in deck")
+					CAN++
+						
+				} else {
+					P.cards.push(D[cardno])
+					msg.author.send("Drew card: "+PDEK.deck[cardno].name +" <= "+PDEK.deck[cardno].id)
+					PDEK.deck.splice(cardno,1)
+				}
+			}
+			PDEK.channel.send(PDEK.players[msg.author].name + " drew "+no+" cards from the deck")
+			if(CAN > 0){
+				PDEK.channel.send(PDEK.players[msg.author].name + " had "+no+" cards cancelled from empty deck draw")
+			}
+		}
+	if(split[0] == "show"){
+		let out = ''
+		let foldedno = 1
+		P.cards.forEach((e)=>{
+			if(!e.folded){
+				out += e.id + " => " + e.name+"\n"
+			} else {
+				out += "f"+foldedno+" => folded\n"
+				foldedno++
+			}
+		})
+		msg.author.send("===CARDS===\n"+out)
+	} else if(split[0] == "put"){
+		let c = PDEK.hasCard(P.cards,split[1])
+		if(c === false){
+			msg.author.send("you dont have that card")
+			// try{msg.delete()}catch{}
+		} else {
+			PDEK.table.unshift(PDEK.newObject(c[1]))
+			P.cards.splice(c[2],1)
+			PDEK.channel.send("new card on table: "+c[1].name)
+		}
+
+
+	} else if(split[0] == "current" || split[0] == "table"){
+		let aout = ""
+		let mx = 5
+		let t = PDEK.table
+		for(let i = 0; i < mx; i++){
+			if(t[i] != undefined){
+				if(!t[i].folded){
+				aout += i+" => "+t[i].name+"\n"} else {
+					aout += i+" => folded"
+				}
+			}
+		}
+		msg.channel.send("===TABLE===\n"+aout)
+	} else if(split[0] == "deck"){
+		let c = PDEK.hasCard(P.cards,split[1])
+		if(c === false){
+			msg.author.send("you dont have that card")
+		} else {
+			PDEK.deck.unshift(PDEK.unfold(PDEK.newObject(c[1])))
+			P.cards.splice(c[2],1)
+			PDEK.channel.send("new card in deck by: "+PDEK.players[msg.author.id].name)
+			msg.author.send("you put your ["+c[1]+"] to the deck")
+		}
+
+	} else if(split[0] == "fold"){
+		let c = PDEK.hasCard(P.cards,split[1])
+		if(c === false){
+			msg.author.send("you dont have that card")
+		} else {
+			P.cards[c[2]].folded = !P.cards[c[2]].folded
+		}
+	} else if(){
+
+	}
+
+
+}
+
 
 
 // debugger
