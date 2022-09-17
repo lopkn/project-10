@@ -273,6 +273,23 @@ class PDEK{
 
 	static hasCard(arrCard,id){
 
+		if(id[0] == "f" || id[0] == "F"){
+			let aid = parseInt(id.substring(1))
+			if(isNaN(aid) || aid < 0){return(false)}
+
+			let r = false
+			let foldCount = 0
+			arrCard.forEach((e,i)=>{
+				if(e.folded){
+					foldCount++
+					if(foldCount==aid){
+						r = [true,e,i]
+					}
+				}
+			})
+			return(r)
+		}
+
 		let r = false
 		arrCard.forEach((e,i)=>{
 			if(e.id == id){
@@ -365,9 +382,65 @@ function pokerHand(msg){
 					PDEK.deck.splice(cardno,1)
 				}
 			}
-			PDEK.channel.send(PDEK.players[msg.author].name + " drew "+no+" cards from the deck")
+			PDEK.channel.send(PDEK.players[msg.author.id].name + " drew "+no+" cards from the deck")
 			if(CAN > 0){
-				PDEK.channel.send(PDEK.players[msg.author].name + " had "+no+" cards cancelled from empty deck draw")
+				PDEK.channel.send(PDEK.players[msg.author.id].name + " had "+CAN+" cards cancelled from empty deck draw")
+			}
+		}
+
+		////DRAWF-==========================================
+		 else if(split[0] == "drawf"){
+
+		let no = 1
+		if(!isNaN(parseInt(split[1]))){
+			no = parseInt(split[1])
+		}
+
+
+		let CAN = 0
+		if(no > 1){
+			let aout = ""
+			for(let i = 0; i < no; i++){
+					let cardno = D.length-1
+					if(cardno == 0){
+						aout += "No more cards in deck \n"
+						CAN++
+						continue;
+					}
+					P.cards.push(D[cardno])
+					let fno = 1
+					P.cards.forEach((e)=>{
+						if(e.folded){
+							fno += 1
+						}
+					})
+					aout += "Drew card: folded <= f"+fno+ "\n"
+					P.cards[P.cards.length-1].folded = true
+					PDEK.deck.splice(cardno,1)
+				}
+				msg.author.send(aout)
+			} else {
+				let cardno = D.length-1
+				if(cardno == 0){
+					msg.author.send("No more cards in deck")
+					CAN++
+						
+				} else {
+					let fno = 1
+					P.cards.forEach((e)=>{
+						if(e.folded){
+							fno += 1
+						}
+					})
+					P.cards.push(D[cardno])
+					P.cards[P.cards.length-1].folded =true
+					msg.author.send("Drew card: folded <= f"+fno)
+					PDEK.deck.splice(cardno,1)
+				}
+			}
+			PDEK.channel.send(PDEK.players[msg.author.id].name + " drew "+no+" folded cards from the deck")
+			if(CAN > 0){
+				PDEK.channel.send(PDEK.players[msg.author.id].name + " had "+CAN+" cards cancelled from empty deck draw")
 			}
 		}
 	if(split[0] == "show"){
@@ -390,7 +463,11 @@ function pokerHand(msg){
 		} else {
 			PDEK.table.unshift(PDEK.newObject(c[1]))
 			P.cards.splice(c[2],1)
-			PDEK.channel.send("new card on table: "+c[1].name)
+			if(!c[1].folded){
+				PDEK.channel.send("new card on table: "+c[1].name+" by "+P.name)
+			} else {
+				PDEK.channel.send("new folded card on table by: " + P.name)
+			}
 		}
 
 
@@ -414,8 +491,11 @@ function pokerHand(msg){
 		} else {
 			PDEK.deck.unshift(PDEK.unfold(PDEK.newObject(c[1])))
 			P.cards.splice(c[2],1)
-			PDEK.channel.send("new card in deck by: "+PDEK.players[msg.author.id].name)
-			msg.author.send("you put your ["+c[1]+"] to the deck")
+			PDEK.channel.send("a card was put in deck by: "+PDEK.players[msg.author.id].name)
+			if(c[1].folded){
+				msg.author.send("you put a folded card to the deck")
+			} else {
+			msg.author.send("you put your ["+c[1].name+"] to the deck")}
 		}
 
 	} else if(split[0] == "fold"){
@@ -424,9 +504,60 @@ function pokerHand(msg){
 			msg.author.send("you dont have that card")
 		} else {
 			P.cards[c[2]].folded = !P.cards[c[2]].folded
+			if(P.cards[c[2]].folded){
+			msg.author.send("you folded ["+split[1]+"]")
+			PDEK.channel.send(P.name+" folded a card")
+			} else {
+				msg.author.send("you unfolded ["+P.cards[c[2]].name+" <= "+P.cards[c[2]].id+"]")
+				PDEK.channel.send(P.name+" unfolded a card")
+			}
 		}
-	} else if(){
+	} else if(split[0] == "take" || split[0] == "grab"){
+		let c = []
+		if(PDEK.table.length < 1){
+			cns(msg,"theres no cards on the table!")
+		} else {if(PDEK.table[split[1]] != undefined){
+			c = [true,PDEK.table[split[1]],split[1]]
+		} else {
+			c = [true,PDEK.table[0],0]
+		}
 
+		P.cards.push(PDEK.newObject(c[1]))
+		if(!c[1].folded){
+			msg.author.send("you got "+c[1].name+" from the table")
+		} else {
+			msg.author.send("you got a folded card from the table")
+		}
+		PDEK.table.splice(c[2],1)
+		PDEK.channel.send(P.name + " took the card ["+c[2]+"] from the table")
+	}
+	} else if(split[0] == "reorg"){
+		let n = []
+		while(P.cards.length > 0){
+			let nc = PDEK.newObject(P.cards[0])
+			P.cards.splice(0,1)
+
+			if(nc.folded){
+				n.unshift(nc)
+			} else {
+				let done = true
+				let counter = 0
+				while(done){
+					if(counter == n.length){
+						n.push(nc)
+						done = false
+					} else if(n[counter].id < nc.id && !n[counter].folded){
+						n.splice(counter,0,nc)
+						done = false
+					}
+					counter++
+				}
+
+			}
+
+		}
+		P.cards = n
+		msg.channel.send("reorganized your cards!")
 	}
 
 
