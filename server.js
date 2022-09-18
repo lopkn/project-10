@@ -5707,3 +5707,32 @@ function DFNorm(dict,val){
 	}
 	return(dict[val])
 }
+
+
+class vectorFuncs{
+	static vectorizor(px,py,vx,vy){
+		//this.walls[p.boidy[k]].x1 = ((p.boidyVect[k][0] * p.rotation[1] + p.boidyVect[k][1] * p.rotation[0]) + p.x)
+		//xb+ya,yb-xa
+		return([px*vy+py*vx,py*vy-px*vx])
+	}
+	static INvectorizor(px,py,vx,vy){
+		//xb-ya,yb+xa
+		return([px*vy-py*vx,py*vy+px*vx])
+	}
+	static ShatterComponents(vx,vy,dx,dy){
+		let normalized = this.originVectorNormalize(dx,dy)
+		let invectorized = this.INvectorizor(vx,vy,normalized[0],normalized[1])
+
+		let tyaxis = this.vectorizor(normalized[0],normalized[1],1,0)
+
+		let resultx = [invectorized[0]*normalized[0],invectorized[1]*normalized[1]]
+		let resulty = [invectorized[1]*tyaxis[0],invectorized[1]*tyaxis[1]]
+		return([resultx,resulty])
+
+	}
+
+	static originVectorNormalize(vx,vy){
+		let d = Math.sqrt(vx*vx+vy*vy)
+		return([vx/d,vy/d])
+	}
+}
