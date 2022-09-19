@@ -5725,10 +5725,29 @@ class vectorFuncs{
 
 		let tyaxis = this.vectorizor(normalized[0],normalized[1],1,0)
 
-		let resultx = [invectorized[0]*normalized[0],invectorized[1]*normalized[1]]
-		let resulty = [invectorized[1]*tyaxis[0],invectorized[1]*tyaxis[1]]
-		return([resultx,resulty])
+		let resultx = [invectorized[1]*normalized[0],invectorized[1]*normalized[1]]
+		let resulty = [invectorized[0]*tyaxis[0],invectorized[0]*tyaxis[1]]
+		return([resultx,resulty,[invectorized[1],invectorized[0]]])
 
+	}
+
+	static ShComp(vx,vy,dx,dy){
+		let normalized = this.originVectorNormalize(dx,dy)
+
+		let dp = this.dotProduct(vx,vy,normalized[0],normalized[1])
+
+		let n2 = [normalized[1],-normalized[0]]
+
+		let dp2 = this.dotProduct(vx,vy,n2[0],n2[1])
+		let resultx = [normalized[0]*dp,normalized[1]*dp]
+		let resulty = [n2[0]*dp2,n2[1]*dp2]
+
+		return([resultx,resulty,[dp,dp2]])
+
+	}
+
+	static dotProduct(x1,y1,x2,y2){
+		return(x1*x2+y1*y2)
 	}
 
 	static originVectorNormalize(vx,vy){

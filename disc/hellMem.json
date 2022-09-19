@@ -14,7 +14,8 @@
             "17": true,
             "18": true,
             "19": true,
-            "20": true
+            "20": true,
+            "38": true
         },
         "math": {
             "2": true
@@ -44,7 +45,8 @@
             "32": true,
             "33": true,
             "34": true,
-            "35": true
+            "35": true,
+            "36": true
         }
     },
     "r": {
@@ -227,8 +229,18 @@
             "type": "chem",
             "q": "what is the general equation of Group I nitrates?",
             "a": "Metal Nitrate + [heat] -> Metal Nitrate(III) salt + Oxygen | (metal nitrate3 salt is for Na is NaNO2)"
+        },
+        "36": {
+            "type": "chem",
+            "q": "Does the reactivity of halogens decrease or increase down a group? explain",
+            "a": "it decreases. The are more electron shells in each atom down a group, the distance between the nucleaus to the outtermost electron increases, so the attractive force from nucleus to electrons is weaker so reactivity decreases."
+        },
+        "38": {
+            "type": "bio",
+            "q": "make a flowchart to show the main groups of most commonly used system of classification",
+            "a": "Domain -> kingdom -> phylum -> class -> order -> family -> genus -> species"
         }
     },
-    "counter": 36,
+    "counter": 39,
     "suggestions": []
 }

@@ -97,6 +97,59 @@ class game{
       document.getElementById(e).remove()
     })
   }
+
+  static OtM(x,y){
+    return([Math.floor(x/MRef.MTS),Math.floor(y/MRef.MTS)])
+  }
+
+  static ss = {"mode":"inspect","x":0,"y":0,"boxes":"main"}
+  static ms = {"held":false,"heldTime":0}
+
+  static renderSelectedSpot(){
+    let ss = this.ss
+    if(ss.boxes == "main"){
+      switch(ss.mode){
+        case "inspect":
+          boarderRect(ss.x*MRef.MTS,ss.y*MRef.MTS,MRef.MTS,MRef.MTS,2,"white")
+          break;
+      }
+    }
+  }
+
+}
+
+
+class EHAND{
+  static mouseHandler(e){
+    if(inRect(mouseX,mouseY,0,0,game.map.width*MRef.MTS,game.map.height*MRef.MTS)){
+      game.ss.boxes = "main"
+      let t = game.OtM(mouseX,mouseY)
+      game.ss.x = t[0]
+      game.ss.y = t[1]
+    }
+    game.ms.held = true
+  }
+
+  static heldMouseDown(e){
+    if(inRect(mouseX,mouseY,0,0,game.map.width*MRef.MTS,game.map.height*MRef.MTS)){
+      game.ss.boxes = "main"
+      let t = game.OtM(mouseX,mouseY)
+      game.ss.x = t[0]
+      game.ss.y = t[1]
+    }
+  }
+
+  static mouseUpHandler(e){
+    game.ms.held = false
+    game.ms.heldTime = 0
+  }
+
+  static repeat(e){
+    if(game.ms.held){
+      game.ms.heldTime++
+      this.heldMouseDown(e)
+    }
+  }
 }
 
 onmousemove = (e)=>{mouseX = (e.clientX); mouseY = (e.clientY)}
@@ -135,15 +188,26 @@ function vectorNormalize(original,multiplier){
 }
 
 
+function inRect(x,y,x1,y1,x2,y2){
+  return(((x>x1&&x<x2)||(x>x2&&x<x1))&&(y>y1&&y<y2)||(y>y2&&x<y1))
+}
+
 
 document.addEventListener("mousedown",(e)=>{
 
+  //{"mode":"inspect","x":0,"y":0,"boxes":"main"}
+  EHAND.mouseHandler(e)
+
+})
+document.addEventListener("mouseup",(e)=>{
+
+  EHAND.mouseUpHandler(e)
 
 })
 
-
 document.addEventListener("keydown",(e)=>{
   // e.preventDefault()
+
   let key = e.key
 
 
@@ -164,7 +228,7 @@ let mainLoopint = setInterval(()=>{
 },1000/30)
 
 
-function repeat(){
+function repeat(e){
   if(game.state == "started"){
     mainCTX.fillStyle = "#303030"
     mainCTX.clearRect(0,0,wWidth,wHeight)
@@ -178,8 +242,8 @@ function repeat(){
       mainCTX.fillStyle = tileInfo.color
       mainCTX.fillRect(MRef.MTS*coord[0],MRef.MTS*coord[1],MRef.MTS,MRef.MTS)
     })
-
-    boarderRect(MRef.MTS,MRef.MTS,MRef.MTS,MRef.MTS,2,"white")
+    EHAND.repeat(e)
+    game.renderSelectedSpot()
 
 
   }
