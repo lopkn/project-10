@@ -87,7 +87,9 @@ function handler2(msg){
 		hellHand(msg)
 	} else if(msg.content[0] == "\\" && msg.content[1] == "p"){
 		pokerHand(msg)
-	} else {
+	} else if(msg.content[0] == "\\" && msg.content[1] == "m"){
+		msgHand(msg)
+	}else {
 		if(handler2s.memr[msg.content] != undefined){
 			cns(msg,handler2s.memr[msg.content].r)
 		} else {
@@ -563,7 +565,9 @@ function pokerHand(msg){
 
 }
 
-
+function msgHand(msg){
+	
+}
 
 // debugger
 // var BotToken = process.env.tx

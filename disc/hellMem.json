@@ -15,7 +15,8 @@
             "18": true,
             "19": true,
             "20": true,
-            "38": true
+            "38": true,
+            "39": true
         },
         "math": {
             "2": true
@@ -239,8 +240,13 @@
             "type": "bio",
             "q": "make a flowchart to show the main groups of most commonly used system of classification",
             "a": "Domain -> kingdom -> phylum -> class -> order -> family -> genus -> species"
+        },
+        "39": {
+            "type": "bio",
+            "q": "Describe the process of mitosis",
+            "a": "Interphase G1 the cell takes in material and grows, S phase the cell replicates its chromosomes, G2 phase the cell replicates organelles and takes in or synthesizes other materials needed for division. during prophase the chromosomes pair up in the cell, during metaphase the chromosomes line up at the equator of the cell, during anaphase the spindle fibres from centrioles pull the sister chromatids apart from the centromere, during telophase two nuclear membrane is reformed and during cytokenesis the cytoplasm fully divides."
         }
     },
-    "counter": 39,
+    "counter": 40,
     "suggestions": []
 }
