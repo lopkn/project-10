@@ -16,7 +16,10 @@
             "19": true,
             "20": true,
             "38": true,
-            "39": true
+            "39": true,
+            "40": true,
+            "41": true,
+            "42": true
         },
         "math": {
             "2": true
@@ -245,8 +248,23 @@
             "type": "bio",
             "q": "Describe the process of mitosis",
             "a": "Interphase G1 the cell takes in material and grows, S phase the cell replicates its chromosomes, G2 phase the cell replicates organelles and takes in or synthesizes other materials needed for division. during prophase the chromosomes pair up in the cell, during metaphase the chromosomes line up at the equator of the cell, during anaphase the spindle fibres from centrioles pull the sister chromatids apart from the centromere, during telophase two nuclear membrane is reformed and during cytokenesis the cytoplasm fully divides."
+        },
+        "40": {
+            "type": "bio",
+            "q": "are humans made of Eukaryotic cells or prokaryotic cells?",
+            "a": "Eukaryotic cells"
+        },
+        "41": {
+            "type": "bio",
+            "q": "What ribosomes do prokaryotic and eukaryotic cells have?",
+            "a": "Eukaryotic cells have both 70s and 80s ribosomes (70s in the mitocondria), Prokaryotic cells only have 70s ribosomes"
+        },
+        "42": {
+            "type": "bio",
+            "q": "describe the structure of the cell walls of a gram positive bacteria.",
+            "a": " it has a thick peptidoglycan layer on the outside with teichoic acid, one layer of plasma membrane inside. The thick peptidoglycan layer can trap crystal violet/gram stain is trapped, so it will not be washed away with alcohol, so it will appear dark purple/blue after the gram staning test"
         }
     },
-    "counter": 40,
+    "counter": 43,
     "suggestions": []
 }

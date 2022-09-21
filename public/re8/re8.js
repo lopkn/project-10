@@ -112,6 +112,9 @@ class game{
         case "inspect":
           boarderRect(ss.x*MRef.MTS,ss.y*MRef.MTS,MRef.MTS,MRef.MTS,2,"white")
           break;
+        case "drag"
+          boarderRect(ss.x*MRef.MTS,ss.y*MRef.MTS,MRef.MTS,MRef.MTS,2,"purple")
+          break;
       }
     }
   }
@@ -133,6 +136,9 @@ class EHAND{
   static heldMouseDown(e){
     if(inRect(mouseX,mouseY,0,0,game.map.width*MRef.MTS,game.map.height*MRef.MTS)){
       game.ss.boxes = "main"
+      if(game.ms.heldTime > 50){
+        game.ss.mode = "drag"
+      }
       let t = game.OtM(mouseX,mouseY)
       game.ss.x = t[0]
       game.ss.y = t[1]

@@ -42,13 +42,21 @@ class emojisdeleter{
 	}
 }
 
-
+client.on('shardError', error => {
+	// console.error('A websocket connection encountered an error:', error);
+	console.log("HOOOO")
+});
+process.on('unhandledRejection', error => {
+	// console.error('Unhandled promise rejection:', error);
+});
 function handler2(msg){
 
 	if(msg.author.id == client.user.id){return}
 
 		if(hasEmoji(msg.content)){
-			msg.delete()
+			try{
+				 msg.delete()
+			}catch{}
 			if(emojisdeleter.counter <= 2){
 				emojisdeleter.newEmojiDelete()
 				try{cns(msg,"No. Emojis.")}catch{}
@@ -248,7 +256,8 @@ function strEnterReplacer(str){
 
 class PDEK{
 
-	static deck = [{"id":0,"name":"ace of diamonds","house":[0,"diamonds"],"number":[0,"ace"],"folded":false},{"id":1,"name":"ace of clubs","house":[1,"clubs"],"number":[0,"ace"],"folded":false},{"id":2,"name":"ace of hearts","house":[2,"hearts"],"number":[0,"ace"],"folded":false},{"id":3,"name":"ace of spades","house":[3,"spades"],"number":[0,"ace"],"folded":false},{"id":4,"name":"2 of diamonds","house":[0,"diamonds"],"number":[1,2],"folded":false},{"id":5,"name":"2 of clubs","house":[1,"clubs"],"number":[1,2],"folded":false},{"id":6,"name":"2 of hearts","house":[2,"hearts"],"number":[1,2],"folded":false},{"id":7,"name":"2 of spades","house":[3,"spades"],"number":[1,2],"folded":false},{"id":8,"name":"3 of diamonds","house":[0,"diamonds"],"number":[2,3],"folded":false},{"id":9,"name":"3 of clubs","house":[1,"clubs"],"number":[2,3],"folded":false},{"id":10,"name":"3 of hearts","house":[2,"hearts"],"number":[2,3],"folded":false},{"id":11,"name":"3 of spades","house":[3,"spades"],"number":[2,3],"folded":false},{"id":12,"name":"4 of diamonds","house":[0,"diamonds"],"number":[3,4],"folded":false},{"id":13,"name":"4 of clubs","house":[1,"clubs"],"number":[3,4],"folded":false},{"id":14,"name":"4 of hearts","house":[2,"hearts"],"number":[3,4],"folded":false},{"id":15,"name":"4 of spades","house":[3,"spades"],"number":[3,4],"folded":false},{"id":16,"name":"5 of diamonds","house":[0,"diamonds"],"number":[4,5],"folded":false},{"id":17,"name":"5 of clubs","house":[1,"clubs"],"number":[4,5],"folded":false},{"id":18,"name":"5 of hearts","house":[2,"hearts"],"number":[4,5],"folded":false},{"id":19,"name":"5 of spades","house":[3,"spades"],"number":[4,5],"folded":false},{"id":20,"name":"6 of diamonds","house":[0,"diamonds"],"number":[5,6],"folded":false},{"id":21,"name":"6 of clubs","house":[1,"clubs"],"number":[5,6],"folded":false},{"id":22,"name":"6 of hearts","house":[2,"hearts"],"number":[5,6],"folded":false},{"id":23,"name":"6 of spades","house":[3,"spades"],"number":[5,6],"folded":false},{"id":24,"name":"7 of diamonds","house":[0,"diamonds"],"number":[6,7],"folded":false},{"id":25,"name":"7 of clubs","house":[1,"clubs"],"number":[6,7],"folded":false},{"id":26,"name":"7 of hearts","house":[2,"hearts"],"number":[6,7],"folded":false},{"id":27,"name":"7 of spades","house":[3,"spades"],"number":[6,7],"folded":false},{"id":28,"name":"8 of diamonds","house":[0,"diamonds"],"number":[7,8],"folded":false},{"id":29,"name":"8 of clubs","house":[1,"clubs"],"number":[7,8],"folded":false},{"id":30,"name":"8 of hearts","house":[2,"hearts"],"number":[7,8],"folded":false},{"id":31,"name":"8 of spades","house":[3,"spades"],"number":[7,8],"folded":false},{"id":32,"name":"9 of diamonds","house":[0,"diamonds"],"number":[8,9],"folded":false},{"id":33,"name":"9 of clubs","house":[1,"clubs"],"number":[8,9],"folded":false},{"id":34,"name":"9 of hearts","house":[2,"hearts"],"number":[8,9],"folded":false},{"id":35,"name":"9 of spades","house":[3,"spades"],"number":[8,9],"folded":false},{"id":36,"name":"10 of diamonds","house":[0,"diamonds"],"number":[9,10],"folded":false},{"id":37,"name":"10 of clubs","house":[1,"clubs"],"number":[9,10],"folded":false},{"id":38,"name":"10 of hearts","house":[2,"hearts"],"number":[9,10],"folded":false},{"id":39,"name":"10 of spades","house":[3,"spades"],"number":[9,10],"folded":false},{"id":40,"name":"jack of diamonds","house":[0,"diamonds"],"number":[10,"jack"],"folded":false},{"id":41,"name":"jack of clubs","house":[1,"clubs"],"number":[10,"jack"],"folded":false},{"id":42,"name":"jack of hearts","house":[2,"hearts"],"number":[10,"jack"],"folded":false},{"id":43,"name":"jack of spades","house":[3,"spades"],"number":[10,"jack"],"folded":false},{"id":44,"name":"queen of diamonds","house":[0,"diamonds"],"number":[11,"queen"],"folded":false},{"id":45,"name":"queen of clubs","house":[1,"clubs"],"number":[11,"queen"],"folded":false},{"id":46,"name":"queen of hearts","house":[2,"hearts"],"number":[11,"queen"],"folded":false},{"id":47,"name":"queen of spades","house":[3,"spades"],"number":[11,"queen"],"folded":false},{"id":48,"name":"king of diamonds","house":[0,"diamonds"],"number":[12,"king"],"folded":false},{"id":49,"name":"king of clubs","house":[1,"clubs"],"number":[12,"king"],"folded":false},{"id":50,"name":"king of hearts","house":[2,"hearts"],"number":[12,"king"],"folded":false},{"id":51,"name":"king of spades","house":[3,"spades"],"number":[12,"king"],"folded":false}] 
+	static deck = [{"id":0,"name":"red - 1","house":[0,"red"],"number":[0,1],"folded":false},{"id":1,"name":"green - 1","house":[1,"green"],"number":[0,1],"folded":false},{"id":2,"name":"blue - 1","house":[2,"blue"],"number":[0,1],"folded":false},{"id":3,"name":"yellow - 1","house":[3,"yellow"],"number":[0,1],"folded":false},{"id":4,"name":"red - 2","house":[0,"red"],"number":[1,2],"folded":false},{"id":5,"name":"green - 2","house":[1,"green"],"number":[1,2],"folded":false},{"id":6,"name":"blue - 2","house":[2,"blue"],"number":[1,2],"folded":false},{"id":7,"name":"yellow - 2","house":[3,"yellow"],"number":[1,2],"folded":false},{"id":8,"name":"red - 3","house":[0,"red"],"number":[2,3],"folded":false},{"id":9,"name":"green - 3","house":[1,"green"],"number":[2,3],"folded":false},{"id":10,"name":"blue - 3","house":[2,"blue"],"number":[2,3],"folded":false},{"id":11,"name":"yellow - 3","house":[3,"yellow"],"number":[2,3],"folded":false},{"id":12,"name":"red - 4","house":[0,"red"],"number":[3,4],"folded":false},{"id":13,"name":"green - 4","house":[1,"green"],"number":[3,4],"folded":false},{"id":14,"name":"blue - 4","house":[2,"blue"],"number":[3,4],"folded":false},{"id":15,"name":"yellow - 4","house":[3,"yellow"],"number":[3,4],"folded":false},{"id":16,"name":"red - 5","house":[0,"red"],"number":[4,5],"folded":false},{"id":17,"name":"green - 5","house":[1,"green"],"number":[4,5],"folded":false},{"id":18,"name":"blue - 5","house":[2,"blue"],"number":[4,5],"folded":false},{"id":19,"name":"yellow - 5","house":[3,"yellow"],"number":[4,5],"folded":false},{"id":20,"name":"red - 6","house":[0,"red"],"number":[5,6],"folded":false},{"id":21,"name":"green - 6","house":[1,"green"],"number":[5,6],"folded":false},{"id":22,"name":"blue - 6","house":[2,"blue"],"number":[5,6],"folded":false},{"id":23,"name":"yellow - 6","house":[3,"yellow"],"number":[5,6],"folded":false},{"id":24,"name":"red - 7","house":[0,"red"],"number":[6,7],"folded":false},{"id":25,"name":"green - 7","house":[1,"green"],"number":[6,7],"folded":false},{"id":26,"name":"blue - 7","house":[2,"blue"],"number":[6,7],"folded":false},{"id":27,"name":"yellow - 7","house":[3,"yellow"],"number":[6,7],"folded":false},{"id":28,"name":"red - 8","house":[0,"red"],"number":[7,8],"folded":false},{"id":29,"name":"green - 8","house":[1,"green"],"number":[7,8],"folded":false},{"id":30,"name":"blue - 8","house":[2,"blue"],"number":[7,8],"folded":false},{"id":31,"name":"yellow - 8","house":[3,"yellow"],"number":[7,8],"folded":false},{"id":32,"name":"red - 9","house":[0,"red"],"number":[8,9],"folded":false},{"id":33,"name":"green - 9","house":[1,"green"],"number":[8,9],"folded":false},{"id":34,"name":"blue - 9","house":[2,"blue"],"number":[8,9],"folded":false},{"id":35,"name":"yellow - 9","house":[3,"yellow"],"number":[8,9],"folded":false},{"id":36,"name":"red - skip","house":[0,"red"],"number":[9,"skip"],"folded":false},{"id":37,"name":"green - skip","house":[1,"green"],"number":[9,"skip"],"folded":false},{"id":38,"name":"blue - skip","house":[2,"blue"],"number":[9,"skip"],"folded":false},{"id":39,"name":"yellow - skip","house":[3,"yellow"],"number":[9,"skip"],"folded":false},{"id":40,"name":"red - reverse","house":[0,"red"],"number":[10,"reverse"],"folded":false},{"id":41,"name":"green - reverse","house":[1,"green"],"number":[10,"reverse"],"folded":false},{"id":42,"name":"blue - reverse","house":[2,"blue"],"number":[10,"reverse"],"folded":false},{"id":43,"name":"yellow - reverse","house":[3,"yellow"],"number":[10,"reverse"],"folded":false},{"id":44,"name":"red - plus 2","house":[0,"red"],"number":[11,"plus 2"],"folded":false},{"id":45,"name":"green - plus 2","house":[1,"green"],"number":[11,"plus 2"],"folded":false},{"id":46,"name":"blue - plus 2","house":[2,"blue"],"number":[11,"plus 2"],"folded":false},{"id":47,"name":"yellow - plus 2","house":[3,"yellow"],"number":[11,"plus 2"],"folded":false},{"id":48,"name":"red - 1","house":[0,"red"],"number":[0,1],"folded":false},{"id":49,"name":"green - 1","house":[1,"green"],"number":[0,1],"folded":false},{"id":50,"name":"blue - 1","house":[2,"blue"],"number":[0,1],"folded":false},{"id":51,"name":"yellow - 1","house":[3,"yellow"],"number":[0,1],"folded":false},{"id":52,"name":"red - 2","house":[0,"red"],"number":[1,2],"folded":false},{"id":53,"name":"green - 2","house":[1,"green"],"number":[1,2],"folded":false},{"id":54,"name":"blue - 2","house":[2,"blue"],"number":[1,2],"folded":false},{"id":55,"name":"yellow - 2","house":[3,"yellow"],"number":[1,2],"folded":false},{"id":56,"name":"red - 3","house":[0,"red"],"number":[2,3],"folded":false},{"id":57,"name":"green - 3","house":[1,"green"],"number":[2,3],"folded":false},{"id":58,"name":"blue - 3","house":[2,"blue"],"number":[2,3],"folded":false},{"id":59,"name":"yellow - 3","house":[3,"yellow"],"number":[2,3],"folded":false},{"id":60,"name":"red - 4","house":[0,"red"],"number":[3,4],"folded":false},{"id":61,"name":"green - 4","house":[1,"green"],"number":[3,4],"folded":false},{"id":62,"name":"blue - 4","house":[2,"blue"],"number":[3,4],"folded":false},{"id":63,"name":"yellow - 4","house":[3,"yellow"],"number":[3,4],"folded":false},{"id":64,"name":"red - 5","house":[0,"red"],"number":[4,5],"folded":false},{"id":65,"name":"green - 5","house":[1,"green"],"number":[4,5],"folded":false},{"id":66,"name":"blue - 5","house":[2,"blue"],"number":[4,5],"folded":false},{"id":67,"name":"yellow - 5","house":[3,"yellow"],"number":[4,5],"folded":false},{"id":68,"name":"red - 6","house":[0,"red"],"number":[5,6],"folded":false},{"id":69,"name":"green - 6","house":[1,"green"],"number":[5,6],"folded":false},{"id":70,"name":"blue - 6","house":[2,"blue"],"number":[5,6],"folded":false},{"id":71,"name":"yellow - 6","house":[3,"yellow"],"number":[5,6],"folded":false},{"id":72,"name":"red - 7","house":[0,"red"],"number":[6,7],"folded":false},{"id":73,"name":"green - 7","house":[1,"green"],"number":[6,7],"folded":false},{"id":74,"name":"blue - 7","house":[2,"blue"],"number":[6,7],"folded":false},{"id":75,"name":"yellow - 7","house":[3,"yellow"],"number":[6,7],"folded":false},{"id":76,"name":"red - 8","house":[0,"red"],"number":[7,8],"folded":false},{"id":77,"name":"green - 8","house":[1,"green"],"number":[7,8],"folded":false},{"id":78,"name":"blue - 8","house":[2,"blue"],"number":[7,8],"folded":false},{"id":79,"name":"yellow - 8","house":[3,"yellow"],"number":[7,8],"folded":false},{"id":80,"name":"red - 9","house":[0,"red"],"number":[8,9],"folded":false},{"id":81,"name":"green - 9","house":[1,"green"],"number":[8,9],"folded":false},{"id":82,"name":"blue - 9","house":[2,"blue"],"number":[8,9],"folded":false},{"id":83,"name":"yellow - 9","house":[3,"yellow"],"number":[8,9],"folded":false},{"id":84,"name":"red - skip","house":[0,"red"],"number":[9,"skip"],"folded":false},{"id":85,"name":"green - skip","house":[1,"green"],"number":[9,"skip"],"folded":false},{"id":86,"name":"blue - skip","house":[2,"blue"],"number":[9,"skip"],"folded":false},{"id":87,"name":"yellow - skip","house":[3,"yellow"],"number":[9,"skip"],"folded":false},{"id":88,"name":"red - reverse","house":[0,"red"],"number":[10,"reverse"],"folded":false},{"id":89,"name":"green - reverse","house":[1,"green"],"number":[10,"reverse"],"folded":false},{"id":90,"name":"blue - reverse","house":[2,"blue"],"number":[10,"reverse"],"folded":false},{"id":91,"name":"yellow - reverse","house":[3,"yellow"],"number":[10,"reverse"],"folded":false},{"id":92,"name":"red - plus 2","house":[0,"red"],"number":[11,"plus 2"],"folded":false},{"id":93,"name":"green - plus 2","house":[1,"green"],"number":[11,"plus 2"],"folded":false},{"id":94,"name":"blue - plus 2","house":[2,"blue"],"number":[11,"plus 2"],"folded":false},{"id":95,"name":"yellow - plus 2","house":[3,"yellow"],"number":[11,"plus 2"],"folded":false},{"id":96,"name":"black - plus 4","house":[4,"black"],"number":[12,"plus 4"]},{"id":97,"name":"black - plus 4","house":[4,"black"],"number":[12,"plus 4"]},{"id":98,"name":"black - plus 4","house":[4,"black"],"number":[12,"plus 4"]},{"id":99,"name":"black - plus 4","house":[4,"black"],"number":[12,"plus 4"]},{"id":100,"name":"black - change color","house":[4,"black"],"number":[13,"change color"]},{"id":101,"name":"black - change color","house":[4,"black"],"number":[13,"change color"]},{"id":102,"name":"black - change color","house":[4,"black"],"number":[13,"change color"]},{"id":103,"name":"black - change color","house":[4,"black"],"number":[13,"change color"]},{"id":104,"name":"red - 0","house":[0,"red"],"number":[5,"0"]},{"id":105,"name":"green - 0","house":[1,"green"],"number":[5,"0"]},{"id":106,"name":"blue - 0","house":[2,"blue"],"number":[5,"0"]},{"id":107,"name":"yellow - 0","house":[3,"yellow"],"number":[5,"0"]}]
+	// static deck = [{"id":0,"name":"ace of diamonds","house":[0,"diamonds"],"number":[0,"ace"],"folded":false},{"id":1,"name":"ace of clubs","house":[1,"clubs"],"number":[0,"ace"],"folded":false},{"id":2,"name":"ace of hearts","house":[2,"hearts"],"number":[0,"ace"],"folded":false},{"id":3,"name":"ace of spades","house":[3,"spades"],"number":[0,"ace"],"folded":false},{"id":4,"name":"2 of diamonds","house":[0,"diamonds"],"number":[1,2],"folded":false},{"id":5,"name":"2 of clubs","house":[1,"clubs"],"number":[1,2],"folded":false},{"id":6,"name":"2 of hearts","house":[2,"hearts"],"number":[1,2],"folded":false},{"id":7,"name":"2 of spades","house":[3,"spades"],"number":[1,2],"folded":false},{"id":8,"name":"3 of diamonds","house":[0,"diamonds"],"number":[2,3],"folded":false},{"id":9,"name":"3 of clubs","house":[1,"clubs"],"number":[2,3],"folded":false},{"id":10,"name":"3 of hearts","house":[2,"hearts"],"number":[2,3],"folded":false},{"id":11,"name":"3 of spades","house":[3,"spades"],"number":[2,3],"folded":false},{"id":12,"name":"4 of diamonds","house":[0,"diamonds"],"number":[3,4],"folded":false},{"id":13,"name":"4 of clubs","house":[1,"clubs"],"number":[3,4],"folded":false},{"id":14,"name":"4 of hearts","house":[2,"hearts"],"number":[3,4],"folded":false},{"id":15,"name":"4 of spades","house":[3,"spades"],"number":[3,4],"folded":false},{"id":16,"name":"5 of diamonds","house":[0,"diamonds"],"number":[4,5],"folded":false},{"id":17,"name":"5 of clubs","house":[1,"clubs"],"number":[4,5],"folded":false},{"id":18,"name":"5 of hearts","house":[2,"hearts"],"number":[4,5],"folded":false},{"id":19,"name":"5 of spades","house":[3,"spades"],"number":[4,5],"folded":false},{"id":20,"name":"6 of diamonds","house":[0,"diamonds"],"number":[5,6],"folded":false},{"id":21,"name":"6 of clubs","house":[1,"clubs"],"number":[5,6],"folded":false},{"id":22,"name":"6 of hearts","house":[2,"hearts"],"number":[5,6],"folded":false},{"id":23,"name":"6 of spades","house":[3,"spades"],"number":[5,6],"folded":false},{"id":24,"name":"7 of diamonds","house":[0,"diamonds"],"number":[6,7],"folded":false},{"id":25,"name":"7 of clubs","house":[1,"clubs"],"number":[6,7],"folded":false},{"id":26,"name":"7 of hearts","house":[2,"hearts"],"number":[6,7],"folded":false},{"id":27,"name":"7 of spades","house":[3,"spades"],"number":[6,7],"folded":false},{"id":28,"name":"8 of diamonds","house":[0,"diamonds"],"number":[7,8],"folded":false},{"id":29,"name":"8 of clubs","house":[1,"clubs"],"number":[7,8],"folded":false},{"id":30,"name":"8 of hearts","house":[2,"hearts"],"number":[7,8],"folded":false},{"id":31,"name":"8 of spades","house":[3,"spades"],"number":[7,8],"folded":false},{"id":32,"name":"9 of diamonds","house":[0,"diamonds"],"number":[8,9],"folded":false},{"id":33,"name":"9 of clubs","house":[1,"clubs"],"number":[8,9],"folded":false},{"id":34,"name":"9 of hearts","house":[2,"hearts"],"number":[8,9],"folded":false},{"id":35,"name":"9 of spades","house":[3,"spades"],"number":[8,9],"folded":false},{"id":36,"name":"10 of diamonds","house":[0,"diamonds"],"number":[9,10],"folded":false},{"id":37,"name":"10 of clubs","house":[1,"clubs"],"number":[9,10],"folded":false},{"id":38,"name":"10 of hearts","house":[2,"hearts"],"number":[9,10],"folded":false},{"id":39,"name":"10 of spades","house":[3,"spades"],"number":[9,10],"folded":false},{"id":40,"name":"jack of diamonds","house":[0,"diamonds"],"number":[10,"jack"],"folded":false},{"id":41,"name":"jack of clubs","house":[1,"clubs"],"number":[10,"jack"],"folded":false},{"id":42,"name":"jack of hearts","house":[2,"hearts"],"number":[10,"jack"],"folded":false},{"id":43,"name":"jack of spades","house":[3,"spades"],"number":[10,"jack"],"folded":false},{"id":44,"name":"queen of diamonds","house":[0,"diamonds"],"number":[11,"queen"],"folded":false},{"id":45,"name":"queen of clubs","house":[1,"clubs"],"number":[11,"queen"],"folded":false},{"id":46,"name":"queen of hearts","house":[2,"hearts"],"number":[11,"queen"],"folded":false},{"id":47,"name":"queen of spades","house":[3,"spades"],"number":[11,"queen"],"folded":false},{"id":48,"name":"king of diamonds","house":[0,"diamonds"],"number":[12,"king"],"folded":false},{"id":49,"name":"king of clubs","house":[1,"clubs"],"number":[12,"king"],"folded":false},{"id":50,"name":"king of hearts","house":[2,"hearts"],"number":[12,"king"],"folded":false},{"id":51,"name":"king of spades","house":[3,"spades"],"number":[12,"king"],"folded":false}] 
 	static players = {}
 
 	static table = []
@@ -565,8 +574,67 @@ function pokerHand(msg){
 
 }
 
+
+class MHAND{
+	static MAUTH = ""
+	static users = {}
+	static uref = {}
+
+	static counter = 0
+	static msgWait = {}
+
+	static ncounter(){
+		this.counter++
+		return(this.counter)
+	}
+}
+
 function msgHand(msg){
-	
+	if(msg.content == "\\ml"){
+		msg.channel.send("current users: "+JSON.stringify(Object.keys(MHAND.uref)))
+	}
+	let content = msg.content.substring(3)
+	let split = content.split(' ')
+
+	if(msg.author.id == "468988026853523457"){
+		MHAND.MAUTH = msg.author
+		if(MHAND.msgWait[split[0]] != undefined){
+			let m = MHAND.msgWait[split[0]]
+			if(split[1] == "allow"||split[1] == "a"){
+
+				MHAND.users[m[0]][0].send("from => "+m[2]+" : "+m[3])
+				m = 0
+				delete MHAND.msgWait[split[0]]
+			}
+			if(split[1] == "n"||split[1] == "no"||split[1] == "d"){
+
+				m = 0
+				delete MHAND.msgWait[split[0]]
+			}
+		}
+	}
+
+	if(split[0] == "register" && MHAND.users[msg.author.id]==undefined){
+		if(split[1] == '' || split[1] == undefined){
+			return;
+		}
+		MHAND.users[msg.author.id] = [msg.author,split[1]]
+		MHAND.uref[split[1]] = msg.author.id
+	} else if(MHAND.uref[split[0]]!= undefined){
+		let idto = MHAND.uref[split[0]]
+		let nameto = split[0]
+		let namefrom = MHAND.users[msg.author.id][1]
+
+		let mscont = content.substring(nameto.length+1)
+
+		if(MHAND.MAUTH != ""){
+			let n = MHAND.ncounter()
+			MHAND.msgWait[n] = [idto,nameto,namefrom,mscont]
+
+			MHAND.MAUTH.send("["+n+"] - "+namefrom+" => "+nameto+" : "+mscont)
+		}
+
+	}
 }
 
 // debugger
