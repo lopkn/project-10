@@ -466,7 +466,7 @@ function pokerHand(msg){
 			}
 		})
 		msg.author.send("===CARDS===\n"+out)
-	} else if(split[0] == "put"){
+	} else if(split[0] == "put" || split[0] == "play"){
 		let c = PDEK.hasCard(P.cards,split[1])
 		if(c === false){
 			msg.author.send("you dont have that card")

@@ -50,7 +50,8 @@
             "33": true,
             "34": true,
             "35": true,
-            "36": true
+            "36": true,
+            "43": true
         }
     },
     "r": {
@@ -263,8 +264,13 @@
             "type": "bio",
             "q": "describe the structure of the cell walls of a gram positive bacteria.",
             "a": " it has a thick peptidoglycan layer on the outside with teichoic acid, one layer of plasma membrane inside. The thick peptidoglycan layer can trap crystal violet/gram stain is trapped, so it will not be washed away with alcohol, so it will appear dark purple/blue after the gram staning test"
+        },
+        "43": {
+            "type": "chem",
+            "q": "how to differentiate between silver bromide and silver chloride?",
+            "a": "Add it to dilute ammonia. If it is silver bromide, the white percipitate will not dissolve (have white percipitate), but silver chloride will turn colorless."
         }
     },
-    "counter": 43,
+    "counter": 44,
     "suggestions": []
 }
