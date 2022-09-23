@@ -25,7 +25,8 @@
             "2": true
         },
         "phy": {
-            "3": true
+            "3": true,
+            "44": true
         },
         "physics": {
             "4": true
@@ -269,8 +270,13 @@
             "type": "chem",
             "q": "how to differentiate between silver bromide and silver chloride?",
             "a": "Add it to dilute ammonia. If it is silver bromide, the white percipitate will not dissolve (have white percipitate), but silver chloride will turn colorless."
+        },
+        "44": {
+            "type": "phy",
+            "q": "",
+            "a": "what is the SI base unit of power?"
         }
     },
-    "counter": 44,
+    "counter": 45,
     "suggestions": []
 }
