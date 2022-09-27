@@ -19,7 +19,10 @@
             "39": true,
             "40": true,
             "41": true,
-            "42": true
+            "42": true,
+            "45": true,
+            "46": true,
+            "47": true
         },
         "math": {
             "2": true
@@ -275,8 +278,23 @@
             "type": "phy",
             "q": "",
             "a": "what is the SI base unit of power?"
+        },
+        "45": {
+            "type": "bio",
+            "q": "describe the process of protein synthesis starting from DNA in the nucleus",
+            "a": "-"
+        },
+        "46": {
+            "type": "bio",
+            "q": "what is the meaning of species richness",
+            "a": "the amount of DIFFERENT SPECIES in an area"
+        },
+        "47": {
+            "type": "bio",
+            "q": "what is the meaning of relative species abundance",
+            "a": "the distribution of different species in an area"
         }
     },
-    "counter": 45,
+    "counter": 48,
     "suggestions": []
 }

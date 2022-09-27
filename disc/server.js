@@ -29,11 +29,15 @@ class handler2s{
 	}
 }
 process.on('uncaughtException',(err)=>{
+	THR(err)
+})
+
+function THR(err){
 	fs.writeFileSync('./memh2.json',JSON.stringify(handler2s.memr,null,4), function writeJSON(err){if(err)return console.log(err)})
 	fs.writeFileSync('./hellMem.json',JSON.stringify(hl.hellMem,null,4), function writeJSON(err){if(err)return console.log(err)})
 	console.log("\x1b[31m%s\x1b[1m" ,"ERROR")
 	throw err
-})
+}
 class emojisdeleter{
 	static counter = 0
 	static newEmojiDelete(){
