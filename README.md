@@ -54,7 +54,7 @@ DONE (after creation of tdl)
 - dragging
 - server generated lightning beams
 - automatic rescaling
-
+- cookies
 
 TO DO LIST
 
@@ -113,8 +113,6 @@ TO DO LIST
 - entity menu
 
 - number display for bars
-
-- try out using cache and cookies
 
 - try out WFC
 
