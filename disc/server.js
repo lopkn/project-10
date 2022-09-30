@@ -53,11 +53,14 @@ client.on('shardError', error => {
 process.on('unhandledRejection', error => {
 	// console.error('Unhandled promise rejection:', error);
 });
+
+var BANEMOJIS = false
+
 function handler2(msg){
 
 	if(msg.author.id == client.user.id){return}
 
-		if(hasEmoji(msg.content)){
+		if(BANEMOJIS && hasEmoji(msg.content)){
 			try{
 				 msg.delete()
 			}catch{}

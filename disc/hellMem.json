@@ -22,7 +22,8 @@
             "42": true,
             "45": true,
             "46": true,
-            "47": true
+            "47": true,
+            "48": true
         },
         "math": {
             "2": true
@@ -293,8 +294,13 @@
             "type": "bio",
             "q": "what is the meaning of relative species abundance",
             "a": "the distribution of different species in an area"
+        },
+        "48": {
+            "type": "bio",
+            "q": "Whats the difference between anatomy and physiology?",
+            "a": "Anatomy is about an organisms body features, Physiology is about how those features work."
         }
     },
-    "counter": 48,
+    "counter": 49,
     "suggestions": []
 }
