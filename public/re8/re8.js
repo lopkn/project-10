@@ -188,6 +188,7 @@ class EHAND{
     game.ms.held = false
     if(game.ms.hacted){
       game.ms.hacted = false
+      socket.emit("drag",{"id":ID,"x":game.ss.x,"y":game.ss.y,"tx":game.ms.heldSpace[0],"ty":game.ms.held[1]})
       console.log("dragged from:"+JSON.stringify(game.ms.heldSpace)+" to "+game.ss.x+","+game.ss.y)
     } else {
       socket.emit("click",{"id":ID,"x":game.ss.x,"y":game.ss.y})
