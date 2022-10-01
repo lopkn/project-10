@@ -28,6 +28,9 @@ socket.on("joinedRoom",(e)=>{
 socket.on("startGame",(e)=>{
   game.startProcess(e)
 })
+socket.on("entityUpdate",(e)=>{
+  game.entityUpdate(e)
+})
 
 function lobby(){
   let b1 = document.createElement("button")
@@ -78,21 +81,32 @@ function boarderRect(x,y,w,h,bloat,col){
 }
 
 
-var MRef = {"MTS":800,"wholeHeight":0,"wholeWidth":0}
+var MRef = {"MTS":800,"vision":0,"wholeHeight":0,"wholeWidth":0,"MTD":{}}
 
 
 class game{
   static state = "lobby"
   static map = {}
+  static enDict = {}
+  static camera = [0,0]
   static startProcess(e){
 
-    
+    // this.enDict = e.enDict
     this.map = e.map
     MRef.MTS = document.getElementById("t1").value
-    MRef.MTS /= e.map.width>e.map.height?e.map.width:e.map.height
+    MRef.MTS /= e.vision
+    MRef.vision = e.vision
 
     MRef.wholeHeight = MRef.MTS * e.map.height
     MRef.wholeWidth = MRef.MTS * e.map.width
+
+    let mm = MRef.MTS
+
+    MRef.MTD = {
+      "0.1":mm/10,
+      "0.2":mm/5,
+      "0.5":mm/2
+    }
 
     this.state = "started"
 
@@ -122,6 +136,14 @@ class game{
           boarderRect(this.ms.heldSpace[0]*MRef.MTS,this.ms.heldSpace[1]*MRef.MTS,MRef.MTS,MRef.MTS,4,"#FFA000")
           break;
       }
+    }
+  }
+
+  static entityUpdate(e){
+    if(e[1] !== "-DEL-"){
+      this.enDict[e[0]] = e[1]
+    } else {
+      delete this.enDict[e[0]]
     }
   }
 
@@ -168,6 +190,7 @@ class EHAND{
       game.ms.hacted = false
       console.log("dragged from:"+JSON.stringify(game.ms.heldSpace)+" to "+game.ss.x+","+game.ss.y)
     } else {
+      socket.emit("click",{"id":ID,"x":game.ss.x,"y":game.ss.y})
       console.log("clicked on: "+game.ss.x+","+game.ss.y)
     }
     game.ss.mode = "inspect"
@@ -236,11 +259,8 @@ document.addEventListener("mouseup",(e)=>{
 })
 
 document.addEventListener("keydown",(e)=>{
-  // e.preventDefault()
 
   let key = e.key
-
-
 
 })
 
@@ -248,8 +268,18 @@ document.addEventListener("keyup",(e)=>{
   e.preventDefault()
   let key = e.key
 
+  if(key == "ArrowUp"){
+     game.camera[1] -= 1
+    } else if(key == "ArrowDown"){
+        game.camera[1] += 1
+    } else if(key == "ArrowLeft"){
+      game.camera[0] -= 1
+    } else if(key == "ArrowRight"){
+      game.camera[0] += 1
+    } else {
 
-
+      socket.emit("key",{"id":ID,"key":key})
+    }
 })
 
 
@@ -264,14 +294,25 @@ function repeat(e){
     mainCTX.clearRect(0,0,wWidth,wHeight)
     mainCTX.fillRect(0,0,wWidth,wHeight)
 
-    let mapArr = Object.keys(game.map)
-    mapArr.forEach((e,i)=>{
-      let coord = e.split(",")
-      let tileInfo = game.map[e]
+    let mapArr = Object.keys(game.map.tiles)
+    // mapArr.forEach((e,i)=>{
+    //   // let coord = e.split(",")
+    //   // let tileInfo = game.map[e]
 
-      mainCTX.fillStyle = tileInfo.color
-      mainCTX.fillRect(MRef.MTS*coord[0],MRef.MTS*coord[1],MRef.MTS,MRef.MTS)
-    })
+    //   // mainCTX.fillStyle = tileInfo.color
+    //   // mainCTX.fillRect(MRef.MTS*coord[0],MRef.MTS*coord[1],MRef.MTS,MRef.MTS)
+    // })
+
+    for(let i = 0; i < MRef.vision; i++){
+      for(let j = 0; j < MRef.vision; j++){
+        let gp = getApos(i,j)
+        let pos = gp[0] + ","+gp[1]
+        mainCTX.fillStyle = game.map.tiles[pos].color
+        mainCTX.fillRect(MRef.MTS*i,MRef.MTS*j,MRef.MTS,MRef.MTS)
+      }
+    }
+
+
 
     mainCTX.strokeStyle = "#000000"
     mainCTX.lineWidth = 3
@@ -286,6 +327,13 @@ function repeat(e){
     }
     mainCTX.stroke()
 
+
+    let enObj = Object.keys(game.enDict)
+
+    enObj.forEach((e,i)=>{
+      entityRender(game.enDict[e])
+    })
+
     EHAND.repeat(e)
     game.renderSelectedSpot()
 
@@ -295,4 +343,29 @@ function repeat(e){
 
 
 
+function getApos(x,y){
+
+    let h = game.map.height
+    let w = game.map.width
+
+   let xx = game.camera[0] + x
+   let yy = game.camera[1] + y
+
+   return([xx%w>=0?xx%w:(w+xx%w),yy%h>=0?yy%h:h+yy%h])
+
+  }
+
+
+function entityRender(e){
+
+  let ax = e.x-game.camera[0]
+  let ay = e.y-game.camera[1]
+
+  switch(e.type){
+    case "factory":
+      mainCTX.fillStyle = "#909090"
+      mainCTX.fillRect(ax*MRef.MTS+4,ay*MRef.MTS+4,MRef.MTS-8,MRef.MTS-8)
+      break;
+  }
+}
 

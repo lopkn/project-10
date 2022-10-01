@@ -5694,16 +5694,16 @@ class re8{
 		if(this.rooms[this.players[e.id].room].started === false){
 			let tr = this.rooms[this.players[e.id].room]
 			tr.started = true
-			let map = {"width":15,"height":15}
+			let map = {"width":15,"height":15,"tiles":{}}
 			for(let i = 0; i < map.width; i++){
 				for(let j = 0; j < map.height; j++){
-					map[i+","+j] = this.generateTile("grass","rgb(0,"+Math.random()*255+",0)")
+					map.tiles[i+","+j] = this.generateTile("grass","rgb(0,"+Math.random()*255+",0)")
 				}
 			}
 			tr.map = map
 			tr.enmap = {}
 			tr.enDict = {}
-			io.to(this.players[e.id].room).emit("startGame",{"map":map})
+			io.to(this.players[e.id].room).emit("startGame",{"map":map,"vision":15})
 		}
 	}
 
@@ -5728,8 +5728,8 @@ class re8{
 		if(this.players[e.id].factoryUnplaced){
 			delete this.players[e.id].factoryUnplaced
 			let p = this.players[e.id]
-			let gp = this.getApos(e.id,e.x,e.y)
-			this.newEntity(e.id,gp[0],gp[1],"factory",rm)
+			// let gp = this.getApos(e.id,e.x,e.y)
+			this.newEntity(e.id,e.x,e.y,"factory",rm)
 		}
 	}
 
@@ -5737,25 +5737,28 @@ class re8{
 
 	}
 
-	static getApos(id,x,y){
-		let p = this.players[id]
-		let h = 0
-		let w = 0
+	// static getApos(id,x,y){
+	// 	let p = this.players[id]
+	// 	let h = 0
+	// 	let w = 0
 
-		if(this.rooms[p.room].started){
-			let r = this.rooms[p.room].map
-			h = r.height
-			w = r.width
-		}
+	// 	if(this.rooms[p.room].started){
+	// 		let r = this.rooms[p.room].map
+	// 		h = r.height
+	// 		w = r.width
+	// 	}
 
-		let xx = p.camera[0] + x
-		let yy = p.camera[1] + y
+	// 	let xx = p.camera[0] + x
+	// 	let yy = p.camera[1] + y
 
-		return([xx>=0?xx%w:w+xx%w,yy>=0?yy%h:h+yy%h])
+	// 	return([xx>=0?xx%w:w+xx%w,yy>=0?yy%h:h+yy%h])
 
-	}
+	// }
 
 	static key(e,rm){
+
+		let key = e.key
+
 
 	}
 
@@ -5776,6 +5779,12 @@ class re8{
 		room.enDict[eid].type = entity
 		this.rmEnmaper(room,eid,x+","+y,"add")
 
+		this.emitEntityUpdate(eid,room)
+
+	}
+
+	static emitEntityUpdate(id,rm){
+		io.to(rm.name).emit("entityUpdate",[id,rm.enDict[id]])
 	}
 
 	static rmEnmaper(rm,enid,loc,op){
