@@ -12,7 +12,7 @@ let GAMESESSION = "G10.3"
 socket.emit("JOINGAME",GAMESESSION)
 
 var ID = 0
-var TEAM = window.prompt("what room would you join?","0:t")+"-"+window.prompt("what team would you join?","0")+"-"+window.prompt("what color?","p")
+var TEAM = window.prompt("what room would you join?","0")+":"+window.prompt("room type?","t")+"-"+window.prompt("what team would you join?","0")+"-"+window.prompt("what color?","p")
 
 socket.on("acknowledge G10.3",(e)=>{ID = e; console.log("joined as e")
   socket.emit("jointeam",[TEAM,ID])
@@ -39,7 +39,7 @@ function lobby(){
   b1.style.width = '70px'
   b1.style.zIndex = 2
   b1.style.position = "absolute"
-  b1.onclick = ()=>{startGame();console.log("hi")}
+  b1.onclick = ()=>{startGame()}
   document.body.appendChild(b1)
 
   let t1 = document.createElement("input")
@@ -73,11 +73,12 @@ function boarderRect(x,y,w,h,bloat,col){
   mainCTX.lineTo(x+w,y+h)
   mainCTX.lineTo(x,y+h)
   mainCTX.lineTo(x,y)
+  mainCTX.lineTo(x+w,y)
   mainCTX.stroke();
 }
 
 
-var MRef = {"MTS":800}
+var MRef = {"MTS":800,"wholeHeight":0,"wholeWidth":0}
 
 
 class game{
@@ -89,6 +90,10 @@ class game{
     this.map = e.map
     MRef.MTS = document.getElementById("t1").value
     MRef.MTS /= e.map.width>e.map.height?e.map.width:e.map.height
+
+    MRef.wholeHeight = MRef.MTS * e.map.height
+    MRef.wholeWidth = MRef.MTS * e.map.width
+
     this.state = "started"
 
 
@@ -103,17 +108,18 @@ class game{
   }
 
   static ss = {"mode":"inspect","x":0,"y":0,"boxes":"main"}
-  static ms = {"held":false,"heldTime":0}
+  static ms = {"held":false,"hacted":false,"heldTime":0,"heldSpace":[false]}
 
   static renderSelectedSpot(){
     let ss = this.ss
     if(ss.boxes == "main"){
       switch(ss.mode){
         case "inspect":
-          boarderRect(ss.x*MRef.MTS,ss.y*MRef.MTS,MRef.MTS,MRef.MTS,2,"white")
+          boarderRect(ss.x*MRef.MTS,ss.y*MRef.MTS,MRef.MTS,MRef.MTS,4,"white")
           break;
-        case "drag"
-          boarderRect(ss.x*MRef.MTS,ss.y*MRef.MTS,MRef.MTS,MRef.MTS,2,"purple")
+        case "drag":
+          boarderRect(ss.x*MRef.MTS,ss.y*MRef.MTS,MRef.MTS,MRef.MTS,4,"red")
+          boarderRect(this.ms.heldSpace[0]*MRef.MTS,this.ms.heldSpace[1]*MRef.MTS,MRef.MTS,MRef.MTS,4,"#FFA000")
           break;
       }
     }
@@ -136,8 +142,13 @@ class EHAND{
   static heldMouseDown(e){
     if(inRect(mouseX,mouseY,0,0,game.map.width*MRef.MTS,game.map.height*MRef.MTS)){
       game.ss.boxes = "main"
-      if(game.ms.heldTime > 50){
-        game.ss.mode = "drag"
+      if(game.ms.heldTime > 15){
+        if(game.ms.hacted === false){
+        this.heldDown(e)
+        }
+      } else {
+        mainCTX.fillStyle = "rgba(255,0,0,"+game.ms.heldTime/30+")"
+        mainCTX.fillRect(mouseX,mouseY,150-game.ms.heldTime*10,20)
       }
       let t = game.OtM(mouseX,mouseY)
       game.ss.x = t[0]
@@ -145,8 +156,21 @@ class EHAND{
     }
   }
 
+  static heldDown(e){
+    game.ms.hacted = true
+    game.ss.mode = "drag"
+    game.ms.heldSpace = [game.ss.x,game.ss.y]
+  }
+
   static mouseUpHandler(e){
     game.ms.held = false
+    if(game.ms.hacted){
+      game.ms.hacted = false
+      console.log("dragged from:"+JSON.stringify(game.ms.heldSpace)+" to "+game.ss.x+","+game.ss.y)
+    } else {
+      console.log("clicked on: "+game.ss.x+","+game.ss.y)
+    }
+    game.ss.mode = "inspect"
     game.ms.heldTime = 0
   }
 
@@ -248,6 +272,20 @@ function repeat(e){
       mainCTX.fillStyle = tileInfo.color
       mainCTX.fillRect(MRef.MTS*coord[0],MRef.MTS*coord[1],MRef.MTS,MRef.MTS)
     })
+
+    mainCTX.strokeStyle = "#000000"
+    mainCTX.lineWidth = 3
+    mainCTX.beginPath()
+    for(let i = 0; i < game.map.width+1; i++){
+      mainCTX.moveTo(MRef.MTS*i,0)
+      mainCTX.lineTo(MRef.MTS*i,MRef.wholeHeight)
+    }
+    for(let i = 0; i < game.map.height+1; i++){
+      mainCTX.moveTo(0,MRef.MTS*i)
+      mainCTX.lineTo(MRef.wholeWidth,MRef.MTS*i)
+    }
+    mainCTX.stroke()
+
     EHAND.repeat(e)
     game.renderSelectedSpot()
 

@@ -1549,6 +1549,9 @@ function joinGame(game,socket){
 		io.to(socket.id).emit("acknowledge G10.3",socket.id)
 		socket.on("jointeam",(e)=>{re8.initiatePlayer(e,socket)})
 		socket.on("startRoom",(e)=>{re8.startRoom(e)})
+		socket.on("click",(e)=>{re8.rmHandler(e,"click")})
+		socket.on("drag",(e)=>{re8.rmHandler(e,"drag")})
+		socket.on("key",(e)=>{re8.rmHandler(e,"key")})
 	}
 }
 
@@ -5659,6 +5662,7 @@ class re8{
 	static rooms = {}
 	static referencer = {"color":{"r":"#A00000","b":"#0000A0","y":"#A0A000","o":"#A04000","p":"#0060C0"}}
 
+	static enIDCnt = 0
 
 	static initiatePlayer(e,socket){
 		if(this.players[e[1]]== undefined ){
@@ -5667,7 +5671,9 @@ class re8{
 				"id":e[1],
 				"color":DFNorm(this.referencer.color,split[2]),
 				"team":split[1],
-				"room":split[0].split(":")[0]
+				"room":split[0].split(":")[0],
+				"camera":[0,0],
+				"factoryUnplaced":true
 			}
 			let n = split[0].split(":")[0]
 			if(this.rooms[n]==undefined){
@@ -5694,12 +5700,111 @@ class re8{
 					map[i+","+j] = this.generateTile("grass","rgb(0,"+Math.random()*255+",0)")
 				}
 			}
+			tr.map = map
+			tr.enmap = {}
+			tr.enDict = {}
 			io.to(this.players[e.id].room).emit("startGame",{"map":map})
 		}
 	}
 
+	static rmHandler(e,type){
+		if(this.rooms[this.players[e.id].room].started){
+			let rm = this.rooms[this.players[e.id].room]
+			switch(type){
+				case "click":
+					this.click(e,rm)
+					break;
+				case "drag":
+					this.drag(e,rm)
+					break;
+				case "key":
+					this.key(e,rm)
+					break;
+			}
+		}
+	}
+
+	static click(e,rm){
+		if(this.players[e.id].factoryUnplaced){
+			delete this.players[e.id].factoryUnplaced
+			let p = this.players[e.id]
+			let gp = this.getApos(e.id,e.x,e.y)
+			this.newEntity(e.id,gp[0],gp[1],"factory",rm)
+		}
+	}
+
+	static drag(e,rm){
+
+	}
+
+	static getApos(id,x,y){
+		let p = this.players[id]
+		let h = 0
+		let w = 0
+
+		if(this.rooms[p.room].started){
+			let r = this.rooms[p.room].map
+			h = r.height
+			w = r.width
+		}
+
+		let xx = p.camera[0] + x
+		let yy = p.camera[1] + y
+
+		return([xx>=0?xx%w:w+xx%w,yy>=0?yy%h:h+yy%h])
+
+	}
+
+	static key(e,rm){
+
+	}
+
 	static generateTile(n,c){
 		return({"ground":n,"color":c})
+	}
+
+
+
+	static newEntity(id,x,y,entity,room){
+		this.enIDCnt += 1
+		let eid = this.enIDCnt
+
+		room.enDict[eid] = this.entityDictor(entity)
+		room.enDict[eid].id = eid
+		room.enDict[eid].x = x
+		room.enDict[eid].y = y
+		room.enDict[eid].type = entity
+		this.rmEnmaper(room,eid,x+","+y,"add")
+
+	}
+
+	static rmEnmaper(rm,enid,loc,op){
+		let place = rm.enmap[loc]
+		if(op == "add"){
+			if(place == undefined){
+				rm.enmap[loc] = []
+			}
+				rm.enmap[loc].push(enid)
+		} else if("remove"){
+			place = place.filter(e => e !== enid)
+			if(place.length == 0){
+				delete rm.enmap[loc]
+			}
+		}
+	}
+
+
+	static entityDictor(en){
+		switch(en){
+			case "factory":
+				return({
+					"hp":300,
+					"moveable":false,
+					"sight":5,
+					"canshoot":false,
+					"cooldown":["none",0,0]
+				})
+		}
 	}
 
 }
@@ -5709,6 +5814,13 @@ function DFNorm(dict,val){
 		return(dict.default)
 	}
 	return(dict[val])
+}
+
+function mergeDict(d,d2){
+	let obj = Object.keys(d2)
+	obj.forEach((e)=>{
+		d[e] = d2[e]
+	})
 }
 
 
