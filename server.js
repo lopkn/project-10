@@ -5731,6 +5731,30 @@ class re8{
 		})
 	}
 
+	static uplayerVision2(id,rm){
+		let finalVision = {}
+		let p = this.players[id]
+		let room = this.rooms[rm]
+
+		if(!room.teamVision){
+			let penArr = Object.keys(p.entities)
+			penArr.forEach((e,i)=>{
+				let vis = room.enDict[e].Asight
+				let objvis = Object.keys(vis)
+
+				objvis.forEach((E,I)=>{
+					if(finalVision[E] == undefined || finalVision[E].dist < vis[E].dist){
+						finalVision[E] = vis[E]
+						finalVision[E]["by"] = e
+					}
+				})
+
+			})
+		}
+
+		return(finalVision)
+
+	}
 
 	static uplayerVision(e,rm){
 		let p = this.players[e]
@@ -5743,26 +5767,28 @@ class re8{
 
 			let penArr = Object.keys(p.entities)
 			penArr.forEach((e,i)=>{
-				let en = this.players[e].entities[e]
+				let en = this.rooms[rm].enDict[e]
 
 				let sightLim = [[en.sight,en.x,en.y]]
 
 				while(sightLim.length > 0){
 					let tempVision = {}
 					sightLim.forEach((E,I)=>{
-						let number = E[1]-1
+						let number = E[0]-1
 						if(number > 0){
 							for(let j = 0; j < 4; j++){
-								let w = this.walkerD(j,E[1],E[2])
+								let W = this.walkerD(j,E[1],E[2])
+								let w = this.reApos(w[0],w[1],room.vision,room.vision) 
 								let wl = w[0]+","+w[1]
-								if(tempVision[wl] == undefined || tempVision[wl][0] < numnber){
-									tempVision[wl] = [E[1],w[0],w[1]]
+								if(tempVision[wl] == undefined || tempVision[wl][0] < number){
+									tempVision[wl] = [number,w[0],w[1]]
 								}
 							}
 						}
 					})
 
 					sightLim = []
+
 
 					let objk = Object.keys(tempVision)
 					objk.forEach((E,I)=>{
@@ -5778,10 +5804,53 @@ class re8{
 
 			})
 
-			console.log(finalVision)
+			
 
 		}
 
+	}
+	static uenVision(id,rm){
+		let room = this.rooms[rm]
+
+			let finalVision = {}
+			
+				let en = this.rooms[rm].enDict[id]
+
+				let sightLim = [[en.sight,en.x,en.y,0,0]]
+
+				while(sightLim.length > 0){
+					let tempVision = {}
+					sightLim.forEach((E,I)=>{
+						let number = E[0]-1
+						if(number > 0){
+							for(let j = 0; j < 4; j++){
+								let W = this.walkerD(j,E[1],E[2])
+								if(distance(0,0,walkerD[0]+e[3],walkerD[1]+e[4]) > en.sight){
+									continue;
+								}
+								let w = this.reApos(W[0],W[1],room.vision,room.vision) 
+								let wl = w[0]+","+w[1]
+								if(tempVision[wl] == undefined || tempVision[wl][0] < number){
+									tempVision[wl] = [number,w[0],w[1],walkerD[0]+e[3],walkerD[1]+e[4]]
+								}
+							}
+						}
+					})
+
+					sightLim = []
+
+
+					let objk = Object.keys(tempVision)
+					objk.forEach((E,I)=>{
+						sightLim.push(tempVision[E])
+
+						if(finalVision[E] == undefined || finalVision.dist < tempVision[E][0]){
+							finalVision[E] = {"dist":tempVision[E][0],"x":tempVision[E][1],"y":tempVision[E][2]}
+						}
+
+					})
+				}
+		return(finalVision)
 	}
 
 	static walkerD(num,x,y){
@@ -5794,6 +5863,10 @@ class re8{
 		} else if(num == 3){
 			return([x,y-1])
 		}
+	}
+
+	static reApos(x,y,w,h){
+		return([x%w>=0?x%w:(w+x%w),y%h>=0?y%h:h+y%h])
 	}
 
 	static rmHandler(e,type){
@@ -5817,9 +5890,28 @@ class re8{
 		if(this.players[e.id].factoryUnplaced){
 			delete this.players[e.id].factoryUnplaced
 			let p = this.players[e.id]
-			// let gp = this.getApos(e.id,e.x,e.y)
 			this.newEntity(e.id,e.x,e.y,"factory",rm,p.team)
+			// p.temporalMap = uplayerVision2(e.id,rm.name)
+			this.sendPlayerMapUpdate(e.id,rm)
 		}
+	}
+
+
+	static sendPlayerMapUpdate(id,room){
+		let p = this.players[id]
+		let prv = this.uplayerVision2(id,room.name)
+
+		this.players[id].temporalMap = prv
+
+		let map = {}
+		
+		let objk = Object.keys(prv)
+		objk.forEach((e,i)=>{
+			map[e] = mergeDict(prv[e],room.map.tiles[e])
+		})
+
+		io.to(id).emit("personalMapUpdate",{"map":map})
+
 	}
 
 	static drag(e,rm){
@@ -5869,6 +5961,8 @@ class re8{
 		room.enDict[eid].color = this.players[id].color
 		room.enDict[eid].type = entity
 		room.enDict[eid].team = team
+
+		room.enDict[eid].Asight = this.uenVision(eid,room.name)
 
 		this.players[id].entities[eid] = true
 		room.teams[team].entities[eid] = true
@@ -5938,6 +6032,7 @@ function mergeDict(d,d2){
 	obj.forEach((e)=>{
 		d[e] = d2[e]
 	})
+	return(d)
 }
 
 

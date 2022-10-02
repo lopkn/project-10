@@ -31,6 +31,10 @@ socket.on("startGame",(e)=>{
 socket.on("entityUpdate",(e)=>{
   game.entityUpdate(e)
 })
+socket.on("personalMapUpdate",(e)=>{
+  game.pmu(e)
+})
+
 
 function lobby(){
   let b1 = document.createElement("button")
@@ -145,6 +149,11 @@ class game{
     } else {
       delete this.enDict[e[0]]
     }
+  }
+
+
+  static pmu(e){
+    game.map = {"height":game.map.height,"width":game.map.width,"tiles":e.map}
   }
 
 }
@@ -367,7 +376,13 @@ function repeat(e){
       for(let j = 0; j < MRef.vision; j++){
         let gp = getApos(i,j)
         let pos = gp[0] + ","+gp[1]
-        mainCTX.fillStyle = game.map.tiles[pos].color
+
+        let col = "#000000"
+        
+        if(game.map.tiles[pos]!=undefined){
+          col = game.map.tiles[pos].color
+        }
+        mainCTX.fillStyle = col
         mainCTX.fillRect(MRef.MTS*i,MRef.MTS*j,MRef.MTS,MRef.MTS)
       }
     }
