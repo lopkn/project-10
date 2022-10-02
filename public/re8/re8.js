@@ -101,8 +101,8 @@ class game{
     MRef.MTS /= e.vision
     MRef.vision = e.vision
 
-    MRef.wholeHeight = MRef.MTS * e.map.height
-    MRef.wholeWidth = MRef.MTS * e.map.width
+    MRef.wholeHeight = MRef.MTS * e.vision
+    MRef.wholeWidth = MRef.MTS * e.vision
 
     let mm = MRef.MTS
 
@@ -125,12 +125,12 @@ class game{
     return([Math.floor(x/MRef.MTS),Math.floor(y/MRef.MTS)])
   }
 
-  static ss = {"mode":"inspect","x":0,"y":0,"boxes":"main"}
+  static ss = {"mode":"inspect","ax":0,"ay":0,"x":0,"y":0,"boxes":"main"}
   static ms = {"held":false,"hacted":false,"heldTime":0,"heldSpace":[false]}
 
   static renderSelectedSpot(){
     let ss = this.ss
-    if(ss.boxes == "main"){
+    // if(ss.boxes == "main"){
       switch(ss.mode){
         case "inspect":
           boarderRect(ss.x*MRef.MTS,ss.y*MRef.MTS,MRef.MTS,MRef.MTS,4,"white")
@@ -140,7 +140,7 @@ class game{
           boarderRect(this.ms.heldSpace[0]*MRef.MTS,this.ms.heldSpace[1]*MRef.MTS,MRef.MTS,MRef.MTS,4,"#FFA000")
           break;
       }
-    }
+    // }
   }
 
   static entityUpdate(e){
@@ -161,11 +161,16 @@ class game{
 
 class EHAND{
   static mouseHandler(e){
-    if(inRect(mouseX,mouseY,0,0,game.map.width*MRef.MTS,game.map.height*MRef.MTS)){
+    if(inRect(mouseX,mouseY,0,0,MRef.wholeWidth,MRef.wholeHeight)){
       game.ss.boxes = "main"
       let t = game.OtM(mouseX,mouseY)
       game.ss.x = t[0]
       game.ss.y = t[1]
+
+      let A = reApos(t[0]+game.camera[0],t[1]+game.camera[1],game.map.width,game.map.height)
+      game.ss.ax = A[0]
+      game.ss.ay = A[1]
+
     } else if(inRect(mouseX,mouseY,MRef.wholeWidth,0,MRef.wholeWidth+MRef.buttonW,MRef.buttonH*B.buttons.length)){
       this.buttonPressed()
     } else {
@@ -175,9 +180,19 @@ class EHAND{
   }
 
   static heldMouseDown(e){
-    if(inRect(mouseX,mouseY,0,0,game.map.width*MRef.MTS,game.map.height*MRef.MTS)){
+    if(inRect(mouseX,mouseY,0,0,MRef.wholeWidth,MRef.wholeHeight)){
       game.ss.boxes = "main"
-      if(game.ms.heldTime > 15){
+      let t = game.OtM(mouseX,mouseY)
+      game.ss.x = t[0]
+      game.ss.y = t[1]
+      let A = reApos(t[0]+game.camera[0],t[1]+game.camera[1],game.map.width,game.map.height)
+      game.ss.ax = A[0]
+      game.ss.ay = A[1]
+    } else {
+      game.ss.boxes = "out"
+    }
+
+    if(game.ms.heldTime > 15){
         if(game.ms.hacted === false){
         this.heldDown(e)
         }
@@ -185,18 +200,12 @@ class EHAND{
         mainCTX.fillStyle = "rgba(255,0,0,"+game.ms.heldTime/30+")"
         mainCTX.fillRect(mouseX,mouseY,150-game.ms.heldTime*10,20)
       }
-      let t = game.OtM(mouseX,mouseY)
-      game.ss.x = t[0]
-      game.ss.y = t[1]
-    } else {
-      game.ss.boxes = "out"
-    }
   }
 
   static heldDown(e){
     game.ms.hacted = true
     game.ss.mode = "drag"
-    game.ms.heldSpace = [game.ss.x,game.ss.y]
+    game.ms.heldSpace = [game.ss.x,game.ss.y,game.ss.ax,game.ss.ay]
   }
 
   static mouseUpHandler(e){
@@ -204,12 +213,15 @@ class EHAND{
     if(game.ss.boxes == "main"){
     if(game.ms.hacted){
       game.ms.hacted = false
-      socket.emit("drag",{"id":ID,"x":game.ss.x,"y":game.ss.y,"tx":game.ms.heldSpace[0],"ty":game.ms.held[1],"mode":"main"})
-      console.log("dragged from:"+JSON.stringify(game.ms.heldSpace)+" to "+game.ss.x+","+game.ss.y)
+      socket.emit("drag",{"id":ID,"x":game.ss.ax,"y":game.ss.ay,"tx":game.ms.heldSpace[2],"ty":game.ms.heldSpace[3],"mode":"main"})
+      console.log("dragged from:"+JSON.stringify(game.ms.heldSpace)+" to "+game.ss.ax+","+game.ss.ay)
     } else {
-      socket.emit("click",{"id":ID,"x":game.ss.x,"y":game.ss.y,"mode":"main"})
-      console.log("clicked on: "+game.ss.x+","+game.ss.y)
-    }}
+      socket.emit("click",{"id":ID,"x":game.ss.ax,"y":game.ss.ay,"mode":"main"})
+      console.log("clicked on: "+game.ss.ax+","+game.ss.ay)
+    }} else if(game.ss.boxes == "out"){
+  
+    }
+    game.ms.hacted = false
     game.ss.mode = "inspect"
     game.ms.heldTime = 0
   }
@@ -392,11 +404,11 @@ function repeat(e){
     mainCTX.strokeStyle = "#000000"
     mainCTX.lineWidth = 3
     mainCTX.beginPath()
-    for(let i = 0; i < game.map.width+1; i++){
+    for(let i = 0; i < MRef.vision+1; i++){
       mainCTX.moveTo(MRef.MTS*i,0)
       mainCTX.lineTo(MRef.MTS*i,MRef.wholeHeight)
     }
-    for(let i = 0; i < game.map.height+1; i++){
+    for(let i = 0; i < MRef.vision+1; i++){
       mainCTX.moveTo(0,MRef.MTS*i)
       mainCTX.lineTo(MRef.wholeWidth,MRef.MTS*i)
     }
@@ -420,8 +432,8 @@ function repeat(e){
 
 function getApos(x,y){
 
-    let h = MRef.vision
-    let w = MRef.vision
+    let h = game.map.height
+    let w = game.map.width
 
    let xx = game.camera[0] + x
    let yy = game.camera[1] + y
@@ -437,14 +449,18 @@ function reApos(x,y,w,h){
 
 function entityRender(e){
 
-  let rp = reApos(game.camera[0],game.camera[1],MRef.vision,MRef.vision)
+  let rp = reApos(game.camera[0],game.camera[1],game.map.width,game.map.height)
 
-  let rrp = reApos(e.x-rp[0],e.y-rp[1],MRef.vision,MRef.vision)
+  let rrp = reApos(e.x-rp[0],e.y-rp[1],game.map.width,game.map.height)
 
   // let ax = e.x-rp[0]
   // let ay = e.y-rp[1]
   let ax = rrp[0]
   let ay = rrp[1]
+
+  if(ax > MRef.vision-1 || ay > MRef.vision-1){
+    return
+  }
 
   switch(e.type){
     case "factory":

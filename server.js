@@ -5702,7 +5702,7 @@ class re8{
 		if(this.rooms[this.players[e.id].room].started === false){
 			let tr = this.rooms[this.players[e.id].room]
 			tr.started = true
-			let map = {"width":15,"height":15,"tiles":{}}
+			let map = {"width":45,"height":45,"tiles":{}}
 			for(let i = 0; i < map.width; i++){
 				for(let j = 0; j < map.height; j++){
 					map.tiles[i+","+j] = this.generateTile("grass","rgb(0,"+Math.random()*255+",0)")
@@ -5733,6 +5733,7 @@ class re8{
 
 	static uplayerVision2(id,rm){
 		let finalVision = {}
+		let visionArray = []
 		let p = this.players[id]
 		let room = this.rooms[rm]
 
@@ -5740,6 +5741,7 @@ class re8{
 			let penArr = Object.keys(p.entities)
 			penArr.forEach((e,i)=>{
 				let vis = room.enDict[e].Asight
+				visionArray.push(vis)
 				let objvis = Object.keys(vis)
 
 				objvis.forEach((E,I)=>{
@@ -5752,39 +5754,37 @@ class re8{
 			})
 		}
 
-		return(finalVision)
+		return([finalVision,visionArray])
 
 	}
 
-	static uplayerVision(e,rm){
-		let p = this.players[e]
+	static uenVisionC(id,rm){
 		let room = this.rooms[rm]
 
-		if(!room.teamVision){
-
 			let finalVision = {}
+			
+				let en = this.rooms[rm].enDict[id]
 
-
-			let penArr = Object.keys(p.entities)
-			penArr.forEach((e,i)=>{
-				let en = this.rooms[rm].enDict[e]
-
-				let sightLim = [[en.sight,en.x,en.y]]
+				let sightLim = [[0,en.x,en.y,0,0]]
 
 				while(sightLim.length > 0){
 					let tempVision = {}
 					sightLim.forEach((E,I)=>{
-						let number = E[0]-1
-						if(number > 0){
+						
 							for(let j = 0; j < 4; j++){
 								let W = this.walkerD(j,E[1],E[2])
-								let w = this.reApos(w[0],w[1],room.vision,room.vision) 
+								let d = distance(0,0,W[2]+E[3],W[3]+E[4])
+								
+								if(d > en.sight){
+									continue;
+								}
+								let w = this.reApos(W[0],W[1],room.map.width,room.map.height) 
 								let wl = w[0]+","+w[1]
-								if(tempVision[wl] == undefined || tempVision[wl][0] < number){
-									tempVision[wl] = [number,w[0],w[1]]
+								if(tempVision[wl] == undefined && finalVision[wl] == undefined){
+									tempVision[wl] = [Math.floor(d),w[0],w[1],W[2]+E[3],W[3]+E[4],d]
 								}
 							}
-						}
+						
 					})
 
 					sightLim = []
@@ -5794,21 +5794,15 @@ class re8{
 					objk.forEach((E,I)=>{
 						sightLim.push(tempVision[E])
 
-						if(finalVision[E] == undefined || finalVision.dist < tempVision[E][0]){
-							finalVision[E] = {"by":e,"dist":tempVision[E][0],"x":tempVision[E][1],"y":tempVision[E][2]}
+						if(finalVision[E] == undefined){
+							finalVision[E] = {"dist":tempVision[E][0],"x":tempVision[E][1],"y":tempVision[E][2]}
 						}
 
 					})
 				}
-
-
-			})
-
-			
-
-		}
-
+		return(finalVision)
 	}
+	
 	static uenVision(id,rm){
 		let room = this.rooms[rm]
 
@@ -5825,10 +5819,7 @@ class re8{
 						if(number > 0){
 							for(let j = 0; j < 4; j++){
 								let W = this.walkerD(j,E[1],E[2])
-								if(distance(0,0,walkerD[0]+e[3],walkerD[1]+e[4]) > en.sight){
-									continue;
-								}
-								let w = this.reApos(W[0],W[1],room.vision,room.vision) 
+								let w = this.reApos(W[0],W[1],room.map.width,room.map.height) 
 								let wl = w[0]+","+w[1]
 								if(tempVision[wl] == undefined || tempVision[wl][0] < number){
 									tempVision[wl] = [number,w[0],w[1],walkerD[0]+e[3],walkerD[1]+e[4]]
@@ -5844,7 +5835,7 @@ class re8{
 					objk.forEach((E,I)=>{
 						sightLim.push(tempVision[E])
 
-						if(finalVision[E] == undefined || finalVision.dist < tempVision[E][0]){
+						if(finalVision[E] == undefined || finalVision[E].dist < tempVision[E][0]){
 							finalVision[E] = {"dist":tempVision[E][0],"x":tempVision[E][1],"y":tempVision[E][2]}
 						}
 
@@ -5855,13 +5846,13 @@ class re8{
 
 	static walkerD(num,x,y){
 		if(num == 0){
-			return([x+1,y])
+			return([x+1,y,1,0])
 		} else if(num == 1){
-			return([x-1,y])
+			return([x-1,y,-1,0])
 		} else if(num == 2){
-			return([x,y+1])
+			return([x,y+1,0,1])
 		} else if(num == 3){
-			return([x,y-1])
+			return([x,y-1,0,-1])
 		}
 	}
 
@@ -5899,9 +5890,10 @@ class re8{
 
 	static sendPlayerMapUpdate(id,room){
 		let p = this.players[id]
-		let prv = this.uplayerVision2(id,room.name)
+		let prvWhole = this.uplayerVision2(id,room.name)
+		let prv = prvWhole[0]
 
-		this.players[id].temporalMap = prv
+		this.players[id].temporalMap = prvWhole
 
 		let map = {}
 		
@@ -5962,7 +5954,7 @@ class re8{
 		room.enDict[eid].type = entity
 		room.enDict[eid].team = team
 
-		room.enDict[eid].Asight = this.uenVision(eid,room.name)
+		room.enDict[eid].Asight = this.uenVisionC(eid,room.name)
 
 		this.players[id].entities[eid] = true
 		room.teams[team].entities[eid] = true
@@ -6010,8 +6002,8 @@ class re8{
 				return({
 					"hp":300,
 					"moveable":false,
-					"sight":6,
-					"ensight":5,
+					"sight":5,
+					"ensight":4,
 					"canshoot":false,
 					"cooldown":["none",0,0]
 				})
