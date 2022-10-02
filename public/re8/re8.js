@@ -81,7 +81,7 @@ function boarderRect(x,y,w,h,bloat,col){
 }
 
 
-var MRef = {"MTS":800,"vision":0,"wholeHeight":0,"wholeWidth":0,"MTD":{}}
+var MRef = {"MTS":800,"vision":0,"wholeHeight":0,"wholeWidth":0,"MTD":{},"buttonW":250,"buttonH":100}
 
 
 class game{
@@ -157,6 +157,10 @@ class EHAND{
       let t = game.OtM(mouseX,mouseY)
       game.ss.x = t[0]
       game.ss.y = t[1]
+    } else if(inRect(mouseX,mouseY,MRef.wholeWidth,0,MRef.wholeWidth+MRef.buttonW,MRef.buttonH*B.buttons.length)){
+      this.buttonPressed()
+    } else {
+      game.ss.boxes = "out"
     }
     game.ms.held = true
   }
@@ -175,6 +179,8 @@ class EHAND{
       let t = game.OtM(mouseX,mouseY)
       game.ss.x = t[0]
       game.ss.y = t[1]
+    } else {
+      game.ss.boxes = "out"
     }
   }
 
@@ -186,14 +192,15 @@ class EHAND{
 
   static mouseUpHandler(e){
     game.ms.held = false
+    if(game.ss.boxes == "main"){
     if(game.ms.hacted){
       game.ms.hacted = false
-      socket.emit("drag",{"id":ID,"x":game.ss.x,"y":game.ss.y,"tx":game.ms.heldSpace[0],"ty":game.ms.held[1]})
+      socket.emit("drag",{"id":ID,"x":game.ss.x,"y":game.ss.y,"tx":game.ms.heldSpace[0],"ty":game.ms.held[1],"mode":"main"})
       console.log("dragged from:"+JSON.stringify(game.ms.heldSpace)+" to "+game.ss.x+","+game.ss.y)
     } else {
-      socket.emit("click",{"id":ID,"x":game.ss.x,"y":game.ss.y})
+      socket.emit("click",{"id":ID,"x":game.ss.x,"y":game.ss.y,"mode":"main"})
       console.log("clicked on: "+game.ss.x+","+game.ss.y)
-    }
+    }}
     game.ss.mode = "inspect"
     game.ms.heldTime = 0
   }
@@ -203,8 +210,60 @@ class EHAND{
       game.ms.heldTime++
       this.heldMouseDown(e)
     }
+
+    B.renderAll()
+
   }
+
+  static buttonPressed(){
+    let bh = MRef.buttonH
+    let bno = mouseY/MRef.buttonH
+
+
+
+  }
+
 }
+
+
+class B{
+
+  static buttons = [
+    {
+      "name":"act 1",
+      "color":"#505050",
+      "txtcolor":"#FFFFFF"
+    },{
+      "name":"act 2",
+      "color":"#505050",
+      "txtcolor":"#FFFFFF"
+    },{
+      "name":"act 3",
+      "color":"#505050",
+      "txtcolor":"#FFFFFF"
+    },{
+      "name":"act 4",
+      "color":"#505050",
+      "txtcolor":"#FFFFFF"
+    }
+  ]
+
+  static renderAll(){
+    mainCTX.fillStyle = "#000000"
+    mainCTX.fillRect(MRef.wholeWidth,0,MRef.buttonW,MRef.buttonH*7)
+    mainCTX.fillStyle = "#404040"
+    mainCTX.fillRect(MRef.wholeWidth,0,MRef.buttonW,MRef.buttonH*this.buttons.length)
+    mainCTX.lineWidth = 5
+    mainCTX.font = "20px Arial"
+    this.buttons.forEach((e,i)=>{
+      mainCTX.fillStyle = e.txtcolor
+      mainCTX.fillText(e.name,MRef.wholeWidth,i*MRef.buttonH+30)
+    })
+  }
+
+}
+
+
 
 onmousemove = (e)=>{mouseX = (e.clientX); mouseY = (e.clientY)}
 
@@ -346,8 +405,8 @@ function repeat(e){
 
 function getApos(x,y){
 
-    let h = game.map.height
-    let w = game.map.width
+    let h = MRef.vision
+    let w = MRef.vision
 
    let xx = game.camera[0] + x
    let yy = game.camera[1] + y
@@ -356,15 +415,25 @@ function getApos(x,y){
 
   }
 
+function reApos(x,y,w,h){
+  return([x%w>=0?x%w:(w+x%w),y%h>=0?y%h:h+y%h])
+}
+
 
 function entityRender(e){
 
-  let ax = e.x-game.camera[0]
-  let ay = e.y-game.camera[1]
+  let rp = reApos(game.camera[0],game.camera[1],MRef.vision,MRef.vision)
+
+  let rrp = reApos(e.x-rp[0],e.y-rp[1],MRef.vision,MRef.vision)
+
+  // let ax = e.x-rp[0]
+  // let ay = e.y-rp[1]
+  let ax = rrp[0]
+  let ay = rrp[1]
 
   switch(e.type){
     case "factory":
-      mainCTX.fillStyle = "#909090"
+      mainCTX.fillStyle = e.color
       mainCTX.fillRect(ax*MRef.MTS+4,ay*MRef.MTS+4,MRef.MTS-8,MRef.MTS-8)
       break;
   }

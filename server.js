@@ -5673,17 +5673,25 @@ class re8{
 				"team":split[1],
 				"room":split[0].split(":")[0],
 				"camera":[0,0],
-				"factoryUnplaced":true
+				"factoryUnplaced":true,
+				"temporalMap":{},
+				"entities":{}
 			}
 			let n = split[0].split(":")[0]
 			if(this.rooms[n]==undefined){
-				this.rooms[n] = {"name":n,
-				"type":split[0].split(":")[1],"started":false,"players":{},"map":{}}
+				this.rooms[n] = {"name":n,"vision":15,
+				"type":split[0].split(":")[1],"started":false,"players":{},"map":{},
+				"teamVision":false,"teams":{}
+			}
 			}
 			
 			if(this.rooms[n].started===false){
 				socket.join(n)
 				this.rooms[n].players[e[1]] = this.players[e[1]]
+				if(this.rooms[n].teams[split[1]] == undefined){
+					this.rooms[n].teams[split[1]] = {"entities":{},"players":{},"temporalMap":{}}
+				}
+				this.rooms[n].teams[split[1]].players[e[1]] = this.players[e[1]]
 				io.to(n).emit("joinedRoom",this.rooms[n])
 			}
 		}
@@ -5703,7 +5711,88 @@ class re8{
 			tr.map = map
 			tr.enmap = {}
 			tr.enDict = {}
-			io.to(this.players[e.id].room).emit("startGame",{"map":map,"vision":15})
+			// io.to(this.players[e.id].room).emit("startGame",{"map":map,"vision":15})
+			this.sendRoomMapUpdate(this.players[e.id].room)
+		}
+	}
+
+	static sendRoomMapUpdate(rm){
+		let room = this.rooms[rm]
+		let rmplarr = Object.keys(room.players)
+		rmplarr.forEach((e,i)=>{
+			if(room.players[e].factoryUnplaced){
+				io.to(e).emit("startGame",{"map":room.map,"vision":room.vision})
+			} else {
+
+				let tmp = this.uplayerVision(e,rm)
+
+				io.to(e).emit("updateMap",{})
+			}
+		})
+	}
+
+
+	static uplayerVision(e,rm){
+		let p = this.players[e]
+		let room = this.rooms[rm]
+
+		if(!room.teamVision){
+
+			let finalVision = {}
+
+
+			let penArr = Object.keys(p.entities)
+			penArr.forEach((e,i)=>{
+				let en = this.players[e].entities[e]
+
+				let sightLim = [[en.sight,en.x,en.y]]
+
+				while(sightLim.length > 0){
+					let tempVision = {}
+					sightLim.forEach((E,I)=>{
+						let number = E[1]-1
+						if(number > 0){
+							for(let j = 0; j < 4; j++){
+								let w = this.walkerD(j,E[1],E[2])
+								let wl = w[0]+","+w[1]
+								if(tempVision[wl] == undefined || tempVision[wl][0] < numnber){
+									tempVision[wl] = [E[1],w[0],w[1]]
+								}
+							}
+						}
+					})
+
+					sightLim = []
+
+					let objk = Object.keys(tempVision)
+					objk.forEach((E,I)=>{
+						sightLim.push(tempVision[E])
+
+						if(finalVision[E] == undefined || finalVision.dist < tempVision[E][0]){
+							finalVision[E] = {"by":e,"dist":tempVision[E][0],"x":tempVision[E][1],"y":tempVision[E][2]}
+						}
+
+					})
+				}
+
+
+			})
+
+			console.log(finalVision)
+
+		}
+
+	}
+
+	static walkerD(num,x,y){
+		if(num == 0){
+			return([x+1,y])
+		} else if(num == 1){
+			return([x-1,y])
+		} else if(num == 2){
+			return([x,y+1])
+		} else if(num == 3){
+			return([x,y-1])
 		}
 	}
 
@@ -5729,7 +5818,7 @@ class re8{
 			delete this.players[e.id].factoryUnplaced
 			let p = this.players[e.id]
 			// let gp = this.getApos(e.id,e.x,e.y)
-			this.newEntity(e.id,e.x,e.y,"factory",rm)
+			this.newEntity(e.id,e.x,e.y,"factory",rm,p.team)
 		}
 	}
 
@@ -5768,15 +5857,22 @@ class re8{
 
 
 
-	static newEntity(id,x,y,entity,room){
+	static newEntity(id,x,y,entity,room,team){
 		this.enIDCnt += 1
 		let eid = this.enIDCnt
 
 		room.enDict[eid] = this.entityDictor(entity)
 		room.enDict[eid].id = eid
+		room.enDict[eid].ownerID = id
 		room.enDict[eid].x = x
 		room.enDict[eid].y = y
+		room.enDict[eid].color = this.players[id].color
 		room.enDict[eid].type = entity
+		room.enDict[eid].team = team
+
+		this.players[id].entities[eid] = true
+		room.teams[team].entities[eid] = true
+
 		this.rmEnmaper(room,eid,x+","+y,"add")
 
 		this.emitEntityUpdate(eid,room)
@@ -5785,6 +5881,17 @@ class re8{
 
 	static emitEntityUpdate(id,rm){
 		io.to(rm.name).emit("entityUpdate",[id,rm.enDict[id]])
+	}
+
+	static killEntity(id,rm){
+		let entity = this.rooms[rm].enDict[id]
+
+		let entityOwner = entity.ownerID
+
+		delete this.players[entityOwner].entities[id]
+		delete this.rooms[rm].teams[entity.team].entities[id]
+		this.rmEnmaper(this.rooms[rm],id,entity.x+","+entity.y,"remove")
+		delete this.rooms[rm].enDict[id]
 	}
 
 	static rmEnmaper(rm,enid,loc,op){
@@ -5809,7 +5916,8 @@ class re8{
 				return({
 					"hp":300,
 					"moveable":false,
-					"sight":5,
+					"sight":6,
+					"ensight":5,
 					"canshoot":false,
 					"cooldown":["none",0,0]
 				})
