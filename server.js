@@ -4562,7 +4562,7 @@ function randomItem(List){
 
 
 //============ block tickers ======
-function tickAllBlocks(){
+function tickAllBlocks(){ 
 	for(let i = allTickyBlocks.length-1; i > -1; i--){
 		let dimension = allTickyBlocks[i][2]
 		let tempctm = CoordToMap(allTickyBlocks[i][0],allTickyBlocks[i][1],dimension)
@@ -5674,7 +5674,7 @@ class re8{
 				"room":split[0].split(":")[0],
 				"camera":[0,0],
 				"factoryUnplaced":true,
-				"temporalMap":{},
+				"temporalMap":[{},[]],
 				"entities":{}
 			}
 			let n = split[0].split(":")[0]
@@ -5689,7 +5689,7 @@ class re8{
 				socket.join(n)
 				this.rooms[n].players[e[1]] = this.players[e[1]]
 				if(this.rooms[n].teams[split[1]] == undefined){
-					this.rooms[n].teams[split[1]] = {"entities":{},"players":{},"temporalMap":{}}
+					this.rooms[n].teams[split[1]] = {"entities":{},"players":{},"temporalMap":[]}
 				}
 				this.rooms[n].teams[split[1]].players[e[1]] = this.players[e[1]]
 				io.to(n).emit("joinedRoom",this.rooms[n])
@@ -5716,20 +5716,7 @@ class re8{
 		}
 	}
 
-	static sendRoomMapUpdate(rm){
-		let room = this.rooms[rm]
-		let rmplarr = Object.keys(room.players)
-		rmplarr.forEach((e,i)=>{
-			if(room.players[e].factoryUnplaced){
-				io.to(e).emit("startGame",{"map":room.map,"vision":room.vision})
-			} else {
-
-				let tmp = this.uplayerVision(e,rm)
-
-				io.to(e).emit("updateMap",{})
-			}
-		})
-	}
+	
 
 	static uplayerVision2(id,rm){
 		let finalVision = {}
@@ -5796,6 +5783,10 @@ class re8{
 
 						if(finalVision[E] == undefined){
 							finalVision[E] = {"dist":tempVision[E][0],"x":tempVision[E][1],"y":tempVision[E][2]}
+							if(en.ensight>tempVision[E][0]){
+								finalVision[E]["enseen"] = true
+
+							}
 						}
 
 					})
@@ -5837,6 +5828,10 @@ class re8{
 
 						if(finalVision[E] == undefined || finalVision[E].dist < tempVision[E][0]){
 							finalVision[E] = {"dist":tempVision[E][0],"x":tempVision[E][1],"y":tempVision[E][2]}
+							if(en.ensight<tempVision[E][0]){
+								finalVision[E]["enseen"] = true
+
+							}
 						}
 
 					})
@@ -5884,9 +5879,26 @@ class re8{
 			this.newEntity(e.id,e.x,e.y,"factory",rm,p.team)
 			// p.temporalMap = uplayerVision2(e.id,rm.name)
 			this.sendPlayerMapUpdate(e.id,rm)
+		} else {
+			console.log(e.sel)
 		}
 	}
 
+
+static sendRoomMapUpdate(rm){
+		let room = this.rooms[rm]
+		let rmplarr = Object.keys(room.players)
+		rmplarr.forEach((e,i)=>{
+			if(room.players[e].factoryUnplaced){
+				io.to(e).emit("startGame",{"map":room.map,"vision":room.vision})
+			} else {
+
+				let tmp = this.uplayerVision(e,rm)
+
+				io.to(e).emit("updateMap",{})
+			}
+		})
+	}
 
 	static sendPlayerMapUpdate(id,room){
 		let p = this.players[id]
@@ -5910,23 +5922,7 @@ class re8{
 
 	}
 
-	// static getApos(id,x,y){
-	// 	let p = this.players[id]
-	// 	let h = 0
-	// 	let w = 0
 
-	// 	if(this.rooms[p.room].started){
-	// 		let r = this.rooms[p.room].map
-	// 		h = r.height
-	// 		w = r.width
-	// 	}
-
-	// 	let xx = p.camera[0] + x
-	// 	let yy = p.camera[1] + y
-
-	// 	return([xx>=0?xx%w:w+xx%w,yy>=0?yy%h:h+yy%h])
-
-	// }
 
 	static key(e,rm){
 
@@ -5959,6 +5955,8 @@ class re8{
 		this.players[id].entities[eid] = true
 		room.teams[team].entities[eid] = true
 
+		this.players[id].temporalMap = this.uplayerVision2(id,room.name)
+
 		this.rmEnmaper(room,eid,x+","+y,"add")
 
 		this.emitEntityUpdate(eid,room)
@@ -5966,7 +5964,18 @@ class re8{
 	}
 
 	static emitEntityUpdate(id,rm){
-		io.to(rm.name).emit("entityUpdate",[id,rm.enDict[id]])
+		let plr = Object.keys(rm.players)
+
+		let en = rm.enDict[id]
+
+		plr.forEach((e,i)=>{
+			let tm = this.players[e].temporalMap[0]
+			if(tm[en.x+","+en.y] != undefined && tm[en.x+","+en.y].enseen){
+				io.to(e).emit("entityUpdate",[id,rm.enDict[id]])
+			}
+		})
+
+		// io.to(rm.name).emit("entityUpdate",[id,rm.enDict[id]])
 	}
 
 	static killEntity(id,rm){
@@ -6007,6 +6016,17 @@ class re8{
 					"canshoot":false,
 					"cooldown":["none",0,0]
 				})
+				break;
+			case "architect":
+				return({
+					"hp":100,
+					"moveable":false,
+					"sight":4,
+					"ensight":3,
+					"canshoot":false,
+					"cooldown":["none",0,0]
+				})
+				break;
 		}
 	}
 

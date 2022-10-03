@@ -213,10 +213,10 @@ class EHAND{
     if(game.ss.boxes == "main"){
     if(game.ms.hacted){
       game.ms.hacted = false
-      socket.emit("drag",{"id":ID,"x":game.ss.ax,"y":game.ss.ay,"tx":game.ms.heldSpace[2],"ty":game.ms.heldSpace[3],"mode":"main"})
+      socket.emit("drag",{"sel":B.selection,"id":ID,"x":game.ss.ax,"y":game.ss.ay,"tx":game.ms.heldSpace[2],"ty":game.ms.heldSpace[3],"mode":"main"})
       console.log("dragged from:"+JSON.stringify(game.ms.heldSpace)+" to "+game.ss.ax+","+game.ss.ay)
     } else {
-      socket.emit("click",{"id":ID,"x":game.ss.ax,"y":game.ss.ay,"mode":"main"})
+      socket.emit("click",{"sel":B.selection,"id":ID,"x":game.ss.ax,"y":game.ss.ay,"mode":"main"})
       console.log("clicked on: "+game.ss.ax+","+game.ss.ay)
     }} else if(game.ss.boxes == "out"){
   
@@ -238,9 +238,13 @@ class EHAND{
 
   static buttonPressed(){
     let bh = MRef.buttonH
-    let bno = mouseY/MRef.buttonH
+    let bno = Math.floor(mouseY/MRef.buttonH)
 
-
+    if(B.selection == "none" || B.selection != bno){
+      B.selection = bno
+    } else {
+      B.selection = "none"
+    }
 
   }
 
@@ -252,22 +256,25 @@ class B{
   static buttons = [
     {
       "name":"act 1",
-      "color":"#505050",
+      "color":"#00FF00",
       "txtcolor":"#FFFFFF"
     },{
       "name":"act 2",
-      "color":"#505050",
+      "color":"#0000FF",
       "txtcolor":"#FFFFFF"
     },{
       "name":"act 3",
-      "color":"#505050",
+      "color":"#00FFFF",
       "txtcolor":"#FFFFFF"
     },{
       "name":"act 4",
-      "color":"#505050",
+      "color":"#FF0000",
       "txtcolor":"#FFFFFF"
     }
   ]
+
+
+  static selection = "none"
 
   static renderAll(){
     mainCTX.fillStyle = "#000000"
@@ -280,6 +287,13 @@ class B{
       mainCTX.fillStyle = e.txtcolor
       mainCTX.fillText(e.name,MRef.wholeWidth,i*MRef.buttonH+30)
     })
+
+    if(this.selection != "none"){
+      boarderRect(MRef.wholeWidth,MRef.buttonH*this.selection,MRef.buttonW,
+        MRef.buttonH,4,this.buttons[this.selection].color)
+    }
+
+
   }
 
 }
@@ -466,6 +480,10 @@ function entityRender(e){
     case "factory":
       mainCTX.fillStyle = e.color
       mainCTX.fillRect(ax*MRef.MTS+4,ay*MRef.MTS+4,MRef.MTS-8,MRef.MTS-8)
+      break;
+    case "architect":
+      mainCTX.fillStyle = e.color
+      mainCTX.fillRect(ax*MRef.MTS+MRef.MTD["0.2"],ay*MRef.MTS+MRef.MTD["0.2"],MRef.MTS-MRef.MTD["0.2"]*2,MRef.MTS-MRef.MTD["0.2"]*2)
       break;
   }
 }
