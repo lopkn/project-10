@@ -35,7 +35,7 @@ socket.on("personalMapUpdate",(e)=>{
   game.pmu(e)
 })
 socket.on("SEL",(e)=>{
-  ENAHD.SEL(e)
+  EHAND.SEL(e)
 })
 
 
@@ -246,6 +246,7 @@ class EHAND{
     if(B.BREF.normal[B.selection]){
       if(B.selection == "none" || B.selection != bno){
         B.selection = bno
+        socket.emit("button",{"sel":B.selection,"id":ID,"x":game.ss.ax,"y":game.ss.ay})
       } else {
         B.selection = "none"
       }
@@ -314,7 +315,7 @@ class B{
         boarderRect(MRef.wholeWidth,MRef.buttonH*this.selection,MRef.buttonW,
         MRef.buttonH,4,this.buttons[this.selection].color)
       } else {
-        boarderRect(0,0,MRef.wholeWidth,MRef.wholeHeight,6,e.specialSel.color)
+        boarderRect(0,0,MRef.wholeWidth,MRef.wholeHeight,6,this.specialSel.color)
       }
     }
 

@@ -17,8 +17,6 @@ var dimension = "O"
 
 var allTickyBlocks = []
 
-
-
 const fs = require('fs');
 
 const process = require('process');
@@ -66,8 +64,6 @@ function getStrLengthOf(e){
 	return(JSON.stringify(e).length)
 }
 
-
-
 function testFunctionSpeed(opt,vars,func,p1,p2,p3,p4,p5,p6,p7,p8){
 	
 
@@ -94,8 +90,6 @@ function getServerDataSize(){
 	return(strl + "-" + strl2)
 
 }
-
-
 
 function ping(a){
 
@@ -271,10 +265,6 @@ class mob{
 		
 	
 			// this.Inventory = ["U:6-A:10","U:5-A:10","U:4-A:10","U:3-A:10","U:2-A:10","U:1-A:10","B:7-A:10","B:5-A:10","B:4-A:10","B:3-A:10","B:2-A:10","B:1-A:10","B:6-A:10"]
-			
-		
-
-
 
 
 	}
@@ -853,14 +843,6 @@ function isBlockage(x,y,d){
 	return(true)
 
 }
-
-
-
-
-
-
-
-
 
 
 
@@ -5069,15 +5051,12 @@ class shooter2C{
 				break;
 			case "scat":
 			for(let i = 0; i < 5; i++){
-				// this.bullets.push({"shooter":id,"type":"scat","x":p.x,"y":p.y,"vx":(n[2]-p.x)*110+Math.random()*40-20,"vy":(n[3]-p.y)*110+Math.random()*40-20,
-				// 	"tailLength":6,"lingerance":6,"tail":[],"life":2000})
+				
 				this.pushBullet(p.x,p.y,(n[2]-p.x)*110+Math.random()*40-20,(n[3]-p.y)*110+Math.random()*40-20,id,"scat")
 			}
 				break;
 			case "lazr":
-				// this.bullets.push({"shooter":id,"type":"lazr","x":p.x,"y":p.y,
-				// 	"vx":(n[2]-p.x)*1110,"vy":(n[3]-p.y)*1110,"tailLength":20,
-				// 	"lingerance":20,"tail":[],"life":200})
+				
 				this.pushBullet(p.x,p.y,(n[2]-p.x)*1100,(n[3]-p.y)*1100,id,"lazr")
 				break;
 			case "cnon":
@@ -5634,7 +5613,7 @@ class re8{
 				"temporalMap":[{},[]],
 				"entities":{},
 				"selector":[0,0],
-				"specialState":{}
+				"specialState":{"name":"none"}
 			}
 			let n = split[0].split(":")[0]
 			if(this.rooms[n]==undefined){
@@ -5687,38 +5666,31 @@ class re8{
 			let penArr = Object.keys(p.entities)
 			penArr.forEach((e,i)=>{
 				let vis = room.enDict[e].Asight
-				visionArray[e] = vis
+				visionDict[e] = vis
 				let objvis = Object.keys(vis)
 
 				objvis.forEach((E,I)=>{
-					if(finalVision[E] == undefined || finalVision[E].dist < vis[E].dist){
-						finalVision[E] = vis[E]
+					if(finalVision[E] == undefined||finalVision[E].dist < vis[E].dist){
+
+						if(finalVision[E]!=undefined&&finalVision[E]["enseen"]){
+							finalVision[E] = vis[E]
+							finalVision[E].enseen = true
+						}else{
+						finalVision[E] = vis[E]}
 						finalVision[E]["by"] = e
+					}
+					if(vis[E].enseen){
+						finalVision[E].enseen = true
 					}
 				})
 
 			})
 		}
 
-		return([finalVision,visionArray])
+		return([finalVision,visionDict])
 
 	}
 
-
-	// static uplayerVision3(id,rm){
-	// 	let finalVision = {}
-	// 	let visionDict = {}
-	// 	let p = this.players[id]
-	// 	let t = p.temporalMap
-	// 	let room = this.rooms[rm]
-
-	// 	if(!room.teamVision){
-	// 		let objk = Object.keys(t[1])
-	// 		objk.forEach((e,i)=>{
-
-	// 		})
-	// 	}
-	// }
 
 
 	static uenVisionC(id,rm){
@@ -5852,12 +5824,13 @@ class re8{
 	}
 
 	static click(e,rm){
+		let p = this.players[e.id]
 		if(this.players[e.id].factoryUnplaced){
 			delete this.players[e.id].factoryUnplaced
 			let p = this.players[e.id]
 			this.newEntity(e.id,e.x,e.y,"factory",rm,p.team)
 			
-			this.players.selector = [e.x,e.y]
+			this.players[e.id].selector = [e.x,e.y]
 
 			this.sendPlayerMapUpdate(e.id,rm)
 		} else {
@@ -5870,35 +5843,40 @@ class re8{
 				switch(e.sel){
 					case "Factory1":
 						console.log("placed from factory!")
+						io.to(e.id).emit("SEL",{"name":"none"})
+
+						this.newEntity(e.id,e.x,e.y,"architect",rm,p.team)
+						this.sendPlayerMapUpdate(e.id,rm)
 						break;
 				}
 				this.players.specialState = {}
 			}
-			else if(this.players.temporalMap[loc] == undefined){
+			else if(this.players[e.id].temporalMap[loc] == undefined){
 
 			} else {
 
 			}
 
-			this.players.selector = [e.x,e.y]
+			p.specialState = {"name":"none"}
 
 		}
+		this.players[e.id].selector = [e.x,e.y]
 	}
 
 
 	static button(e,room){
 		let p = this.players[e.id]
 		let loc = p.selector[0]+","+p.selector[1]
-		let end = rm.enDict
-		
-		if(this.players.temporalMap[loc] == undefined){
+		let end = room.enDict
 
+		if(this.players[e.id].temporalMap[loc] == undefined){
+			
 			let SB = this.SELB(e.id,loc,room)
+			console.log(SB)
 			if(SB[3]){
-
-				if(e.sel == 1){
+				if(e.sel == 0){
 					io.to(e.id).emit("SEL",{"name":"Factory1","color":"#009000"})
-					this.players.specialState = {"name":"Factory1","enid":SB[1]}
+					this.players.specialState = {"name":"Factory1","enids":SB[1]}
 				}
 
 			}
@@ -5911,7 +5889,7 @@ class re8{
 		let end = room.enmap
 		let selen;
 
-		if(end[loc] == undefined){
+		if(end[loc] == undefined || end[loc].length == 0){
 			return(out)
 		} else {
 			selen = room.enDict[end[loc]]
