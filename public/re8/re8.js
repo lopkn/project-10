@@ -34,6 +34,9 @@ socket.on("entityUpdate",(e)=>{
 socket.on("personalMapUpdate",(e)=>{
   game.pmu(e)
 })
+socket.on("SEL",(e)=>{
+  ENAHD.SEL(e)
+})
 
 
 function lobby(){
@@ -240,18 +243,35 @@ class EHAND{
     let bh = MRef.buttonH
     let bno = Math.floor(mouseY/MRef.buttonH)
 
-    if(B.selection == "none" || B.selection != bno){
-      B.selection = bno
-    } else {
-      B.selection = "none"
+    if(B.BREF.normal[B.selection]){
+      if(B.selection == "none" || B.selection != bno){
+        B.selection = bno
+      } else {
+        B.selection = "none"
+      }
     }
 
+  }
+
+  static SEL(e){
+    B.selection = e.name
+    B.specialSel = e
   }
 
 }
 
 
 class B{
+
+  static BREF = {
+    "normal":{
+      "none":true,
+      "0":true,
+      "1":true,
+      "2":true,
+      "3":true
+    }
+  }
 
   static buttons = [
     {
@@ -275,6 +295,7 @@ class B{
 
 
   static selection = "none"
+  static specialSel = {}
 
   static renderAll(){
     mainCTX.fillStyle = "#000000"
@@ -289,8 +310,12 @@ class B{
     })
 
     if(this.selection != "none"){
-      boarderRect(MRef.wholeWidth,MRef.buttonH*this.selection,MRef.buttonW,
+      if(B.BREF.normal[B.selection]){
+        boarderRect(MRef.wholeWidth,MRef.buttonH*this.selection,MRef.buttonW,
         MRef.buttonH,4,this.buttons[this.selection].color)
+      } else {
+        boarderRect(0,0,MRef.wholeWidth,MRef.wholeHeight,6,e.specialSel.color)
+      }
     }
 
 

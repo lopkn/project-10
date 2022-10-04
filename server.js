@@ -1552,6 +1552,7 @@ function joinGame(game,socket){
 		socket.on("click",(e)=>{re8.rmHandler(e,"click")})
 		socket.on("drag",(e)=>{re8.rmHandler(e,"drag")})
 		socket.on("key",(e)=>{re8.rmHandler(e,"key")})
+		socket.on("button",(e)=>{re8.rmHandler(e,"button")})
 	}
 }
 
@@ -2880,50 +2881,6 @@ function breakBlockBy(x,y,d,a,options){
 
 }
 
-
-// function breakBlockBy(str,a,type){
-
-// 	if(type == undefined || type == "block"){
-
-// 	  let split = str.split("-")
-// 	  let e = -1
-// 	  let ee = 0
-// 	  let fin = ""
-// 	  for(let i = 0; i < split.length; i++){
-// 	  	let spl2 = split[i].split(":")
-// 	    if(spl2[0] == "D"){
-// 	      e = parseInt(spl2[1])
-// 	    }else if(spl2[0] == "B"){
-// 	      ee = BLOCKSALL[spl2[1]][2]
-// 	      fin += "-" + split[i]
-// 	    } else {
-// 	    	fin += "-" + split[i]
-// 	    }
-// 	  }
-// 	  if(e == -1 || ee == e){
-// 	  	e = ee
-// 	  }
-// 	  let durability = e - a
-
-// 	  if(durability > 0){
-// 	  fin += ("-D:"+durability)
-// 	  return(fin.substring(1))
-// 		} else{
-// 			return("remove")
-// 		}
-// 	}
-
-// 	if(type == "all"){
-
-// 	}
-
-
-// 	if(type == "slab"){
-
-// 	}
-
-
-// }
 
 function BreakBlock(str,type,x,y,d,player){
 	let outstr = ""
@@ -5675,7 +5632,9 @@ class re8{
 				"camera":[0,0],
 				"factoryUnplaced":true,
 				"temporalMap":[{},[]],
-				"entities":{}
+				"entities":{},
+				"selector":[0,0],
+				"specialState":{}
 			}
 			let n = split[0].split(":")[0]
 			if(this.rooms[n]==undefined){
@@ -5720,7 +5679,7 @@ class re8{
 
 	static uplayerVision2(id,rm){
 		let finalVision = {}
-		let visionArray = []
+		let visionDict = {}
 		let p = this.players[id]
 		let room = this.rooms[rm]
 
@@ -5728,7 +5687,7 @@ class re8{
 			let penArr = Object.keys(p.entities)
 			penArr.forEach((e,i)=>{
 				let vis = room.enDict[e].Asight
-				visionArray.push(vis)
+				visionArray[e] = vis
 				let objvis = Object.keys(vis)
 
 				objvis.forEach((E,I)=>{
@@ -5744,6 +5703,23 @@ class re8{
 		return([finalVision,visionArray])
 
 	}
+
+
+	// static uplayerVision3(id,rm){
+	// 	let finalVision = {}
+	// 	let visionDict = {}
+	// 	let p = this.players[id]
+	// 	let t = p.temporalMap
+	// 	let room = this.rooms[rm]
+
+	// 	if(!room.teamVision){
+	// 		let objk = Object.keys(t[1])
+	// 		objk.forEach((e,i)=>{
+
+	// 		})
+	// 	}
+	// }
+
 
 	static uenVisionC(id,rm){
 		let room = this.rooms[rm]
@@ -5827,7 +5803,7 @@ class re8{
 						sightLim.push(tempVision[E])
 
 						if(finalVision[E] == undefined || finalVision[E].dist < tempVision[E][0]){
-							finalVision[E] = {"dist":tempVision[E][0],"x":tempVision[E][1],"y":tempVision[E][2]}
+							finalVision[E] = {"dist":en.sight-tempVision[E][0],"x":tempVision[E][1],"y":tempVision[E][2]}
 							if(en.ensight<tempVision[E][0]){
 								finalVision[E]["enseen"] = true
 
@@ -5868,6 +5844,9 @@ class re8{
 				case "key":
 					this.key(e,rm)
 					break;
+				case "button":
+					this.button(e,rm)
+					break;
 			}
 		}
 	}
@@ -5877,11 +5856,76 @@ class re8{
 			delete this.players[e.id].factoryUnplaced
 			let p = this.players[e.id]
 			this.newEntity(e.id,e.x,e.y,"factory",rm,p.team)
-			// p.temporalMap = uplayerVision2(e.id,rm.name)
+			
+			this.players.selector = [e.x,e.y]
+
 			this.sendPlayerMapUpdate(e.id,rm)
 		} else {
-			console.log(e.sel)
+			console.log(e)
+
+			let loc = e.x+","+e.y
+			let end = rm.enDict
+
+			if(e.sel != "none" &&e.sel != "1" &&e.sel != "2"&&e.sel != "3"){
+				switch(e.sel){
+					case "Factory1":
+						console.log("placed from factory!")
+						break;
+				}
+				this.players.specialState = {}
+			}
+			else if(this.players.temporalMap[loc] == undefined){
+
+			} else {
+
+			}
+
+			this.players.selector = [e.x,e.y]
+
 		}
+	}
+
+
+	static button(e,room){
+		let p = this.players[e.id]
+		let loc = p.selector[0]+","+p.selector[1]
+		let end = rm.enDict
+		
+		if(this.players.temporalMap[loc] == undefined){
+
+			let SB = this.SELB(e.id,loc,room)
+			if(SB[3]){
+
+				if(e.sel == 1){
+					io.to(e.id).emit("SEL",{"name":"Factory1","color":"#009000"})
+					this.players.specialState = {"name":"Factory1","enid":SB[1]}
+				}
+
+			}
+		}
+	}
+
+	static SELB(id,loc,room){
+		//has entity, entity id, entity same team, entity same owner
+		let out = [false,0,false,false]
+		let end = room.enmap
+		let selen;
+
+		if(end[loc] == undefined){
+			return(out)
+		} else {
+			selen = room.enDict[end[loc]]
+			out[0] = true
+			out[1] = end[loc]
+		}
+
+		if(selen.team == this.players[id].team){
+			out[2] = true
+		}
+		if(selen.ownerID == id){
+			out[3] = true
+		}
+		return(out)
 	}
 
 
@@ -6009,11 +6053,12 @@ static sendRoomMapUpdate(rm){
 		switch(en){
 			case "factory":
 				return({
-					"hp":300,
+					"hp":500,
 					"moveable":false,
 					"sight":5,
 					"ensight":4,
 					"canshoot":false,
+					"layer":1,
 					"cooldown":["none",0,0]
 				})
 				break;
@@ -6024,6 +6069,7 @@ static sendRoomMapUpdate(rm){
 					"sight":4,
 					"ensight":3,
 					"canshoot":false,
+					"layer":1,
 					"cooldown":["none",0,0]
 				})
 				break;
