@@ -5973,6 +5973,14 @@ static sendRoomMapUpdate(rm){
 		room.enDict[eid].team = team
 
 		room.enDict[eid].Asight = this.uenVisionC(eid,room.name)
+		let OBJK = Object.keys(room.enDict[eid].Asight)
+		OBJK.forEach((e)=>{
+			if(room.enDict[eid].Asight[e].enseen && room.enmap[e] != undefined && room.enmap[e].length > 0){
+				room.enmap[e].forEach((E)=>{
+				this.emitEntityUpdate(E,room)					
+				})
+			}
+		})
 
 		this.players[id].entities[eid] = true
 		room.teams[team].entities[eid] = true
