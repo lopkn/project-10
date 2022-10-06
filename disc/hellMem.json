@@ -57,6 +57,9 @@
             "35": true,
             "36": true,
             "43": true
+        },
+        "gs": {
+            "49": true
         }
     },
     "r": {
@@ -299,8 +302,13 @@
             "type": "bio",
             "q": "Whats the difference between anatomy and physiology?",
             "a": "Anatomy is about an organisms body features, Physiology is about how those features work."
+        },
+        "49": {
+            "type": "gs",
+            "q": "what is the difference between accuracy and preciseness?",
+            "a": "accuracy is the measure of how close your average value is to the actual value, and preciseness is the measure of how much difference is there between your OWN values"
         }
     },
-    "counter": 49,
+    "counter": 50,
     "suggestions": []
 }
