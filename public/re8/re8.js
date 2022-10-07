@@ -87,6 +87,31 @@ function boarderRect(x,y,w,h,bloat,col){
   mainCTX.stroke();
 }
 
+function timerDraw(time,maxtime,x,y,style){
+  if(time<0){
+    return;
+  }
+  let zotime = time/maxtime
+  let colotime = zotime*255
+  let S = MRef.MTS
+  let SD = MRef.MTD
+  let pxx = x*S
+  let pyy = y*S
+
+  if(style == undefined || style == 1){
+    mainCTX.fillStyle = "rgba(255,0,0,"+(1-zotime)+")"
+    mainCTX.fillRect(pxx+SD[0.1],pyy+SD[0.1],SD[0.2],SD[0.2])
+    mainCTX.fillRect(pxx+S-SD[0.1]*3,pyy+S-SD[0.1]*3,SD[0.2],SD[0.2])
+
+    mainCTX.fillStyle = "rgba(0,250,250,"+zotime+")"
+    mainCTX.fillRect(pxx+SD[0.1],pyy+S-SD[0.1]*3,SD[0.2],SD[0.2])
+    mainCTX.fillRect(pxx+S-SD[0.1]*3,pyy+SD[0.1],SD[0.2],SD[0.2])
+  }else if(style == 2){
+    mainCTX.fillStyle = "rgba("+colotime+","+(255-colotime)+","+(255-colotime)+",0.5)"
+    mainCTX.fillRect(pxx,pyy,S-S*(1-zotime),S)
+  }
+
+}
 
 var MRef = {"MTS":800,"vision":0,"wholeHeight":0,"wholeWidth":0,"MTD":{},"buttonW":250,"buttonH":100}
 
@@ -408,13 +433,13 @@ let mainLoopint = setInterval(()=>{
   repeat()
 },1000/30)
 
+var testTime = 1000
 
 function repeat(e){
   if(game.state == "started"){
     mainCTX.fillStyle = "#303030"
     mainCTX.clearRect(0,0,wWidth,wHeight)
     mainCTX.fillRect(0,0,wWidth,wHeight)
-
     let mapArr = Object.keys(game.map.tiles)
     // mapArr.forEach((e,i)=>{
     //   // let coord = e.split(",")
@@ -463,8 +488,8 @@ function repeat(e){
 
     EHAND.repeat(e)
     game.renderSelectedSpot()
-
-
+    testTime-= 2
+    timerDraw(testTime,1000,1,1,2)
   }
 }
 
@@ -502,15 +527,34 @@ function entityRender(e){
     return
   }
 
+  let S = MRef.MTS
+
   switch(e.type){
     case "factory":
       mainCTX.fillStyle = e.color
-      mainCTX.fillRect(ax*MRef.MTS+4,ay*MRef.MTS+4,MRef.MTS-8,MRef.MTS-8)
+      mainCTX.fillRect(ax*S+4,ay*S+4,S-8,S-8)
       break;
     case "architect":
       mainCTX.fillStyle = e.color
-      mainCTX.fillRect(ax*MRef.MTS+MRef.MTD["0.2"],ay*MRef.MTS+MRef.MTD["0.2"],MRef.MTS-MRef.MTD["0.2"]*2,MRef.MTS-MRef.MTD["0.2"]*2)
+      mainCTX.fillRect(ax*S+MRef.MTD["0.2"],ay*S+MRef.MTD["0.2"],S-MRef.MTD["0.2"]*2,S-MRef.MTD["0.2"]*2)
       break;
+    case "soldier":
+      mainCTX.beginPath();
+      mainCTX.arc(ax*S+S*0.5, ay*S+S*0.5, MRef.MTD[0.1]*3, 0, 2 * Math.PI, false);
+      mainCTX.fillStyle = e.color;
+      mainCTX.fill();
+      mainCTX.lineWidth = 1;
+      mainCTX.strokeStyle = '#000000';
+      mainCTX.stroke();
+      break;
+  }
+
+  if(e.cooldown[0] != "none"){
+    let ec = e.cooldown
+    if(Date.now()-ec[1]>ec[2]){
+      e.cooldown = ["none",0,0]
+    }
+    timerDraw(Date.now()-ec[1],ec[2],ax,ay)
   }
 }
 

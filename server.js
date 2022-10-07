@@ -5848,6 +5848,12 @@ class re8{
 						this.newEntity(e.id,e.x,e.y,"architect",rm,p.team)
 						this.sendPlayerMapUpdate(e.id,rm)
 						break;
+					case "Factory2":
+						console.log("placed from factory!")
+						io.to(e.id).emit("SEL",{"name":"none"})
+						this.newEntity(e.id,e.x,e.y,"soldier",rm,p.team)
+						this.sendPlayerMapUpdate(e.id,rm)
+						break;
 				}
 				this.players.specialState = {}
 			}
@@ -5873,28 +5879,57 @@ class re8{
 			
 			let SB = this.SELB(e.id,loc,room)
 			console.log(SB)
-			if(SB[3]){
+			if(SB[3] && this.OffCooldown(room.name,SB[1])){
 				if(e.sel == 0){
-					io.to(e.id).emit("SEL",{"name":"Factory1","color":"#009000"})
-					this.players.specialState = {"name":"Factory1","enids":SB[1]}
+					if(end[SB[1]].type == "factory"){
+						io.to(e.id).emit("SEL",{"name":"Factory1","color":"#009000"})
+						this.players.specialState = {"name":"Factory1","enids":SB[1]}
+					}
+				}else if(e.sel == 1){
+					if(end[SB[1]].type == "factory"){
+						io.to(e.id).emit("SEL",{"name":"Factory2","color":"#009000"})
+						this.players.specialState = {"name":"Factory2","enids":SB[1]}
+					}
 				}
 
 			}
 		}
 	}
 
-	static SELB(id,loc,room){
-		//has entity, entity id, entity same team, entity same owner
-		let out = [false,0,false,false]
+	static OffCooldown(room,id){
+		let en = this.rooms[room].enDict[id]
+
+		if(en.cooldown[0] == "none"){
+			return true
+		}
+		if(Date.now()-en.cooldown[1] > en.cooldown[2]){
+			en.cooldown = ["none",0,0]
+			return true
+		}
+		return false
+
+	}
+
+	static SELB(id,loc,room,num){
+		//has entity, entity id, entity same team, entity same owner,entity off cooldown
+		if(num==undefined){
+			num = 0
+		}
+		let out = [false,0,false,false,true]
 		let end = room.enmap
 		let selen;
 
 		if(end[loc] == undefined || end[loc].length == 0){
 			return(out)
 		} else {
-			selen = room.enDict[end[loc]]
+			selen = room.enDict[end[loc][num]]
 			out[0] = true
 			out[1] = end[loc]
+		}
+
+		if(selen.cooldown[0] == "none"|| Date.now-selen.cooldown[1] > selen.cooldown[2]){
+			selen.cooldown = ["none",0,0]
+			out[4] = true
 		}
 
 		if(selen.team == this.players[id].team){
@@ -6045,7 +6080,7 @@ static sendRoomMapUpdate(rm){
 					"ensight":4,
 					"canshoot":false,
 					"layer":1,
-					"cooldown":["none",0,0]
+					"cooldown":["building",Date.now(),5000]
 				})
 				break;
 			case "architect":
@@ -6056,7 +6091,20 @@ static sendRoomMapUpdate(rm){
 					"ensight":3,
 					"canshoot":false,
 					"layer":1,
-					"cooldown":["none",0,0]
+					"cooldown":["building",Date.now(),5000]
+				})
+				break;
+			case "soldier":
+				return({
+					"hp":120,
+					"moveable":true,
+					"sight":4,
+					"ensight":3,
+					"canshoot":true,
+					"shootInfo":{"cd":10},
+					"movingInfo":{"range":3,"dmg":20,"dmgv":5,"cd":10},
+					"layer":1,
+					"cooldown":["building",Date.now(),5000]
 				})
 				break;
 		}
