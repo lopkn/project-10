@@ -154,10 +154,155 @@ function ArrRemoveFromTile(str,type){
 	return(fin.substring(1))
 }
 //EXP7
+function minSub(act,sub,min){
+
+	let a = act - sub
+	if(a < min){
+		return([min,min-a])
+	}
+	return([a,0])
+
+}
+
 //EXP8
+function vectorNormalize(original,multiplier){
+
+	if(multiplier == undefined){
+		multiplier = 1
+	}
+
+	let tx = original[2] - original[0]
+	let ty = original[3] - original[1]
+
+	let d = Math.sqrt(tx*tx+ty*ty)
+
+	if(d == 0){
+		return(original)
+	}
+
+	tx = tx*multiplier/d
+	ty = ty*multiplier/d
+
+	return([original[0],original[1],original[0]+tx,original[1]+ty])
+
+}
 //EXP9
+function arrayBoundingBox(arr,type){
+
+	if(type = "notArr"){
+
+	}
+
+	let maxx
+	let maxy
+	let minx
+	let miny
+
+	arr.forEach((e)=>{
+
+		if(e[0] > maxx){
+			maxx = e[0]
+		}
+		if(e[0] < minx){
+			minx = e[0]
+		}
+		if(e[1] > maxy){
+			maxy = e[1]
+		}
+		if(e[1] < miny){
+			miny = e[1]
+		}
+
+	})
+
+	return([maxx,minx,maxy,miny])
+
+}
 //EXP10
+
+function randomItem(List){
+	let sum = 0
+	for(let i = 1; i < List.length; i+=2){
+		sum += List[i]
+	}
+	let value = Math.random()*sum
+	let tempvalue = 0
+	for(let i = 1; i < List.length; i+=2){
+	tempvalue += List[i]
+	if(value < tempvalue){
+		return(List[i-1])
+		}
+	}
+
+
+}
 //EXP11
+function TNEWgenerateTileFromNumber(input,d){
+
+
+	if(d == "O"){
+		let tile = "G:"
+		if(input < 70){
+			tile += "1"
+		} else if(input < 120){
+			tile += "2"
+		} else if(input < 140){
+			tile += "3"
+		} else if(input < 150){
+			tile += "4"
+		} else if(input < 210){
+			tile += "5"
+		} else if(input < 260){
+			tile += "6"
+		} else if(input < 310){
+			tile += "7"
+		} else if(input < 335){
+			tile += "8"
+		} else if(input >= 335){
+			tile += "9"
+		}
+		if(input >= 150 && input < 300){
+			if(Math.random() > 1-input/30000){
+				tile += "-B:3-T:"+(Math.floor(Math.random()*9))+"-S:" + (Math.floor(Math.random()*3)+4)
+			}
+		}
+
+		
+
+
+			return(tile)
+	}
+
+	 else if(d == "T"){
+		let tile = "G:"
+		 if(input < 90){
+			tile += "2"
+		} else if(input < 140){
+			tile += "3"
+		} else if(input < 145){
+			tile += "4"
+		} else if(input < 230){
+			tile += "5"
+		} else if(input < 300){
+			tile += "6"
+		} else if(input < 335){
+			tile += "7"
+		} else if(input >= 335){
+			tile += "8"
+		}
+		if(input >= 150 && input < 300){
+			if(Math.random() > 1-input/30000){
+				tile += "-B:3-T:1-S:" + (Math.floor(Math.random()*3)+1)
+			}
+		}
+
+		
+
+
+			return(tile)
+	}
+}
+
 //EXP12
 //EXP13
 //EXP14
@@ -170,5 +315,10 @@ module.exports = {
 	vectorNormal,
 	myMath,
 	retInsideLine,
-	ArrRemoveFromTile
+	ArrRemoveFromTile,
+	minSub,
+	vectorNormalize,
+	arrayBoundingBox,
+	randomItem,
+	TNEWgenerateTileFromNumber
 }

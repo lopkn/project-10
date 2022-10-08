@@ -88,7 +88,7 @@ function boarderRect(x,y,w,h,bloat,col){
 }
 
 function timerDraw(time,maxtime,x,y,style){
-  if(time<0){
+  if(time>maxtime){
     return;
   }
   let zotime = time/maxtime
@@ -422,10 +422,10 @@ document.addEventListener("keyup",(e)=>{
       game.camera[0] -= 1
     } else if(key == "ArrowRight"){
       game.camera[0] += 1
-    } else {
+    }
 
       socket.emit("key",{"id":ID,"key":key})
-    }
+
 })
 
 
@@ -433,7 +433,6 @@ let mainLoopint = setInterval(()=>{
   repeat()
 },1000/30)
 
-var testTime = 1000
 
 function repeat(e){
   if(game.state == "started"){
@@ -488,8 +487,7 @@ function repeat(e){
 
     EHAND.repeat(e)
     game.renderSelectedSpot()
-    testTime-= 2
-    timerDraw(testTime,1000,1,1,2)
+
   }
 }
 

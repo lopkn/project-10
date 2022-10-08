@@ -69,7 +69,12 @@ const INFUNCS = require("./funcs.js")
 	vectorNormal,
 	myMath,
 	retInsideLine,
-	ArrRemoveFromTile
+	ArrRemoveFromTile,
+	minSub,
+	vectorNormalize,
+	arrayBoundingBox,
+	randomItem,
+	TNEWgenerateTileFromNumber
 */
 let vectorFuncs = INFUNCS.vectorFuncs
 let myMath = INFUNCS.myMath
@@ -77,49 +82,11 @@ let vectorNormal = INFUNCS.vectorNormal
 let LuuidGenerator = INFUNCS.LuuidGenerator
 let retInsideLine = INFUNCS.retInsideLine
 let ArrRemoveFromTile = INFUNCS.ArrRemoveFromTile
-
-/////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////
+let minSub = INFUNCS.minSub
+let	vectorNormalize = INFUNCS.vectorNormalize
+let	arrayBoundingBox = INFUNCS.arrayBoundingBox
+let	randomItem = INFUNCS.randomItem
+let	TNEWgenerateTileFromNumber = INFUNCS.TNEWgenerateTileFromNumber
 
 
 function getStrLengthOf(e){
@@ -4071,71 +4038,6 @@ function generateStructureFromNumber(input,x,y,d){
 	}
 }
 
-function TNEWgenerateTileFromNumber(input,d){
-
-
-	if(d == "O"){
-		let tile = "G:"
-		if(input < 70){
-			tile += "1"
-		} else if(input < 120){
-			tile += "2"
-		} else if(input < 140){
-			tile += "3"
-		} else if(input < 150){
-			tile += "4"
-		} else if(input < 210){
-			tile += "5"
-		} else if(input < 260){
-			tile += "6"
-		} else if(input < 310){
-			tile += "7"
-		} else if(input < 335){
-			tile += "8"
-		} else if(input >= 335){
-			tile += "9"
-		}
-		if(input >= 150 && input < 300){
-			if(Math.random() > 1-input/30000){
-				tile += "-B:3-T:"+(Math.floor(Math.random()*9))+"-S:" + (Math.floor(Math.random()*3)+4)
-			}
-		}
-
-		
-
-
-			return(tile)
-	}
-
-	 else if(d == "T"){
-		let tile = "G:"
-		 if(input < 90){
-			tile += "2"
-		} else if(input < 140){
-			tile += "3"
-		} else if(input < 145){
-			tile += "4"
-		} else if(input < 230){
-			tile += "5"
-		} else if(input < 300){
-			tile += "6"
-		} else if(input < 335){
-			tile += "7"
-		} else if(input >= 335){
-			tile += "8"
-		}
-		if(input >= 150 && input < 300){
-			if(Math.random() > 1-input/30000){
-				tile += "-B:3-T:1-S:" + (Math.floor(Math.random()*3)+1)
-			}
-		}
-
-		
-
-
-			return(tile)
-	}
-}
 
 
 
@@ -4471,22 +4373,6 @@ function endCombatInstance(str){
 
 
 
-function randomItem(List){
-	let sum = 0
-	for(let i = 1; i < List.length; i+=2){
-		sum += List[i]
-	}
-	let value = Math.random()*sum
-	let tempvalue = 0
-	for(let i = 1; i < List.length; i+=2){
-	tempvalue += List[i]
-	if(value < tempvalue){
-		return(List[i-1])
-		}
-	}
-
-
-}
 
 
 
@@ -4637,60 +4523,10 @@ function explosion(x,y,size,d){
 
 }
 
-function arrayBoundingBox(arr,type){
-
-	if(type = "notArr"){
-
-	}
-
-	let maxx
-	let maxy
-	let minx
-	let miny
-
-	arr.forEach((e)=>{
-
-		if(e[0] > maxx){
-			maxx = e[0]
-		}
-		if(e[0] < minx){
-			minx = e[0]
-		}
-		if(e[1] > maxy){
-			maxy = e[1]
-		}
-		if(e[1] < miny){
-			miny = e[1]
-		}
-
-	})
-
-	return([maxx,minx,maxy,miny])
-
-}
 
 
-function vectorNormalize(original,multiplier){
 
-	if(multiplier == undefined){
-		multiplier = 1
-	}
 
-	let tx = original[2] - original[0]
-	let ty = original[3] - original[1]
-
-	let d = Math.sqrt(tx*tx+ty*ty)
-
-	if(d == 0){
-		return(original)
-	}
-
-	tx = tx*multiplier/d
-	ty = ty*multiplier/d
-
-	return([original[0],original[1],original[0]+tx,original[1]+ty])
-
-}
 
 
 function serverLightning2(original,steps,random,options,hitFunc){
@@ -4774,20 +4610,6 @@ function serverLightning(original,steps,random,lightning,decay){
   
 }
 
-
-
-//============================
-
-
-function minSub(act,sub,min){
-
-	let a = act - sub
-	if(a < min){
-		return([min,min-a])
-	}
-	return([a,0])
-
-}
 
 
 
@@ -4967,6 +4789,7 @@ function brackedator(str,option){
 
 
 var foutputDict = {"NATTRIBUTEOF":[]}
+
 function sameFunctionOutputs(func,inputs){
 
   let b = []
@@ -5581,7 +5404,7 @@ class re8{
 				"factoryUnplaced":true,
 				"temporalMap":[{},[]],
 				"entities":{},
-				"resources":{"money":500},
+				"resources":{"money":1500},
 				"selector":[0,0],
 				"specialState":{"name":"none"}
 			}
@@ -5809,7 +5632,6 @@ class re8{
 
 			this.sendPlayerMapUpdate(e.id,rm)
 		} else {
-			console.log(e)
 
 			let loc = e.x+","+e.y
 			let end = rm.enDict
@@ -5817,16 +5639,15 @@ class re8{
 			if(e.sel != "none" &&e.sel != "1" &&e.sel != "2"&&e.sel != "3"){
 				switch(e.sel){
 					case "Factory1":
-						if(!this.entityAtPos(loc,rm.name,1)[0] && hasMoney(e.id,300)){
-							console.log("placed from factory!")
+						if(!this.entityAtPos(loc,rm,1)[0] && this.hasMoney(e.id,300)){
 							this.newEntity(e.id,e.x,e.y,"architect",rm,p.team)
 							this.sendPlayerMapUpdate(e.id,rm)
-							p.resources.moeny -= 300
+							p.resources.money -= 300
 						}
 						io.to(e.id).emit("SEL",{"name":"none"})
 						break;
 					case "Factory2":
-						console.log("placed from factory!")
+						
 						io.to(e.id).emit("SEL",{"name":"none"})
 						this.newEntity(e.id,e.x,e.y,"soldier",rm,p.team)
 						this.sendPlayerMapUpdate(e.id,rm)
@@ -5855,7 +5676,7 @@ class re8{
 		if(this.players[e.id].temporalMap[loc] == undefined){
 			
 			let SB = this.SELB(e.id,loc,room)
-			console.log(SB)
+			
 			if(SB[3] && this.OffCooldown(room.name,SB[1])){
 				if(e.sel == 0){
 					if(end[SB[1]].type == "factory"){
@@ -5892,12 +5713,13 @@ class re8{
 		if(ens == undefined || ens.length < 1){
 			return([false,0])
 		}
-		ens.forEach((e)=>{
+		for(let i = 0; i < ens.length; i++){
+			let e = ens[i]
 			let en = room.enDict[e]
 			if(en.layer == layer){
 				return([true,e])
 			}
-		})
+		}
 		return([false,0])
 	}
 
@@ -5916,6 +5738,46 @@ class re8{
 			selen = room.enDict[end[loc][num]]
 			out[0] = true
 			out[1] = end[loc]
+		}
+
+		if(selen.cooldown[0] == "none"|| Date.now-selen.cooldown[1] > selen.cooldown[2]){
+			selen.cooldown = ["none",0,0]
+			out[4] = true
+		}
+
+		if(selen.team == this.players[id].team){
+			out[2] = true
+		}
+		if(selen.ownerID == id){
+			out[3] = true
+		}
+		return(out)
+	}
+
+	static TNEWSELB(id,loc,room,num){
+		if(num==undefined){
+			num = 1
+		}
+		let out = [false,0,false,false,true]
+		let end = room.enmap
+		let selen;
+
+		if(end[loc] == undefined || end[loc].length == 0){
+			return(out)
+		} else {
+
+			let selno = "none"
+			end[loc].forEach((e)=>{
+				if(room.enDict[e].layer == num){
+					selno = e
+				}
+			})
+			if(selno == "none"){
+				return(out)
+			}
+			selen = room.enDict[selno]
+			out[0] = true
+			out[1] = selno
 		}
 
 		if(selen.cooldown[0] == "none"|| Date.now-selen.cooldown[1] > selen.cooldown[2]){
@@ -5975,8 +5837,56 @@ static sendRoomMapUpdate(rm){
 	static key(e,rm){
 
 		let key = e.key
+		let p = this.players[e.id]
 
 
+
+	    switch(key){
+	    	case "w":
+	    		this.handleWalk(e.id,p.selector[0],p.selector[1]-1,rm)
+	    		break;
+	    }
+
+	    if(key == "ArrowUp" || key == "w"){
+     		p.selector[1] -= 1
+	    } else if(key == "ArrowDown"|| key == "s"){
+	        p.selector[1] += 1
+	    } else if(key == "ArrowLeft"|| key == "a"){
+	      	p.selector[0] -= 1
+	    } else if(key == "ArrowRight"|| key == "d"){
+	      	p.selector[0] += 1
+	    }
+
+	}
+
+	static handleWalk(id,x,y,room){
+		let p = this.players[id]
+		let s = this.TNEWSELB(id,p.selector[0]+","+p.selector[1],room,1)
+		console.log("E",s)
+		if(s[3]){
+			let h = this.entityAtPos(x+","+y,room,1)
+			console.log("EE")
+
+			if(!h[0]){
+				console.log("EEE")
+
+				let en = room.enDict[s[1]]
+
+				if(this.OffCooldown(room.name,s[1]) && en.movable){
+					this.rmREmapper(room.name,s[1],en.x+","+en.y,x+","+y)
+					room.enDict[s[1]].x = x
+					room.enDict[s[1]].y = y
+					room.enDict[s[1]].cooldown = ["move",Date.now(),room.enDict[s[1]].movingInfo.cd]
+					room.enDict[s[1]].Asight = this.uenVisionC(s[1],room.name)
+					this.emitEntityUpdate(s[1],room)
+					this.sendPlayerMapUpdate(id,room)
+					console.log("walked")
+					return(true)
+				}
+				
+			}
+		}
+		return(false)
 	}
 
 	static generateTile(n,c){
@@ -6019,19 +5929,18 @@ static sendRoomMapUpdate(rm){
 
 	}
 
-	static emitEntityUpdate(id,rm){
-		let plr = Object.keys(rm.players)
+	static emitEntityUpdate(id,room){
+		let plr = Object.keys(room.players)
 
-		let en = rm.enDict[id]
+		let en = room.enDict[id]
 
 		plr.forEach((e,i)=>{
 			let tm = this.players[e].temporalMap[0]
 			if(tm[en.x+","+en.y] != undefined && tm[en.x+","+en.y].enseen){
-				io.to(e).emit("entityUpdate",[id,rm.enDict[id]])
+				io.to(e).emit("entityUpdate",[id,room.enDict[id]])
 			}
 		})
 
-		// io.to(rm.name).emit("entityUpdate",[id,rm.enDict[id]])
 	}
 
 	static killEntity(id,rm){
@@ -6045,19 +5954,32 @@ static sendRoomMapUpdate(rm){
 		delete this.rooms[rm].enDict[id]
 	}
 
-	static rmEnmaper(rm,enid,loc,op){
-		let place = rm.enmap[loc]
+	static rmEnmaper(room,enid,loc,op){
+		let place = room.enmap[loc]
 		if(op == "add"){
 			if(place == undefined){
-				rm.enmap[loc] = []
+				room.enmap[loc] = []
 			}
-				rm.enmap[loc].push(enid)
+				room.enmap[loc].push(enid)
 		} else if("remove"){
 			place = place.filter(e => e !== enid)
 			if(place.length == 0){
-				delete rm.enmap[loc]
+				delete room.enmap[loc]
 			}
 		}
+	}
+
+	static rmREmapper(rm,enid,prloc,loc){
+		let room = this.rooms[rm]
+		let enm = room.enmap[prloc]
+		for(let i = 0; i < enm.length; i++){
+			if(enid == enm[i]){
+				this.rooms[rm].enmap[prloc].splice(i,1)
+				this.rmEnmaper(room,enid,loc,"add")
+				return(true)
+			}
+		}
+		return(false)
 	}
 
 
@@ -6066,37 +5988,37 @@ static sendRoomMapUpdate(rm){
 			case "factory":
 				return({
 					"hp":500,
-					"moveable":false,
+					"movable":false,
 					"sight":5,
 					"ensight":4,
 					"canshoot":false,
 					"layer":1,
-					"cooldown":["building",Date.now(),5000]
+					"cooldown":["building",Date.now(),2000]
 				})
 				break;
 			case "architect":
 				return({
 					"hp":100,
-					"moveable":true,
+					"movable":true,
 					"movingInfo":{"cd":1000},
 					"sight":4,
 					"ensight":3,
 					"canshoot":false,
 					"layer":1,
-					"cooldown":["building",Date.now(),5000]
+					"cooldown":["building",Date.now(),2000]
 				})
 				break;
 			case "soldier":
 				return({
 					"hp":120,
-					"moveable":true,
+					"movable":true,
 					"sight":4,
 					"ensight":3,
 					"canshoot":true,
 					"movingInfo":{"cd":1000},
 					"shootInfo":{"range":3,"dmg":20,"dmgv":5,"cd":1000},
 					"layer":1,
-					"cooldown":["building",Date.now(),5000]
+					"cooldown":["building",Date.now(),2000]
 				})
 				break;
 		}
