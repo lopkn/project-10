@@ -1837,6 +1837,8 @@ var TickLimit = 70
 var serverTickWait = 50
 
 function doSomething(startTime){
+
+
 	if(TIME < TickLimit-10){
 		TIME += 1
 		io.to("G10").emit('TIME',TIME)
@@ -3874,9 +3876,6 @@ function TNEWATTRIBUTEOF(str,e){
 	  return("NONE")
 	}
 
-
-
-
 	 else {
 		let BLs = bracketLevels(str)
 
@@ -3887,14 +3886,7 @@ function TNEWATTRIBUTEOF(str,e){
 
   		if(strHas(act[1],"^")){
 
-
-  			
-
   		return(bracketCompressionProcess(act[1],BLs,1))
-
-
-
-
 
   		} else {
 
@@ -3909,8 +3901,6 @@ function TNEWATTRIBUTEOF(str,e){
 	}
 
 
-
-
 }
 
 
@@ -3918,9 +3908,6 @@ function MODIFYATTRIBUTEOF(str,a,mod){
 	let tout = removeAttributeOf(str,a) + "-" + a + ":" + mod
 	return(tout)
 }
-
-
-
 
 function MasterTileDeparser(str){
   let split = str.split('-')
@@ -4601,7 +4588,7 @@ function serverLightning(original,steps,random,lightning,decay){
         newBeams.push([ts[2],ts[3],ts[2]+velocity1,ts[3]+velocity2,ts[4]])
       }
     }
-    currentBeams = newBeams
+    currentBeams = Beams
     
   }
 
@@ -4721,72 +4708,6 @@ function NATTRIBUTEOF(str,type){
 	return("NONE")
 }
 
-function brackedator(str,option){
-
-	let tempbrackedate = []
-	let tempbasestring = ""
-
-	let outbases = []
-	let outbaselinks = []
-	let outeffect = "base"
-	let ttout = ""
-
-	for(let i = 0; i < str.length; i++){
-		let brconfig =  CURRENTCONFIGS.brackets[str[i]]
-		if(brconfig != undefined){
-			
-			if(brconfig[0] == "c"){
-
-				if(tempbrackedate[tempbrackedate.length-1] == brconfig.substring(1)){
-					tempbrackedate.pop()
-				} else {
-					return("BRACKETS NOT MATCHING")
-				}
-
-			} else {
-				tempbrackedate.push(str[i])
-			}
-
-		} else if(tempbrackedate.length == 0){
-			tempbasestring += str[i]
-
-		}
-
-
-		if(tempbrackedate.length == 0&&str[i] == ":"){
-				outeffect == "link"
-				outbases.push(ttout)
-				ttout = ""
-			}else if(tempbrackedate.length == 0&&str[i] == "-"){
-				outeffect == "base"
-				outbaselinks.push(ttout)
-				ttout = ""
-			} else {
-					ttout += str[i]
-			}
-
-	}
-	outbaselinks.push(ttout)
-
-	if(option == undefined || option == "normal"){
-		let outdict = {}
-		for(let i = 0; i < outbases.length; i++){
-			outdict[outbases[i]] = outbaselinks[i]
-		}
-		return(outdict)
-
-	} else if(option == "debug1"){
-
-
-		return(tempbasestring)
-
-
-	} else if(option == "debug2"){
-		return([outbases,outbaselinks])
-	}
-
-}
-
 
 var foutputDict = {"NATTRIBUTEOF":[]}
 
@@ -4810,10 +4731,6 @@ function sameFunctionOutputs(func,inputs){
 
 //game10 functions end//===============================================================================
 
-
-exports.add = function(i, j) {
-  return i + j;
-};
 
 //shooter2 functions start//======================
 
@@ -5436,7 +5353,7 @@ class re8{
 			let map = {"width":45,"height":45,"tiles":{}}
 			for(let i = 0; i < map.width; i++){
 				for(let j = 0; j < map.height; j++){
-					map.tiles[i+","+j] = this.generateTile("grass","rgb(0,"+Math.random()*255+",0)")
+					map.tiles[i+","+j] = this.generateTile()
 				}
 			}
 			tr.map = map
@@ -5834,7 +5751,7 @@ static sendRoomMapUpdate(rm){
 
 
 
-	static key(e,rm){
+	static key(e,room){
 
 		let key = e.key
 		let p = this.players[e.id]
@@ -5843,44 +5760,63 @@ static sendRoomMapUpdate(rm){
 
 	    switch(key){
 	    	case "w":
-	    		this.handleWalk(e.id,p.selector[0],p.selector[1]-1,rm)
+	    		this.handleWalk(e.id,p.selector[0],p.selector[1]-1,room)
+	    		break;
+	    	case "s":
+	    		this.handleWalk(e.id,p.selector[0],p.selector[1]+1,room)
+	    		break;
+	    	case "a":
+	    		this.handleWalk(e.id,p.selector[0]-1,p.selector[1],room)
+	    		break;
+	    	case "d":
+	    		this.handleWalk(e.id,p.selector[0]+1,p.selector[1],room)
 	    		break;
 	    }
 
-	    if(key == "ArrowUp" || key == "w"){
-     		p.selector[1] -= 1
-	    } else if(key == "ArrowDown"|| key == "s"){
-	        p.selector[1] += 1
-	    } else if(key == "ArrowLeft"|| key == "a"){
-	      	p.selector[0] -= 1
-	    } else if(key == "ArrowRight"|| key == "d"){
-	      	p.selector[0] += 1
+	    if(key == "w"){
+     		p.selector = this.selectorMove(e.id,room,0,-1)
+	    } else if(key == "s"){
+	        p.selector = this.selectorMove(e.id,room,0,1)
+	    } else if(key == "a"){
+	      	p.selector = this.selectorMove(e.id,room,-1,0)
+	    } else if(key == "d"){
+	      	p.selector = this.selectorMove(e.id,room,1,0)
 	    }
 
+	}
+
+	static selectorMove(id,room,x,y){
+		let ps = this.players[id].selector
+		return(this.reApos(ps[0]+x,ps[1]+y,room.map.width,room.map.height))
 	}
 
 	static handleWalk(id,x,y,room){
 		let p = this.players[id]
 		let s = this.TNEWSELB(id,p.selector[0]+","+p.selector[1],room,1)
-		console.log("E",s)
 		if(s[3]){
 			let h = this.entityAtPos(x+","+y,room,1)
-			console.log("EE")
 
 			if(!h[0]){
-				console.log("EEE")
 
 				let en = room.enDict[s[1]]
 
 				if(this.OffCooldown(room.name,s[1]) && en.movable){
-					this.rmREmapper(room.name,s[1],en.x+","+en.y,x+","+y)
-					room.enDict[s[1]].x = x
-					room.enDict[s[1]].y = y
-					room.enDict[s[1]].cooldown = ["move",Date.now(),room.enDict[s[1]].movingInfo.cd]
+					let reap = this.reApos(x,y,room.map.width,room.map.height)
+					this.rmREmapper(room.name,s[1],en.x+","+en.y,reap[0]+","+reap[1])
+					
+					room.enDict[s[1]].x = reap[0]
+					room.enDict[s[1]].y = reap[1]
+					let tcd = room.enDict[s[1]].movingInfo.cd
+					if(room.map.tiles[room.enDict[s[1]].x+","+room.enDict[s[1]].y].ground == "mountain"){
+						tcd += tcd
+					}
+					room.enDict[s[1]].cooldown = ["moving",Date.now(),tcd]
+					let oldsight = JSON.parse(JSON.stringify(room.enDict[s[1]].Asight))
 					room.enDict[s[1]].Asight = this.uenVisionC(s[1],room.name)
-					this.emitEntityUpdate(s[1],room)
 					this.sendPlayerMapUpdate(id,room)
-					console.log("walked")
+					this.entitySightUpdate(id,oldsight,room.enDict[s[1]].Asight,room)
+					this.emitEntityUpdate(s[1],room)
+					
 					return(true)
 				}
 				
@@ -5889,9 +5825,86 @@ static sendRoomMapUpdate(rm){
 		return(false)
 	}
 
-	static generateTile(n,c){
+	static generateTile(){
+		let n = ""
+		let c = ""
+		let colran = Math.random()
+		if(Math.random()>0.3){
+			n = "grass"
+			c = "rgb(0,"+(Math.random()*200+55)+",0)"
+		} else {
+			n = "mountain"
+			c = "rgb("+(colran*40+80)+","+(colran*40+80)+","+(colran*40+80)+")"
+		}
+
 		return({"ground":n,"color":c})
 	}
+
+	static entitySightUpdate(id,os,ns,room){
+		let cDict = {}
+		// no -> yes = true
+		let objkOS = Object.keys(os)
+		let objkNS = Object.keys(ns)
+
+		objkOS.forEach((e)=>{
+			if(ns[e] == undefined){
+				if(os[e].enseen){
+				cDict[e] = false}
+				return
+			}
+			if(os[e].enseen != ns[e].enseen){
+				if(os[e].enseen){
+					cDict[e] = false
+					return
+				}
+				if(ns[e].enseen){
+					cDict[e] = true
+					return
+				}
+			}
+		})
+
+		objkNS.forEach((e)=>{
+			if(os[e] == undefined){
+				if(ns[e].enseen){
+				cDict[e] = true
+				}
+				return
+			}
+			if(os[e].enseen != ns[e].enseen){
+				if(os[e].enseen){
+					cDict[e] = false
+					return
+				}
+				if(ns[e].enseen){
+					cDict[e] = true
+					return
+				}
+			}
+		})
+
+		let objc = Object.keys(cDict)
+		let delposes = []
+		objc.forEach((e)=>{
+			if(cDict[e]){
+				if(room.enmap[e] == undefined){
+					return;
+				}
+				room.enmap[e].forEach((E)=>{
+					io.to(id).emit("entityUpdate",[E,room.enDict[E]])
+				})
+			} else {
+				if(this.players[id].temporalMap[0][e] == undefined || this.players[id].temporalMap[0][e].enseen !== true){
+					delposes.push(e)
+				}
+			}
+		})
+		io.to(id).emit("entityPDel",delposes)
+
+	}
+
+		
+
 
 
 
@@ -5938,6 +5951,8 @@ static sendRoomMapUpdate(rm){
 			let tm = this.players[e].temporalMap[0]
 			if(tm[en.x+","+en.y] != undefined && tm[en.x+","+en.y].enseen){
 				io.to(e).emit("entityUpdate",[id,room.enDict[id]])
+			} else {
+				io.to(e).emit("entityUpdate",[id,"-DEL-"])
 			}
 		})
 
@@ -5972,14 +5987,9 @@ static sendRoomMapUpdate(rm){
 	static rmREmapper(rm,enid,prloc,loc){
 		let room = this.rooms[rm]
 		let enm = room.enmap[prloc]
-		for(let i = 0; i < enm.length; i++){
-			if(enid == enm[i]){
-				this.rooms[rm].enmap[prloc].splice(i,1)
-				this.rmEnmaper(room,enid,loc,"add")
-				return(true)
-			}
-		}
-		return(false)
+
+		this.rmEnmaper(room,enid,prloc,"remove")
+		this.rmEnmaper(room,enid,loc,"add")
 	}
 
 
@@ -6000,12 +6010,12 @@ static sendRoomMapUpdate(rm){
 				return({
 					"hp":100,
 					"movable":true,
-					"movingInfo":{"cd":1000},
+					"movingInfo":{"cd":4000},
 					"sight":4,
 					"ensight":3,
 					"canshoot":false,
 					"layer":1,
-					"cooldown":["building",Date.now(),2000]
+					"cooldown":["building",Date.now(),5000]
 				})
 				break;
 			case "soldier":

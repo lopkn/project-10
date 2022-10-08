@@ -1,4 +1,8 @@
 // needed Funcs
+
+
+var CURRENTCONFIGS = require("./config")
+
 function distance(x1,y1,x2,y2) {
 	let a = x2-x1
 	let b = y2-y1
@@ -304,6 +308,72 @@ function TNEWgenerateTileFromNumber(input,d){
 }
 
 //EXP12
+function brackedator(str,option){
+
+	let tempbrackedate = []
+	let tempbasestring = ""
+
+	let outbases = []
+	let outbaselinks = []
+	let outeffect = "base"
+	let ttout = ""
+
+	for(let i = 0; i < str.length; i++){
+		let brconfig =  CURRENTCONFIGS.brackets[str[i]]
+		if(brconfig != undefined){
+			
+			if(brconfig[0] == "c"){
+
+				if(tempbrackedate[tempbrackedate.length-1] == brconfig.substring(1)){
+					tempbrackedate.pop()
+				} else {
+					return("BRACKETS NOT MATCHING")
+				}
+
+			} else {
+				tempbrackedate.push(str[i])
+			}
+
+		} else if(tempbrackedate.length == 0){
+			tempbasestring += str[i]
+
+		}
+
+
+		if(tempbrackedate.length == 0&&str[i] == ":"){
+				outeffect == "link"
+				outbases.push(ttout)
+				ttout = ""
+			}else if(tempbrackedate.length == 0&&str[i] == "-"){
+				outeffect == "base"
+				outbaselinks.push(ttout)
+				ttout = ""
+			} else {
+					ttout += str[i]
+			}
+
+	}
+	outbaselinks.push(ttout)
+
+	if(option == undefined || option == "normal"){
+		let outdict = {}
+		for(let i = 0; i < outbases.length; i++){
+			outdict[outbases[i]] = outbaselinks[i]
+		}
+		return(outdict)
+
+	} else if(option == "debug1"){
+
+
+		return(tempbasestring)
+
+
+	} else if(option == "debug2"){
+		return([outbases,outbaselinks])
+	}
+
+}
+
 //EXP13
 //EXP14
 //EXP15
@@ -320,5 +390,6 @@ module.exports = {
 	vectorNormalize,
 	arrayBoundingBox,
 	randomItem,
-	TNEWgenerateTileFromNumber
+	TNEWgenerateTileFromNumber,
+	brackedator
 }

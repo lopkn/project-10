@@ -37,6 +37,9 @@ socket.on("personalMapUpdate",(e)=>{
 socket.on("SEL",(e)=>{
   EHAND.SEL(e)
 })
+socket.on("entityPDel",(e)=>{
+  game.entityDel(e)
+})
 
 
 function lobby(){
@@ -98,7 +101,7 @@ function timerDraw(time,maxtime,x,y,style){
   let pxx = x*S
   let pyy = y*S
 
-  if(style == undefined || style == 1){
+  if(style == undefined || style == 1 || style == "building"){
     mainCTX.fillStyle = "rgba(255,0,0,"+(1-zotime)+")"
     mainCTX.fillRect(pxx+SD[0.1],pyy+SD[0.1],SD[0.2],SD[0.2])
     mainCTX.fillRect(pxx+S-SD[0.1]*3,pyy+S-SD[0.1]*3,SD[0.2],SD[0.2])
@@ -106,9 +109,9 @@ function timerDraw(time,maxtime,x,y,style){
     mainCTX.fillStyle = "rgba(0,250,250,"+zotime+")"
     mainCTX.fillRect(pxx+SD[0.1],pyy+S-SD[0.1]*3,SD[0.2],SD[0.2])
     mainCTX.fillRect(pxx+S-SD[0.1]*3,pyy+SD[0.1],SD[0.2],SD[0.2])
-  }else if(style == 2){
-    mainCTX.fillStyle = "rgba("+colotime+","+(255-colotime)+","+(255-colotime)+",0.5)"
-    mainCTX.fillRect(pxx,pyy,S-S*(1-zotime),S)
+  }else if(style == 2 || style == "moving"){
+    mainCTX.fillStyle = "rgba("+(255-colotime)+","+colotime+","+colotime+",0.35)"
+    mainCTX.fillRect(pxx,pyy,S-S*zotime,S)
   }
 
 }
@@ -158,7 +161,7 @@ class game{
 
   static renderSelectedSpot(){
     let ss = this.ss
-    // if(ss.boxes == "main"){
+    if(inRect(ss.x,ss.y,-1,-1,MRef.vision,MRef.vision)){
       switch(ss.mode){
         case "inspect":
           boarderRect(ss.x*MRef.MTS,ss.y*MRef.MTS,MRef.MTS,MRef.MTS,4,"white")
@@ -168,7 +171,7 @@ class game{
           boarderRect(this.ms.heldSpace[0]*MRef.MTS,this.ms.heldSpace[1]*MRef.MTS,MRef.MTS,MRef.MTS,4,"#FFA000")
           break;
       }
-    // }
+    }
   }
 
   static entityUpdate(e){
@@ -177,6 +180,19 @@ class game{
     } else {
       delete this.enDict[e[0]]
     }
+  }
+
+  static entityDel(p){
+    let objK = Object.keys(this.enDict)
+    p.forEach((pos)=>{
+      objK.forEach((e)=>{
+        let en = this.enDict[e]
+        if(en.x+","+en.y==pos){
+          delete this.enDict[e]
+        }
+      })
+    })
+    
   }
 
 
@@ -205,6 +221,14 @@ class EHAND{
       game.ss.boxes = "out"
     }
     game.ms.held = true
+  }
+
+  static updateSelector(x,y){
+    game.ss.x += x
+    game.ss.y += y
+    let A = reApos(game.ss.x+game.camera[0],game.ss.y+game.camera[1],game.map.width,game.map.height)
+    game.ss.ax = A[0]
+    game.ss.ay = A[1]
   }
 
   static heldMouseDown(e){
@@ -415,13 +439,27 @@ document.addEventListener("keyup",(e)=>{
   let key = e.key
 
   if(key == "ArrowUp"){
-     game.camera[1] -= 1
+      game.camera[1] -= 1
+      game.ss.y += 1
     } else if(key == "ArrowDown"){
         game.camera[1] += 1
+        game.ss.y -= 1
     } else if(key == "ArrowLeft"){
       game.camera[0] -= 1
+      game.ss.x += 1
     } else if(key == "ArrowRight"){
       game.camera[0] += 1
+      game.ss.x -= 1
+    }
+
+  if(key == "w"){
+     EHAND.updateSelector(0,-1)
+    } else if(key == "s"){
+     EHAND.updateSelector(0,1)
+    } else if(key == "a"){
+     EHAND.updateSelector(-1,0)
+    } else if(key == "d"){
+     EHAND.updateSelector(1,0)
     }
 
       socket.emit("key",{"id":ID,"key":key})
@@ -551,8 +589,9 @@ function entityRender(e){
     let ec = e.cooldown
     if(Date.now()-ec[1]>ec[2]){
       e.cooldown = ["none",0,0]
+    } else {
+      timerDraw(Date.now()-ec[1],ec[2],ax,ay,e.cooldown[0])
     }
-    timerDraw(Date.now()-ec[1],ec[2],ax,ay)
   }
 }
 
