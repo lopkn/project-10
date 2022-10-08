@@ -60,6 +60,68 @@ var consoleKey = "216"
 var pping = 0
 var startPing = 0
 
+
+
+const INFUNCS = require("./funcs.js")
+/*	
+	vectorFuncs,
+	LuuidGenerator,
+	vectorNormal,
+	myMath,
+	retInsideLine,
+	ArrRemoveFromTile
+*/
+let vectorFuncs = INFUNCS.vectorFuncs
+let myMath = INFUNCS.myMath
+let vectorNormal = INFUNCS.vectorNormal
+let LuuidGenerator = INFUNCS.LuuidGenerator
+let retInsideLine = INFUNCS.retInsideLine
+let ArrRemoveFromTile = INFUNCS.ArrRemoveFromTile
+
+/////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 function getStrLengthOf(e){
 	return(JSON.stringify(e).length)
 }
@@ -1358,33 +1420,7 @@ function inRect(x,y,rx,ry,w,h){
 
 
 
-function retInsideLine(x,y,x1,y1){
-	let fout = []
-	let dx = x1 - x
-	if(dx != 0){
-	let slope = (y1-y)/(dx)
-	let dist = distance(x,y,x1,y1)
 
-	for(let i = 1; i < dist; i++){
-		let e = x+i*dx/dist
-		let tout = [Math.round(e),Math.round(y + (e-x)*slope)]
-		if(fout[0] == undefined||fout[fout.length-1][0] != tout[0] ||fout[fout.length-1][1] != tout[1]){
-		fout.push(tout)}
-	}
-
-
-	} else {
-		slope = y1 > y ? 1 : -1
-		for(let i = 1; i < Math.abs(y1-y)+1; i++){
-		let tout = [x,y + i*slope]
-		if(fout[0] == undefined||fout[fout.length-1][0] != tout[0] ||fout[fout.length-1][1] != tout[1]){
-		fout.push(tout)}
-		}
-	}
-
-	return(fout)
-
-}
 
 
 
@@ -1951,7 +1987,7 @@ function tellPerlin(x,y,d){
 }
 
 
-/////////////////////////////////////////////////////////////
+
 //game functions//===================================================================================
 
 function posHasEntity(x,y,d){
@@ -3056,26 +3092,7 @@ function selectSlot(e){
 }
 
 
-function ArrRemoveFromTile(str,type){
-	let split = str.split("-")
-	let fin = ""
-	for(let i = 0; i < split.length; i++){
 
-		let isRemove = 0
-
-		for(let j = 0 ; j < type.length; j++){
-			if(split[i].split(":")[0] == type[j]){
-				isRemove = 1
-				break;
-				
-			}
-		}
-		if(isRemove == 0){
-			fin += "-" + split[i]
-		}
-	}
-	return(fin.substring(1))
-}
 
 
 
@@ -3558,19 +3575,7 @@ function tp(r,i1,i2){
 
 
 	}
-	//  else if(!isNaN(parseInt(i1))&& !isNaN(parseInt(i2))){
-	// 	enArr[r].x = parseInt(i1)
-	// 	enArr[r].y = parseInt(i2)
-	// 	enArr[r].log("successfully teleported to "+i1+","+i2,cmdc.success)
-	// } else if(i1[0] == "=" && i2[0] == "="){
-	// 	let ar = parseInt(i1.split("=")[1])
-	// 	let ae = parseInt(i2.split("=")[1])
-	// 	if(!isNaN(ar) && !isNaN(ae)){
-	// 		enArr[r].x += ar
-	// 		enArr[r].y += ae
-	// 		enArr[r].log("successfully teleported to "+i1+","+i2,cmdc.success)
-	// 	}
-	// }
+
 		else{
 			let pos = getRelativity(r,i1,i2)
 			enDict[r].x = pos[0]
@@ -3716,14 +3721,7 @@ function inEffectArr(effect,arr){
 }
 
 
-///input a player id to get its position in the array 
-function findPlayerInArr(inp){
-  // for(let i = 0; i < entities.length; i++){
-  //   if(inp == enArr[i].id){
-  //     return(i)
-  //   }
-  // } return(false)
-}
+
 
 
 ///inputs an array and an item, returns index of item in array's second item, returns false if not in array
@@ -4327,8 +4325,7 @@ class combatInstance{
 
 	simul(){
 
-		// this.p1n = findPlayerInArr(this.p1)
-		// this.p2n = findPlayerInArr(this.p2)
+		
 		if(enDict[this.p1] == undefined || enDict[this.p2] == undefined){
 			endCombatInstance(this.comid)
 			return;
@@ -5089,20 +5086,20 @@ class shooter2C{
 			case "norm":
 				this.walls[a] = {
 					"type":"norm","x1":x1,"y1":y1,"x2":x2,"y2":y2,
-					"hp":1000,"midpt":midPointOfLine(x1,y1,x2,y2),
+					"hp":1000,"midpt":myMath.midPointOfLine(x1,y1,x2,y2),
 					"defense":1,
 					"frad":distance(x1,y1,x2,y2)/2
 				}
 				break;
 			case "player":
 				this.walls[a] = {"frad":distance(x1,y1,x2,y2)/2,"plid":options.id,"type":"player","x1":x1,"y1":y1,"x2":x2,"y2":y2,"hp":1000,
-					"defense":0.5,"midpt":midPointOfLine(x1,y1,x2,y2),
+					"defense":0.5,"midpt":myMath.midPointOfLine(x1,y1,x2,y2),
 					"frad":distance(x1,y1,x2,y2)/2
 				}
 				break;
 			case "body":
 			this.walls[a] = {"frad":distance(x1,y1,x2,y2)/2,"plid":options.id,"type":"body","x1":0,"y1":0,"x2":0,"y2":0,"hp":1000,
-					"defense":0.2,"midpt":midPointOfLine(x1,y1,x2,y2),
+					"defense":0.2,"midpt":myMath.midPointOfLine(x1,y1,x2,y2),
 					"frad":distance(x1,y1,x2,y2)/2
 				}
 				let pp = this.players[options.id]
@@ -5496,8 +5493,8 @@ class shooter2C{
     }}
     yc = (xc-x1)*slopeL1+y1
     if(isNaN(yc)){yc = (xc-x3)*slopeL2+y3}
-    let cola = pointInLine(xc,yc,x1,y1,x2,y2)
-    let colb = pointInLine(xc,yc,x3,y3,x4,y4)
+    let cola = myMath.pointInLine(xc,yc,x1,y1,x2,y2)
+    let colb = myMath.pointInLine(xc,yc,x3,y3,x4,y4)
     let colc = (cola&&colb)
     return([xc,yc,cola,colb,colc])
   } else {
@@ -5557,46 +5554,18 @@ class shooter2C{
 
 
 
-function pointInLine(px,py,x1,y1,x2,y2){
-  let extremelySmall = 0.000000001
-  if((px <= x1 + extremelySmall && px >= x2 - extremelySmall )||(px >= x1 - extremelySmall && px <= x2 + extremelySmall)){
-    if((py <= y1 + extremelySmall && py >= y2  - extremelySmall)||(py >= y1 - extremelySmall && py <= y2 + extremelySmall)){
-      return(true)
-    }
-  }
-  return(false)
-}
 
-function midPointOfLine(x1,y1,x2,y2){
-	return([(x1+x2)/2,(y1+y2)/2])
-}
 
-function vectorNormal(x1,y1,x2,y2){
-  let d = distance(x1,y1,x2,y2)
-  let dx = (x2-x1)/d
-  let dy = (y2-y1)/d
-  return([-dy,dx,dy,-dx])
-}
 
-class LuuidGenerator{
-	static counter = 0
 
-	static generate(){
 
-		let hexstr = this.counter.toString(16)
-		while(hexstr.length < 10){
-			hexstr = "0"+hexstr
-		}
-		this.counter ++
-		return(hexstr)
-	}
-}
+
 
 
 class re8{
 	static players = {}
 	static rooms = {}
-	static referencer = {"color":{"r":"#A00000","b":"#0000A0","y":"#A0A000","o":"#A04000","p":"#0060C0"}}
+	static referencer = {"color":{"r":"#A00000","b":"#0000A0","y":"#A0A000","o":"#A04000","p":"#6000C0","c":"#0060C0"}}
 
 	static enIDCnt = 0
 
@@ -5612,6 +5581,7 @@ class re8{
 				"factoryUnplaced":true,
 				"temporalMap":[{},[]],
 				"entities":{},
+				"resources":{"money":500},
 				"selector":[0,0],
 				"specialState":{"name":"none"}
 			}
@@ -5823,6 +5793,11 @@ class re8{
 		}
 	}
 
+
+	static hasMoney(id,amt){
+		return(this.players[id].resources.money >= amt)
+	}
+
 	static click(e,rm){
 		let p = this.players[e.id]
 		if(this.players[e.id].factoryUnplaced){
@@ -5842,11 +5817,13 @@ class re8{
 			if(e.sel != "none" &&e.sel != "1" &&e.sel != "2"&&e.sel != "3"){
 				switch(e.sel){
 					case "Factory1":
-						console.log("placed from factory!")
+						if(!this.entityAtPos(loc,rm.name,1)[0] && hasMoney(e.id,300)){
+							console.log("placed from factory!")
+							this.newEntity(e.id,e.x,e.y,"architect",rm,p.team)
+							this.sendPlayerMapUpdate(e.id,rm)
+							p.resources.moeny -= 300
+						}
 						io.to(e.id).emit("SEL",{"name":"none"})
-
-						this.newEntity(e.id,e.x,e.y,"architect",rm,p.team)
-						this.sendPlayerMapUpdate(e.id,rm)
 						break;
 					case "Factory2":
 						console.log("placed from factory!")
@@ -5908,6 +5885,20 @@ class re8{
 		}
 		return false
 
+	}
+
+	static entityAtPos(loc,room,layer){
+		let ens = room.enmap[loc]
+		if(ens == undefined || ens.length < 1){
+			return([false,0])
+		}
+		ens.forEach((e)=>{
+			let en = room.enDict[e]
+			if(en.layer == layer){
+				return([true,e])
+			}
+		})
+		return([false,0])
 	}
 
 	static SELB(id,loc,room,num){
@@ -6086,7 +6077,8 @@ static sendRoomMapUpdate(rm){
 			case "architect":
 				return({
 					"hp":100,
-					"moveable":false,
+					"moveable":true,
+					"movingInfo":{"cd":1000},
 					"sight":4,
 					"ensight":3,
 					"canshoot":false,
@@ -6101,8 +6093,8 @@ static sendRoomMapUpdate(rm){
 					"sight":4,
 					"ensight":3,
 					"canshoot":true,
-					"shootInfo":{"cd":10},
-					"movingInfo":{"range":3,"dmg":20,"dmgv":5,"cd":10},
+					"movingInfo":{"cd":1000},
+					"shootInfo":{"range":3,"dmg":20,"dmgv":5,"cd":1000},
 					"layer":1,
 					"cooldown":["building",Date.now(),5000]
 				})
@@ -6128,49 +6120,3 @@ function mergeDict(d,d2){
 }
 
 
-class vectorFuncs{
-	static vectorizor(px,py,vx,vy){
-		//this.walls[p.boidy[k]].x1 = ((p.boidyVect[k][0] * p.rotation[1] + p.boidyVect[k][1] * p.rotation[0]) + p.x)
-		//xb+ya,yb-xa
-		return([px*vy+py*vx,py*vy-px*vx])
-	}
-	static INvectorizor(px,py,vx,vy){
-		//xb-ya,yb+xa
-		return([px*vy-py*vx,py*vy+px*vx])
-	}
-	static ShatterComponents(vx,vy,dx,dy){
-		let normalized = this.originVectorNormalize(dx,dy)
-		let invectorized = this.INvectorizor(vx,vy,normalized[0],normalized[1])
-
-		let tyaxis = this.vectorizor(normalized[0],normalized[1],1,0)
-
-		let resultx = [invectorized[1]*normalized[0],invectorized[1]*normalized[1]]
-		let resulty = [invectorized[0]*tyaxis[0],invectorized[0]*tyaxis[1]]
-		return([resultx,resulty,[invectorized[1],invectorized[0]]])
-
-	}
-
-	static ShComp(vx,vy,dx,dy){
-		let normalized = this.originVectorNormalize(dx,dy)
-
-		let dp = this.dotProduct(vx,vy,normalized[0],normalized[1])
-
-		let n2 = [normalized[1],-normalized[0]]
-
-		let dp2 = this.dotProduct(vx,vy,n2[0],n2[1])
-		let resultx = [normalized[0]*dp,normalized[1]*dp]
-		let resulty = [n2[0]*dp2,n2[1]*dp2]
-
-		return([resultx,resulty,[dp,dp2]])
-
-	}
-
-	static dotProduct(x1,y1,x2,y2){
-		return(x1*x2+y1*y2)
-	}
-
-	static originVectorNormalize(vx,vy){
-		let d = Math.sqrt(vx*vx+vy*vy)
-		return([vx/d,vy/d])
-	}
-}
