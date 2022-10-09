@@ -41,6 +41,14 @@ socket.on("entityPDel",(e)=>{
   game.entityDel(e)
 })
 
+socket.on("sline",(e)=>{
+  game.pushSline(e)
+})
+
+socket.on("resourcesUpdate",(e)=>{
+  game.resources = e
+})
+
 
 function lobby(){
   let b1 = document.createElement("button")
@@ -112,16 +120,21 @@ function timerDraw(time,maxtime,x,y,style){
   }else if(style == 2 || style == "moving"){
     mainCTX.fillStyle = "rgba("+(255-colotime)+","+colotime+","+colotime+",0.35)"
     mainCTX.fillRect(pxx,pyy,S-S*zotime,S)
+  }else if(style == 3 || style == "reloading"){
+    mainCTX.fillStyle = "rgba("+(255-colotime)+","+(255-colotime)+",0,0.35)"
+    mainCTX.fillRect(pxx,pyy,S-S*zotime,S)
   }
 
 }
 
-var MRef = {"MTS":800,"vision":0,"wholeHeight":0,"wholeWidth":0,"MTD":{},"buttonW":250,"buttonH":100}
+var MRef = {"FPS":20,"FPSR":1/20,"MTS":800,"vision":0,"wholeHeight":0,"wholeWidth":0,"MTD":{},"buttonW":250,"buttonH":100}
 
 
 class game{
   static state = "lobby"
   static map = {}
+  static resources = {}
+  static slines = []
   static enDict = {}
   static camera = [0,0]
   static startProcess(e){
@@ -150,6 +163,9 @@ class game{
     deleteButtonsArr.forEach((e)=>{
       document.getElementById(e).remove()
     })
+
+
+
   }
 
   static OtM(x,y){
@@ -187,12 +203,40 @@ class game{
     p.forEach((pos)=>{
       objK.forEach((e)=>{
         let en = this.enDict[e]
+        if(en == undefined){
+          return
+        }
         if(en.x+","+en.y==pos){
           delete this.enDict[e]
         }
       })
     })
     
+  }
+
+
+
+  static pushSline(e){
+    this.slines.push(e)
+  }
+
+  static renderSlines(){
+    let flevelcam = reApos(game.camera[0],game.camera[1],game.map.width,game.map.height)
+    this.slines.forEach((e,i)=>{
+      // if(inRect(e.x,e.y,flevelcam[0]-1,flevelcam[1]-1,MRef.vision,MRef.vision)){
+        e.life -= MRef.FPSR
+        if(e.life <= 0){
+          this.slines.splice(i,1)
+          return;
+        }
+        mainCTX.beginPath()
+        mainCTX.lineWidth = 7
+        mainCTX.strokeStyle = e.color
+        mainCTX.moveTo(MRef.MTS*(e.x-flevelcam[0])+MRef.MTD[0.5],MRef.MTS*(e.y-flevelcam[1])+MRef.MTD[0.5])
+        mainCTX.lineTo(MRef.MTS*(e.x-flevelcam[0]+e.vx)+MRef.MTD[0.5],MRef.MTS*(e.y-flevelcam[1]+e.vy)+MRef.MTD[0.5])
+        mainCTX.stroke()
+      // }
+    })
   }
 
 
@@ -265,7 +309,9 @@ class EHAND{
     if(game.ss.boxes == "main"){
     if(game.ms.hacted){
       game.ms.hacted = false
-      socket.emit("drag",{"sel":B.selection,"id":ID,"x":game.ss.ax,"y":game.ss.ay,"tx":game.ms.heldSpace[2],"ty":game.ms.heldSpace[3],"mode":"main"})
+      socket.emit("drag",{"sel":B.selection,"id":ID,"tx":game.ss.ax,"ty":game.ss.ay,"x":game.ms.heldSpace[2],"y":game.ms.heldSpace[3],
+        "dist":distance(game.ss.ax,game.ss.ay,game.ms.heldSpace[2],game.ms.heldSpace[3]),"mode":"main",
+        "vx":game.ss.x-game.ms.heldSpace[0],"vy":game.ss.y-game.ms.heldSpace[1]})
       console.log("dragged from:"+JSON.stringify(game.ms.heldSpace)+" to "+game.ss.ax+","+game.ss.ay)
     } else {
       socket.emit("click",{"sel":B.selection,"id":ID,"x":game.ss.ax,"y":game.ss.ay,"mode":"main"})
@@ -285,7 +331,8 @@ class EHAND{
     }
 
     B.renderAll()
-
+    this.renderResources()
+    game.renderSlines()
   }
 
   static buttonPressed(){
@@ -306,6 +353,17 @@ class EHAND{
   static SEL(e){
     B.selection = e.name
     B.specialSel = e
+  }
+
+  static renderResources(){
+    mainCTX.fillStyle = "#000030"
+    mainCTX.fillRect(MRef.wholeWidth+MRef.buttonW,0,200,500)
+    let objk = Object.keys(game.resources)
+    objk.forEach((e,i)=>{
+      mainCTX.fillStyle = "#FFFFFF"
+      mainCTX.font = "27px Arial"
+      mainCTX.fillText(e+": "+game.resources[e],MRef.wholeWidth+MRef.buttonW,20+30*i)
+    })
   }
 
 }
@@ -469,7 +527,7 @@ document.addEventListener("keyup",(e)=>{
 
 let mainLoopint = setInterval(()=>{
   repeat()
-},1000/30)
+},1000/MRef.FPS)
 
 
 function repeat(e){
@@ -576,7 +634,7 @@ function entityRender(e){
       break;
     case "soldier":
       mainCTX.beginPath();
-      mainCTX.arc(ax*S+S*0.5, ay*S+S*0.5, MRef.MTD[0.1]*3, 0, 2 * Math.PI, false);
+      mainCTX.arc(ax*S+S*0.5, ay*S+S*0.5, MRef.MTD[0.1]*2.5, 0, 2 * Math.PI, false);
       mainCTX.fillStyle = e.color;
       mainCTX.fill();
       mainCTX.lineWidth = 1;

@@ -375,9 +375,239 @@ function brackedator(str,option){
 }
 
 //EXP13
+
+function generateChestContents(input){
+
+	let outitems = ""
+
+	if(typeof(input)=="string"){
+		input = input.split("==")
+	}
+
+	for(let i = 0; i < input.length; i++){
+
+			if(CURRENTCONFIGS.chestLootTables[input[i]] == undefined){
+				outitems += ("=" + input[i])
+			} else {
+				outitems += "=" + randomItem(CURRENTCONFIGS.chestLootTables[input[i]])
+			}
+		}
+
+		return(outitems.substring(1))
+
+}
+
+//G:1-Ch:[B:1-Bbr:{r:1}=Bj:{h:[b:1]}]
 //EXP14
+function alreadyHasBlockATT(str,att){
+  let split = str.split("-")
+  for(let i = 0; i < split.length; i++){
+    if(split[i].split(":")[0] == att){
+      return(true)
+    }
+  }
+  return(false)
+}
+
+
 //EXP15
+
+function alreadyHasBlock(str){
+  let split = str.split("-")
+  for(let i = 0; i < split.length; i++){
+    if(split[i].split(":")[0] == "B"){
+      return(true)
+    }
+  }
+  return(false)
+}
+
+
+
 //EXP16
+function strHasBrackets(str){
+	for(let i = 0; i < str.length; i++){
+		if(str[i] == "(" || str[i] == "[" || str[i] == "{" || str[i] == ")" || str[i] == "]" || str[i] == "}"){
+			return(str[i])
+		}
+	}
+	return(false)
+}
+//EXP17
+function strHas(str,has){
+	try{
+	for(let i = 0; i < str.length; i++){
+		for(let j = 0; j < has.length; j++){
+			if(str[i] == has[j]){
+				return([i,j])
+			}
+		}
+	}
+	return(false)
+		} catch{
+			console.log("cerr: strHas",str,has)
+		}
+}
+
+//EXP18
+function removeOutterBracket(str){
+	if(str[0] == "[" && str[str.length-1] == "]"){
+		str = str.substring(1)
+		str = str.slice(0,-1)
+	}
+
+	return(str)
+}
+//EXP19
+function bracketCompressionProcess(str,arr,parseLevel){
+
+	let outStr = ""
+	let parsedInt = ""
+	let isParsing = 0
+
+	for(let i = 0; i < str.length; i++){
+		if(str[i] != "^" && isParsing == 0){
+			outStr += str[i]
+		} else if(str[i] != "^" && isParsing == 1){
+			parsedInt += str[i] 
+		} else {
+			if(isParsing == 0){
+				isParsing = 1
+			} else {
+				isParsing = 0
+
+				let splitarr = arr[parseLevel].split("&")
+
+				let toutStr = ("[" + splitarr[parseInt(parsedInt)] + "]")
+
+				outStr += bracketCompressionProcess(toutStr,arr,parseLevel+1)
+			}
+		}
+	}
+		return(outStr)
+}
+//EXP20
+///input a attribute string and an attribute to find the value of the attribute
+function bracketLevels(str){
+  let level = 0
+
+  let counters = []
+
+  let out = [""]
+  for(let i = 0; i < str.length; i++){
+    if(str[i] == "(" || str[i] == "[" || str[i] == "{" ){
+
+    	if(counters[level] == undefined){
+    		counters[level] = 0
+    	} else {
+    		counters[level] ++
+    	}
+	  out[level] += ("^"+counters[level]+"^")
+      level += 1
+      if(out[level] == undefined){
+      	out[level] = ""
+      }
+    } else if(str[i] == ")" || str[i] == "]" || str[i] == "}" ){
+    	out[level] += ("&")
+      level -= 1
+    } else {
+      out[level] += str[i]
+    }
+  }
+  return(out)
+}
+//EXP21
+function BASEATTRIBUTESOF(str){
+	let outstr = ""
+	let a = bracketLevels(str)[0]
+	let deleting = false
+	for(let i = 0; i < a.length; i++){
+		if(a[i] == "^"){
+			deleting = !deleting
+			continue
+		}if(deleting){
+			continue
+		}
+
+		outstr += a[i]
+
+	}
+	let outarr = []
+	let split1 = outstr.split("-")
+	for(let i = 0; i < split1.length; i++){
+		outarr.push(split1[i].split(":")[0])
+	}
+
+
+	return(outarr)
+}
+
+//EXP22
+function TNEWATTRIBUTEOF(str,e){
+  if(str == undefined){return("NONE")}
+
+  	if(!strHasBrackets(str)){
+
+	  let split = str.split("-")
+	  for(let i = 0; i < split.length; i++){
+	  	let act = split[i].split(":")
+	  	if(act[0] == e){
+	  		return(act[1])
+	  	}
+	  }
+	  return("NONE")
+	}
+
+	 else {
+		let BLs = bracketLevels(str)
+
+  let BaseSplit = BLs[0].split("-")
+  for(let i = 0; i < BaseSplit.length; i++){
+  	let act = BaseSplit[i].split(":")
+  	if(act[0] == e){
+
+  		if(strHas(act[1],"^")){
+
+  		return(bracketCompressionProcess(act[1],BLs,1))
+
+  		} else {
+
+  		return(act[1])
+  	}
+
+  	}
+  }
+  return("NONE")
+
+
+	}
+
+
+}
+//EXP23
+
+function removeAttributeOf(str,e){
+	let BLs = bracketLevels(str)
+	let split = BLs[0].split("-")
+	let outstr = ""
+
+	for(let i = 0; i < split.length; i++){
+		let split2 = split[i].split(":")
+		if(split2[0] != e){
+			outstr += "-" + split2[0] + ":" + TNEWATTRIBUTEOF(str,split2[0])
+		}
+	}
+
+	return(outstr.substring(1))
+
+}
+//EXP24
+//EXP25
+//EXP26
+//EXP27
+//EXP28
+//EXP29
+//EXP30
 
 module.exports = {
 	vectorFuncs,
@@ -391,5 +621,16 @@ module.exports = {
 	arrayBoundingBox,
 	randomItem,
 	TNEWgenerateTileFromNumber,
-	brackedator
+	brackedator,
+	generateChestContents,
+	alreadyHasBlockATT,
+	alreadyHasBlock,
+	strHasBrackets,
+	strHas,
+	removeOutterBracket,
+	bracketCompressionProcess,
+	bracketLevels,
+	BASEATTRIBUTESOF,
+	TNEWATTRIBUTEOF,
+	removeAttributeOf
 }

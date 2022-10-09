@@ -74,7 +74,18 @@ const INFUNCS = require("./funcs.js")
 	vectorNormalize,
 	arrayBoundingBox,
 	randomItem,
-	TNEWgenerateTileFromNumber
+	TNEWgenerateTileFromNumber,
+	generateChestContents,
+	alreadyHasBlockATT,
+	alreadyHasBlock,
+	strHasBrackets,
+	strHas,
+	removeOutterBracket,
+	bracketCompressionProcess,
+	bracketLevels,
+	BASEATTRIBUTESOF,
+	TNEWATTRIBUTEOF,
+	removeAttributeOf
 */
 let vectorFuncs = INFUNCS.vectorFuncs
 let myMath = INFUNCS.myMath
@@ -87,6 +98,17 @@ let	vectorNormalize = INFUNCS.vectorNormalize
 let	arrayBoundingBox = INFUNCS.arrayBoundingBox
 let	randomItem = INFUNCS.randomItem
 let	TNEWgenerateTileFromNumber = INFUNCS.TNEWgenerateTileFromNumber
+let generateChestContents = INFUNCS.generateChestContents
+let alreadyHasBlockATT = INFUNCS.alreadyHasBlockATT
+let alreadyHasBlock = INFUNCS.alreadyHasBlock
+let strHasBrackets = INFUNCS.strHasBrackets
+let	strHas = INFUNCS.strHas
+let	removeOutterBracket = INFUNCS.removeOutterBracket
+let	bracketCompressionProcess = INFUNCS.bracketCompressionProcess
+let	bracketLevels = INFUNCS.bracketLevels
+let	BASEATTRIBUTESOF = INFUNCS.BASEATTRIBUTESOF
+let	TNEWATTRIBUTEOF = INFUNCS.TNEWATTRIBUTEOF
+let	removeAttributeOf = INFUNCS.removeAttributeOf
 
 
 function getStrLengthOf(e){
@@ -3704,204 +3726,13 @@ function inListRS(inp,arr){
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-///input a attribute string and an attribute to find the value of the attribute
-function bracketLevels(str){
-  let level = 0
-
-  let counters = []
-
-  let out = [""]
-  for(let i = 0; i < str.length; i++){
-    if(str[i] == "(" || str[i] == "[" || str[i] == "{" ){
-
-    	if(counters[level] == undefined){
-    		counters[level] = 0
-    	} else {
-    		counters[level] ++
-    	}
-
-			out[level] += ("^"+counters[level]+"^")
-
-      level += 1
-      if(out[level] == undefined){
-      	out[level] = ""
-      }
-    } else if(str[i] == ")" || str[i] == "]" || str[i] == "}" ){
-
-    	out[level] += ("&")
-
-      level -= 1
-
-    } else {
-    	
-
-      out[level] += str[i]
-    }
-
-
-  }
-
-  return(out)
-
-}
-
-function bracketCompressionProcess(str,arr,parseLevel){
-
-	let outStr = ""
-	let parsedInt = ""
-	let isParsing = 0
-
-	for(let i = 0; i < str.length; i++){
-		if(str[i] != "^" && isParsing == 0){
-			outStr += str[i]
-		} else if(str[i] != "^" && isParsing == 1){
-			parsedInt += str[i] 
-		} else {
-			if(isParsing == 0){
-				isParsing = 1
-			} else {
-				isParsing = 0
-
-				let splitarr = arr[parseLevel].split("&")
-
-				let toutStr = ("[" + splitarr[parseInt(parsedInt)] + "]")
-
-				outStr += bracketCompressionProcess(toutStr,arr,parseLevel+1)
 
 
 
-			}
-		}
 
 
 
-	}
 
-
-
-		return(outStr)
-
-}
-
-
-function strHas(str,has){
-	try{
-	for(let i = 0; i < str.length; i++){
-		for(let j = 0; j < has.length; j++){
-			if(str[i] == has[j]){
-				return([i,j])
-			}
-		}
-	}
-	return(false)
-		} catch{
-			console.log("cerr: strHas",str,has)
-		}
-}
-
-function strHasBrackets(str){
-	for(let i = 0; i < str.length; i++){
-		if(str[i] == "(" || str[i] == "[" || str[i] == "{" || str[i] == ")" || str[i] == "]" || str[i] == "}"){
-			return(str[i])
-		}
-	}
-	return(false)
-}
-
-
-
-function removeOutterBracket(str){
-	if(str[0] == "[" && str[str.length-1] == "]"){
-		str = str.substring(1)
-		str = str.slice(0,-1)
-	}
-
-	return(str)
-}
-
-
-function removeAttributeOf(str,e){
-	let BLs = bracketLevels(str)
-	let split = BLs[0].split("-")
-	let outstr = ""
-
-	for(let i = 0; i < split.length; i++){
-		let split2 = split[i].split(":")
-		if(split2[0] != e){
-			outstr += "-" + split2[0] + ":" + TNEWATTRIBUTEOF(str,split2[0])
-		}
-	}
-
-	return(outstr.substring(1))
-
-}
-
-function BASEATTRIBUTESOF(str){
-	let outstr = ""
-	let a = bracketLevels(str)[0]
-	let deleting = false
-	for(let i = 0; i < a.length; i++){
-		if(a[i] == "^"){
-			deleting = !deleting
-			continue
-		}if(deleting){
-			continue
-		}
-
-		outstr += a[i]
-
-	}
-	let outarr = []
-	let split1 = outstr.split("-")
-	for(let i = 0; i < split1.length; i++){
-		outarr.push(split1[i].split(":")[0])
-	}
-
-
-	return(outarr)
-}
-
-function TNEWATTRIBUTEOF(str,e){
-  if(str == undefined){return("NONE")}
-
-  	if(!strHasBrackets(str)){
-
-	  let split = str.split("-")
-	  for(let i = 0; i < split.length; i++){
-	  	let act = split[i].split(":")
-	  	if(act[0] == e){
-	  		return(act[1])
-	  	}
-	  }
-	  return("NONE")
-	}
-
-	 else {
-		let BLs = bracketLevels(str)
-
-  let BaseSplit = BLs[0].split("-")
-  for(let i = 0; i < BaseSplit.length; i++){
-  	let act = BaseSplit[i].split(":")
-  	if(act[0] == e){
-
-  		if(strHas(act[1],"^")){
-
-  		return(bracketCompressionProcess(act[1],BLs,1))
-
-  		} else {
-
-  		return(act[1])
-  	}
-
-  	}
-  }
-  return("NONE")
-
-
-	}
-
-
-}
 
 
 function MODIFYATTRIBUTEOF(str,a,mod){
@@ -3940,12 +3771,6 @@ function MasterTileDeparser(str){
 
 var BLOCKSALL = CURRENTCONFIGS.BLOCKSALL
 var HeightMap = CURRENTCONFIGS.HeightMap
-
-
-
-
-
-
 var TILESALL = CURRENTCONFIGS.TILESALL
 
 //-------------------------------------------
@@ -3981,28 +3806,6 @@ function STOPPING(){
 }
 
 
-
-function alreadyHasBlock(str){
-  let split = str.split("-")
-  for(let i = 0; i < split.length; i++){
-    if(split[i].split(":")[0] == "B"){
-      return(true)
-    }
-  }
-  return(false)
-}
-
-
-
-function alreadyHasBlockATT(str,att){
-  let split = str.split("-")
-  for(let i = 0; i < split.length; i++){
-    if(split[i].split(":")[0] == att){
-      return(true)
-    }
-  }
-  return(false)
-}
 
 
 function removeAcc(Acc){
@@ -4310,7 +4113,6 @@ class combatInstance{
 function getstats(p,str){
 	return(enDict[p].entityStats[str])
 }
-
 
 
 function combatProcess(r,str){
@@ -4667,37 +4469,7 @@ function processItemUsage(p,use,num,slot){
 }
 
 
-function generateChestContents(input){
-
-	let outitems = ""
-
-	if(typeof(input)=="string"){
-		input = input.split("==")
-	}
-
-	for(let i = 0; i < input.length; i++){
-
-			if(CURRENTCONFIGS.chestLootTables[input[i]] == undefined){
-				outitems += ("=" + input[i])
-			} else {
-				outitems += "=" + randomItem(CURRENTCONFIGS.chestLootTables[input[i]])
-			}
-		}
-
-		return(outitems.substring(1))
-
-}
-
-//G:1-Ch:[B:1-Bbr:{r:1}=Bj:{h:[b:1]}]
-
-
 function NATTRIBUTEOF(str,type){
-
-	// let SFOP = sameFunctionOutputs("NATTRIBUTEOF",arguments)
-	// if(SFOP[0] == "true"){
-	// 	return(SFOP[1])
-	// }
-
 
 	let a = brackedator(str)
 	if(a[type]!=undefined){
@@ -5329,7 +5101,11 @@ class re8{
 			if(this.rooms[n]==undefined){
 				this.rooms[n] = {"name":n,"vision":15,
 				"type":split[0].split(":")[1],"started":false,"players":{},"map":{},
-				"teamVision":false,"teams":{}
+				"teamVision":false,"teams":{},
+				"enRef":{
+					"architect":{"m":400,"r":1},
+					"soldier":{"m":100,"r":2}
+				}
 			}
 			}
 			
@@ -5361,6 +5137,9 @@ class re8{
 			tr.enDict = {}
 			// io.to(this.players[e.id].room).emit("startGame",{"map":map,"vision":15})
 			this.sendRoomMapUpdate(this.players[e.id].room)
+			Object.keys(this.rooms[this.players[e.id].room].players).forEach((e)=>{
+				this.resourcesUpdate(e,tr)
+			})
 		}
 	}
 
@@ -5402,6 +5181,10 @@ class re8{
 	}
 
 
+	static resourcesUpdate(id,room){
+		let p = this.players[id]
+		io.to(id).emit("resourcesUpdate",p.resources)
+	}
 
 	static uenVisionC(id,rm){
 		let room = this.rooms[rm]
@@ -5553,21 +5336,30 @@ class re8{
 			let loc = e.x+","+e.y
 			let end = rm.enDict
 
+			let pss = this.players.specialState
+
 			if(e.sel != "none" &&e.sel != "1" &&e.sel != "2"&&e.sel != "3"){
+				let rref;
 				switch(e.sel){
 					case "Factory1":
-						if(!this.entityAtPos(loc,rm,1)[0] && this.hasMoney(e.id,300)){
+						rref = rm.enRef["architect"]
+						if(!this.entityAtPos(loc,rm,1)[0] && this.hasMoney(e.id,rref.m) && end[pss.enid].Asight[loc].dist <= rref.r){
 							this.newEntity(e.id,e.x,e.y,"architect",rm,p.team)
 							this.sendPlayerMapUpdate(e.id,rm)
-							p.resources.money -= 300
+							p.resources.money -= rref.m
+							this.resourcesUpdate(e.id,rm.name)
 						}
 						io.to(e.id).emit("SEL",{"name":"none"})
 						break;
 					case "Factory2":
-						
+						rref = rm.enRef["soldier"]
+						if(!this.entityAtPos(loc,rm,1)[0] && this.hasMoney(e.id,rref.m)&& end[pss.enid].Asight[loc].dist <= rref.r){
+							p.resources.money -= rref.m
+							this.resourcesUpdate(e.id,rm.name)
+							this.newEntity(e.id,e.x,e.y,"soldier",rm,p.team)
+							this.sendPlayerMapUpdate(e.id,rm)
+						}
 						io.to(e.id).emit("SEL",{"name":"none"})
-						this.newEntity(e.id,e.x,e.y,"soldier",rm,p.team)
-						this.sendPlayerMapUpdate(e.id,rm)
 						break;
 				}
 				this.players.specialState = {}
@@ -5590,25 +5382,26 @@ class re8{
 		let loc = p.selector[0]+","+p.selector[1]
 		let end = room.enDict
 
-		if(this.players[e.id].temporalMap[loc] == undefined){
+		// if(this.players[e.id].temporalMap[loc] == undefined){
+
 			
-			let SB = this.SELB(e.id,loc,room)
+			let SB = this.TNEWSELB(e.id,loc,room)
 			
 			if(SB[3] && this.OffCooldown(room.name,SB[1])){
 				if(e.sel == 0){
 					if(end[SB[1]].type == "factory"){
 						io.to(e.id).emit("SEL",{"name":"Factory1","color":"#009000"})
-						this.players.specialState = {"name":"Factory1","enids":SB[1]}
+						this.players.specialState = {"name":"Factory1","enid":SB[1]}
 					}
 				}else if(e.sel == 1){
 					if(end[SB[1]].type == "factory"){
 						io.to(e.id).emit("SEL",{"name":"Factory2","color":"#009000"})
-						this.players.specialState = {"name":"Factory2","enids":SB[1]}
+						this.players.specialState = {"name":"Factory2","enid":SB[1]}
 					}
 				}
 
 			}
-		}
+		// }
 	}
 
 	static OffCooldown(room,id){
@@ -5745,8 +5538,43 @@ static sendRoomMapUpdate(rm){
 
 	}
 
-	static drag(e,rm){
+	static drag(e,room){
 
+		let p = this.players[e.id]
+		let loc = e.x + "," + e.y
+		let tloc = e.tx + "," + e.ty
+
+		let SB = this.SELB(e.id,loc,room)
+		let end = room.enDict
+			
+			if(SB[3] && this.OffCooldown(room.name,SB[1])){
+				if(e.sel == "none"){
+					if(end[SB[1]].canshoot && end[SB[1]].shootInfo.range > e.dist){
+						io.to(e.id).emit("sline",{"name":"soldier1","color":"#F00000","x":e.x,"y":e.y,"vx":e.vx,"vy":e.vy,"life":30})
+						end[SB[1]].cooldown = ["reloading",Date.now(),end[SB[1]].shootInfo.cd]
+						let eap = this.entityAtPos(tloc,room,1)
+						if(eap[0]){
+							this.damageEntity(SB[1],eap[1],e.dist,room)
+						}
+						this.emitEntityUpdate(SB[1],room)
+					}
+				}
+
+			}
+		console.log(e.tx,e.ty)
+
+		p.selector = [e.tx,e.ty]
+
+	}
+
+	static damageEntity(sid,rid,dist,room){
+		let end = room.enDict
+		let sifo = end[sid].shootInfo
+		end[rid].hp -= sifo.dmg + Math.floor(Math.random()*sifo.dmgv)
+		if(end[rid].hp <= 0){
+			this.killEntity(rid,room.name)
+			io.to(room.name).emit("entityUpdate",[rid,"-DEL-"])
+		}
 	}
 
 
@@ -5923,6 +5751,13 @@ static sendRoomMapUpdate(rm){
 
 		room.enDict[eid].Asight = this.uenVisionC(eid,room.name)
 		let OBJK = Object.keys(room.enDict[eid].Asight)
+
+
+		this.players[id].entities[eid] = true
+		room.teams[team].entities[eid] = true
+
+		this.players[id].temporalMap = this.uplayerVision2(id,room.name)
+
 		OBJK.forEach((e)=>{
 			if(room.enDict[eid].Asight[e].enseen && room.enmap[e] != undefined && room.enmap[e].length > 0){
 				room.enmap[e].forEach((E)=>{
@@ -5930,11 +5765,6 @@ static sendRoomMapUpdate(rm){
 				})
 			}
 		})
-
-		this.players[id].entities[eid] = true
-		room.teams[team].entities[eid] = true
-
-		this.players[id].temporalMap = this.uplayerVision2(id,room.name)
 
 		this.rmEnmaper(room,eid,x+","+y,"add")
 
