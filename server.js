@@ -3484,7 +3484,7 @@ function getRelativity(p,x,y){
 
 function tp(r,i1,i2){
 	if(i2 == undefined){
-		// let temp = findPlayerString(i1)
+
 		if(enArr[parseInt(i1)] != undefined){
 			let enid = enArr[parseInt(i1)]
 			enDict[r].x = enDict[enid].x
@@ -3608,22 +3608,6 @@ function addToItem(str,amount){
 
 
 
-function findPlayerString(e){
-	if(e.length == 1 && parseInt(e) != NaN){
-		return(parseInt(e))
-	}
-	if(findPlayerInArr(e) !== false){
-		return(findPlayerInArr(e))
-	}
-	for(let i = 0; i < enArr.length; i++){
-		if(enDict[ enArr[i]].name == e){
-			return(i)
-		}
-	}
-	return(false)
-
-
-}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -5305,7 +5289,7 @@ class re8{
 				switch(e.sel){
 					case "Factory1":
 						rref = rm.enRef["architect"]
-						if(!this.entityAtPos(loc,rm,1)[0] && this.hasMoney(e.id,rref.m) && end[pss.enid].Asight[loc].dist <= rref.r){
+						if(!this.entityAtPos(loc,rm,1)[0] && this.hasMoney(e.id,rref.m) && end[pss.enid].Asight[loc] != undefined&& end[pss.enid].Asight[loc].dist <= rref.r){
 							enid = this.newEntity(e.id,e.x,e.y,"architect",rm,p.team)
 							this.sendPlayerMapUpdate(e.id,rm)
 							p.resources.money -= rref.m
@@ -5315,7 +5299,7 @@ class re8{
 						break;
 					case "Factory2":
 						rref = rm.enRef["soldier"]
-						if(!this.entityAtPos(loc,rm,1)[0] && this.hasMoney(e.id,rref.m)&& end[pss.enid].Asight[loc].dist <= rref.r){
+						if(!this.entityAtPos(loc,rm,1)[0] && this.hasMoney(e.id,rref.m)&& end[pss.enid].Asight[loc] != undefined&& end[pss.enid].Asight[loc].dist <= rref.r){
 							p.resources.money -= rref.m
 							this.resourcesUpdate(e.id,rm.name)
 							enid = this.newEntity(e.id,e.x,e.y,"soldier",rm,p.team)
@@ -5325,7 +5309,7 @@ class re8{
 						break;
 					case "Factory3":
 						rref = rm.enRef["tank"]
-						if(!this.entityAtPos(loc,rm,1)[0] && this.hasMoney(e.id,rref.m)&& end[pss.enid].Asight[loc].dist <= rref.r){
+						if(!this.entityAtPos(loc,rm,1)[0] && this.hasMoney(e.id,rref.m)&& end[pss.enid].Asight[loc] != undefined&& end[pss.enid].Asight[loc].dist <= rref.r){
 							p.resources.money -= rref.m
 							this.resourcesUpdate(e.id,rm.name)
 							enid = this.newEntity(e.id,e.x,e.y,"tank",rm,p.team)
@@ -5335,7 +5319,7 @@ class re8{
 						break;
 					case "Factory4":
 						rref = rm.enRef["sniper"]
-						if(!this.entityAtPos(loc,rm,1)[0] && this.hasMoney(e.id,rref.m)&& end[pss.enid].Asight[loc].dist <= rref.r){
+						if(!this.entityAtPos(loc,rm,1)[0] && this.hasMoney(e.id,rref.m)&& end[pss.enid].Asight[loc] != undefined&& end[pss.enid].Asight[loc].dist <= rref.r){
 							p.resources.money -= rref.m
 							this.resourcesUpdate(e.id,rm.name)
 							enid = this.newEntity(e.id,e.x,e.y,"sniper",rm,p.team)
@@ -5345,7 +5329,7 @@ class re8{
 						break;
 					case "Architect1":
 						rref = rm.enRef["mine"]
-						if(rm.map.tiles[loc].ground == "mountain"&&!this.entityAtPos(loc,rm,1)[0] && this.hasMoney(e.id,rref.m)&& end[pss.enid].Asight[loc].dist <= rref.r){
+						if(rm.map.tiles[loc].ground == "mountain"&&!this.entityAtPos(loc,rm,1)[0] && this.hasMoney(e.id,rref.m)&& end[pss.enid].Asight[loc] != undefined&& end[pss.enid].Asight[loc].dist <= rref.r){
 							p.resources.money -= rref.m
 							this.resourcesUpdate(e.id,rm.name)
 							enid = this.newEntity(e.id,e.x,e.y,"mine",rm,p.team)
@@ -5388,23 +5372,23 @@ class re8{
 						io.to(e.id).emit("SEL",{"name":"Factory1","color":"#009000"})
 						this.players.specialState = {"name":"Factory1","enid":SB[1]}
 					} else if(end[SB[1]].type == "architect"){
-						io.to(e.id).emit("SEL",{"name":"Architect1","color":"#0000FF"})
+						io.to(e.id).emit("SEL",{"name":"Architect1","color":"#009000"})
 						this.players.specialState = {"name":"Architect1","enid":SB[1]}
 					}
 
 				}else if(e.sel == 1){
 					if(end[SB[1]].type == "factory"){
-						io.to(e.id).emit("SEL",{"name":"Factory2","color":"#00A000"})
+						io.to(e.id).emit("SEL",{"name":"Factory2","color":"#000090"})
 						this.players.specialState = {"name":"Factory2","enid":SB[1]}
 					}
 				}else if(e.sel == 2){
 					if(end[SB[1]].type == "factory"){
-						io.to(e.id).emit("SEL",{"name":"Factory3","color":"#00B000"})
+						io.to(e.id).emit("SEL",{"name":"Factory3","color":"#009090"})
 						this.players.specialState = {"name":"Factory3","enid":SB[1]}
 					}
 				}else if(e.sel == 3){
 					if(end[SB[1]].type == "factory"){
-						io.to(e.id).emit("SEL",{"name":"Factory4","color":"#00C000"})
+						io.to(e.id).emit("SEL",{"name":"Factory4","color":"#900000"})
 						this.players.specialState = {"name":"Factory4","enid":SB[1]}
 					}
 				}

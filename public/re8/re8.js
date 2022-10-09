@@ -195,7 +195,7 @@ class game{
     t1.style.userSelect = "none"
     t1.style.color = "white"
     t1.style.font = "17px Arial"
-    t1.style.left = Math.floor(MRef.wholeWidth)+"px"
+    t1.style.left = Math.floor(MRef.wholeWidth+2)+"px"
     t1.style.height = Math.floor(MRef.buttonH)+'px'
     t1.style.width = Math.floor(MRef.buttonW)+'px'
     t1.style.zIndex = 2
@@ -208,7 +208,7 @@ class game{
     t1.style.color = "white"
     t1.style.font = "17px Arial"
     t1.style.top = Math.floor(MRef.buttonH)+"px"
-    t1.style.left = Math.floor(MRef.wholeWidth)+"px"
+    t1.style.left = Math.floor(MRef.wholeWidth+2)+"px"
     t1.style.height = Math.floor(MRef.buttonH)+'px'
     t1.style.width = Math.floor(MRef.buttonW)+'px'
     t1.style.zIndex = 2
@@ -221,7 +221,7 @@ class game{
     t1.style.color = "white"
     t1.style.font = "17px Arial"
     t1.style.top = Math.floor(MRef.buttonH*2)+"px"
-    t1.style.left = Math.floor(MRef.wholeWidth)+"px"
+    t1.style.left = Math.floor(MRef.wholeWidth+2)+"px"
     t1.style.height = Math.floor(MRef.buttonH)+'px'
     t1.style.width = Math.floor(MRef.buttonW)+'px'
     t1.style.zIndex = 2
@@ -234,7 +234,7 @@ class game{
     t1.style.color = "white"
     t1.style.font = "17px Arial"
     t1.style.top = Math.floor(MRef.buttonH*3)+"px"
-    t1.style.left = Math.floor(MRef.wholeWidth)+"px"
+    t1.style.left = Math.floor(MRef.wholeWidth+2)+"px"
     t1.style.height = Math.floor(MRef.buttonH)+'px'
     t1.style.width = Math.floor(MRef.buttonW)+'px'
     t1.style.zIndex = 2
@@ -272,8 +272,18 @@ class game{
   static entityUpdate(e){
     if(e[1] !== "-DEL-"){
       this.enDict[e[0]] = e[1]
+
+      if(this.ss.selEn === false && this.ss.ax == e[1].x&& this.ss.ay == e[1].y&& this.selectedLayer == e[1].layer){
+        EHAND.updateSelector(0,0,"add")
+      }
+
     } else {
+      let en = this.enDict[e[0]]
+      if(this.ss.selEn !== false && this.ss.ax == en.x&& this.ss.ay == en.y&& this.selectedLayer == en.layer){
+        this.ss.selEn = false
+      } 
       delete this.enDict[e[0]]
+
     }
   }
 
@@ -286,6 +296,9 @@ class game{
           return
         }
         if(en.x+","+en.y==pos){
+          if(this.ss.selEn !== false && this.ss.ax == en.x&& this.ss.ay == en.y&& this.selectedLayer == en.layer){
+            this.ss.selEn = false
+          }
           delete this.enDict[e]
         }
       })
@@ -433,11 +446,17 @@ class EHAND{
 
     if(game.ss.selEn !== false){
       let dr = B.displayReference[game.enDict[game.ss.selEn].type]
+      if(dr != undefined){
       t1.innerHTML = dr[0].disp
       t2.innerHTML = dr[1].disp
       t3.innerHTML = dr[2].disp
       t4.innerHTML = dr[3].disp
     } else {
+      t1.innerHTML = "act 1"
+      t2.innerHTML = "act 2"
+      t3.innerHTML = "act 3"
+      t4.innerHTML = "act 4"
+    }} else {
       t1.innerHTML = "act 1"
       t2.innerHTML = "act 2"
       t3.innerHTML = "act 3"
@@ -480,6 +499,7 @@ class EHAND{
         "dist":distance(game.ss.x,game.ss.y,game.ms.heldSpace[0],game.ms.heldSpace[1]),"mode":"main",
         "vx":game.ss.x-game.ms.heldSpace[0],"vy":game.ss.y-game.ms.heldSpace[1]})
       console.log("dragged from:"+JSON.stringify(game.ms.heldSpace)+" to "+game.ss.ax+","+game.ss.ay)
+      EHAND.updateSelector(game.ss.ax,game.ss.ay,"abs")
     } else {
       socket.emit("click",{"sel":B.selection,"id":ID,"x":game.ss.ax,"y":game.ss.ay,"mode":"main"})
       console.log("clicked on: "+game.ss.ax+","+game.ss.ay)
@@ -572,31 +592,50 @@ class B{
 
   static disprefUpdate(){
       this.displayReference = {"factory":{
-      "0":{
-        "disp":"act 1 - spawn architect </br>cost: "+
-        game.enRef.architect.m+"</br>spawn range: "+
-        game.enRef.architect.r+"</br>build time: "+
-        ((game.mainEnRef.architect.cooldown[2]/1000).toFixed(1))+"s"
+        "0":{
+          "disp":"act 1 - spawn architect </br>cost: "+
+          game.enRef.architect.m+"</br>spawn range: "+
+          game.enRef.architect.r+"</br>build time: "+
+          ((game.mainEnRef.architect.cooldown[2]/1000).toFixed(1))+"s"
+        },
+        "1":{
+          "disp":"act 2 - spawn soldier </br>cost: "+
+          game.enRef.soldier.m+"</br>spawn range: "+
+          game.enRef.soldier.r+"</br>build time: "+
+          ((game.mainEnRef.soldier.cooldown[2]/1000).toFixed(1))+"s"
+        },
+        "2":{
+          "disp":"act 3 - build tank </br>cost: "+
+          game.enRef.tank.m+"</br>spawn range: "+
+          game.enRef.tank.r+"</br>build time: "+
+          ((game.mainEnRef.tank.cooldown[2]/1000).toFixed(1))+"s"
+        },
+        "3":{
+          "disp":"act 4 - spawn sniper </br>cost: "+
+          game.enRef.sniper.m+"</br>spawn range: "+
+          game.enRef.sniper.r+"</br>build time: "+
+          ((game.mainEnRef.sniper.cooldown[2]/1000).toFixed(1))+"s"
+        }
       },
-      "1":{
-        "disp":"act 2 - spawn soldier </br>cost: "+
-        game.enRef.soldier.m+"</br>spawn range: "+
-        game.enRef.soldier.r+"</br>build time: "+
-        ((game.mainEnRef.soldier.cooldown[2]/1000).toFixed(1))+"s"
-      },
-      "2":{
-        "disp":"act 3 - build tank </br>cost: "+
-        game.enRef.tank.m+"</br>spawn range: "+
-        game.enRef.tank.r+"</br>build time: "+
-        ((game.mainEnRef.tank.cooldown[2]/1000).toFixed(1))+"s"
-      },
-      "3":{
-        "disp":"act 4 - spawn sniper </br>cost: "+
-        game.enRef.sniper.m+"</br>spawn range: "+
-        game.enRef.sniper.r+"</br>build time: "+
-        ((game.mainEnRef.sniper.cooldown[2]/1000).toFixed(1))+"s"
+      "architect":{
+        "0":{
+          "disp":"act 1 - build mine</br>cost: "+
+          game.enRef.mine.m+"</br>spawn range: "+
+          game.enRef.mine.r+"</br>build time: "+
+          ((game.mainEnRef.mine.cooldown[2]/1000).toFixed(1))+"s</br>built only on mountains"
+        },
+        "1":{
+          "disp":"act 2"
+        },
+        "2":{
+          "disp":"act 3"
+        },
+        "3":{
+          "disp":"act 4"
+        }
       }
-    }}
+
+    }
   }
 
 
