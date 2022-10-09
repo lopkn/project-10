@@ -52,6 +52,12 @@ socket.on("dmgnum",(e)=>{
   game.pushDmgnum(e)
 })
 
+socket.on("enRef",(e)=>{
+  game.enRef = e[0]
+  game.mainEnRef = e[1]
+  B.disprefUpdate()
+})
+
 
 function lobby(){
   let b1 = document.createElement("button")
@@ -144,8 +150,10 @@ class game{
   static dmgnums = []
   static enDict = {}
   static camera = [0,0]
-
+  static enRef = {}
   static selectedLayer = 1
+
+  static mainEnRef = {}
 
   static slineRef = {
     "soldier":{"life":800,"size":7,"reducing":true},
@@ -180,6 +188,59 @@ class game{
       document.getElementById(e).remove()
     })
 
+    let t1 = document.createElement("div");
+    t1.innerHTML = "act 1"
+    t1.id = "t1"
+    t1.style.top = "0px"
+    t1.style.userSelect = "none"
+    t1.style.color = "white"
+    t1.style.font = "17px Arial"
+    t1.style.left = Math.floor(MRef.wholeWidth)+"px"
+    t1.style.height = Math.floor(MRef.buttonH)+'px'
+    t1.style.width = Math.floor(MRef.buttonW)+'px'
+    t1.style.zIndex = 2
+    t1.style.position = "absolute"
+    document.body.appendChild(t1)
+    t1 = document.createElement("div");
+    t1.innerHTML = "act 2"
+    t1.id = "t2"
+    t1.style.userSelect = "none"
+    t1.style.color = "white"
+    t1.style.font = "17px Arial"
+    t1.style.top = Math.floor(MRef.buttonH)+"px"
+    t1.style.left = Math.floor(MRef.wholeWidth)+"px"
+    t1.style.height = Math.floor(MRef.buttonH)+'px'
+    t1.style.width = Math.floor(MRef.buttonW)+'px'
+    t1.style.zIndex = 2
+    t1.style.position = "absolute"
+    document.body.appendChild(t1)
+    t1 = document.createElement("div");
+    t1.id = "t3"
+    t1.innerHTML = "act 3"
+    t1.style.userSelect = "none"
+    t1.style.color = "white"
+    t1.style.font = "17px Arial"
+    t1.style.top = Math.floor(MRef.buttonH*2)+"px"
+    t1.style.left = Math.floor(MRef.wholeWidth)+"px"
+    t1.style.height = Math.floor(MRef.buttonH)+'px'
+    t1.style.width = Math.floor(MRef.buttonW)+'px'
+    t1.style.zIndex = 2
+    t1.style.position = "absolute"
+    document.body.appendChild(t1)
+    t1 = document.createElement("div");
+    t1.id = "t4"
+    t1.innerHTML = "act 4"
+    t1.style.userSelect = "none"
+    t1.style.color = "white"
+    t1.style.font = "17px Arial"
+    t1.style.top = Math.floor(MRef.buttonH*3)+"px"
+    t1.style.left = Math.floor(MRef.wholeWidth)+"px"
+    t1.style.height = Math.floor(MRef.buttonH)+'px'
+    t1.style.width = Math.floor(MRef.buttonW)+'px'
+    t1.style.zIndex = 2
+    t1.style.position = "absolute"
+    document.body.appendChild(t1)
+
     setTimeout(()=>{
       B.selection = "none"
     })
@@ -190,7 +251,7 @@ class game{
     return([Math.floor(x/MRef.MTS),Math.floor(y/MRef.MTS)])
   }
 
-  static ss = {"mode":"inspect","ax":0,"ay":0,"x":0,"y":0,"boxes":"main"}
+  static ss = {"mode":"inspect","ax":0,"ay":0,"x":0,"y":0,"boxes":"main","selEn":false}
   static ms = {"held":false,"hacted":false,"heldTime":0,"heldSpace":[false]}
 
   static renderSelectedSpot(){
@@ -320,6 +381,19 @@ class game{
     game.map = {"height":game.map.height,"width":game.map.width,"tiles":e.map}
   }
 
+
+  static selectedEntity(){
+    let out = false
+    let enobj = Object.keys(game.enDict)
+    enobj.forEach((e)=>{
+      let en = game.enDict[e]
+      if(en.layer == game.selectedLayer && en.x == game.ss.ax && en.y == game.ss.ay){
+        out = e
+      }
+    })
+    return(out)
+  }
+
 }
 
 
@@ -328,12 +402,7 @@ class EHAND{
     if(inRect(mouseX,mouseY,0,0,MRef.wholeWidth,MRef.wholeHeight)){
       game.ss.boxes = "main"
       let t = game.OtM(mouseX,mouseY)
-      game.ss.x = t[0]
-      game.ss.y = t[1]
-
-      let A = reApos(t[0]+game.camera[0],t[1]+game.camera[1],game.map.width,game.map.height)
-      game.ss.ax = A[0]
-      game.ss.ay = A[1]
+      this.updateSelector(t[0],t[1],"abs")
 
     } else if(inRect(mouseX,mouseY,MRef.wholeWidth,0,MRef.wholeWidth+MRef.buttonW,MRef.buttonH*B.buttons.length)){
       this.buttonPressed()
@@ -343,23 +412,45 @@ class EHAND{
     game.ms.held = true
   }
 
-  static updateSelector(x,y){
-    game.ss.x += x
-    game.ss.y += y
+  static updateSelector(x,y,type){
+    if(type == "add"){
+      game.ss.x += x
+      game.ss.y += y
+    } else {
+      game.ss.x = x
+      game.ss.y = y
+    }
     let A = reApos(game.ss.x+game.camera[0],game.ss.y+game.camera[1],game.map.width,game.map.height)
     game.ss.ax = A[0]
     game.ss.ay = A[1]
+
+    game.ss.selEn = game.selectedEntity()
+
+    let t1 = document.getElementById('t1')
+    let t2 = document.getElementById('t2')
+    let t3 = document.getElementById('t3')
+    let t4 = document.getElementById('t4')
+
+    if(game.ss.selEn !== false){
+      let dr = B.displayReference[game.enDict[game.ss.selEn].type]
+      t1.innerHTML = dr[0].disp
+      t2.innerHTML = dr[1].disp
+      t3.innerHTML = dr[2].disp
+      t4.innerHTML = dr[3].disp
+    } else {
+      t1.innerHTML = "act 1"
+      t2.innerHTML = "act 2"
+      t3.innerHTML = "act 3"
+      t4.innerHTML = "act 4"
+    }
+
   }
 
   static heldMouseDown(e){
     if(inRect(mouseX,mouseY,0,0,MRef.wholeWidth,MRef.wholeHeight)){
       game.ss.boxes = "main"
       let t = game.OtM(mouseX,mouseY)
-      game.ss.x = t[0]
-      game.ss.y = t[1]
-      let A = reApos(t[0]+game.camera[0],t[1]+game.camera[1],game.map.width,game.map.height)
-      game.ss.ax = A[0]
-      game.ss.ay = A[1]
+      this.updateSelector(t[0],t[1])
     } else {
       game.ss.boxes = "out"
     }
@@ -395,6 +486,11 @@ class EHAND{
     }} else if(game.ss.boxes == "out"){
   
     }
+
+    // if(B.selection != "none" && B.selection != 0 && B.selection != 1 && B.selection != 2 && B.selection != 3 ){
+    //   B.selection = "none"
+    // }
+
     game.ms.hacted = false
     game.ss.mode = "inspect"
     game.ms.heldTime = 0
@@ -408,6 +504,7 @@ class EHAND{
 
     B.renderAll()
     this.renderResources()
+    this.renderScan()
     game.renderSlines()
   }
 
@@ -417,8 +514,8 @@ class EHAND{
 
     if(B.BREF.normal[B.selection]){
       if(B.selection == "none" || B.selection != bno){
-        B.selection = bno
-        socket.emit("button",{"sel":B.selection,"id":ID,"x":game.ss.ax,"y":game.ss.ay})
+        B.selection = "none"
+        socket.emit("button",{"sel":bno,"id":ID,"x":game.ss.ax,"y":game.ss.ay})
       } else {
         B.selection = "none"
       }
@@ -433,19 +530,75 @@ class EHAND{
 
   static renderResources(){
     mainCTX.fillStyle = "#000030"
-    mainCTX.fillRect(MRef.wholeWidth+MRef.buttonW,0,200,500)
+    mainCTX.fillRect(MRef.wholeWidth+MRef.buttonW,0,200,250)
     let objk = Object.keys(game.resources)
     objk.forEach((e,i)=>{
       mainCTX.fillStyle = "#FFFFFF"
       mainCTX.font = "27px Arial"
       mainCTX.fillText(e+": "+game.resources[e],MRef.wholeWidth+MRef.buttonW,20+30*i)
     })
+
   }
+  static renderScan(){
+    mainCTX.fillStyle = "#000020"
+    mainCTX.fillRect(MRef.wholeWidth+MRef.buttonW,250,200,500)
+    
+    mainCTX.fillStyle = "#FFFF00"
+    mainCTX.font = "24px Arial"
+
+    if(game.ss.selEn !== false){
+      let en = game.enDict[game.ss.selEn]
+        mainCTX.fillText("type: "+en.type,MRef.wholeWidth+MRef.buttonW,270)
+        mainCTX.fillText("team: "+en.team,MRef.wholeWidth+MRef.buttonW,300)
+        if(en.ownerID == ID){
+          mainCTX.fillText("hp: "+en.hp,MRef.wholeWidth+MRef.buttonW,330)
+          if(en.income != undefined){
+            mainCTX.fillText("income: "+en.income[0]+"/"+((en.income[2]/1000).toFixed(1))+"s",MRef.wholeWidth+MRef.buttonW,390)
+          }
+        }
+      }
+  
+
+  }
+
 
 }
 
 
 class B{
+
+  static displayReference = {
+  }
+
+  static disprefUpdate(){
+      this.displayReference = {"factory":{
+      "0":{
+        "disp":"act 1 - spawn architect </br>cost: "+
+        game.enRef.architect.m+"</br>spawn range: "+
+        game.enRef.architect.r+"</br>build time: "+
+        ((game.mainEnRef.architect.cooldown[2]/1000).toFixed(1))+"s"
+      },
+      "1":{
+        "disp":"act 2 - spawn soldier </br>cost: "+
+        game.enRef.soldier.m+"</br>spawn range: "+
+        game.enRef.soldier.r+"</br>build time: "+
+        ((game.mainEnRef.soldier.cooldown[2]/1000).toFixed(1))+"s"
+      },
+      "2":{
+        "disp":"act 3 - build tank </br>cost: "+
+        game.enRef.tank.m+"</br>spawn range: "+
+        game.enRef.tank.r+"</br>build time: "+
+        ((game.mainEnRef.tank.cooldown[2]/1000).toFixed(1))+"s"
+      },
+      "3":{
+        "disp":"act 4 - spawn sniper </br>cost: "+
+        game.enRef.sniper.m+"</br>spawn range: "+
+        game.enRef.sniper.r+"</br>build time: "+
+        ((game.mainEnRef.sniper.cooldown[2]/1000).toFixed(1))+"s"
+      }
+    }}
+  }
+
 
   static BREF = {
     "normal":{
@@ -487,11 +640,7 @@ class B{
     mainCTX.fillStyle = "#404040"
     mainCTX.fillRect(MRef.wholeWidth,0,MRef.buttonW,MRef.buttonH*this.buttons.length)
     mainCTX.lineWidth = 5
-    mainCTX.font = "20px Arial"
-    this.buttons.forEach((e,i)=>{
-      mainCTX.fillStyle = e.txtcolor
-      mainCTX.fillText(e.name,MRef.wholeWidth,i*MRef.buttonH+30)
-    })
+
 
     if(this.selection != "none"){
       if(B.BREF.normal[B.selection]){
@@ -501,6 +650,10 @@ class B{
         boarderRect(0,0,MRef.wholeWidth,MRef.wholeHeight,6,this.specialSel.color)
       }
     }
+
+    for(let i = 0; i < this.buttons.length; i++){
+    boarderRect(MRef.wholeWidth,MRef.buttonH*i,MRef.buttonW,
+        MRef.buttonH,4,this.buttons[i].color)}
 
 
   }
@@ -624,13 +777,13 @@ document.addEventListener("keyup",(e)=>{
   }
 
   if(key == "w"){
-     EHAND.updateSelector(0,-1)
+     EHAND.updateSelector(0,-1,"add")
     } else if(key == "s"){
-     EHAND.updateSelector(0,1)
+     EHAND.updateSelector(0,1,"add")
     } else if(key == "a"){
-     EHAND.updateSelector(-1,0)
+     EHAND.updateSelector(-1,0,"add")
     } else if(key == "d"){
-     EHAND.updateSelector(1,0)
+     EHAND.updateSelector(1,0,"add")
     }
 
       socket.emit("key",{"id":ID,"key":key})

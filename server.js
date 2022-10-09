@@ -5041,6 +5041,7 @@ class re8{
 			this.sendRoomMapUpdate(this.players[e.id].room)
 			Object.keys(this.rooms[this.players[e.id].room].players).forEach((e)=>{
 				this.resourcesUpdate(e,tr)
+				io.to(e).emit("enRef",[tr.enRef,CURRENTCONFIGS.re8])
 			})
 		}
 	}
@@ -5279,7 +5280,7 @@ class re8{
 
 	static click(e,rm){
 		let p = this.players[e.id]
-		if(this.players[e.id].factoryUnplaced){
+		if(this.players[e.id].factoryUnplaced&&rm.enmap[e.x+","+e.y] == undefined){
 			delete this.players[e.id].factoryUnplaced
 			let p = this.players[e.id]
 			let enid = this.newEntity(e.id,e.x,e.y,"factory",rm,p.team)
@@ -5298,6 +5299,9 @@ class re8{
 				let rref;
 				let enid;
 				console.log("re8err",pss)
+				if(end[pss.enid] == undefined){
+					return;
+				}
 				switch(e.sel){
 					case "Factory1":
 						rref = rm.enRef["architect"]
