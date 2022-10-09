@@ -2,6 +2,7 @@
 
 
 var CURRENTCONFIGS = require("./config")
+var BLOCKSALL = CURRENTCONFIGS.BLOCKSALL
 
 function distance(x1,y1,x2,y2) {
 	let a = x2-x1
@@ -602,12 +603,123 @@ function removeAttributeOf(str,e){
 
 }
 //EXP24
+///inputs an array and an item, returns index of item in array's second item, returns false if not in array
+function inListRS(inp,arr){
+  for(let i = 0; i < arr.length; i++){
+    if(inp[0] == arr[i][0] && inp[1] == arr[i][1] ){
+      return(i)
+    }
+  } return(false)
+}
 //EXP25
+//for effects
+function inEffectArr(effect,arr){
+	for(let i = 0; i < arr.length; i++){
+		if(arr[i][0] == effect){
+			return(true)
+		}
+	}
+	return(false)
+}
 //EXP26
+///inputs an array and an item, returns index of item in array, returns false if not in array
+function inListR(inp,arr){
+  for(let i = 0; i < arr.length; i++){
+    if(inp == arr[i]){
+      return(i)
+    }
+  } return(false)
+}
+
+
 //EXP27
+function ATTRIBUTESTROF(str,type){
+	let a = TNEWATTRIBUTEOF(str,type)
+	if(a != "NONE"){
+
+		return(type+":"+a)
+
+	}
+	return("")
+}
 //EXP28
+
+function TNEWbreakBlockBy(str,a){
+
+	let tblockATT = TNEWATTRIBUTEOF(str,"B")
+	if(tblockATT != "NONE"){
+		let dura = parseInt(TNEWATTRIBUTEOF(str,"D"))
+		if(isNaN(dura)){
+			dura = BLOCKSALL[tblockATT][2]
+		}
+		let fdura = dura-a
+		if(fdura > 0){
+			return(removeAttributeOf(str,"D")+"-D:"+fdura)}
+		else {
+			return("remove")
+		}
+	}
+	return("no block")
+}
 //EXP29
+
+function getBlockDurability(str,a){
+	let blockATT = TNEWATTRIBUTEOF(str,"B")
+	if(blockATT != "NONE"){
+
+		let dura = parseInt(TNEWATTRIBUTEOF(str,"D"))
+		if(isNaN(dura)){
+			dura = BLOCKSALL[blockATT][2]
+		}
+
+		return(dura)
+	} else {
+		return("no block")
+	}
+}
 //EXP30
+function TNEWremoveFromTile(str,type){
+	let split = str.split("-")
+	let fin = ""
+	for(let i = 0; i < split.length; i++){
+		if(split[i].split(":")[0] != type){
+			fin += "-" + split[i]
+		}
+	}
+	return(fin.substring(1))
+}
+//EXP31
+
+function tileItemable(str){
+	if(str == undefined){
+		return(false)
+	}
+	if(TNEWATTRIBUTEOF(str,"B") == "NONE" && TNEWATTRIBUTEOF(str,"I") == "NONE"){
+		return(true)
+	}
+	return(false)
+}
+
+//EXP32
+function TNEWkeepOnlyTile(str,type){
+	let split = str.split("-")
+	let fin = ""
+	for(let i = 0; i < split.length; i++){
+		if(split[i].split(":")[0] == type){
+			fin += "-" + split[i]
+		}
+	}
+	return(fin.substring(1))
+}
+//EXP33
+
+//EXP34
+//EXP35
+//EXP36
+//EXP37
+//EXP38
+//EXP39
+//EXP40
 
 module.exports = {
 	vectorFuncs,
@@ -632,5 +744,15 @@ module.exports = {
 	bracketLevels,
 	BASEATTRIBUTESOF,
 	TNEWATTRIBUTEOF,
-	removeAttributeOf
+	removeAttributeOf,
+	inListRS,
+	inEffectArr,
+	inListR,
+	ATTRIBUTESTROF,
+	TNEWbreakBlockBy,
+	getBlockDurability,
+	TNEWremoveFromTile,
+	tileItemable,
+	TNEWkeepOnlyTile
+
 }

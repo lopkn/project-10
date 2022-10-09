@@ -123,11 +123,14 @@ function timerDraw(time,maxtime,x,y,style){
   }else if(style == 3 || style == "reloading"){
     mainCTX.fillStyle = "rgba("+(255-colotime)+","+(255-colotime)+",0,0.35)"
     mainCTX.fillRect(pxx,pyy,S-S*zotime,S)
+  }else if(style == 4 || style == "mine"){
+    mainCTX.fillStyle = "rgba(255,255,0,0.5)"
+    mainCTX.fillRect(pxx,pyy,S,S*zotime)
   }
 
 }
 
-var MRef = {"FPS":20,"FPSR":1/20,"MTS":800,"vision":0,"wholeHeight":0,"wholeWidth":0,"MTD":{},"buttonW":250,"buttonH":100}
+var MRef = {"FPS":30,"FPSR":1/30,"MTS":800,"vision":0,"wholeHeight":0,"wholeWidth":0,"MTD":{},"buttonW":250,"buttonH":100}
 
 
 class game{
@@ -217,6 +220,7 @@ class game{
 
 
   static pushSline(e){
+    e.maxlife = e.life
     this.slines.push(e)
   }
 
@@ -224,21 +228,35 @@ class game{
     let flevelcam = reApos(game.camera[0],game.camera[1],game.map.width,game.map.height)
     this.slines.forEach((e,i)=>{
       // if(inRect(e.x,e.y,flevelcam[0]-1,flevelcam[1]-1,MRef.vision,MRef.vision)){
-        e.life -= MRef.FPSR
+        e.life -= MRef.FPSR*1000
         if(e.life <= 0){
           this.slines.splice(i,1)
           return;
         }
         mainCTX.beginPath()
         mainCTX.lineWidth = 7
-        mainCTX.strokeStyle = e.color
-        mainCTX.moveTo(MRef.MTS*(e.x-flevelcam[0])+MRef.MTD[0.5],MRef.MTS*(e.y-flevelcam[1])+MRef.MTD[0.5])
-        mainCTX.lineTo(MRef.MTS*(e.x-flevelcam[0]+e.vx)+MRef.MTD[0.5],MRef.MTS*(e.y-flevelcam[1]+e.vy)+MRef.MTD[0.5])
+        mainCTX.strokeStyle = this.getShootingLine(e.name,e.life,e.maxlife)
+        for(let i = -1; i < 2; i++){
+          for(let j = -1; j < 2; j++){
+            mainCTX.moveTo(MRef.MTS*(e.x-flevelcam[0]+i*game.map.width)+MRef.MTD[0.5],MRef.MTS*(e.y-flevelcam[1]+j*game.map.height)+MRef.MTD[0.5])
+            mainCTX.lineTo(MRef.MTS*(e.x-flevelcam[0]+e.vx+i*game.map.width)+MRef.MTD[0.5],MRef.MTS*(e.y-flevelcam[1]+e.vy+j*game.map.height)+MRef.MTD[0.5])
+          }
+        }
         mainCTX.stroke()
       // }
     })
   }
 
+
+  static getShootingLine(name,l,ml){
+    let lp = l/ml
+    let mr = Math.random()
+    switch(name){
+      case "soldier1":
+        return("rgba("+(mr*255)+",0,0,"+lp+")")
+        break;
+    }
+  }
 
   static pmu(e){
     game.map = {"height":game.map.height,"width":game.map.width,"tiles":e.map}
@@ -310,7 +328,7 @@ class EHAND{
     if(game.ms.hacted){
       game.ms.hacted = false
       socket.emit("drag",{"sel":B.selection,"id":ID,"tx":game.ss.ax,"ty":game.ss.ay,"x":game.ms.heldSpace[2],"y":game.ms.heldSpace[3],
-        "dist":distance(game.ss.ax,game.ss.ay,game.ms.heldSpace[2],game.ms.heldSpace[3]),"mode":"main",
+        "dist":distance(game.ss.x,game.ss.y,game.ms.heldSpace[0],game.ms.heldSpace[1]),"mode":"main",
         "vx":game.ss.x-game.ms.heldSpace[0],"vy":game.ss.y-game.ms.heldSpace[1]})
       console.log("dragged from:"+JSON.stringify(game.ms.heldSpace)+" to "+game.ss.ax+","+game.ss.ay)
     } else {
@@ -486,29 +504,66 @@ document.addEventListener("mouseup",(e)=>{
 
 })
 
+var moveVals = {}
+var pressedKeys = {}
+
 document.addEventListener("keydown",(e)=>{
 
   let key = e.key
+
+  if(pressedKeys[key] === true){
+    return;
+  } else {
+    pressedKeys[key] = true
+  }
+
+  if(key == "o"){
+    game.camera = [0,0]
+  }
+
+  if(key == "ArrowUp"){
+      game.camera[1] -= 1
+      game.ss.y += 1
+      moveVals[key] = setTimeout(()=>{clearTimeout(moveVals[key]);moveVals[key]=setInterval(()=>{
+      game.camera[1] -= 1
+      game.ss.y += 1
+      },40)},300)
+    } else if(key == "ArrowDown"){
+        game.camera[1] += 1
+        game.ss.y -= 1
+        moveVals[key] = setTimeout(()=>{clearTimeout(moveVals[key]);moveVals[key]=setInterval(()=>{
+        game.camera[1] += 1
+        game.ss.y -= 1
+      },40)},300)
+    } else if(key == "ArrowLeft"){
+      game.camera[0] -= 1
+      game.ss.x += 1
+      moveVals[key] = setTimeout(()=>{clearTimeout(moveVals[key]);moveVals[key]=setInterval(()=>{
+        game.camera[0] -= 1
+      game.ss.x += 1
+      },40)},300)
+    } else if(key == "ArrowRight"){
+      game.camera[0] += 1
+      game.ss.x -= 1
+      moveVals[key] = setTimeout(()=>{clearTimeout(moveVals[key]);moveVals[key]=setInterval(()=>{
+        game.camera[0] += 1
+      game.ss.x -= 1
+      },40)},300)
+    }
 
 })
 
 document.addEventListener("keyup",(e)=>{
   e.preventDefault()
   let key = e.key
+  pressedKeys[key] = false
 
-  if(key == "ArrowUp"){
-      game.camera[1] -= 1
-      game.ss.y += 1
-    } else if(key == "ArrowDown"){
-        game.camera[1] += 1
-        game.ss.y -= 1
-    } else if(key == "ArrowLeft"){
-      game.camera[0] -= 1
-      game.ss.x += 1
-    } else if(key == "ArrowRight"){
-      game.camera[0] += 1
-      game.ss.x -= 1
-    }
+  if(key[0] == "A" && key[1] == "r"){
+    console.log("clear")
+    clearInterval(moveVals[key])
+    clearTimeout(moveVals[key])
+    clearInterval(moveVals[key])
+  }
 
   if(key == "w"){
      EHAND.updateSelector(0,-1)
@@ -536,13 +591,7 @@ function repeat(e){
     mainCTX.clearRect(0,0,wWidth,wHeight)
     mainCTX.fillRect(0,0,wWidth,wHeight)
     let mapArr = Object.keys(game.map.tiles)
-    // mapArr.forEach((e,i)=>{
-    //   // let coord = e.split(",")
-    //   // let tileInfo = game.map[e]
 
-    //   // mainCTX.fillStyle = tileInfo.color
-    //   // mainCTX.fillRect(MRef.MTS*coord[0],MRef.MTS*coord[1],MRef.MTS,MRef.MTS)
-    // })
 
     for(let i = 0; i < MRef.vision; i++){
       for(let j = 0; j < MRef.vision; j++){
@@ -641,6 +690,39 @@ function entityRender(e){
       mainCTX.strokeStyle = '#000000';
       mainCTX.stroke();
       break;
+    case "tank":
+      mainCTX.beginPath();
+      mainCTX.arc(ax*S+S*0.5, ay*S+S*0.5, MRef.MTD[0.1]*3.5, 0, 2 * Math.PI, false);
+      mainCTX.fillStyle = e.color;
+      mainCTX.fill();
+      mainCTX.lineWidth = 1;
+      mainCTX.strokeStyle = '#000000';
+      mainCTX.stroke();
+      break;
+    case "sniper":
+      mainCTX.beginPath();
+      mainCTX.arc(ax*S+S*0.5, ay*S+S*0.5, MRef.MTD[0.1]*4, 0, 2 * Math.PI, false);
+      mainCTX.moveTo(ax*S+S*0.5,ay*S+S*0.1)
+      mainCTX.lineTo(ax*S+S*0.5,ay*S+S-S*0.1)
+      mainCTX.moveTo(ax*S+S*0.1,ay*S+S*0.5)
+      mainCTX.lineTo(ax*S+S-S*0.1,ay*S+S*0.5)
+      mainCTX.lineWidth = 4;
+      mainCTX.strokeStyle = e.color;
+      mainCTX.stroke();
+      break;
+    case "mine":
+      mainCTX.beginPath();
+      mainCTX.moveTo(ax*S+MRef.MTD[0.5],ay*S+S-MRef.MTD[0.2])
+      mainCTX.lineTo(ax*S+MRef.MTD[0.2],ay*S+MRef.MTD[0.2])
+      mainCTX.lineTo(ax*S+S-MRef.MTD[0.2],ay*S+MRef.MTD[0.2])
+   
+      mainCTX.closePath()
+      mainCTX.fillStyle = e.color;
+      mainCTX.fill();
+      mainCTX.lineWidth = 1;
+      mainCTX.strokeStyle = '#000000';
+      mainCTX.stroke();
+      break;
   }
 
   if(e.cooldown[0] != "none"){
@@ -650,6 +732,9 @@ function entityRender(e){
     } else {
       timerDraw(Date.now()-ec[1],ec[2],ax,ay,e.cooldown[0])
     }
+  } if(e.income != undefined){
+    let ei = e.income
+    timerDraw((Date.now()-ei[1])%ei[2],ei[2],ax,ay,"mine")
   }
 }
 

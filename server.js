@@ -63,6 +63,9 @@ var startPing = 0
 
 
 const INFUNCS = require("./funcs.js")
+
+INFUNCS.enDict = enDict
+
 /*	
 	vectorFuncs,
 	LuuidGenerator,
@@ -76,6 +79,7 @@ const INFUNCS = require("./funcs.js")
 	randomItem,
 	TNEWgenerateTileFromNumber,
 	generateChestContents,
+	brackedator,
 	alreadyHasBlockATT,
 	alreadyHasBlock,
 	strHasBrackets,
@@ -85,7 +89,16 @@ const INFUNCS = require("./funcs.js")
 	bracketLevels,
 	BASEATTRIBUTESOF,
 	TNEWATTRIBUTEOF,
-	removeAttributeOf
+	removeAttributeOf,
+	inListRS,
+	inEffectArr,
+	inListR,
+	ATTRIBUTESTROF,
+	TNEWbreakBlockBy,
+	getBlockDurability,
+	TNEWremoveFromTile,
+	tileItemable,
+	TNEWkeepOnlyTile
 */
 let vectorFuncs = INFUNCS.vectorFuncs
 let myMath = INFUNCS.myMath
@@ -99,6 +112,7 @@ let	arrayBoundingBox = INFUNCS.arrayBoundingBox
 let	randomItem = INFUNCS.randomItem
 let	TNEWgenerateTileFromNumber = INFUNCS.TNEWgenerateTileFromNumber
 let generateChestContents = INFUNCS.generateChestContents
+let brackedator = INFUNCS.brackedator
 let alreadyHasBlockATT = INFUNCS.alreadyHasBlockATT
 let alreadyHasBlock = INFUNCS.alreadyHasBlock
 let strHasBrackets = INFUNCS.strHasBrackets
@@ -109,6 +123,15 @@ let	bracketLevels = INFUNCS.bracketLevels
 let	BASEATTRIBUTESOF = INFUNCS.BASEATTRIBUTESOF
 let	TNEWATTRIBUTEOF = INFUNCS.TNEWATTRIBUTEOF
 let	removeAttributeOf = INFUNCS.removeAttributeOf
+let inListRS = INFUNCS.inListRS
+let	inEffectArr = INFUNCS.inEffectArr
+let	inListR = INFUNCS.inListR
+let ATTRIBUTESTROF = INFUNCS.ATTRIBUTESTROF
+let	TNEWbreakBlockBy = INFUNCS.TNEWbreakBlockBy
+let	getBlockDurability = INFUNCS.getBlockDurability
+let	TNEWremoveFromTile = INFUNCS.TNEWremoveFromTile
+let	tileItemable = INFUNCS.tileItemable
+let	TNEWkeepOnlyTile = INFUNCS.TNEWkeepOnlyTile
 
 
 function getStrLengthOf(e){
@@ -1407,14 +1430,6 @@ function inRect(x,y,rx,ry,w,h){
 }
 
 
-
-
-
-
-
-
-
-
 function distance(x1,y1,x2,y2) {
 	let a = x2-x1
 	let b = y2-y1
@@ -1560,6 +1575,7 @@ function joinGame(game,socket){
 		socket.on("drag",(e)=>{re8.rmHandler(e,"drag")})
 		socket.on("key",(e)=>{re8.rmHandler(e,"key")})
 		socket.on("button",(e)=>{re8.rmHandler(e,"button")})
+		socket.on("disconnect",()=>{re8.disconnect(socket)})
 	}
 }
 
@@ -3000,52 +3016,6 @@ function processBreakAtt(str,att,x,y,d,type,player){
 
 }
 
-function ATTRIBUTESTROF(str,type){
-	let a = TNEWATTRIBUTEOF(str,type)
-	if(a != "NONE"){
-
-		return(type+":"+a)
-
-	}
-	return("")
-}
-
-function TNEWbreakBlockBy(str,a){
-
-	let tblockATT = TNEWATTRIBUTEOF(str,"B")
-	if(tblockATT != "NONE"){
-		let dura = parseInt(TNEWATTRIBUTEOF(str,"D"))
-		if(isNaN(dura)){
-			dura = BLOCKSALL[tblockATT][2]
-		}
-		let fdura = dura-a
-		if(fdura > 0){
-			return(removeAttributeOf(str,"D")+"-D:"+fdura)}
-		else {
-			return("remove")
-		}
-	}
-	return("no block")
-}
-
-function getBlockDurability(str,a){
-	let blockATT = TNEWATTRIBUTEOF(str,"B")
-	if(blockATT != "NONE"){
-
-		let dura = parseInt(TNEWATTRIBUTEOF(str,"D"))
-		if(isNaN(dura)){
-			dura = BLOCKSALL[blockATT][2]
-		}
-
-		return(dura)
-	} else {
-		return("no block")
-	}
-}
-
-
-
-
 
 
 function broadcast(s,e){
@@ -3084,42 +3054,6 @@ function selectSlot(e){
 
 
 
-
-
-
-function TNEWremoveFromTile(str,type){
-	let split = str.split("-")
-	let fin = ""
-	for(let i = 0; i < split.length; i++){
-		if(split[i].split(":")[0] != type){
-			fin += "-" + split[i]
-		}
-	}
-	return(fin.substring(1))
-}
-
-
-function tileItemable(str){
-	if(str == undefined){
-		return(false)
-	}
-	if(TNEWATTRIBUTEOF(str,"B") == "NONE" && TNEWATTRIBUTEOF(str,"I") == "NONE"){
-		return(true)
-	}
-	return(false)
-}
-
-
-function TNEWkeepOnlyTile(str,type){
-	let split = str.split("-")
-	let fin = ""
-	for(let i = 0; i < split.length; i++){
-		if(split[i].split(":")[0] == type){
-			fin += "-" + split[i]
-		}
-	}
-	return(fin.substring(1))
-}
 
 
 function testGenerateChunks(e){
@@ -3691,43 +3625,7 @@ function findPlayerString(e){
 
 }
 
-
-///inputs an array and an item, returns index of item in array, returns false if not in array
-function inListR(inp,arr){
-  for(let i = 0; i < arr.length; i++){
-    if(inp == arr[i]){
-      return(i)
-    }
-  } return(false)
-}
-
-//for effects
-function inEffectArr(effect,arr){
-	for(let i = 0; i < arr.length; i++){
-		if(arr[i][0] == effect){
-			return(true)
-		}
-	}
-	return(false)
-}
-
-
-
-
-
-///inputs an array and an item, returns index of item in array's second item, returns false if not in array
-function inListRS(inp,arr){
-  for(let i = 0; i < arr.length; i++){
-    if(inp[0] == arr[i][0] && inp[1] == arr[i][1] ){
-      return(i)
-    }
-  } return(false)
-}
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-
-
 
 
 
@@ -3780,10 +3678,6 @@ function selectedSlotItems(p){
 	let e = enDict[r].selectedSlot
 	if(enDict[r].Inventory[e] != undefined){
 		let split = enDict[r].Inventory[e].split('-')
-
-		// if(itemType(split[0])=="block"){
-
-		// }
 
 		return(split[0])
 	
@@ -5096,6 +4990,7 @@ class re8{
 				"resources":{"money":1500},
 				"selector":[0,0],
 				"specialState":{"name":"none"}
+				// "intervals":{"mines":{}}
 			}
 			let n = split[0].split(":")[0]
 			if(this.rooms[n]==undefined){
@@ -5104,8 +4999,10 @@ class re8{
 				"teamVision":false,"teams":{},
 				"enRef":{
 					"architect":{"m":400,"r":1},
-					"soldier":{"m":100,"r":2}
-				}
+					"soldier":{"m":100,"r":2},
+					"mine":{"m":400,"r":1},
+					"tank":{"m":300,"r":1}
+				}, "loop":"", "currentIntervals":{}
 			}
 			}
 			
@@ -5135,6 +5032,10 @@ class re8{
 			tr.map = map
 			tr.enmap = {}
 			tr.enDict = {}
+			let ar = this.players[e.id].room
+			tr.loop = setInterval(()=>{
+				this.roomLoop(ar)
+			},1000/20)
 			// io.to(this.players[e.id].room).emit("startGame",{"map":map,"vision":15})
 			this.sendRoomMapUpdate(this.players[e.id].room)
 			Object.keys(this.rooms[this.players[e.id].room].players).forEach((e)=>{
@@ -5143,7 +5044,61 @@ class re8{
 		}
 	}
 
-	
+	static disconnect(socket){
+		let id = socket.id
+		let p = this.players[id]
+		// p.intervals.mines.forEach((e)=>{
+		// 	clearInterval(p.intervals.mines[e])
+		// })
+		let rm = p.room 
+		delete this.rooms[p.room].players[id]
+		delete this.players[id]
+		if(Object.keys(this.rooms[rm].players).length == 0){
+			clearInterval(this.rooms[rm].loop)
+			delete this.rooms[rm].enDict
+			delete this.rooms[rm].enmap
+			delete this.rooms[rm]
+		}
+		
+	}
+
+
+	static roomLoop(rm){
+		let room = this.rooms[rm]
+		let ci = room.currentIntervals
+		let objk = Object.keys(ci)
+		let d = Date.now()
+
+		objk.forEach((e)=>{
+			let aci = ci[e]
+
+			if(aci.type == "income"){
+				let en = room.enDict[aci.enid]
+				let incomeAmt = en.income
+				let p = this.players[en.ownerID]
+
+				let cd = this.OffCooldown(room.name,aci.enid)
+				if(cd){
+					if(en.income[1] != "cooldown"){
+						if(d-incomeAmt[1] > incomeAmt[2]){
+							let amt = Math.floor((d-incomeAmt[1])/incomeAmt[2])
+							room.enDict[aci.enid].income[1] += incomeAmt[2] * amt
+							p.resources.money += incomeAmt[0] * amt
+							this.resourcesUpdate(en.ownerID,room)
+						}
+						
+					} else {
+						en.income[1] = d
+						this.emitEntityUpdate(aci.enid,room)
+					}
+				}
+
+				
+
+			}
+
+		})
+	}
 
 	static uplayerVision2(id,rm){
 		let finalVision = {}
@@ -5326,8 +5281,8 @@ class re8{
 		if(this.players[e.id].factoryUnplaced){
 			delete this.players[e.id].factoryUnplaced
 			let p = this.players[e.id]
-			this.newEntity(e.id,e.x,e.y,"factory",rm,p.team)
-			
+			let enid = this.newEntity(e.id,e.x,e.y,"factory",rm,p.team)
+			rm.currentIntervals[enid] = {"type":"income","enid":enid}
 			this.players[e.id].selector = [e.x,e.y]
 
 			this.sendPlayerMapUpdate(e.id,rm)
@@ -5337,14 +5292,16 @@ class re8{
 			let end = rm.enDict
 
 			let pss = this.players.specialState
+			console.log("re8err",pss)
 
 			if(e.sel != "none" &&e.sel != "1" &&e.sel != "2"&&e.sel != "3"){
 				let rref;
+				let enid;
 				switch(e.sel){
 					case "Factory1":
 						rref = rm.enRef["architect"]
 						if(!this.entityAtPos(loc,rm,1)[0] && this.hasMoney(e.id,rref.m) && end[pss.enid].Asight[loc].dist <= rref.r){
-							this.newEntity(e.id,e.x,e.y,"architect",rm,p.team)
+							enid = this.newEntity(e.id,e.x,e.y,"architect",rm,p.team)
 							this.sendPlayerMapUpdate(e.id,rm)
 							p.resources.money -= rref.m
 							this.resourcesUpdate(e.id,rm.name)
@@ -5356,11 +5313,33 @@ class re8{
 						if(!this.entityAtPos(loc,rm,1)[0] && this.hasMoney(e.id,rref.m)&& end[pss.enid].Asight[loc].dist <= rref.r){
 							p.resources.money -= rref.m
 							this.resourcesUpdate(e.id,rm.name)
-							this.newEntity(e.id,e.x,e.y,"soldier",rm,p.team)
+							enid = this.newEntity(e.id,e.x,e.y,"soldier",rm,p.team)
 							this.sendPlayerMapUpdate(e.id,rm)
 						}
 						io.to(e.id).emit("SEL",{"name":"none"})
 						break;
+					case "Factory3":
+						rref = rm.enRef["tank"]
+						if(!this.entityAtPos(loc,rm,1)[0] && this.hasMoney(e.id,rref.m)&& end[pss.enid].Asight[loc].dist <= rref.r){
+							p.resources.money -= rref.m
+							this.resourcesUpdate(e.id,rm.name)
+							enid = this.newEntity(e.id,e.x,e.y,"tank",rm,p.team)
+							this.sendPlayerMapUpdate(e.id,rm)
+						}
+						io.to(e.id).emit("SEL",{"name":"none"})
+						break;
+					case "Architect1":
+						rref = rm.enRef["mine"]
+						if(rm.map.tiles[loc].ground == "mountain"&&!this.entityAtPos(loc,rm,1)[0] && this.hasMoney(e.id,rref.m)&& end[pss.enid].Asight[loc].dist <= rref.r){
+							p.resources.money -= rref.m
+							this.resourcesUpdate(e.id,rm.name)
+							enid = this.newEntity(e.id,e.x,e.y,"mine",rm,p.team)
+							rm.currentIntervals[enid] = {"type":"income","enid":enid}
+							this.sendPlayerMapUpdate(e.id,rm)
+						}
+						io.to(e.id).emit("SEL",{"name":"none"})
+						break;
+
 				}
 				this.players.specialState = {}
 			}
@@ -5389,14 +5368,24 @@ class re8{
 			
 			if(SB[3] && this.OffCooldown(room.name,SB[1])){
 				if(e.sel == 0){
+
 					if(end[SB[1]].type == "factory"){
 						io.to(e.id).emit("SEL",{"name":"Factory1","color":"#009000"})
 						this.players.specialState = {"name":"Factory1","enid":SB[1]}
+					} else if(end[SB[1]].type == "architect"){
+						io.to(e.id).emit("SEL",{"name":"Architect1","color":"#0000FF"})
+						this.players.specialState = {"name":"Architect1","enid":SB[1]}
 					}
+
 				}else if(e.sel == 1){
 					if(end[SB[1]].type == "factory"){
-						io.to(e.id).emit("SEL",{"name":"Factory2","color":"#009000"})
+						io.to(e.id).emit("SEL",{"name":"Factory2","color":"#00A000"})
 						this.players.specialState = {"name":"Factory2","enid":SB[1]}
+					}
+				}else if(e.sel == 2){
+					if(end[SB[1]].type == "factory"){
+						io.to(e.id).emit("SEL",{"name":"Factory3","color":"#00B000"})
+						this.players.specialState = {"name":"Factory3","enid":SB[1]}
 					}
 				}
 
@@ -5404,8 +5393,8 @@ class re8{
 		// }
 	}
 
-	static OffCooldown(room,id){
-		let en = this.rooms[room].enDict[id]
+	static OffCooldown(rm,id){
+		let en = this.rooms[rm].enDict[id]
 
 		if(en.cooldown[0] == "none"){
 			return true
@@ -5550,7 +5539,7 @@ static sendRoomMapUpdate(rm){
 			if(SB[3] && this.OffCooldown(room.name,SB[1])){
 				if(e.sel == "none"){
 					if(end[SB[1]].canshoot && end[SB[1]].shootInfo.range > e.dist){
-						io.to(e.id).emit("sline",{"name":"soldier1","color":"#F00000","x":e.x,"y":e.y,"vx":e.vx,"vy":e.vy,"life":30})
+						io.to(e.id).emit("sline",{"name":"soldier1","color":"#F00000","x":e.x,"y":e.y,"vx":e.vx,"vy":e.vy,"life":800})
 						end[SB[1]].cooldown = ["reloading",Date.now(),end[SB[1]].shootInfo.cd]
 						let eap = this.entityAtPos(tloc,room,1)
 						if(eap[0]){
@@ -5561,8 +5550,6 @@ static sendRoomMapUpdate(rm){
 				}
 
 			}
-		console.log(e.tx,e.ty)
-
 		p.selector = [e.tx,e.ty]
 
 	}
@@ -5748,7 +5735,7 @@ static sendRoomMapUpdate(rm){
 		room.enDict[eid].color = this.players[id].color
 		room.enDict[eid].type = entity
 		room.enDict[eid].team = team
-
+		room.enDict[eid].cooldown[1] = Date.now()
 		room.enDict[eid].Asight = this.uenVisionC(eid,room.name)
 		let OBJK = Object.keys(room.enDict[eid].Asight)
 
@@ -5769,6 +5756,7 @@ static sendRoomMapUpdate(rm){
 		this.rmEnmaper(room,eid,x+","+y,"add")
 
 		this.emitEntityUpdate(eid,room)
+		return(eid)
 
 	}
 
@@ -5792,6 +5780,10 @@ static sendRoomMapUpdate(rm){
 		let entity = this.rooms[rm].enDict[id]
 
 		let entityOwner = entity.ownerID
+
+		if(this.rooms[rm].currentIntervals[id] !== undefined){
+			delete this.rooms[rm].currentIntervals[id]
+		}
 
 		delete this.players[entityOwner].entities[id]
 		delete this.rooms[rm].teams[entity.team].entities[id]
@@ -5824,44 +5816,7 @@ static sendRoomMapUpdate(rm){
 
 
 	static entityDictor(en){
-		switch(en){
-			case "factory":
-				return({
-					"hp":500,
-					"movable":false,
-					"sight":5,
-					"ensight":4,
-					"canshoot":false,
-					"layer":1,
-					"cooldown":["building",Date.now(),2000]
-				})
-				break;
-			case "architect":
-				return({
-					"hp":100,
-					"movable":true,
-					"movingInfo":{"cd":4000},
-					"sight":4,
-					"ensight":3,
-					"canshoot":false,
-					"layer":1,
-					"cooldown":["building",Date.now(),5000]
-				})
-				break;
-			case "soldier":
-				return({
-					"hp":120,
-					"movable":true,
-					"sight":4,
-					"ensight":3,
-					"canshoot":true,
-					"movingInfo":{"cd":1000},
-					"shootInfo":{"range":3,"dmg":20,"dmgv":5,"cd":1000},
-					"layer":1,
-					"cooldown":["building",Date.now(),2000]
-				})
-				break;
-		}
+		return(JSON.parse(JSON.stringify(CURRENTCONFIGS.re8[en])))
 	}
 
 }

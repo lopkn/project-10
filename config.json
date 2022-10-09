@@ -3,6 +3,7 @@
 
 
 
+
 	"BLOCKSALL":{
 		"1":{"0":["#B96A04"],"1":"Oak Wood","2":100},
 		"2":{"0":["#8C8C8C"],"1":"Stone","2":400},
@@ -146,5 +147,81 @@
 	},
 	"brackets":{"[":"]","{":"}","(":")","]":"c[","}":"c{",")":"c("},
 	"DefaultTabcuts":["/help","/schmode","/ping","/actxt","/scanmode","/dragclock","/login","/clickupdate","/keyholder","/commandto","/process","/stopsound","/playsound"],
-	"OpTabcuts":["/tp","/give","/set","/summon","/djump"]
+	"OpTabcuts":["/tp","/give","/set","/summon","/djump"],
+
+
+	"re8":{
+			"factory":
+				{
+					"hp":500,
+					"movable":false,
+					"sight":5,
+					"ensight":4,
+					"canshoot":false,
+					"layer":1,
+					"cooldown":["building",0,2000],
+					"income":[50,"cooldown",10000]
+				},
+				
+			"mine":
+				{
+					"hp":70,
+					"movable":false,
+					"sight":3,
+					"ensight":3,
+					"canshoot":false,
+					"layer":1,
+					"cooldown":["building",0,2000],
+					"income":[5,"cooldown",5000]
+				},
+			 "architect":
+				{
+					"hp":100,
+					"movable":true,
+					"movingInfo":{"cd":4000},
+					"sight":4,
+					"ensight":3,
+					"canshoot":false,
+					"layer":1,
+					"cooldown":["building",0,5000]
+				},
+			 "soldier":
+				{
+					"hp":120,
+					"movable":true,
+					"sight":4,
+					"ensight":3,
+					"canshoot":true,
+					"movingInfo":{"cd":3000},
+					"shootInfo":{"range":3,"dmg":20,"dmgv":5,"cd":3000},
+					"layer":1,
+					"cooldown":["building",0,7000]
+				},
+				 "tank":
+				{
+					"hp":350,
+					"movable":true,
+					"sight":5,
+					"ensight":4,
+					"canshoot":true,
+					"movingInfo":{"cd":6000},
+					"shootInfo":{"range":4,"dmg":110,"dmgv":20,"cd":5000},
+					"layer":1,
+					"cooldown":["building",0,15000]
+				},
+			 "sniper":
+				{
+					"hp":350,
+					"movable":true,
+					"sight":7,
+					"ensight":6,
+					"canshoot":true,
+					"movingInfo":{"cd":5500},
+					"shootInfo":{"range":7,"dmg":40,"dmgv":20,"cd":5000},
+					"layer":1,
+					"cooldown":["building",0,10000]
+				}
+		}
+
+
 }
