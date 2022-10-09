@@ -5001,7 +5001,8 @@ class re8{
 					"architect":{"m":400,"r":1},
 					"soldier":{"m":100,"r":2},
 					"mine":{"m":400,"r":1},
-					"tank":{"m":300,"r":1}
+					"tank":{"m":340,"r":1},
+					"sniper":{"m":320,"r":2}
 				}, "loop":"", "currentIntervals":{}
 			}
 			}
@@ -5292,11 +5293,11 @@ class re8{
 			let end = rm.enDict
 
 			let pss = this.players.specialState
-			console.log("re8err",pss)
 
 			if(e.sel != "none" &&e.sel != "1" &&e.sel != "2"&&e.sel != "3"){
 				let rref;
 				let enid;
+				console.log("re8err",pss)
 				switch(e.sel){
 					case "Factory1":
 						rref = rm.enRef["architect"]
@@ -5324,6 +5325,16 @@ class re8{
 							p.resources.money -= rref.m
 							this.resourcesUpdate(e.id,rm.name)
 							enid = this.newEntity(e.id,e.x,e.y,"tank",rm,p.team)
+							this.sendPlayerMapUpdate(e.id,rm)
+						}
+						io.to(e.id).emit("SEL",{"name":"none"})
+						break;
+					case "Factory4":
+						rref = rm.enRef["sniper"]
+						if(!this.entityAtPos(loc,rm,1)[0] && this.hasMoney(e.id,rref.m)&& end[pss.enid].Asight[loc].dist <= rref.r){
+							p.resources.money -= rref.m
+							this.resourcesUpdate(e.id,rm.name)
+							enid = this.newEntity(e.id,e.x,e.y,"sniper",rm,p.team)
 							this.sendPlayerMapUpdate(e.id,rm)
 						}
 						io.to(e.id).emit("SEL",{"name":"none"})
@@ -5386,6 +5397,11 @@ class re8{
 					if(end[SB[1]].type == "factory"){
 						io.to(e.id).emit("SEL",{"name":"Factory3","color":"#00B000"})
 						this.players.specialState = {"name":"Factory3","enid":SB[1]}
+					}
+				}else if(e.sel == 3){
+					if(end[SB[1]].type == "factory"){
+						io.to(e.id).emit("SEL",{"name":"Factory4","color":"#00C000"})
+						this.players.specialState = {"name":"Factory4","enid":SB[1]}
 					}
 				}
 
@@ -5538,12 +5554,13 @@ static sendRoomMapUpdate(rm){
 			
 			if(SB[3] && this.OffCooldown(room.name,SB[1])){
 				if(e.sel == "none"){
-					if(end[SB[1]].canshoot && end[SB[1]].shootInfo.range > e.dist){
-						io.to(e.id).emit("sline",{"name":"soldier1","color":"#F00000","x":e.x,"y":e.y,"vx":e.vx,"vy":e.vy,"life":800})
+					if(end[SB[1]].canshoot && end[SB[1]].shootInfo.range >= e.dist){
+						io.to(e.id).emit("sline",{"name":end[SB[1]].type,"color":"#F00000","x":e.x,"y":e.y,"vx":e.vx,"vy":e.vy})
 						end[SB[1]].cooldown = ["reloading",Date.now(),end[SB[1]].shootInfo.cd]
 						let eap = this.entityAtPos(tloc,room,1)
 						if(eap[0]){
-							this.damageEntity(SB[1],eap[1],e.dist,room)
+							let dmg = this.damageEntity(SB[1],eap[1],e.dist,room)
+							this.damageNumRel(dmg,tloc,room)
 						}
 						this.emitEntityUpdate(SB[1],room)
 					}
@@ -5557,14 +5574,25 @@ static sendRoomMapUpdate(rm){
 	static damageEntity(sid,rid,dist,room){
 		let end = room.enDict
 		let sifo = end[sid].shootInfo
-		end[rid].hp -= sifo.dmg + Math.floor(Math.random()*sifo.dmgv)
+		let dmg = sifo.dmg + Math.floor(Math.random()*sifo.dmgv)
+		end[rid].hp -= dmg
+		let fatal = false
 		if(end[rid].hp <= 0){
 			this.killEntity(rid,room.name)
+			fatal = true
 			io.to(room.name).emit("entityUpdate",[rid,"-DEL-"])
 		}
+		return([dmg,fatal])
 	}
 
-
+	static damageNumRel(dmg,loc,room){
+		let objk = Object.keys(room.players)
+		objk.forEach((e)=>{
+			if(room.players[e].temporalMap[0][loc] != undefined){
+				io.to(e).emit("dmgnum",[loc,dmg])
+			}
+		})
+	}
 
 	static key(e,room){
 

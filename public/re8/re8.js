@@ -48,6 +48,9 @@ socket.on("sline",(e)=>{
 socket.on("resourcesUpdate",(e)=>{
   game.resources = e
 })
+socket.on("dmgnum",(e)=>{
+  game.pushDmgnum(e)
+})
 
 
 function lobby(){
@@ -138,8 +141,18 @@ class game{
   static map = {}
   static resources = {}
   static slines = []
+  static dmgnums = []
   static enDict = {}
   static camera = [0,0]
+
+  static selectedLayer = 1
+
+  static slineRef = {
+    "soldier":{"life":800,"size":7,"reducing":true},
+    "sniper":{"life":1800,"size":8,"reducing":true},
+    "tank":{"life":1800,"size":17,"reducing":true}
+  }
+
   static startProcess(e){
 
     // this.enDict = e.enDict
@@ -167,7 +180,9 @@ class game{
       document.getElementById(e).remove()
     })
 
-
+    setTimeout(()=>{
+      B.selection = "none"
+    })
 
   }
 
@@ -218,9 +233,43 @@ class game{
   }
 
 
+  static pushDmgnum(e){
+    e[1][2] = 1000 + e[1][0]
+    this.dmgnums[e[0]] = e[1]
+  }
+
+  static numDecrease(){
+    let objk = Object.keys(this.dmgnums)
+    objk.forEach((e,i)=>{
+        this.dmgnums[e][2] -= MRef.FPSR*1000
+        if(this.dmgnums[e][2] <= 0){
+          delete this.dmgnums[e]
+          return;
+        }
+    })
+  }
+
+  static renderDmgNums(a){
+    a.forEach((e)=>{
+      mainCTX.fillStyle = "rgb("+(Math.random()*170+20)+",0,0)"
+      mainCTX.strokeStyle = "rgb("+(Math.random()*170+20)+",0,0)"
+      let size = 30
+      if(this.dmgnums[e[0]][1]){
+        size += 7
+      }
+      mainCTX.font = "bold "+size+"px serif"
+      mainCTX.textAlign = "center"
+      mainCTX.fillText(this.dmgnums[e[0]][0],MRef.MTS*(0.5+e[1]),MRef.MTS*e[2]+MRef.MTS*(this.dmgnums[e[0]][2]*0.001-0.2))     
+      mainCTX.textAlign = "left"
+    })
+  }
 
   static pushSline(e){
+    let info = this.slineRef[e.name]
+    e.life = info.life
+    e.size = info.size
     e.maxlife = e.life
+    e.info = info
     this.slines.push(e)
   }
 
@@ -234,7 +283,11 @@ class game{
           return;
         }
         mainCTX.beginPath()
-        mainCTX.lineWidth = 7
+        if(e.info.reducing){
+          mainCTX.lineWidth = e.size*(e.life/e.maxlife)
+        }else{
+          mainCTX.lineWidth = e.size
+        }
         mainCTX.strokeStyle = this.getShootingLine(e.name,e.life,e.maxlife)
         for(let i = -1; i < 2; i++){
           for(let j = -1; j < 2; j++){
@@ -252,9 +305,14 @@ class game{
     let lp = l/ml
     let mr = Math.random()
     switch(name){
-      case "soldier1":
+      case "soldier":
         return("rgba("+(mr*255)+",0,0,"+lp+")")
         break;
+      case "sniper":
+      case "tank":
+        return("rgba("+(mr*255)+",0,0,"+(lp/2+0.5)+")")
+        break;
+
     }
   }
 
@@ -592,11 +650,16 @@ function repeat(e){
     mainCTX.fillRect(0,0,wWidth,wHeight)
     let mapArr = Object.keys(game.map.tiles)
 
+    let numrender = []
 
     for(let i = 0; i < MRef.vision; i++){
       for(let j = 0; j < MRef.vision; j++){
         let gp = getApos(i,j)
         let pos = gp[0] + ","+gp[1]
+
+        if(game.dmgnums[pos] != undefined){
+          numrender.push([pos,i,j])
+        }
 
         let col = "#000000"
         
@@ -630,7 +693,10 @@ function repeat(e){
       entityRender(game.enDict[e])
     })
 
+
     EHAND.repeat(e)
+    game.renderDmgNums(numrender)
+    game.numDecrease()
     game.renderSelectedSpot()
 
   }
@@ -701,11 +767,11 @@ function entityRender(e){
       break;
     case "sniper":
       mainCTX.beginPath();
-      mainCTX.arc(ax*S+S*0.5, ay*S+S*0.5, MRef.MTD[0.1]*4, 0, 2 * Math.PI, false);
-      mainCTX.moveTo(ax*S+S*0.5,ay*S+S*0.1)
-      mainCTX.lineTo(ax*S+S*0.5,ay*S+S-S*0.1)
-      mainCTX.moveTo(ax*S+S*0.1,ay*S+S*0.5)
-      mainCTX.lineTo(ax*S+S-S*0.1,ay*S+S*0.5)
+      mainCTX.arc(ax*S+S*0.5, ay*S+S*0.5, MRef.MTD[0.1]*2.25, 0, 2 * Math.PI, false);
+      mainCTX.moveTo(ax*S+S*0.5,ay*S+S*0.15)
+      mainCTX.lineTo(ax*S+S*0.5,ay*S+S-S*0.15)
+      mainCTX.moveTo(ax*S+S*0.15,ay*S+S*0.5)
+      mainCTX.lineTo(ax*S+S-S*0.15,ay*S+S*0.5)
       mainCTX.lineWidth = 4;
       mainCTX.strokeStyle = e.color;
       mainCTX.stroke();

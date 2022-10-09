@@ -155,8 +155,8 @@
 				{
 					"hp":500,
 					"movable":false,
-					"sight":5,
-					"ensight":4,
+					"sight":4,
+					"ensight":3,
 					"canshoot":false,
 					"layer":1,
 					"cooldown":["building",0,2000],
@@ -167,8 +167,8 @@
 				{
 					"hp":70,
 					"movable":false,
-					"sight":3,
-					"ensight":3,
+					"sight":2,
+					"ensight":2,
 					"canshoot":false,
 					"layer":1,
 					"cooldown":["building",0,2000],
@@ -179,8 +179,8 @@
 					"hp":100,
 					"movable":true,
 					"movingInfo":{"cd":4000},
-					"sight":4,
-					"ensight":3,
+					"sight":3,
+					"ensight":2,
 					"canshoot":false,
 					"layer":1,
 					"cooldown":["building",0,5000]
@@ -189,11 +189,11 @@
 				{
 					"hp":120,
 					"movable":true,
-					"sight":4,
-					"ensight":3,
+					"sight":3,
+					"ensight":2,
 					"canshoot":true,
 					"movingInfo":{"cd":3000},
-					"shootInfo":{"range":3,"dmg":20,"dmgv":5,"cd":3000},
+					"shootInfo":{"range":2,"dmg":20,"dmgv":5,"cd":6000},
 					"layer":1,
 					"cooldown":["building",0,7000]
 				},
@@ -201,23 +201,23 @@
 				{
 					"hp":350,
 					"movable":true,
-					"sight":5,
-					"ensight":4,
+					"sight":4,
+					"ensight":3,
 					"canshoot":true,
 					"movingInfo":{"cd":6000},
-					"shootInfo":{"range":4,"dmg":110,"dmgv":20,"cd":5000},
+					"shootInfo":{"range":4,"dmg":110,"dmgv":20,"cd":12000},
 					"layer":1,
 					"cooldown":["building",0,15000]
 				},
 			 "sniper":
 				{
-					"hp":350,
+					"hp":90,
 					"movable":true,
-					"sight":7,
-					"ensight":6,
+					"sight":5,
+					"ensight":5,
 					"canshoot":true,
 					"movingInfo":{"cd":5500},
-					"shootInfo":{"range":7,"dmg":40,"dmgv":20,"cd":5000},
+					"shootInfo":{"range":5,"dmg":40,"dmgv":20,"cd":10000},
 					"layer":1,
 					"cooldown":["building",0,10000]
 				}
