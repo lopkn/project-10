@@ -220,7 +220,18 @@
 					"shootInfo":{"range":5,"dmg":40,"dmgv":20,"cd":10000},
 					"layer":1,
 					"cooldown":["building",0,10000]
+				},
+			 "road":
+				{
+					"hp":120,
+					"movable":false,
+					"sight":1,
+					"ensight":1,
+					"canshoot":false,
+					"layer":0,
+					"cooldown":["building",0,4000]
 				}
+
 		}
 
 

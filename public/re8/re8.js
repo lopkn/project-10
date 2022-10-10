@@ -127,11 +127,13 @@ function timerDraw(time,maxtime,x,y,style){
     mainCTX.fillRect(pxx+SD[0.1],pyy+S-SD[0.1]*3,SD[0.2],SD[0.2])
     mainCTX.fillRect(pxx+S-SD[0.1]*3,pyy+SD[0.1],SD[0.2],SD[0.2])
   }else if(style == 2 || style == "moving"){
-    mainCTX.fillStyle = "rgba("+(255-colotime)+","+colotime+","+colotime+",0.35)"
+    mainCTX.fillStyle = "rgba("+(255-colotime)+","+colotime+","+colotime+",0.4)"
     mainCTX.fillRect(pxx,pyy,S-S*zotime,S)
   }else if(style == 3 || style == "reloading"){
     mainCTX.fillStyle = "rgba("+(255-colotime)+","+(255-colotime)+",0,0.35)"
     mainCTX.fillRect(pxx,pyy,S-S*zotime,S)
+    mainCTX.fillStyle = "rgba("+(255-colotime)+",0,0,0.35)"
+    mainCTX.fillRect(pxx,pyy+S*0.3,S-S*zotime,S*0.4)
   }else if(style == 4 || style == "mine"){
     mainCTX.fillStyle = "rgba(255,255,0,0.5)"
     mainCTX.fillRect(pxx,pyy,S,S*zotime)
@@ -497,11 +499,13 @@ class EHAND{
       game.ms.hacted = false
       socket.emit("drag",{"sel":B.selection,"id":ID,"tx":game.ss.ax,"ty":game.ss.ay,"x":game.ms.heldSpace[2],"y":game.ms.heldSpace[3],
         "dist":distance(game.ss.x,game.ss.y,game.ms.heldSpace[0],game.ms.heldSpace[1]),"mode":"main",
-        "vx":game.ss.x-game.ms.heldSpace[0],"vy":game.ss.y-game.ms.heldSpace[1]})
+        "vx":game.ss.x-game.ms.heldSpace[0],"vy":game.ss.y-game.ms.heldSpace[1],"layer":game.selectedLayer
+
+      })
       console.log("dragged from:"+JSON.stringify(game.ms.heldSpace)+" to "+game.ss.ax+","+game.ss.ay)
-      EHAND.updateSelector(game.ss.ax,game.ss.ay,"abs")
+      EHAND.updateSelector(game.ss.x,game.ss.y,"abs")
     } else {
-      socket.emit("click",{"sel":B.selection,"id":ID,"x":game.ss.ax,"y":game.ss.ay,"mode":"main"})
+      socket.emit("click",{"sel":B.selection,"id":ID,"x":game.ss.ax,"y":game.ss.ay,"mode":"main","layer":game.selectedLayer})
       console.log("clicked on: "+game.ss.ax+","+game.ss.ay)
     }} else if(game.ss.boxes == "out"){
   
@@ -825,7 +829,7 @@ document.addEventListener("keyup",(e)=>{
      EHAND.updateSelector(1,0,"add")
     }
 
-      socket.emit("key",{"id":ID,"key":key})
+      socket.emit("key",{"id":ID,"key":key,"layer":game.selectedLayer})
 
 })
 
@@ -879,9 +883,12 @@ function repeat(e){
     mainCTX.stroke()
 
 
-    let enObj = Object.keys(game.enDict)
+    let enobj = Object.keys(game.enDict)
+    enobj.sort((a,b)=>{return(game.enDict[a].layer-game.enDict[b].layer)})
 
-    enObj.forEach((e,i)=>{
+    // console.log(enobj)
+
+    enobj.forEach((e,i)=>{
       entityRender(game.enDict[e])
     })
 
@@ -919,8 +926,6 @@ function entityRender(e){
 
   let rrp = reApos(e.x-rp[0],e.y-rp[1],game.map.width,game.map.height)
 
-  // let ax = e.x-rp[0]
-  // let ay = e.y-rp[1]
   let ax = rrp[0]
   let ay = rrp[1]
 
@@ -980,6 +985,10 @@ function entityRender(e){
       mainCTX.lineWidth = 1;
       mainCTX.strokeStyle = '#000000';
       mainCTX.stroke();
+      break;
+    case "road":
+      mainCTX.fillStyle = "rgba(255,255,0,0.6)"
+      mainCTX.fillRect(ax*S,ay*S+S*0.25,S,S*0.5)
       break;
   }
 

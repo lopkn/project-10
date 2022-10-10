@@ -98,7 +98,9 @@ INFUNCS.enDict = enDict
 	getBlockDurability,
 	TNEWremoveFromTile,
 	tileItemable,
-	TNEWkeepOnlyTile
+	TNEWkeepOnlyTile,
+	getRelativity,
+	itemStackable
 */
 let vectorFuncs = INFUNCS.vectorFuncs
 let myMath = INFUNCS.myMath
@@ -132,6 +134,8 @@ let	getBlockDurability = INFUNCS.getBlockDurability
 let	TNEWremoveFromTile = INFUNCS.TNEWremoveFromTile
 let	tileItemable = INFUNCS.tileItemable
 let	TNEWkeepOnlyTile = INFUNCS.TNEWkeepOnlyTile
+let getRelativity = INFUNCS.getRelativity
+let	itemStackable = INFUNCS.itemStackable
 
 
 function getStrLengthOf(e){
@@ -3385,26 +3389,7 @@ function setblock(x,y,block,d){
 }
 
 
-function itemStackable(item1,item2){
 
-	if(TNEWATTRIBUTEOF(item1,"stk") == "1" || TNEWATTRIBUTEOF(item2,"stk") == "1" ){
-		return(false)
-	}
-
-	let baseatt = BASEATTRIBUTESOF(item1)
-	for(let i = 0; i < baseatt.length; i++){
-		if(baseatt[0] == "A" || baseatt[0] == "M"){
-			continue;
-		}
-		if(TNEWATTRIBUTEOF(item1,baseatt[i]) != TNEWATTRIBUTEOF(item2,baseatt[i])){
-			return(false)
-		}
-
-	}
-
-	return(true)
-
-}
 
 
 function give(p,amount,item){
@@ -3438,48 +3423,6 @@ function ArrLoc(p){
 	
 }
 
-
-function getRelativity(p,x,y){
-	let outx = 0
-	let outy = 0
-	if(x == undefined){
-		return("NONE")
-	}
-	if(x[0] == "="){
-		if(x[1] != undefined){
-			outx = enDict[p].x + parseInt(x.substring(1))
-		} else {
-			outx = enDict[p].x
-
-		}
-
-	} else {
-			outx = parseInt(x)
-
-			if(isNaN(outx)){
-				return("NONE")
-			}
-	}
-
-	if(y == undefined){
-		return("NONE")
-	}
-
-	if(y[0] == "="){
-		if(y[1] != undefined){
-			outy = enDict[p].y + parseInt(y.substring(1))
-		} else {
-			outy = enDict[p].y
-		}
-	} else {
-		outy = parseInt(y)
-			if(isNaN(outy)){
-				return("NONE")
-			}
-	}
-
-	return([outx,outy])
-}
 
 
 function tp(r,i1,i2){
@@ -4986,7 +4929,8 @@ class re8{
 					"soldier":{"m":100,"r":2},
 					"mine":{"m":400,"r":1},
 					"tank":{"m":340,"r":1},
-					"sniper":{"m":320,"r":2}
+					"sniper":{"m":320,"r":2},
+					"road":{"m":200,"r":1}
 				}, "loop":"", "currentIntervals":{}
 			}
 			}
@@ -5338,6 +5282,16 @@ class re8{
 						}
 						io.to(e.id).emit("SEL",{"name":"none"})
 						break;
+					case "Architect2":
+						rref = rm.enRef["road"]
+						if(!this.entityAtPos(loc,rm,1)[0] && this.hasMoney(e.id,rref.m)&& end[pss.enid].Asight[loc] != undefined&& end[pss.enid].Asight[loc].dist <= rref.r){
+							p.resources.money -= rref.m
+							this.resourcesUpdate(e.id,rm.name)
+							enid = this.newEntity(e.id,e.x,e.y,"road",rm,p.team)
+							this.sendPlayerMapUpdate(e.id,rm)
+						}
+						io.to(e.id).emit("SEL",{"name":"none"})
+						break;
 
 				}
 				this.players.specialState = {}
@@ -5380,6 +5334,9 @@ class re8{
 					if(end[SB[1]].type == "factory"){
 						io.to(e.id).emit("SEL",{"name":"Factory2","color":"#000090"})
 						this.players.specialState = {"name":"Factory2","enid":SB[1]}
+					} else if(end[SB[1]].type == "architect"){
+						io.to(e.id).emit("SEL",{"name":"Architect2","color":"#000090"})
+						this.players.specialState = {"name":"Architect2","enid":SB[1]}
 					}
 				}else if(e.sel == 2){
 					if(end[SB[1]].type == "factory"){
@@ -5545,7 +5502,7 @@ static sendRoomMapUpdate(rm){
 					if(end[SB[1]].canshoot && end[SB[1]].shootInfo.range >= e.dist){
 						io.to(e.id).emit("sline",{"name":end[SB[1]].type,"color":"#F00000","x":e.x,"y":e.y,"vx":e.vx,"vy":e.vy})
 						end[SB[1]].cooldown = ["reloading",Date.now(),end[SB[1]].shootInfo.cd]
-						let eap = this.entityAtPos(tloc,room,1)
+						let eap = this.entityAtPos(tloc,room,e.layer)
 						if(eap[0]){
 							let dmg = this.damageEntity(SB[1],eap[1],e.dist,room)
 							this.damageNumRel(dmg,tloc,room)
@@ -5591,16 +5548,16 @@ static sendRoomMapUpdate(rm){
 
 	    switch(key){
 	    	case "w":
-	    		this.handleWalk(e.id,p.selector[0],p.selector[1]-1,room)
+	    		this.handleWalk(e.id,p.selector[0],p.selector[1]-1,e.layer,room)
 	    		break;
 	    	case "s":
-	    		this.handleWalk(e.id,p.selector[0],p.selector[1]+1,room)
+	    		this.handleWalk(e.id,p.selector[0],p.selector[1]+1,e.layer,room)
 	    		break;
 	    	case "a":
-	    		this.handleWalk(e.id,p.selector[0]-1,p.selector[1],room)
+	    		this.handleWalk(e.id,p.selector[0]-1,p.selector[1],e.layer,room)
 	    		break;
 	    	case "d":
-	    		this.handleWalk(e.id,p.selector[0]+1,p.selector[1],room)
+	    		this.handleWalk(e.id,p.selector[0]+1,p.selector[1],e.layer,room)
 	    		break;
 	    }
 
@@ -5621,11 +5578,11 @@ static sendRoomMapUpdate(rm){
 		return(this.reApos(ps[0]+x,ps[1]+y,room.map.width,room.map.height))
 	}
 
-	static handleWalk(id,x,y,room){
+	static handleWalk(id,x,y,layer,room){
 		let p = this.players[id]
-		let s = this.TNEWSELB(id,p.selector[0]+","+p.selector[1],room,1)
+		let s = this.TNEWSELB(id,p.selector[0]+","+p.selector[1],room,layer)
 		if(s[3]){
-			let h = this.entityAtPos(x+","+y,room,1)
+			let h = this.entityAtPos(x+","+y,room,layer)
 
 			if(!h[0]){
 
@@ -5638,8 +5595,12 @@ static sendRoomMapUpdate(rm){
 					room.enDict[s[1]].x = reap[0]
 					room.enDict[s[1]].y = reap[1]
 					let tcd = room.enDict[s[1]].movingInfo.cd
+					let trd = this.TNEWSELB(id,reap[0]+","+reap[1],room,0)
 					if(room.map.tiles[room.enDict[s[1]].x+","+room.enDict[s[1]].y].ground == "mountain"){
 						tcd += tcd
+					}
+					if(trd[0] && room.enDict[trd[1]].type == "road"){
+						tcd = Math.floor(tcd*0.3)
 					}
 					room.enDict[s[1]].cooldown = ["moving",Date.now(),tcd]
 					let oldsight = JSON.parse(JSON.stringify(room.enDict[s[1]].Asight))
@@ -5781,6 +5742,11 @@ static sendRoomMapUpdate(rm){
 
 		let en = room.enDict[id]
 
+		if(en == undefined){
+			console.log(id,room.name)
+			return;
+		}
+
 		plr.forEach((e,i)=>{
 			let tm = this.players[e].temporalMap[0]
 			if(tm[en.x+","+en.y] != undefined && tm[en.x+","+en.y].enseen){
@@ -5814,8 +5780,8 @@ static sendRoomMapUpdate(rm){
 				room.enmap[loc] = []
 			}
 				room.enmap[loc].push(enid)
-		} else if("remove"){
-			place = place.filter(e => e !== enid)
+		} else if(op == "remove"){
+			room.enmap[loc] = place.filter(e => e !== enid)
 			if(place.length == 0){
 				delete room.enmap[loc]
 			}

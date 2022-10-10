@@ -712,8 +712,70 @@ function TNEWkeepOnlyTile(str,type){
 	return(fin.substring(1))
 }
 //EXP33
+function getRelativity(p,x,y){
+	let outx = 0
+	let outy = 0
+	if(x == undefined){
+		return("NONE")
+	}
+	if(x[0] == "="){
+		if(x[1] != undefined){
+			outx = enDict[p].x + parseInt(x.substring(1))
+		} else {
+			outx = enDict[p].x
+
+		}
+
+	} else {
+			outx = parseInt(x)
+
+			if(isNaN(outx)){
+				return("NONE")
+			}
+	}
+
+	if(y == undefined){
+		return("NONE")
+	}
+
+	if(y[0] == "="){
+		if(y[1] != undefined){
+			outy = enDict[p].y + parseInt(y.substring(1))
+		} else {
+			outy = enDict[p].y
+		}
+	} else {
+		outy = parseInt(y)
+			if(isNaN(outy)){
+				return("NONE")
+			}
+	}
+
+	return([outx,outy])
+}
+
 
 //EXP34
+function itemStackable(item1,item2){
+
+	if(TNEWATTRIBUTEOF(item1,"stk") == "1" || TNEWATTRIBUTEOF(item2,"stk") == "1" ){
+		return(false)
+	}
+
+	let baseatt = BASEATTRIBUTESOF(item1)
+	for(let i = 0; i < baseatt.length; i++){
+		if(baseatt[0] == "A" || baseatt[0] == "M"){
+			continue;
+		}
+		if(TNEWATTRIBUTEOF(item1,baseatt[i]) != TNEWATTRIBUTEOF(item2,baseatt[i])){
+			return(false)
+		}
+
+	}
+
+	return(true)
+
+}
 //EXP35
 //EXP36
 //EXP37
@@ -753,6 +815,8 @@ module.exports = {
 	getBlockDurability,
 	TNEWremoveFromTile,
 	tileItemable,
-	TNEWkeepOnlyTile
+	TNEWkeepOnlyTile,
+	getRelativity,
+	itemStackable
 
 }
