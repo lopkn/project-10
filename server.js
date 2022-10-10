@@ -4814,7 +4814,8 @@ class re8{
 					"tank":{"m":340,"r":1},
 					"sniper":{"m":320,"r":2},
 					"road":{"m":200,"r":1},
-					"armory":{"m":2400,"r":1}
+					"armory":{"m":2400,"r":1},
+					"medic":{"m":600,"r":2}
 				}, "loop":"", "currentIntervals":{}
 			}
 			}
@@ -5184,6 +5185,16 @@ class re8{
 						}
 						io.to(e.id).emit("SEL",{"name":"none"})
 						break;
+					case "Armory1":
+						rref = rm.enRef["medic"]
+						if(!this.entityAtPos(loc,rm,1)[0] && this.hasMoney(e.id,rref.m)&& end[pss.enid].Asight[loc] != undefined&& end[pss.enid].Asight[loc].dist <= rref.r){
+							p.resources.money -= rref.m
+							this.resourcesUpdate(e.id,rm.name)
+							enid = this.newEntity(e.id,e.x,e.y,"medic",rm,p.team)
+							this.sendPlayerMapUpdate(e.id,rm)
+						}
+						io.to(e.id).emit("SEL",{"name":"none"})
+						break;
 
 
 				}
@@ -5221,6 +5232,9 @@ class re8{
 					} else if(end[SB[1]].type == "architect"){
 						io.to(e.id).emit("SEL",{"name":"Architect1","color":"#009000"})
 						this.players.specialState = {"name":"Architect1","enid":SB[1]}
+					} else if(end[SB[1]].type == "armory"){
+						io.to(e.id).emit("SEL",{"name":"Armory1","color":"#009000"})
+						this.players.specialState = {"name":"Armory1","enid":SB[1]}
 					}
 
 				}else if(e.sel == 1){

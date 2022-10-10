@@ -197,6 +197,18 @@
 					"layer":1,
 					"cooldown":["building",0,7000]
 				},
+				"medic":
+				{
+					"hp":110,
+					"movable":true,
+					"sight":2,
+					"ensight":2,
+					"canshoot":true,
+					"movingInfo":{"cd":5000},
+					"shootInfo":{"range":2,"dmg":-20,"dmgv":-5,"cd":15000},
+					"layer":1,
+					"cooldown":["building",0,18000]
+				},
 				 "tank":
 				{
 					"hp":350,

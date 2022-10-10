@@ -160,7 +160,8 @@ class game{
   static slineRef = {
     "soldier":{"life":800,"size":7,"reducing":true},
     "sniper":{"life":1800,"size":8,"reducing":true},
-    "tank":{"life":1800,"size":17,"reducing":true}
+    "tank":{"life":1800,"size":17,"reducing":true},
+    "medic":{"life":1200,"size":7}
   }
 
   static startProcess(e){
@@ -327,15 +328,20 @@ class game{
 
   static renderDmgNums(a){
     a.forEach((e)=>{
-      mainCTX.fillStyle = "rgb("+(Math.random()*170+20)+",0,0)"
-      mainCTX.strokeStyle = "rgb("+(Math.random()*170+20)+",0,0)"
+      if(this.dmgnums[e[0]][0] >= 0){
+        mainCTX.fillStyle = "rgb("+(Math.random()*170+20)+",0,0)"
+        mainCTX.strokeStyle = "rgb("+(Math.random()*170+20)+",0,0)"
+      } else {
+        mainCTX.fillStyle = "rgb(0,"+(Math.random()*170+20)+",200)"
+        mainCTX.strokeStyle = "rgb(0,"+(Math.random()*170+20)+",200)"
+      }
       let size = 30
       if(this.dmgnums[e[0]][1]){
         size += 7
       }
       mainCTX.font = "bold "+size+"px serif"
       mainCTX.textAlign = "center"
-      mainCTX.fillText(this.dmgnums[e[0]][0],MRef.MTS*(0.5+e[1]),MRef.MTS*e[2]+MRef.MTS*(this.dmgnums[e[0]][2]*0.001-0.2))     
+      mainCTX.fillText(Math.abs(this.dmgnums[e[0]][0]),MRef.MTS*(0.5+e[1]),MRef.MTS*e[2]+MRef.MTS*(this.dmgnums[e[0]][2]*0.001-0.2))     
       mainCTX.textAlign = "left"
     })
   }
@@ -387,6 +393,9 @@ class game{
       case "sniper":
       case "tank":
         return("rgba("+(mr*255)+",0,0,"+(lp/2+0.5)+")")
+        break;
+      case "medic":
+        return("rgba(0,"+(mr*255)+",20,"+(lp/2+0.5)+")")
         break;
 
     }
@@ -629,10 +638,16 @@ class B{
           ((game.mainEnRef.mine.cooldown[2]/1000).toFixed(1))+"s</br>built only on mountains"
         },
         "1":{
-          "disp":"act 2"
+          "disp":"act 2 - build road</br>cost: "+
+          game.enRef.road.m+"</br>spawn range: "+
+          game.enRef.road.r+"</br>build time: "+
+          ((game.mainEnRef.road.cooldown[2]/1000).toFixed(1))+"s</br>increases movement speed"
         },
         "2":{
-          "disp":"act 3"
+          "disp":"act 3 - build armory</br>cost: "+
+          game.enRef.armory.m+"</br>spawn range: "+
+          game.enRef.armory.r+"</br>build time: "+
+          ((game.mainEnRef.armory.cooldown[2]/1000).toFixed(1))+"s</br>unlocks units"
         },
         "3":{
           "disp":"act 4"
@@ -980,6 +995,16 @@ function entityRender(e){
       mainCTX.moveTo(ax*S+S*0.15,ay*S+S*0.5)
       mainCTX.lineTo(ax*S+S-S*0.15,ay*S+S*0.5)
       mainCTX.lineWidth = 4;
+      mainCTX.strokeStyle = e.color;
+      mainCTX.stroke();
+      break;
+    case "medic":
+      mainCTX.beginPath();
+      mainCTX.moveTo(ax*S+S*0.5,ay*S+S*0.15)
+      mainCTX.lineTo(ax*S+S*0.5,ay*S+S-S*0.15)
+      mainCTX.moveTo(ax*S+S*0.15,ay*S+S*0.5)
+      mainCTX.lineTo(ax*S+S-S*0.15,ay*S+S*0.5)
+      mainCTX.lineWidth = 6;
       mainCTX.strokeStyle = e.color;
       mainCTX.stroke();
       break;
