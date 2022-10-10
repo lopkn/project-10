@@ -938,7 +938,17 @@ function entityRender(e){
   switch(e.type){
     case "factory":
       mainCTX.fillStyle = e.color
-      mainCTX.fillRect(ax*S+4,ay*S+4,S-8,S-8)
+      mainCTX.fillRect(ax*S+S*0.075,ay*S+S*0.075,S-S*0.15,S-S*0.15)
+      break;
+    case "armory":
+      mainCTX.fillStyle = e.color
+      mainCTX.beginPath()
+      mainCTX.moveTo(ax*S+S*0.2,ay*S+S*0.075)
+      mainCTX.lineTo(ax*S+S*0.8,ay*S+S*0.075)
+      mainCTX.lineTo(ax*S+S*0.925,ay*S+S*0.925)
+      mainCTX.lineTo(ax*S+S*0.075,ay*S+S*0.925)
+      mainCTX.closePath()
+      mainCTX.fill()
       break;
     case "architect":
       mainCTX.fillStyle = e.color

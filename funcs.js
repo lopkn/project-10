@@ -777,9 +777,122 @@ function itemStackable(item1,item2){
 
 }
 //EXP35
+function structureArrDecompress(arr){
+	let outarr = []
+	outarr[0] = arr[0]
+
+	for(let i = 1; i < arr.length; i++){
+		if(arr[i][0] == "@"){
+			let split = (arr[i].substring(1)).split("@")
+			let number = parseInt(split[1])
+			let block = split[0]
+			for(let j = 0; j < number; j++){
+
+				outarr.push(block)
+			}
+		} else {
+			outarr.push(arr[i])
+		}
+	}
+	return(outarr)
+}
+
 //EXP36
+function structureArrCompress(arr){
+
+	let hold = "STARTHOLD"
+	let number = 2
+
+	for(let i = 1; i < arr.length; i++){
+
+		if(arr[i] == hold){
+			if(arr[i-1][0] != "@"){
+				arr[i-1] = "@" + arr[i-1] + "@2"
+			} else {
+				number += 1
+				arr[i-1] = "@" + hold + "@" + number
+			}
+			hold = arr[i]
+			arr.splice(i,1)
+			i--
+		} else {
+			hold = arr[i]
+			number = 2
+		}
+	}
+	return(arr)
+
+}
+
 //EXP37
+
+function rotateStructure(arr,rotate,mirror){
+	let newArr = []
+
+		//fill in the spaces undefined
+		while(((arr.length-1)/arr[0])%1 != 0){
+			arr.push("")
+		}
+
+
+
+	if(rotate == 1 || rotate == "left"){
+
+		let newBorder = (arr.length-1)/arr[0]
+		newArr[0] = newBorder
+		for(let j = arr[0]; j > 0; j--){
+			for(let i = 0; i < newBorder; i++){
+				newArr.push(arr[j+i*arr[0]])
+			}
+
+		}
+	} else if(rotate == 2 || rotate == "180"){
+		
+		newArr[0] = arr[0]
+		for(let i = arr.length-1; i > 0; i--){
+			newArr.push(arr[i])
+		}
+
+	} else if(rotate == 3 || rotate == "right"){
+		let newBorder = (arr.length-1)/arr[0]
+		newArr[0] = newBorder
+		for(let j = 1; j <= arr[0]; j++){
+			for(let i = newBorder -1; i > -1; i--){
+				newArr.push(arr[j+i*arr[0]])
+			}
+
+		}
+
+
+
+	} else {
+		newArr = arr
+	}
+
+	if(mirror == 1){
+		let newBorder2 = (newArr.length-1)/newArr[0]
+		let half = Math.floor(newArr[0]/2) + 1
+		let na0 = newArr[0]
+		for(let i = 1; i < half; i++){
+			for(let j = 0; j < newBorder2; j++){
+				let Swap_temp = newArr[i+j*na0]
+				newArr[i+j*na0] = newArr[(na0-i+1)+j*na0]
+				newArr[(na0-i+1)+j*na0] = Swap_temp
+			}
+		}
+	}
+
+
+
+	return(newArr)
+}
+
+
 //EXP38
+
+function grabFirstOfDict(d){
+	return(d[Object.keys(d)[0]])
+}
 //EXP39
 //EXP40
 
@@ -817,6 +930,9 @@ module.exports = {
 	tileItemable,
 	TNEWkeepOnlyTile,
 	getRelativity,
-	itemStackable
-
+	itemStackable,
+	structureArrDecompress,
+	structureArrCompress,
+	rotateStructure,
+	grabFirstOfDict
 }

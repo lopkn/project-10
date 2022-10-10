@@ -100,7 +100,10 @@ INFUNCS.enDict = enDict
 	tileItemable,
 	TNEWkeepOnlyTile,
 	getRelativity,
-	itemStackable
+	itemStackable,
+	structureArrDecompress,
+	structureArrCompress,
+	rotateStructure
 */
 let vectorFuncs = INFUNCS.vectorFuncs
 let myMath = INFUNCS.myMath
@@ -136,7 +139,10 @@ let	tileItemable = INFUNCS.tileItemable
 let	TNEWkeepOnlyTile = INFUNCS.TNEWkeepOnlyTile
 let getRelativity = INFUNCS.getRelativity
 let	itemStackable = INFUNCS.itemStackable
-
+let structureArrDecompress = INFUNCS.structureArrDecompress
+let	structureArrCompress = INFUNCS.structureArrCompress
+let	rotateStructure = INFUNCS.rotateStructure
+let grabFirstOfDict = INFUNCS.grabFirstOfDict
 
 function getStrLengthOf(e){
 	return(JSON.stringify(e).length)
@@ -3109,130 +3115,8 @@ function rCoordToChunk(i){
 
 
 
-function rotateStructure(arr,rotate,mirror){
-	let newArr = []
-
-		//fill in the spaces undefined
-		while(((arr.length-1)/arr[0])%1 != 0){
-			arr.push("")
-		}
 
 
-
-	if(rotate == 1 || rotate == "left"){
-
-		let newBorder = (arr.length-1)/arr[0]
-		newArr[0] = newBorder
-		for(let j = arr[0]; j > 0; j--){
-			for(let i = 0; i < newBorder; i++){
-				newArr.push(arr[j+i*arr[0]])
-			}
-
-		}
-	} else if(rotate == 2 || rotate == "180"){
-		
-		newArr[0] = arr[0]
-		for(let i = arr.length-1; i > 0; i--){
-			newArr.push(arr[i])
-		}
-
-	} else if(rotate == 3 || rotate == "right"){
-		let newBorder = (arr.length-1)/arr[0]
-		newArr[0] = newBorder
-		for(let j = 1; j <= arr[0]; j++){
-			for(let i = newBorder -1; i > -1; i--){
-				newArr.push(arr[j+i*arr[0]])
-			}
-
-		}
-
-
-
-	} else {
-		newArr = arr
-	}
-
-	if(mirror == 1){
-		let newBorder2 = (newArr.length-1)/newArr[0]
-		let half = Math.floor(newArr[0]/2) + 1
-		let na0 = newArr[0]
-		for(let i = 1; i < half; i++){
-			for(let j = 0; j < newBorder2; j++){
-				let Swap_temp = newArr[i+j*na0]
-				newArr[i+j*na0] = newArr[(na0-i+1)+j*na0]
-				newArr[(na0-i+1)+j*na0] = Swap_temp
-			}
-		}
-	}
-
-
-
-	return(newArr)
-}
-
-
-function structureArrCompress(arr){
-
-	let hold = "STARTHOLD"
-	let number = 2
-
-	for(let i = 1; i < arr.length; i++){
-
-		if(arr[i] == hold){
-			if(arr[i-1][0] != "@"){
-				arr[i-1] = "@" + arr[i-1] + "@2"
-			} else {
-				number += 1
-				arr[i-1] = "@" + hold + "@" + number
-			}
-
-			hold = arr[i]
-			arr.splice(i,1)
-
-			i--
-
-		} else {
-			hold = arr[i]
-			number = 2
-		}
-
-
-
-		
-	}
-	return(arr)
-
-
-}
-
-
-function structureArrDecompress(arr){
-	let outarr = []
-	outarr[0] = arr[0]
-
-	for(let i = 1; i < arr.length; i++){
-		if(arr[i][0] == "@"){
-			let split = (arr[i].substring(1)).split("@")
-			let number = parseInt(split[1])
-			let block = split[0]
-			for(let j = 0; j < number; j++){
-
-				outarr.push(block)
-			}
-
-
-
-		} else {
-			outarr.push(arr[i])
-		}
-
-
-	}
-
-	return(outarr)
-
-
-}
 
 
 function tryStructureGen(push){
@@ -4917,7 +4801,6 @@ class re8{
 				"resources":{"money":1500},
 				"selector":[0,0],
 				"specialState":{"name":"none"}
-				// "intervals":{"mines":{}}
 			}
 			let n = split[0].split(":")[0]
 			if(this.rooms[n]==undefined){
@@ -4930,7 +4813,8 @@ class re8{
 					"mine":{"m":400,"r":1},
 					"tank":{"m":340,"r":1},
 					"sniper":{"m":320,"r":2},
-					"road":{"m":200,"r":1}
+					"road":{"m":200,"r":1},
+					"armory":{"m":2400,"r":1}
 				}, "loop":"", "currentIntervals":{}
 			}
 			}
@@ -4977,9 +4861,7 @@ class re8{
 	static disconnect(socket){
 		let id = socket.id
 		let p = this.players[id]
-		// p.intervals.mines.forEach((e)=>{
-		// 	clearInterval(p.intervals.mines[e])
-		// })
+
 		let rm = p.room 
 		delete this.rooms[p.room].players[id]
 		delete this.players[id]
@@ -5292,6 +5174,17 @@ class re8{
 						}
 						io.to(e.id).emit("SEL",{"name":"none"})
 						break;
+					case "Architect3":
+						rref = rm.enRef["armory"]
+						if(!this.entityAtPos(loc,rm,1)[0] && this.hasMoney(e.id,rref.m)&& end[pss.enid].Asight[loc] != undefined&& end[pss.enid].Asight[loc].dist <= rref.r){
+							p.resources.money -= rref.m
+							this.resourcesUpdate(e.id,rm.name)
+							enid = this.newEntity(e.id,e.x,e.y,"armory",rm,p.team)
+							this.sendPlayerMapUpdate(e.id,rm)
+						}
+						io.to(e.id).emit("SEL",{"name":"none"})
+						break;
+
 
 				}
 				this.players.specialState = {}
@@ -5342,6 +5235,9 @@ class re8{
 					if(end[SB[1]].type == "factory"){
 						io.to(e.id).emit("SEL",{"name":"Factory3","color":"#009090"})
 						this.players.specialState = {"name":"Factory3","enid":SB[1]}
+					} else if(end[SB[1]].type == "architect"){
+						io.to(e.id).emit("SEL",{"name":"Architect3","color":"#009090"})
+						this.players.specialState = {"name":"Architect3","enid":SB[1]}
 					}
 				}else if(e.sel == 3){
 					if(end[SB[1]].type == "factory"){

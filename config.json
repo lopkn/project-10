@@ -153,7 +153,7 @@
 	"re8":{
 			"factory":
 				{
-					"hp":500,
+					"hp":1500,
 					"movable":false,
 					"sight":4,
 					"ensight":3,
@@ -230,6 +230,16 @@
 					"canshoot":false,
 					"layer":0,
 					"cooldown":["building",0,4000]
+				},
+				"armory":
+				{
+					"hp":500,
+					"movable":false,
+					"sight":3,
+					"ensight":3,
+					"canshoot":false,
+					"layer":1,
+					"cooldown":["building",0,40000]
 				}
 
 		}
