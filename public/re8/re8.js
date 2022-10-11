@@ -282,7 +282,7 @@ class game{
 
     } else {
       let en = this.enDict[e[0]]
-      if(this.ss.selEn !== false && this.ss.ax == en.x&& this.ss.ay == en.y&& this.selectedLayer == en.layer){
+      if(en != undefined && this.ss.selEn !== false && this.ss.ax == en.x&& this.ss.ay == en.y&& this.selectedLayer == en.layer){
         this.ss.selEn = false
       } 
       delete this.enDict[e[0]]
