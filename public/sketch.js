@@ -1010,13 +1010,13 @@ var entityMapImg = new Image();
 var animation = new Image();
 
 
-entityMapImg.src = 'entitiesMap.png'
-tileMapImg.src = 'tilesMap.png'
-img.src = 'newItemMap.png';
-animation.src = 'AnimationItem.png'
+entityMapImg.src = 'images/entitiesMap.png'
+tileMapImg.src = 'images/tilesMap.png'
+img.src = 'images/newItemMap.png';
+animation.src = 'images/AnimationItem.png'
 
 var playerSprites = new Image();
-playerSprites.src = 'playerSprites.png'
+playerSprites.src = 'images/playerSprites.png'
 
 // img.onload = function() {
 //     ctx.drawImage(img.image, 400, 400);
