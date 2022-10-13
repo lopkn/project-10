@@ -107,6 +107,107 @@ class myMath{
 		return([(x1+x2)/2,(y1+y2)/2])
 	}
 
+	static cosineInterp(x1,y1,x2,y2,x){
+		let ab = x-x1
+		if(y1 < y2){
+		return(0.5 * Math.cos(ab*Math.PI/(x2-x1)-Math.PI)+(y2+y1)*0.5)}
+		return(0.5 * Math.cos(ab*Math.PI/(x2-x1))+(y2+y1)*0.5)
+	}
+	static bicubicInterp(s1,x1,y1,s2,x2,y2,x){
+		let C = s1
+		//3ax^2 + 10b + C = -1
+		// let B = (3*s1*x2-3*x2-3*y2)/(-x2*x2)
+		// let A = (y2-s1*x2-B*x2*x2)/(x2*x2*x2)
+		let ax = x2-x1
+    let ay = y2-y1
+        
+		let B = (ax*s2-3*ay+2*ax*s1)/(-ax*ax)
+    let A = (ay-s1*ax-B*ax*ax)/(ax*ax*ax)
+
+		let X = x-x1
+		return(A*X*X*X + B*X*X + C*X + y1)
+	}
+	static bicubicInterp2(x1,y1,x2,y2,x3,y3,x4,y4,x){
+		let slope1 = this.getSlopeOf(x1,y1,x2,y2)
+		let slope2 = this.getSlopeOf(x2,y2,x3,y3)
+		let slope3 = this.getSlopeOf(x3,y3,x4,y4)
+
+		let S1 = 0
+		let S2 = 0
+		if(slope1 == slope2){
+			S1 = slope1
+		} else {
+
+			// let aS1 = -1/slope1
+			// let aS2 = -1/slope2
+
+			// let intsct = this.findIntersection2L(aS1,x1,y1,aS2,x3,y3)
+
+			// S1 = -1/this.getSlopeOf(intsct[0],intsct[1],x2,y2)
+
+			S1 = this.getAverageSlopeOf(x1,y1,x2,y2,x3,y3)
+
+		}
+
+		if(slope2 == slope3){
+			S2 = slope2
+		} else {
+			// let aS1 = -1/slope2
+			// let aS2 = -1/slope3
+
+			// let intsct = this.findIntersection2L(aS1,x2,y2,aS2,x4,y4)
+
+			// S2 = -1/this.getSlopeOf(intsct[0],intsct[1],x3,y3)
+			S2 = this.getAverageSlopeOf(x2,y2,x3,y3,x4,y4)
+		}
+
+		return(this.bicubicInterp(S1,x2,y2,S2,x3,y3,x))
+	}
+
+	static getSlopeOf(x1,y1,x2,y2){
+		return((y2-y1)/(x2-x1))
+	}
+
+	static getAverageSlopeOf(x1,y1,x2,y2,x3,y3){
+		let d1 = distance(x1,y1,x2,y2)
+		let ax1 = (x2-x1)/d1
+		let ay1 = (y2-y1)/d1
+
+		let d2 = distance(x2,y2,x3,y3)
+		let ax2 = (x3-x2)/d2
+		let ay2 = (y3-y2)/d2
+
+		let s1 = -1/this.getSlopeOf(x1,y1,x2,y2)
+		let s2 = -1/this.getSlopeOf(x2,y2,x3,y3)
+
+		let fi = this.findIntersection2L(s1,ax1,ay1,s2,ax2,ay2)
+		return(this.getSlopeOf(fi[0],fi[1],0,0))
+
+	}
+
+
+	static findIntersection2L(s1,x1,y1,s2,x2,y2){
+		if(s1 == s2){
+			if(x1 == x2){
+				return([x1,y1])
+			}
+			return("none")
+		}
+		let X = 0
+		if(s1 == Infinity || s1 == -Infinity){
+			X = x1
+		} else if(s2 == Infinity || s2 == -Infinity){
+			X = x2
+		} else {X = (y1-s1*x1+s2*x2-y2)/(s2-s1)}
+
+		if(s1 != Infinity && s1 != -Infinity){
+			return([X,s1*X-s1*x1+y1])
+		} else {
+			return([X,s2*X-s2*x2+y2])
+		}
+
+	}
+
 }
 
 //EXP5
@@ -895,6 +996,16 @@ function grabFirstOfDict(d){
 }
 //EXP39
 //EXP40
+//EXP41
+//EXP42
+//EXP43
+//EXP44
+//EXP45
+//EXP46
+//EXP47
+//EXP48
+//EXP49
+//EXP50
 
 module.exports = {
 	vectorFuncs,

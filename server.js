@@ -65,7 +65,8 @@ var startPing = 0
 const INFUNCS = require("./funcs.js")
 
 INFUNCS.enDict = enDict
-
+INFUNCS.enArr = enArr
+INFUNCS.plArr = plArr
 /*	
 	vectorFuncs,
 	LuuidGenerator,
@@ -158,8 +159,6 @@ function testFunctionSpeed(opt,vars,func,p1,p2,p3,p4,p5,p6,p7,p8){
 		console.timeEnd("Function speed")
 		return("done")
 	}
-
-	
 }
 
 
@@ -320,7 +319,7 @@ class mob{
   case "verdant":
 
     this.Inventory = ["","B:6-A:1"]
-	this.Cstats.hp = 170
+		this.Cstats.hp = 170
 
     break;
 
@@ -331,7 +330,6 @@ class mob{
   	this.Inventory = [randomItem(["",40,"In:2-A:1",7,"In:1-A:1",1]),randomItem(["",40,"In:2-A:1",7,"In:1-A:1",1])]
 
   	break
-
 
   case "duck":
 
@@ -1423,22 +1421,12 @@ function isSameTeam(e1,e2){
 }
 
 
-
-
-
-
-
-
-
-
-
 function inRect(x,y,rx,ry,w,h){
 	if(x >= rx && y >= ry && x <= rx+w && y <= ry + h){
 		return(true)
 	}
 	return(false)
 }
-
 
 function distance(x1,y1,x2,y2) {
 	let a = x2-x1
@@ -1462,16 +1450,11 @@ console.log("server is opened")
 // console.log("seeds: " + JSON.stringify(perSeeds))
 
 
-
-
-
 var socket = require('socket.io');
 
 var ranStrucLists = {"GoldOre":["gold ore vein1",1,"gold ore vein2",1,"gold ore vein3",1,"gold ore vein4",1]}
-
-
 var io = socket(server);
-
+INFUNCS.io = io
 // socket = io("https://home.unsown.top")
 
 io.sockets.on('connection', newConnection)
