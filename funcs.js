@@ -168,23 +168,33 @@ class myMath{
 		return((y2-y1)/(x2-x1))
 	}
 
-	static getAverageSlopeOf(x1,y1,x2,y2,x3,y3){
-		let d1 = distance(x1,y1,x2,y2)
-		let ax1 = (x2-x1)/d1
-		let ay1 = (y2-y1)/d1
+	// static getAverageSlopeOf(x1,y1,x2,y2,x3,y3){
+	// 	let d1 = distance(x1,y1,x2,y2)
+	// 	let ax1 = (x2-x1)/d1
+	// 	let ay1 = (y2-y1)/d1
 
-		let d2 = distance(x2,y2,x3,y3)
-		let ax2 = (x3-x2)/d2
-		let ay2 = (y3-y2)/d2
+	// 	let d2 = distance(x2,y2,x3,y3)
+	// 	let ax2 = (x3-x2)/d2
+	// 	let ay2 = (y3-y2)/d2
 
-		let s1 = -1/this.getSlopeOf(x1,y1,x2,y2)
-		let s2 = -1/this.getSlopeOf(x2,y2,x3,y3)
+	// 	let s1 = -1/this.getSlopeOf(x1,y1,x2,y2)
+	// 	let s2 = -1/this.getSlopeOf(x2,y2,x3,y3)
 
-		let fi = this.findIntersection2L(s1,ax1,ay1,s2,ax2,ay2)
-		return(this.getSlopeOf(fi[0],fi[1],0,0))
+	// 	let fi = this.findIntersection2L(s1,ax1,ay1,s2,ax2,ay2)
+	// 	return(this.getSlopeOf(fi[0],fi[1],0,0))
 
+	// }
+
+	static getAverageSlopeOf(x1,y1,x2,y2){
+		let d1 = distance(x1,y1,0,0)
+		let ax1 = x1/d1
+		let ay1 = y1/d1
+
+		let d2 = distance(x2,y2,0,0)
+		let ax2 = x2/d2
+		let ay2 = y2/d2
+		return(this.getSlopeOf(0,0,ax1+ax2,ay2+ay1))
 	}
-
 
 	static findIntersection2L(s1,x1,y1,s2,x2,y2){
 		if(s1 == s2){
