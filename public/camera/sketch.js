@@ -20,12 +20,17 @@ click_button.addEventListener('click', function() {
     canvas.getContext('2d').drawImage(image,0,0,canvas.width,canvas.height)
 
     // data url of the image
-    setTimeout(()=>{
-    let a = canvas.getContext('2d').getImageData(mouseX,mouseY,1,1).data
-    PARR(a[0],a[1],a[2],mouseX,mouseY)
-    console.log(a);
+    // setTimeout(()=>{
+    // let a = canvas.getContext('2d').getImageData(mouseX,mouseY,1,1).data
+    // PARR(a[0],a[1],a[2],mouseX,mouseY)
+    // console.log(a);
     
-    },1000)
+    // },1000)
+
+    console.log("initializing image")
+    photop.initializeImg()
+    console.log("initialized")
+    console.log(photop.img["277,22"])
     
 });
 allzoom = 1
@@ -168,6 +173,7 @@ class photop{
     static conimg = {}
     static conimg2 = {}
 
+    static conimg3 = {}
 
     static drcon(){
         let objk = Object.keys(this.conimg)
@@ -187,6 +193,34 @@ class photop{
         })
     }
 
+    static drcon3(){
+        let objk = Object.keys(this.conimg3)
+        objk.forEach((e)=>{
+            ctx.fillStyle = "rgba("+(0.05*this.conimg3[e].n)+",255,"+(0.5*this.conimg3[e].n)+","+(0.05*this.conimg3[e].n)+")"
+            ctx.fillRect(this.conimg3[e].x,this.conimg3[e].y,1,1)
+            this.conimg3[e].n -= 1
+            if(this.conimg3[e].n < 0){delete this.conimg3[e]}
+        })
+    }
+
+
+    static initializeImg(){
+        for(let i = -2;i<643; i++){
+           for(let j = -2; j<482; j++){
+
+
+
+                this.img[i+","+j] = this.getPix(i,j)
+
+                if(i+","+j == "277,22"){
+                    console.log(this.img[i+","+j])
+                }
+
+
+            } 
+        }
+    }
+
     static flow42(x,y,D,org){
         let d = 0
         let out = []
@@ -195,9 +229,9 @@ class photop{
 
             let dstr = d[0] + "," + d[1]
 
-            if(this.img[dstr] == undefined){
-                this.img[dstr] = this.getPix(d[0],d[1])
-            }
+            // if(this.img[dstr] == undefined){
+            //     this.img[dstr] = this.getPix(d[0],d[1])
+            // }
             if(this.img[dstr] === false|| D[dstr]){
                 continue;
             }
@@ -207,10 +241,10 @@ class photop{
             let c = this.compCol(timg.col,org.col,10)
             D[dstr] = true
             if(c === false){
-                if(this.conimg2[dstr] == undefined){
-                    this.conimg2[dstr] = []
+                if(this.conimg3[dstr] == undefined){
+                    this.conimg3[dstr] = {"n":40,"x":d[0],"y":d[1]}
                 }
-                this.conimg2[dstr].push([d[0],d[1],x,y])
+                this.conimg3[dstr].n *= 1.4
             } else {
                 out.push([d[0],d[1]])
             }
@@ -335,6 +369,17 @@ class photop{
     }
 
 }
+
+
+function conimg3Loop(){
+    setInterval(()=>{
+        ctx.fillStyle = "#000000"
+        ctx.fillRect(0,0,1000,1000)
+        photop.flhowl2(mouseX,mouseY)
+        photop.drcon3()
+    },200)
+}
+
 
 document.addEventListener('mousedown', (event) => {
     ctx.fillStyle = "#000000"
