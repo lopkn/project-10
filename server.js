@@ -1569,6 +1569,7 @@ function joinGame(game,socket){
 		socket.on("key",(e)=>{re8.rmHandler(e,"key")})
 		socket.on("button",(e)=>{re8.rmHandler(e,"button")})
 		socket.on("disconnect",()=>{re8.disconnect(socket)})
+		socket.onAny((e,n)=>{re8.logger.push([Date.now(),e,n])})
 	}
 }
 
@@ -4767,6 +4768,9 @@ class re8{
 	static rooms = {}
 	static referencer = {"color":{"r":"#A00000","b":"#0000A0","y":"#A0A000","o":"#A04000","p":"#6000C0","c":"#0060C0"}}
 
+
+	static logger = []
+
 	static enIDCnt = 0
 
 	static initiatePlayer(e,socket){
@@ -5092,9 +5096,9 @@ class re8{
 			if(e.sel != "none" &&e.sel != "1" &&e.sel != "2"&&e.sel != "3"){
 				let rref;
 				let enid;
-				console.log("re8err",pss)
 				if(end[pss.enid] == undefined){
 					return;
+					console.log("re8err",pss)
 				}
 				switch(e.sel){
 					case "Factory1":
@@ -5181,6 +5185,7 @@ class re8{
 
 
 				}
+				io.to(e.id).emit("SEL",{"name":"none"})
 				this.players.specialState = {}
 			}
 			else if(this.players[e.id].temporalMap[loc] == undefined){
