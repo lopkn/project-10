@@ -2,6 +2,7 @@
 let mainCanvas = document.getElementById("myCanvas")
 mainCanvas.height = window.innerHeight
 mainCanvas.width = window.innerWidth
+mainCanvas.style.zIndex = 1
 let wWidth = window.innerWidth
 let wHeight = window.innerHeight
 let mainCTX = mainCanvas.getContext("2d")
@@ -12,17 +13,22 @@ let GAMESESSION = "G10.3"
 socket.emit("JOINGAME",GAMESESSION)
 
 var ID = 0
-var TEAM = window.prompt("what room would you join?","0")+":"+window.prompt("room type?","t")+"-"+window.prompt("what team would you join?","0")+"-"+window.prompt("what color?","p")
+// var TEAM = window.prompt("what room would you join?","0")+":"+window.prompt("room type?","t")+"-"+window.prompt("what team would you join?","0")+"-"+window.prompt("what color?","p")
 
 socket.on("acknowledge G10.3",(e)=>{ID = e; console.log("joined as e")
-  socket.emit("jointeam",[TEAM,ID])
+  socket.emit("reloadLobby",ID)
 })
+
+socket.on("lobby",(e)=>{
+  lobby2(e)
+})
+
 socket.on("joinedRoom",(e)=>{
   mainCTX.lineWidth = 3
   // mainCTX.clearRect(0,0,2000,2000)
   mainCTX.font = "bold 20px Arial"
   mainCTX.fillStyle = "#FFFFFF"
-  mainCTX.fillText("join info: "+JSON.stringify([e.name,e.type,e.started,TEAM,ID]),100,100)
+  // mainCTX.fillText("join info: "+JSON.stringify([e.name,e.type,e.started,TEAM,ID]),100,100)
   console.log("joined team: "+JSON.stringify(e))
 })
 socket.on("startGame",(e)=>{
@@ -59,6 +65,7 @@ socket.on("enRef",(e)=>{
 })
 
 
+
 function lobby(){
   let b1 = document.createElement("button")
   b1.id = "b1"
@@ -87,7 +94,280 @@ function lobby(){
     document.getElementById("t1").blur()}
   document.body.appendChild(t1)
 }
-lobby()
+// lobby()
+
+
+let allLobrooms = []
+
+function lobby2(a){
+
+
+  // let currentRooms = [{"name":"hello","players":[{"id":"abcbbcbbcbbcbbc","color":"p","team":1},{"id":"bbcbbcbbcbbcbbc","color":"r","team":0}]}]
+  let currentRooms = a
+
+  currentRooms.forEach((e,i)=>{
+
+    allLobrooms.forEach((e)=>{
+      document.getElementById(e).remove()
+      document.getElementById("j"+e).remove()
+    })
+    allLobrooms = []
+
+    let PLRd = ""
+
+    e.players.forEach((E)=>{
+      PLRd+="|  id: "+E.id+"<br>|-  team: "+E.team+"<br>|-  color: "+E.color+"<br><br>"
+    })
+
+
+    let div = document.createElement("div")
+    div.id = "di"+i
+    allLobrooms.push(div.id)
+    div.style.display = "inline-block"
+    div.style.width += 20
+    div.style.fontSize = "20px"
+    div.style.zIndex = 20
+    div.style.position = "relative"
+    div.style.border = "3px solid rgb("+(Math.random()*255)+","+(Math.random()*255)+","+(Math.random()*255)+")"
+    div.style.color = "white"
+    div.innerHTML = "room name: "+e.name+"<br><br><br>players:<br>"+PLRd
+    document.body.appendChild(div)
+
+    txt = document.createElement("button")
+    txt.id = "jdi"+i
+    txt.style.position = "relative"
+    txt.zIndex = 200
+    txt.innerHTML = "join"
+    txt.onclick = ()=>{
+      createRoom2(e)
+    }
+    document.getElementById("di"+i).appendChild(txt)
+
+  })
+
+  if(document.getElementById("reloadButton")===null){
+  let btn = document.createElement("button")
+  btn.innerHTML = "reload lobby"
+  btn.style.backgroundColor = "#00000F"
+  btn.id = "reloadButton"
+  btn.style.color = "#00FFAF"
+  btn.style.zIndex = 30
+  btn.style.fontSize = "25px"
+  btn.style.position = "relative"
+  btn.onclick = ()=>{
+    socket.emit("reloadLobby",ID)
+  }
+  document.body.appendChild(btn)
+  }
+  if(document.getElementById("createRoom")===null){
+  let btn = document.createElement("button")
+  btn.innerHTML = "create room"
+  btn.style.backgroundColor = "#00000F"
+  btn.id = "createRoom"
+  btn.style.color = "#FFFFAF"
+  btn.style.zIndex = 30
+  btn.style.fontSize = "25px"
+  btn.style.position = "relative"
+  btn.onclick = ()=>{
+    createRoom()
+  }
+  document.body.appendChild(btn)
+  }
+
+}
+lobby2([])
+
+function createRoom2(A){
+  allLobrooms.forEach((e)=>{
+      document.getElementById(e).remove()
+    })
+  document.getElementById("reloadButton").remove()
+  document.getElementById("createRoom").remove()
+  let div = document.createElement("div")
+
+  div.id = "roomCreation"
+  div.style.position = "relative"
+  div.style.fontSize = "20px"
+  div.style.top = Math.floor(window.innerHeight/10)+"px"
+  // console.log(div.style.top,Math.floor(Window.innerHeight/10)+"px")
+  div.style.left = "10%"
+  div.style.width = "80%"
+  div.style.height = "80%"
+  div.innerHTML = "NAME: "+A.name+"<br>TYPE: "+A.type+"<br>YOUR TEAM: <br>YOUR COLOR:"
+  div.style.zIndex = 2
+  div.style.border = "3px solid rgb("+(Math.random()*255)+","+(Math.random()*255)+","+(Math.random()*255)+")"
+  div.style.color = "white"
+  div.style.overflow = "auto"
+
+  document.body.appendChild(div)
+
+
+  txt = document.createElement("input")
+  txt.id = "txt3"
+  txt.style.marginLeft = "20px"
+  txt.style.marginTop = "-23px"
+  txt.style.position = "absolute"
+  txt.zIndex = 3
+  txt.value = "team1"
+  txt.onchange = ()=>{
+    let v = document.getElementById("txt3").value;
+    console.log(v);
+    txt.blur()
+  }
+  document.getElementById("roomCreation").appendChild(txt)
+  txt = document.createElement("input")
+  txt.id = "txt4"
+  txt.style.marginLeft = "20px"
+  txt.style.marginTop = "0px"
+  txt.style.position = "absolute"
+  txt.zIndex = 3
+  txt.value = "p"
+  txt.onchange = ()=>{
+    let v = document.getElementById("txt4").value;
+    console.log(v);
+    txt.blur()
+  }
+  document.getElementById("roomCreation").appendChild(txt)
+
+  txt = document.createElement("button")
+  txt.id = "txt5"
+  txt.style.marginLeft = "20px"
+  txt.style.marginTop = "-64px"
+  txt.style.position = "absolute"
+  txt.zIndex = 3
+  txt.innerHTML = "-> join <-"
+  txt.onclick = ()=>{
+    //name:type-team-color
+
+    let t3 = document.getElementById("txt3").value;
+    let t4 = document.getElementById("txt4").value;
+
+    document.getElementById("txt3").remove()
+    document.getElementById("txt4").remove()
+    document.getElementById("txt5").remove()
+    socket.emit("jointeam",[A.name+":"+A.type+"-"+t3+"-"+t4,ID])
+    document.getElementById("roomCreation").innerHTML = "ROOM NAME: "+A.name+"<br>ROOM TYPE: "+A.type+"<br>YOUR TEAM: "+t3+"<br>YOUR COLOR: "+t4
+
+
+    lobby()
+
+  }
+  document.getElementById("roomCreation").appendChild(txt)
+
+}
+
+function createRoom(){
+  allLobrooms.forEach((e)=>{
+      document.getElementById(e).remove()
+    })
+  document.getElementById("reloadButton").remove()
+  document.getElementById("createRoom").remove()
+  let div = document.createElement("div")
+
+  div.id = "roomCreation"
+  div.style.position = "relative"
+  div.style.fontSize = "20px"
+  div.style.top = Math.floor(window.innerHeight/10)+"px"
+  // console.log(div.style.top,Math.floor(Window.innerHeight/10)+"px")
+  div.style.left = "10%"
+  div.style.width = "80%"
+  div.style.height = "80%"
+  div.innerHTML = "NAME: <br>TYPE: <br>YOUR TEAM: <br>YOUR COLOR:"
+  div.style.zIndex = 2
+  div.style.border = "3px solid rgb("+(Math.random()*255)+","+(Math.random()*255)+","+(Math.random()*255)+")"
+  div.style.color = "white"
+  div.style.overflow = "auto"
+
+  document.body.appendChild(div)
+
+  let txt = document.createElement("input")
+  txt.id = "txt4"
+  txt.style.marginLeft = "20px"
+  txt.style.position = "absolute"
+  txt.zIndex = 3
+  txt.value = "p"
+  txt.onchange = ()=>{
+    let v = document.getElementById("txt4").value;
+    console.log(v);
+    document.getElementById("txt4").blur()
+  }
+  document.getElementById("roomCreation").appendChild(txt)
+  txt = document.createElement("input")
+  txt.id = "txt3"
+  txt.style.marginTop = "-22px"
+  txt.style.marginLeft = "20px"
+  txt.style.position = "absolute"
+  txt.zIndex = 3
+  txt.value = "team1"
+  txt.onchange = ()=>{
+    let v = document.getElementById("txt3").value;
+    console.log(v);
+    document.getElementById("txt3").blur()
+  }
+  document.getElementById("roomCreation").appendChild(txt)
+  txt = document.createElement("input")
+  txt.id = "txt2"
+  txt.style.marginLeft = "20px"
+  txt.style.marginTop = "-43px"
+  txt.style.position = "absolute"
+  txt.zIndex = 3
+  txt.value = "t"
+  txt.onchange = ()=>{
+    let v = document.getElementById("txt2").value;
+    console.log(v);
+    document.getElementById("txt2").blur()
+  }
+  document.getElementById("roomCreation").appendChild(txt)
+  
+  
+  txt = document.createElement("input")
+  txt.id = "txt1"
+  txt.style.marginTop = "-64px"
+  txt.style.marginLeft = "20px"
+  txt.style.position = "absolute"
+  txt.zIndex = 3
+  txt.value = "room1"
+
+  txt.onchange = ()=>{
+    let v = document.getElementById("txt1").value;
+    console.log(v);
+    document.getElementById("txt1").blur()
+  }
+  document.getElementById("roomCreation").appendChild(txt)
+
+
+  txt = document.createElement("button")
+  txt.id = "txt5"
+  txt.style.marginLeft = "240px"
+  txt.style.marginTop = "-64px"
+  txt.style.position = "absolute"
+  txt.zIndex = 3
+  txt.innerHTML = "create and join"
+  txt.onclick = ()=>{
+    //name:type-team-color
+    let t1 = document.getElementById("txt1").value;
+    let t2 = document.getElementById("txt2").value;
+    let t3 = document.getElementById("txt3").value;
+    let t4 = document.getElementById("txt4").value;
+    document.getElementById("txt1").remove()
+    document.getElementById("txt2").remove()
+    document.getElementById("txt3").remove()
+    document.getElementById("txt4").remove()
+    document.getElementById("txt5").remove()
+    socket.emit("jointeam",[t1+":"+t2+"-"+t3+"-"+t4,ID])
+    document.getElementById("roomCreation").innerHTML = "ROOM NAME: "+t1+"<br>ROOM TYPE: "+t2+"<br>YOUR TEAM: "+t3+"<br>YOUR COLOR: "+t4
+
+    
+
+    console.log("hi")
+
+    lobby()
+
+  }
+  document.getElementById("roomCreation").appendChild(txt)
+
+}
+
 
 function bloatRect(x,y,w,h,bloat,col){
   mainCTX.fillStyle = col
@@ -186,7 +466,7 @@ class game{
     this.state = "started"
 
 
-    let deleteButtonsArr = ["b1","t1"]
+    let deleteButtonsArr = ["b1","t1","roomCreation"]
     deleteButtonsArr.forEach((e)=>{
       document.getElementById(e).remove()
     })
@@ -780,7 +1060,7 @@ document.addEventListener("keydown",(e)=>{
 
   let key = e.key
 
-  if(pressedKeys[key] === true){
+  if(pressedKeys[key] === true || game.state == "lobby"){
     return;
   } else {
     pressedKeys[key] = true
@@ -824,6 +1104,9 @@ document.addEventListener("keydown",(e)=>{
 
 document.addEventListener("keyup",(e)=>{
   e.preventDefault()
+  if(game.state == "lobby"){
+    return;
+  }
   let key = e.key
   pressedKeys[key] = false
 

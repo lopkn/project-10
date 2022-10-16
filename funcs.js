@@ -1005,8 +1005,42 @@ function grabFirstOfDict(d){
 	return(d[Object.keys(d)[0]])
 }
 //EXP39
+function deductStrAtt(str){
+
+	let split = str.split(":")
+	if(!isNaN(split[1])){
+		return(split[0]+":"+(parseInt(split[1])-1))
+	}
+
+}
 //EXP40
+function amountOfItems(p){
+	// let r = findPlayerInArr(p)
+	let player = enDict[p]
+
+	try{if(player.Inventory){}} catch {console.log("cerr amOI",p)}
+
+  if(player.Inventory[player.selectedSlot] != undefined){
+    let e = TNEWATTRIBUTEOF(player.Inventory[player.selectedSlot],"A")
+    return(e)
+  } else {return("none")}
+}
+//error here
 //EXP41
+function selectedSlotItems(p){
+	let r = p
+	if(enDict[r] !== undefined){
+	let e = enDict[r].selectedSlot
+	if(enDict[r].Inventory[e] != undefined){
+		let split = enDict[r].Inventory[e].split('-')
+
+		return(split[0])
+	
+	}} else {
+		console.log(p,"error")
+	}
+}
+
 //EXP42
 //EXP43
 //EXP44
@@ -1055,5 +1089,8 @@ module.exports = {
 	structureArrDecompress,
 	structureArrCompress,
 	rotateStructure,
-	grabFirstOfDict
+	grabFirstOfDict,
+	deductStrAtt,
+	amountOfItems,
+	selectedSlotItems
 }

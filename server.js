@@ -104,7 +104,10 @@ INFUNCS.plArr = plArr
 	itemStackable,
 	structureArrDecompress,
 	structureArrCompress,
-	rotateStructure
+	rotateStructure,
+	deductStrAtt,
+	amountOfItems,
+	selectedSlotItems
 */
 let vectorFuncs = INFUNCS.vectorFuncs
 let myMath = INFUNCS.myMath
@@ -144,6 +147,9 @@ let structureArrDecompress = INFUNCS.structureArrDecompress
 let	structureArrCompress = INFUNCS.structureArrCompress
 let	rotateStructure = INFUNCS.rotateStructure
 let grabFirstOfDict = INFUNCS.grabFirstOfDict
+let deductStrAtt = INFUNCS.deductStrAtt
+let	amountOfItems = INFUNCS.amountOfItems
+let	selectedSlotItems = INFUNCS.selectedSlotItems
 
 function getStrLengthOf(e){
 	return(JSON.stringify(e).length)
@@ -1569,6 +1575,8 @@ function joinGame(game,socket){
 		socket.on("key",(e)=>{re8.rmHandler(e,"key")})
 		socket.on("button",(e)=>{re8.rmHandler(e,"button")})
 		socket.on("disconnect",()=>{re8.disconnect(socket)})
+		socket.on("reloadLobby",(e)=>{re8.loadLobby(e)})
+
 		socket.onAny((e,n)=>{re8.logger.push([Date.now(),e,n])})
 	}
 }
@@ -3467,19 +3475,6 @@ var HeightMap = CURRENTCONFIGS.HeightMap
 var TILESALL = CURRENTCONFIGS.TILESALL
 
 //-------------------------------------------
-function selectedSlotItems(p){
-	let r = p
-	if(enDict[r] !== undefined){
-	let e = enDict[r].selectedSlot
-	if(enDict[r].Inventory[e] != undefined){
-		let split = enDict[r].Inventory[e].split('-')
-
-		return(split[0])
-	
-	}} else {
-		console.log(p,"error")
-	}
-}
 
 
 function itemType(i){
@@ -3538,18 +3533,7 @@ function CoordToMap(x,y,d){
 
 
 
-function amountOfItems(p){
-	// let r = findPlayerInArr(p)
-	let player = enDict[p]
 
-	try{if(player.Inventory){}} catch {console.log("cerr amOI",p)}
-
-  if(player.Inventory[player.selectedSlot] != undefined){
-    let e = TNEWATTRIBUTEOF(player.Inventory[player.selectedSlot],"A")
-    return(e)
-  } else {return("none")}
-}
-//error here
 
 
 
@@ -3915,14 +3899,7 @@ function tickAllBlocks(){
 	}
 }
 
-function deductStrAtt(str){
 
-	let split = str.split(":")
-	if(!isNaN(split[1])){
-		return(split[0]+":"+(parseInt(split[1])-1))
-	}
-
-}
 
 function tickAtZero(str,pos){
 
@@ -4811,12 +4788,40 @@ class re8{
 				socket.join(n)
 				this.rooms[n].players[e[1]] = this.players[e[1]]
 				if(this.rooms[n].teams[split[1]] == undefined){
-					this.rooms[n].teams[split[1]] = {"entities":{},"players":{},"temporalMap":[]}
+					this.rooms[n].teams[split[1]] = {"entities":{},"players":{},"temporalMap":[],"type":"normal"}
 				}
 				this.rooms[n].teams[split[1]].players[e[1]] = this.players[e[1]]
 				io.to(n).emit("joinedRoom",this.rooms[n])
+
+
+
+
 			}
 		}
+	}
+
+
+	static loadLobby(id){
+		let pl = this.players[id]
+		let rmph = []
+		let rmobjk = Object.keys(this.rooms)
+		rmobjk.forEach((e)=>{
+			let rm = this.rooms[e]
+			if(rm.started){
+				return
+			}
+			let rmd = {"name":rm.name,"type":rm.type,"players":[]}
+			let objP = Object.keys(rm.players)
+
+			objP.forEach((E)=>{
+				let tpl = this.players[E]
+				rmd.players.push({"id":E,"team":tpl.team,"color":tpl.color})
+			})
+			rmph.push(rmd)
+
+		})
+		console.log(id)
+		io.to(id).emit("lobby",rmph)
 	}
 
 
@@ -4850,7 +4855,10 @@ class re8{
 		let id = socket.id
 		let p = this.players[id]
 
-		let rm = p.room 
+		if(p == undefined){
+			return;
+		}
+		let rm = p.room
 		delete this.rooms[p.room].players[id]
 		delete this.players[id]
 		if(Object.keys(this.rooms[rm].players).length == 0){
@@ -5052,7 +5060,7 @@ class re8{
 	}
 
 	static rmHandler(e,type){
-		if(this.rooms[this.players[e.id].room].started){
+		if(this.players[e.id]&&this.rooms[this.players[e.id].room].started){
 			let rm = this.rooms[this.players[e.id].room]
 			switch(type){
 				case "click":
@@ -5497,7 +5505,7 @@ static sendRoomMapUpdate(rm){
 					if(room.map.tiles[room.enDict[s[1]].x+","+room.enDict[s[1]].y].ground == "mountain"){
 						tcd += tcd
 					}
-					if(trd[0] && room.enDict[trd[1]].type == "road"){
+					if(trd[0] && room.enDict[trd[1]].type == "road" && this.OffCooldown(room.name,trd[1])){
 						tcd = Math.floor(tcd*0.3)
 					}
 					room.enDict[s[1]].cooldown = ["moving",Date.now(),tcd]
