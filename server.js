@@ -4884,6 +4884,9 @@ class re8{
 				let en = room.enDict[aci.enid]
 				let incomeAmt = en.income
 				let p = this.players[en.ownerID]
+				if(p == undefined){
+					return;
+				}
 
 				let cd = this.OffCooldown(room.name,aci.enid)
 				if(cd){
@@ -5105,8 +5108,9 @@ class re8{
 				let rref;
 				let enid;
 				if(end[pss.enid] == undefined){
-					return;
+					io.to(e.id).emit("SEL",{"name":"none"})
 					console.log("re8err",pss)
+					return;
 				}
 				switch(e.sel){
 					case "Factory1":
@@ -5196,11 +5200,7 @@ class re8{
 				io.to(e.id).emit("SEL",{"name":"none"})
 				this.players.specialState = {}
 			}
-			else if(this.players[e.id].temporalMap[loc] == undefined){
-
-			} else {
-
-			}
+			
 
 			p.specialState = {"name":"none"}
 
