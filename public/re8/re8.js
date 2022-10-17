@@ -64,6 +64,12 @@ socket.on("enRef",(e)=>{
   B.disprefUpdate()
 })
 
+socket.on("joinMenu",(e)=>{
+  let d = document.getElementById("d1")
+  if(d !== null){
+    d.innerHTML = JSON.stringify(e)
+  }
+})
 
 
 function lobby(){
@@ -78,6 +84,18 @@ function lobby(){
   b1.style.position = "absolute"
   b1.onclick = ()=>{startGame()}
   document.body.appendChild(b1)
+
+  let d1 = document.createElement("div")
+  d1.id = "d1"
+  d1.innerHTML = "Waiting for players.."
+  d1.style.top = "200px"
+  d1.style.left = "200px"
+  d1.style.height = '300px'
+  d1.style.width = '70px'
+  d1.style.color = "white"
+  d1.style.zIndex = 2
+  d1.style.position = "absolute"
+  document.body.appendChild(d1)
 
   let t1 = document.createElement("input")
   t1.id = "t1"
@@ -472,7 +490,7 @@ class game{
     this.state = "started"
 
 
-    let deleteButtonsArr = ["b1","t1","roomCreation"]
+    let deleteButtonsArr = ["b1","t1","roomCreation","d1"]
     deleteButtonsArr.forEach((e)=>{
       document.getElementById(e).remove()
     })
@@ -947,9 +965,9 @@ class B{
           ((game.mainEnRef.medic.cooldown[2]/1000).toFixed(1))+"s"
         },
         "1":{"disp":"act 1 - spawn combat jeep</br>cost: "+
-          game.enRef.["combat jeep"].m+"</br>spawn range: "+
-          game.enRef.["combat jeep"].r+"</br>build time: "+
-          ((game.mainEnRef.["combat jeep"].cooldown[2]/1000).toFixed(1))+"s</br>includes 4 soldiers"},
+          game.enRef["combat jeep"].m+"</br>spawn range: "+
+          game.enRef["combat jeep"].r+"</br>build time: "+
+          ((game.mainEnRef["combat jeep"].cooldown[2]/1000).toFixed(1))+"s</br>includes 4 soldiers"},
         "2":{"disp":"act 3"},
         "3":{"disp":"act 4"}
       }

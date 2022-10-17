@@ -55,12 +55,23 @@ class re8{
 				io.to(n).emit("joinedRoom",this.rooms[n])
 
 
-
+				this.joinMenuReload(n)
 
 			}
 		}
 	}
 
+
+	static joinMenuReload(rm){
+		let room = this.rooms[rm]
+		let objk = Object.keys(room.players)
+		let outarr = []
+		objk.forEach((e)=>{
+			let pl = this.players[e]
+			outarr.push({"id":e,"team":pl.team,"color":pl.color})
+		})
+		io.to(rm).emit("joinMenu",outarr)
+	}
 
 	static loadLobby(id){
 		let pl = this.players[id]
@@ -90,7 +101,7 @@ class re8{
 		if(this.rooms[this.players[e.id].room].started === false){
 			let tr = this.rooms[this.players[e.id].room]
 			tr.started = true
-			let map = {"width":45,"height":45,"tiles":{}}
+			let map = {"width":35,"height":35,"tiles":{}}
 			for(let i = 0; i < map.width; i++){
 				for(let j = 0; j < map.height; j++){
 					map.tiles[i+","+j] = this.generateTile()
@@ -120,6 +131,15 @@ class re8{
 			return;
 		}
 		let rm = p.room
+
+		if(!rm.started){
+
+			delete rm.players[id]
+
+			this.joinMenuReload(n)
+			return;
+		}
+
 		delete this.rooms[p.room].players[id]
 		delete this.players[id]
 		if(Object.keys(this.rooms[rm].players).length == 0){
