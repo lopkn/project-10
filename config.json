@@ -172,7 +172,7 @@
 					"canshoot":false,
 					"layer":1,
 					"cooldown":["building",0,2000],
-					"income":[5,"cooldown",5000]
+					"income":[2,"cooldown",5000]
 				},
 			 "architect":
 				{
@@ -251,7 +251,20 @@
 					"ensight":3,
 					"canshoot":false,
 					"layer":1,
-					"cooldown":["building",0,40000]
+					"cooldown":["building",0,40000],
+					"income":[-50,"cooldown",7500]
+				},
+				"combat jeep":{
+					"hp":250,
+					"movable":true,
+					"sight":3,
+					"ensight":3,
+					"canshoot":false,
+					"movingInfo":{"cd":4000},
+					"layer":1,
+					"units":[],
+					"carrierInfo":{"max":5,"type":"soldier"},
+					"cooldown":["building",0,30000]
 				}
 
 		}

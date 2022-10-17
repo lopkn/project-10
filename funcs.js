@@ -1042,8 +1042,25 @@ function selectedSlotItems(p){
 }
 
 //EXP42
+
+
 //EXP43
+function DFNorm(dict,val){
+	if(dict[val] == undefined){
+		return(dict.default)
+	}
+	return(dict[val])
+}
+
+
 //EXP44
+function mergeDict(d,d2){
+	let obj = Object.keys(d2)
+	obj.forEach((e)=>{
+		d[e] = d2[e]
+	})
+	return(d)
+}
 //EXP45
 //EXP46
 //EXP47
@@ -1092,5 +1109,7 @@ module.exports = {
 	grabFirstOfDict,
 	deductStrAtt,
 	amountOfItems,
-	selectedSlotItems
+	selectedSlotItems,
+	DFNorm,
+	mergeDict
 }

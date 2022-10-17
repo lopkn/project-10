@@ -420,6 +420,9 @@ function timerDraw(time,maxtime,x,y,style){
   }else if(style == 4 || style == "mine"){
     mainCTX.fillStyle = "rgba(255,255,0,0.5)"
     mainCTX.fillRect(pxx,pyy,S,S*zotime)
+  }else if(style == 4 || style == "antiMine"){
+    mainCTX.fillStyle = "rgba(255,0,0,0.35)"
+    mainCTX.fillRect(pxx,pyy,S,S*zotime)
   }
 
 }
@@ -935,6 +938,17 @@ class B{
         "3":{
           "disp":"act 4"
         }
+      },
+      "armory":{
+        "0":{
+          "disp":"act 1 - spawn medic</br>cost: "+
+          game.enRef.medic.m+"</br>spawn range: "+
+          game.enRef.medic.r+"</br>build time: "+
+          ((game.mainEnRef.medic.cooldown[2]/1000).toFixed(1))+"s</br>built only on mountains"
+        },
+        "1":{"disp":"act 2"},
+        "2":{"disp":"act 3"},
+        "3":{"disp":"act 4"}
       }
 
     }
@@ -1339,8 +1353,10 @@ function entityRender(e){
       ei[1] += (DN-ei[1])
     }
 
-    
-    timerDraw((DN-ei[1])%ei[2],ei[2],ax,ay,"mine")
+    if(e.income[0] > 0){
+    timerDraw((DN-ei[1])%ei[2],ei[2],ax,ay,"mine")} else {
+      timerDraw((DN-ei[1])%ei[2],ei[2],ax,ay,"antiMine")
+    }
   }
 }
 
