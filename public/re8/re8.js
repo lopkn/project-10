@@ -105,13 +105,16 @@ function lobby2(a){
   // let currentRooms = [{"name":"hello","players":[{"id":"abcbbcbbcbbcbbc","color":"p","team":1},{"id":"bbcbbcbbcbbcbbc","color":"r","team":0}]}]
   let currentRooms = a
 
-  currentRooms.forEach((e,i)=>{
-
-    allLobrooms.forEach((e)=>{
+  allLobrooms.forEach((e)=>{
+    document.getElementById("j"+e).remove()
       document.getElementById(e).remove()
-      document.getElementById("j"+e).remove()
+      
     })
     allLobrooms = []
+
+  currentRooms.forEach((e,i)=>{
+
+    
 
     let PLRd = ""
 
@@ -1067,7 +1070,14 @@ document.addEventListener("keydown",(e)=>{
   }
 
   if(key == "o"){
-    game.camera = [0,0]
+    // game.camera = [0,0]
+    let enobj = Object.keys(game.enDict)
+    enobj.forEach((a)=>{
+      let e = game.enDict[a]
+      if(e.type == "factory" && e.ownerID == ID){
+        game.camera = [e.x-7,e.y-7]
+      }
+    })
   }
 
   if(key == "ArrowUp"){
@@ -1111,7 +1121,6 @@ document.addEventListener("keyup",(e)=>{
   pressedKeys[key] = false
 
   if(key[0] == "A" && key[1] == "r"){
-    console.log("clear")
     clearInterval(moveVals[key])
     clearTimeout(moveVals[key])
     clearInterval(moveVals[key])
@@ -1310,16 +1319,32 @@ function entityRender(e){
       break;
   }
 
+  let DN = DNOW()
+
   if(e.cooldown[0] != "none"){
     let ec = e.cooldown
-    if(Date.now()-ec[1]>ec[2]){
+
+    if(DN-ec[1] < 0){
+      ec[1] += (DN-ec[1])
+    }
+
+    if(DN-ec[1]>ec[2]){
       e.cooldown = ["none",0,0]
     } else {
-      timerDraw(Date.now()-ec[1],ec[2],ax,ay,e.cooldown[0])
+      timerDraw(DN-ec[1],ec[2],ax,ay,e.cooldown[0])
     }
   } if(e.income != undefined){
     let ei = e.income
-    timerDraw((Date.now()-ei[1])%ei[2],ei[2],ax,ay,"mine")
+    if(DN-ei[1] < 0){
+      ei[1] += (DN-ei[1])
+    }
+
+    
+    timerDraw((DN-ei[1])%ei[2],ei[2],ax,ay,"mine")
   }
+}
+
+function DNOW(){
+  return(Date.now())
 }
 

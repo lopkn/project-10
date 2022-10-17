@@ -4990,7 +4990,7 @@ class re8{
 
 						if(finalVision[E] == undefined){
 							finalVision[E] = {"dist":tempVision[E][0],"x":tempVision[E][1],"y":tempVision[E][2]}
-							if(en.ensight>tempVision[E][0]){
+							if(en.ensight>=tempVision[E][0]){
 								finalVision[E]["enseen"] = true
 
 							}
