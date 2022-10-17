@@ -883,7 +883,55 @@ static sendRoomMapUpdate(rm){
 		
 
 
+	static newEmEntity(id,x,y,entity,team){
+		this.enIDCnt += 1
+		let eid = this.enIDCnt
 
+		let E = this.entityDictor(entity)
+		E.id = eid
+		E.ownerID = id
+		E.x = x
+		E.y = y
+		E.color = this.players[id].color
+		E.type = entity
+		E.team = team
+		E.cooldown[1] = Date.now()
+
+
+		return(E)
+	}
+
+	static deployEntity(parent,room,x,y,number){
+		let pid = parent.ownerID
+		let un = parent.units[number]
+		if(un == undefined){
+			return;
+		}
+		let eid = un.id
+		room.enDict[eid] = un
+		room.enDict[eid].Asight = this.uenVisionC(eid,room.name)
+///
+		let OBJK = Object.keys(room.enDict[eid].Asight)
+
+
+		this.players[id].entities[eid] = true
+		room.teams[team].entities[eid] = true
+
+		this.players[id].temporalMap = this.uplayerVision2(id,room.name)
+
+		OBJK.forEach((e)=>{
+			if(room.enDict[eid].Asight[e].enseen && room.enmap[e] != undefined && room.enmap[e].length > 0){
+				room.enmap[e].forEach((E)=>{
+				this.emitEntityUpdate(E,room)					
+				})
+			}
+		})
+
+		this.rmEnmaper(room,eid,x+","+y,"add")
+
+		this.emitEntityUpdate(eid,room)
+
+	}
 
 	static newEntity(id,x,y,entity,room,team){
 		this.enIDCnt += 1
@@ -903,7 +951,7 @@ static sendRoomMapUpdate(rm){
 		switch(entity){
 			case "combat jeep":
 				for(let i = 0; i < 4; i++){
-					room.enDict[eid].unit.push(this.newEntity(id,x,y,"soldier",room,team))
+					room.enDict[eid].units.push(this.newEmEntity(id,x,y,"soldier",team))
 				}
 				break;
 		}

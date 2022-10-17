@@ -944,9 +944,12 @@ class B{
           "disp":"act 1 - spawn medic</br>cost: "+
           game.enRef.medic.m+"</br>spawn range: "+
           game.enRef.medic.r+"</br>build time: "+
-          ((game.mainEnRef.medic.cooldown[2]/1000).toFixed(1))+"s</br>built only on mountains"
+          ((game.mainEnRef.medic.cooldown[2]/1000).toFixed(1))+"s"
         },
-        "1":{"disp":"act 2"},
+        "1":{"disp":"act 1 - spawn combat jeep</br>cost: "+
+          game.enRef.["combat jeep"].m+"</br>spawn range: "+
+          game.enRef.["combat jeep"].r+"</br>build time: "+
+          ((game.mainEnRef.["combat jeep"].cooldown[2]/1000).toFixed(1))+"s</br>includes 4 soldiers"},
         "2":{"disp":"act 3"},
         "3":{"disp":"act 4"}
       }
@@ -1268,6 +1271,16 @@ function entityRender(e){
       mainCTX.lineTo(ax*S+S*0.8,ay*S+S*0.075)
       mainCTX.lineTo(ax*S+S*0.925,ay*S+S*0.925)
       mainCTX.lineTo(ax*S+S*0.075,ay*S+S*0.925)
+      mainCTX.closePath()
+      mainCTX.fill()
+      break;
+    case "combat jeep":
+      mainCTX.fillStyle = e.color
+      mainCTX.beginPath()
+      mainCTX.moveTo(ax*S+S*0.2,ay*S+S*0.2)
+      mainCTX.lineTo(ax*S+S*0.8,ay*S+S*0.2)
+      mainCTX.lineTo(ax*S+S*0.925,ay*S+S*0.8)
+      mainCTX.lineTo(ax*S+S*0.075,ay*S+S*0.8)
       mainCTX.closePath()
       mainCTX.fill()
       break;

@@ -155,7 +155,7 @@ let	selectedSlotItems = INFUNCS.selectedSlotItems
 let DFNorm = INFUNCS.DFNorm
 let	mergeDict = INFUNCS.mergeDict
 
-let re8L = require("./funcs.js")
+let re8L = require("./re8.js")
 let re8 = re8L.re8
 
 function getStrLengthOf(e){
