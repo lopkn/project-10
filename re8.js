@@ -64,6 +64,9 @@ class re8{
 
 	static joinMenuReload(rm){
 		let room = this.rooms[rm]
+		if(room == undefined){
+			return;
+		}
 		let objk = Object.keys(room.players)
 		let outarr = []
 		objk.forEach((e)=>{
@@ -132,11 +135,12 @@ class re8{
 		}
 		let rm = p.room
 
-		if(!rm.started){
+		if(rm.started === false){
 
-			delete rm.players[id]
+			if(rm.players && rm.players[id]){
+			delete rm.players[id]}
 
-			this.joinMenuReload(n)
+			this.joinMenuReload(rm.name)
 			return;
 		}
 

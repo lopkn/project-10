@@ -495,6 +495,38 @@ class game{
       document.getElementById(e).remove()
     })
 
+    let txtb = document.createElement('input')
+    txtb.id = "textInput"
+    txtb.style.left = (window.innerWidth-150)+"px"
+    txtb.style.top = (window.innerHeight-25)+"px"
+    txtb.width = "200px"
+    txtb.height = "75px"
+    txtb.style.backgroundColor = "cyan"
+    txtb.style.position = "absolute"
+    txtb.style.zIndex = 3
+    document.body.appendChild(txtb)
+
+    txtb = document.createElement('button')
+    txtb.id = "textToggle"
+    txtb.style.left = (window.innerWidth-215)+"px"
+    txtb.style.top = (window.innerHeight-25)+"px"
+    txtb.width = "100px"
+    txtb.height = "75px"
+    txtb.style.backgroundColor = "red"
+    txtb.style.position = "absolute"
+    txtb.innerHTML = "chatBox"
+    txtb.data = {"toggled":false}
+    txtb.onclick = ()=>{
+      let d = document.getElementById("textToggle")
+      if(!d.data.toggle){
+
+        console.log("turn on txbx")
+      }
+      d.data.toggle = !d.data.toggle
+    }
+    txtb.style.zIndex = 3
+    document.body.appendChild(txtb)
+
     let t1 = document.createElement("div");
     t1.innerHTML = "act 1"
     t1.id = "t1"
