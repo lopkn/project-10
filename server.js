@@ -156,6 +156,8 @@ let DFNorm = INFUNCS.DFNorm
 let	mergeDict = INFUNCS.mergeDict
 
 let re8L = require("./re8.js")
+let serTen = require("./serTen.js")
+let ten = serTen.ten
 let re8 = re8L.re8
 
 function getStrLengthOf(e){
@@ -1470,6 +1472,7 @@ var io = socket(server);
 INFUNCS.io = io
 
 re8L.io = io
+ten.io = io
 
 // socket = io("https://home.unsown.top")
 
@@ -1588,6 +1591,13 @@ function joinGame(game,socket){
 		socket.on("reloadLobby",(e)=>{re8.loadLobby(e)})
 
 		socket.onAny((e,n)=>{re8.logger.push([Date.now(),e,n])})
+	} else if(game == "G10.4"){
+		socket.join("G10.4")
+		io.to(socket.id).emit("acknowledge G10.4",socket.id)
+
+		socket.on("joinRm",(e)=>{ten.joinRm(e,socket)})
+
+		socket.onAny((e,n)=>{ten.logger.push([Date.now(),e,n])})
 	}
 }
 
