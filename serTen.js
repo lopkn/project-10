@@ -4,6 +4,31 @@ class ten{
 	static rooms = {}
 	static players = {}
 
+
+	static restartRoom(pl){
+
+		let rm = this.players[pl].room
+
+		this.rooms[rm] = {"players":{},"started":false,"map":{},"turn":Math.random()>0.5?1:2,"limiting":"all"}
+			for(let i = 0; i < 3; i++){
+				for(let j = 0; j < 3; j++){
+					this.rooms[rm].map[i+","+j] = {"checked":0,"minmap":{}}
+					for(let a = 0; a < 3; a++){
+						for(let b = 0; b < 3; b++){
+							this.rooms[rm].map[i+","+j].minmap[a+","+b] = {"checked":0}
+						}
+					}
+				}
+			}
+
+			let room = this.rooms[rm]
+
+			room.plArr.forEach((e)=>{
+				io.to(e).emit("updateMap",[room.map,room.turn,room.limiting])
+			})
+
+	}
+
 	static joinRm(e,socket){
 		console.log(e)
 		let id = e[0]

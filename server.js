@@ -1597,6 +1597,7 @@ function joinGame(game,socket){
 
 		socket.on("joinRm",(e)=>{ten.joinRm(e,socket)})
 		socket.on("click",(e)=>{ten.processClick(e)})
+		socket.on("restart",(e)=>{ten.restartRoom(e)})
 
 		socket.onAny((e,n)=>{ten.logger.push([Date.now(),e,n])})
 	}
