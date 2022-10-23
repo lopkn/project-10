@@ -454,6 +454,9 @@ class game{
   static resources = {}
   static slines = []
   static dmgnums = []
+
+  static shiftingInfo = {"to":[0,0],"toggle":false}
+
   static enDict = {}
   static camera = [0,0]
   static enRef = {}
@@ -497,8 +500,8 @@ class game{
 
     let txtb = document.createElement('input')
     txtb.id = "textInput"
-    txtb.style.left = (window.innerWidth-150)+"px"
-    txtb.style.top = (window.innerHeight-25)+"px"
+    txtb.style.left = (window.innerWidth-200)+"px"
+    txtb.style.top = (window.innerHeight-75)+"px"
     txtb.width = "200px"
     txtb.height = "75px"
     txtb.style.backgroundColor = "cyan"
@@ -508,8 +511,8 @@ class game{
 
     txtb = document.createElement('button')
     txtb.id = "textToggle"
-    txtb.style.left = (window.innerWidth-215)+"px"
-    txtb.style.top = (window.innerHeight-25)+"px"
+    txtb.style.left = (window.innerWidth-300)+"px"
+    txtb.style.top = (window.innerHeight-75)+"px"
     txtb.width = "100px"
     txtb.height = "75px"
     txtb.style.backgroundColor = "red"
@@ -759,17 +762,40 @@ class game{
 
 class EHAND{
   static mouseHandler(e){
+
+    if(game.ms.held){
+      return;
+    }
+
     if(inRect(mouseX,mouseY,0,0,MRef.wholeWidth,MRef.wholeHeight)){
       game.ss.boxes = "main"
       let t = game.OtM(mouseX,mouseY)
       this.updateSelector(t[0],t[1],"abs")
 
     } else if(inRect(mouseX,mouseY,MRef.wholeWidth,0,MRef.wholeWidth+MRef.buttonW,MRef.buttonH*B.buttons.length)){
-      this.buttonPressed()
+      let bno = Math.floor(mouseY/MRef.buttonH)
+      this.buttonPressed(bno)
     } else {
       game.ss.boxes = "out"
     }
-    game.ms.held = true
+    game.ms.held = "mouse"
+  }
+
+  static AmouseHandler(e){
+
+    if(game.ms.held){
+      return;
+    }
+
+    e.x = e.x * MRef.MTS + MRef.MTS/2
+    e.y = e.y * MRef.MTS + MRef.MTS/2
+
+      game.ss.boxes = "main"
+      let t = game.OtM(e.x,e.y)
+      this.updateSelector(t[0],t[1],"abs")
+
+    
+    game.ms.held = "artificial"
   }
 
   static updateSelector(x,y,type){
@@ -812,14 +838,15 @@ class EHAND{
 
   }
 
-  static heldMouseDown(e){
+  static heldMouseDown(e,type){
+    if(type == "n"){
     if(inRect(mouseX,mouseY,0,0,MRef.wholeWidth,MRef.wholeHeight)){
       game.ss.boxes = "main"
       let t = game.OtM(mouseX,mouseY)
       this.updateSelector(t[0],t[1])
     } else {
       game.ss.boxes = "out"
-    }
+    }}
 
     if(game.ms.heldTime > 15){
         if(game.ms.hacted === false){
@@ -830,6 +857,8 @@ class EHAND{
         mainCTX.fillRect(mouseX,mouseY,150-game.ms.heldTime*10,20)
       }
   }
+
+
 
   static heldDown(e){
     game.ms.hacted = true
@@ -866,9 +895,13 @@ class EHAND{
   }
 
   static repeat(e){
-    if(game.ms.held){
+    if(game.ms.held == "mouse"){
       game.ms.heldTime++
-      this.heldMouseDown(e)
+      this.heldMouseDown(e,"n")
+    }
+    if(game.ms.held == "artificial"){
+      game.ms.heldTime++
+      this.heldMouseDown(e,"a")
     }
 
     B.renderAll()
@@ -877,9 +910,9 @@ class EHAND{
     game.renderSlines()
   }
 
-  static buttonPressed(){
+  static buttonPressed(bno){
     let bh = MRef.buttonH
-    let bno = Math.floor(mouseY/MRef.buttonH)
+    
 
     if(B.BREF.normal[B.selection]){
       if(B.selection == "none" || B.selection != bno){
@@ -1177,6 +1210,37 @@ document.addEventListener("keydown",(e)=>{
       },40)},300)
     }
 
+    switch(key){
+      case "W":
+        game.shiftingInfo.to[1] -= 1
+        break;
+      case "S":
+        game.shiftingInfo.to[1] += 1
+        break;
+      case "A":
+        game.shiftingInfo.to[0] -= 1
+        break;
+      case "D":
+        game.shiftingInfo.to[0] += 1
+        break;
+      case " ":
+        EHAND.AmouseHandler({"x":game.shiftingInfo.to[0]+game.ss.x,"y":game.shiftingInfo.to[1]+game.ss.y})
+        break;
+      case "1":
+        EHAND.buttonPressed(0)
+        break;
+      case "2":
+        EHAND.buttonPressed(1)
+        break;
+      case "3":
+        EHAND.buttonPressed(2)
+        break;
+      case "4":
+        EHAND.buttonPressed(3)
+        break;
+      
+    }
+
 })
 
 document.addEventListener("keyup",(e)=>{
@@ -1201,7 +1265,15 @@ document.addEventListener("keyup",(e)=>{
      EHAND.updateSelector(-1,0,"add")
     } else if(key == "d"){
      EHAND.updateSelector(1,0,"add")
+    } else if(key == " "){
+      EHAND.mouseUpHandler(undefined)
     }
+
+  if(key == "Shift"){
+    let gc = game.shiftingInfo.to
+    EHAND.updateSelector(gc[0],gc[1],"add")
+    game.shiftingInfo.to = [0,0]
+  }
 
       socket.emit("key",{"id":ID,"key":key,"layer":game.selectedLayer})
 
