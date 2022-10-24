@@ -705,6 +705,11 @@ static sendRoomMapUpdate(rm){
 
 		let SB = this.SELB(e.id,loc,room)
 		let end = room.enDict
+
+		if(room.enDict[SB[1]] == undefined){
+			console.log("re8err Here")
+			return;
+		}
 			
 			if(SB[3] && this.OffCooldown(room.name,SB[1])){
 				if(e.sel == "none"){
