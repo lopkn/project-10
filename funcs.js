@@ -168,23 +168,6 @@ class myMath{
 		return((y2-y1)/(x2-x1))
 	}
 
-	// static getAverageSlopeOf(x1,y1,x2,y2,x3,y3){
-	// 	let d1 = distance(x1,y1,x2,y2)
-	// 	let ax1 = (x2-x1)/d1
-	// 	let ay1 = (y2-y1)/d1
-
-	// 	let d2 = distance(x2,y2,x3,y3)
-	// 	let ax2 = (x3-x2)/d2
-	// 	let ay2 = (y3-y2)/d2
-
-	// 	let s1 = -1/this.getSlopeOf(x1,y1,x2,y2)
-	// 	let s2 = -1/this.getSlopeOf(x2,y2,x3,y3)
-
-	// 	let fi = this.findIntersection2L(s1,ax1,ay1,s2,ax2,ay2)
-	// 	return(this.getSlopeOf(fi[0],fi[1],0,0))
-
-	// }
-
 	static getAverageSlopeOf(x1,y1,x2,y2){
 		let d1 = distance(x1,y1,0,0)
 		let ax1 = x1/d1
@@ -198,9 +181,9 @@ class myMath{
 
 	static findIntersection2L(s1,x1,y1,s2,x2,y2){
 		if(s1 == s2){
-			if(x1 == x2){
-				return([x1,y1])
-			}
+			// if(x1 == x2){
+			// 	return([x1,y1])
+			// }
 			return("none")
 		}
 		let X = 0
@@ -215,6 +198,29 @@ class myMath{
 		} else {
 			return([X,s2*X-s2*x2+y2])
 		}
+
+	}
+
+	static findIntersection4P(x1,y1,x2,y2,x3,y3,x4,y4){
+
+		let iSlope = this.getSlopeOf(x1,y1,x2,y2)
+
+		let lSlope = this.getSlopeOf(x3,y3,x4,y4)
+
+		let cent = this.midPointOfLine(x3,y3,x4,y4)
+
+		let fd = distance(x4,y4,cent[0],cent[1])
+
+		let fi2l = this.findIntersection2L(iSlope,x1,y1,lSlope,x3,y3)
+		if(fi2l == "none"){
+			return("none")
+		}
+		let ffd = distance(fi2l[0],fi2l[1],cent[0],cent[1])
+
+		if(ffd <= fd){
+			return(fi2l)
+		}
+		return("none")
 
 	}
 
