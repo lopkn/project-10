@@ -66,6 +66,7 @@ socket.on("enRef",(e)=>{
 
 socket.on("joinMenu",(e)=>{
   let d = document.getElementById("d1")
+  d.style.fontSize = "30px" 
   if(d !== null){
     d.innerHTML = JSON.stringify(e)
   }
