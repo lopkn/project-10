@@ -4236,7 +4236,7 @@ class shooter2C{
 
 	static playerClick(id,x,y,w){
 		let p = this.players[id]
-		if(p.reloading > 0){
+		if(p.reloading > 0 || p.reloading == undefined){
 			return;
 		}
 		let n = vectorNormalize([p.x,p.y,x+p.x-410,y+p.y-410])
