@@ -186,7 +186,21 @@ class GI{
 		},
 		"A5":{
 			"color":"#0000FF"
-		}
+		},
+		"A6":{
+			"toOther":(p,op)=>{
+				let d = distance(p.x,p.y,op.x,op.y)
+				let dx = (op.x-p.x)
+				let dy = (op.y-p.y)
+
+				op.x -= dx/d
+				op.y -= dy/d
+
+				return([d*dx,d*dy])
+
+			},
+			"color":"#FF70FF"
+		},
 	}
 
 	static getTypeInfo(t){

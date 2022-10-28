@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+
+	<canvas id="alex"></canvas>
+<script>
+	
+
+	console.log("hello")
+	document.getElementById("alex").width = window.innerWidth
+
+	document.getElementById("alex").height = window.innerHeight
+	let ctx = document.getElementById("alex").getContext("2d")
+
+
+	let x = 50
+	let y = 5
+    let a = 500
+    let b = 50
+
+	setInterval(()=>{
+
+		//run here, repeating each frame
+
+		x+=-4
+		y+=8
+		ctx.fillStyle = "blue"
+		ctx.fillRect(y,x,20,20)
+
+		x+=4
+		y+=8
+		ctx.fillStyle= "green"
+		ctx.fillRect(x,y,20,20)
+        
+        x-=4
+		y-=8
+		ctx.fillStyle= "red"
+		ctx.fillRect(x,y,20,20)
+		
+        a-=-4
+		b-=8
+		ctx.fillStyle = "purple"
+		ctx.fillRect(a,b,20,20)
+
+		a-=-4
+		b-=8
+		ctx.fillStyle= "pink"
+		ctx.fillRect(b,a,20,20)
+        
+        a-=4
+		b-=-8
+		ctx.fillStyle= "orange"
+		ctx.fillRect(b,a,20,20)
+
+		
+		
+
+
+		
+
+	//end run for each frame
+	},100)
+
+
+</script>
+
+</body>
+
+</html>
