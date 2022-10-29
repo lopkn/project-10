@@ -69,6 +69,9 @@ document.addEventListener("keydown",(e)=>{
 		case "A":
 			GI.type[0] = "A"
 			break;
+		case "C":
+			GI.type[0] = "C"
+			break;
 
 
 		case "=":
@@ -79,7 +82,7 @@ document.addEventListener("keydown",(e)=>{
 			break;
 	}
 
-	let r = ["",15]
+	let r = ["",15*GI.zoom]
 	if(e.shiftKey){
 		r = ["v",1]
 	}
@@ -107,16 +110,19 @@ class G{
 
 		let typeInfo = GI.getTypeInfo(type)
 		if(typeInfo == undefined){return}
+		let typeInfo2 = GI.getTypeInfo2(type)
 		let id = GI.getPI()
 
 		GI.particles[id] = {
 			"x":x,"y":y,"t":type,"r":r,
 			"id":id,"info":typeInfo,
 			"vx":0,"vy":0,
+			"stinfo":typeInfo2,
+			"life":1000,
 			"nxadd":{"x":0,"y":0,"vx":0,"vy":0},
 			"nxrps":{}
 		}
-		if(!e.shiftKey){GI.particlesArr.push(id)}else{GI.particlesArr.unshift(id)}
+		if(!e||!e.shiftKey){GI.particlesArr.push(id)}else{GI.particlesArr.unshift(id)}
 	}
 
 	static drawCircle(x,y,r,f){
@@ -127,7 +133,7 @@ class G{
 	}
 
 	static drawParticle(p){
-		ctx.fillStyle = p.info.color
+		ctx.fillStyle = p.stinfo.color
 		this.drawCircle((p.x-GI.cam.x)/GI.zoom,(p.y-GI.cam.y)/GI.zoom,(p.r)/GI.zoom,true)
 	}
 
@@ -166,9 +172,30 @@ class G{
 		p.vy += nxad.vy
 		p.vx += nxad.vx
 
+		if(p.stinfo.decay !== undefined){
+			p.life -= p.stinfo.decay
+		}
 
+		if(p.life <= 0){
+			this.delParticle(p)
+		}
 
 		p.nxadd = {"x":0,"y":0,"vx":0,"vy":0}
+	}
+	static delParticle(p){
+		let id = p.id
+		for(let i =0; i < GI.particlesArr.length; i++){
+			if(GI.particlesArr[i] == id){
+				GI.particlesArr.splice(i,1)
+				break;
+			}
+		}
+
+		if(p.info.onDeath != undefined){
+			p.info.onDeath(p)
+		}
+
+		delete GI.particles[id]
 	}
 
 }
@@ -201,8 +228,7 @@ class GI{
 
 				return([-d*dx,-d*dy])
 
-			},
-			"color":"#00FF00"
+			}
 		},
 		"A2":{
 			"toOther":(p,op)=>{
@@ -215,8 +241,7 @@ class GI{
 
 				return([-d*dx,-d*dy])
 
-			},
-			"color":"#FF0000"
+			}
 		},
 		"A3":{
 			"toOther":(p,op)=>{
@@ -229,8 +254,8 @@ class GI{
 
 				return([-d*dx,-d*dy])
 
-			},
-			"color":"#FFFF00"
+			}
+			
 		},
 		"A4":{
 			"toOther":(p,op)=>{
@@ -243,11 +268,11 @@ class GI{
 
 				return([-d*dx,-d*dy])
 
-			},
-			"color":"#FFFFFF"
+			}
+			
 		},
 		"A5":{
-			"color":"#0000FF"
+			
 		},
 		"A6":{
 			"toOther":(p,op)=>{
@@ -259,8 +284,28 @@ class GI{
 				op.y -= dy/d
 
 
-			},
-			"color":"#FF70FF"
+			}
+			
+		},
+		"A7":{
+			"toOther":(p,op)=>{
+				let d = distance(p.x,p.y,op.x,op.y)
+				let dx = (op.x-p.x)
+				let dy = (op.y-p.y)
+
+				if(d<1){
+						d = 1
+					}
+				let a = d
+				if(d > 2000){
+					a = 2000
+				}
+
+				op.nxadd.x += dx*Math.sqrt(a)*Math.sin(d/40)*0.001
+				op.nxadd.y += dy*Math.sqrt(a)*Math.sin(d/40)*0.001
+
+			}
+			
 		},
 
 
@@ -276,8 +321,8 @@ class GI{
 				
 				op.nxadd.y += 50*dy/d/d
 
-			},
-			"color":"#808080"
+			}
+		
 		},
 		"B2":{
 			"toOther":(p,op)=>{
@@ -288,8 +333,8 @@ class GI{
 				op.nxadd.x += dx/d/d*Math.sin(d/100)*450
 				op.nxadd.y += dy/d/d*Math.sin(d/100)*450
 
-			},
-			"color":"#F08080"
+			}
+			
 		},
 		"B3":{
 			"toOther":(p,op)=>{
@@ -301,11 +346,11 @@ class GI{
 						d = 1
 					}
 
-				op.nxadd.x += dx/d/d*Math.cos(d/70)*450
-				op.nxadd.y += dy/d/d*Math.sin(d/70)*450
+				op.nxadd.x += dx/d/d*Math.cos(d/40)*450
+				op.nxadd.y += dy/d/d*Math.sin(d/40)*450
 
-			},
-			"color":"#80F080"
+			}
+			
 		},
 		"B4":{
 			"toOther":(p,op)=>{
@@ -324,8 +369,8 @@ class GI{
 				op.nxadd.x -= 50*dx/d/d*r
 				op.nxadd.y -= 50*dy/d/d*r
 
-			},
-			"color":"#8080F0"
+			}
+			
 		},
 		"B5":{
 			"toOther":(p,op)=>{
@@ -340,13 +385,135 @@ class GI{
 				op.nxadd.x += dx/d/d*Math.sin(d/40)*450
 				op.nxadd.y += dy/d/d*Math.sin(d/40)*450
 
+			}
+			
+		},
+		"B6":{
+			"toOther":(p,op)=>{
+				let d = distance(p.x,p.y,op.x,op.y)
+				let dx = (op.x-p.x)
+				let dy = (op.y-p.y)
+
+				if(d<1){
+						d = 1
+					}
+
+				op.nxadd.x += dx/d/d*Math.sin(d/40)*450
+				op.nxadd.y += dy/d/d*Math.cos(d/40)*450
+
+			}
+			
+		},
+		"B7":{
+			"toOther":(p,op)=>{
+				let d = distance(p.x,p.y,op.x,op.y)
+				let dx = (op.x-p.x)
+				let dy = (op.y-p.y)
+
+				let r = 1
+				if(d < 50){
+					if(d<2){
+						d = 2
+					}
+					r = -0.8
+				}
+
+				op.nxadd.x -= 450*dx/d/d*r
+				op.nxadd.y -= 450*dy/d/d*r
+
+			}
+			
+		},
+		"C1":{
+			"toOther":(p,op)=>{
+				let d = distance(p.x,p.y,op.x,op.y)
+				let dx = (op.x-p.x)
+				let dy = (op.y-p.y)
+
+				let r = 1
+				if(d < 50){
+					if(d<2){
+						d = 2
+					}
+					r = -0.8
+				}
+
+				op.nxadd.x -= 450*dx/d/d*r
+				op.nxadd.y -= 450*dy/d/d*r
+
 			},
-			"color":"#F080F0"
-		}
+			"onDeath":(p)=>{
+				G.newParticle(p.x,p.y,"B4",10)
+			}
+			
+		},
+		"C2":{
+			"toOther":(p,op)=>{
+				let d = distance(p.x,p.y,op.x,op.y)
+				let dx = (op.x-p.x)
+				let dy = (op.y-p.y)
+
+				op.nxadd.x -= 0.005*dx
+				op.nxadd.y -= 0.005*dy
+
+			},
+			"onDeath":(p)=>{
+				G.newParticle(p.x,p.y,"C1",10)
+			}
+			
+		},
+		"C3":{
+			"toOther":(p,op)=>{
+				let d = distance(p.x,p.y,op.x,op.y)
+				let dx = (op.x-p.x)
+				let dy = (op.y-p.y)
+
+				if(d<1){
+						d = 1
+					}
+				if(d > 2000){
+					d = 2000
+				}
+
+				op.nxadd.x += dx*Math.sqrt(d)*Math.sin(d/40)*0.001
+				op.nxadd.y += dy*Math.sqrt(d)*Math.sin(d/40)*0.001
+
+			},
+			"onDeath":(p)=>{
+				G.newParticle(p.x,p.y,"B5",10)
+			}
+			
+		},
+
+	}
+
+	static typeDict2 = {
+		"A1":{"color":"#00FF00"},
+		"A2":{"color":"#FF0000"},
+		"A3":{"color":"#FFFF00"},
+		"A4":{"color":"#FFFFFF"},
+		"A5":{"color":"#0000FF"},
+		"A6":{"color":"#FF005F"},
+		"A7":{"color":"#800000"},
+
+		"B1":{"color":"#808080"},
+		"B2":{"color":"#F08080"},
+		"B3":{"color":"#80F080"},
+		"B4":{"color":"#8080F0"},
+		"B5":{"color":"#F080F0"},
+		"B6":{"color":"#80F0F0"},
+		"B7":{"color":"#4040FF"},
+
+		"C1":{"color":"#303030","decay":5},
+		"C2":{"color":"#008000","decay":10},
+		"C3":{"color":"#FF9F00","decay":5},
 	}
 
 	static getTypeInfo(t){
 		return(this.typeDict[t])
+	}
+	static getTypeInfo2(t){
+		return(this.typeDict2[t])
 	}
 }
 
