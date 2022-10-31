@@ -17,7 +17,7 @@ let mouseY = 0
 onmousemove = (e)=>{mouseX = (e.clientX); mouseY = (e.clientY)}
 
 document.addEventListener("mousedown",(e)=>{
-
+	e.preventDefault()
 	if(e.altKey){
 		GI.selectionStart = [mouseX,mouseY]
 
@@ -55,6 +55,8 @@ document.addEventListener("mouseup",(e)=>{
 
 })
 
+document.addEventListener('contextmenu', function(e) {
+  e.preventDefault();})
 
 document.addEventListener("keydown",(e)=>{
 	let k = e.key
@@ -130,6 +132,11 @@ document.addEventListener("keydown",(e)=>{
 		case "[":
 			GI.autoclickSpeed += 5
 			break;
+
+
+		case "Control":
+			e.preventDefault()
+			break
 	}
 
 	let r = ["",15*GI.zoom]
