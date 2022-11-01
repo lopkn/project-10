@@ -108,6 +108,9 @@ document.addEventListener("keydown",(e)=>{
 		case "E":
 			GI.type[0] = "E"
 			break;
+		case "F":
+			GI.type[0] = "F"
+			break;
 
 
 		case "=":
@@ -316,7 +319,7 @@ class GI{
 	static FRATE = 50
 
 	static typeDict = {
-		"A1":{
+		"F1":{
 			"toOther":(p,op)=>{
 				let d = distance(p.x,p.y,op.x,op.y)
 				let dx = (op.x-p.x)
@@ -329,7 +332,7 @@ class GI{
 
 			}
 		},
-		"A2":{
+		"F2":{
 			"toOther":(p,op)=>{
 				let d = distance(p.x,p.y,op.x,op.y)
 				let dx = (op.x-p.x)
@@ -342,7 +345,7 @@ class GI{
 
 			}
 		},
-		"A3":{
+		"F3":{
 			"toOther":(p,op)=>{
 				let d = distance(p.x,p.y,op.x,op.y)
 				let dx = (op.x-p.x)
@@ -356,7 +359,7 @@ class GI{
 			}
 			
 		},
-		"A4":{
+		"F4":{
 			"toOther":(p,op)=>{
 				let d = distance(p.x,p.y,op.x,op.y)
 				let dx = (op.x-p.x)
@@ -370,10 +373,10 @@ class GI{
 			}
 			
 		},
-		"A5":{
+		"F5":{
 			
 		},
-		"A6":{
+		"F6":{
 			"toOther":(p,op)=>{
 				let d = distance(p.x,p.y,op.x,op.y)
 				let dx = (op.x-p.x)
@@ -386,7 +389,7 @@ class GI{
 			}
 			
 		},
-		"A7":{
+		"F7":{
 			"toOther":(p,op)=>{
 				let d = distance(p.x,p.y,op.x,op.y)
 				let dx = (op.x-p.x)
@@ -415,8 +418,8 @@ class GI{
 				let dx = (op.x-p.x)
 				let dy = (op.y-p.y)
 
-				if(d < 0.1){
-					d = 0.1
+				if(d < 1){
+					d = 1/d
 				}
 
 				op.nxadd.x += 50*dx/d/d
@@ -755,6 +758,240 @@ class GI{
 			},
 			
 		},
+		"D5":{
+			"eachFrame":(f,p)=>{
+				let op = GI.particles[p.stinfo.following]
+
+				if(op !== undefined){
+					let d = distance(p.x,p.y,op.x,op.y)
+					let dx = (op.x-p.x)
+					let dy = (op.y-p.y)
+					if(d<3){
+						d = 3
+					}
+
+					if(d < 60){
+
+					op.life -= 15
+
+					if(op.life <= 0){
+						G.newParticle(op.x+Math.random()-0.5,op.y+Math.random()-0.5,"B1",10)
+						G.newParticle(op.x+Math.random()-0.5,op.y+Math.random()-0.5,"B1",10)
+						G.delParticle(op)
+						p.life -= 100
+						return
+						}
+					}
+
+					p.x += 0.05 * dx
+					p.y += 0.05 * dy
+
+				} else {
+
+				GI.particlesArr.forEach((e)=>{
+					
+
+					let op = GI.particles[e]
+					if(op.t !== "B4"){return}
+					let d = distance(p.x,p.y,op.x,op.y)
+
+					if(d < 600){
+					if(Math.random()>0.9){
+						p.stinfo.following = e
+					}
+					if(d<3){
+						d = 3
+					}
+					}
+					let dx = (op.x-p.x)
+					let dy = (op.y-p.y)
+
+					op.nxadd.x -= 180*dx/d/d	
+					op.nxadd.y -= 180*dy/d/d
+				})
+
+				
+
+			}
+
+			},
+			
+		},
+		"D6":{
+			"eachFrame":(f,p)=>{
+				let op = GI.particles[p.stinfo.following]
+
+				if(op !== undefined){
+					let d = distance(p.x,p.y,op.x,op.y)
+					let dx = (op.x-p.x)
+					let dy = (op.y-p.y)
+					if(d<3){
+						d = 3
+					}
+
+					if(d < 60){
+
+					op.life -= 15
+
+					if(op.life <= 0){
+						G.newParticle(op.x+Math.random()-0.5,op.y+Math.random()-0.5,"B4",10)
+						G.newParticle(op.x+Math.random()-0.5,op.y+Math.random()-0.5,"B4",10)
+						G.delParticle(op)
+						p.life -= 100
+						return
+						}
+					}
+
+					p.x += 0.05 * dx
+					p.y += 0.05 * dy
+
+				} else {
+
+				GI.particlesArr.forEach((e)=>{
+					
+
+					let op = GI.particles[e]
+					if(op.t !== "B1"){return}
+					let d = distance(p.x,p.y,op.x,op.y)
+
+					if(d < 600){
+					if(Math.random()>0.9){
+						p.stinfo.following = e
+					}
+					if(d<3){
+						d = 3
+					}
+					}
+					let dx = (op.x-p.x)
+					let dy = (op.y-p.y)
+
+					op.nxadd.x -= 180*dx/d/d	
+					op.nxadd.y -= 180*dy/d/d
+				})
+
+				
+
+			}
+
+			},
+			
+		},
+		"D7":{
+			"eachFrame":(f,p)=>{
+				let op = GI.particles[p.stinfo.following]
+
+				if(op !== undefined){
+					let d = distance(p.x,p.y,op.x,op.y)
+					let dx = (op.x-p.x)
+					let dy = (op.y-p.y)
+					if(d<3){
+						d = 3
+					}
+
+					if(d < 60){
+
+					op.life -= 15
+
+					if(op.life <= 0){
+						G.newParticle(op.x+Math.random(),op.y+Math.random(),"B1",10)
+						G.delParticle(op)
+						p.life -= 50
+						return
+						}
+					}
+
+					p.x += 0.05 * dx
+					p.y += 0.05 * dy
+
+				} else {
+
+				GI.particlesArr.forEach((e)=>{
+					
+
+					let op = GI.particles[e]
+					if(op.t !== "B4"){return}
+					let d = distance(p.x,p.y,op.x,op.y)
+
+					if(d < 600){
+					if(Math.random()>0.9){
+						p.stinfo.following = e
+					}
+					if(d<3){
+						d = 3
+					}
+					}
+					let dx = (op.x-p.x)
+					let dy = (op.y-p.y)
+
+					op.nxadd.x -= 180*dx/d/d	
+					op.nxadd.y -= 180*dy/d/d
+				})
+
+				
+
+			}
+
+			},
+			
+		},
+		"D8":{
+			"eachFrame":(f,p)=>{
+				let op = GI.particles[p.stinfo.following]
+
+				if(op !== undefined){
+					let d = distance(p.x,p.y,op.x,op.y)
+					let dx = (op.x-p.x)
+					let dy = (op.y-p.y)
+					if(d<3){
+						d = 3
+					}
+
+					if(d < 60){
+
+					op.life -= 15
+
+					if(op.life <= 0){
+						G.newParticle(op.x+Math.random(),op.y+Math.random(),"B4",10)
+						G.delParticle(op)
+						p.life -= 50
+						return
+						}
+					}
+
+					p.x += 0.05 * dx
+					p.y += 0.05 * dy
+
+				} else {
+
+				GI.particlesArr.forEach((e)=>{
+					
+
+					let op = GI.particles[e]
+					if(op.t !== "B1"){return}
+					let d = distance(p.x,p.y,op.x,op.y)
+
+					if(d < 600){
+					if(Math.random()>0.9){
+						p.stinfo.following = e
+					}
+					if(d<3){
+						d = 3
+					}
+					}
+					let dx = (op.x-p.x)
+					let dy = (op.y-p.y)
+
+					op.nxadd.x -= 180*dx/d/d	
+					op.nxadd.y -= 180*dy/d/d
+				})
+
+				
+
+			}
+
+			},
+			
+		},
 		"E1":{
 			"toOther":(p,op)=>{
 				let d = distance(p.x,p.y,op.x,op.y)
@@ -894,18 +1131,55 @@ class GI{
 			}
 			
 		},
+		"A1":{
+			"toOther":(p,op)=>{
+				let d = distance(p.x,p.y,op.x,op.y)
+				let dx = (op.x-p.x)
+				let dy = (op.y-p.y)
+				if(d < 200){
+					if(d < 20){
+					if(d<5){
+						dx = 0
+						dy = 0
+					}
+					d*=5
+					}
+				op.nxadd.x -= 50*dx/d/d
+				op.nxadd.y -= 50*dy/d/d
+				}
+			}
+			
+		},
+		"A2":{
+			"toOther":(p,op)=>{
+				let d = distance(p.x,p.y,op.x,op.y)
+				let dx = (op.x-p.x)
+				let dy = (op.y-p.y)
+				if(d < 200){
+					if(d < 20){
+					d*=5
+					}
+				op.nxadd.x += 50*dx/d/d
+				op.nxadd.y += 50*dy/d/d
+				}
+			}
+			
+		},
 
 
 		}
 
 	static typeDict2 = {
+		"F1":{"color":"#00FF00","letter":"U"},
+		"F2":{"color":"#FF0000","letter":"U"},
+		"F3":{"color":"#FFFF00","letter":"U"},//gridpt ST
+		"F4":{"color":"#FFFFFF","letter":"U"},//cross displace INF
+		"F5":{"color":"#0000FF","letter":"U"},//does nothing
+		"F6":{"color":"#FF005F","letter":"U"},//gravity
+		"F7":{"color":"#800000","letter":"U"},//shell ST?
+
 		"A1":{"color":"#00FF00"},
-		"A2":{"color":"#FF0000"},
-		"A3":{"color":"#FFFF00"},//gridpt ST
-		"A4":{"color":"#FFFFFF"},//cross displace INF
-		"A5":{"color":"#0000FF"},//does nothing
-		"A6":{"color":"#FF005F"},//gravity
-		"A7":{"color":"#800000"},//shell ST?
+		"A2":{"color":"#0000FF"},
 
 		"B1":{"color":"#808080"},//push
 		"B2":{"color":"#F08080"},//shell
@@ -924,12 +1198,16 @@ class GI{
 		"D2":{"color":"#F000F0","decay":5},//virus -> B1
 		"D3":{"color":"#800080","decay":5},//virus
 		"D4":{"color":"#800080","decay":2,"letter":"F","following":-1},//virus, following
+		"D5":{"color":"#404040","letter":"F","following":-1},//catalyser, following
+		"D6":{"color":"#004040","letter":"F","following":-1},//catalyser, following
+		"D7":{"color":"#808080","letter":"F","following":-1},//catalyser, following
+		"D8":{"color":"#008080","letter":"F","following":-1},//catalyser, following
 
 		"E1":{"color":"#628000"},//gravity killer +> 2x B1 -> 4x B8
 		"E2":{"color":"#2E230A"},//generator(B8) -> E1
 		"E3":{"color":"#6E2300","children":0,"letter":"G"},//generator(B8,B5,B4) -> E1
-		"E4":{"color":"#00A000","children":0,"letter":"G"},
-		"E5":{"color":"#00A0A0","children":0,"letter":"G"},
+		"E4":{"color":"#00A000","children":0,"letter":"G"},//generator(B3,B5,B4) -> E1
+		"E5":{"color":"#00A0A0","children":0,"letter":"G"},//generator(B6,B5,B4) -> E1
 	}
 
 	static getTypeInfo(t){
