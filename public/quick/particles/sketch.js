@@ -19,8 +19,7 @@ onmousemove = (e)=>{mouseX = (e.clientX); mouseY = (e.clientY)}
 document.addEventListener("mousedown",(e)=>{
 	e.preventDefault()
 	if(e.altKey){
-		GI.selectionStart = [mouseX,mouseY]
-
+		GI.selectionStart = [mouseX,mouseY,e.shiftKey]
 	}
 
 	if(e.ctrlKey){
@@ -31,7 +30,7 @@ document.addEventListener("mousedown",(e)=>{
 document.addEventListener("mouseup",(e)=>{
 	if(GI.selectionStart !== false){
 
-			let s =GI.selectionStart
+			let s = GI.selectionStart
 
 			let acmap = [GI.cam.x+(s[0])*GI.zoom,GI.cam.y+(s[1])*GI.zoom,GI.cam.x+(mouseX)*GI.zoom,GI.cam.y+(mouseY)*GI.zoom]
 
@@ -39,9 +38,13 @@ document.addEventListener("mouseup",(e)=>{
 			for(let i = GI.particlesArr.length-1; i > -1; i--){
 				let r = GI.particlesArr[i]
 				let p = GI.particles[r]
-
+				if(!s[2]){
 				if(inRect(p.x,p.y,acmap[0],acmap[1],acmap[2]-acmap[0],acmap[3]-acmap[1])){
 					G.delParticle(p)
+				}} else {
+					if(inRect(p.x,p.y,acmap[0],acmap[1],acmap[2]-acmap[0],acmap[3]-acmap[1])&&p.t == GI.type[0]+GI.type[1]){
+					G.delParticle(p)
+				}
 				}
 			}
 
@@ -1174,6 +1177,9 @@ class GI{
 				let dy = (op.y-p.y)
 				if(d < 200){
 					if(d < 20){
+						if(d < 1){
+							d = 1/d
+						}
 					d*=5
 					}
 				op.nxadd.x += -50*dy/d/d
@@ -1189,6 +1195,9 @@ class GI{
 				let dy = (op.y-p.y)
 				if(d < 200){
 					if(d < 20){
+						if(d < 1){
+							d = 1/d
+						}
 					d*=5
 					}
 				op.nxadd.x -= -50*dy/d/d
