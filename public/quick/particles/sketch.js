@@ -256,6 +256,8 @@ class G{
 		p.y += nxad.y
 		p.vy += nxad.vy
 		p.vx += nxad.vx
+		p.x += p.vx
+		p.y += p.vy
 
 		if(p.stinfo.decay !== undefined){
 			p.life -= p.stinfo.decay
@@ -1165,6 +1167,60 @@ class GI{
 			}
 			
 		},
+		"A3":{
+			"toOther":(p,op)=>{
+				let d = distance(p.x,p.y,op.x,op.y)
+				let dx = (op.x-p.x)
+				let dy = (op.y-p.y)
+				if(d < 200){
+					if(d < 20){
+					d*=5
+					}
+				op.nxadd.x += -50*dy/d/d
+				op.nxadd.y += 50*dx/d/d
+				}
+			}
+			
+		},
+		"A4":{
+			"toOther":(p,op)=>{
+				let d = distance(p.x,p.y,op.x,op.y)
+				let dx = (op.x-p.x)
+				let dy = (op.y-p.y)
+				if(d < 200){
+					if(d < 20){
+					d*=5
+					}
+				op.nxadd.x -= -50*dy/d/d
+				op.nxadd.y -= 50*dx/d/d
+				}
+			}
+			
+		},
+		"A5":{
+			"toOther":(p,op)=>{
+				let d = distance(p.x,p.y,op.x,op.y)
+				let dx = (op.x-p.x)
+				let dy = (op.y-p.y)
+				if(d < 200){
+				op.nxadd.x += -dy*d/2000
+				op.nxadd.y += dx*d/2000
+				}
+			}
+			
+		},
+		"A6":{
+			"toOther":(p,op)=>{
+				let d = distance(p.x,p.y,op.x,op.y)
+				let dx = (op.x-p.x)
+				let dy = (op.y-p.y)
+				if(d < 200){
+				op.nxadd.x -= -dy*d/2000
+				op.nxadd.y -= dx*d/2000
+				}
+			}
+			
+		},
 
 
 		}
@@ -1180,6 +1236,10 @@ class GI{
 
 		"A1":{"color":"#00FF00"},
 		"A2":{"color":"#0000FF"},
+		"A3":{"color":"#FF00FF"},
+		"A4":{"color":"#FF0000"},
+		"A5":{"color":"#FF00FF","letter":"I"},
+		"A6":{"color":"#FF0000","letter":"I"},
 
 		"B1":{"color":"#808080"},//push
 		"B2":{"color":"#F08080"},//shell
