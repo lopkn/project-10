@@ -313,7 +313,7 @@ class GI{
 	static autoclickSpeed = 100
 
 	static frame = 0
-
+	static preformanceCalculate = 0
 	static zoom = 1
 
 	static getPI(){
@@ -1345,7 +1345,10 @@ function repeat(){
 	ctx.fillRect(0,5,Width*(ED-D-GI.FRATE)/GI.FRATE,15)
 	}
 
+	GI.preformanceCalculate += ((ED-D)/GI.particlesArr.length)*100
+
 	if(GI.frame%100 == 0){
-		console.log("AVERAGE PARTICLE CALCULATION TIME: "+((ED-D)/GI.particlesArr.length)*100)
+		console.log("AVERAGE PARTICLE CALCULATION TIME: "+(GI.preformanceCalculate/100))
+		GI.preformanceCalculate = 0
 	}
 }
