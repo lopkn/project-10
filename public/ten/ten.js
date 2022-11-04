@@ -26,11 +26,31 @@ socket.on("updateMap",(e)=>{game.updateMap(e)})
 
 
 let SIZE = WR
+
+
+let _b = document.createElement("button")
+_b.style.top = Math.floor(SIZE/2)+"px"
+_b.style.left = Math.floor(SIZE) + "px"
+_b.style.width = "100px"
+_b.style.backgroundColor = "#303030"
+_b.style.color = "white"
+_b.style.height = "100px"
+_b.style.position = "absolute"
+_b.id = "darkB"
+_b.innerHTML = "toggleBlack"
+_b.onclick = ()=>{
+  game.dark = true
+  document.getElementById("darkB").remove()
+}
+document.body.appendChild(_b)
+
+
 let S1 = SIZE/3
 let S2 = S1/3
 
 class game{
 
+  static dark = false
   static turn = 1
   static map = {}
   static objkm = []
@@ -110,7 +130,7 @@ class game{
 
     })
 
-    mainCTX.strokeStyle ="white"
+    mainCTX.strokeStyle ="#A0A0A0"
     for(let i = 0; i < 10; i++){
       if(i%3 == 0){
         mainCTX.lineWidth = 8
@@ -134,8 +154,14 @@ class game{
       mainCTX.stroke()
     }
 
+    if(game.dark){
+      mainCTX.fillStyle = "black"
+      mainCTX.fillRect(0,0,wWidth,wHeight)
+    }
+
 
   }
+
 
 }
 
@@ -143,6 +169,26 @@ class game{
 onmousemove = (e)=>{mouseX = (e.clientX); mouseY = (e.clientY)}
 
 document.addEventListener("mousedown",(e)=>{
+
+  if(game.dark){
+    game.dark = false
+    let _b = document.createElement("button")
+    _b.style.top = Math.floor(SIZE/2)+"px"
+    _b.style.left = Math.floor(SIZE) + "px"
+    _b.style.width = "100px"
+    _b.style.height = "100px"
+    _b.style.backgroundColor = "#303030"
+    _b.style.color = "white"
+    _b.style.position = "absolute"
+    _b.id = "darkB"
+    _b.innerHTML = "toggleBlack"
+    _b.onclick = ()=>{
+      game.dark = true
+      document.getElementById("darkB").remove()
+    }
+    document.body.appendChild(_b)
+    return
+  }
 
   if(mouseX > 819 || mouseY > 819){
     return;

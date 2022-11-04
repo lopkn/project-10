@@ -124,10 +124,12 @@ document.addEventListener("keydown",(e)=>{
 			break;
 
 		case "F1":
+		case "!":
 			e.preventDefault()
 			GI.display.background = "#000000"
 			break;
 		case "F2":
+		case "@":
 			e.preventDefault()
 			GI.display.background = "rgba(0,0,0,0.1)"
 			break;
@@ -1206,6 +1208,85 @@ class GI{
 			}
 			
 		},
+		"E8":{
+			"toOther":(p,op)=>{
+				let d = distance(p.x,p.y,op.x,op.y)
+				let dx = (op.x-p.x)
+				let dy = (op.y-p.y)
+
+				if(d<10){
+						d = 10
+					}
+
+				if(op.t != "A4" && op.t != "E8"){
+				if(d < 60){
+
+				op.life -= 5
+
+				if(op.life <= 0){
+					G.newParticle(op.x,op.y+5,"A4",10)
+					G.delParticle(op)
+					p.life -= 75
+					// console.log(op)
+					return
+				}
+
+				
+				}
+
+
+				op.nxadd.x -= 180*dx/d/d	
+				op.nxadd.y -= 180*dy/d/d
+				}
+
+			},
+			"onDeath":(p)=>{
+				for(let i = 0; i < 4; i++){
+					G.newParticle(p.x+Math.random()*16-8,p.y+Math.random()*16-8,"A4",10)
+				}
+			}
+			
+		},
+		"E9":{
+			"toOther":(p,op)=>{
+				let d = distance(p.x,p.y,op.x,op.y)
+				let dx = (op.x-p.x)
+				let dy = (op.y-p.y)
+
+				if(d<10){
+						d = 10
+					}
+
+				if(op.t != "A3" && op.t != "E9"){
+				if(d < 60){
+
+				op.life -= 5
+
+				if(op.life <= 0){
+					G.newParticle(op.x,op.y+5,"A3",10)
+					G.delParticle(op)
+					p.life -= 75
+					// console.log(op)
+					return
+				}
+
+				
+				}
+
+
+				op.nxadd.x -= 180*dx/d/d	
+				op.nxadd.y -= 180*dy/d/d
+				}
+
+			},
+			"onDeath":(p)=>{
+				for(let i = 0; i < 4; i++){
+					G.newParticle(p.x+Math.random()*16-8,p.y+Math.random()*16-8,"A3",10)
+				}
+			}
+			
+		},
+
 		"A1":{
 			"toOther":(p,op)=>{
 				let d = distance(p.x,p.y,op.x,op.y)
@@ -1345,13 +1426,15 @@ class GI{
 		"D7":{"color":"#808080","letter":"F","following":-1},//catalyser, following
 		"D8":{"color":"#008080","letter":"F","following":-1},//catalyser, following
 
-		"E1":{"color":"#628000"},//gravity killer +> 2x B1 -> 4x B8
-		"E2":{"color":"#2E230A"},//generator(B8) -> E1
+		"E1":{"color":"#628000","letter":"C"},//gravity killer +> 2x B1 -> 4x B8
+		"E2":{"color":"#2E230A","letter":"G"},//generator(B8) -> E1
 		"E3":{"color":"#6E2300","children":0,"letter":"G"},//generator(B8,B5,B4) -> E1
 		"E4":{"color":"#00A000","children":0,"letter":"G"},//generator(B3,B5,B4) -> E1
 		"E5":{"color":"#00A0A0","children":0,"letter":"G"},//generator(B6,B5,B4) -> E1
 		"E6":{"color":"#A000A0","children":0,"letter":"G"},//generator(A3)
 		"E7":{"color":"#A00000","children":0,"letter":"G"},//generator(A4)
+		"E8":{"color":"#620000","letter":"C"},//gravity killer +> A4 -> 4x A4
+		"E9":{"color":"#620062","letter":"C"},//gravity killer +> A3 -> 4x A3
 	}
 
 	static getTypeInfo(t){
