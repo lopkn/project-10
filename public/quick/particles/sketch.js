@@ -139,6 +139,39 @@ document.addEventListener("keydown",(e)=>{
 			GI.autoclickSpeed += 5
 			break;
 
+		case ">":
+			GI.FRATE -= 5
+			clearInterval(_MainInterval_)
+			_MainInterval_ = setInterval(()=>{repeat()},GI.FRATE)
+			break;
+		case "<":
+			GI.FRATE += 5
+			clearInterval(_MainInterval_)
+			_MainInterval_ = setInterval(()=>{repeat()},GI.FRATE)
+			break;
+		case ".":
+			GI.FRATE -= 1
+			clearInterval(_MainInterval_)
+			_MainInterval_ = setInterval(()=>{repeat()},GI.FRATE)
+			break;
+		case ",":
+			GI.FRATE += 1
+			clearInterval(_MainInterval_)
+			_MainInterval_ = setInterval(()=>{repeat()},GI.FRATE)
+			break;
+		case "?":
+			GI.FRATE = 50
+			clearInterval(_MainInterval_)
+			_MainInterval_ = setInterval(()=>{repeat()},GI.FRATE)
+			break;
+		case " ":
+			if(GI.paused){
+				psf = ()=>{G.updateParticles()}
+			} else {
+				psf = ()=>{}
+			}
+			GI.paused = !GI.paused
+			break;
 
 		case "Control":
 			e.preventDefault()
@@ -313,6 +346,7 @@ class GI{
 	static autoclickSpeed = 100
 
 	static frame = 0
+	static paused = false
 	static preformanceCalculate = 0
 	static zoom = 1
 
@@ -1136,6 +1170,42 @@ class GI{
 			}
 			
 		},
+		"E6":{
+			"onDeath":(p)=>{
+				for(let i = 0; i < 6; i++){
+					G.newParticle(p.x+Math.random()*16-8,p.y+Math.random()*16-8,"A3",10)
+				}
+			},
+			"eachFrame":(f,p)=>{
+				if(f%6 == 0 && p.stinfo.children < 20){
+					p.stinfo.children += 1
+					G.newParticle(p.x+Math.random()-0.5,p.y+Math.random()-0.5,"A3",10,{"shiftKey":true},p)
+					
+				}
+			},
+			"childOnDeath":(c,p)=>{
+				p.stinfo.children -= 1
+			}
+			
+		},
+		"E7":{
+			"onDeath":(p)=>{
+				for(let i = 0; i < 6; i++){
+					G.newParticle(p.x+Math.random()-0.5,p.y+Math.random()-0.5,"A4",10)
+				}
+			},
+			"eachFrame":(f,p)=>{
+				if(f%6 == 0 && p.stinfo.children < 20){
+					p.stinfo.children += 1
+					G.newParticle(p.x+Math.random()*16-8,p.y+Math.random()*16-8,"A4",10,{"shiftKey":true},p)
+					
+				}
+			},
+			"childOnDeath":(c,p)=>{
+				p.stinfo.children -= 1
+			}
+			
+		},
 		"A1":{
 			"toOther":(p,op)=>{
 				let d = distance(p.x,p.y,op.x,op.y)
@@ -1144,6 +1214,9 @@ class GI{
 				if(d < 200){
 					if(d < 20){
 					if(d<5){
+						if(d === 0){
+							return
+						}
 						dx = 0
 						dy = 0
 					}
@@ -1277,6 +1350,8 @@ class GI{
 		"E3":{"color":"#6E2300","children":0,"letter":"G"},//generator(B8,B5,B4) -> E1
 		"E4":{"color":"#00A000","children":0,"letter":"G"},//generator(B3,B5,B4) -> E1
 		"E5":{"color":"#00A0A0","children":0,"letter":"G"},//generator(B6,B5,B4) -> E1
+		"E6":{"color":"#A000A0","children":0,"letter":"G"},//generator(A3)
+		"E7":{"color":"#A00000","children":0,"letter":"G"},//generator(A4)
 	}
 
 	static getTypeInfo(t){
@@ -1296,6 +1371,9 @@ function distance(x1,y1,x2,y2) {
 
 let _MainInterval_ = setInterval(()=>{repeat()},GI.FRATE)
 
+function psf(){
+	G.updateParticles()
+}
 
 function repeat(){
 
@@ -1323,7 +1401,8 @@ function repeat(){
 	GI.cam.x += GI.cam.vx
 	GI.cam.y += GI.cam.vy
 
-	G.updateParticles()
+	psf()
+
 	G.drawParticles()
 
 	if(GI.selectionStart !== false){
