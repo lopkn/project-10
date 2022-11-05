@@ -10,8 +10,19 @@
     
 
 <canvas id="myCanvas" ></canvas>
-<button id = "wow" top="0px" left = "0px" style = "width:1000;height:1000;position:absolute;z-index:2" onclick = "console.log('hi');
-for(let i = 0; i < 2; i ++){playSound(i)};init();document.body.style.touchAction = 'none';document.getElementById('wow').remove();">
+<button id = "wow" top="0px" left = "0px" style = "width:1000;height:1000;position:absolute;z-index:2" onclick = "
+  console.log('hi');
+  // for(let i = 0; i < 40; i ++){console.log('OY');
+  // setInterval(()=>{playSound2(5)},10000);
+  // playSound(i);console.log('EY')};
+
+  INIT()
+
+  init();
+  mainI = setInterval(()=>{Amain();mainCounter++},15);
+  document.body.style.touchAction = 'none';
+  document.getElementById('wow').remove()
+">
 
 <script src="sketch.js"></script>
 </body>

@@ -23,48 +23,96 @@ document.addEventListener("mouseup",()=>{
 })
 
 onmousemove = (e)=>{mouseX = (e.clientX); mouseY = (e.clientY)}
-// let auds = {
-// 	"1":new "./music/Note1.mp3",
-// 	"2":"./music/Note2.mp3",
-// 	"3":"./music/Note3.mp3",
-// 	"4":"./music/Note4.mp3",
-// 	"5":"./music/Note5.mp3",
-// 	"6":"./music/Note6.mp3",
-// 	"7":"./music/7.mp3",
-// 	"8":"./music/8.mp3",
-// 	"9":"./music/9.mp3",
-// 	"10":"./music/10.mp3",
-// 	"11":"./music/11.mp3",
-// 	"12":"./music/12.mp3",
-// 	"13":"./music/13.mp3",
-// 	"14":"./music/14.mp3",
-// 	"15":"./music/15.mp3",
-// 	"16":"./music/16.mp3",
-// 	"17":"./music/17.mp3",
-// 	"18":"./music/18.mp3",
-// 	"19":"./music/19.mp3",
-// 	"20":"./music/20.mp3",
-// 	"21":"./music/21.mp3",
-// 	"22":"./music/22.mp3",
-// 	"23":"./music/23.mp3",
-// 	"24":"./music/24.mp3",
-// 	"25":"./music/25.mp3",
-// 	"26":"./music/26.mp3",
-// 	"27":"./music/27.mp3",
-// 	"28":"./music/28.mp3",
-// 	"29":"./music/29.mp3",
-// 	"30":"./music/30.mp3",
-// 	"31":"./music/31.mp3",
-// 	"32":"./music/32.mp3",
-// 	"33":"./music/33.mp3",
-// 	"34":"./music/34.mp3",
-// 	"35":"./music/35.mp3",
-// 	"36":"./music/36.mp3",
-// 	"37":"./music/37.mp3",
-// 	"38":"./music/38.mp3",
-// 	"39":"./music/39.mp3",
-// 	"R18":"./music/R18.mp3",
-// }
+class vectorFuncs{
+	static vectorizor(px,py,vx,vy){
+		//this.walls[p.boidy[k]].x1 = ((p.boidyVect[k][0] * p.rotation[1] + p.boidyVect[k][1] * p.rotation[0]) + p.x)
+		//xb+ya,yb-xa
+		return([px*vy+py*vx,py*vy-px*vx])
+	}
+	static INvectorizor(px,py,vx,vy){
+		//xb-ya,yb+xa
+		return([px*vy-py*vx,py*vy+px*vx])
+	}
+	static ShatterComponents(vx,vy,dx,dy){
+		let normalized = this.originVectorNormalize(dx,dy)
+		let invectorized = this.INvectorizor(vx,vy,normalized[0],normalized[1])
+
+		let tyaxis = this.vectorizor(normalized[0],normalized[1],1,0)
+
+		let resultx = [invectorized[1]*normalized[0],invectorized[1]*normalized[1]]
+		let resulty = [invectorized[0]*tyaxis[0],invectorized[0]*tyaxis[1]]
+		return([resultx,resulty,[invectorized[1],invectorized[0]]])
+
+	}
+
+	static ShComp(vx,vy,dx,dy){
+		let normalized = this.originVectorNormalize(dx,dy)
+
+		let dp = this.dotProduct(vx,vy,normalized[0],normalized[1])
+
+		let n2 = [normalized[1],-normalized[0]]
+
+		let dp2 = this.dotProduct(vx,vy,n2[0],n2[1])
+		let resultx = [normalized[0]*dp,normalized[1]*dp]
+		let resulty = [n2[0]*dp2,n2[1]*dp2]
+
+		return([resultx,resulty,[dp,dp2]])
+
+	}
+
+	static dotProduct(x1,y1,x2,y2){
+		return(x1*x2+y1*y2)
+	}
+
+	static originVectorNormalize(vx,vy){
+		let d = Math.sqrt(vx*vx+vy*vy)
+		return([vx/d,vy/d])
+	}
+}
+
+let auds2 = {
+	"1":"./music/Note1.mp3",
+	"2":"./music/Note2.mp3",
+	"3":"./music/Note3.mp3",
+	"4":"./music/Note4.mp3",
+	// "5":"./music/Note5.mp3",
+	// "6":"./music/Note6.mp3",
+	// "7":"./music/7.mp3",
+	// "8":"./music/8.mp3",
+	// "9":"./music/9.mp3",
+	// "10":"./music/10.mp3",
+	// "11":"./music/11.mp3",
+	// "12":"./music/12.mp3",
+	// "13":"./music/13.mp3",
+	// "14":"./music/14.mp3",
+	// "15":"./music/15.mp3",
+	// "16":"./music/16.mp3",
+	// "17":"./music/17.mp3",
+	// "18":"./music/18.mp3",
+	// "19":"./music/19.mp3",
+	// "20":"./music/20.mp3",
+	// "21":"./music/21.mp3",
+	// "22":"./music/22.mp3",
+	// "23":"./music/23.mp3",
+	// "24":"./music/24.mp3",
+	// "25":"./music/25.mp3",
+	// "26":"./music/26.mp3",
+	// "27":"./music/27.mp3",
+	// "28":"./music/28.mp3",
+	// "29":"./music/29.mp3",
+	// "30":"./music/30.mp3",
+	// "31":"./music/31.mp3",
+	// "32":"./music/32.mp3",
+	// "33":"./music/33.mp3",
+	// "34":"./music/34.mp3",
+	// "35":"./music/35.mp3",
+	// "36":"./music/36.mp3",
+	"37":"./music/37.mp3",
+	// "38":"./music/38.mp3",
+	// "39":"./music/39.mp3",
+	// "R18":"./music/R18.mp3",
+}
+
 let auds = {
 	"1":new Audio("./music/Note1.mp3"),
 	"2":new Audio("./music/Note2.mp3"),
@@ -108,19 +156,13 @@ let auds = {
 	"R18":new Audio("./music/R18.mp3"),
 }
 
-let objkt = Object.keys(auds)
-objkt.forEach((e)=>{
-	auds[e].preload = "auto"
-	auds[e].load()
-})
+// let objkt = Object.keys(auds)
+// objkt.forEach((e)=>{
+// 	auds[e].preload = "auto"
+// 	auds[e].load()
+// 	auds[e].addEventListener('canplaythrough', ()=>{console.log("done loading "+e)});
+// })
 
-function playSound(n) {
-	let sound = auds[n]
-	if(sound == undefined){return}
-  	let click=sound.cloneNode();
-    console.log(n)
-    click.play();
-}
 
 let song1 = {
 	"info":{"repeat":256},
@@ -401,10 +443,78 @@ let song2 = {
 //C 1,13,25,37 :E 5,17,29 : F 6,18,30 : G 8,20,32 : A 10,22,34
 let currentAud = [0,0]
 
+let aud3 = {
+
+}
+
+let objk3 = Object.keys(auds2)
+
+// function INIT(){
+// objk3.forEach((e)=>{
+// 	aud3[e] = []
+// 	for(let i = 0; i < 6; i++){
+// 		aud3[e].push(new Audio(auds2[e]))
+// 		console.log(i)
+// 		aud3[e][i].load()
+// 		aud3[e][i].volume = 0.1
+// 		aud3[e][i].play()
+// 	}
+// })
+// }
+
+let COUNTER = 0
+function INIT(){
+	objk3.forEach((e)=>{
+		aud3[e] = []
+		for(let i = 0; i < 6; i++){
+			
+			COUNTER += 1
+			let a = document.createElement("Audio")
+			a.src = auds2[e]
+			a.id = COUNTER
+			console.log(a.id)
+			a.volume = 0.1
+			a.load()
+			aud3[e].push(COUNTER)
+			document.body.appendChild(a)
+			document.getElementById(COUNTER).play().catch((err)=>{console.log("error playing");console.log(err)})
+		}	
+	})
+	document.getElementById("2").addEventListener('canplaythrough',()=>{console.log("222 can play")})
+}
+
+function playSound3(s){
+	let auarr = aud3[s]
+	if(auarr === undefined){return}
+	for(let i = 0; i < 6; i++){
+		let e = document.getElementById(auarr[i])
+		if(e.paused){
+			e.volume = 1
+			e.currentTime = 0
+			e.play()
+			break;
+		}
+	}
+}
+
+function playSound4(s){
+	let auarr = aud3[s]
+	for(let i = 0; i < 6; i++){
+		let e = auarr[i]
+		if(e.paused){
+			e.volume = 1
+			e.currentTime = 0
+			e.play()
+			break;
+		}
+	}
+}
 
 function playSound2(s){
-	currentAud[1] = new Audio(auds[s])
+	currentAud[1] = new Audio(auds2[s])
 	currentAud[1].play()
+	// console.log(currentAud.)
+	handle.newParticle()
 }
 
 
@@ -428,7 +538,7 @@ class song{
 		let arr = this.currentSong[a][b]
 		if(arr == undefined){return}
 		arr.forEach((e)=>{
-			playSound(e)
+			playSound3(e)
 		})
 
 		
@@ -448,7 +558,7 @@ class song{
 
 
 
-let mainI = setInterval(()=>{Amain();mainCounter++},15)
+let mainI = 0
 let mainCounter = 0
 function Amain(){
 	if(mainCounter%song.intervalTime === 0){
@@ -461,82 +571,31 @@ function Amain(){
 	
 }
 
+function playSound(n) {
+	let sound = auds[n]
+	if(sound == undefined){return}
+  	let click = sound.cloneNode(true);
+  	let pp = click.play();
 
+  	if(pp !== undefined){
+  		pp.then(()=>{}).catch((err)=>{
+  			if(err.name == "NotAllowedError"){
+  				console.log("caught")
+  				// showPlayButton(click)
+  				alert("hi")
+  				console.log(document.hasFocus())
+  			}
+  		})
+  	}
 
-// function playForce(a,s){
-// 	playSound(s)
-// 	currentAud[0] = a
-// }
-
-// let interval = setInterval(()=>{
-
-// 	if(currentAud[0] > 0){
-// 		currentAud[0] -= 1
-
-// 		if(currentAud[0] > 50){
-// 			currentAud[1].playbackRate = 1
-// 		}else {
-// 			currentAud[1].playbackRate = (currentAud[0]/50)*0.4+0.6
-// 		}
-
-// 	} else {
-// 		if(currentAud[1] !== 0){
-// 		// currentAud[1].pause()
-// 	}
-// 	}
-
-// },100)
-
-// setTimeout(()=>{song.start()},1000)
-
-
-
-class vectorFuncs{
-	static vectorizor(px,py,vx,vy){
-		//this.walls[p.boidy[k]].x1 = ((p.boidyVect[k][0] * p.rotation[1] + p.boidyVect[k][1] * p.rotation[0]) + p.x)
-		//xb+ya,yb-xa
-		return([px*vy+py*vx,py*vy-px*vx])
-	}
-	static INvectorizor(px,py,vx,vy){
-		//xb-ya,yb+xa
-		return([px*vy-py*vx,py*vy+px*vx])
-	}
-	static ShatterComponents(vx,vy,dx,dy){
-		let normalized = this.originVectorNormalize(dx,dy)
-		let invectorized = this.INvectorizor(vx,vy,normalized[0],normalized[1])
-
-		let tyaxis = this.vectorizor(normalized[0],normalized[1],1,0)
-
-		let resultx = [invectorized[1]*normalized[0],invectorized[1]*normalized[1]]
-		let resulty = [invectorized[0]*tyaxis[0],invectorized[0]*tyaxis[1]]
-		return([resultx,resulty,[invectorized[1],invectorized[0]]])
-
-	}
-
-	static ShComp(vx,vy,dx,dy){
-		let normalized = this.originVectorNormalize(dx,dy)
-
-		let dp = this.dotProduct(vx,vy,normalized[0],normalized[1])
-
-		let n2 = [normalized[1],-normalized[0]]
-
-		let dp2 = this.dotProduct(vx,vy,n2[0],n2[1])
-		let resultx = [normalized[0]*dp,normalized[1]*dp]
-		let resulty = [n2[0]*dp2,n2[1]*dp2]
-
-		return([resultx,resulty,[dp,dp2]])
-
-	}
-
-	static dotProduct(x1,y1,x2,y2){
-		return(x1*x2+y1*y2)
-	}
-
-	static originVectorNormalize(vx,vy){
-		let d = Math.sqrt(vx*vx+vy*vy)
-		return([vx/d,vy/d])
-	}
+    handle.newParticle()
+    // console.log(n, click)
 }
+
+
+
+
+
 
 function distance(x,y,a,b){
 	let c = a-x
@@ -592,6 +651,8 @@ class handle{
 	static pullstat = [0,0]
 	static wind = 0
 	static msd = false
+
+	static particles = []
 
 	static draw(){
 
@@ -678,6 +739,25 @@ class handle{
 		}
 
 		this.apull()
+
+		ctx.strokeStyle = "yellow"
+		ctx.fillStyle = "yellow"
+		ctx.lineWidth = 0
+		this.particles.forEach((e,i)=>{
+			e[1] -= 1
+			e[2] -= 1
+			if(e[2] < 1){
+				this.particles.splice(i,1)
+				return
+			}
+			ctx.beginPath()
+			ctx.arc(e[0],e[1],e[2]/40, 0, 2 * Math.PI);
+			ctx.fill()
+			ctx.stroke()
+		})
+
+
+
 	}
 
 	static apull(){
@@ -699,6 +779,12 @@ class handle{
 		shc[1][1] *= 0.5
 		this.pull = shc[1]
 		this.pullstat = shc[2]
+	}
+
+	static newParticle(){
+		let x = this.middle[0] + Math.random()*80-40
+		let y = this.middle[1] + Math.random()*40-20
+		this.particles.push([x,y,100])
 	}
 }
 
@@ -730,10 +816,10 @@ function touchHandler(event)
                                   false, false, false, 0, null);
 
     first.target.dispatchEvent(simulatedEvent);
-    if(!FIRSTTOUCH){
-    event.preventDefault();
-    handler.wind = 100
-	}
+    // if(!FIRSTTOUCH){
+    // event.preventDefault();
+    // handler.wind = 100
+	// }
 }
 
 
@@ -743,3 +829,5 @@ function init(){
     document.addEventListener("touchend", touchHandler);
     document.addEventListener("touchcancel", touchHandler);    
 }
+
+
