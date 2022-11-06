@@ -14,9 +14,25 @@ let ctx = CTX.main
 let mouseX = 0
 let mouseY = 0
 
-document.addEventListener("mousedown",()=>{
+document.addEventListener("mousedown",(e)=>{
+	mouseX = e.clientX
+	mouseY = e.clientY
 	FIRSTTOUCH = false
 	handle.msd = true
+
+	if(mouseX <= 20 && mouseY <= 20){
+		if(song.currentSong == song1){
+			song.currentSong = song2
+		} else {
+			song.currentSong = song1
+		}
+		song.counter = -1
+	}
+
+	if(mouseX >= Width-30 && mouseY <= 30){
+		song.show = !song.show
+	}
+
 })
 document.addEventListener("mouseup",()=>{
 	handle.msd = false
@@ -75,38 +91,38 @@ let auds2 = {
 	"2":"./music/Note2.mp3",
 	"3":"./music/Note3.mp3",
 	"4":"./music/Note4.mp3",
-	// "5":"./music/Note5.mp3",
-	// "6":"./music/Note6.mp3",
-	// "7":"./music/7.mp3",
-	// "8":"./music/8.mp3",
-	// "9":"./music/9.mp3",
-	// "10":"./music/10.mp3",
-	// "11":"./music/11.mp3",
-	// "12":"./music/12.mp3",
-	// "13":"./music/13.mp3",
-	// "14":"./music/14.mp3",
-	// "15":"./music/15.mp3",
-	// "16":"./music/16.mp3",
-	// "17":"./music/17.mp3",
-	// "18":"./music/18.mp3",
-	// "19":"./music/19.mp3",
-	// "20":"./music/20.mp3",
-	// "21":"./music/21.mp3",
-	// "22":"./music/22.mp3",
-	// "23":"./music/23.mp3",
-	// "24":"./music/24.mp3",
-	// "25":"./music/25.mp3",
-	// "26":"./music/26.mp3",
-	// "27":"./music/27.mp3",
-	// "28":"./music/28.mp3",
-	// "29":"./music/29.mp3",
-	// "30":"./music/30.mp3",
-	// "31":"./music/31.mp3",
-	// "32":"./music/32.mp3",
-	// "33":"./music/33.mp3",
-	// "34":"./music/34.mp3",
-	// "35":"./music/35.mp3",
-	// "36":"./music/36.mp3",
+	"5":"./music/Note5.mp3",
+	"6":"./music/Note6.mp3",
+	"7":"./music/7.mp3",
+	"8":"./music/8.mp3",
+	"9":"./music/9.mp3",
+	"10":"./music/10.mp3",
+	"11":"./music/11.mp3",
+	"12":"./music/12.mp3",
+	"13":"./music/13.mp3",
+	"14":"./music/14.mp3",
+	"15":"./music/15.mp3",
+	"16":"./music/16.mp3",
+	"17":"./music/17.mp3",
+	"18":"./music/18.mp3",
+	"19":"./music/19.mp3",
+	"20":"./music/20.mp3",
+	"21":"./music/21.mp3",
+	"22":"./music/22.mp3",
+	"23":"./music/23.mp3",
+	"24":"./music/24.mp3",
+	"25":"./music/25.mp3",
+	"26":"./music/26.mp3",
+	"27":"./music/27.mp3",
+	"28":"./music/28.mp3",
+	"29":"./music/29.mp3",
+	"30":"./music/30.mp3",
+	"31":"./music/31.mp3",
+	"32":"./music/32.mp3",
+	"33":"./music/33.mp3",
+	"34":"./music/34.mp3",
+	"35":"./music/35.mp3",
+	"36":"./music/36.mp3",
 	"37":"./music/37.mp3",
 	// "38":"./music/38.mp3",
 	// "39":"./music/39.mp3",
@@ -495,6 +511,7 @@ function playSound3(s){
 			break;
 		}
 	}
+	handle.newParticle()
 }
 
 function playSound4(s){
@@ -538,7 +555,7 @@ class song{
 		let arr = this.currentSong[a][b]
 		if(arr == undefined){return}
 		arr.forEach((e)=>{
-			playSound3(e)
+			playSoundF(e)
 		})
 
 		
@@ -615,15 +632,20 @@ function main(){
 	ctx.fillRect(0,0,Width*2,Height*2)
 
 
+
 	
 
 	handle.draw()
 
+	ctx.fillStyle = "004000"
+	ctx.fillRect(0,0,20,20)
+	if(song.show){
+	if(Height < 500){
 	ctx.strokeStyle = "#F07040"
 	ctx.lineWidth = 3
 	ctx.beginPath()
-	ctx.moveTo(Width*0.8-7,Height*0.4-7*40)
-	ctx.lineTo(Width*0.8-7,Height*0.4)
+	ctx.moveTo(Width*0.1-7,Height*1-7*40)
+	ctx.lineTo(Width*0.1-7,Height*1)
 	ctx.stroke()
 
 	for(let i = -10; i < 34; i++){
@@ -636,21 +658,48 @@ function main(){
 		let arr = song.currentSong[a][b]
 		arr.forEach((e)=>{
 			ctx.fillStyle = "rgb(0,255,"+(e*7)+")"
-			ctx.fillRect(Width*0.8+i*7,Height*0.4-7*e,5,5)
+			ctx.fillRect(Width*0.1+i*7,Height*1-7*e,5,5)
 		})
 	}
 	}
-	
+	} else {
+	ctx.strokeStyle = "#F07040"
+	ctx.lineWidth = 3
+	ctx.beginPath()
+	ctx.moveTo(Width*0.35-7,Height*0.4-7*40)
+	ctx.lineTo(Width*0.35-7,Height*0.4)
+	ctx.stroke()
+
+	for(let i = -10; i < 37; i++){
+
+	let A = (song.counter+i)%song.currentSong.info.repeat
+	let b = A%16
+	let a = Math.floor(A/16)
+
+	if(song.currentSong[a] !== undefined && song.currentSong[a][b] !== undefined){
+		let arr = song.currentSong[a][b]
+		arr.forEach((e)=>{
+			ctx.fillStyle = "rgb(0,255,"+(e*7)+")"
+			ctx.fillRect(Width*0.35+i*7,Height*0.4-7*e,5,5)
+		})
+	}
+	}
+	}}
 
 }
 
+let img = new Image()
+img.src = "./wood3.jpg"
+
 class handle{
-	static middle = [Width*0.4+145,Height*0.4+85]
-	static handle = [Width*0.4+145,Height*0.4+85-70]
+	static show = false
+	static middle = [Width*0.3+145,Height*0.4+85]
+	static handle = [Width*0.3+145,Height*0.4+85-70]
 	static pull = [0,0]
 	static pullstat = [0,0]
 	static wind = 0
 	static msd = false
+	static windSound = new Audio("./music/wind.mp3")
 
 	static particles = []
 
@@ -670,14 +719,43 @@ class handle{
 			c = 30
 		}
 
+		ctx.strokeStyle = "#702000"
+
 		if(c < 150){
 			song.intervalTime = song.AintervalTime + Math.floor(150/(c-30))
 		} else {
 			song.intervalTime = song.AintervalTime
 		}
 
-		ctx.fillStyle = "rgb("+c+","+c+","+c+")"
-		ctx.fillRect(Width*0.4,Height*0.4,250,170)
+		// ctx.fillStyle = "rgb("+c+","+c+","+c+")"
+		// ctx.fillRect(Width*0.4,Height*0.4,250,170)
+
+		let flash = (Date.now()%2040)/4
+
+			flash = flash > 255?500-flash:flash
+
+			let size = Date.now()%4800
+			size = size > 2400?4800-size:size
+
+
+			ctx.fillStyle = "rgba("+(275-flash/2)+",255,"+(0)+","+(0.04*(c/150))+")"
+			ctx.beginPath()
+			ctx.arc(this.middle[0],this.middle[1],size/400+300, 0, 2 * Math.PI);
+			ctx.fill()
+			ctx.beginPath()
+			ctx.arc(this.middle[0],this.middle[1],size/400+270, 0, 2 * Math.PI);
+			ctx.fill()
+			ctx.beginPath()
+			ctx.arc(this.middle[0],this.middle[1],size/400+240, 0, 2 * Math.PI);
+			ctx.fill()
+			ctx.beginPath()
+			ctx.arc(this.middle[0],this.middle[1],size/400+210, 0, 2 * Math.PI);
+			ctx.fill()
+
+		ctx.drawImage(img, 0, 0, 500, 340,Width*0.3,Height*0.4,250,170);
+
+		ctx.fillStyle = "rgba(0,0,0,"+(1-c/150)+")"
+		ctx.fillRect(Width*0.3,Height*0.4,250,170)
 
 		
 		ctx.lineWidth = 5
@@ -691,6 +769,7 @@ class handle{
 		} else {
 			ctx.fillStyle = "white"
 		}
+		ctx.strokeStyle = "#707070"
 		ctx.beginPath()
 		ctx.arc(this.handle[0], this.handle[1], 10, 0, 2 * Math.PI);
 		ctx.fill()
@@ -707,6 +786,7 @@ class handle{
 			}
 
 		if(this.pullstat[1] < 0){
+			this.windSound.pause()
 			if(D>20){
 				this.pull = vectorFuncs.originVectorNormalize(this.pull[0],this.pull[1])
 				this.pull[0] *= 20
@@ -716,6 +796,13 @@ class handle{
 				}
 			}
 		}else{
+			if(this.pullstat[1] > 10){
+			if(this.windSound.currentTime > 2){
+				this.windSound.currentTime = 0
+			}
+			this.windSound.play()} else {
+				this.windSound.pause()
+			}
 			this.wind = Math.floor(this.wind + D*0.5)
 		}
 			
@@ -740,21 +827,35 @@ class handle{
 
 		this.apull()
 
-		ctx.strokeStyle = "yellow"
-		ctx.fillStyle = "yellow"
-		ctx.lineWidth = 0
-		this.particles.forEach((e,i)=>{
-			e[1] -= 1
+		ctx.lineWidth = 1
+		let dn = Date.now()
+		for(let i = this.particles.length-1; i > -1; i--){
+			let e = this.particles[i]
+			e[1] -= e[5]
 			e[2] -= 1
-			if(e[2] < 1){
+			if(e[2] < 1 || this.particles.length > 100){
 				this.particles.splice(i,1)
-				return
+				continue
 			}
+			ctx.strokeStyle = "yellow"
+			ctx.fillStyle = "yellow"
 			ctx.beginPath()
 			ctx.arc(e[0],e[1],e[2]/40, 0, 2 * Math.PI);
 			ctx.fill()
 			ctx.stroke()
-		})
+
+			let dd = ((dn - e[3])%(e[4]))/e[4]
+			let ddd = dd > 0.5? (1-dd)*2:dd*2
+			ddd*=255
+			ctx.strokeStyle = "rgba("+(255-ddd)+",255,"+ddd+",0.1)"
+			ctx.fillStyle = "rgba("+(255-ddd)+",255,"+ddd+",0.1)"
+			ctx.beginPath()
+			ctx.arc(e[0],e[1],e[2]/15, 0, 2 * Math.PI);
+			ctx.fill()
+			ctx.arc(e[0],e[1],e[2]/10, 0, 2 * Math.PI);
+			ctx.fill()
+			// ctx.stroke()
+		}
 
 
 
@@ -782,9 +883,9 @@ class handle{
 	}
 
 	static newParticle(){
-		let x = this.middle[0] + Math.random()*80-40
-		let y = this.middle[1] + Math.random()*40-20
-		this.particles.push([x,y,100])
+		let x = this.middle[0] + Math.random()*220-110
+		let y = this.middle[1] + Math.random()*40-20+40
+		this.particles.push([x,y,100+Math.random()*150,Date.now(),Math.random()*500+500,1+Math.random()])
 	}
 }
 
@@ -830,4 +931,111 @@ function init(){
     document.addEventListener("touchcancel", touchHandler);    
 }
 
+
+// function INIT2(){
+
+
+
+var sampler = new Tone.Sampler({
+	urls: {
+
+		"C2":auds2[1],
+	"C#2":auds2[2],
+	"D2":auds2[3],
+	"D#2":auds2[4],
+	"E2":auds2[5],
+	"F2":auds2[6],
+	"F#2":auds2[7],
+	"G2":auds2[8],
+	"G#2":auds2[9],
+	"A2":auds2[10],
+	"A#2":auds2[11],
+	"B2":auds2[12],
+	"C3":auds2[13],
+	"C#3":auds2[14],
+	"D3":auds2[15],
+	"D#3":auds2[16],
+	"E3":auds2[17],
+	"F3":auds2[18],
+	"F#3":auds2[19],
+	"G3":auds2[20],
+	"G#3":auds2[21],
+	"A3":auds2[22],
+	"A#3":auds2[23],
+	"B3":auds2[24],
+	"C4":auds2[25],
+	"C#4":auds2[26],
+	"D4":auds2[27],
+	"D#4":auds2[28],
+	"E4":auds2[29],
+	"F4":auds2[30],
+	"F#4":auds2[31],
+	"G4":auds2[32],
+	"G#4":auds2[33],
+	"A4":auds2[34],
+	"A#4":auds2[35],
+	"B4":auds2[36],
+	"C5":auds2[37]
+
+	},
+	// baseUrl: "http:",
+}).toDestination();
+
+Tone.loaded().then(() => {
+	sampler.triggerAttackRelease(["C4","C5"], 2.5);
+})
+// }
+
+let soundMapper = {
+	"1":"C2",
+	"2":"C#2",
+	"3":"D2",
+	"4":"D#2",
+	"5":"E2",
+	"6":"F2",
+	"7":"F#2",
+	"8":"G2",
+	"9":"G#2",
+	"10":"A2",
+	"11":"A#2",
+	"12":"B2",
+	"13":"C3",
+	"14":"C#3",
+	"15":"D3",
+	"16":"D#3",
+	"17":"E3",
+	"18":"F3",
+	"19":"F#3",
+	"20":"G3",
+	"21":"G#3",
+	"22":"A3",
+	"23":"A#3",
+	"24":"B3",
+	"25":"C4",
+	"26":"C#4",
+	"27":"D4",
+	"28":"D#4",
+	"29":"E4",
+	"30":"F4",
+	"31":"F#4",
+	"32":"G4",
+	"33":"G#4",
+	"34":"A4",
+	"35":"A#4",
+	"36":"B4",
+	"37":"C5"
+}
+
+function playSoundF(s){
+	sampler.triggerAttackRelease([soundMapper[s]]);
+	handle.newParticle()
+}
+
+
+function INIT2(){}
+
+document.querySelector('button')?.addEventListener('click', async () => {
+	await Tone.start()
+	console.log('audio is ready')
+})
 

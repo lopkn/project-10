@@ -10,7 +10,11 @@ function playSound(){
 	document.body.appendChild(a)
 	document.getElementById(n).load()
 	document.getElementById(n).addEventListener('canplaythrough',()=>{console.log("WHAT")})
-	document.getElementById(n).play().catch((err)=>{console.log("caught?");console.log(err)})
+	document.getElementById(n).play()
 	console.log("3")
 }
-console.log("EFOIHEFIOHF")
+function INIT(){
+	for(let i = 0; i < 3; i++){
+		playSound()
+	}
+}
