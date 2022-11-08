@@ -213,6 +213,28 @@ function inRect(x,y,rx,ry,w,h){
 
 class G{
 
+	static grapher = []
+	static grapherInfo = {"px":8,"f":(e)=>{return(e*5)},"ln":120}
+
+	static updateGrapher(e){
+		let pt = this.grapherInfo.f(e)
+		this.grapher.unshift(pt)
+		if(this.grapher.length > this.grapherInfo.ln){
+			this.grapher.splice(this.grapherInfo.ln,1)
+		}
+	}
+
+	static drawGrapher(){
+		let x = 0
+		ctx.strokeStyle = "#00FF00"
+		ctx.lineWidth = 5
+		ctx.beginPath()
+		ctx.moveTo(this.grapherInfo.px*this.grapherInfo.ln,Height-this.grapher[0])
+		for(let i = 1; i < this.grapher.length;i++){
+			ctx.lineTo((this.grapherInfo.px*(this.grapherInfo.ln-i)),Height-this.grapher[i])
+		}
+		ctx.stroke()
+	}
 
 	static newParticle(x,y,type,r,e,parent){
 
@@ -224,7 +246,7 @@ class G{
 		GI.particles[id] = {
 			"x":x,"y":y,"t":type,"r":r,
 			"id":id,
-			// "info":typeInfo,
+			"info":typeInfo,
 			"vx":0,"vy":0,
 			"stinfo":typeInfo2,
 			"life":1000,
@@ -283,28 +305,28 @@ class G{
 		}
 	}
 
-	static updateParticle3(p){
-		let t = p.t
-		if(GI.typeDict[t].toOther !== undefined){
-			GI.particlesArr.forEach((e)=>{
-				if(e!==p.id){
+	// static updateParticle3(p){
+	// 	let t = p.t
+	// 	if(GI.typeDict[t].toOther !== undefined){
+	// 		GI.particlesArr.forEach((e)=>{
+	// 			if(e!==p.id){
 
-				let op = GI.particles[e]
-				GI.typeDict[t].toOther(p,op)
-				}
+	// 			let op = GI.particles[e]
+	// 			GI.typeDict[t].toOther(p,op)
+	// 			}
 
-			})
-		}
+	// 		})
+	// 	}
 
-		if(GI.typeDict[t].eachFrame!=undefined){
-			GI.typeDict[t].eachFrame(GI.frame,p)
-		}
+	// 	if(GI.typeDict[t].eachFrame!=undefined){
+	// 		GI.typeDict[t].eachFrame(GI.frame,p)
+	// 	}
 
-	}
+	// }
 
 	static updateParticles(){
 		GI.particlesArr.forEach((e)=>{
-			this.updateParticle3(GI.particles[e])
+			this.updateParticle(GI.particles[e])
 		})
 		GI.particlesArr.forEach((e)=>{
 			this.updateParticle2(GI.particles[e])
@@ -1605,8 +1627,11 @@ function repeat(){
 	ctx.fillRect(0,5,Width*(ED-D-GI.FRATE)/GI.FRATE,15)
 	}
 
-	GI.preformanceCalculate += ((ED-D)/GI.particlesArr.length)*100
 
+	G.drawGrapher()
+
+	GI.preformanceCalculate += ((ED-D)/GI.particlesArr.length)*100
+	G.updateGrapher(ED-D)
 	if(GI.frame%100 == 0){
 		console.log("AVERAGE PARTICLE CALCULATION TIME: "+(GI.preformanceCalculate/100))
 		GI.preformanceCalculate = 0
