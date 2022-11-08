@@ -114,6 +114,9 @@ document.addEventListener("keydown",(e)=>{
 		case "F":
 			GI.type[0] = "F"
 			break;
+		case "G":
+			GI.type[0] = "G"
+			break;
 
 
 		case "=":
@@ -220,7 +223,8 @@ class G{
 
 		GI.particles[id] = {
 			"x":x,"y":y,"t":type,"r":r,
-			"id":id,"info":typeInfo,
+			"id":id,
+			// "info":typeInfo,
 			"vx":0,"vy":0,
 			"stinfo":typeInfo2,
 			"life":1000,
@@ -279,9 +283,28 @@ class G{
 		}
 	}
 
+	static updateParticle3(p){
+		let t = p.t
+		if(GI.typeDict[t].toOther !== undefined){
+			GI.particlesArr.forEach((e)=>{
+				if(e!==p.id){
+
+				let op = GI.particles[e]
+				GI.typeDict[t].toOther(p,op)
+				}
+
+			})
+		}
+
+		if(GI.typeDict[t].eachFrame!=undefined){
+			GI.typeDict[t].eachFrame(GI.frame,p)
+		}
+
+	}
+
 	static updateParticles(){
 		GI.particlesArr.forEach((e)=>{
-			this.updateParticle(GI.particles[e])
+			this.updateParticle3(GI.particles[e])
 		})
 		GI.particlesArr.forEach((e)=>{
 			this.updateParticle2(GI.particles[e])
@@ -309,6 +332,7 @@ class G{
 	}
 	static delParticle(p){
 		let id = p.id
+		let t = p.t
 		for(let i =0; i < GI.particlesArr.length; i++){
 			if(GI.particlesArr[i] == id){
 				GI.particlesArr.splice(i,1)
@@ -316,15 +340,15 @@ class G{
 			}
 		}
 
-		if(p.info.onDeath != undefined){
-			p.info.onDeath(p)
+		if(GI.typeDict[t].onDeath != undefined){
+			GI.typeDict[t].onDeath(p)
 		}
 
 		if(p.parent != undefined){
 		let parent = GI.particles[p.parent]
 
 		if(parent != undefined){
-			parent.info.childOnDeath(p,parent)
+			GI.typeDict[parent.t].childOnDeath(p,parent)
 		}}
 
 
@@ -1384,6 +1408,76 @@ class GI{
 			}
 			
 		},
+		"G1":{
+			"onDeath":(p)=>{
+				for(let i = 0; i < 4; i++){
+					G.newParticle(p.x+Math.random()-0.5,p.y+Math.random()-0.5,"B8",10)
+				}
+			},
+			"eachFrame":(f,p)=>{
+				p.stinfo.pulse = 4-f%40/10
+			},
+			"toOther":(p,op)=>{
+				let d = distance(p.x,p.y,op.x,op.y)
+				let dx = (op.x-p.x)
+				let dy = (op.y-p.y)
+				if(d < 300){
+				if(d < 1){
+					d = 1/d
+				}
+				op.nxadd.x += p.stinfo.pulse*p.stinfo.pulse*20*dx/d/d				
+				op.nxadd.y += p.stinfo.pulse*p.stinfo.pulse*20*dy/d/d
+				}
+				}
+			},
+		"G2":{
+			"onDeath":(p)=>{
+				for(let i = 0; i < 4; i++){
+					G.newParticle(p.x+Math.random()-0.5,p.y+Math.random()-0.5,"B8",10)
+				}
+			},
+			"eachFrame":(f,p)=>{
+				p.stinfo.pulse = f%70>40?0:40-f%70
+			},
+			"toOther":(p,op)=>{
+				let d = distance(p.x,p.y,op.x,op.y)
+				let dx = (op.x-p.x)
+				let dy = (op.y-p.y)
+				if(d < 300){
+				if(d < 1){
+					d = 1/d
+				}
+				op.nxadd.x += p.stinfo.pulse*p.stinfo.pulse*dx/d/d/2			
+				op.nxadd.y += p.stinfo.pulse*p.stinfo.pulse*dy/d/d/2
+				}
+				}
+			},
+		"G3":{
+			"onDeath":(p)=>{
+				for(let i = 0; i < 4; i++){
+					G.newParticle(p.x+Math.random()-0.5,p.y+Math.random()-0.5,"B8",10)
+				}
+			},
+			"eachFrame":(f,p)=>{
+				p.stinfo.pulse = (f%300>150?(300-f%300):f%300)-75
+			},
+			"toOther":(p,op)=>{
+				let d = distance(p.x,p.y,op.x,op.y)
+				let dx = (op.x-p.x)
+				let dy = (op.y-p.y)
+				if(d < 200){
+					if(d < 20){
+						if(d < 1){
+							d = 1/d
+						}
+					d*=5
+					}
+				op.nxadd.x += -p.stinfo.pulse*15*dy/d/d
+				op.nxadd.y += p.stinfo.pulse*15*dx/d/d
+				}
+			}
+			}
+
 
 
 		}
@@ -1435,6 +1529,10 @@ class GI{
 		"E7":{"color":"#A00000","children":0,"letter":"G"},//generator(A4)
 		"E8":{"color":"#620000","letter":"C"},//gravity killer +> A4 -> 4x A4
 		"E9":{"color":"#620062","letter":"C"},//gravity killer +> A3 -> 4x A3
+
+		"G1":{"color":"#FFFFFF","letter":"P","pulse":0},//pulsar push
+		"G2":{"color":"#808080","letter":"P","pulse":0},//pulsar push
+		"G3":{"color":"#800080","letter":"S","pulse":0},//phaser spin
 	}
 
 	static getTypeInfo(t){
