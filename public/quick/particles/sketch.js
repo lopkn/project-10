@@ -1079,6 +1079,66 @@ class GI{
 			},
 			
 		},
+		"D9":{
+			"eachFrame":(f,p)=>{
+				let op = GI.particles[p.stinfo.following]
+
+				if(op !== undefined){
+					let d = distance(p.x,p.y,op.x,op.y)
+					let dx = (op.x-p.x)
+					let dy = (op.y-p.y)
+					if(d<3){
+						d = 3
+					}
+
+					if(d < 60){
+
+					op.life -= 15
+
+					if(op.life <= 0){
+						G.newParticle(op.x,op.y,"D9",10)
+						G.delParticle(op)
+						p.life -= 10
+						return
+						}
+					}
+
+					p.x += 0.05 * dx
+					p.y += 0.05 * dy
+
+				} else {
+
+				GI.particlesArr.forEach((e)=>{
+					
+
+					let op = GI.particles[e]
+					if(op.t == "D9" || op.t == "B8"){return}
+					let d = distance(p.x,p.y,op.x,op.y)
+
+					if(d < 3000){
+					if(Math.random()>0.9){
+						p.stinfo.following = e
+					}
+					if(d<3){
+						d = 3
+					}
+					}
+					let dx = (op.x-p.x)
+					let dy = (op.y-p.y)
+						op.nxadd.x -= 180*dx/d/d	
+						op.nxadd.y -= 180*dy/d/d
+				})
+
+				
+
+			}
+
+			},
+			"onDeath":(p)=>{
+				G.newParticle(p.x,p.y,"B8",10)
+			}
+			
+		},
 		"E1":{
 			"toOther":(p,op)=>{
 				let d = distance(p.x,p.y,op.x,op.y)
@@ -1541,6 +1601,7 @@ class GI{
 		"D6":{"color":"#004040","letter":"F","following":-1},//catalyser, following
 		"D7":{"color":"#808080","letter":"F","following":-1},//catalyser, following
 		"D8":{"color":"#008080","letter":"F","following":-1},//catalyser, following
+		"D9":{"color":"#F00080","decay":2,"letter":"F","following":-1},//virus, following -> B8
 
 		"E1":{"color":"#628000","letter":"C"},//gravity killer +> 2x B1 -> 4x B8
 		"E2":{"color":"#2E230A","letter":"G"},//generator(B8) -> E1
@@ -1554,7 +1615,7 @@ class GI{
 
 		"G1":{"color":"#FFFFFF","letter":"P","pulse":0},//pulsar push
 		"G2":{"color":"#808080","letter":"P","pulse":0},//pulsar push
-		"G3":{"color":"#800080","letter":"S","pulse":0},//phaser spin
+		"G3":{"color":"#F8BBD0","letter":"S","pulse":0},//phaser spin
 	}
 
 	static getTypeInfo(t){
