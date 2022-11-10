@@ -1558,7 +1558,33 @@ class GI{
 				op.nxadd.y += p.stinfo.pulse*15*dx/d/d
 				}
 			}
-			}
+			},
+
+			"G4":{
+			"onDeath":(p)=>{
+				for(let i = 0; i < 4; i++){
+					G.newParticle(p.x+Math.random()-0.5,p.y+Math.random()-0.5,"B8",10)
+				}
+			},
+			"eachFrame":(f,p)=>{
+				p.stinfo.pulse = 4-f%40/10
+			},
+			"toOther":(p,op)=>{
+				let d = distance(p.x,p.y,op.x,op.y)
+				let dx = (op.x-p.x)
+				let dy = (op.y-p.y)
+				if(d < 300){
+				if(d < 15){
+					if(d<3){
+						return
+					}
+					d*=15	
+				}
+				op.nxadd.x -= p.stinfo.pulse*p.stinfo.pulse*20*dx/d/d				
+				op.nxadd.y -= p.stinfo.pulse*p.stinfo.pulse*20*dy/d/d
+				}
+				}
+			},
 
 
 
@@ -1616,6 +1642,7 @@ class GI{
 		"G1":{"color":"#FFFFFF","letter":"P","pulse":0},//pulsar push
 		"G2":{"color":"#808080","letter":"P","pulse":0},//pulsar push
 		"G3":{"color":"#F8BBD0","letter":"S","pulse":0},//phaser spin
+		"G4":{"color":"#BBF8D0","letter":"P","pulse":0},//pulsar gravity
 	}
 
 	static getTypeInfo(t){
