@@ -1725,3 +1725,7 @@ function repeat(){
 		GI.preformanceCalculate = 0
 	}
 }
+
+
+
+
