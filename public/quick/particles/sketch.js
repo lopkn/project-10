@@ -18,7 +18,8 @@ onmousemove = (e)=>{mouseX = (e.clientX); mouseY = (e.clientY)}
 
 document.addEventListener("mousedown",(e)=>{
 	e.preventDefault()
-	if(e.altKey){
+	GI.debuggingInfo = JSON.stringify(e.altKey)
+	if(e.altKey||GI.altPressed){
 		GI.selectionStart = [mouseX,mouseY,e.shiftKey]
 	}
 
@@ -34,15 +35,23 @@ document.addEventListener("mouseup",(e)=>{
 
 			let acmap = [GI.cam.x+(s[0])*GI.zoom,GI.cam.y+(s[1])*GI.zoom,GI.cam.x+(mouseX)*GI.zoom,GI.cam.y+(mouseY)*GI.zoom]
 
+			let ax1 = acmap[0] > acmap[2] ? acmap[2] : acmap[0]
+			let ax2 = acmap[0] > acmap[2] ? acmap[0] : acmap[2]
+			let ay1 = acmap[1] > acmap[3] ? acmap[3] : acmap[1]
+			let ay2 = acmap[1] > acmap[3] ? acmap[1] : acmap[3]
 
 			for(let i = GI.particlesArr.length-1; i > -1; i--){
 				let r = GI.particlesArr[i]
 				let p = GI.particles[r]
+
+
 				if(!s[2]){
-				if(inRect(p.x,p.y,acmap[0],acmap[1],acmap[2]-acmap[0],acmap[3]-acmap[1])){
+
+
+				if(inRectA(p.x,p.y,ax1,ay1,ax2,ay2)){
 					G.delParticle(p)
 				}} else {
-					if(inRect(p.x,p.y,acmap[0],acmap[1],acmap[2]-acmap[0],acmap[3]-acmap[1])&&p.t == GI.type[0]+GI.type[1]){
+					if(inRectA(p.x,p.y,ax1,ay1,ax2,ay2)&&p.t == GI.type[0]+GI.type[1]){
 					G.delParticle(p)
 				}
 				}
@@ -61,8 +70,17 @@ document.addEventListener("mouseup",(e)=>{
 document.addEventListener('contextmenu', function(e) {
   e.preventDefault();})
 
+document.addEventListener("keyup",(e)=>{
+	let k = e.key
+	if(k == "Alt"){
+			GI.altPressed = false;
+	}
+})
+
 document.addEventListener("keydown",(e)=>{
 	let k = e.key
+
+	GI.currentKey = k
 
 	console.log(k)
 
@@ -116,6 +134,15 @@ document.addEventListener("keydown",(e)=>{
 			break;
 		case "G":
 			GI.type[0] = "G"
+			break;
+		case "H":
+			GI.type[0] = "H"
+			break;
+		case "I":
+			GI.type[0] = "I"
+			break;
+		case "J":
+			GI.type[0] = "J"
 			break;
 
 
@@ -181,6 +208,16 @@ document.addEventListener("keydown",(e)=>{
 		case "Control":
 			e.preventDefault()
 			break
+		case "g":
+			GI.grid = !GI.grid
+			break;
+
+		case "#":
+			GI.customDebugger = !GI.customDebugger
+			break;
+		case "Alt":
+			GI.altPressed = true;
+			break;
 	}
 
 	let r = ["",15*GI.zoom]
@@ -206,6 +243,13 @@ document.addEventListener("keydown",(e)=>{
 
 function inRect(x,y,rx,ry,w,h){
 	if(x >= rx && y >= ry && x <= rx+w && y <= ry + h){
+		return(true)
+	}
+	return(false)
+}
+
+function inRectA(x,y,rx,ry,rax,ray){
+	if(x >= rx && y >= ry && x <= rax && y <= ray){
 		return(true)
 	}
 	return(false)
@@ -386,16 +430,22 @@ class GI{
 	static particlesArr = []
 	static type = ["A","1"]
 
+	static debuggingInfo = ""
+	static customDebugger = false
+
 	static display = {"background":"#000000"}
 
 	static selectionStart = false
 	static mouseInterval = 0
 
-	static autoclickSpeed = 100
+	static currentKey = "nothing"
 
+	static autoclickSpeed = 100
+	static grid = false
 	static frame = 0
 	static paused = false
 	static preformanceCalculate = 0
+	static altPressed = false
 	static zoom = 1
 
 	static getPI(){
@@ -1672,12 +1722,33 @@ function repeat(){
 
 	ctx.fillStyle = GI.display.background
 	ctx.fillRect(0,0,Width,Height)
+
+
+	if(GI.grid){
+		ctx.beginPath()
+		ctx.lineWidth = 1
+		ctx.strokeStyle = "#303030"
+		for(let i = 0; i < Width/80*GI.zoom+1; i++){
+			ctx.moveTo((i*80-GI.cam.x%80)/GI.zoom,0)
+			ctx.lineTo((i*80-GI.cam.x%80)/GI.zoom,Height)
+		}
+		for(let i = 0; i < Height/80*GI.zoom+1; i++){
+			ctx.moveTo(0,(i*80-GI.cam.y%80)/GI.zoom)
+			ctx.lineTo(Width,(i*80-GI.cam.y%80)/GI.zoom)
+		}
+		ctx.stroke()
+	}
+
+
 	if(GI.typeDict2[GI.type[0]+GI.type[1]] !== undefined){
 	ctx.fillStyle = "purple"} else {
 		ctx.fillStyle = "red"
 	}
 	ctx.font = "40px Arial"
-	ctx.fillText(GI.type[0]+GI.type[1]+"  -  Particles: "+GI.particlesArr.length,0,40)
+	ctx.fillText(GI.type[0]+GI.type[1]+"  -  Particles: "+GI.particlesArr.length+" - key: "+GI.currentKey,0,40)
+	if(GI.customDebugger){
+		ctx.fillText(GI.debuggingInfo,0,80)
+	}
 
 	ctx.strokeStyle = "purple"
 	ctx.lineWidth = 4
@@ -1725,7 +1796,3 @@ function repeat(){
 		GI.preformanceCalculate = 0
 	}
 }
-
-
-
-
