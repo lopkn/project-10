@@ -215,13 +215,106 @@ public:
 
 };
 
+
+
+bool inrange(a,b,c){
+  return((a>b&&a<b+c));
+};
+
+
+
+class nur2{
+public:
+  double memory = 0;
+  // int lastMemoryTime = 0;
+  double decay = 0.001;
+
+  bool used = false;
+
+  bool outputter = false;
+  string pheontype = "";
+
+  double inputMult[3] = {0,0,0};
+  double inputAdd[3] = {0,0,0};
+
+  double outputs[2] = {1,1};
+  double outputVals[2] = {1,1};
+  int outputsTo[2] = {-1,-1};
+
+  void memoryLapse(){
+    // int t = timenow();
+    // (t-lastMemoryTime)*
+    memory -= decay;
+    if(memory < 0){
+      memory = 0;
+    };
+    // lastMemoryTime = t;
+  };
+
+  int[2] neuroActivate(double amount, int nurnum){
+
+    used = true;
+
+    memoryLapse();
+
+    bool outs[2] = {false,false};
+
+    if(outputter == false){
+
+   
+
+    double adder = (amount + inputAdd[nurnum])*inputMult[nurnum];
+    memory += adder;
+    if(adder > 0){
+      for(int i = 0; i < 2; i++){
+        if(inrange(outputs[i],memory-adder,adder)){
+
+          outs[i] = true;
+
+        };
+      };
+
+    }else if(memory < 0){
+      memory = 0;
+    };
+
+    } else {
+
+      outs[0] = true;
+      outs[1] = true;
+
+    double adder = (amount + inputAdd[nurnum])*inputMult[nurnum];
+    memory += adder;
+    if(adder > 0){
+
+        if(inrange(outputs[0],memory-adder,adder)){
+
+          cout << pheontype;
+
+        };
+
+    } else if(memory < 0){
+      memory = 0;
+    };
+
+    };
+
+    return(outs);
+
+  };
+
+
+}
+
+
+
+
+
 int main(){
 
-  nur NEURONS[100];
+  nur2 NEURONS[100];
 
   int currentNur = 0;
-
-  nur (*NEURONPOINTER)[100] = &NEURONS;
 
   using namespace std;
   while(true){
@@ -231,38 +324,49 @@ int main(){
     getline(cin, operation);
 
     if(operation == "l"){
-
+      bool continueing = true;
+      bool continueCounter = 0;
+      double inputs[5] = {0,0,0,0,0};
+      string expectedOutputs[5] = {"","","","",""};
+      while(continueing){
       cout << "what do you want it to learn? -> \n";
+        
       string in1;
       string in2;
       string in3;
-      string in4;
-
       getline(cin, in1);
       getline(cin, in2);
-      getline(cin, in3);
-      getline(cin, in4);
-
+      // getline(cin, in3);
       double ai1 = stod(in1);
       double ai2 = stod(in2);
-      double ai3 = stod(in3);
-      double ai4 = stod(in4);
+      // double ai3 = stod(in3);
 
-      double aina[3] = {ai1,ai2,ai3};
+      string ct;
+      getline(cin, ct)
+        if(ct == "n" || ct == "no"){
+          continueing = false;
+        };
+
+
+      };
 
 
 
-      cout << "attempts?";
-      string attpt;
-      getline(cin, attpt);
 
-      uint64_t attp = stoi(attpt) + timenow();
-      cout << timenow() << "-" << attp;
-      if(stoi(attpt) > 0){
-      double out = NEURONS[currentNur].process(aina,ai4,attp,NEURONPOINTER);
+    } else if(operation == "start"){
 
-      cout << "got: "<<out<<"\n";
-      }
+      nur2[1].used = true;
+      nur2[1].pheontype = "";
+      nur2[1].outputter = true;
+
+      nur2[2].used = true;
+      nur2[2].pheontype = "h";
+      nur2[2].outputter = true;
+
+      nur2[3].used = true;
+      nur2[3].pheontype = "i";
+      nur2[3].outputter = true;
+
 
     } else if(operation == "q"){
       cout << "what do you want it to answer? -> \n";
@@ -294,3 +398,88 @@ int main(){
   };
 
 }
+
+
+
+
+
+
+// int main(){
+
+//   nur NEURONS[100];
+
+//   int currentNur = 0;
+
+//   nur (*NEURONPOINTER)[100] = &NEURONS;
+
+//   using namespace std;
+//   while(true){
+
+//     cout << "operation? -> ";
+//     string operation;
+//     getline(cin, operation);
+
+//     if(operation == "l"){
+
+//       cout << "what do you want it to learn? -> \n";
+//       string in1;
+//       string in2;
+//       string in3;
+//       string in4;
+
+//       getline(cin, in1);
+//       getline(cin, in2);
+//       getline(cin, in3);
+//       getline(cin, in4);
+
+//       double ai1 = stod(in1);
+//       double ai2 = stod(in2);
+//       double ai3 = stod(in3);
+//       double ai4 = stod(in4);
+
+//       double aina[3] = {ai1,ai2,ai3};
+
+
+
+//       cout << "attempts?";
+//       string attpt;
+//       getline(cin, attpt);
+
+//       uint64_t attp = stoi(attpt) + timenow();
+//       cout << timenow() << "-" << attp;
+//       if(stoi(attpt) > 0){
+//       double out = NEURONS[currentNur].process(aina,ai4,attp,NEURONPOINTER);
+
+//       cout << "got: "<<out<<"\n";
+//       }
+
+//     } else if(operation == "q"){
+//       cout << "what do you want it to answer? -> \n";
+//       string in1;
+//       string in2;
+//       string in3;
+//       getline(cin, in1);
+//       getline(cin, in2);
+//       getline(cin, in3);
+//       double ai1 = stod(in1);
+//       double ai2 = stod(in2);
+//       double ai3 = stod(in3);
+
+//       cout << NEURONS[currentNur].question(ai1,ai2,ai3)<<"\n";
+//     } else if(operation == "s"){
+
+//       string in1;
+//       getline(cin, in1);
+//       int ai1 = stoi(in1);
+
+//       currentNur = ai1;
+
+//     } else if(operation == "p"){
+//       cout << NEURONS[currentNur].linkedNurNum;
+//     } else if(operation == "t"){
+//       time_t T = timenow();
+//       cout << T;
+//     };
+//   };
+
+// }
