@@ -17,18 +17,36 @@ let mouseY = 0
 onmousemove = (e)=>{mouseX = (e.clientX); mouseY = (e.clientY)}
 
 document.addEventListener("mousedown",(e)=>{
-	e.preventDefault()
-	GI.debuggingInfo = JSON.stringify(e.altKey)
-	if(e.altKey||GI.altPressed){
-		GI.selectionStart = [mouseX,mouseY,e.shiftKey]
-	}
+	if(GI.mouseModeArr[GI.mouseMode] == "normal"){
+		e.preventDefault()
+		GI.debuggingInfo = JSON.stringify(e.altKey)
+		if(e.altKey||GI.altPressed){
+			GI.selectionStart = [mouseX,mouseY,e.shiftKey]
+		}
 
-	if(e.ctrlKey){
-		GI.mouseInterval = setInterval(()=>{G.newParticle(GI.cam.x+(mouseX)*GI.zoom,GI.cam.y+(mouseY)*GI.zoom,GI.type[0]+GI.type[1],10,e)},GI.autoclickSpeed)
+		if(e.ctrlKey){
+			GI.mouseInterval = setInterval(()=>{G.newParticle(GI.cam.x+(mouseX)*GI.zoom,GI.cam.y+(mouseY)*GI.zoom,GI.type[0]+GI.type[1],10,e)},GI.autoclickSpeed)
+		}
+	} else if(GI.mouseModeArr[GI.mouseMode] == "selector"){
+		let selected = G.selectParticle(GI.cam.x+(mouseX)*GI.zoom,GI.cam.y+(mouseY)*GI.zoom)
+		if(selected !== "none"){
+			GI.selectedParticles.push(selected[0])
+			if(e.ctrlKey){
+				GI.mouseInterval = setInterval(()=>{GI.particles[selected[0]].x = GI.cam.x+(mouseX)*GI.zoom;GI.particles[selected[0]].y =GI.cam.y+(mouseY)*GI.zoom},GI.autoclickSpeed)
+			}
+		}
+	} else if(GI.mouseModeArr[GI.mouseMode] == "activator"){
+		let selected = G.selectParticle(GI.cam.x+(mouseX)*GI.zoom,GI.cam.y+(mouseY)*GI.zoom)
+		if(selected !== "none"){
+			let p = GI.particles[selected[0]]
+
+			p.info.chainRes(GI.AE,p,0)
+		}
 	}
 })
 
 document.addEventListener("mouseup",(e)=>{
+	if(GI.mouseModeArr[GI.mouseMode] == "normal"){
 	if(GI.selectionStart !== false){
 
 			let s = GI.selectionStart
@@ -60,10 +78,33 @@ document.addEventListener("mouseup",(e)=>{
 			GI.selectionStart = false
 			return
 		}
+	G.newParticle(GI.cam.x+(mouseX)*GI.zoom,GI.cam.y+(mouseY)*GI.zoom,GI.type[0]+GI.type[1],10,e)
+
+} else if(GI.mouseModeArr[GI.mouseMode] == "selector"){
+		let selected = G.selectParticle(GI.cam.x+(mouseX)*GI.zoom,GI.cam.y+(mouseY)*GI.zoom)
+
+		if(selected[0] != GI.selectedParticles[0]){
+			let sp = GI.particles[GI.selectedParticles[0]]
+			let tp = GI.particles[selected[0]]
+
+			if(sp.stinfo.chainMem !== undefined && tp.stinfo.chainMem !== undefined){
+				//assume other is defined
+				//assume chainto is defined
+
+				sp.stinfo.chainMem.outTo.push(selected[0])
+
+			}
+
+		}
+
+		GI.selectedParticles = []
+	} else if(GI.mouseModeArr[GI.mouseMode] == "activator"){
+		GI.selectedParticles = []
+	}
+
+
+
 	clearInterval(GI.mouseInterval)
-		G.newParticle(GI.cam.x+(mouseX)*GI.zoom,GI.cam.y+(mouseY)*GI.zoom,GI.type[0]+GI.type[1],10,e)
-
-
 
 })
 
@@ -218,6 +259,10 @@ document.addEventListener("keydown",(e)=>{
 		case "Alt":
 			GI.altPressed = true;
 			break;
+		case "Tab":
+			e.preventDefault()
+			GI.mouseMode = (GI.mouseMode+1)==GI.mouseModeArr.length?0:(GI.mouseMode+1)
+			break;
 	}
 
 	let r = ["",15*GI.zoom]
@@ -313,7 +358,46 @@ class G{
 		ctx.stroke();
 	}
 
+	static drawParticleChainLine(p){
+		if(p.stinfo.chainMem !== undefined){
+			//assume outTo defined.
+			
+			ctx.lineWidth = 2/GI.zoom
+			
+			let s = p.stinfo.chainMem
+			for(let i = s.outTo.length-1; i > -1; i--){
+				if(GI.particles[s.outTo[i]] !== undefined){
+					let op = GI.particles[s.outTo[i]]
+					let xy1 = [(p.x-GI.cam.x)/GI.zoom,(p.y-GI.cam.y)/GI.zoom]
+					let xy2 = [(op.x-GI.cam.x)/GI.zoom,(op.y-GI.cam.y)/GI.zoom]
+					ctx.beginPath()
+					ctx.strokeStyle = "#00FFFF"
+					ctx.moveTo(xy1[0],xy1[1])
+					ctx.lineTo(xy2[0],xy2[1])
+					ctx.stroke()
+
+					ctx.beginPath()
+					ctx.strokeStyle = "#FF0000"
+					ctx.moveTo(xy1[0]+(xy2[0]-xy1[0])/1.5,xy1[1]+(xy2[1]-xy1[1])/1.5)
+					ctx.lineTo(xy2[0],xy2[1])
+					ctx.stroke()
+
+				}else {
+					p.stinfo.chainMem.outTo.splice(i,1)
+				}
+			}
+			
+			
+			ctx.strokeStyle = "#000000"
+			ctx.lineWidth = 1
+
+		}
+	}
+
 	static drawParticle(p){
+
+		this.drawParticleChainLine(p)
+
 		ctx.fillStyle = p.stinfo.color
 		this.drawCircle((p.x-GI.cam.x)/GI.zoom,(p.y-GI.cam.y)/GI.zoom,(p.r)/GI.zoom,true)
 
@@ -323,6 +407,7 @@ class G{
 			ctx.fillStyle = "#FFFFFF"
 			ctx.fillText(p.stinfo.letter,(p.x-GI.cam.x)/GI.zoom-dy/2.5,(p.y-GI.cam.y)/GI.zoom+dy/2.5)
 		}
+
 
 	}
 
@@ -367,6 +452,14 @@ class G{
 	// 	}
 
 	// }
+
+
+	// static particleChainUpdate(i,p,c){
+	// 	if(p.info.chainRes !== undefined){
+	// 		let a = p.info.chainRes(i,p,c)
+	// 	}
+	// }
+
 
 	static updateParticles(){
 		GI.particlesArr.forEach((e)=>{
@@ -421,6 +514,24 @@ class G{
 		delete GI.particles[id]
 	}
 
+	static selectParticle(x,y){
+		if(GI.particlesArr.length > 0){
+			let p = [0,Infinity]
+
+			for(let i = 0; i < GI.particlesArr.length; i++){
+				let P = GI.particles[GI.particlesArr[i]]
+				let d = distance(P.x,P.y,x,y)
+				if(d <= p[1]){
+					p = [GI.particlesArr[i],d]
+				}
+			}
+
+			return(p)
+
+		}
+		return("none")
+	}
+
 }
 
 class GI{
@@ -439,6 +550,12 @@ class GI{
 	static mouseInterval = 0
 
 	static currentKey = "nothing"
+
+	static mouseMode = 0
+	static mouseModeArr = ["normal","selector","activator"]
+	static selectedParticles = []
+
+	static AE = 150;
 
 	static autoclickSpeed = 100
 	static grid = false
@@ -1636,7 +1753,29 @@ class GI{
 				}
 			},
 
+			"H1":{
+			"chainRes":(i,p,c)=>{
+					c+=1
+					let s = p.stinfo.chainMem
+					s.mem += i
+					let out = i * 0.8
+					if(c < s.maxChain){
+					s.outTo.forEach((e)=>{
+						GI.particles[e].info.chainRes(out,GI.particles[e],c)
+					})
+					}
 
+				},
+				"eachFrame":(f,p)=>{
+				let s = p.stinfo.chainMem
+				s.mem -= s.decay
+				if(s.mem < 0){
+					s.mem = 0
+				}
+				p.stinfo.color = "rgb(0,"+(s.mem)+",0)"
+			},
+			},
+			
 
 		}
 
@@ -1693,6 +1832,17 @@ class GI{
 		"G2":{"color":"#808080","letter":"P","pulse":0},//pulsar push
 		"G3":{"color":"#F8BBD0","letter":"S","pulse":0},//phaser spin
 		"G4":{"color":"#BBF8D0","letter":"P","pulse":0},//pulsar gravity
+
+		"H1":{"color":"#605050","letter":"M","chainMem":{
+			"mem":0,
+			"inMults":[0,0,0],
+			"inAdds":[0,0,0],
+			"outLim":10,
+			"decay":0.5,
+			"outNum":1,
+			"outTo":[],
+			"maxChain":10,
+		}},//memory core
 	}
 
 	static getTypeInfo(t){
@@ -1745,7 +1895,7 @@ function repeat(){
 		ctx.fillStyle = "red"
 	}
 	ctx.font = "40px Arial"
-	ctx.fillText(GI.type[0]+GI.type[1]+"  -  Particles: "+GI.particlesArr.length+" - key: "+GI.currentKey,0,40)
+	ctx.fillText(GI.type[0]+GI.type[1]+"  -  Particles: "+GI.particlesArr.length+" - key: "+GI.currentKey+" - mode: "+GI.mouseModeArr[GI.mouseMode],0,40)
 	if(GI.customDebugger){
 		ctx.fillText(GI.debuggingInfo,0,80)
 	}
