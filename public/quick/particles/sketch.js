@@ -40,7 +40,7 @@ document.addEventListener("mousedown",(e)=>{
 		if(selected !== "none"){
 			let p = GI.particles[selected[0]]
 
-			p.info.chainRes(GI.AE,p,0)
+			p.capsule.chainRes(GI.AE,0)
 		}
 	}
 })
@@ -87,12 +87,12 @@ document.addEventListener("mouseup",(e)=>{
 			let sp = GI.particles[GI.selectedParticles[0]]
 			let tp = GI.particles[selected[0]]
 
-			if(sp.stinfo.chainMem !== undefined && tp.stinfo.chainMem !== undefined){
+			if(sp.capsule !== undefined && tp.capsule !== undefined){
 				//assume other is defined
 				//assume chainto is defined
 
-				sp.stinfo.chainMem.outTo.push(selected[0])
-
+				sp.capsule.outTo.push(selected[0])
+				tp.capsule.inFrom.push(selected[0])
 			}
 
 		}
@@ -342,7 +342,9 @@ class G{
 			"nxadd":{"x":0,"y":0,"vx":0,"vy":0},
 			"nxrps":{}
 		}
-
+		if(GI.particles[id].info.initiate !== undefined){
+			GI.particles[id].info.initiate(GI.particles[id])	
+		}
 		if(parent != undefined){
 			GI.particles[id].parent = parent.id
 		}
@@ -359,12 +361,12 @@ class G{
 	}
 
 	static drawParticleChainLine(p){
-		if(p.stinfo.chainMem !== undefined){
+		if(p.capsule !== undefined){
 			//assume outTo defined.
 			
 			ctx.lineWidth = 2/GI.zoom
 			
-			let s = p.stinfo.chainMem
+			let s = p.capsule
 			for(let i = s.outTo.length-1; i > -1; i--){
 				if(GI.particles[s.outTo[i]] !== undefined){
 					let op = GI.particles[s.outTo[i]]
@@ -383,7 +385,7 @@ class G{
 					ctx.stroke()
 
 				}else {
-					p.stinfo.chainMem.outTo.splice(i,1)
+					p.capsule.outTo.splice(i,1)
 				}
 			}
 			
@@ -635,7 +637,9 @@ class GI{
 				let d = distance(p.x,p.y,op.x,op.y)
 				let dx = (op.x-p.x)
 				let dy = (op.y-p.y)
-
+				if(d < 1){
+					d = 1/d
+				}
 				op.x -= dx/d
 				op.y -= dy/d
 
@@ -1754,26 +1758,29 @@ class GI{
 			},
 
 			"H1":{
-			"chainRes":(i,p,c)=>{
-					c+=1
-					let s = p.stinfo.chainMem
-					s.mem += i
-					let out = i * 0.8
-					if(c < s.maxChain){
-					s.outTo.forEach((e)=>{
-						GI.particles[e].info.chainRes(out,GI.particles[e],c)
-					})
-					}
+			// "chainRes":(i,p,c)=>{
+			// 		c+=1
+			// 		let s = p.stinfo.chainMem
+			// 		s.mem += i
+			// 		let out = i * 0.8
+			// 		if(c < s.maxChain){
+			// 		s.outTo.forEach((e)=>{
+			// 			GI.particles[e].info.chainRes(out,GI.particles[e],c)
+			// 		})
+			// 		}
 
-				},
+			// 	},
 				"eachFrame":(f,p)=>{
-				let s = p.stinfo.chainMem
+				let s = p.capsule
 				s.mem -= s.decay
 				if(s.mem < 0){
 					s.mem = 0
 				}
 				p.stinfo.color = "rgb(0,"+(s.mem)+",0)"
 			},
+				"initiate":(p)=>{
+					p.capsule = new nur1()
+				}
 			},
 			
 
@@ -1852,6 +1859,69 @@ class GI{
 		return(JSON.parse(JSON.stringify(this.typeDict2[t])))
 	}
 }
+
+
+
+
+class nur1{
+	constructor(){
+		this.mem = 0;
+		this.inMults = [0,0,0];
+		this.inAdds = [0,0,0];
+		this.outLim = 10;
+		this.decay = 1;
+		this.outNum = 1;
+		this.lastAction = {"in":[],"out":0}
+		this.outTo = [];
+		this.inFrom = [];
+		this.maxChain = 10;
+	}
+
+
+	chainRes(i,c){
+		c+=1
+		this.mem += i
+		if(this.mem > 255){
+			this.mem = 255
+		}
+		let out = i * 0.8
+		if(c < this.maxChain){
+			this.outTo.forEach((e)=>{
+				GI.particles[e].capsule.chainRes(out,c)
+			})
+		}
+	}
+
+	AChainRes(a,c){
+		c+=1
+
+		let i = 0;
+		this.inMults.forEach((e,j)=>{
+			if(a[j] === undefined){return;}
+			i += (a[j]+inAdds[j])*e
+		})
+
+		this.mem += i
+		if(c < this.maxChain){ 
+			if(this.outLim < this.mem && this.outLim > this.mem-i){
+				this.outTo.forEach((e)=>{
+					GI.particles[e].capsule.AChainRes(this.outNum,c)
+				})
+			}
+		}
+	}
+
+	CorrShld(a){
+		if(a == "none"){
+
+		}
+	}
+
+
+}
+
+
+
 
 
 function distance(x1,y1,x2,y2) {
