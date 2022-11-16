@@ -1782,6 +1782,37 @@ class GI{
 					p.capsule = new nur1()
 				}
 			},
+			"H2":{
+
+				"toOther":(p,op)=>{
+				let d = distance(p.x,p.y,op.x,op.y)
+				let dx = (op.x-p.x)
+				let dy = (op.y-p.y)
+
+				let r = 1
+				if(d < 50){
+					if(d<2){
+						d = 2
+					}
+					r = -0.8
+				}
+
+				op.nxadd.x -= 450*dx/d/d*r
+				op.nxadd.y -= 450*dy/d/d*r
+
+			},
+				"eachFrame":(f,p)=>{
+				let s = p.capsule
+				s.mem -= s.decay
+				if(s.mem < 0){
+					s.mem = 0
+				}
+				p.stinfo.color = "rgb(0,"+(s.mem)+",0)"
+			},
+				"initiate":(p)=>{
+					p.capsule = new nur1()
+				}
+			},
 			
 
 		}
