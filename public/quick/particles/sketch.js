@@ -1788,18 +1788,13 @@ class GI{
 				let d = distance(p.x,p.y,op.x,op.y)
 				let dx = (op.x-p.x)
 				let dy = (op.y-p.y)
-
-				let r = 1
-				if(d < 50){
-					if(d<2){
-						d = 2
-					}
-					r = -0.8
+				if(d < 100){
+				if(d < 2){
+					d = 2
 				}
-
-				op.nxadd.x -= 450*dx/d/d*r
-				op.nxadd.y -= 450*dy/d/d*r
-
+				op.nxadd.x += 50*dx/d/d
+				op.nxadd.y += 50*dy/d/d
+				}
 			},
 				"eachFrame":(f,p)=>{
 				let s = p.capsule
@@ -1881,6 +1876,7 @@ class GI{
 			"outTo":[],
 			"maxChain":10,
 		}},//memory core
+		"H2":{"color":"#605050","letter":"M"},//repulsive memory core
 	}
 
 	static getTypeInfo(t){
