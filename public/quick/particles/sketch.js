@@ -39,8 +39,15 @@ document.addEventListener("mousedown",(e)=>{
 		let selected = G.selectParticle(GI.cam.x+(mouseX)*GI.zoom,GI.cam.y+(mouseY)*GI.zoom)
 		if(selected !== "none"){
 			let p = GI.particles[selected[0]]
-
-			p.capsule.chainRes(GI.AE,0)
+			if(p.capsule !== undefined){
+				if(p.capsule.version === 1){
+				p.capsule.chainRes(GI.AE,0)} else {
+					p.capsule.chainRes([GI.AE],0)
+				}
+			}
+			if(e.ctrlKey){
+				GI.mouseInterval = setInterval(()=>{GI.particles[selected[0]].x = GI.cam.x+(mouseX)*GI.zoom;GI.particles[selected[0]].y =GI.cam.y+(mouseY)*GI.zoom},GI.autoclickSpeed)
+			}
 		}
 	}
 })
@@ -1808,6 +1815,108 @@ class GI{
 					p.capsule = new nur1()
 				}
 			},
+			"H3":{
+
+				"toOther":(p,op)=>{
+				let d = distance(p.x,p.y,op.x,op.y)
+				let dx = (op.x-p.x)
+				let dy = (op.y-p.y)
+				if(d < 100){
+				if(d < 2){
+					d = 2
+				}
+				op.nxadd.x += 50*dx/d/d
+				op.nxadd.y += 50*dy/d/d
+				}
+			},
+				"eachFrame":(f,p)=>{
+				let s = p.capsule
+				s.mem -= s.mem*0.02
+				if(s.mem < 0){
+					s.mem = 0
+				}
+				// p.stinfo.color = "rgb(0,"+(s.mem)+",0)"
+
+				if(s.mem < 1){
+					p.stinfo.color = "rgb("+(s.mem*255)+",0,0)"
+				} else if(s.mem < 10){
+					p.stinfo.color = "rgb(255,"+(s.mem*25.5)+",0)"
+				} else if(s.mem < 100){
+					p.stinfo.color = "rgb(255,255,"+(s.mem*2.55)+")"
+				} else if(s.mem < 1000){
+					p.stinfo.color = "rgb("+(255-s.mem*0.255)+",255,"+(255-s.mem*0.255)+")"
+				} else if(s.mem < 10000){
+					p.stinfo.color = "rgb(0,255,"+(s.mem*0.0255)+")"
+				} else if(s.mem < 100000){
+					p.stinfo.color = "rgb(0,"+(255-s.mem*0.00255)+",255)"
+				} else if(s.mem < 1000000){
+					p.stinfo.color = "rgb("+(s.mem*0.000255)+",0,255)"
+				}
+
+			},
+				"initiate":(p)=>{
+					p.capsule = new nur1()
+					p.capsule.maxMem = Infinity;
+				}
+			},
+			"H4":{
+
+				"toOther":(p,op)=>{
+				let d = distance(p.x,p.y,op.x,op.y)
+				let dx = (op.x-p.x)
+				let dy = (op.y-p.y)
+				if(d<200){
+					if(d < 150){
+					if(d < 2){
+						d = 2
+					}
+					op.nxadd.x += 50*dx/d/d
+					op.nxadd.y += 50*dy/d/d
+					}
+
+					if(op.capsule!==undefined &&p.capsule.outToD[op.id] !== true && p.capsule.inFromD[op.id] !== true){
+						if(Math.random()>0.5){
+						nur1.connect(p,op)} else {
+							nur1.connect(op,p)
+						}
+					}
+
+				} else {
+					if(p.capsule.outToD[op.id] === true){
+						nur1.disconnect(p,op)
+					}
+					if(p.capsule.inFromD[op.id] === true){
+						nur1.disconnect(op,p)
+					}
+				}
+			},
+				"eachFrame":(f,p)=>{
+				let s = p.capsule
+				s.mem *= 0.95
+				if(s.mem < 0){
+					s.mem = 0
+				}
+				if(s.mem < 1){
+					p.stinfo.color = "rgb("+(s.mem*255)+",0,0)"
+				} else if(s.mem < 10){
+					p.stinfo.color = "rgb(255,"+(s.mem*25.5)+",0)"
+				} else if(s.mem < 100){
+					p.stinfo.color = "rgb(255,255,"+(s.mem*2.55)+")"
+				} else if(s.mem < 1000){
+					p.stinfo.color = "rgb("+(255-s.mem*0.255)+",255,"+(255-s.mem*0.255)+")"
+				} else if(s.mem < 10000){
+					p.stinfo.color = "rgb(0,255,"+(s.mem*0.0255)+")"
+				} else if(s.mem < 100000){
+					p.stinfo.color = "rgb(0,"+(255-s.mem*0.00255)+",255)"
+				} else if(s.mem < 1000000){
+					p.stinfo.color = "rgb("+(s.mem*0.000255)+",0,255)"
+				}
+			},
+				"initiate":(p)=>{
+					p.capsule = new nur1()
+					p.capsule.maxMem = Infinity;
+				}
+			},
 			
 
 		}
@@ -1866,17 +1975,10 @@ class GI{
 		"G3":{"color":"#F8BBD0","letter":"S","pulse":0},//phaser spin
 		"G4":{"color":"#BBF8D0","letter":"P","pulse":0},//pulsar gravity
 
-		"H1":{"color":"#605050","letter":"M","chainMem":{
-			"mem":0,
-			"inMults":[0,0,0],
-			"inAdds":[0,0,0],
-			"outLim":10,
-			"decay":0.5,
-			"outNum":1,
-			"outTo":[],
-			"maxChain":10,
-		}},//memory core
+		"H1":{"color":"#605050","letter":"M"},//memory core
 		"H2":{"color":"#605050","letter":"M"},//repulsive memory core
+		"H3":{"color":"#000000","letter":"I"},//indicator particle
+		"H4":{"color":"#000000","letter":"M"},//connector particle
 	}
 
 	static getTypeInfo(t){
@@ -1891,7 +1993,35 @@ class GI{
 
 
 class nur1{
+
+
+	static disconnect(from,to){
+		let fa = from.capsule.outTo
+		for(let i = fa.length-1; i>-1;i--){
+			if(fa[i] == to.id){
+				from.capsule.outTo.splice(i,1)
+			}
+		}
+
+		let ta = from.capsule.outTo
+		for(let i = ta.length-1; i>-1;i--){
+			if(ta[i] == from.id){
+				to.capsule.outTo.splice(i,1)
+			}
+		}
+		delete from.capsule.outToD[to.id]
+		delete to.capsule.inFromD[from.id]
+	}
+
+	static connect(from,to){
+		from.capsule.outTo.push(to.id)
+		to.capsule.inFrom.push(from.id)
+		from.capsule.outToD[to.id] = true
+		to.capsule.inFromD[from.id] = true
+	}
+
 	constructor(){
+		this.version = 1
 		this.mem = 0;
 		this.inMults = [0,0,0];
 		this.inAdds = [0,0,0];
@@ -1901,15 +2031,20 @@ class nur1{
 		this.lastAction = {"in":[],"out":0}
 		this.outTo = [];
 		this.inFrom = [];
+
+		this.outToD = {};
+		this.inFromD = {};
+
 		this.maxChain = 10;
+		this.maxMem = 255;
 	}
 
 
 	chainRes(i,c){
 		c+=1
 		this.mem += i
-		if(this.mem > 255){
-			this.mem = 255
+		if(this.mem > this.maxMem){
+			this.mem = this.maxMem
 		}
 		let out = i * 0.8
 		if(c < this.maxChain){
@@ -1925,7 +2060,7 @@ class nur1{
 		let i = 0;
 		this.inMults.forEach((e,j)=>{
 			if(a[j] === undefined){return;}
-			i += (a[j]+inAdds[j])*e
+			i += (a[j]+this.inAdds[j])*e
 		})
 
 		this.mem += i
@@ -1938,10 +2073,116 @@ class nur1{
 		}
 	}
 
-	CorrShld(a){
-		if(a == "none"){
+	evaluateSelf(m,a,s){
+		return(this.evaluate(m,a,s,this.inAdds,this.inMults,this.outLim,this.outNum))
+	}
+
+	selfCorrect(a,t){
+		let originalError = 0
+		let originalError2 = 0
+		a.forEach((e)=>{
+			let b = this.evaluateSelf(e[0],e[1],e[2])
+			originalError2 += b[1]
+			originalError += b[0]
+		})
+
+		for(let i = 0; i < t; i++){
+			let td = [JSON.parse(JSON.stringify(this.inAdds)),JSON.parse(JSON.stringify(this.inMults)),this.outLim,this.outNum]
+			
+			let r = Math.random()
+			if(r>0.65){
+				td[0][Math.floor(Math.random()*td[0].length)] += originalError * Math.random() * 2 - originalError
+			} else if(r>0.3){
+				td[1][Math.floor(Math.random()*td[0].length)] += originalError * Math.random() * 2 - originalError
+			} else {
+				if(Math.random()>0.5){
+					td[2] += originalError * Math.random() * 2 - originalError
+				} else {
+					td[3] += originalError * Math.random() * 2 - originalError
+				}
+			}
+
+			let ev = [0,0]
+
+
+			a.forEach((e)=>{
+			let aa = this.evaluate(e[0],e[1],e[2],td[0],td[1],td[2],td[3])
+				ev[0] += aa[0]
+				ev[1] += aa[1]
+			})
+			
+
+			if(ev[0] < originalError){
+				this.inAdds = td[0]
+				this.inMults = td[1]
+				this.outLim = td[2]
+				this.outNum = td[3]
+
+				originalError = ev[0]
+				originalError2 = ev[1]
+
+			} else if(ev[0] == originalError && ev[1] < originalError2){
+				this.inAdds = td[0]
+				this.inMults = td[1]
+				this.outLim = td[2]
+				this.outNum = td[3]
+
+				originalError = ev[0]
+				originalError2 = ev[1]
+
+			}
 
 		}
+
+	}
+
+	evaluate(om,a,s,iad,imu,olm,onm){
+		let aout = "none"
+		let error = 0
+		let er2 = 0
+
+		if(s == "none"){
+			let i = 0
+			imu.forEach((e,j)=>{
+				if(a[j] === undefined){return;}
+				i += (a[j]+iad[j])*e
+		})
+
+			if(olm < om+i){
+				if(olm > om){
+					aout = onm
+					error = onm
+					er2 = om+i-onm
+				}
+			}
+
+		} else {
+			let i = 0
+			imu.forEach((e,j)=>{
+				if(a[j] === undefined){return;}
+				i += (a[j]+iad[j])*e
+			})
+
+			//had output
+			if(olm < om+i){
+				if(olm > om){
+					aout = onm
+					error = Math.abs(s-onm)
+					er2 = Math.abs(s-onm)
+				}
+				//no output
+			} else {
+				error = s
+				er2 = olm-(om+i)
+			}
+
+
+
+
+		}
+
+		return([error,er2,aout])
+
 	}
 
 
