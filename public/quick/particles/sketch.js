@@ -16,6 +16,10 @@ let mouseY = 0
 
 onmousemove = (e)=>{mouseX = (e.clientX); mouseY = (e.clientY)}
 
+function camPosRel(x,y){
+	return([(-GI.cam.x+(x))/GI.zoom,(-GI.cam.y+(y))/GI.zoom])
+}
+
 document.addEventListener("mousedown",(e)=>{
 	if(GI.mouseModeArr[GI.mouseMode] == "normal"){
 		e.preventDefault()
@@ -420,7 +424,34 @@ class G{
 
 	}
 
+	static drawLines(){
+		let d = Date.now()
+
+		//{"x":,"y":,"tx":,"ty":,"color":,"expireTime":,"size":,}
+		for(let i = GI.lines.length-1;i>-1;i--){
+
+			let e = GI.lines[i]
+			e.life -= 1
+			if(e.life < 1){
+				GI.lines.splice(i,1)
+				continue;
+			}
+
+			ctx.beginPath()
+			ctx.strokeStyle = e.color
+			ctx.lineWidth = e.size/GI.zoom*e.life/e.maxlife
+			let apos = camPosRel(e.x,e.y)
+			let bpos = camPosRel(e.tx,e.ty)
+			ctx.moveTo(apos[0],apos[1])
+			ctx.lineTo(bpos[0],bpos[1])
+			ctx.stroke()
+		}
+		
+	}
+
 	static drawParticles(){
+		ctx.lineWidth = 1
+		ctx.strokeStyle = "#000000"
 		GI.particlesArr.forEach((e)=>{
 			let p = GI.particles[e]
 			this.drawParticle(p)
@@ -573,6 +604,9 @@ class GI{
 	static preformanceCalculate = 0
 	static altPressed = false
 	static zoom = 1
+
+	static lines = []
+
 
 	static getPI(){
 		this.partIDcount++
@@ -979,7 +1013,9 @@ class GI{
 					if(d < 60){
 
 					op.life -= 15
-
+					if(f%5==0){
+					GI.lines.push({"x":p.x,"y":p.y,"tx":op.x,"ty":op.y,"size":5,"life":8,"maxlife":8,"color":"#00FFFF"})
+					}
 					if(op.life <= 0){
 						G.newParticle(op.x,op.y,"D4",10)
 						G.delParticle(op)
@@ -1917,6 +1953,232 @@ class GI{
 					p.capsule.maxMem = Infinity;
 				}
 			},
+
+			"I1":{
+				"toOther":(p,op)=>{
+					let d = distance(p.x,p.y,op.x,op.y)
+					let dx = (op.x-p.x)
+					let dy = (op.y-p.y)
+					if(d < 700){
+						if(d < 300){
+						if(d < 100){
+						if(d < 2){
+							d = 2
+						}
+						op.nxadd.x += 50*dx/d/d
+						op.nxadd.y += 50*dy/d/d
+						}
+
+						if(op.stinfo.team !== undefined && op.stinfo.team != p.stinfo.team && p.stinfo.reload < 0 && Math.random()>0.9){
+							GI.lines.push({"x":p.x,"y":p.y,"tx":op.x,"ty":op.y,"size":2,"life":30,"maxlife":30,"color":"#FFFF00"})
+							p.stinfo.reload = 40 + Math.floor(Math.random()*20)
+							op.life -= 200
+						}
+						}
+					}
+
+				},
+				"eachFrame":(f,p)=>{
+					p.stinfo.reload -= 1
+				}
+			},
+			"I2":{
+				"toOther":(p,op)=>{
+					let d = distance(p.x,p.y,op.x,op.y)
+					let dx = (op.x-p.x)
+					let dy = (op.y-p.y)
+					if(d < 300){
+						if(d < 100){
+						if(d < 2){
+							d = 2
+						}
+						op.nxadd.x += 50*dx/d/d
+						op.nxadd.y += 50*dy/d/d
+						}
+
+						if(op.stinfo.team !== undefined && op.stinfo.team === -1){
+							op.stinfo.team = p.stinfo.team
+							op.stinfo.color = p.stinfo.color
+						}
+					}
+
+
+				},
+				"eachFrame":(f,p)=>{
+				if(f%61 == 0 && p.stinfo.children < 20){
+					p.stinfo.children += 1
+					G.newParticle(p.x+Math.random()-0.5,p.y+Math.random()-0.5,"I3",10,undefined,p)
+					
+				}
+				},
+				"childOnDeath":(c,p)=>{
+					p.stinfo.children -= 1
+				}
+			},
+			"I3":{
+				"eachFrame":(f,p)=>{
+					p.stinfo.reload -= 1
+				let op1 = GI.particles[p.stinfo.following]
+
+				if(op1 !== undefined && op1.stinfo.team != p.stinfo.team){
+					let d = distance(p.x,p.y,op1.x,op1.y)
+					let dx = (op1.x-p.x)
+					let dy = (op1.y-p.y)
+					if(d<3){
+						d = 3
+					}
+
+					if(d < 260){
+
+						if(op1.stinfo.team !== undefined && op1.stinfo.team != p.stinfo.team && p.stinfo.reload < 0 && Math.random()>0.9){
+							GI.lines.push({"x":p.x,"y":p.y,"tx":op1.x,"ty":op1.y,"size":2,"life":30,"maxlife":30,"color":"#FFFF00"})
+							p.stinfo.reload = 40 + Math.floor(Math.random()*20)
+							op1.life -= 200
+							op1.nxadd.x += 10*dx/d
+							op1.nxadd.y += 10*dy/d
+						}
+					
+					}
+
+					if(d > 100){
+					p.x += 1.5 * dx/d
+					p.y += 1.5 * dy/d
+					}
+							GI.particlesArr.forEach((e)=>{
+							
+
+							let op = GI.particles[e]
+							if(op.stinfo.team == undefined || op.stinfo.team != p.stinfo.team){return}
+							let d2 = distance(p.x,p.y,op.x,op.y)
+
+							if(d2<200){
+							if(d2<3){
+								d2 = 3
+							}
+							let dx2 = (op.x-p.x)
+							let dy2 = (op.y-p.y)
+
+							if(op.stinfo.team == p.stinfo.team){
+								op.nxadd.x += 80*dx2/d2/d2
+								op.nxadd.y += 80*dy2/d2/d2
+							}
+							}
+						})
+
+
+				} else {
+
+				GI.particlesArr.forEach((e)=>{
+					
+
+					let op = GI.particles[e]
+					let d = distance(p.x,p.y,op.x,op.y)
+
+					if(d < 1000){
+					if(op.stinfo.team != p.stinfo.team && Math.random()>0.9){
+						p.stinfo.following = e
+					}
+					if(d<3){
+						d = 3
+					}
+					let dx = (op.x-p.x)
+					let dy = (op.y-p.y)
+					if(op.t != "I2" && d<100){
+						op.nxadd.x += 180*dx/d/d	
+						op.nxadd.y += 180*dy/d/d
+					}
+					}
+					
+				})
+
+				
+
+			}
+
+			},
+			},
+			"I4":{
+				"eachFrame":(f,p)=>{
+					p.stinfo.reload -= 1
+				let op1 = GI.particles[p.stinfo.following]
+
+				if(op1 !== undefined && op1.stinfo.team != p.stinfo.team){
+					let d = distance(p.x,p.y,op1.x,op1.y)
+					let dx = (op1.x-p.x)
+					let dy = (op1.y-p.y)
+					if(d<3){
+						d = 3
+					}
+
+					if(d < 260){
+
+						if(op1.stinfo.team !== undefined && op1.stinfo.team != p.stinfo.team && p.stinfo.reload < 0 && Math.random()>0.9){
+							GI.lines.push({"x":p.x,"y":p.y,"tx":op1.x,"ty":op1.y,"size":2,"life":30,"maxlife":30,"color":"#FFFF00"})
+							p.stinfo.reload = 10 + Math.floor(Math.random()*2)
+							op1.life -= 200
+							op1.nxadd.x += 10*dx/d
+							op1.nxadd.y += 10*dy/d
+						}
+					
+					}
+
+					if(d > 100){
+					p.x += 5.5 * dx/d
+					p.y += 5.5 * dy/d
+					}
+							GI.particlesArr.forEach((e)=>{
+							
+
+							let op = GI.particles[e]
+							if(op.stinfo.team == undefined || op.stinfo.team != p.stinfo.team){return}
+							let d2 = distance(p.x,p.y,op.x,op.y)
+
+							if(d2<300){
+							if(d2<3){
+								d2 = 3
+							}
+							let dx2 = (op.x-p.x)
+							let dy2 = (op.y-p.y)
+
+							if(op.stinfo.team == p.stinfo.team){
+								op.nxadd.x += 80*dx2/d2/d2
+								op.nxadd.y += 80*dy2/d2/d2
+							}
+							}
+						})
+
+
+				} else {
+
+				GI.particlesArr.forEach((e)=>{
+					
+
+					let op = GI.particles[e]
+					let d = distance(p.x,p.y,op.x,op.y)
+
+					if(d < 1000){
+					if(op.stinfo.team != p.stinfo.team && Math.random()>0.9){
+						p.stinfo.following = e
+					}
+					if(d<3){
+						d = 3
+					}
+					let dx = (op.x-p.x)
+					let dy = (op.y-p.y)
+					if(op.t != "I2" && d<100){
+						op.nxadd.x += 180*dx/d/d	
+						op.nxadd.y += 180*dy/d/d
+					}
+					}
+					
+				})
+
+				
+
+			}
+
+			},
+			}
 			
 
 		}
@@ -1979,6 +2241,11 @@ class GI{
 		"H2":{"color":"#605050","letter":"M"},//repulsive memory core
 		"H3":{"color":"#000000","letter":"I"},//indicator particle
 		"H4":{"color":"#000000","letter":"M"},//connector particle
+
+		"I1":{"color":"#303030","letter":"A","team":-1,"reload":-1,"following":-1},
+		"I2":{"color":"#306030","letter":"A","team":1,"children":0},
+		"I3":{"color":"#303030","letter":"A","team":-1,"reload":-1,"following":-1},
+		"I4":{"color":"#303030","letter":"A","team":-1,"reload":-1,"following":-1},
 	}
 
 	static getTypeInfo(t){
@@ -2011,13 +2278,15 @@ class nur1{
 		}
 		delete from.capsule.outToD[to.id]
 		delete to.capsule.inFromD[from.id]
+		delete to.capsule.inSort[from.id]
 	}
 
-	static connect(from,to){
+	static connect(from,to,n){
 		from.capsule.outTo.push(to.id)
 		to.capsule.inFrom.push(from.id)
 		from.capsule.outToD[to.id] = true
 		to.capsule.inFromD[from.id] = true
+		to.capsule.inSort[from.id] = n===undefined?0:n
 	}
 
 	constructor(){
@@ -2037,6 +2306,11 @@ class nur1{
 
 		this.maxChain = 10;
 		this.maxMem = 255;
+
+		this.tempMem = {}
+
+		this.inSort = {}
+
 	}
 
 
@@ -2054,20 +2328,33 @@ class nur1{
 		}
 	}
 
-	AChainRes(a,c){
+	AChainRes(a,c,cmid,p){
 		c+=1
+		if(this.tempMem.id !== cmid){
+			this.tempMem = {"id":cmid,"in":[]}
+		}
 
+
+
+		this.tempMem.in[this.inSort[p.id]].push({"p":p,"a":a})
+		
 		let i = 0;
 		this.inMults.forEach((e,j)=>{
 			if(a[j] === undefined){return;}
 			i += (a[j]+this.inAdds[j])*e
 		})
 
+		let m = this.mem
 		this.mem += i
+
+		if(this.mem < 0){
+			this.mem = 0
+		}
+
 		if(c < this.maxChain){ 
-			if(this.outLim < this.mem && this.outLim > this.mem-i){
+			if(this.outLim < this.mem && this.outLim > m){
 				this.outTo.forEach((e)=>{
-					GI.particles[e].capsule.AChainRes(this.outNum,c)
+					GI.particles[e].capsule.AChainRes(this.outNum,c,cmid,this)
 				})
 			}
 		}
@@ -2075,6 +2362,84 @@ class nur1{
 
 	evaluateSelf(m,a,s){
 		return(this.evaluate(m,a,s,this.inAdds,this.inMults,this.outLim,this.outNum))
+	}
+
+	selfCorrectBP(a,t){
+		let originalError = 0
+		let originalError2 = 0
+		a.forEach((e)=>{
+			let b = this.evaluateSelf(e[0],e[1],e[2])
+			originalError2 += b[1]
+			originalError += b[0]
+		})
+
+		let aorigin = [originalError,originalError2]
+
+		for(let i = 0; i < t; i++){
+			let td = [JSON.parse(JSON.stringify(this.inAdds)),JSON.parse(JSON.stringify(this.inMults)),this.outLim,this.outNum,e[0],e[1],e[2]]
+			let mut = 1
+			if(Math.random() > 0.99){
+				mut = Math.random() * 100
+			}
+
+			let r = Math.random()
+			let BP = false
+			if(Math.random()>0.7){
+				BP = true
+				td[Math.floor(Math.random()*3)+4] += mut*(originalError * Math.random() * 2 - originalError)
+			}else 
+
+			if(r>0.65){
+				td[0][Math.floor(Math.random()*td[0].length)] += mut*(originalError * Math.random() * 2 - originalError)
+			} else if(r>0.3){
+				td[1][Math.floor(Math.random()*td[0].length)] += mut*(originalError * Math.random() * 2 - originalError)
+			} else {
+				if(Math.random()>0.5){
+					td[2] += mut*(originalError * Math.random() * 2 - originalError)
+				} else {
+					td[3] += mut*(originalError * Math.random() * 2 - originalError)
+				}
+			}
+
+			let ev = [0,0]
+
+
+			a.forEach((e)=>{
+			let aa = this.evaluate(td[4],td[5],td[6],td[0],td[1],td[2],td[3])
+				ev[0] += aa[0]
+				ev[1] += aa[1]
+			})
+			
+
+			if(ev[0] < originalError){
+				if(BP){
+
+				}else{
+				this.inAdds = td[0]
+				this.inMults = td[1]
+				this.outLim = td[2]
+				this.outNum = td[3]
+
+				originalError = ev[0]
+				originalError2 = ev[1]
+				}
+			} else if(ev[0] == originalError && ev[1] < originalError2){
+				if(BP){
+
+				}else{
+				this.inAdds = td[0]
+				this.inMults = td[1]
+				this.outLim = td[2]
+				this.outNum = td[3]
+
+				originalError = ev[0]
+				originalError2 = ev[1]
+				}
+			}
+
+		}
+		return([originalError,aorigin[0],originalError2,aorigin[1]])
+
 	}
 
 	selfCorrect(a,t){
@@ -2086,19 +2451,25 @@ class nur1{
 			originalError += b[0]
 		})
 
+		let aorigin = [originalError,originalError2]
+
 		for(let i = 0; i < t; i++){
 			let td = [JSON.parse(JSON.stringify(this.inAdds)),JSON.parse(JSON.stringify(this.inMults)),this.outLim,this.outNum]
-			
+			let mut = 1
+			if(Math.random() > 0.99){
+				mut = Math.random() * 100
+			}
+
 			let r = Math.random()
 			if(r>0.65){
-				td[0][Math.floor(Math.random()*td[0].length)] += originalError * Math.random() * 2 - originalError
+				td[0][Math.floor(Math.random()*td[0].length)] += mut*(originalError * Math.random() * 2 - originalError)
 			} else if(r>0.3){
-				td[1][Math.floor(Math.random()*td[0].length)] += originalError * Math.random() * 2 - originalError
+				td[1][Math.floor(Math.random()*td[0].length)] += mut*(originalError * Math.random() * 2 - originalError)
 			} else {
 				if(Math.random()>0.5){
-					td[2] += originalError * Math.random() * 2 - originalError
+					td[2] += mut*(originalError * Math.random() * 2 - originalError)
 				} else {
-					td[3] += originalError * Math.random() * 2 - originalError
+					td[3] += mut*(originalError * Math.random() * 2 - originalError)
 				}
 			}
 
@@ -2133,6 +2504,7 @@ class nur1{
 			}
 
 		}
+		return([originalError,aorigin[0],originalError2,aorigin[1]])
 
 	}
 
@@ -2140,40 +2512,50 @@ class nur1{
 		let aout = "none"
 		let error = 0
 		let er2 = 0
+		let i = 0
 
-		if(s == "none"){
-			let i = 0
-			imu.forEach((e,j)=>{
-				if(a[j] === undefined){return;}
-				i += (a[j]+iad[j])*e
+		imu.forEach((e,j)=>{
+			if(a[j] === undefined){return;}
+			i += (a[j]+iad[j])*e
 		})
 
-			if(olm < om+i){
+		let omi = om+i < 0?0:om+i
+
+		if(s == "none"){
+
+			if(olm < omi){
 				if(olm > om){
 					aout = onm
-					error = onm
-					er2 = om+i-onm
+					error = Math.abs(onm)
+					if(GI.debugger){console.log(omi)}
+					er2 = olm-omi
 				}
 			}
 
 		} else {
-			let i = 0
-			imu.forEach((e,j)=>{
-				if(a[j] === undefined){return;}
-				i += (a[j]+iad[j])*e
-			})
+			
 
 			//had output
-			if(olm < om+i){
+			if(olm < omi){
+				if(GI.debugger){console.log("1")}
 				if(olm > om){
+					if(GI.debugger){console.log("2")}
 					aout = onm
 					error = Math.abs(s-onm)
 					er2 = Math.abs(s-onm)
+					
+				} else {
+					error = s
+					if(GI.debugger){console.log(omi)}
+					er2 = olm-omi
 				}
+
+
 				//no output
 			} else {
+				if(GI.debugger){console.log("4")}
 				error = s
-				er2 = olm-(om+i)
+				er2 = olm-omi
 			}
 
 
@@ -2181,7 +2563,7 @@ class nur1{
 
 		}
 
-		return([error,er2,aout])
+		return([error,Math.abs(er2),aout,om+i])
 
 	}
 
@@ -2254,6 +2636,7 @@ function repeat(){
 	psf()
 
 	G.drawParticles()
+	G.drawLines()
 
 	if(GI.selectionStart !== false){
 		ctx.fillStyle = "rgba(255,0,255,0.4)";
