@@ -2178,6 +2178,88 @@ class GI{
 			}
 
 			},
+			},
+			"I5":{
+				"eachFrame":(f,p)=>{
+					p.stinfo.reload -= 1
+				let op1 = GI.particles[p.stinfo.following]
+
+				if(op1 !== undefined && op1.stinfo.team != p.stinfo.team){
+					let d = distance(p.x,p.y,op1.x,op1.y)
+					let dx = (op1.x-p.x)
+					let dy = (op1.y-p.y)
+					if(d<3){
+						d = 3
+					}
+
+					if(d < 260){
+
+						if(op1.stinfo.team !== undefined && op1.stinfo.team != p.stinfo.team && p.stinfo.reload < 0){
+							GI.lines.push({"x":p.x,"y":p.y,"tx":op1.x+Math.random()*5,"ty":op1.y+Math.random()*5,"size":2,"life":30,"maxlife":30,"color":"#FFFFFF"})
+							p.stinfo.reload = Math.floor(Math.random()*10)
+							op1.life -= 100
+							op1.nxadd.x += 10*dx/d
+							op1.nxadd.y += 10*dy/d
+						}
+					
+					}
+
+					if(d > 100){
+					p.x += 5.5 * dx/d
+					p.y += 5.5 * dy/d
+					}
+							GI.particlesArr.forEach((e)=>{
+							
+
+							let op = GI.particles[e]
+							if(op.stinfo.team == undefined || op.stinfo.team != p.stinfo.team){return}
+							let d2 = distance(p.x,p.y,op.x,op.y)
+
+							if(d2<300){
+							if(d2<3){
+								d2 = 3
+							}
+							let dx2 = (op.x-p.x)
+							let dy2 = (op.y-p.y)
+
+							if(op.stinfo.team == p.stinfo.team){
+								op.nxadd.x += 80*dx2/d2/d2
+								op.nxadd.y += 80*dy2/d2/d2
+							}
+							}
+						})
+
+
+				} else {
+
+				GI.particlesArr.forEach((e)=>{
+					
+
+					let op = GI.particles[e]
+					let d = distance(p.x,p.y,op.x,op.y)
+
+					if(d < 1000){
+					if(op.stinfo.team != p.stinfo.team && Math.random()>0.9){
+						p.stinfo.following = e
+					}
+					if(d<3){
+						d = 3
+					}
+					let dx = (op.x-p.x)
+					let dy = (op.y-p.y)
+					if(op.t != "I2" && d<100){
+						op.nxadd.x += 180*dx/d/d	
+						op.nxadd.y += 180*dy/d/d
+					}
+					}
+					
+				})
+
+				
+
+			}
+
+			},
 			}
 			
 
@@ -2246,6 +2328,7 @@ class GI{
 		"I2":{"color":"#306030","letter":"A","team":1,"children":0},
 		"I3":{"color":"#303030","letter":"A","team":-1,"reload":-1,"following":-1},
 		"I4":{"color":"#303030","letter":"A","team":-1,"reload":-1,"following":-1},
+		"I5":{"color":"#303030","letter":"A","team":-1,"reload":-1,"following":-1},
 	}
 
 	static getTypeInfo(t){
