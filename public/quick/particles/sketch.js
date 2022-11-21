@@ -1308,7 +1308,9 @@ class GI{
 					if(d < 60){
 
 					op.life -= 15
-
+					if(f%17==(Math.floor(Math.abs((p.x+p.y)/80))%17)){
+					GI.lines.push({"x":p.x,"y":p.y,"tx":op.x,"ty":op.y,"size":12,"life":8,"maxlife":8,"color":"#5FF05F"})
+					}
 					if(op.life <= 0){
 						G.newParticle(op.x,op.y,"D9",10)
 						G.delParticle(op)
@@ -1330,17 +1332,10 @@ class GI{
 					let d = distance(p.x,p.y,op.x,op.y)
 
 					if(d < 3000){
-					if(Math.random()>0.9){
+					if(Math.random()>0.99){
 						p.stinfo.following = e
 					}
-					if(d<3){
-						d = 3
 					}
-					}
-					let dx = (op.x-p.x)
-					let dy = (op.y-p.y)
-						op.nxadd.x -= 180*dx/d/d	
-						op.nxadd.y -= 180*dy/d/d
 				})
 
 				
