@@ -1948,6 +1948,69 @@ class GI{
 					p.capsule.maxMem = Infinity;
 				}
 			},
+			"H5":{
+
+				"toOther":(p,op)=>{
+				let d = distance(p.x,p.y,op.x,op.y)
+				let dx = (op.x-p.x)
+				let dy = (op.y-p.y)
+				if(d<200){
+					if(d < 150){
+					if(d < 2){
+						d = 2
+					}
+					op.nxadd.x += 50*dx/d/d
+					op.nxadd.y += 50*dy/d/d
+					}
+
+					if(op.capsule!==undefined &&p.capsule.outToD[op.id] !== true && p.capsule.inFromD[op.id] !== true){
+						if(Math.random()>0.5){
+						nur1.connect(p,op)} else {
+							nur1.connect(op,p)
+						}
+					}
+
+				} else {
+					if(p.capsule.outToD[op.id] === true){
+						nur1.disconnect(p,op)
+					}
+					if(p.capsule.inFromD[op.id] === true){
+						nur1.disconnect(op,p)
+					}
+				}
+			},
+				"eachFrame":(f,p)=>{
+				let s = p.capsule
+				s.mem *= 0.95
+				if(s.mem < 0){
+					s.mem = 0
+				}
+				if(s.mem < 1){
+					p.stinfo.color = "rgb("+(s.mem*255)+",0,0)"
+				} else if(s.mem < 10){
+					p.stinfo.color = "rgb(255,"+(s.mem*25.5)+",0)"
+				} else if(s.mem < 100){
+					p.stinfo.color = "rgb(255,255,"+(s.mem*2.55)+")"
+				} else if(s.mem < 1000){
+					p.stinfo.color = "rgb("+(255-s.mem*0.255)+",255,"+(255-s.mem*0.255)+")"
+				} else if(s.mem < 10000){
+					p.stinfo.color = "rgb(0,255,"+(s.mem*0.0255)+")"
+				} else if(s.mem < 100000){
+					p.stinfo.color = "rgb(0,"+(255-s.mem*0.00255)+",255)"
+				} else if(s.mem < 1000000){
+					p.stinfo.color = "rgb("+(s.mem*0.000255)+",0,255)"
+				}
+
+				if(f%120 == p.stinfo.pulseSpawn){
+					p.capsule.chainRes(300,0)
+				}
+			},
+				"initiate":(p)=>{
+					p.capsule = new nur1()
+					p.capsule.maxMem = Infinity;
+					p.stinfo.pulseSpawn = Date.now()%120
+				}
+			},
 
 			"I1":{
 				"toOther":(p,op)=>{
@@ -2318,6 +2381,7 @@ class GI{
 		"H2":{"color":"#605050","letter":"M"},//repulsive memory core
 		"H3":{"color":"#000000","letter":"I"},//indicator particle
 		"H4":{"color":"#000000","letter":"M"},//connector particle
+		"H5":{"color":"#000000","letter":"P","pulse":0},//pulsar activation particle
 
 		"I1":{"color":"#303030","letter":"A","team":-1,"reload":-1,"following":-1},
 		"I2":{"color":"#306030","letter":"A","team":1,"children":0},
@@ -2649,6 +2713,52 @@ class nur1{
 }
 
 
+
+
+
+class LGPH{
+
+	//new LGPH(myCtx,200,150,400,0,"green",true,20)
+	constructor(mainCtx,w,h,x,y,color,trsp,maxv){
+		this.ctx = mainCtx
+		this.w = w
+		this.h = h
+		this.x = x
+		this.y = y
+		this.values = [0]
+		this.maxValues = maxv
+		this.lineSize = w/maxv
+		this.trs = trsp
+		this.color = color
+		this.lineWidth = 5
+		this.heightVide = (x)=>{return(x/50)}
+	}
+
+
+	vPush(val){
+		this.values.unshift(val)
+		if(this.values.length > this.maxValues){
+			this.values.splice(this.maxValues,1)
+		}
+	}
+
+	coverBack(){
+		this.ctx.fillStyle = "#000000"
+		this.ctx.fillRect(this.x,this.y,this.w,this.h)
+	}
+
+	draw(){
+		this.ctx.beginPath()
+		this.ctx.strokeStyle = this.color
+		this.ctx.lineWidth = this.lineWidth
+		this.ctx.moveTo(0+this.x,this.h-this.heightVide(this.values[0]))
+		for(let i = 1; i < this.values.length; i++){
+			this.ctx.lineTo(i*this.lineSize+this.x,this.h-this.heightVide(this.values[i]))
+		}
+		this.ctx.stroke()
+	}
+
+}
 
 
 
