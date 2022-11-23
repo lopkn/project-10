@@ -2758,6 +2758,15 @@ class LGPH{
 		this.ctx.stroke()
 	}
 
+	move(x,y){
+		if(this.trsp){
+			this.ctx.top = y
+			this.ctx.left = x
+		}
+	}
+
+	
+
 }
 
 
