@@ -2721,6 +2721,12 @@ class LGPH{
 	//new LGPH(myCtx,200,150,400,0,"green",true,20)
 	constructor(mainCtx,w,h,x,y,color,trsp,maxv){
 		this.ctx = mainCtx
+		if(mainCtx.top == undefined){
+			mainCtx.top = 0
+		}
+		if(mainCtx.left == undefined){
+			mainCtx.left = 0
+		}
 		this.w = w
 		this.h = h
 		this.x = x
