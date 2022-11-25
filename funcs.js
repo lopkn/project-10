@@ -1068,6 +1068,65 @@ function mergeDict(d,d2){
 	return(d)
 }
 //EXP45
+	class myStat{
+		static ranges = []
+		static values = []
+
+		static totalVal = 0
+
+		static pushVal(r1,r2,v){
+			this.ranges.push([r1,r2])
+			this.values.push(v)
+			this.totalValUpdate()
+		}
+		static removeVal(i){
+			this.ranges.splice(i,1)
+			this.values.splice(i,1)
+			this.totalValUpdate()
+		}
+		static clear(){
+			this.totalVal = 0
+			this.ranges = []
+			this.values = []
+		}
+
+		static totalValUpdate(){
+			this.totalVal = 0
+			this.values.forEach((e)=>{
+				this.totalVal += e
+			})
+		}
+
+		static getValuePlace(n){
+			let ctr = n
+			let vlctr = 0
+			while(ctr > 0){
+				ctr -= this.values[vlctr]
+				vlctr += 1
+			}
+
+			if(vlctr == 0){
+				vlctr = 1
+			}
+			return({"place":vlctr-1,"over":-ctr})
+
+		}
+
+		static getValue(n){
+			let d = this.getValuePlace(n)
+			d["gvn"] = this.ranges[d.place][0] + (this.ranges[d.place][1]-this.ranges[d.place][0])*(this.values[d.place]-d.over)/this.values[d.place]
+			return(d)
+		}
+
+		static vExplode(n,r){
+			let d1 = this.getValue(n)
+			let d2 = this.getValue(r)
+
+			return([d2.gvn-d1.gvn,d1,d2])
+
+		}
+
+	}
 //EXP46
 //EXP47
 //EXP48
@@ -1117,5 +1176,6 @@ module.exports = {
 	amountOfItems,
 	selectedSlotItems,
 	DFNorm,
-	mergeDict
+	mergeDict,
+	myStat
 }

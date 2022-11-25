@@ -109,7 +109,8 @@ INFUNCS.plArr = plArr
 	amountOfItems,
 	selectedSlotItems,
 	DFNorm,
-	mergeDict
+	mergeDict,
+	myStat
 */
 let vectorFuncs = INFUNCS.vectorFuncs
 let myMath = INFUNCS.myMath
@@ -154,6 +155,7 @@ let	amountOfItems = INFUNCS.amountOfItems
 let	selectedSlotItems = INFUNCS.selectedSlotItems
 let DFNorm = INFUNCS.DFNorm
 let	mergeDict = INFUNCS.mergeDict
+let myStat = INFUNCS.myStat
 
 let re8L = require("./re8.js")
 let serTen = require("./serTen.js")
