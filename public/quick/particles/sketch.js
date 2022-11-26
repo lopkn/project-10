@@ -1699,6 +1699,14 @@ class GI{
 			}
 			
 		},
+		"A7":{
+			"onDeath":(p)=>{
+				for(let i = 0; i < 50; i++){
+					setTimeout(()=>{G.newParticle(p.x+Math.random()-0.5,p.y+Math.random()-0.5,"B1",10)},Math.random()*500)
+				}
+			}
+			
+		},
 		"G1":{
 			"onDeath":(p)=>{
 				for(let i = 0; i < 4; i++){
@@ -1796,18 +1804,6 @@ class GI{
 			},
 
 			"H1":{
-			// "chainRes":(i,p,c)=>{
-			// 		c+=1
-			// 		let s = p.stinfo.chainMem
-			// 		s.mem += i
-			// 		let out = i * 0.8
-			// 		if(c < s.maxChain){
-			// 		s.outTo.forEach((e)=>{
-			// 			GI.particles[e].info.chainRes(out,GI.particles[e],c)
-			// 		})
-			// 		}
-
-			// 	},
 				"eachFrame":(f,p)=>{
 				let s = p.capsule
 				s.mem -= s.decay
@@ -2338,6 +2334,7 @@ class GI{
 		"A4":{"color":"#FF0000"},
 		"A5":{"color":"#FF00FF","letter":"I"},
 		"A6":{"color":"#FF0000","letter":"I"},
+		"A7":{"color":"#FF00FF","decay":15,"letter":"E"},//explosion
 
 		"B1":{"color":"#808080"},//push
 		"B2":{"color":"#F08080"},//shell
