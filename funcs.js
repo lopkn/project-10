@@ -1075,10 +1075,21 @@ function mergeDict(d,d2){
 		static totalVal = 0
 
 		static pushVal(r1,r2,v){
+			if(v !== undefined){
 			this.ranges.push([r1,r2])
 			this.values.push(v)
 			this.totalValUpdate()
+			}else if(r2 === undefined){
+				this.ranges.push([r1,r1])
+				this.values.push(1)
+				this.totalValUpdate()
+			} else {
+				this.ranges.push([r1,r2])
+				this.values.push(1)
+				this.totalValUpdate()
+			}
 		}
+
 		static removeVal(i){
 			this.ranges.splice(i,1)
 			this.values.splice(i,1)
@@ -1115,6 +1126,7 @@ function mergeDict(d,d2){
 		static getValue(n){
 			let d = this.getValuePlace(n)
 			d["gvn"] = this.ranges[d.place][0] + (this.ranges[d.place][1]-this.ranges[d.place][0])*(this.values[d.place]-d.over)/this.values[d.place]
+			
 			return(d)
 		}
 
@@ -1124,6 +1136,12 @@ function mergeDict(d,d2){
 
 			return([d2.gvn-d1.gvn,d1,d2])
 
+		}
+
+		static rearrange(){
+			this.ranges.sort((a,b)=>{
+				return(a[0]-b[0])
+			})
 		}
 
 	}

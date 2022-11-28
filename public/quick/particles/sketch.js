@@ -1712,7 +1712,7 @@ class GI{
 				let r = Math.random()*7
 				let a = Object.keys(GI.typeDict2)
 				let R = Math.floor(Math.random()*a.length)
-				for(let i = 0; i < r; i++){
+				for(let i = 0; i < r+3; i++){
 				G.newParticle(p.x+Math.random()-0.5,p.y+Math.random()-0.5,a[R],10)
 				}
 			}
@@ -2357,7 +2357,7 @@ class GI{
 		"A5":{"color":"#FF00FF","letter":"I"},
 		"A6":{"color":"#FF0000","letter":"I"},
 		"A7":{"color":"#FF00FF","decay":15,"letter":"E"},//explosion
-		"A8":{"color":"#FFFFFF"},
+		"A8":{"color":"#a881fc"},
 		"A9":{"color":"#5000FF"},
 
 		"B1":{"color":"#808080"},//push
