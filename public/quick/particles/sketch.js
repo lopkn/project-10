@@ -205,6 +205,12 @@ document.addEventListener("keydown",(e)=>{
 			GI.zoom -= 0.1
 			break;
 
+		case "+":
+			GI.zoom += 0.5
+			break;
+		case "_":
+			GI.zoom -= 0.5
+			break;
 		case "F1":
 		case "!":
 			e.preventDefault()
