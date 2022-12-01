@@ -2357,6 +2357,20 @@ class GI{
 			}
 			
 		},
+		"J2":{
+			"toOther":(p,op)=>{
+				let d = distance(p.x,p.y,op.x,op.y)
+				// let dx = (op.x-p.x)
+				// let dy = (op.y-p.y)
+
+				// let r = 1
+				if(d < 500){
+					op.nxadd.y -= 1
+				}
+
+			}
+			
+		},
 			
 
 		}
@@ -2431,6 +2445,7 @@ class GI{
 		"I5":{"color":"#303030","letter":"A","team":-1,"reload":-1,"following":-1},
 
 		"J1":{"color":"#000088","letter":"D"}, //direction down
+		"J2":{"color":"#005088","letter":"D"}, //direction up
 	}
 
 	static getTypeInfo(t){
