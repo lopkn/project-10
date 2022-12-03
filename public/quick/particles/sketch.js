@@ -2350,7 +2350,7 @@ class GI{
 				// let dy = (op.y-p.y)
 
 				// let r = 1
-				if(d < 500){
+				if(d < 300){
 					op.nxadd.y += 1
 				}
 
@@ -2364,7 +2364,7 @@ class GI{
 				// let dy = (op.y-p.y)
 
 				// let r = 1
-				if(d < 500){
+				if(d < 300){
 					op.nxadd.y -= 1
 				}
 
@@ -2378,7 +2378,7 @@ class GI{
 				// let dy = (op.y-p.y)
 
 				// let r = 1
-				if(d < 500){
+				if(d < 300){
 					op.nxadd.x -= 1
 				}
 
@@ -2393,13 +2393,33 @@ class GI{
 				// let dy = (op.y-p.y)
 
 				// let r = 1
-				if(d < 500){
+				if(d < 300){
 					op.nxadd.x -= 1
 				}
 
 			}
 			
+		}, 
+
+		"J4":{
+			"toOther":(p,op)=>{
+				let d = distance(p.x,p.y,op.x,op.y)
+				// let dx = (op.x-p.x)
+				// let dy = (op.y-p.y)
+
+				// let r = 1
+				if(d < 300){
+					op.nxadd.x += p.stinfo.pulse - 0.5
+				}
+
+			},
+			"eachFrame":(f,p)=>{
+				p.stinfo.pulse = (f%50)/50
+			},
+			
 		},
+
+		
 
 
 		}
@@ -2477,6 +2497,7 @@ class GI{
 		"J2":{"color":"#505088","letter":"D"}, //direction up
 		"J3":{"color":"#500088","letter":"D"}, //direction left
 		"J4":{"color":"#005088","letter":"D"}, //direction right
+		"J4":{"color":"#000088","letter":"P","pulse":0}, //direction right
 	}
 
 	static getTypeInfo(t){
