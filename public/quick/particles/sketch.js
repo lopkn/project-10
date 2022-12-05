@@ -2431,7 +2431,7 @@ class GI{
 
 			},
 			"eachFrame":(f,p)=>{
-				p.stinfo.pulse = (f%50)/50
+				p.stinfo.pulse = 4-f%40/10
 			},
 			
 		},
