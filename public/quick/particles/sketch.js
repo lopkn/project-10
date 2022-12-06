@@ -2409,12 +2409,12 @@ class GI{
 
 				// let r = 1
 				if(d < 300){
-					op.nxadd.x += p.stinfo.pulse - 0.5
+					op.nxadd.x += p.stinfo.pulse
 				}
 
 			},
 			"eachFrame":(f,p)=>{
-				p.stinfo.pulse = (f%50)/50
+				p.stinfo.pulse = (f%20>10?(20-f%20):f%20)-5
 			},
 			
 		},
@@ -2426,12 +2426,12 @@ class GI{
 
 				// let r = 1
 				if(d < 300){
-					op.nxadd.y += p.stinfo.pulse - 0.5
+					op.nxadd.y += p.stinfo.pulse
 				}
 
 			},
 			"eachFrame":(f,p)=>{
-				p.stinfo.pulse = 4-f%40/10
+				p.stinfo.pulse = (f%20>10?(20-f%20):f%20)-5
 			},
 			
 		},
