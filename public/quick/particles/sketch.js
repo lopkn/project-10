@@ -377,6 +377,25 @@ class G{
 		ctx.stroke();
 	}
 
+	static loadParticles(a){
+		a.forEach((e)=>{
+			this.newParticle(e.x,e.y,e.t,10)
+		})
+	}
+
+	static loadS(s){
+		this.loadParticles(JSON.parse(s))
+	}
+
+	static saveState(){
+		let d = []
+		GI.particlesArr.forEach((e)=>{
+			d.push({"x":GI.particles[e].x,"y":GI.particles[e].y,"t":GI.particles[e].t})
+		})
+		console.log(JSON.stringify(d))
+		return(JSON.stringify(d))
+	}
+
 	static drawParticleChainLine(p){
 		if(p.capsule !== undefined){
 			//assume outTo defined.
