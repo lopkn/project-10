@@ -377,23 +377,52 @@ class G{
 		ctx.stroke();
 	}
 
-	static loadParticles(a){
-		a.forEach((e)=>{
-			this.newParticle(e.x,e.y,e.t,10)
-		})
+	static loadParticles(a,l){
+		if(l){
+			a.forEach((e)=>{
+				this.newParticle(e.x,e.y,e.t,10)
+				GI.particles[GI.particlesArr[GI.particlesArr.length-1]].life = e.l
+			})
+		} else {
+			a.forEach((e)=>{
+				this.newParticle(e.x,e.y,e.t,10)
+			})
+		}
+	}
+	static loadState(d){
+		GI.cam.x = d.camx
+		GI.cam.y = d.camy
+		GI.zoom = d.zoom
+		GI.FRATE = d.frate
 	}
 
 	static loadS(s){
-		this.loadParticles(JSON.parse(s))
+		let a = JSON.parse(s)
+		this.loadParticles(a[0],a[1].l)
+		this.loadState(a[1])
 	}
 
-	static saveState(){
+	static saveState(life){
 		let d = []
+
+		life = life?true:false
+
+		if(life){
 		GI.particlesArr.forEach((e)=>{
+			d.push({"x":GI.particles[e].x,"y":GI.particles[e].y,"t":GI.particles[e].t,"l":GI.particles[e].life})
+		})
+		} else {
+			GI.particlesArr.forEach((e)=>{
 			d.push({"x":GI.particles[e].x,"y":GI.particles[e].y,"t":GI.particles[e].t})
 		})
-		console.log(JSON.stringify(d))
-		return(JSON.stringify(d))
+		}
+
+		let gd = {"camx":GI.cam.x,"camy":GI.cam.y,"zoom":GI.zoom,"frate":GI.FRATE,"l":life}
+
+		let a = [d,gd]
+
+		console.log(JSON.stringify(a))
+		return(JSON.stringify(a))
 	}
 
 	static drawParticleChainLine(p){
