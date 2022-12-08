@@ -1090,6 +1090,10 @@ function mergeDict(d,d2){
 			}
 		}
 
+		static percentile(p,t){
+			return(p/1*(t-1)+1)
+		}
+
 		static removeVal(i){
 			this.ranges.splice(i,1)
 			this.values.splice(i,1)
@@ -1144,7 +1148,7 @@ function mergeDict(d,d2){
 			})
 		}
 
-		
+
 
 	}
 //EXP46

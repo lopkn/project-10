@@ -196,6 +196,9 @@ document.addEventListener("keydown",(e)=>{
 		case "J":
 			GI.type[0] = "J"
 			break;
+		case "K":
+			GI.type[0] = "K"
+			break;
 
 
 		case "=":
@@ -317,10 +320,74 @@ function inRectA(x,y,rx,ry,rax,ray){
 	return(false)
 }
 
+
+class LGPH{
+
+	//new LGPH(myCtx,200,150,400,0,"green",true,20)
+	constructor(mainCtx,w,h,x,y,color,trsp,maxv){
+		this.ctx = mainCtx
+		if(mainCtx.top == undefined){
+			mainCtx.top = 0
+		}
+		if(mainCtx.left == undefined){
+			mainCtx.left = 0
+		}
+		this.w = w
+		this.h = h
+		this.x = x
+		this.y = y
+		this.values = [0]
+		this.maxValues = maxv
+		this.lineSize = w/maxv
+		this.trsp = trsp
+		this.color = color
+		this.lineWidth = 5
+		this.heightVide = (x)=>{return(x/3)}
+	}
+
+
+	vPush(val){
+		this.values.unshift(val)
+		if(this.values.length > this.maxValues){
+			this.values.splice(this.maxValues,1)
+		}
+	}
+
+	coverBack(){
+		this.ctx.fillStyle = "#000000"
+		this.ctx.fillRect(this.x,this.y,this.w,this.h)
+	}
+
+	draw(){
+		this.ctx.beginPath()
+		this.ctx.strokeStyle = this.color
+		this.ctx.lineWidth = this.lineWidth
+		this.ctx.moveTo(0+this.x,this.h-this.heightVide(this.values[0]))
+		for(let i = 1; i < this.values.length; i++){
+			this.ctx.lineTo(i*this.lineSize+this.x,this.h-this.heightVide(this.values[i]))
+		}
+		this.ctx.stroke()
+	}
+
+	move(x,y){
+		if(this.trsp){
+			this.ctx.top = y
+			this.ctx.left = x
+		}
+	}
+
+	
+
+}
+
+
 class G{
 
 	static grapher = []
 	static grapherInfo = {"px":8,"f":(e)=>{return(e*5)},"ln":120}
+
+	static pgph = new LGPH(ctx,960,Height,0,Height,"red",false,60)
+
 
 	static updateGrapher(e){
 		let pt = this.grapherInfo.f(e)
@@ -2483,7 +2550,105 @@ class GI{
 			},
 			
 		},
+		"K1":{
+			"toOther":(p,op)=>{
+				let d = distance(p.x,p.y,op.x,op.y)
+				let dx = (op.x-p.x)
+				let dy = (op.y-p.y)
 
+				let r = 1
+				if(d < 50){
+					if(d<2){
+						d = 2
+					}
+					r = -1
+				}
+
+				op.nxadd.x -= 50*dx/d/d*r
+				op.nxadd.y -= 50*dy/d/d*r
+
+			},
+			"eachFrame":(f,p)=>{
+				if(f%100===p.stinfo.pulseSpawn && Math.random()>0.5){
+					p.life -= 2000
+				}
+			},
+			"initiate":(p)=>{
+				p.stinfo.pulseSpawn = Math.floor(Math.random()*100)
+			}
+			
+		},
+
+		"K2":{
+			"toOther":(p,op)=>{
+				let d = distance(p.x,p.y,op.x,op.y)
+				let dx = (op.x-p.x)
+				let dy = (op.y-p.y)
+
+				let r = 1
+				if(d < 50){
+					if(d<2){
+						d = 2
+					}
+					r = 1
+				}
+
+				op.nxadd.x += 50*dx/d/d*r
+				op.nxadd.y += 50*dy/d/d*r
+
+			},
+			"eachFrame":(f,p)=>{
+				if(f%100===p.stinfo.pulseSpawn && Math.random()>0.5){
+					p.life -= 2000
+					let a = Object.keys(GI.typeDict2)
+				
+					for(let i = 0; i < Math.random()*10; i++){
+						let R = Math.floor(Math.random()*a.length)
+						G.newParticle(p.x+Math.random()-0.5,p.y+Math.random()-0.5,a[R],10)
+					}
+				}
+
+				if(f%60 === 0){
+					let a = Object.keys(GI.typeDict2)
+					let R = Math.floor(Math.random()*a.length)
+						G.newParticle(p.x+Math.random()-0.5,p.y+Math.random()-0.5,a[R],10)
+				}
+
+			},
+			"initiate":(p)=>{
+				p.stinfo.pulseSpawn = Math.floor(Math.random()*100)
+			}
+			
+		},
+
+		"K1":{
+			"toOther":(p,op)=>{
+				let d = distance(p.x,p.y,op.x,op.y)
+				let dx = (op.x-p.x)
+				let dy = (op.y-p.y)
+
+				let r = 1
+				if(d < 50){
+					if(d<2){
+						d = 2
+					}
+					r = -1
+				}
+
+				op.nxadd.x += 50*dx/d/d*r
+				op.nxadd.y += 50*dy/d/d*r
+
+			},
+			"eachFrame":(f,p)=>{
+				if(f%100===p.stinfo.pulseSpawn && Math.random()>0.5){
+					p.life -= 2000
+				}
+			},
+			"initiate":(p)=>{
+				p.stinfo.pulseSpawn = Math.floor(Math.random()*100)
+			}
+			
+		},
 
 		
 
@@ -2565,6 +2730,11 @@ class GI{
 		"J4":{"color":"#005088","letter":"D"}, //direction right
 		"J5":{"color":"#000088","letter":"P","pulse":0}, //pulse left right
 		"J6":{"color":"#505088","letter":"P","pulse":0}, //pulse up down
+
+		"K1":{"color":"#8080F0","letter":"H"}, //hl B4
+		"K2":{"color":"#6000FF","letter":"H"}, //hl Chaos generator
+		"K3":{"color":"#808080","letter":"H"}, //hl B8
+
 	}
 
 	static getTypeInfo(t){
@@ -2893,65 +3063,6 @@ class nur1{
 
 
 
-class LGPH{
-
-	//new LGPH(myCtx,200,150,400,0,"green",true,20)
-	constructor(mainCtx,w,h,x,y,color,trsp,maxv){
-		this.ctx = mainCtx
-		if(mainCtx.top == undefined){
-			mainCtx.top = 0
-		}
-		if(mainCtx.left == undefined){
-			mainCtx.left = 0
-		}
-		this.w = w
-		this.h = h
-		this.x = x
-		this.y = y
-		this.values = [0]
-		this.maxValues = maxv
-		this.lineSize = w/maxv
-		this.trs = trsp
-		this.color = color
-		this.lineWidth = 5
-		this.heightVide = (x)=>{return(x/50)}
-	}
-
-
-	vPush(val){
-		this.values.unshift(val)
-		if(this.values.length > this.maxValues){
-			this.values.splice(this.maxValues,1)
-		}
-	}
-
-	coverBack(){
-		this.ctx.fillStyle = "#000000"
-		this.ctx.fillRect(this.x,this.y,this.w,this.h)
-	}
-
-	draw(){
-		this.ctx.beginPath()
-		this.ctx.strokeStyle = this.color
-		this.ctx.lineWidth = this.lineWidth
-		this.ctx.moveTo(0+this.x,this.h-this.heightVide(this.values[0]))
-		for(let i = 1; i < this.values.length; i++){
-			this.ctx.lineTo(i*this.lineSize+this.x,this.h-this.heightVide(this.values[i]))
-		}
-		this.ctx.stroke()
-	}
-
-	move(x,y){
-		if(this.trsp){
-			this.ctx.top = y
-			this.ctx.left = x
-		}
-	}
-
-	
-
-}
-
 
 
 function distance(x1,y1,x2,y2) {
@@ -3037,11 +3148,13 @@ function repeat(){
 	ctx.fillRect(0,5,Width*(ED-D-GI.FRATE)/GI.FRATE,15)
 	}
 
-
+	G.pgph.vPush(GI.particlesArr.length)
+	G.pgph.draw()
 	G.drawGrapher()
 
 	GI.preformanceCalculate += ((ED-D)/GI.particlesArr.length)*100
 	G.updateGrapher(ED-D)
+	
 	if(GI.frame%100 == 0){
 		console.log("AVERAGE PARTICLE CALCULATION TIME: "+(GI.preformanceCalculate/100))
 		GI.preformanceCalculate = 0
