@@ -1100,6 +1100,30 @@ class GI{
 			}
 			
 		},
+		"D11":{
+			"toOther":(p,op)=>{
+				let d = distance(p.x,p.y,op.x,op.y)
+				let dx = (op.x-p.x)
+				let dy = (op.y-p.y)
+
+				if(d < 200 && op.t !== "D11"){
+				if(d < 60){
+
+				op.life -= 3
+
+				if(d<1){
+						d = 1
+					}
+				}
+				op.nxadd.x -= 2*dx/d	
+				op.nxadd.y -= 2*dy/d
+				}
+			},
+			"onDeath":(p)=>{
+				G.newParticle(p.x,p.y,"D01",10)
+			}
+			
+		},
 		"D02":{
 			"toOther":(p,op)=>{
 				let d = distance(p.x,p.y,op.x,op.y)
@@ -1875,6 +1899,22 @@ class GI{
 				for(let i = 0; i < 50; i++){
 					setTimeout(()=>{G.newParticle(p.x+Math.random()-0.5,p.y+Math.random()-0.5,"B01",10)},Math.random()*500)
 				}
+			}
+			
+		},
+		"A17":{
+			"onDeath":(p)=>{
+				GI.particlesArr.forEach((e)=>{
+					let op = GI.particles[e]
+					let d = distance(p.x,p.y,op.x,op.y)
+					let dx = (op.x-p.x)
+					let dy = (op.y-p.y)
+
+					if(d < 400){
+						op.nxadd.x += Math.random()*1000*dx/d
+						op.nxadd.y += Math.random()*1000*dy/d
+					}
+				})
 			}
 			
 		},
@@ -2721,6 +2761,7 @@ class GI{
 		"A05":{"color":"#FF00FF","letter":"I"},
 		"A06":{"color":"#FF0000","letter":"I"},
 		"A07":{"color":"#FF00FF","decay":15,"letter":"E"},//explosion
+		"A17":{"color":"#EF00FF","decay":15,"letter":"E"},//explosion
 		"A08":{"color":"#a881fc"},
 		"A09":{"color":"#5000FF"},
 
@@ -2737,7 +2778,8 @@ class GI{
 		"C02":{"color":"#008000","decay":10},//gravity ST -> C1
 		"C03":{"color":"#FF9F00","decay":5},//shell ST -> B5
 
-		"D01":{"color":"#280040","decay":5},//push + killer
+		"D01":{"color":"#280040","decay":5,"letter":"V"},//push + killer
+			"D11":{"color":"#230040","decay":5,"letter":"V"},//pull + killer
 		"D02":{"color":"#F000F0","decay":5},//virus -> B1
 		"D03":{"color":"#800080","decay":5},//virus
 		"D04":{"color":"#800080","decay":2,"letter":"F","following":-1},//virus, following
