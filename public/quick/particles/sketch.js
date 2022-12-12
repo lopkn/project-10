@@ -1124,6 +1124,27 @@ class GI{
 			}
 			
 		},
+		"D21":{
+			"toOther":(p,op)=>{
+				let d = distance(p.x,p.y,op.x,op.y)
+				let dx = (op.x-p.x)
+				let dy = (op.y-p.y)
+
+				if(d < 200 && op.t !== "D21"){
+				if(d < 60){
+
+				op.life -= 6
+
+				if(d<1){
+						d = 1
+					}
+				}
+				op.nxadd.x -= 2*dx/d	
+				op.nxadd.y -= 2*dy/d
+				}
+			}
+			
+		},
 		"D02":{
 			"toOther":(p,op)=>{
 				let d = distance(p.x,p.y,op.x,op.y)
@@ -2780,6 +2801,7 @@ class GI{
 
 		"D01":{"color":"#280040","decay":5,"letter":"V"},//push + killer
 			"D11":{"color":"#230040","decay":5,"letter":"V"},//pull + killer
+			"D21":{"color":"#130040","decay":3,"letter":"V"},//pull + killer
 		"D02":{"color":"#F000F0","decay":5},//virus -> B1
 		"D03":{"color":"#800080","decay":5},//virus
 		"D04":{"color":"#800080","decay":2,"letter":"F","following":-1},//virus, following
