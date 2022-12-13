@@ -1451,6 +1451,63 @@ class GI{
 			},
 			
 		},
+		"D17":{
+			"eachFrame":(f,p)=>{
+				let op = GI.particles[p.stinfo.following]
+
+				if(op !== undefined){
+					let d = distance(p.x,p.y,op.x,op.y)
+					let dx = (op.x-p.x)
+					let dy = (op.y-p.y)
+					if(d<3){
+						d = 3
+					}
+
+					if(d < 60){
+
+					op.life -= 15
+
+					if(op.life <= 0){
+						G.newParticle(op.x+Math.random(),op.y+Math.random(),"B01",10)
+						G.delParticle(op)
+						return
+						}
+					}
+
+					p.x += 0.05 * dx
+					p.y += 0.05 * dy
+
+				} else {
+
+				GI.particlesArr.forEach((e)=>{
+					
+
+					let op = GI.particles[e]
+					if(op.t !== "B04"){return}
+					let d = distance(p.x,p.y,op.x,op.y)
+
+					if(d < 600){
+					if(Math.random()>0.9){
+						p.stinfo.following = e
+					}
+					if(d<3){
+						d = 3
+					}
+					}
+					let dx = (op.x-p.x)
+					let dy = (op.y-p.y)
+
+					op.nxadd.x -= 180*dx/d/d	
+					op.nxadd.y -= 180*dy/d/d
+				})
+
+				
+
+			}
+
+			},
+			
+		},
 		"D08":{
 			"eachFrame":(f,p)=>{
 				let op = GI.particles[p.stinfo.following]
@@ -1471,6 +1528,63 @@ class GI{
 						G.newParticle(op.x+Math.random(),op.y+Math.random(),"B04",10)
 						G.delParticle(op)
 						p.life -= 50
+						return
+						}
+					}
+
+					p.x += 0.05 * dx
+					p.y += 0.05 * dy
+
+				} else {
+
+				GI.particlesArr.forEach((e)=>{
+					
+
+					let op = GI.particles[e]
+					if(op.t !== "B01"){return}
+					let d = distance(p.x,p.y,op.x,op.y)
+
+					if(d < 600){
+					if(Math.random()>0.9){
+						p.stinfo.following = e
+					}
+					if(d<3){
+						d = 3
+					}
+					}
+					let dx = (op.x-p.x)
+					let dy = (op.y-p.y)
+
+					op.nxadd.x -= 180*dx/d/d	
+					op.nxadd.y -= 180*dy/d/d
+				})
+
+				
+
+			}
+
+			},
+			
+		},
+		"D18":{
+			"eachFrame":(f,p)=>{
+				let op = GI.particles[p.stinfo.following]
+
+				if(op !== undefined){
+					let d = distance(p.x,p.y,op.x,op.y)
+					let dx = (op.x-p.x)
+					let dy = (op.y-p.y)
+					if(d<3){
+						d = 3
+					}
+
+					if(d < 60){
+
+					op.life -= 15
+
+					if(op.life <= 0){
+						G.newParticle(op.x+Math.random(),op.y+Math.random(),"B04",10)
+						G.delParticle(op)
 						return
 						}
 					}
@@ -2808,7 +2922,9 @@ class GI{
 		"D05":{"color":"#404040","letter":"F","following":-1},//catalyser, following
 		"D06":{"color":"#004040","letter":"F","following":-1},//catalyser, following
 		"D07":{"color":"#808080","letter":"F","following":-1},//catalyser, following
+			"D17":{"color":"#808080","letter":"F","following":-1},//catalyser, following
 		"D08":{"color":"#008080","letter":"F","following":-1},//catalyser, following
+			"D18":{"color":"#008080","letter":"F","following":-1},//catalyser, following
 		"D09":{"color":"#F00080","decay":2,"letter":"F","following":-1},//virus, following -> B8
 
 		"E01":{"color":"#628000","letter":"C"},//gravity killer +> 2x B1 -> 4x B8
