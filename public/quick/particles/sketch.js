@@ -2845,8 +2845,49 @@ class GI{
 			}
 			
 		},
+		"K12":{
+			"toOther":(p,op)=>{
+				let d = distance(p.x,p.y,op.x,op.y)
+				let dx = (op.x-p.x)
+				let dy = (op.y-p.y)
 
-		"K01":{
+				let r = 1
+				if(d < 50){
+					if(d<2){
+						d = 2
+					}
+					r = 1
+				}
+
+				op.nxadd.x += 50*dx/d/d*r
+				op.nxadd.y += 50*dy/d/d*r
+
+			},
+			"eachFrame":(f,p)=>{
+				if(f%500===p.stinfo.pulseSpawn && Math.random()>0.5){
+					p.life -= 2000
+					let a = Object.keys(GI.typeDict2)
+				
+					for(let i = 0; i < Math.random()*10; i++){
+						let R = Math.floor(Math.random()*a.length)
+						G.newParticle(p.x+Math.random()-0.5,p.y+Math.random()-0.5,a[R],10)
+					}
+				}
+
+				if(f%60 === 0){
+					let a = Object.keys(GI.typeDict2)
+					let R = Math.floor(Math.random()*a.length)
+						G.newParticle(p.x+Math.random()-0.5,p.y+Math.random()-0.5,a[R],10)
+				}
+
+			},
+			"initiate":(p)=>{
+				p.stinfo.pulseSpawn = Math.floor(Math.random()*500)
+			}
+			
+		},
+
+		"K03":{
 			"toOther":(p,op)=>{
 				let d = distance(p.x,p.y,op.x,op.y)
 				let dx = (op.x-p.x)
@@ -2963,6 +3004,7 @@ class GI{
 
 		"K01":{"color":"#8080F0","letter":"H"}, //hl B4
 		"K02":{"color":"#6000FF","letter":"H"}, //hl Chaos generator
+			"K12":{"color":"#7000FF","letter":"H"}, //hl Chaos generator
 		"K03":{"color":"#808080","letter":"H"}, //hl B8
 
 	}
