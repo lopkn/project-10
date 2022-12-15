@@ -3375,6 +3375,7 @@ function repeat(){
 
 	if(GI.typeDict2[GI.type[0]+GI.type[2]+GI.type[1]] !== undefined){
 	ctx.fillStyle = "purple"} else {
+		GI.type[2] = 0
 		ctx.fillStyle = "red"
 	}
 	ctx.font = "40px Arial"
