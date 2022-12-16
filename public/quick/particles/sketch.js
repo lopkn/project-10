@@ -1,7 +1,7 @@
 let myCanvas = document.getElementById("myCanvas")
 
-let Width = window.innerWidth
-let Height = window.innerHeight
+let Height = window.innerWidth >window.innerHeight?window.innerHeight:window.innerWidth
+let Width = window.innerWidth >window.innerHeight?window.innerWidth:window.innerHeight
 myCanvas.style.top = 0
 myCanvas.style.left = 0
 myCanvas.width = Width
@@ -23,7 +23,6 @@ function camPosRel(x,y){
 document.addEventListener("mousedown",(e)=>{
 	if(GI.mouseModeArr[GI.mouseMode] == "normal"){
 		e.preventDefault()
-		GI.debuggingInfo = JSON.stringify(e.altKey)
 		if(e.altKey||GI.altPressed){
 			GI.selectionStart = [mouseX,mouseY,e.shiftKey]
 		}
@@ -57,6 +56,8 @@ document.addEventListener("mousedown",(e)=>{
 })
 
 document.addEventListener("mouseup",(e)=>{
+    	GI.debuggingInfo = "?"
+
 	if(GI.mouseModeArr[GI.mouseMode] == "normal"){
 	if(GI.selectionStart !== false){
 
@@ -777,7 +778,7 @@ class GI{
 	static type = ["A","1","0"]
 
 	static debuggingInfo = ""
-	static customDebugger = false
+	static customDebugger = true
 
 	static display = {"background":"#000000"}
 
@@ -802,6 +803,8 @@ class GI{
 
 	static lines = []
 
+
+	static barFont = Width > 1000? "40px Arial":"25px Arial"
 
 	static getPI(){
 		this.partIDcount++
@@ -3597,7 +3600,7 @@ function repeat(){
 		ctx.fillStyle = "red"
 		GI.type[2] = 0
 	}
-	ctx.font = "40px Arial"
+	ctx.font = GI.barFont
 	ctx.fillText(GI.type[0]+GI.type[2]+GI.type[1]+"  -  Particles: "+GI.particlesArr.length+" - key: "+GI.currentKey+" - mode: "+GI.mouseModeArr[GI.mouseMode],0,40)
 	if(GI.customDebugger){
 		ctx.fillText(GI.debuggingInfo,0,80)
@@ -3652,3 +3655,77 @@ function repeat(){
 		GI.preformanceCalculate = 0
 	}
 }
+
+
+
+
+
+
+
+function touchHandler(event)
+{
+
+	console.log(event.type)
+    var touches = event.changedTouches,
+        first = touches[0],
+        type = "";
+
+    switch(event.type)
+    {
+        case "touchstart": type = "mousedown"; break;
+        case "touchmove":  type = "mousemove"; break;        
+        case "touchend":   type = "mouseup";   break;
+        case "touchcancel":   type = "mouseup";   break;
+        default:           return;
+    }
+
+
+    // initMouseEvent(type, canBubble, cancelable, view, clickCount, 
+    //                screenX, screenY, clientX, clientY, ctrlKey, 
+    //                altKey, shiftKey, metaKey, button, relatedTarget);
+
+
+
+
+    if(type !== "mouseup"){
+    mouseX = event.touches[0].clientX
+    mouseY = event.touches[0].clientY}
+
+
+    var simulatedEvent = document.createEvent("MouseEvent");
+
+    if(event.type == "touchend"){
+       	console.log("t4")
+       }
+
+    simulatedEvent.initMouseEvent(type, true, true, window, 1, 
+                                  first.screenX, first.screenY, 
+                                  first.clientX, first.clientY, false, 
+                                  false, false, false, 0/*left*/, null);
+
+    if(event.type == "touchend"){
+       	console.log("t5")
+       }
+
+    // if(type=="mouseup"){
+    // console.log("hi")} else {
+    // 	console.log(event.type)
+    // }
+    document.body.dispatchEvent(simulatedEvent);
+    
+    event.preventDefault();
+}
+
+function myh(e){
+	 
+}
+
+function init() 
+{
+    document.addEventListener("touchstart", touchHandler, true);
+    document.addEventListener("touchmove", (e)=>{myh(e);touchHandler(e)}, true);
+    document.addEventListener("touchend", touchHandler, true);
+    document.addEventListener("touchcancel", touchHandler, true);    
+    // document.addEventListener('touchmove', function() { e.preventDefault();GI.debuggingInfo = "cancled" }, { passive:false });
+}
+init()
