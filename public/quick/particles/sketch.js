@@ -3000,13 +3000,18 @@ class GI{
 					if(d<1){
 						d = 1/d
 					}
-					let rr = Math.sqrt(p.r)/3
+					let rr = Math.sqrt(p.r)/1.5
+					// if(p.stinfo.pulse > 0){rr*=2}
 					op.nxadd.x += p.stinfo.pulse*dx/d/d*rr
 					op.nxadd.y += p.stinfo.pulse*dy/d/d*rr
 				}
 
 			},
 			"eachFrame":(f,p)=>{
+
+				if(p.r > 150){
+					p.r *= 0.9995
+				}
 
 				if(f%100 === 0 && p.r > 40){
 					p.r = Math.sqrt(p.r*p.r/2)
@@ -3017,7 +3022,7 @@ class GI{
 				// p.r *= 0.995
 				p.life = p.r-10
 				p.stinfo.pulse = 50 - f%100
-				if(f%500 > 450){
+				if(f%400 > 350){
 					p.stinfo.pulse *= 2
 				}
 			},
@@ -3027,6 +3032,105 @@ class GI{
 			
 		},
 
+		"L04":{
+			"toOther":(p,op)=>{
+				let d = distance(p.x,p.y,op.x,op.y)
+				let dx = (op.x-p.x)
+				let dy = (op.y-p.y)
+
+				if(p.r > d+op.r && (op.t !== "L04" || p.stinfo.pulse < -30)){
+					p.r = Math.sqrt(op.r*op.r+p.r*p.r)
+					G.delParticle(op)
+				} else if(op.t==="L04"){
+
+					if(d<10){
+						d *= 5
+						if(d < 1){
+							d = 1/d
+						}
+					}
+					let rr = Math.sqrt(p.r)*2
+					// if(p.stinfo.pulse < 0){??}
+					op.nxadd.x += p.stinfo.pulse*dx/d/d*rr
+					op.nxadd.y += p.stinfo.pulse*dy/d/d*rr
+				}
+
+			},
+			"eachFrame":(f,p)=>{
+
+					p.r *= 0.9998
+
+				if(f%100 === 0 && p.r > 40 + Math.random()*40){
+					p.r = Math.sqrt(p.r*p.r/2)
+					let tid = G.newParticle(p.x+Math.random()-0.5,p.y+Math.random()-0.5,"L04",10)
+					GI.particles[tid].r = p.r
+				}
+
+				// p.r *= 0.995
+				p.life = p.r-10
+				p.stinfo.pulse = 50 - f%100
+				if(f%300 > 250){
+					p.stinfo.pulse *= 4.5
+				}
+			},
+			"initiate":(p)=>{
+				p.r = 40
+			}
+			
+		},
+
+		"L05":{
+			"toOther":(p,op)=>{
+				let d = distance(p.x,p.y,op.x,op.y)
+				let dx = (op.x-p.x)
+				let dy = (op.y-p.y)
+
+				
+				let rr = Math.sqrt(p.r)/1.5
+
+				if(p.r > d+op.r && (op.t !== "L05" || p.stinfo.pulse < -30)){
+					p.r = Math.sqrt(op.r*op.r+p.r*p.r)
+					G.delParticle(op)
+				} else if(op.t==="L05"){
+
+					if(d<1){
+						d = 1/d
+					}
+					
+					// if(p.stinfo.pulse > 0){rr*=2}
+					op.nxadd.x += p.stinfo.pulse*dx/d/d*rr
+					op.nxadd.y += p.stinfo.pulse*dy/d/d*rr
+				}
+
+				if(d < 50){d = 50}
+				op.nxadd.x += -100*dy/d/d*rr
+				op.nxadd.y += 100*dx/d/d*rr
+
+			},
+			"eachFrame":(f,p)=>{
+
+				if(p.r > 150){
+					p.r *= 0.9995
+				}
+
+				if(f%100 === 0 && p.r > 40){
+					p.r = Math.sqrt(p.r*p.r/2)
+					let tid = G.newParticle(p.x+Math.random()-0.5,p.y+Math.random()-0.5,"L05",10)
+					GI.particles[tid].r = p.r
+				}
+
+				// p.r *= 0.995
+				p.life = p.r-10
+				p.stinfo.pulse = 50 - f%100
+				if(f%300 > 250){
+					p.stinfo.pulse *= 4
+				}
+			},
+			"initiate":(p)=>{
+				p.r = 40
+			}
+			
+		},
 
 		}
 
@@ -3119,6 +3223,8 @@ class GI{
 		"L01":{"color":"#80F080","letter":"S"}, //slime
 		"L02":{"color":"#90F090","letter":"S"}, //smart slime
 		"L03":{"color":"#90F0C0","letter":"S","pulse":0}, //very smart slime
+		"L04":{"color":"#80B080","letter":"S","pulse":0}, //high repulsion random smart slime
+		"L05":{"color":"#00F0C0","letter":"S","pulse":0}, //spinner smart slime
 
 	}
 
