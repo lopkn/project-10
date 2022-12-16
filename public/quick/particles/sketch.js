@@ -172,6 +172,15 @@ document.addEventListener("keydown",(e)=>{
 		case "K":
 			GI.type[0] = "K"
 			break;
+		case "L":
+			GI.type[0] = "L"
+			break;
+		case "M":
+			GI.type[0] = "M"
+			break;
+		case "N":
+			GI.type[0] = "N"
+			break;
 
 
 		case "=":
@@ -459,6 +468,20 @@ class G{
 		ctx.stroke()
 	}
 
+	static fvirus(){
+		let count = 0
+		let list = []
+		GI.particlesArr.forEach((e)=>{
+			let a = GI.particles[e]
+			if(isNaN(a.x) || isNaN(a.y)){
+				count += 1
+				list.push(e)
+			}
+		})
+		console.log("found "+count+" broken particles")
+		return([count,list])
+	}
+
 	static newParticle(x,y,type,r,e,parent){
 
 		let typeInfo = GI.getTypeInfo(type)
@@ -485,6 +508,7 @@ class G{
 
 
 		if(!e||!e.shiftKey){GI.particlesArr.push(id)}else{GI.particlesArr.unshift(id)}
+		return(id)
 	}
 
 	static drawCircle(x,y,r,f){
@@ -2916,7 +2940,92 @@ class GI{
 			
 		},
 
-		
+		"L01":{
+			"toOther":(p,op)=>{
+				let d = distance(p.x,p.y,op.x,op.y)
+				let dx = (op.x-p.x)
+				let dy = (op.y-p.y)
+
+				if(p.r > d+op.r){
+					p.r += op.r
+					G.delParticle(op)
+				}
+
+			},
+			"eachFrame":(f,p)=>{
+				p.r -= 0.5
+				if(p.r > 100){
+					p.r = 100
+				}
+				p.life = p.r
+			},
+			"initiate":(p)=>{
+				p.r = 30
+			}
+			
+		},
+
+		"L02":{
+			"toOther":(p,op)=>{
+				let d = distance(p.x,p.y,op.x,op.y)
+				let dx = (op.x-p.x)
+				let dy = (op.y-p.y)
+
+				if(p.r > d+op.r){
+					p.r = Math.sqrt(op.r*op.r+p.r*p.r)
+					G.delParticle(op)
+				}
+
+			},
+			"eachFrame":(f,p)=>{
+				p.r *= 0.99
+				p.life = p.r-5
+			},
+			"initiate":(p)=>{
+				p.r = 30
+			}
+			
+		},
+		"L03":{
+			"toOther":(p,op)=>{
+				let d = distance(p.x,p.y,op.x,op.y)
+				let dx = (op.x-p.x)
+				let dy = (op.y-p.y)
+
+				if(p.r > d+op.r && (op.t !== "L03" || p.stinfo.pulse > -30)){
+					p.r = Math.sqrt(op.r*op.r+p.r*p.r)
+					G.delParticle(op)
+				} else if(op.t==="L03"){
+
+					if(d<1){
+						d = 1/d
+					}
+					let rr = Math.sqrt(p.r)/3
+					op.nxadd.x += p.stinfo.pulse*dx/d/d*rr
+					op.nxadd.y += p.stinfo.pulse*dy/d/d*rr
+				}
+
+			},
+			"eachFrame":(f,p)=>{
+
+				if(f%100 === 0 && p.r > 40){
+					p.r = Math.sqrt(p.r*p.r/2)
+					let tid = G.newParticle(p.x+Math.random()-0.5,p.y+Math.random()-0.5,"L03",10)
+					GI.particles[tid].r = p.r
+				}
+
+				// p.r *= 0.995
+				p.life = p.r-10
+				p.stinfo.pulse = 50 - f%100
+				if(f%500 > 450){
+					p.stinfo.pulse *= 2
+				}
+			},
+			"initiate":(p)=>{
+				p.r = 40
+			}
+			
+		},
 
 
 		}
@@ -3006,6 +3115,10 @@ class GI{
 		"K02":{"color":"#6000FF","letter":"H"}, //hl Chaos generator
 			"K12":{"color":"#7000FF","letter":"H"}, //hl Chaos generator
 		"K03":{"color":"#808080","letter":"H"}, //hl B8
+
+		"L01":{"color":"#80F080","letter":"S"}, //slime
+		"L02":{"color":"#90F090","letter":"S"}, //smart slime
+		"L03":{"color":"#90F0C0","letter":"S","pulse":0}, //very smart slime
 
 	}
 
@@ -3375,8 +3488,8 @@ function repeat(){
 
 	if(GI.typeDict2[GI.type[0]+GI.type[2]+GI.type[1]] !== undefined){
 	ctx.fillStyle = "purple"} else {
-		GI.type[2] = 0
 		ctx.fillStyle = "red"
+		GI.type[2] = 0
 	}
 	ctx.font = "40px Arial"
 	ctx.fillText(GI.type[0]+GI.type[2]+GI.type[1]+"  -  Particles: "+GI.particlesArr.length+" - key: "+GI.currentKey+" - mode: "+GI.mouseModeArr[GI.mouseMode],0,40)
