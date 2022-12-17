@@ -362,6 +362,8 @@ document.addEventListener("keydown",(e)=>{
 	if(k == "r"){
 		GI.cam.vx =0
 		GI.cam.vy =0
+	} else if(key == "g"){
+		GI.grapherTrans = !GI.grapherTrans
 	}
 
 })
@@ -459,7 +461,7 @@ class G{
 
 	static drawGrapher(){
 		let x = 0
-		ctx.strokeStyle = "#00FF00"
+		ctx.strokeStyle = GI.grapherTrans?"rgba(0,255,0,0.3)":"#00FF00"
 		ctx.lineWidth = 5
 		ctx.beginPath()
 		ctx.moveTo(this.grapherInfo.px*this.grapherInfo.ln,Height-this.grapher[0])
@@ -786,6 +788,8 @@ class GI{
 	static mouseInterval = 0
 
 	static currentKey = "nothing"
+
+	static grapherTrans = true
 
 	static mouseMode = 0
 	static mouseModeArr = ["normal","selector","activator"]
@@ -3154,8 +3158,8 @@ class GI{
 		"A06":{"color":"#FF0000","letter":"I"},
 		"A07":{"color":"#FF00FF","decay":15,"letter":"E"},//explosion
 		"A17":{"color":"#EF00FF","decay":15,"letter":"E"},//explosion
-		"A08":{"color":"#a881fc"},
-		"A09":{"color":"#5000FF"},
+		"A08":{"color":"#a881fc"},//structured chaos bomb
+		"A09":{"color":"#5000FF"},//chaos bomb
 
 		"B01":{"color":"#808080"},//push
 		"B02":{"color":"#F08080"},//shell
@@ -3205,7 +3209,7 @@ class GI{
 		"H04":{"color":"#000000","letter":"M"},//connector particle
 		"H05":{"color":"#000000","letter":"P","pulse":0},//pulsar activation particle
 
-		"I01":{"color":"#303030","letter":"A","team":-1,"reload":-1,"following":-1},
+		"I01":{"color":"#303030","letter":"A","team":-1,"reload":-1,"following":-1}, ///army particles
 		"I02":{"color":"#306030","letter":"A","team":1,"children":0},
 		"I03":{"color":"#303030","letter":"A","team":-1,"reload":-1,"following":-1},
 		"I04":{"color":"#303030","letter":"A","team":-1,"reload":-1,"following":-1},
@@ -3215,8 +3219,8 @@ class GI{
 		"J02":{"color":"#505088","letter":"D"}, //direction up
 		"J03":{"color":"#500088","letter":"D"}, //direction left
 		"J04":{"color":"#005088","letter":"D"}, //direction right
-		"J05":{"color":"#000088","letter":"P","pulse":0}, //pulse left right
-		"J06":{"color":"#505088","letter":"P","pulse":0}, //pulse up down
+		"J05":{"color":"#000088","letter":"P","pulse":0}, //phaser left right
+		"J06":{"color":"#505088","letter":"P","pulse":0}, //phaser up down
 
 		"K01":{"color":"#8080F0","letter":"H"}, //hl B4
 		"K02":{"color":"#6000FF","letter":"H"}, //hl Chaos generator
@@ -3601,7 +3605,7 @@ function repeat(){
 		GI.type[2] = 0
 	}
 	ctx.font = GI.barFont
-	ctx.fillText(GI.type[0]+GI.type[2]+GI.type[1]+"  -  Particles: "+GI.particlesArr.length+" - key: "+GI.currentKey+" - mode: "+GI.mouseModeArr[GI.mouseMode],0,40)
+	ctx.fillText(GI.type[0]+GI.type[1]+"."+GI.type[2]+"  -  Particles: "+GI.particlesArr.length+" - key: "+GI.currentKey+" - mode: "+GI.mouseModeArr[GI.mouseMode],0,40)
 	if(GI.customDebugger){
 		ctx.fillText(GI.debuggingInfo,0,80)
 	}
