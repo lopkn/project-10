@@ -21,20 +21,28 @@ function camPosRel(x,y){
 }
 
 document.addEventListener("mousedown",(e)=>{
+
+	if(interactor.clickedOn(mouseX,mouseY)){
+		interactor.phaseSpace = true;
+		interactor.handleStart()
+		return;
+	}
+
+
 	if(GI.mouseModeArr[GI.mouseMode] == "normal"){
 		e.preventDefault()
-		if(e.altKey||GI.altPressed){
-			GI.selectionStart = [mouseX,mouseY,e.shiftKey]
+		if(e.altKey||GI.altPressed || GI.functionals.alt){
+			GI.selectionStart = [mouseX,mouseY,e.shiftKey?e.shiftKey:GI.functionals.shift]
 		}
 
-		if(e.ctrlKey){
+		if(e.ctrlKey || GI.functionals.ctrl){
 			GI.mouseInterval = setInterval(()=>{G.newParticle(GI.cam.x+(mouseX)*GI.zoom,GI.cam.y+(mouseY)*GI.zoom,GI.type[0]+GI.type[2]+GI.type[1],10,e)},GI.autoclickSpeed)
 		}
 	} else if(GI.mouseModeArr[GI.mouseMode] == "selector"){
 		let selected = G.selectParticle(GI.cam.x+(mouseX)*GI.zoom,GI.cam.y+(mouseY)*GI.zoom)
 		if(selected !== "none"){
 			GI.selectedParticles.push(selected[0])
-			if(e.ctrlKey){
+			if(e.ctrlKey || GI.functionals.ctrl){
 				GI.mouseInterval = setInterval(()=>{GI.particles[selected[0]].x = GI.cam.x+(mouseX)*GI.zoom;GI.particles[selected[0]].y =GI.cam.y+(mouseY)*GI.zoom},GI.autoclickSpeed)
 			}
 		}
@@ -48,7 +56,7 @@ document.addEventListener("mousedown",(e)=>{
 					p.capsule.chainRes([GI.AE],0)
 				}
 			}
-			if(e.ctrlKey){
+			if(e.ctrlKey || GI.functionals.ctrl){
 				GI.mouseInterval = setInterval(()=>{GI.particles[selected[0]].x = GI.cam.x+(mouseX)*GI.zoom;GI.particles[selected[0]].y =GI.cam.y+(mouseY)*GI.zoom},GI.autoclickSpeed)
 			}
 		}
@@ -56,6 +64,13 @@ document.addEventListener("mousedown",(e)=>{
 })
 
 document.addEventListener("mouseup",(e)=>{
+
+	if(interactor.phaseSpace){
+		interactor.phaseSpace = false;
+		interactor.handleEnd()
+		return;
+	}
+
     	GI.debuggingInfo = "?"
 
 	if(GI.mouseModeArr[GI.mouseMode] == "normal"){
@@ -125,64 +140,42 @@ document.addEventListener('contextmenu', function(e) {
 
 document.addEventListener("keyup",(e)=>{
 	let k = e.key
-	if(k == "Alt"){
+	if(k == "Control" || k == "Shift" || k == "Alt" || k == "Tab"){
+		GI.functionals[k] = false
+		if(k == "Alt"){
 			GI.altPressed = false;
+		}
 	}
+	
 })
+
+const regexp1 = new RegExp('^[A-Z]+$');
+const regexp2 = new RegExp('^[0-9]+$');
 
 document.addEventListener("keydown",(e)=>{
 	let k = e.key
 
 	GI.currentKey = k
 
+	if(k == "Control" || k == "Shift" || k == "Alt" || k == "Tab"){
+		GI.functionals[k] = true
+	}
+
 	console.log(k)
 
+	if(regexp1.test(k)){
+		GI.type[0] = k
+	}
+
+	if(regexp2.test(k)){
+		if(e.ctrlKey || GI.functionals.ctrl){
+			GI.type[2] = k
+		} else {
+			GI.type[1] = k
+		}
+	}
+
 	switch(k){
-
-
-		case "B":
-			GI.type[0] = "B"
-			break;
-		case "A":
-			GI.type[0] = "A"
-			break;
-		case "C":
-			GI.type[0] = "C"
-			break;
-		case "D":
-			GI.type[0] = "D"
-			break;
-		case "E":
-			GI.type[0] = "E"
-			break;
-		case "F":
-			GI.type[0] = "F"
-			break;
-		case "G":
-			GI.type[0] = "G"
-			break;
-		case "H":
-			GI.type[0] = "H"
-			break;
-		case "I":
-			GI.type[0] = "I"
-			break;
-		case "J":
-			GI.type[0] = "J"
-			break;
-		case "K":
-			GI.type[0] = "K"
-			break;
-		case "L":
-			GI.type[0] = "L"
-			break;
-		case "M":
-			GI.type[0] = "M"
-			break;
-		case "N":
-			GI.type[0] = "N"
-			break;
-
 
 		case "=":
 			GI.zoom += 0.1
@@ -255,6 +248,9 @@ document.addEventListener("keydown",(e)=>{
 		case "g":
 			GI.grid = !GI.grid
 			break;
+		case "i":
+			interactor.opened = !interactor.opened;
+			break;
 
 		case "#":
 			GI.customDebugger = !GI.customDebugger
@@ -268,77 +264,18 @@ document.addEventListener("keydown",(e)=>{
 			break;
 	}
 
-	if(e.ctrlKey){
+	if(e.ctrlKey||GI.functionals.ctrl){
 		e.preventDefault()
 	}
 
-	if(k == "1"){
-		if(e.ctrlKey){
-			GI.type[2] = "1"
-		}else{
-			GI.type[1] = "1"
-			}}
-		if(k == "2"){
-			if(e.ctrlKey){
-				GI.type[2] = "2"
-			}else{
-			GI.type[1] = "2"
-			}}
-		if(k == "3"){
-			if(e.ctrlKey){
-				GI.type[2] = "3"
-			}else{
-			GI.type[1] = "3"
-			}}
-		if(k == "4"){
-			if(e.ctrlKey){
-				GI.type[2] = "4"
-			}else{
-			GI.type[1] = "4"
-			}}
-		if(k == "5"){
-			if(e.ctrlKey){
-				GI.type[2] = "5"
-			}else{
-			GI.type[1] = "5"
-			}}
-		if(k == "6"){
-			if(e.ctrlKey){
-				GI.type[2] = "6"
-			}else{
-			GI.type[1] = "6"
-			}}
-		if(k == "7"){
-			if(e.ctrlKey){
-				GI.type[2] = "7"
-			}else{
-			GI.type[1] = "7"
-			}}
-		if(k == "8"){
-			if(e.ctrlKey){
-				GI.type[2] = "8"
-			}else{
-			GI.type[1] = "8"
-			}}
-		if(k == "9"){
-			if(e.ctrlKey){
-				GI.type[2] = "9"
-			}else{
-			GI.type[1] = "9"
-			}}
-		if(k == "0"){
-			if(e.ctrlKey){
-				GI.type[2] = "0"
-			}else{
-			GI.type[1] = "0"
-			}}
+	
 
 	let r = ["",15*GI.zoom]
-	if(e.shiftKey){
-		r = ["v",1]
+	if(e.shiftKey || GI.functionals.shift){
+		r = ["v",1*GI.zoom]
 	}
 
-	if(e.altKey){
+	if(e.altKey || GI.functionals.alt){
 		e.preventDefault()
 	if(k == "ArrowUp"){
 		GI.cam[r[0]+"y"] -= r[1]
@@ -360,9 +297,9 @@ document.addEventListener("keydown",(e)=>{
 	}
 
 	if(k == "r"){
-		GI.cam.vx =0
-		GI.cam.vy =0
-	} else if(key == "g"){
+		GI.cam.vx = 0
+		GI.cam.vy = 0
+	} else if(k == "t"){
 		GI.grapherTrans = !GI.grapherTrans
 	}
 
@@ -510,7 +447,7 @@ class G{
 		}
 
 
-		if(!e||!e.shiftKey){GI.particlesArr.push(id)}else{GI.particlesArr.unshift(id)}
+		if(!e||!e.shiftKey || !GI.functionals.shift){GI.particlesArr.push(id)}else{GI.particlesArr.unshift(id)}
 		return(id)
 	}
 
@@ -796,6 +733,13 @@ class GI{
 	static selectedParticles = []
 
 	static AE = 150;
+
+	static functionals = {
+		"ctrl":false,
+		"shift":false,
+		"alt":false,
+		"tab":false
+	}
 
 	static autoclickSpeed = 100
 	static grid = false
@@ -3658,6 +3602,12 @@ function repeat(){
 		console.log("AVERAGE PARTICLE CALCULATION TIME: "+(GI.preformanceCalculate/100))
 		GI.preformanceCalculate = 0
 	}
+	if(interactor.opened){
+		if(interactor.phaseSpace){
+			interactor.phaseTick()
+		}
+		interactor.draw()
+	}
 }
 
 
@@ -3733,3 +3683,89 @@ function init()
     // document.addEventListener('touchmove', function() { e.preventDefault();GI.debuggingInfo = "cancled" }, { passive:false });
 }
 init()
+
+
+
+
+
+
+
+
+
+
+class interactor{
+	static page = 1
+	static pos = {"x":Width/2-175,"y":Height/2-120}
+	static phaseSpace = false
+	static phaseState = "none"
+	static opened = true
+	//300*240
+
+	static abuttons = [
+		{"color":"yellow","x":5,"y":5,"w":25,"h":25}
+	]
+	static buttons = [
+		this.abuttons[0]
+	]
+
+	static downPos = [0,0]
+	static phasePos = [0,0]
+
+	static transform = 1
+	static w = 350
+	static h = 240
+	static mainBoxInfo = {
+		"color":"rgba(0,0,255,0.4)"
+	}
+
+	static draw(){
+		ctx.fillStyle = this.mainBoxInfo.color
+		ctx.fillRect(this.pos.x,this.pos.y,this.w*this.transform,this.h*this.transform)
+
+		this.buttons.forEach((e)=>{
+			ctx.fillStyle = e.color
+			ctx.fillRect(this.pos.x+e.x*this.transform,this.pos.y+e.y*this.transform,e.w*this.transform,e.h*this.transform)
+		})
+	}
+
+	static clickedOn(x,y){
+		return(this.opened&&inRect(x,y,this.pos.x,this.pos.y,this.w*this.transform,this.h*this.transform))
+	}
+
+	static handleStart(){
+		this.downPos = [mouseX,mouseY]
+		this.phasePos = [mouseX,mouseY]
+		let ret = true
+		this.buttons.forEach((e,i)=>{
+			if(inRect(mouseX,mouseY,this.pos.x+e.x*this.transform,this.pos.y+e.y*this.transform,e.w*this.transform,e.h*this.transform)){
+				this.handleButton(i)
+				ret = false
+			}
+		})
+			//heldDefault
+			if(ret===true){this.phaseState = "moving"}
+	}
+
+	static handleButton(n){
+
+	}
+
+	static phaseTick(){
+		if(this.phaseState === "moving"){
+			this.pos.x += mouseX - this.phasePos[0]
+			this.pos.y += mouseY - this.phasePos[1]
+		}
+		this.phasePos = [mouseX,mouseY]
+	}
+
+	static handleEnd(){
+
+		if(this.phaseState === "moving"){
+			this.pos.x += mouseX - this.phasePos[0]
+			this.pos.y += mouseY - this.phasePos[1]
+		}
+		console.log("hi")
+
+		this.phaseState = "none"
+	}
+}
