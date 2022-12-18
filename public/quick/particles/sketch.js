@@ -3695,6 +3695,7 @@ init()
 
 class interactor{
 	static page = 1
+	static pageButtons = [[0,1,2,3],[0,1,2,3]]
 	static pos = {"x":Width/2-175,"y":Height/2-120}
 	static phaseSpace = false
 	static phaseState = "none"
@@ -3702,11 +3703,47 @@ class interactor{
 	//300*240
 
 	static abuttons = [
-		{"color":"yellow","x":5,"y":5,"w":25,"h":25}
+		{"color":"yellow",
+		"x":5,"y":5,"w":25,"h":25,
+		"clicked":()=>{
+				interactor.maximized = false
+				interactor.w = 35;
+				interactor.h = 35;
+				this.mainBoxInfo.color = "rgba(255,0,255,0.4)"
+			}
+
+		},
+		{"color":"#00CFCF",
+		"x":5,"y":35,"w":25,"h":25,
+		"clicked":()=>{
+				interactor.page += 1
+				if(interactor.page > 2){
+					interactor.page = 1
+				}
+				interactor.loadPageButtons()
+			}
+
+		},
+		{"color":"#008F8F",
+		"x":5,"y":65,"w":25,"h":25,
+		"clicked":()=>{
+				interactor.page -= 1
+				if(interactor.page < 1){
+					interactor.page = 2
+				}
+				interactor.loadPageButtons()
+			}
+
+		},
+		{"color":"#8000FF",
+		"x":5,"y":205,"w":30,"h":30,
+		"clicked":()=>{
+				interactor.phaseState = "movingCam"
+			}
+
+		}
 	]
-	static buttons = [
-		this.abuttons[0]
-	]
+	static buttons = []
 
 	static downPos = [0,0]
 	static phasePos = [0,0]
@@ -3714,6 +3751,7 @@ class interactor{
 	static transform = 1
 	static w = 350
 	static h = 240
+	static maximized = true
 	static mainBoxInfo = {
 		"color":"rgba(0,0,255,0.4)"
 	}
@@ -3722,20 +3760,37 @@ class interactor{
 		ctx.fillStyle = this.mainBoxInfo.color
 		ctx.fillRect(this.pos.x,this.pos.y,this.w*this.transform,this.h*this.transform)
 
+		if(this.maximized){
 		this.buttons.forEach((e)=>{
 			ctx.fillStyle = e.color
 			ctx.fillRect(this.pos.x+e.x*this.transform,this.pos.y+e.y*this.transform,e.w*this.transform,e.h*this.transform)
 		})
+		}
 	}
 
 	static clickedOn(x,y){
 		return(this.opened&&inRect(x,y,this.pos.x,this.pos.y,this.w*this.transform,this.h*this.transform))
 	}
 
+	static loadPageButtons(){
+		let pb = this.pageButtons[this.page-1]
+		this.buttons = []
+		pb.forEach((e)=>{
+			this.buttons.push(this.abuttons[e])
+		})
+	}
+
 	static handleStart(){
 		this.downPos = [mouseX,mouseY]
 		this.phasePos = [mouseX,mouseY]
 		let ret = true
+		if(!this.maximized){
+			this.maximized = true
+			this.w = 350
+			this.h = 240
+			this.mainBoxInfo.color = "rgba(0,0,255,0.4)"
+			return;
+		}
 		this.buttons.forEach((e,i)=>{
 			if(inRect(mouseX,mouseY,this.pos.x+e.x*this.transform,this.pos.y+e.y*this.transform,e.w*this.transform,e.h*this.transform)){
 				this.handleButton(i)
@@ -3747,13 +3802,22 @@ class interactor{
 	}
 
 	static handleButton(n){
-
+		this.buttons[n].clicked()
 	}
 
 	static phaseTick(){
 		if(this.phaseState === "moving"){
 			this.pos.x += mouseX - this.phasePos[0]
 			this.pos.y += mouseY - this.phasePos[1]
+		} else if(this.phaseState === "movingCam"){
+			GI.cam.x += (mouseX - this.downPos[0])/5
+			GI.cam.y += (mouseY - this.downPos[1])/5
+			ctx.beginPath()
+			ctx.lineWidth = 3
+			ctx.strokeStyle = "#5000A0"
+			ctx.moveTo(this.downPos[0],this.downPos[1])
+			ctx.lineTo(mouseX,mouseY)
+			ctx.stroke()
 		}
 		this.phasePos = [mouseX,mouseY]
 	}
@@ -3769,3 +3833,5 @@ class interactor{
 		this.phaseState = "none"
 	}
 }
+
+interactor.loadPageButtons()
