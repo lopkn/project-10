@@ -3697,7 +3697,7 @@ init()
 
 class interactor{
 	static page = 1
-	static pageButtons = [[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22],[0,1,2,3]]
+	static pageButtons = [[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24],[0,1,2,3]]
 	static pos = {"x":Width/2-175,"y":Height/2-120}
 	static phaseSpace = false
 	static phaseState = "none"
@@ -3714,6 +3714,7 @@ class interactor{
 	static transform = 1
 	static w = 350
 	static h = 240
+	static pressStart = 0
 	static maximized = true
 	static mainBoxInfo = {
 		"color":"rgba(0,0,255,0.4)"
@@ -3750,6 +3751,7 @@ class interactor{
 	}
 
 	static handleStart(){
+		this.pressStart = Date.now()
 		this.downPos = [mouseX,mouseY]
 		this.phasePos = [mouseX,mouseY]
 		let ret = true
@@ -3782,6 +3784,15 @@ class interactor{
 		} else if(this.phaseState === "movingCam"){
 			GI.cam.x += (mouseX - this.downPos[0])/9*GI.zoom
 			GI.cam.y += (mouseY - this.downPos[1])/9*GI.zoom
+			ctx.beginPath()
+			ctx.lineWidth = 3
+			ctx.strokeStyle = "#5000A0"
+			ctx.moveTo(this.downPos[0],this.downPos[1])
+			ctx.lineTo(mouseX,mouseY)
+			ctx.stroke()
+		} else if(this.phaseState === "movingCamVel"){
+			GI.cam.vx = (mouseX - this.downPos[0])/9*GI.zoom
+			GI.cam.vy = (mouseY - this.downPos[1])/9*GI.zoom
 			ctx.beginPath()
 			ctx.lineWidth = 3
 			ctx.strokeStyle = "#5000A0"
@@ -3867,10 +3878,128 @@ class interactor{
 
 
 		}
-		console.log("hi")
+
+		if(Date.now()-this.pressStart < 200){
+			if(this.phaseState = "movingCamVel"){
+				GI.cam.vx = 0
+				GI.cam.vy = 0
+			}
+		}
+
 
 		this.phaseState = "none"
 	}
 }
 
 interactor.loadPageButtons()
+
+
+
+// function conf() {
+//     return 'Are you sure you want to quit?';
+// }
+
+// window.onbeforeunload = conf;
+
+window.onbeforeunload=()=> {
+	console.log("confirm")
+	alert("you")
+	return "are you sure?"
+}
+
+
+function abd(x,y){
+	return(Math.abs(x-y))
+}
+
+class p3{
+	static inOuPairs = []
+	static mpa = {"m":1,"p":1,"a":0}
+
+	static interInput(x){
+		let o = {"m":x*this.mpa.m,"p":Math.pow(x,this.mpa.p),"a":this.mpa.a+x}
+		return(o)
+	}
+	static evalDiffs(){
+		let o = {"tmd":0,"tpd":0,"tad":0,"t":0}
+		this.inOuPairs.forEach((e)=>{
+			let d = this.evalDiff(e[0],e[1])
+			o.tmd += d.md
+			o.tpd += d.pd
+			o.tad += d.ad;
+			o.t += d.t
+		})
+		return(o)
+	}
+
+	static evalm(v){
+		let d = 0
+		this.inOuPairs.forEach((e)=>{
+			d += abd(e[1],e[0]*v)
+		})
+		return(d)
+	}
+	static evalp(v){
+		let d = 0
+		this.inOuPairs.forEach((e)=>{
+			d += abd(e[1],Math.pow(e[0],v))
+		})
+		return(d)
+	}
+	static evala(v){
+		let d = 0
+		this.inOuPairs.forEach((e)=>{
+			d += abd(e[1],e[0]+v)
+		})
+		return(d)
+	}
+
+	static evalDiff(x,y){
+		let d = this.interInput(x)
+		d.md = abd(d.m,y)
+		d.pd = abd(d.p,y)
+		d.ad = abd(d.a,y)
+		d.t = d.md + d.pd + d.ad
+		return(d)
+	}
+	static lfrom(){
+		let d = this.evalDiffs()
+		let rdt = Math.random()
+		// if(rdt < d.tmd/d.t){
+			if(1){
+			let dm = d.tmd
+
+			let tm = this.mpa.m + Math.random()*10-5
+
+			let trr = this.evalm(tm)
+			if(trr < dm){
+				console.log("mchange:"+(dm-trr)+" and "+this.mpa.m+"->"+tm)
+				this.mpa.m = tm
+			}
+
+		// } else if(rdt > 1-d.tad/d.t){
+		}if(1){
+			let dm = d.tpd
+
+			let tm = this.mpa.p + Math.random()-0.5
+
+			let trr = this.evalp(tm)
+			if(trr < dm){
+				console.log("pchange:"+(dm-trr)+" and "+this.mpa.p+"->"+tm)
+				this.mpa.p = tm
+			}
+		// } else {
+		}if(1){
+			let dm = d.tad
+
+			let tm = this.mpa.a + Math.random()*10-5
+
+			let trr = this.evala(tm)
+			if(trr < dm){
+				console.log("achange:"+(dm-trr)+" and "+this.mpa.a+"->"+tm)
+				this.mpa.a = tm
+			}
+		}
+	}
+	
+}

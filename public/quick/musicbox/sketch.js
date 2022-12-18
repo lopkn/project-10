@@ -1,5 +1,5 @@
 let myCanvas = document.getElementById("myCanvas")
-
+window.navigator.standalone
 let Width = window.innerWidth
 let Height = window.innerHeight
 myCanvas.style.top = 0

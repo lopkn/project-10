@@ -34,7 +34,7 @@ var abuttons = [
 		{"color":"#8000FF",
 		"x":5,"y":205,"w":30,"h":30,
 		"clicked":()=>{
-				interactor.phaseState = "movingCam"
+				interactor.phaseState = "movingCamVel"
 			}
 
 		},
@@ -241,6 +241,21 @@ var abuttons = [
 				abuttons[22].color = "#FF0000"
 				}
 				GI.functionals.alt = !GI.functionals.alt
+			}
+
+		},
+		{"color":"#FF0000",
+		"x":315,"y":205,"w":30,"h":30,
+		"clicked":()=>{
+				GI.particlesArr = []
+				GI.particles = {}
+			}
+
+		},
+		{"color":"#8000FF",
+		"x":155,"y":100,"w":40,"h":40,
+		"clicked":()=>{
+				interactor.phaseState = "movingCam"
 			}
 
 		},
