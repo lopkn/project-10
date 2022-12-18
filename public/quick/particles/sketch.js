@@ -235,10 +235,12 @@ document.addEventListener("keydown",(e)=>{
 			break;
 		case " ":
 			if(GI.paused){
+				interactor.abuttons[17].color = "#00F000"
 				psf = ()=>{G.updateParticles()}
-			} else {
-				psf = ()=>{}
-			}
+				} else {
+					interactor.abuttons[17].color = "#FF0000"
+					psf = ()=>{}
+				}
 			GI.paused = !GI.paused
 			break;
 
@@ -3603,10 +3605,10 @@ function repeat(){
 		GI.preformanceCalculate = 0
 	}
 	if(interactor.opened){
+		interactor.draw()
 		if(interactor.phaseSpace){
 			interactor.phaseTick()
 		}
-		interactor.draw()
 	}
 }
 
@@ -3695,54 +3697,15 @@ init()
 
 class interactor{
 	static page = 1
-	static pageButtons = [[0,1,2,3],[0,1,2,3]]
+	static pageButtons = [[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22],[0,1,2,3]]
 	static pos = {"x":Width/2-175,"y":Height/2-120}
 	static phaseSpace = false
 	static phaseState = "none"
 	static opened = true
+	static phaseButton = 0
 	//300*240
 
-	static abuttons = [
-		{"color":"yellow",
-		"x":5,"y":5,"w":25,"h":25,
-		"clicked":()=>{
-				interactor.maximized = false
-				interactor.w = 35;
-				interactor.h = 35;
-				this.mainBoxInfo.color = "rgba(255,0,255,0.4)"
-			}
-
-		},
-		{"color":"#00CFCF",
-		"x":5,"y":35,"w":25,"h":25,
-		"clicked":()=>{
-				interactor.page += 1
-				if(interactor.page > 2){
-					interactor.page = 1
-				}
-				interactor.loadPageButtons()
-			}
-
-		},
-		{"color":"#008F8F",
-		"x":5,"y":65,"w":25,"h":25,
-		"clicked":()=>{
-				interactor.page -= 1
-				if(interactor.page < 1){
-					interactor.page = 2
-				}
-				interactor.loadPageButtons()
-			}
-
-		},
-		{"color":"#8000FF",
-		"x":5,"y":205,"w":30,"h":30,
-		"clicked":()=>{
-				interactor.phaseState = "movingCam"
-			}
-
-		}
-	]
+	static abuttons = abuttons
 	static buttons = []
 
 	static downPos = [0,0]
@@ -3757,14 +3720,20 @@ class interactor{
 	}
 
 	static draw(){
+		if(this.phaseState === "none" || this.phaseState === "moving"){
 		ctx.fillStyle = this.mainBoxInfo.color
 		ctx.fillRect(this.pos.x,this.pos.y,this.w*this.transform,this.h*this.transform)
-
+		
 		if(this.maximized){
 		this.buttons.forEach((e)=>{
 			ctx.fillStyle = e.color
 			ctx.fillRect(this.pos.x+e.x*this.transform,this.pos.y+e.y*this.transform,e.w*this.transform,e.h*this.transform)
 		})
+		}
+		} else {
+			let e = this.buttons[this.phaseButton]
+			ctx.fillStyle = e.color
+			ctx.fillRect(this.pos.x+e.x*this.transform,this.pos.y+e.y*this.transform,e.w*this.transform,e.h*this.transform)
 		}
 	}
 
@@ -3802,6 +3771,7 @@ class interactor{
 	}
 
 	static handleButton(n){
+		this.phaseButton = n
 		this.buttons[n].clicked()
 	}
 
@@ -3810,14 +3780,67 @@ class interactor{
 			this.pos.x += mouseX - this.phasePos[0]
 			this.pos.y += mouseY - this.phasePos[1]
 		} else if(this.phaseState === "movingCam"){
-			GI.cam.x += (mouseX - this.downPos[0])/5
-			GI.cam.y += (mouseY - this.downPos[1])/5
+			GI.cam.x += (mouseX - this.downPos[0])/9*GI.zoom
+			GI.cam.y += (mouseY - this.downPos[1])/9*GI.zoom
 			ctx.beginPath()
 			ctx.lineWidth = 3
 			ctx.strokeStyle = "#5000A0"
 			ctx.moveTo(this.downPos[0],this.downPos[1])
 			ctx.lineTo(mouseX,mouseY)
 			ctx.stroke()
+		} else if(this.phaseState === "zooming"){
+			GI.cam.x += (mouseX - this.downPos[0])/9*GI.zoom
+			GI.zoom *= 1+(mouseY - this.downPos[1])/5000
+			ctx.beginPath()
+			ctx.lineWidth = 3
+			ctx.strokeStyle = "#5000A0"
+			ctx.moveTo(this.downPos[0],this.downPos[1])
+			ctx.lineTo(mouseX,mouseY)
+			ctx.stroke()
+		} else if(this.phaseState === "timeDile"){
+			GI.FRATE += ((mouseY - this.downPos[1])/8000*GI.FRATE)
+			if(GI.FRATE < 1){
+				GI.FRATE = 1
+			}
+			clearInterval(_MainInterval_)
+			_MainInterval_ = setInterval(()=>{repeat()},GI.FRATE)
+			ctx.beginPath()
+			ctx.lineWidth = 3
+			ctx.strokeStyle = "#5000A0"
+			ctx.moveTo(this.downPos[0],this.downPos[1])
+			ctx.lineTo(mouseX,mouseY)
+			ctx.stroke()
+
+			ctx.fillText(GI.FRATE.toPrecision(4),mouseX,mouseY-50)
+
+		} else if(this.phaseState === "padPhase"){
+			let unt = this.transform*(this.buttons[this.phaseButton].w + 30)
+			let uux = this.pos.x+this.transform*(this.buttons[this.phaseButton].x - 15) - unt
+			let uuy = this.pos.y+this.transform*(this.buttons[this.phaseButton].y - 15) - unt
+			ctx.fillStyle = "#C0C0C0"
+			ctx.fillRect(uux,uuy,unt*3,unt*3)
+			ctx.beginPath()
+			ctx.strokeStyle = "#000000"
+			ctx.lineWidth = 3
+			ctx.moveTo(uux+unt,uuy)
+			ctx.lineTo(uux+unt,uuy+unt*3)
+			ctx.moveTo(uux+unt+unt,uuy)
+			ctx.lineTo(uux+unt+unt,uuy+unt*3)
+
+			ctx.moveTo(uux,uuy+unt)
+			ctx.lineTo(uux+unt*3,uuy+unt)
+			ctx.moveTo(uux,uuy+unt+unt)
+			ctx.lineTo(uux+unt*3,uuy+unt*2)
+			ctx.stroke()
+
+
+			let mpx = Math.floor((mouseX-uux)/unt)
+			let mpy = Math.floor((mouseY-uuy)/unt)
+			
+			if((mpx === 0 || mpx === 1 || mpx === 2 )&&(mpy === 0 || mpy === 1 || mpy === 2 )){
+				ctx.fillStyle = "#008000"
+				ctx.fillRect(uux+unt*mpx,uuy+unt*mpy,unt,unt)
+			}
 		}
 		this.phasePos = [mouseX,mouseY]
 	}
@@ -3827,6 +3850,22 @@ class interactor{
 		if(this.phaseState === "moving"){
 			this.pos.x += mouseX - this.phasePos[0]
 			this.pos.y += mouseY - this.phasePos[1]
+		} else if(this.phaseState === "padPhase"){
+			let unt = this.transform*(this.buttons[this.phaseButton].w + 30)
+			let uux = this.pos.x+this.transform*(this.buttons[this.phaseButton].x - 15) - unt
+			let uuy = this.pos.y+this.transform*(this.buttons[this.phaseButton].y - 15) - unt
+
+
+			let mpx = Math.floor((mouseX-uux)/unt)
+			let mpy = Math.floor((mouseY-uuy)/unt)
+
+			if((mpx === 0 || mpx === 1 || mpx === 2 )&&(mpy === 0 || mpy === 1 || mpy === 2 )){
+				this.buttons[this.phaseButton].up(mpx+mpy*3+1)
+			} else {
+				this.buttons[this.phaseButton].up(0)
+			}
+
+
 		}
 		console.log("hi")
 
