@@ -260,4 +260,16 @@ var abuttons = [
 
 		},
 
+		{"color":"#A04000",
+		"x":315,"y":45,"w":25,"h":25,
+		"clicked":()=>{
+				interactor.phaseState = "padPhase"
+			},
+		"up":(e)=>{
+			GI.type[2] = e
+		}
+
+		},
+
+
 	]

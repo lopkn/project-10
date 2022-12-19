@@ -2030,6 +2030,14 @@ class GI{
 			}
 			
 		},
+		"A27":{
+			"onDeath":(p)=>{
+				for(let i = 0; i < 50; i++){
+					setTimeout(()=>{G.newParticle(p.x+Math.random()-0.5,p.y+Math.random()-0.5,"B01",10)},Math.random()*500)
+				}
+			}
+			
+		},
 		"A08":{
 			"onDeath":(p)=>{
 				let r = Math.random()*7
@@ -2990,11 +2998,63 @@ class GI{
 				let d = distance(p.x,p.y,op.x,op.y)
 				let dx = (op.x-p.x)
 				let dy = (op.y-p.y)
+				let rr = Math.sqrt(p.r)*2
+
+				if(p.r +op.r> d){
+					op.nxadd.x -= 5*dx/d/d*rr
+					op.nxadd.y -= 5*dy/d/d*rr
+				}
 
 				if(p.r > d+op.r && (op.t !== "L04" || p.stinfo.pulse < -30)){
 					p.r = Math.sqrt(op.r*op.r+p.r*p.r)
 					G.delParticle(op)
 				} else if(op.t==="L04"){
+
+					if(d<10){
+						d *= 5
+						if(d < 1){
+							d = 1/d
+						}
+					}
+					// if(p.stinfo.pulse < 0){??}
+					op.nxadd.x += p.stinfo.pulse*dx/d/d*rr
+					op.nxadd.y += p.stinfo.pulse*dy/d/d*rr
+				}
+
+			},
+			"eachFrame":(f,p)=>{
+
+					p.r *= 0.9998
+
+				if(f%100 === 0 && p.r > 40 + Math.random()*40){
+					p.r = Math.sqrt(p.r*p.r/2)
+					let tid = G.newParticle(p.x+Math.random()-0.5,p.y+Math.random()-0.5,"L14",10)
+					GI.particles[tid].r = p.r
+				}
+
+				// p.r *= 0.995
+				p.life = p.r-10
+				p.stinfo.pulse = 50 - f%100
+				if(f%300 > 250){
+					p.stinfo.pulse *= 4.5
+				}
+			},
+			"initiate":(p)=>{
+				p.r = 40
+			}
+			
+		},
+
+		"L14":{
+			"toOther":(p,op)=>{
+				let d = distance(p.x,p.y,op.x,op.y)
+				let dx = (op.x-p.x)
+				let dy = (op.y-p.y)
+
+				if(p.r > d+op.r && (op.t !== "L14" || p.stinfo.pulse < -30)){
+					p.r = Math.sqrt(op.r*op.r+p.r*p.r)
+					G.delParticle(op)
+				} else if(op.t==="L14"){
 
 					if(d<10){
 						d *= 5
@@ -3015,7 +3075,7 @@ class GI{
 
 				if(f%100 === 0 && p.r > 40 + Math.random()*40){
 					p.r = Math.sqrt(p.r*p.r/2)
-					let tid = G.newParticle(p.x+Math.random()-0.5,p.y+Math.random()-0.5,"L04",10)
+					let tid = G.newParticle(p.x+Math.random()-0.5,p.y+Math.random()-0.5,"L14",10)
 					GI.particles[tid].r = p.r
 				}
 
@@ -3103,7 +3163,8 @@ class GI{
 		"A05":{"color":"#FF00FF","letter":"I"},
 		"A06":{"color":"#FF0000","letter":"I"},
 		"A07":{"color":"#FF00FF","decay":15,"letter":"E"},//explosion
-		"A17":{"color":"#EF00FF","decay":15,"letter":"E"},//explosion
+			"A17":{"color":"#EF00FF","decay":15,"letter":"E"},//explosion
+			"A27":{"color":"#EF00FF","letter":"E"},//explosion
 		"A08":{"color":"#a881fc"},//structured chaos bomb
 		"A09":{"color":"#5000FF"},//chaos bomb
 
@@ -3176,7 +3237,8 @@ class GI{
 		"L01":{"color":"#80F080","letter":"S"}, //slime
 		"L02":{"color":"#90F090","letter":"S"}, //smart slime
 		"L03":{"color":"#90F0C0","letter":"S","pulse":0}, //very smart slime
-		"L04":{"color":"#80B080","letter":"S","pulse":0}, //high repulsion random smart slime
+		"L04":{"color":"#80B080","letter":"S","pulse":0}, //high repulsion hunter random smart slime
+			"L14":{"color":"#209020","letter":"S","pulse":0}, //high repulsion random smart slime
 		"L05":{"color":"#00F0C0","letter":"S","pulse":0}, //spinner smart slime
 
 	}
@@ -3697,7 +3759,7 @@ init()
 
 class interactor{
 	static page = 1
-	static pageButtons = [[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24],[0,1,2,3]]
+	static pageButtons = [[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25],[0,1,2,3]]
 	static pos = {"x":Width/2-175,"y":Height/2-120}
 	static phaseSpace = false
 	static phaseState = "none"
