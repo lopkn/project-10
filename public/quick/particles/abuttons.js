@@ -270,6 +270,13 @@ var abuttons = [
 		}
 
 		},
+		{"color":"#505050",
+		"x":315,"y":75,"w":25,"h":25,
+		"clicked":()=>{
+			GI.grid = !GI.grid
+			}
+
+		},
 
 
 	]

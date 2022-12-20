@@ -1459,7 +1459,7 @@ function fastdistance(x1,y1,x2,y2) {
 ///////////////////////////////////////////////////////////////
 var express = require('express');
 var app = express();
-var server = app.listen(3001);
+var server = app.listen(3000);
 app.use(express.static('public'));
 
 console.log("server is opened")
