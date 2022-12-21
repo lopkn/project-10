@@ -3028,7 +3028,7 @@ class GI{
 
 				if(f%100 === 0 && p.r > 40 + Math.random()*40){
 					p.r = Math.sqrt(p.r*p.r/2)
-					let tid = G.newParticle(p.x+Math.random()-0.5,p.y+Math.random()-0.5,"L14",10)
+					let tid = G.newParticle(p.x+Math.random()-0.5,p.y+Math.random()-0.5,"L04",10)
 					GI.particles[tid].r = p.r
 				}
 
