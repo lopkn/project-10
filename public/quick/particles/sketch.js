@@ -65,6 +65,10 @@ document.addEventListener("mousedown",(e)=>{
 
 document.addEventListener("mouseup",(e)=>{
 
+
+	clearInterval(GI.mouseInterval)
+	
+
 	if(interactor.phaseSpace){
 		interactor.phaseSpace = false;
 		interactor.handleEnd()
@@ -131,7 +135,6 @@ document.addEventListener("mouseup",(e)=>{
 
 
 
-	clearInterval(GI.mouseInterval)
 
 })
 
