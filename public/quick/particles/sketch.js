@@ -67,7 +67,7 @@ document.addEventListener("mouseup",(e)=>{
 
 
 	clearInterval(GI.mouseInterval)
-	
+
 
 	if(interactor.phaseSpace){
 		interactor.phaseSpace = false;
@@ -451,8 +451,7 @@ class G{
 			GI.particles[id].parent = parent.id
 		}
 
-
-		if(!e||!e.shiftKey || !GI.functionals.shift){GI.particlesArr.push(id)}else{GI.particlesArr.unshift(id)}
+		if(!e||(!e.shiftKey && !GI.functionals.shift)){GI.particlesArr.push(id)}else{GI.particlesArr.unshift(id)}
 		return(id)
 	}
 
@@ -645,13 +644,21 @@ class G{
 		GI.particlesArr.forEach((e)=>{
 			this.updateParticle(GI.particles[e])
 		})
-		GI.particlesArr.forEach((e)=>{
+		GI.particlesArr.forEach((e,i)=>{
 			this.updateParticle2(GI.particles[e])
 		})
 	}
 
 	static updateParticle2(p){
 		let nxad = p.nxadd
+
+		if(p.info.stability !== undefined){
+			nxad.x *= p.info.stability.x
+			nxad.y *= p.info.stability.y
+			nxad.vx *= p.info.stability.vx
+			nxad.vy *= p.info.stability.vy
+		}
+
 		p.x += nxad.x
 		p.y += nxad.y
 		p.vy += nxad.vy
@@ -1256,6 +1263,102 @@ class GI{
 			
 		},
 		"D05":{
+			"stability":{"x":0.02,"y":0.02,"vx":0.5,"vy":0.5},
+			"toOther":(p,op)=>{
+				let d = distance(p.x,p.y,op.x,op.y)
+				let dx = (op.x-p.x)
+				let dy = (op.y-p.y)
+
+				if(d<3){
+						d = 3
+					}
+
+				if(op.t !== "D05"){
+					if(d < 60){
+
+					op.life -= 50
+
+						if(op.life <= 0){
+							G.newParticle(op.x,op.y,"D05",10)
+							G.delParticle(op)
+							p.life += 400
+
+							return
+						}				
+					}
+				} else {
+					op.nxadd.x += Math.random()*500*dx/d/d
+					op.nxadd.y += Math.random()*500*dy/d/d
+				}
+
+			},
+			"eachFrame":(f,p)=>{
+				p.stinfo.color = "rgba(255,"+(p.life/4)+",0,"+(p.life/200)+")"
+			}
+		},
+		"D15":{
+			"stability":{"x":0.02,"y":0.02,"vx":0.5,"vy":0.5},
+			"toOther":(p,op)=>{
+				let d = distance(p.x,p.y,op.x,op.y)
+				let dx = (op.x-p.x)
+				let dy = (op.y-p.y)
+
+				if(d<3){
+						d = 3
+					}
+
+				if(op.t !== "D15" && op.t !== "D25"){
+					if(d < 60){
+
+					op.life -= 50
+
+						if(op.life <= 0){
+							if(p.life > 1700){
+								G.newParticle(op.x,op.y,"D25",10)
+							}else{
+								G.newParticle(op.x,op.y,"D15",10)
+							}
+							G.delParticle(op)
+							p.life += 400
+
+							return
+						}				
+					}
+				} else {
+					op.nxadd.x += Math.random()*500*dx/d/d
+					op.nxadd.y += Math.random()*500*dy/d/d
+				}
+
+			},
+			"eachFrame":(f,p)=>{
+				p.stinfo.color = "rgba(255,"+(p.life/4)+",0,"+(p.life/200)+")"
+				p.vy -= p.stinfo.flameVel
+			},
+			"initiate":(p)=>{
+				p.stinfo.flameVel = Math.random()*0.3
+			}
+		},
+		"D25":{
+			"stability":{"x":0.02,"y":0.02,"vx":0.5,"vy":0.5},
+			"eachFrame":(f,p)=>{
+				p.r = p.life/75
+				if(f%3===0){
+					console.log(p.stinfo.color)
+					G.newParticle(p.x,p.y,"D15",10,{"shiftKey":true})
+				}
+				p.vy += p.stinfo.flameVel
+			},
+			"initiate":(p)=>{
+				if(Math.random()<0.5){
+					p.stinfo.color = "rgb(255,255,"+(Math.random()*150+100)+")"
+				} else {
+					p.stinfo.color = "rgb(200,200,"+(Math.random()*55+220)+")"
+				}
+				p.vx = Math.random()*2-1
+				p.stinfo.flameVel = Math.random()*0.3
+			}
+		},
+		"D27":{
 			"eachFrame":(f,p)=>{
 				let op = GI.particles[p.stinfo.following]
 
@@ -1314,7 +1417,7 @@ class GI{
 			},
 			
 		},
-		"D06":{
+		"D28":{
 			"eachFrame":(f,p)=>{
 				let op = GI.particles[p.stinfo.following]
 
@@ -3190,12 +3293,15 @@ class GI{
 		"D02":{"color":"#F000F0","decay":5},//virus -> B1
 		"D03":{"color":"#800080","decay":5},//virus
 		"D04":{"color":"#800080","decay":2,"letter":"F","following":-1},//virus, following
-		"D05":{"color":"#404040","letter":"F","following":-1},//catalyser, following
-		"D06":{"color":"#004040","letter":"F","following":-1},//catalyser, following
+		"D05":{"color":"#FFC000","decay":25,"letter":"V"},//fire
+			"D15":{"color":"#FFC000","decay":25,"letter":"g"},//gravity effected fire
+			"D25":{"color":"#FFC000","decay":15,"letter":"g"},//gravity effected fire spark
 		"D07":{"color":"#808080","letter":"F","following":-1},//catalyser, following
 			"D17":{"color":"#808080","letter":"F","following":-1},//catalyser, following
+			"D27":{"color":"#404040","letter":"F","following":-1},//catalyser, following, previously D05
 		"D08":{"color":"#008080","letter":"F","following":-1},//catalyser, following
 			"D18":{"color":"#008080","letter":"F","following":-1},//catalyser, following
+			"D28":{"color":"#004040","letter":"F","following":-1},//catalyser, following, previously D06
 		"D09":{"color":"#F00080","decay":2,"letter":"F","following":-1},//virus, following -> B8
 
 		"E01":{"color":"#628000","letter":"C"},//gravity killer +> 2x B1 -> 4x B8
