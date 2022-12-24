@@ -1308,15 +1308,17 @@ class GI{
 					}
 
 				if(op.t !== "D15" && op.t !== "D25"){
-					if(d < 60){
+					if(d < 90){
 
-					op.life -= 50
+					op.life -= Math.floor(50*d/70)
 
 						if(op.life <= 0){
-							if(p.life > 1700){
+							if(Math.random()>0.1){
+							if(p.life > 2000){
 								G.newParticle(op.x,op.y,"D25",10)
 							}else{
 								G.newParticle(op.x,op.y,"D15",10)
+							}
 							}
 							G.delParticle(op)
 							p.life += 400
@@ -1325,6 +1327,9 @@ class GI{
 						}				
 					}
 				} else {
+					if(d < 60){
+						op.life -= 2
+					}
 					op.nxadd.x += Math.random()*500*dx/d/d
 					op.nxadd.y += Math.random()*500*dy/d/d
 				}
@@ -1341,10 +1346,8 @@ class GI{
 		"D25":{
 			"stability":{"x":0.02,"y":0.02,"vx":0.5,"vy":0.5},
 			"eachFrame":(f,p)=>{
-				p.r = p.life/75
 				if(f%3===0){
-					console.log(p.stinfo.color)
-					G.newParticle(p.x,p.y,"D15",10,{"shiftKey":true})
+					G.newParticle(p.x,p.y,"D15",10)
 				}
 				p.vy += p.stinfo.flameVel
 			},
@@ -1354,7 +1357,8 @@ class GI{
 				} else {
 					p.stinfo.color = "rgb(200,200,"+(Math.random()*55+220)+")"
 				}
-				p.vx = Math.random()*2-1
+				p.vx = Math.random()*5-2.5
+				p.life *= Math.random()*2+1
 				p.stinfo.flameVel = Math.random()*0.3
 			}
 		},
@@ -2140,6 +2144,34 @@ class GI{
 			"onDeath":(p)=>{
 				for(let i = 0; i < 50; i++){
 					setTimeout(()=>{G.newParticle(p.x+Math.random()-0.5,p.y+Math.random()-0.5,"B01",10)},Math.random()*500)
+				}
+			}
+			
+		},
+		"A37":{
+			"onDeath":(p)=>{
+				let rr = Math.random()*3 + 1
+				for(let i = 0; i < 20; i++){
+					setTimeout(()=>{
+						let tp = G.newParticle(p.x+Math.random()-0.5,p.y+Math.random()-0.5,"D25",10)
+						GI.particles[tp].vy = (Math.random()*5-2.5)*rr*rr
+						GI.particles[tp].vx *= Math.random()*2.5 + 0.5
+						GI.particles[tp].vx *= rr
+					},Math.random()*5)
+				}
+			}
+			
+		},
+		"A47":{
+			"onDeath":(p)=>{
+				let rr = Math.random()*3 + 2
+				for(let i = 0; i < 4; i++){
+					setTimeout(()=>{
+						let tp = G.newParticle(p.x+Math.random()-0.5,p.y+Math.random()-0.5,"D25",10)
+						GI.particles[tp].vy = (Math.random()*5-2.5)*rr*rr
+						GI.particles[tp].vx *= Math.random()*2.5 + 0.5
+						GI.particles[tp].vx *= rr
+					},Math.random()*5)
 				}
 			}
 			
@@ -3271,6 +3303,8 @@ class GI{
 		"A07":{"color":"#FF00FF","decay":15,"letter":"E"},//explosion
 			"A17":{"color":"#EF00FF","decay":15,"letter":"E"},//explosion
 			"A27":{"color":"#EF00FF","letter":"E"},//explosion
+			"A37":{"color":"#AF00FF","letter":"E"},//fire explosion
+			"A47":{"color":"#8F00FF","letter":"E"},//small fire explosion
 		"A08":{"color":"#a881fc"},//structured chaos bomb
 		"A09":{"color":"#5000FF"},//chaos bomb
 
