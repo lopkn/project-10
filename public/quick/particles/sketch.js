@@ -1201,6 +1201,40 @@ class GI{
 
 			},
 		},
+			"D13":{
+				"stability":{"x":0.002,"y":0.002,"vx":0.25,"vy":0.25},
+			"toOther":(p,op)=>{
+				let d = distance(p.x,p.y,op.x,op.y)
+				let dx = (op.x-p.x)
+				let dy = (op.y-p.y)
+
+				if(d<3){
+						d = 3
+					}
+
+				if(op.t != "D03"){
+				if(d < 60){
+
+				op.life -= 5
+
+				if(op.life <= 0){
+					G.newParticle(op.x,op.y,"D03",10)
+					G.delParticle(op)
+					p.life -= 10
+
+					return
+				}
+
+				
+				}
+
+
+				op.nxadd.x -= 180*dx/d/d	
+				op.nxadd.y -= 180*dy/d/d
+				}
+
+			},
+		},
 			"D04":{
 			"eachFrame":(f,p)=>{
 				let op = GI.particles[p.stinfo.following]
@@ -3342,6 +3376,7 @@ class GI{
 			"D21":{"color":"#130040","decay":3,"letter":"V"},//pull + killer
 		"D02":{"color":"#F000F0","decay":5},//virus -> B1
 		"D03":{"color":"#800080","decay":5},//virus
+			"D13":{"color":"#800080","decay":5},//unmoving virus
 		"D04":{"color":"#800080","decay":2,"letter":"F","following":-1},//virus, following
 		"D05":{"color":"#FFC000","decay":25,"letter":"V"},//fire
 			"D15":{"color":"#FFC000","decay":25,"letter":"g"},//gravity effected fire
