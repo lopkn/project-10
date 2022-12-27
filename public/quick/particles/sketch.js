@@ -2225,6 +2225,23 @@ class GI{
 			}
 			
 		},
+		"A67":{
+			"onDeath":(p)=>{
+				let rr = Math.random()*3 + 2
+				for(let i = 0; i < 6; i++){
+					setTimeout(()=>{
+						let tp = G.newParticle(p.x+Math.random()-0.5,p.y+Math.random()-0.5,"A57",10)
+							GI.particles[tp].life = 100000
+							GI.particles[tp].vx = Math.random()*5-2.5
+							GI.particles[tp].stinfo.decay = 5000
+						GI.particles[tp].vy = (Math.random()*5-2.5)*rr*rr
+						GI.particles[tp].vx *= Math.random()*2.5 + 0.5
+						GI.particles[tp].vx *= rr
+					},Math.random()*5)
+				}
+			}
+			
+		},
 		"A08":{
 			"onDeath":(p)=>{
 				let r = Math.random()*7
@@ -3354,7 +3371,8 @@ class GI{
 			"A27":{"color":"#EF00FF","letter":"E"},//explosion
 			"A37":{"color":"#AF00FF","letter":"E"},//fire explosion
 			"A47":{"color":"#8F00FF","letter":"E"},//small fire explosion
-			"A57":{"color":"#8F00FF","letter":"E"},//small blast explosion
+			"A57":{"color":"#7F00FF","letter":"E"},//small blast explosion
+			"A67":{"color":"#6F00FF","letter":"E"},//MIRV explosion
 		"A08":{"color":"#a881fc"},//structured chaos bomb
 		"A09":{"color":"#5000FF"},//chaos bomb
 
@@ -4259,3 +4277,5 @@ class p3{
 	}
 	
 }
+
+//notes: typeis() dict
