@@ -1168,6 +1168,43 @@ class GI{
 			}
 			
 		},
+		"D12":{
+			"stability":{"x":0.002,"y":0.002,"vx":0.25,"vy":0.25},
+			"toOther":(p,op)=>{
+				let d = distance(p.x,p.y,op.x,op.y)
+				let dx = (op.x-p.x)
+				let dy = (op.y-p.y)
+
+				if(d<1){
+						d = 1
+					}
+
+				if(op.t != "D02"){
+				if(d < 60 && op.t != "B01"){
+
+				op.life -= 5
+
+				if(op.life <= 0){
+					G.newParticle(op.x,op.y,"D02",10)
+					G.delParticle(op)
+					p.life -= 10
+					return
+				}
+
+				
+				}
+
+
+				op.nxadd.x -= 80*dx/d/d	
+				op.nxadd.y -= 80*dy/d/d
+				}
+
+			},
+			"onDeath":(p)=>{
+				G.newParticle(p.x,p.y,"B01",10)
+			}
+			
+		},
 		"D03":{
 			"toOther":(p,op)=>{
 				let d = distance(p.x,p.y,op.x,op.y)
@@ -3393,6 +3430,7 @@ class GI{
 			"D11":{"color":"#230040","decay":5,"letter":"V"},//pull + killer
 			"D21":{"color":"#130040","decay":3,"letter":"V"},//pull + killer
 		"D02":{"color":"#F000F0","decay":5},//virus -> B1
+			"D12":{"color":"#F000F0","decay":5},//unmobing virus -> B1
 		"D03":{"color":"#800080","decay":5},//virus
 			"D13":{"color":"#800080","decay":5},//unmoving virus
 		"D04":{"color":"#800080","decay":2,"letter":"F","following":-1},//virus, following
@@ -4278,4 +4316,11 @@ class p3{
 	
 }
 
-//notes: typeis() dict
+class typeIs{
+
+}
+
+//mnotes LOL: E G# B C B G# E 'B 
+
+
+//notes: typeis() dict, Ambibuild
