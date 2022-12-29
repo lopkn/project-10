@@ -938,6 +938,27 @@ class GI{
 			}
 			
 		},
+		"B14":{
+			"stability":{"x":0.02,"y":0.02,"vx":0.5,"vy":0.5},
+			"toOther":(p,op)=>{
+				let d = distance(p.x,p.y,op.x,op.y)
+				let dx = (op.x-p.x)
+				let dy = (op.y-p.y)
+
+				let r = 1
+				if(d < 50){
+					if(d<2){
+						d = 2
+					}
+					r = -1
+				}
+
+				op.nxadd.x -= 50*dx/d/d*r
+				op.nxadd.y -= 50*dy/d/d*r
+
+			}
+			
+		},
 		"B05":{
 			"toOther":(p,op)=>{
 				let d = distance(p.x,p.y,op.x,op.y)
@@ -3417,6 +3438,7 @@ class GI{
 		"B02":{"color":"#F08080"},//shell
 		"B03":{"color":"#80F080"},//wall Y
 		"B04":{"color":"#8080F0"},//gravity
+			"B14":{"color":"#8080F0"},//stable gravity
 		"B05":{"color":"#F080F0"},//shell
 		"B06":{"color":"#80F0F0"},//wall X
 		"B07":{"color":"#4040FF"},//gravity
