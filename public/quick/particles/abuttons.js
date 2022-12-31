@@ -278,5 +278,17 @@ var abuttons = [
 
 		},
 
+		{"color":"#704000",
+		"x":285,"y":45,"w":25,"h":25,
+		"clicked":()=>{
+				GI.altNumber = !GI.altNumber
+				if(GI.altNumber){
+					interactor.abuttons[27].color = "#FF0000"
+				} else {
+					interactor.abuttons[27].color = "#704000"
+				}
+			},
+
+		},
 
 	]

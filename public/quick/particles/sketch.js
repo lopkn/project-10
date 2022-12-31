@@ -171,7 +171,7 @@ document.addEventListener("keydown",(e)=>{
 	}
 
 	if(regexp2.test(k)){
-		if(e.ctrlKey || GI.functionals.ctrl){
+		if(e.ctrlKey || GI.functionals.ctrl || GI.altNumber){
 			GI.type[2] = k
 		} else {
 			GI.type[1] = k
@@ -266,6 +266,14 @@ document.addEventListener("keydown",(e)=>{
 		case "Tab":
 			e.preventDefault()
 			GI.mouseMode = (GI.mouseMode+1)==GI.mouseModeArr.length?0:(GI.mouseMode+1)
+			break;
+		case "z":
+			GI.altNumber = !GI.altNumber
+			if(GI.altNumber){
+					interactor.abuttons[27].color = "#FF0000"
+				} else {
+					interactor.abuttons[27].color = "#704000"
+				}
 			break;
 	}
 
@@ -752,6 +760,8 @@ class GI{
 		"alt":false,
 		"tab":false
 	}
+
+	static altNumber = false
 
 	static autoclickSpeed = 100
 	static grid = false
@@ -4031,7 +4041,7 @@ init()
 
 class interactor{
 	static page = 1
-	static pageButtons = [[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26],[0,1,2,3]]
+	static pageButtons = [[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27],[0,1,2,3]]
 	static pos = {"x":Width/2-175,"y":Height/2-120}
 	static phaseSpace = false
 	static phaseState = "none"
@@ -4341,8 +4351,7 @@ class p3{
 class typeIs{
 
 }
-
-//mnotes LOL: E G# B C B G# E 'B 
+//mnotes LOL: E G# B C B G# E 'B
 
 
 //notes: typeis() dict, Ambibuild
