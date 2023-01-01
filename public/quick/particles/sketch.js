@@ -8,6 +8,17 @@ myCanvas.width = Width
 myCanvas.height = Height
 myCanvas.style.position = "absolute"
 
+document.getElementById("help").width = Width-20
+document.getElementById("help").height = Height
+document.getElementById("help").style.position = "absolute"
+document.getElementById("help").style.left = 0
+document.getElementById("help").style.top = 0
+document.getElementById("help").innerHTML =
+`
+</br>This is lopkns particle simulator, LPRTS for short.
+</br>LPRTS is an infinite space particle sandbox built using <span style="color:red">javascript</span>
+`
+
 let CTX = {"main":myCanvas.getContext("2d")}
 let ctx = CTX.main
 
@@ -31,7 +42,7 @@ document.addEventListener("mousedown",(e)=>{
 
 	if(GI.mouseModeArr[GI.mouseMode] == "normal"){
 		e.preventDefault()
-		if(e.altKey||GI.altPressed || GI.functionals.alt){
+		if(e.altKey||GI.altPressed || GI.functionals.alt || e.which === 3){
 			GI.selectionStart = [mouseX,mouseY,e.shiftKey?e.shiftKey:GI.functionals.shift]
 		}
 
@@ -75,7 +86,6 @@ document.addEventListener("mouseup",(e)=>{
 		return;
 	}
 
-    	GI.debuggingInfo = "?"
 
 	if(GI.mouseModeArr[GI.mouseMode] == "normal"){
 	if(GI.selectionStart !== false){
@@ -275,6 +285,13 @@ document.addEventListener("keydown",(e)=>{
 					interactor.abuttons[27].color = "#704000"
 				}
 			break;
+		case "h":
+			GI.help = !GI.help
+			if(GI.help){
+			document.getElementById("help").style.visibility = "visible"
+			} else {
+				document.getElementById("help").style.visibility = "hidden"
+			}
 	}
 
 	if(e.ctrlKey||GI.functionals.ctrl){
@@ -743,6 +760,8 @@ class GI{
 
 	static selectionStart = false
 	static mouseInterval = 0
+
+	static help = false
 
 	static currentKey = "nothing"
 
@@ -3948,6 +3967,8 @@ function repeat(){
 		console.log("AVERAGE PARTICLE CALCULATION TIME: "+(GI.preformanceCalculate/100))
 		GI.preformanceCalculate = 0
 	}
+
+
 	if(interactor.opened){
 		interactor.draw()
 		if(interactor.phaseSpace){
@@ -4041,7 +4062,7 @@ init()
 
 class interactor{
 	static page = 1
-	static pageButtons = [[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27],[0,1,2,3]]
+	static pageButtons = [[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27],[0,1,2,3,28]]
 	static pos = {"x":Width/2-175,"y":Height/2-120}
 	static phaseSpace = false
 	static phaseState = "none"
@@ -4088,9 +4109,17 @@ class interactor{
 
 	static loadPageButtons(){
 		let pb = this.pageButtons[this.page-1]
+		this.buttons.forEach((e)=>{
+			if(e.offLoad !== undefined){
+				e.offLoad()
+			}
+		})
 		this.buttons = []
 		pb.forEach((e)=>{
 			this.buttons.push(this.abuttons[e])
+			if(this.abuttons[e].onLoad !== undefined){
+				this.abuttons[e].onLoad()
+			}
 		})
 	}
 
@@ -4348,9 +4377,14 @@ class p3{
 	
 }
 
+
+
+
 class typeIs{
 
 }
+
+
 //mnotes LOL: E G# B C B G# E 'B
 
 

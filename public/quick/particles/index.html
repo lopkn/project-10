@@ -12,12 +12,19 @@
 </head>
 <body style="padding:0;margin:0;background-color: black;">
   
+  
+
   <div draggable="false" ondragstart="return false">
 
-<canvas id="myCanvas" disabled="true" style = "touch-action: none; user-select: none;
+<canvas id="myCanvas" disabled="true" style = "z-index: 1;touch-action: none; user-select: none;
 -webkit-user-select: none;
 -moz-user-select: none;"></canvas>
+
+
   </div>
+<div id="help" lang="en" style="z-index: 2; color: white; background-color: rgba(0,0,0,0.5); font-size: 20px;user-select: none; visibility: hidden;">
+  </div>
+
 
 <!-- <script src="/socket.io/socket.io.js"></script> -->
 

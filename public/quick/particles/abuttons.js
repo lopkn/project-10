@@ -289,6 +289,16 @@ var abuttons = [
 				}
 			},
 
+		},//27
+
+		{"color":"#00CFCF",
+		"x":5,"y":100,"w":25,"h":25,
+		"clicked":()=>{
+				GI.debuggingInfo = "test"
+			},
+		"onLoad":()=>{GI.debuggingInfo = "test1"},
+		"offLoad":()=>{GI.debuggingInfo = "test2"}
+
 		},
 
 	]
