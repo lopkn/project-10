@@ -15,8 +15,22 @@ document.getElementById("help").style.left = 0
 document.getElementById("help").style.top = 0
 document.getElementById("help").innerHTML =
 `
+<strong>
 </br>This is lopkns particle simulator, LPRTS for short.
 </br>LPRTS is an infinite space particle sandbox built using <span style="color:red">javascript</span>
+</br>This game is currently getting new updates every single day!
+</br>Press <span style="color:cyan">[h]</span> to toggle this help menu. Please note that this game is <span style="color:yellow">CASE SENSITIVE</span>
+</br>
+</br>This help menu is still being developed, still feel free to tell me what you think should change.
+</br>Lopkns discord tag is <span style="color:yellow">lopkn#0019</span>
+</br>
+</br>
+</br>
+</br><span style="color:green">= == === BASIC CONTROLS === == =</span>
+</br>
+</br>you can place down the currently selected particle type by clicking/tapping.
+</br>
+</strong>
 `
 
 let CTX = {"main":myCanvas.getContext("2d")}
@@ -188,6 +202,7 @@ document.addEventListener("keydown",(e)=>{
 		}
 	}
 
+
 	switch(k){
 
 		case "=":
@@ -241,7 +256,7 @@ document.addEventListener("keydown",(e)=>{
 			clearInterval(_MainInterval_)
 			_MainInterval_ = setInterval(()=>{repeat()},GI.FRATE)
 			break;
-		case "?":
+		case "/":
 			GI.FRATE = 50
 			clearInterval(_MainInterval_)
 			_MainInterval_ = setInterval(()=>{repeat()},GI.FRATE)
@@ -286,12 +301,14 @@ document.addEventListener("keydown",(e)=>{
 				}
 			break;
 		case "h":
+		case "?":
 			GI.help = !GI.help
 			if(GI.help){
 			document.getElementById("help").style.visibility = "visible"
 			} else {
 				document.getElementById("help").style.visibility = "hidden"
 			}
+			break;
 	}
 
 	if(e.ctrlKey||GI.functionals.ctrl){
