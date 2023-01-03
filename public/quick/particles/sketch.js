@@ -8,16 +8,16 @@ myCanvas.width = Width
 myCanvas.height = Height
 myCanvas.style.position = "absolute"
 
-document.getElementById("help").width = Width-20
-document.getElementById("help").height = Height
+document.getElementById("help").style.width = Math.floor(Width-20)+"px"
+document.getElementById("help").style.height = Math.floor(Height)+"px"
 document.getElementById("help").style.position = "absolute"
 document.getElementById("help").style.left = 0
 document.getElementById("help").style.top = 0
 document.getElementById("help").innerHTML =
 `
 <strong>
-</br>This is lopkns particle simulator, LPRTS for short.
-</br>LPRTS is an infinite space particle sandbox built using <span style="color:red">javascript</span>
+</br>This is lopkns particle simulator, LPRTS for short. (Undulating balls!!)
+</br>LPRTS is an infinite space particle sandbox built using <span style="color:orange">javascript</span>
 </br>This game is currently getting new updates every single day!
 </br>Press <span style="color:cyan">[h]</span> to toggle this help menu. Please note that this game is <span style="color:yellow">CASE SENSITIVE</span>
 </br>
@@ -26,9 +26,98 @@ document.getElementById("help").innerHTML =
 </br>
 </br>
 </br>
-</br><span style="color:green">= == === BASIC CONTROLS === == =</span>
+</br><span style="color:green">= == === BASIC INFO === == =</span>
 </br>
-</br>you can place down the currently selected particle type by clicking/tapping.
+</br>-Content order of help menu:
+</br><span style="color:green">-BASIC INFO-</span>
+</br><span style="color:green">-KEYBOARD & MOUSE CONTROLS-</span>
+</br><span style="color:green">-MOBILE CONTROLS-</span>
+</br>
+</br>
+</br>-Default color schemes:
+</br><span style="color:green">green</span> => content page name
+</br><span style="color:yellow">yellow</span> => important information
+</br><span style="color:cyan">cyan</span> => game controls
+</br><span style="color:red">turquoise</span> => false information
+</br>
+</br>
+</br>-If you have a keyboard, you can close/toggle mobile UI by pressing <span style="color:cyan">[i]</span>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br><span style="color:green">= == === KEYBOARD & MOUSE CONTROLS === == =</span>
+</br>
+</br>
+</br><span style="color:orange"> basic mouse controls </span>
+</br>
+</br><span style="color:cyan">left clicking</span> will place down a particle of the current type where you click.
+</br>
+</br><span style="color:cyan">[ctrl] + holding left click</span> autoclick/spams current particle where your cursor is.
+</br>
+</br><span style="color:cyan">[alt] + holding left click + dragging / holding right click + dragging </span> kill enclosed particles.
+</br>
+</br><span style="color:cyan">[alt] + [shift] + holding left click + dragging</span> kill enclosed particles of the current selected particle type.
+</br>
+</br>
+</br><span style="color:orange"> miscellaneous </span>
+</br>
+</br><span style="color:cyan">[i]</span> toggles the mobile UI.
+</br>
+</br><span style="color:cyan">[h] or [?]</span> toggles this current help menu.
+</br>
+</br><span style="color:cyan">[z]</span> toggles sub-type mode.
+</br>
+</br><span style="color:cyan">[g]</span> toggles grid background.
+</br>
+</br>
+</br><span style="color:orange"> particle selection </span>
+</br>
+</br><span style="color:cyan">letters [A] to [L]</span> switches the selected particle to that <span style="color:yellow">category</span>
+</br>
+</br><span style="color:cyan">numbers [0] to [9]</span> switches the selected particle to that <span style="color:yellow">type</span>
+</br>
+</br><span style="color:cyan">[ctrl] + numbers [0] to [9]</span> switches the selected particle to that <span style="color:yellow">sub-type</span>
+</br>This can be also be done when "sub-type mode" is toggled on.
+</br>
+</br>
+</br><span style="color:orange"> camera controls </span>
+</br>
+</br><span style="color:cyan">[=]</span> zooms out.
+</br>
+</br><span style="color:cyan">[-]</span> zooms in.
+</br>
+</br><span style="color:cyan">arrow keys</span> <span style="color:yellow">moves camera</span> in respective direction. moves twice as fast if <span style="color:cyan">[alt]</span> is held down.
+</br>
+</br><span style="color:cyan">[shift] + arrow keys</span> applies a <span style="color:yellow">velocity</span> to the camera indicated by a line from the middle of the screen. Your camera will move by itself in that direction.
+</br>
+</br><span style="color:cyan">[r]</span> resets the current camera velocity to 0.
+</br>
+</br>
+</br><span style="color:orange"> time dialation controls </span> -- please note that changing the speed will affect the FPS since the main update loop is tied to drawing the frame. It will also affect the stat graphs for your device preformance accordingly.
+</br>
+</br><span style="color:cyan">[\>]</span> speeds up simulation.
+</br>
+</br><span style="color:cyan">[\<]</span> slows down simulation.
+</br>
+</br><span style="color:cyan">[.]</span> speeds up simulation by a small bit.
+</br>
+</br><span style="color:cyan">[,]</span> slows down simulation by a small bit.
+</br>
+</br><span style="color:cyan">[/]</span> returns simulation to default speed.
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
 </br>
 </strong>
 `
