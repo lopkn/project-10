@@ -1,6 +1,7 @@
 let camera, scene, renderer, controls, mesh, light, plane;
 
-
+let Width = window.innerWidth
+let Height = window.innerHeight
 
 class gw{
 
@@ -34,11 +35,11 @@ class gw{
 
   static pdate(d){
     if(camera.position.z > this.boarder - 400){
-      this.boarder += 2
+      this.boarder += 4+c.vel*0.5
       let mesh3 = new THREE.Mesh(
-      new THREE.BoxGeometry(1+Math.random()*4, 1+Math.random()*30+this.boarder*0.01, 1+Math.random()*4),
+      new THREE.BoxGeometry(1+Math.random()*4+c.vel*3, 1+Math.random()*30+this.boarder*0.01, 1+Math.random()*4+c.vel*3),
       new THREE.MeshStandardMaterial({ color:  Math.floor(Math.random()*16777215)}))
-      mesh3.position.x += 11 + Math.random()*50
+      mesh3.position.x += 11 + Math.random()*c.vel*1000+Math.random()*10
       mesh3.position.z += 12 + this.boarder
       mesh3.position.y -= mesh3.position.z * 0.385 - 1
       mesh3.name = gw.idcr() + ""
@@ -71,14 +72,14 @@ class c{
     if(this.spinX > 0.03){
       this.spinX = 0.03
     }
-    if(this.spinZ > 0.03){
-      this.spinZ = 0.03
+    if(this.spinZ > 3){
+      this.spinZ = 3
     }
     if(this.spinX < -0.03){
       this.spinX = -0.03
     }
-    if(this.spinZ < -0.03){
-      this.spinZ = -0.03
+    if(this.spinZ < -3){
+      this.spinZ = -3
     }
 
     camera.rotateX(this.spinX)
@@ -100,7 +101,7 @@ class c{
 
     this.vel += Math.sqrt(Math.abs((lpos.y-camera.position.y)))/1500
     if(lpos.y-camera.position.y < 0){
-      this.vel -= Math.sqrt(Math.abs((lpos.y-camera.position.y)))/750
+      this.vel -= Math.sqrt(Math.abs((lpos.y-camera.position.y)))/725
     }
 
     if(this.vel < 0){
@@ -123,7 +124,10 @@ class c{
   }
 
 }
+let mouseX = 0
+let mouseY = 0
 
+onmousemove = (e)=>{mouseX = (e.clientX); mouseY = (e.clientY)}
 
 const createWorld = () => {
   mesh = new THREE.Mesh(
@@ -218,8 +222,64 @@ scene.add( line );
 
 };
 
+class vectorFuncs{
+  static vectorizor(px,py,vx,vy){
+    //this.walls[p.boidy[k]].x1 = ((p.boidyVect[k][0] * p.rotation[1] + p.boidyVect[k][1] * p.rotation[0]) + p.x)
+    //xb+ya,yb-xa
+    return([px*vy+py*vx,py*vy-px*vx])
+  }
+  static INvectorizor(px,py,vx,vy){
+    //xb-ya,yb+xa
+    return([px*vy-py*vx,py*vy+px*vx])
+  }
+  static ShatterComponents(vx,vy,dx,dy){
+    let normalized = this.originVectorNormalize(dx,dy)
+    let invectorized = this.INvectorizor(vx,vy,normalized[0],normalized[1])
+
+    let tyaxis = this.vectorizor(normalized[0],normalized[1],1,0)
+
+    let resultx = [invectorized[1]*normalized[0],invectorized[1]*normalized[1]]
+    let resulty = [invectorized[0]*tyaxis[0],invectorized[0]*tyaxis[1]]
+    return([resultx,resulty,[invectorized[1],invectorized[0]]])
+
+  }
+
+  static ShComp(vx,vy,dx,dy){
+    let normalized = this.originVectorNormalize(dx,dy)
+
+    let dp = this.dotProduct(vx,vy,normalized[0],normalized[1])
+
+    let n2 = [normalized[1],-normalized[0]]
+
+    let dp2 = this.dotProduct(vx,vy,n2[0],n2[1])
+    let resultx = [normalized[0]*dp,normalized[1]*dp]
+    let resulty = [n2[0]*dp2,n2[1]*dp2]
+
+    return([resultx,resulty,[dp,dp2]])
+
+  }
+
+  static dotProduct(x1,y1,x2,y2){
+    return(x1*x2+y1*y2)
+  }
+
+  static originVectorNormalize(vx,vy){
+    let d = Math.sqrt(vx*vx+vy*vy)
+    return([vx/d,vy/d])
+  }
+}
+
 document.addEventListener("mousedown",(e)=>{
   mesh.rotateY(0.4);
+  keysHeld["mdl"] = ()=>{
+    let ovn = vectorFuncs.originVectorNormalize(mouseX-Width/2,mouseY-Height/2)
+    c.spinX += -0.0005*c.vel*5*ovn[1];c.vel*=0.9999
+    c.spinZ -= 0.0005*c.vel*8*ovn[0]
+  }
+})
+
+document.addEventListener("mouseup",(e)=>{
+  keysHeld["mdl"] = ()=>{}
 })
 
 var keysHeld = {}
@@ -240,16 +300,16 @@ document.addEventListener("keydown",(e)=>{
   console.log(k)
   switch(k){
     case "w":
-      keysHeld[k] = ()=>{c.spinX += 0.0005*cont}
+      keysHeld[k] = ()=>{c.spinX += 0.0005*c.vel*5;c.vel*=0.9999}
       break;
     case "d":
-      keysHeld[k] = ()=>{c.spinZ -= 0.0005*cont}
+      keysHeld[k] = ()=>{c.spinZ -= 0.0005*c.vel*8}
       break;
     case "a":
-      keysHeld[k] = ()=>{c.spinZ += 0.0005*cont}
+      keysHeld[k] = ()=>{c.spinZ += 0.0005*c.vel*8}
       break;
     case "s":
-      keysHeld[k] = ()=>{c.spinX -= 0.0005*cont}
+      keysHeld[k] = ()=>{c.spinX -= 0.0005*c.vel*5;c.vel*=0.9999}
       break;
     case "ArrowUp":
       keysHeld[k] = ()=>{c.vel+=0.001}
