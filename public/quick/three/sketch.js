@@ -63,6 +63,10 @@ class c{
 
   static spinX = 0
   static spinZ = 0
+
+  static rotX = 0
+  static rotZ = 0
+
   // static lpos = {"x":-5,"y":15,"z":7}
 
    static update(){
@@ -311,6 +315,22 @@ document.addEventListener("keydown",(e)=>{
     case "s":
       keysHeld[k] = ()=>{c.spinX -= 0.0005*c.vel*5;c.vel*=0.9999}
       break;
+    case "i":
+      keysHeld[k] = ()=>{c.rotX += 0.005}
+      break;
+    case "l":
+      keysHeld[k] = ()=>{c.rotZ -= 0.005}
+      break;
+    case "j":
+      keysHeld[k] = ()=>{c.rotZ += 0.005}
+      break;
+    case "k":
+      keysHeld[k] = ()=>{c.rotX -= 0.005}
+      break;
+    case "o":
+      c.rotX = 0
+      c.rotZ = 0
+      break;
     case "ArrowUp":
       keysHeld[k] = ()=>{c.vel+=0.001}
       break;
@@ -345,6 +365,11 @@ const init = () => {
   renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
 
+  renderer.domElement.disabled = "true"
+  renderer.domElement.style.userSelect = "none"
+  renderer.domElement.style.touchAction = "none"
+  //disabled="true" style = "z-index: 1;touch-action: none; user-select: none;-webkit-user-select: none;-moz-user-select: none;
+
   document.body.appendChild(renderer.domElement);
   
   // controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -357,10 +382,79 @@ const animate = () => {
   
   // controls.update();
 
+  camera.rotateX(c.rotX)
+  camera.rotateY(c.rotZ)
+
   renderer.render(scene, camera); 
+  camera.rotateY(-c.rotZ)
+
+  camera.rotateX(-c.rotX)
 
   c.update()
 }
+function touchHandler(event)
+{
+
+  console.log(event.type)
+    var touches = event.changedTouches,
+        first = touches[0],
+        type = "";
+
+    switch(event.type)
+    {
+        case "touchstart": type = "mousedown"; break;
+        case "touchmove":  type = "mousemove"; break;        
+        case "touchend":   type = "mouseup";   break;
+        case "touchcancel":   type = "mouseup";   break;
+        default:           return;
+    }
+
+
+    // initMouseEvent(type, canBubble, cancelable, view, clickCount, 
+    //                screenX, screenY, clientX, clientY, ctrlKey, 
+    //                altKey, shiftKey, metaKey, button, relatedTarget);
+
+
+
+
+    if(type !== "mouseup"){
+    mouseX = event.touches[0].clientX
+    mouseY = event.touches[0].clientY}
+
+
+    var simulatedEvent = document.createEvent("MouseEvent");
+
+    if(event.type == "touchend"){
+        console.log("t4")
+       }
+
+    simulatedEvent.initMouseEvent(type, true, true, window, 1, 
+                                  first.screenX, first.screenY, 
+                                  first.clientX, first.clientY, false, 
+                                  false, false, false, 0/*left*/, null);
+
+    if(event.type == "touchend"){
+        console.log("t5")
+       }
+
+    // if(type=="mouseup"){
+    // console.log("hi")} else {
+    //  console.log(event.type)
+    // }
+    document.body.dispatchEvent(simulatedEvent);
+    
+    event.preventDefault();
+}
+function init2() 
+{
+    document.addEventListener("touchstart", touchHandler, true);
+    document.addEventListener("touchmove", (e)=>{myh(e);touchHandler(e)}, true);
+    document.addEventListener("touchend", touchHandler, true);
+    document.addEventListener("touchcancel", touchHandler, true);    
+    // document.addEventListener('touchmove', function() { e.preventDefault();GI.debuggingInfo = "cancled" }, { passive:false });
+}
+init2()
+
 
 init();
 animate();
