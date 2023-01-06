@@ -319,9 +319,11 @@ document.addEventListener("keydown",(e)=>{
       keysHeld[k] = ()=>{c.rotX += 0.005}
       break;
     case "l":
+    case "ArrowRight":
       keysHeld[k] = ()=>{c.rotZ -= 0.005}
       break;
     case "j":
+    case "ArrowLeft":
       keysHeld[k] = ()=>{c.rotZ += 0.005}
       break;
     case "k":
