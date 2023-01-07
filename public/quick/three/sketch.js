@@ -1,7 +1,16 @@
 let camera, scene, renderer, controls, mesh, light, plane, person, wing1, wing2;
 
-let Width = window.innerWidth
-let Height = window.innerHeight
+let myCanvas = document.getElementById("myCanvas")
+
+let Height = window.innerWidth >window.innerHeight?window.innerHeight:window.innerWidth
+let Width = window.innerWidth >window.innerHeight?window.innerWidth:window.innerHeight
+myCanvas.style.top = 0
+myCanvas.style.left = 0
+myCanvas.width = Width
+myCanvas.height = Height
+myCanvas.style.position = "absolute"
+
+
 
 class gw{
 
@@ -69,6 +78,8 @@ class c{
   static vel = 0.004
 
   static thirdPerson = true
+
+  static thirdPersonBack = 0.5
 
   static spinX = 0
   static spinZ = 0
@@ -141,13 +152,13 @@ class c{
       person.position.y = camera.position.y
       person.position.z = camera.position.z
 
-      wing1.position.x = camera.position.x
-      wing1.position.y = camera.position.y
-      wing1.position.z = camera.position.z
-
       person.rotation.x = camera.rotation.x
       person.rotation.y = camera.rotation.y
       person.rotation.z = camera.rotation.z
+
+      wing1.position.x = camera.position.x
+      wing1.position.y = camera.position.y
+      wing1.position.z = camera.position.z
 
       wing1.rotation.x = camera.rotation.x
       wing1.rotation.y = camera.rotation.y
@@ -155,6 +166,17 @@ class c{
 
       wing1.translateX(0.18)
       wing1.rotateY(-0.2)
+
+      wing2.position.x = camera.position.x
+      wing2.position.y = camera.position.y
+      wing2.position.z = camera.position.z
+
+      wing2.rotation.x = camera.rotation.x
+      wing2.rotation.y = camera.rotation.y
+      wing2.rotation.z = camera.rotation.z
+
+      wing2.translateX(-0.18)
+      wing2.rotateY(0.2)
     }
 
     document.getElementById("info").innerHTML = "velocity: " + Math.floor(this.vel*1000)
@@ -173,7 +195,7 @@ const createWorld = () => {
     new THREE.MeshStandardMaterial({ color: 0xff9999 })
   );
 
-  plane = new THREE.Mesh(new THREE.PlaneBufferGeometry(1000, 1000),new THREE.MeshStandardMaterial({ color: 0x222222 }))
+  plane = new THREE.Mesh(new THREE.PlaneBufferGeometry(1000, 1000),new THREE.MeshStandardMaterial({ color: 0x12401e }))
   plane.rotateX(-1.2)
   scene.add(plane)
 
@@ -223,6 +245,7 @@ const createWorld = () => {
   // }
   let mat1 = new THREE.MeshStandardMaterial({ color:  "rgb(255,255,0)"})
   mat1.opacity = 0.6
+  mat1.depthWrite = false
   mat1.transparent = true
   person = new THREE.Mesh(
       new THREE.BoxGeometry(0.1,0.1,0.2),
@@ -332,8 +355,8 @@ document.addEventListener("mousedown",(e)=>{
   mesh.rotateY(0.4);
   keysHeld["mdl"] = ()=>{
     let ovn = vectorFuncs.originVectorNormalize(mouseX-Width/2,mouseY-Height/2)
-    c.spinX += -0.0005*c.vel*5*ovn[1];c.vel*=0.9999
-    c.spinZ -= 0.0005*c.vel*8*ovn[0]
+    c.spinX += -0.0005*c.vel*3*ovn[1];c.vel*=0.9999
+    c.spinZ -= 0.0005*c.vel*3*ovn[0]
   }
 })
 
@@ -375,11 +398,13 @@ document.addEventListener("keydown",(e)=>{
       break;
     case "l":
     case "ArrowRight":
-      keysHeld[k] = ()=>{c.rotZ -= 0.005}
+      keysHeld[k] = ()=>{
+        if(c.thirdPerson){c.rotZ += 0.005}else{c.rotZ -= 0.005}}
       break;
     case "j":
     case "ArrowLeft":
-      keysHeld[k] = ()=>{c.rotZ += 0.005}
+      keysHeld[k] = ()=>{
+        if(c.thirdPerson){c.rotZ -= 0.005}else{c.rotZ += 0.005}}
       break;
     case "k":
       keysHeld[k] = ()=>{c.rotX -= 0.005}
@@ -395,7 +420,18 @@ document.addEventListener("keydown",(e)=>{
       keysHeld[k] = ()=>{c.vel*=0.999}
       break;
 
+    case "t":
+      c.thirdPerson = !c.thirdPerson
 
+
+  }
+})
+
+document.addEventListener("wheel",(e)=>{
+  // console.log(e.deltaY)
+  e.preventDefault()
+  if(c.thirdPerson){
+    c.thirdPersonBack += e.deltaY*0.005
   }
 })
 
@@ -417,7 +453,7 @@ const init = () => {
 
   scene.add(light);
 
-  renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer = new THREE.WebGLRenderer({ antialias: true , canvas: myCanvas});
   renderer.setSize(window.innerWidth, window.innerHeight);
 
   renderer.domElement.disabled = "true"
@@ -441,13 +477,13 @@ const animate = () => {
   camera.rotateY(c.rotZ)
 
   if(c.thirdPerson){
-    camera.translateZ(0.5)
+    camera.translateZ(c.thirdPersonBack)
   }
 
   renderer.render(scene, camera); 
   
   if(c.thirdPerson){
-    camera.translateZ(-0.5)
+    camera.translateZ(-c.thirdPersonBack)
   }
 
   camera.rotateY(-c.rotZ)
