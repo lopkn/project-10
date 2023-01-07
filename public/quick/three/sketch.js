@@ -1,10 +1,13 @@
-let camera, scene, renderer, controls, mesh, light, plane;
+let camera, scene, renderer, controls, mesh, light, plane, person, wing1, wing2;
 
 let Width = window.innerWidth
 let Height = window.innerHeight
 
 class gw{
 
+  static SLconst = 1.2
+  static SLang = Math.PI/2-this.SLconst
+  static SLslope = -Math.tan(this.SLang)
 
   static idC = 0
 
@@ -15,6 +18,10 @@ class gw{
   static idcr(){
     this.idC += 1
     return(this.idC)
+  }
+
+  static GPC(z){
+    return(z*this.SLslope)
   }
 
   static adbx(w,h,l,px,py,pz){
@@ -35,11 +42,11 @@ class gw{
 
   static pdate(d){
     if(camera.position.z > this.boarder - 400){
-      this.boarder += 4+c.vel*0.5
+      this.boarder += 2+c.vel*0.25
       let mesh3 = new THREE.Mesh(
-      new THREE.BoxGeometry(1+Math.random()*4+c.vel*3, 1+Math.random()*30+this.boarder*0.01, 1+Math.random()*4+c.vel*3),
+      new THREE.BoxGeometry(1+Math.random()*4+c.vel*3*Math.random(), 1+Math.random()*30+this.boarder*0.01, 1+Math.random()*4+c.vel*3*Math.random()),
       new THREE.MeshStandardMaterial({ color:  Math.floor(Math.random()*16777215)}))
-      mesh3.position.x += 11 + Math.random()*c.vel*1000+Math.random()*10
+      mesh3.position.x += 11 + Math.random()*c.vel*2000+Math.random()*20
       mesh3.position.z += 12 + this.boarder
       mesh3.position.y -= mesh3.position.z * 0.385 - 1
       mesh3.name = gw.idcr() + ""
@@ -60,6 +67,8 @@ class gw{
 
 class c{
   static vel = 0.004
+
+  static thirdPerson = true
 
   static spinX = 0
   static spinZ = 0
@@ -89,19 +98,19 @@ class c{
     camera.rotateX(this.spinX)
     camera.rotateZ(this.spinZ)
 
-    this.spinX *= 1/(this.vel*0.5+1)
-    this.spinZ *= 1/(this.vel*0.5+1)
+    this.spinX *= 1/(this.vel*0.2+1.002)
+    this.spinZ *= 1/(this.vel*0.2+1.002)
 
     let lpos = {"x":camera.position.x,"y":camera.position.y,"z":camera.position.z}
     camera.translateZ(-c.vel)
-
-
-    while(plane.position.z - camera.position.z < 200){
-      plane.translateY(-0.01)
-      if(Math.random()>0.9999){
-        break;
-      }
+    if(camera.position.y < camera.position.z*gw.SLslope){
+      camera.position.y += 0.01
+      this.vel *= 0.95
     }
+
+
+    plane.position.z = camera.position.z-200
+    plane.position.y = gw.GPC(camera.position.z-200)
 
     this.vel += Math.sqrt(Math.abs((lpos.y-camera.position.y)))/1500
     if(lpos.y-camera.position.y < 0){
@@ -119,9 +128,34 @@ class c{
     }
 
 
+    scene.background.b = this.vel
+    scene.background.r = this.vel*0.5
+    scene.background.g = this.vel*0.5
+
+
     light.position.x = camera.position.x
-    light.position.y = camera.position.y
-    light.position.z = camera.position.z
+    light.position.y = camera.position.y+0.4
+    light.position.z = camera.position.z-0.2
+    if(this.thirdPerson){
+      person.position.x = camera.position.x
+      person.position.y = camera.position.y
+      person.position.z = camera.position.z
+
+      wing1.position.x = camera.position.x
+      wing1.position.y = camera.position.y
+      wing1.position.z = camera.position.z
+
+      person.rotation.x = camera.rotation.x
+      person.rotation.y = camera.rotation.y
+      person.rotation.z = camera.rotation.z
+
+      wing1.rotation.x = camera.rotation.x
+      wing1.rotation.y = camera.rotation.y
+      wing1.rotation.z = camera.rotation.z
+
+      wing1.translateX(0.18)
+      wing1.rotateY(-0.2)
+    }
 
     document.getElementById("info").innerHTML = "velocity: " + Math.floor(this.vel*1000)
     // console.log(this.lpos.y,camera.position.y)
@@ -187,6 +221,26 @@ const createWorld = () => {
   // mesh3.name = gw.idcr()
   // scene.add(mesh3)
   // }
+  let mat1 = new THREE.MeshStandardMaterial({ color:  "rgb(255,255,0)"})
+  mat1.opacity = 0.6
+  mat1.transparent = true
+  person = new THREE.Mesh(
+      new THREE.BoxGeometry(0.1,0.1,0.2),
+      mat1
+      )
+  scene.add(person)
+
+  wing1 = new THREE.Mesh(
+      new THREE.BoxGeometry(0.3,0.05,0.15),
+      mat1
+      )
+  scene.add(wing1)
+
+  wing2 = new THREE.Mesh(
+      new THREE.BoxGeometry(0.3,0.05,0.15),
+      mat1
+      )
+  scene.add(wing2)
 
   for(let i = 0; i < 400; i++){
     let r = Math.sqrt(100000)-Math.sqrt(Math.random()*100000)
@@ -208,6 +262,7 @@ const createWorld = () => {
       )
     mesh3.rotateX(0.37)
     mesh3.translateZ(i*8)
+    mesh3.position.y += 0.5
   scene.add(mesh3)
   }
 
@@ -304,16 +359,16 @@ document.addEventListener("keydown",(e)=>{
   console.log(k)
   switch(k){
     case "w":
-      keysHeld[k] = ()=>{c.spinX += 0.0005*c.vel*5;c.vel*=0.9999}
+      keysHeld[k] = ()=>{c.spinX += 0.0005*c.vel*3;c.vel*=0.9999}
       break;
     case "d":
-      keysHeld[k] = ()=>{c.spinZ -= 0.0005*c.vel*8}
+      keysHeld[k] = ()=>{c.spinZ -= 0.0005*c.vel*3}
       break;
     case "a":
-      keysHeld[k] = ()=>{c.spinZ += 0.0005*c.vel*8}
+      keysHeld[k] = ()=>{c.spinZ += 0.0005*c.vel*3}
       break;
     case "s":
-      keysHeld[k] = ()=>{c.spinX -= 0.0005*c.vel*5;c.vel*=0.9999}
+      keysHeld[k] = ()=>{c.spinX -= 0.0005*c.vel*3;c.vel*=0.9999}
       break;
     case "i":
       keysHeld[k] = ()=>{c.rotX += 0.005}
@@ -339,9 +394,7 @@ document.addEventListener("keydown",(e)=>{
     case "ArrowDown":
       keysHeld[k] = ()=>{c.vel*=0.999}
       break;
-    // case "t":
-    //   keysHeld[k] = ()=>{plane.translateY(-0.5)}
-    //   break;
+
 
   }
 })
@@ -357,7 +410,7 @@ const init = () => {
   camera.position.set(0, 21, 0);
 
   scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x333333);
+  scene.background = new THREE.Color("rgb(51,51,51)");
 
   light = new THREE.PointLight(0xffffcc, 2.5, 1000, 1.5)
   // light.castShadow = true
@@ -387,7 +440,16 @@ const animate = () => {
   camera.rotateX(c.rotX)
   camera.rotateY(c.rotZ)
 
+  if(c.thirdPerson){
+    camera.translateZ(0.5)
+  }
+
   renderer.render(scene, camera); 
+  
+  if(c.thirdPerson){
+    camera.translateZ(-0.5)
+  }
+
   camera.rotateY(-c.rotZ)
 
   camera.rotateX(-c.rotX)
