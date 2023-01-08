@@ -12,6 +12,8 @@ myCanvas.style.position = "absolute"
 
 
 
+
+
 class gw{
 
   static SLconst = 1.2
@@ -24,7 +26,7 @@ class gw{
 
   static boarder = 0
 
-  static bder = [{"b":0,"mult":1,"gbk":[],"lim":-6}/*,{"b":0,"mult":0.2,"gbk":[],"lim":2000}*/]
+  // static bder = [{"b":0,"mult":1,"gbk":[],"lim":-6},{"b":0,"mult":0.2,"gbk":[],"lim":20000}]
 
   static idcr(){
     this.idC += 1
@@ -83,21 +85,26 @@ class gw{
 
     this.bder.forEach((BDER)=>{
 
+      let B = 0;
 
     if(camera.position.z+c.vel*5 > BDER.b - 800){
       while(camera.position.z+c.vel*5 > BDER.b - 800){
 
         if(camera.position.z > BDER.lim){
       BDER.b += 1+c.vel*0.005+Math.sqrt(BDER.b/1000)
+      B = BDER.b-BDER.lim
     } else {
-        BDER.b += (1+c.vel*0.005+Math.sqrt(BDER.b/1000))+500
+        BDER.b += (1+c.vel*0.005+Math.sqrt(BDER.b/1000))+5
+        B = 1
+        // console.log("HIH?")
       }
       if(c.vel < 0.007){
         BDER.b += 0.5
+        B += 0.5
       }
-      let h = 1+Math.random()*30+BDER.b*0.01
+      let h = 1+Math.random()*30+B*0.01
       let mesh3 = new THREE.Mesh(
-      new THREE.BoxGeometry(1+Math.random()*4+c.vel*13*Math.random()+BDER.b*0.001, h, 1+Math.random()*4+c.vel*13*Math.random()+BDER.b*0.001),
+      new THREE.BoxGeometry(1+Math.random()*4+c.vel*13*Math.random()+B*0.001, h, 1+Math.random()*4+c.vel*13*Math.random()+B*0.001),
       new THREE.MeshStandardMaterial({ color:  Math.floor(Math.random()*16777215)}))
       mesh3.position.x += Math.random()*c.vel*8000+Math.random()*80-40-c.vel*4000+camera.position.x
       mesh3.position.z += 12 + BDER.b
@@ -120,6 +127,33 @@ class gw{
 
   }
 
+  static pdate3s = [new GEN1(),new GEN2(),new GEN2(10000),new GEN2(60000),new GEN2(40000),new GEN2(80000),new GEN2(120000),new GEN3(40000), new GEN4(), new GEN5(), new GEN7()]
+
+  static pdate3(){
+    this.pdate3s.forEach((e)=>{e.update()})
+  }
+
+  // static pd3Clense(){
+  //   this.pdate3s.forEach((e)=>{
+  //     e.gbk.forEach((A)=>{
+  //       if()
+  //     })
+  //   })
+  // }
+
+  static CLENSE(z){
+    let clarr = []
+    scene.children.forEach((e)=>{
+      if(e.position.z +z < camera.position.z){
+        clarr.push(e.id)
+      }
+    })
+
+    clarr.forEach((e)=>{
+      this.rmObj(e)
+    })
+  }
+
 
 }
 
@@ -130,17 +164,28 @@ class c{
 
   static thirdPersonBack = 0.5
 
+  static throttle = 1
+
   static spinX = 0
   static spinZ = 0
+
+  static boost = 100
 
   static rotX = 0
   static rotZ = 0
 
   // static lpos = {"x":-5,"y":15,"z":7}
+  static clenseCounter = 0
 
    static update(){
 
-    gw.pdate()
+    this.clenseCounter++
+    if(this.clenseCounter > 500){
+      gw.CLENSE(200)
+      this.clenseCounter=0
+    }
+
+    gw.pdate3()
 
     if(this.spinX > 0.03){
       this.spinX = 0.03
@@ -158,8 +203,8 @@ class c{
     camera.rotateX(this.spinX)
     camera.rotateZ(this.spinZ)
 
-    this.spinX *= 1/(this.vel*0.2+1.002)
-    this.spinZ *= 1/(this.vel*0.2+1.002)
+    this.spinX *= 1/(this.vel*0.12+1.002)
+    this.spinZ *= 1/(this.vel*0.12+1.002)
 
     let lpos = {"x":camera.position.x,"y":camera.position.y,"z":camera.position.z}
     camera.translateZ(-c.vel)
@@ -192,6 +237,19 @@ class c{
     scene.background.b = this.vel
     scene.background.r = this.vel*0.5
     scene.background.g = this.vel*0.5
+
+    scene.fog.color = scene.background
+
+    if(this.vel > 2){
+      let tv = this.vel -2
+      scene.background.b -= tv*15
+      scene.background.g -= tv*10
+      scene.background.r -= tv
+    } else if(camera.position.y-gw.GPC(camera.position.z)>60){if(this.vel>0.3){
+      this.vel /= (Math.sqrt(camera.position.y-gw.GPC(camera.position.z)-60)*0.00006+1)
+    } else {
+      this.vel /= (Math.sqrt(camera.position.y-gw.GPC(camera.position.z)-60)*0.00003+1)
+    }}
 
 
     light.position.x = camera.position.x
@@ -234,10 +292,17 @@ class c{
       wing2.rotateY(0.2)
     }
 
-    document.getElementById("info").innerHTML = "velocity: " + Math.floor(this.vel*1000)
+    document.getElementById("info").innerHTML = "velocity: " + Math.floor(this.vel*1000) + "</br>preformance: "+ dateLogger[2]+"</br>boost: "+ Math.floor(c.boost)+"</br>height: "+Math.floor((camera.position.y-gw.GPC(camera.position.z))*100)
     let cc = (255-this.vel*155)<0?0:(255-this.vel*155)
     document.getElementById("info").style.color = "rgb(255,"+cc+","+cc+")"
     // console.log(this.lpos.y,camera.position.y)
+
+    c.boost += 0.4/(camera.position.y-gw.GPC(camera.position.z))
+    if(c.boost > 100){
+      c.boost = 100
+    }
+
+
   }
 
 }
@@ -413,8 +478,8 @@ document.addEventListener("mousedown",(e)=>{
   mesh.rotateY(0.4);
   keysHeld["mdl"] = ()=>{
     let ovn = vectorFuncs.originVectorNormalize(mouseX-Width/2,mouseY-Height/2)
-    c.spinX += -0.0005*c.vel*3*ovn[1];c.vel*=0.9999
-    c.spinZ -= 0.0005*c.vel*3*ovn[0]
+    c.spinX += -0.0005*c.vel*3*ovn[1]*c.throttle;c.vel/=(1+c.throttle*0.0001)
+    c.spinZ -= 0.0005*c.vel*3*ovn[0]*c.throttle
   }
 })
 
@@ -440,16 +505,16 @@ document.addEventListener("keydown",(e)=>{
   console.log(k)
   switch(k){
     case "w":
-      keysHeld[k] = ()=>{c.spinX += 0.0005*c.vel*3;c.vel*=0.9999}
+      keysHeld[k] = ()=>{c.spinX += 0.0005*c.vel*3*c.throttle;c.vel/=(1+c.throttle*0.0001)}
       break;
     case "d":
-      keysHeld[k] = ()=>{c.spinZ -= 0.0005*c.vel*3}
+      keysHeld[k] = ()=>{c.spinZ -= 0.0005*c.vel*3*c.throttle}
       break;
     case "a":
-      keysHeld[k] = ()=>{c.spinZ += 0.0005*c.vel*3}
+      keysHeld[k] = ()=>{c.spinZ += 0.0005*c.vel*3*c.throttle}
       break;
     case "s":
-      keysHeld[k] = ()=>{c.spinX -= 0.0005*c.vel*3;c.vel*=0.9999}
+      keysHeld[k] = ()=>{c.spinX -= 0.0005*c.vel*3*c.throttle;c.vel/=(1+c.throttle*0.0001)}
       break;
     case "i":
       keysHeld[k] = ()=>{if(c.thirdPerson){c.rotX -= 0.005}else{c.rotX += 0.005}}
@@ -467,12 +532,29 @@ document.addEventListener("keydown",(e)=>{
     case "k":
       keysHeld[k] = ()=>{if(c.thirdPerson){c.rotX += 0.005}else{c.rotX -= 0.005}}
       break;
-    case "o":
+    case "p":
       c.rotX = 0
       c.rotZ = 0
       break;
+
+    case "1":
+      c.throttle = 1
+      break;
+    case "2":
+      c.throttle = 0.75
+      break;
+    case "3":
+      c.throttle = 0.5
+      break;
+    case "4":
+      c.throttle = 0.25
+      break;
     case "ArrowUp":
-      keysHeld[k] = ()=>{c.vel+=0.001}
+      if(e.shiftKey){
+        
+        keysHeld[k] = ()=>{if(c.boost > 0.1){c.boost-=0.1;c.vel+=0.005}}
+      }else{
+      keysHeld[k] = ()=>{if(c.boost > 0.02){c.boost-=0.02;c.vel+=0.001}}}
       break;
     case "ArrowDown":
       keysHeld[k] = ()=>{c.vel*=0.999}
@@ -480,6 +562,14 @@ document.addEventListener("keydown",(e)=>{
 
     case "t":
       c.thirdPerson = !c.thirdPerson
+      break;
+
+    case "o":
+      keysHeld[k] = ()=>{c.thirdPersonBack += 0.001}
+      break;
+    case "u":
+      keysHeld[k] = ()=>{c.thirdPersonBack -= 0.001}
+      break;
 
 
   }
@@ -504,6 +594,7 @@ const init = () => {
   camera.position.set(0, 21, -5);
 
   scene = new THREE.Scene();
+  scene.fog = new THREE.Fog("rgb(0,0,0)",300,500)
   scene.background = new THREE.Color("rgb(51,51,51)");
 
   light = new THREE.PointLight(0xffffcc, 2.5, 1000, 1.5)
@@ -526,9 +617,27 @@ const init = () => {
   createWorld();
 }
 
-const animate = () => {
+let LDATE = Date.now()
+let dateLogger = [0,0,0]
+
+
+let animate = () => {
   requestAnimationFrame(animate);
   
+  let r = LDATE
+  LDATE = Date.now()
+
+  if(LDATE-r > 300){
+    animate = ()=>{console.log("too slow")}
+  }
+
+  dateLogger[0] += 1
+  dateLogger[1] += (LDATE-r)
+  if(dateLogger[0] > 100){
+    // dateLogger[2] = dateLogger[1]-1
+    dateLogger = [0,0,dateLogger[1]]
+  }
+
   // controls.update();
 
   camera.rotateX(c.rotX)
