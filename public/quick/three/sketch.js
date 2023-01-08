@@ -24,6 +24,8 @@ class gw{
 
   static boarder = 0
 
+  static bder = [{"b":0,"mult":1,"gbk":[],"lim":-6}/*,{"b":0,"mult":0.2,"gbk":[],"lim":2000}*/]
+
   static idcr(){
     this.idC += 1
     return(this.idC)
@@ -45,30 +47,77 @@ class gw{
   }
 
   static rmObj(n){
-    scene.remove(scene.getObjectByName(n))
+    scene.remove(scene.getObjectById(n))
   } 
 
 
   static pdate(d){
-    if(camera.position.z > this.boarder - 400){
-      this.boarder += 2+c.vel*0.25
+    if(camera.position.z+c.vel*5 > this.boarder - 800){
+      while(camera.position.z+c.vel*5 > this.boarder - 800){
+      this.boarder += 1+c.vel*0.005+Math.sqrt(this.boarder/1000)
+      if(c.vel < 0.007){
+        this.boarder += 0.5
+      }
+      let h = 1+Math.random()*30+this.boarder*0.01
       let mesh3 = new THREE.Mesh(
-      new THREE.BoxGeometry(1+Math.random()*4+c.vel*3*Math.random(), 1+Math.random()*30+this.boarder*0.01, 1+Math.random()*4+c.vel*3*Math.random()),
+      new THREE.BoxGeometry(1+Math.random()*4+c.vel*13*Math.random()+this.boarder*0.001, h, 1+Math.random()*4+c.vel*13*Math.random()+this.boarder*0.001),
       new THREE.MeshStandardMaterial({ color:  Math.floor(Math.random()*16777215)}))
-      mesh3.position.x += 11 + Math.random()*c.vel*2000+Math.random()*20
+      mesh3.position.x += Math.random()*c.vel*8000+Math.random()*80-40-c.vel*4000+camera.position.x
       mesh3.position.z += 12 + this.boarder
-      mesh3.position.y -= mesh3.position.z * 0.385 - 1
-      mesh3.name = gw.idcr() + ""
-      this.gbk.push(this.idC)
-      if(mesh3.position.x < 100){
+      mesh3.position.y += this.GPC(mesh3.position.z)+h/2
+      // mesh3.name = gw.idcr() + ""
+      this.gbk.push(mesh3.id)
+      if(mesh3.position.x < 1000+camera.position.x && mesh3.position.x > -1000+camera.position.x){
       scene.add(mesh3)
 
-        if(this.gbk.length > 300){
+        while(this.gbk.length > 1000){
           this.rmObj(this.gbk[0])
           this.gbk.splice(0,1)
         }
       }
     }
+    }
+  }
+
+  static pdate2(){
+
+    this.bder.forEach((BDER)=>{
+
+
+    if(camera.position.z+c.vel*5 > BDER.b - 800){
+      while(camera.position.z+c.vel*5 > BDER.b - 800){
+
+        if(camera.position.z > BDER.lim){
+      BDER.b += 1+c.vel*0.005+Math.sqrt(BDER.b/1000)
+    } else {
+        BDER.b += (1+c.vel*0.005+Math.sqrt(BDER.b/1000))+500
+      }
+      if(c.vel < 0.007){
+        BDER.b += 0.5
+      }
+      let h = 1+Math.random()*30+BDER.b*0.01
+      let mesh3 = new THREE.Mesh(
+      new THREE.BoxGeometry(1+Math.random()*4+c.vel*13*Math.random()+BDER.b*0.001, h, 1+Math.random()*4+c.vel*13*Math.random()+BDER.b*0.001),
+      new THREE.MeshStandardMaterial({ color:  Math.floor(Math.random()*16777215)}))
+      mesh3.position.x += Math.random()*c.vel*8000+Math.random()*80-40-c.vel*4000+camera.position.x
+      mesh3.position.z += 12 + BDER.b
+      mesh3.position.y += this.GPC(mesh3.position.z)+h/2
+
+      BDER.gbk.push(mesh3.id)
+      if(mesh3.position.x < 1000+camera.position.x && mesh3.position.x > -1000+camera.position.x){
+      scene.add(mesh3)
+
+        while(BDER.gbk.length > 1300){
+          this.rmObj(BDER.gbk[0])
+          BDER.gbk.splice(0,1)
+        }
+      }
+    }
+    }
+  })
+
+
+
   }
 
 
@@ -120,8 +169,9 @@ class c{
     }
 
 
-    plane.position.z = camera.position.z-200
-    plane.position.y = gw.GPC(camera.position.z-200)
+    plane.position.z = camera.position.z
+    plane.position.x = camera.position.x
+    plane.position.y = gw.GPC(camera.position.z)
 
     this.vel += Math.sqrt(Math.abs((lpos.y-camera.position.y)))/1500
     if(lpos.y-camera.position.y < 0){
@@ -147,6 +197,11 @@ class c{
     light.position.x = camera.position.x
     light.position.y = camera.position.y+0.4
     light.position.z = camera.position.z-0.2
+
+    light.intensity = Math.sqrt(this.vel)*4
+    if(light.intensity > 5){
+      light.intensity = 5
+    }
     if(this.thirdPerson){
       person.position.x = camera.position.x
       person.position.y = camera.position.y
@@ -180,6 +235,8 @@ class c{
     }
 
     document.getElementById("info").innerHTML = "velocity: " + Math.floor(this.vel*1000)
+    let cc = (255-this.vel*155)<0?0:(255-this.vel*155)
+    document.getElementById("info").style.color = "rgb(255,"+cc+","+cc+")"
     // console.log(this.lpos.y,camera.position.y)
   }
 
@@ -195,8 +252,9 @@ const createWorld = () => {
     new THREE.MeshStandardMaterial({ color: 0xff9999 })
   );
 
-  plane = new THREE.Mesh(new THREE.PlaneBufferGeometry(1000, 1000),new THREE.MeshStandardMaterial({ color: 0x12401e }))
+  plane = new THREE.Mesh(new THREE.PlaneBufferGeometry(1500, 1500),new THREE.MeshStandardMaterial({ color: 0x12401e }))
   plane.rotateX(-1.2)
+  plane.name = "plane"
   scene.add(plane)
 
   
@@ -394,7 +452,7 @@ document.addEventListener("keydown",(e)=>{
       keysHeld[k] = ()=>{c.spinX -= 0.0005*c.vel*3;c.vel*=0.9999}
       break;
     case "i":
-      keysHeld[k] = ()=>{c.rotX += 0.005}
+      keysHeld[k] = ()=>{if(c.thirdPerson){c.rotX -= 0.005}else{c.rotX += 0.005}}
       break;
     case "l":
     case "ArrowRight":
@@ -407,7 +465,7 @@ document.addEventListener("keydown",(e)=>{
         if(c.thirdPerson){c.rotZ -= 0.005}else{c.rotZ += 0.005}}
       break;
     case "k":
-      keysHeld[k] = ()=>{c.rotX -= 0.005}
+      keysHeld[k] = ()=>{if(c.thirdPerson){c.rotX += 0.005}else{c.rotX -= 0.005}}
       break;
     case "o":
       c.rotX = 0
@@ -429,7 +487,7 @@ document.addEventListener("keydown",(e)=>{
 
 document.addEventListener("wheel",(e)=>{
   // console.log(e.deltaY)
-  e.preventDefault()
+  // e.preventDefault()
   if(c.thirdPerson){
     c.thirdPersonBack += e.deltaY*0.005
   }
@@ -442,8 +500,8 @@ document.addEventListener("keyup",(e)=>{
 
 
 const init = () => {
-  camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000.0);
-  camera.position.set(0, 21, 0);
+  camera = new THREE.PerspectiveCamera(120, window.innerWidth / window.innerHeight, 0.1, 1000.0);
+  camera.position.set(0, 21, -5);
 
   scene = new THREE.Scene();
   scene.background = new THREE.Color("rgb(51,51,51)");
