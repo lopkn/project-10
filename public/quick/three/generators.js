@@ -1,3 +1,79 @@
+function rotate(roll, pitch, yaw, point) {
+    var cosa = Math.cos(yaw);
+    var sina = Math.sin(yaw);
+
+    var cosb = Math.cos(pitch);
+    var sinb = Math.sin(pitch);
+
+    var cosc = Math.cos(roll);
+    var sinc = Math.sin(roll);
+
+    var Axx = cosa*cosb;
+    var Axy = cosa*sinb*sinc - sina*cosc;
+    var Axz = cosa*sinb*cosc + sina*sinc;
+
+    var Ayx = sina*cosb;
+    var Ayy = sina*sinb*sinc + cosa*cosc;
+    var Ayz = sina*sinb*cosc - cosa*sinc;
+
+    var Azx = -sinb;
+    var Azy = cosb*sinc;
+    var Azz = cosb*cosc;
+
+        var px = point.x;
+        var py = point.y;
+        var pz = point.z;
+
+        point.x = Axx*px + Axy*py + Axz*pz;
+        point.y = Ayx*px + Ayy*py + Ayz*pz;
+        point.z = Azx*px + Azy*py + Azz*pz;
+    
+    return(point)
+}
+
+
+class collisionChecker{
+
+  //["none",Z,X,x,{X,x,Y,y,Z,z}]
+
+  static colCheck(box,point){
+
+    if(box.X > point.x && box.x < point.x){
+      if(box.Y > point.y && box.y < point.y){
+        if(box.Z > point.z && box.z < point.z){
+          return(box.id)
+       }
+      }
+    }
+
+    return(false)
+  }
+
+  static fastColcheck(Z,X,x,dict,point){
+
+    if(point.z > Z){
+      if(point.x < X && point.x > x){
+        return(this.colCheck(dict,point))
+      }
+    }
+
+    return(false)
+  }
+
+  static collideAll(){
+    let ans = false
+    let colarr = Object.keys(gw.colliders)
+    colarr.forEach((E)=>{
+      let e = gw.colliders[E]
+      if(this.fastColcheck(e[1],e[2],e[3],e[4],camera.position)){
+        ans = this.fastColcheck(e[1],e[2],e[3],e[4],camera.position)
+      }
+    })
+    return(ans)
+  }
+
+}
+
 class GEN1{
 
   constructor(){
@@ -19,12 +95,15 @@ class GEN1{
         this.boarder += 0.5
       }
       let h = 1+Math.random()*30+this.boarder*0.01
+      let w = 1+Math.random()*4+c.vel*13*Math.random()+this.boarder*0.001
+      let l = 1+Math.random()*4+c.vel*13*Math.random()+this.boarder*0.001
       let mesh3 = new THREE.Mesh(
-      new THREE.BoxGeometry(1+Math.random()*4+c.vel*13*Math.random()+this.boarder*0.001, h, 1+Math.random()*4+c.vel*13*Math.random()+this.boarder*0.001),
+      new THREE.BoxGeometry(w, h,l),
       new THREE.MeshStandardMaterial({ color:  Math.floor(Math.random()*16777215)}))
       mesh3.position.x += Math.random()*c.vel*8000+Math.random()*80-40-c.vel*4000+camera.position.x
       mesh3.position.z += 12 + this.boarder
       mesh3.position.y += gw.GPC(mesh3.position.z)+h/2.2
+
 
       if(c.vel > 2){
         let tv = c.vel-2
@@ -32,6 +111,8 @@ class GEN1{
         mesh3.rotateY(Math.random()*tv-tv/2)
         mesh3.rotateZ(Math.random()*tv-tv/2)
         mesh3.position.y -= tv+h/9
+      } else {
+      gw.colliders[mesh3.id] = ["none",mesh3.position.z-l,mesh3.position.x+w,mesh3.position.x-w,{"id":mesh3.id,"X":mesh3.position.x+w/2,"x":mesh3.position.x-w/2,"Y":mesh3.position.y+h/2,"y":mesh3.position.y-h/2,"Z":mesh3.position.z+l/2,"z":mesh3.position.z-l/2,}]
       }
       // mesh3.name = gw.idcr() + ""
       this.gbk.push(mesh3.id)
@@ -88,9 +169,10 @@ class GEN2{
       if(tx > 1000+camera.position.x || tx < -1000+camera.position.x){
         continue;
       }
-
+      let w = 1+Math.random()*4+c.vel*13*Math.random()+B*0.001
+      let l = 1+Math.random()*4+c.vel*13*Math.random()+B*0.001
       let mesh3 = new THREE.Mesh(
-      new THREE.BoxGeometry(1+Math.random()*4+c.vel*13*Math.random()+B*0.001, h, 1+Math.random()*4+c.vel*13*Math.random()+B*0.001),
+      new THREE.BoxGeometry(w, h, l),
       new THREE.MeshStandardMaterial({ color:  Math.floor(Math.random()*16777215)}))
       mesh3.position.x += tx
       mesh3.position.z += 12 + this.boarder

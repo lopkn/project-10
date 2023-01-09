@@ -24,6 +24,8 @@ class gw{
 
   static gbk = []
 
+  static colliders = {}
+
   static boarder = 0
 
   // static bder = [{"b":0,"mult":1,"gbk":[],"lim":-6},{"b":0,"mult":0.2,"gbk":[],"lim":20000}]
@@ -50,6 +52,7 @@ class gw{
 
   static rmObj(n){
     scene.remove(scene.getObjectById(n))
+    delete this.colliders[n]
   } 
 
 
@@ -240,6 +243,12 @@ class c{
 
     scene.fog.color = scene.background
 
+    let COLLIDED = collisionChecker.collideAll()
+    if(COLLIDED){
+      this.vel *= 0.9
+      console.log("COLLIDED: "+COLLIDED)
+    }
+
     if(this.vel > 2){
       let tv = this.vel -2
       scene.background.b -= tv*15
@@ -292,12 +301,12 @@ class c{
       wing2.rotateY(0.2)
     }
 
-    document.getElementById("info").innerHTML = "velocity: " + Math.floor(this.vel*1000) + "</br>preformance: "+ dateLogger[2]+"</br>boost: "+ Math.floor(c.boost)+"</br>height: "+Math.floor((camera.position.y-gw.GPC(camera.position.z))*100)
+    document.getElementById("info").innerHTML = "velocity: " + Math.floor(this.vel*1000) + "</br>preformance: "+ dateLogger[2]+"</br>boost: "+ Math.floor(c.boost)+"</br>height: "+Math.floor((camera.position.y-gw.GPC(camera.position.z))*100)+"</br>distance: "+Math.floor(camera.position.z)
     let cc = (255-this.vel*155)<0?0:(255-this.vel*155)
     document.getElementById("info").style.color = "rgb(255,"+cc+","+cc+")"
     // console.log(this.lpos.y,camera.position.y)
 
-    c.boost += 0.4/(camera.position.y-gw.GPC(camera.position.z))
+    c.boost += 1.2/(camera.position.y-gw.GPC(camera.position.z))
     if(c.boost > 100){
       c.boost = 100
     }
@@ -549,6 +558,18 @@ document.addEventListener("keydown",(e)=>{
     case "4":
       c.throttle = 0.25
       break;
+    case "5":
+      c.throttle = 0.125
+      break;
+
+    case "Enter":
+      if(c.boost > 20){
+        c.boost -= 20
+        c.vel *= 1.5
+      }
+      break;
+
+
     case "ArrowUp":
       if(e.shiftKey){
         
@@ -627,9 +648,9 @@ let animate = () => {
   let r = LDATE
   LDATE = Date.now()
 
-  if(LDATE-r > 300){
-    animate = ()=>{console.log("too slow")}
-  }
+  // if(LDATE-r > 900){
+  //   animate = ()=>{console.log("too slow")}
+  // }
 
   dateLogger[0] += 1
   dateLogger[1] += (LDATE-r)
