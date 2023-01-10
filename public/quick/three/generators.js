@@ -65,8 +65,22 @@ class collisionChecker{
     let colarr = Object.keys(gw.colliders)
     colarr.forEach((E)=>{
       let e = gw.colliders[E]
+      if(e[0] === "none"){
       if(this.fastColcheck(e[1],e[2],e[3],e[4],camera.position)){
         ans = this.fastColcheck(e[1],e[2],e[3],e[4],camera.position)
+      }
+      } else {
+         let pt = {"x":camera.position.x-e[0].x,"y":camera.position.y-e[0].y,"z":camera.position.z-e[0].z}
+         rotate(-e[0].rx,0,0,pt)
+         rotate(0,-e[0].ry,0,pt)
+         rotate(0,0,-e[0].rz,pt)
+
+
+         let r = this.fastColcheck(e[1],e[2],e[3],e[4],{"x":e[0].x+pt.x,"y":e[0].y+pt.y,"z":e[0].z+pt.z})
+         if(r){
+          ans = r
+         }
+
       }
     })
     return(ans)
@@ -105,14 +119,19 @@ class GEN1{
       mesh3.position.y += gw.GPC(mesh3.position.z)+h/2.2
 
 
-      if(c.vel > 2){
-        let tv = c.vel-2
-        mesh3.rotateX(Math.random()*tv-tv/2)
-        mesh3.rotateY(Math.random()*tv-tv/2)
-        mesh3.rotateZ(Math.random()*tv-tv/2)
+      if(c.vel > 2 || c.chaosMode){
+        let tv = c.vel-2+c.chaosMode*2
+        let rx = Math.random()*tv-tv/2
+        let ry = Math.random()*tv-tv/2
+        let rz = Math.random()*tv-tv/2
+        mesh3.rotateX(rx)
+        mesh3.rotateY(ry)
+        mesh3.rotateZ(rz)
         mesh3.position.y -= tv+h/9
+        gw.colliders[mesh3.id] = [{"x":mesh3.position.x,"y":mesh3.position.y,"z":mesh3.position.z,"rx":rx,"ry":ry,"rz":rz},mesh3.position.z-l,mesh3.position.x+w,mesh3.position.x-w,{"id":mesh3.id,"X":mesh3.position.x+w/2,"x":mesh3.position.x-w/2,"Y":mesh3.position.y+h/2,"y":mesh3.position.y-h/2,"Z":mesh3.position.z+l/2,"z":mesh3.position.z-l/2,}]
+
       } else {
-      gw.colliders[mesh3.id] = ["none",mesh3.position.z-l,mesh3.position.x+w,mesh3.position.x-w,{"id":mesh3.id,"X":mesh3.position.x+w/2,"x":mesh3.position.x-w/2,"Y":mesh3.position.y+h/2,"y":mesh3.position.y-h/2,"Z":mesh3.position.z+l/2,"z":mesh3.position.z-l/2,}]
+      gw.colliders[mesh3.id] = ["none",mesh3.position.z-l-10,mesh3.position.x+w,mesh3.position.x-w,{"id":mesh3.id,"X":mesh3.position.x+w/2,"x":mesh3.position.x-w/2,"Y":mesh3.position.y+h/2,"y":mesh3.position.y-h/2,"Z":mesh3.position.z+l/2,"z":mesh3.position.z-l/2,}]
       }
       // mesh3.name = gw.idcr() + ""
       this.gbk.push(mesh3.id)
@@ -305,20 +324,29 @@ class GEN4{
         continue;
       }
 
+      let w = 1+Math.random()*4+c.vel*13*Math.random()+B*0.0001
+      let l = 1+Math.random()*4+c.vel*13*Math.random()+B*0.0001
       let mesh3 = new THREE.Mesh(
-      new THREE.BoxGeometry(1+Math.random()*4+c.vel*13*Math.random()+B*0.0001, h, 1+Math.random()*4+c.vel*13*Math.random()+B*0.0001),
+      new THREE.BoxGeometry(w, h, l),
       new THREE.MeshStandardMaterial({ color:  Math.floor(Math.random()*16777215)}))
       mesh3.position.x += tx
       mesh3.position.z += 12 + this.boarder
       mesh3.position.y += gw.GPC(mesh3.position.z)+h/2.2
 
-      if(c.vel > 2){
+      if(c.chaosMode && c.vel > 2){
         let tv = c.vel-2
-        mesh3.rotateX(Math.random()*tv-tv/2)
-        mesh3.rotateY(Math.random()*tv-tv/2)
-        mesh3.rotateZ(Math.random()*tv-tv/2)
+        let rx = Math.random()*tv-tv/2
+        let ry = Math.random()*tv-tv/2
+        let rz = Math.random()*tv-tv/2
+        mesh3.rotateX(rx)
+        mesh3.rotateY(ry)
+        mesh3.rotateZ(rz)
         mesh3.position.y -= tv+h/9
-      }
+        gw.colliders[mesh3.id] = [{"x":mesh3.position.x,"y":mesh3.position.y,"z":mesh3.position.z,"rx":rx,"ry":ry,"rz":rz},mesh3.position.z-l,mesh3.position.x+w,mesh3.position.x-w,{"id":mesh3.id,"X":mesh3.position.x+w/2,"x":mesh3.position.x-w/2,"Y":mesh3.position.y+h/2,"y":mesh3.position.y-h/2,"Z":mesh3.position.z+l/2,"z":mesh3.position.z-l/2,}]
+
+      } else {
+      gw.colliders[mesh3.id] = ["none",mesh3.position.z-l,mesh3.position.x+w,mesh3.position.x-w,{"id":mesh3.id,"X":mesh3.position.x+w/2,"x":mesh3.position.x-w/2,"Y":mesh3.position.y+h/2,"y":mesh3.position.y-h/2,"Z":mesh3.position.z+l/2,"z":mesh3.position.z-l/2,}]
+    }
 
       // mesh3.name = gw.idcr() + ""
       this.gbk.push(mesh3.id)
@@ -338,7 +366,7 @@ class GEN4{
 
 
 class GEN5{
-
+  //runway
   constructor(dx){
     this.boarder = 0
     this.gbk = []
@@ -488,13 +516,29 @@ class GEN7{
 
       let tx = Math.random()*180*vel-90*vel+camera.position.x+this.displacement
 
-
+      let w = 3+Math.random()*8*vel
+      let l = 3+Math.random()*8*vel
       let mesh3 = new THREE.Mesh(
-      new THREE.BoxGeometry(3+Math.random()*8*vel, h, 3+Math.random()*8*vel),
+      new THREE.BoxGeometry(w, h, l),
       new THREE.MeshStandardMaterial({ color:  Math.floor(Math.random()*16777215)}))
       mesh3.position.x += tx
       mesh3.position.z += 12 + this.boarder
       mesh3.position.y += gw.GPC(mesh3.position.z)+h/1.9
+
+      if(c.chaosMode && c.vel > 2){
+        let tv = c.vel/2-1
+        let rx = Math.random()*tv-tv/2
+        let ry = Math.random()*tv-tv/2
+        let rz = Math.random()*tv-tv/2
+        mesh3.rotateX(rx)
+        mesh3.rotateY(ry)
+        mesh3.rotateZ(rz)
+        mesh3.position.y -= tv+h/9
+        gw.colliders[mesh3.id] = [{"x":mesh3.position.x,"y":mesh3.position.y,"z":mesh3.position.z,"rx":rx,"ry":ry,"rz":rz},mesh3.position.z-l,mesh3.position.x+w,mesh3.position.x-w,{"id":mesh3.id,"X":mesh3.position.x+w/2,"x":mesh3.position.x-w/2,"Y":mesh3.position.y+h/2,"y":mesh3.position.y-h/2,"Z":mesh3.position.z+l/2,"z":mesh3.position.z-l/2,}]
+
+      } else {
+      gw.colliders[mesh3.id] = ["none",mesh3.position.z-l,mesh3.position.x+w,mesh3.position.x-w,{"id":mesh3.id,"X":mesh3.position.x+w/2,"x":mesh3.position.x-w/2,"Y":mesh3.position.y+h/2,"y":mesh3.position.y-h/2,"Z":mesh3.position.z+l/2,"z":mesh3.position.z-l/2,}]
+    }
 
       // mesh3.name = gw.idcr() + ""
       this.gbk.push(mesh3.id)

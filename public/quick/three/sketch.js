@@ -20,6 +20,8 @@ class gw{
   static SLang = Math.PI/2-this.SLconst
   static SLslope = -Math.tan(this.SLang)
 
+  static ratio = window.devicePixelRatio
+
   static idC = 0
 
   static gbk = []
@@ -131,6 +133,7 @@ class gw{
   }
 
   static pdate3s = [new GEN1(),new GEN2(),new GEN2(10000),new GEN2(60000),new GEN2(40000),new GEN2(80000),new GEN2(120000),new GEN3(40000), new GEN4(), new GEN5(), new GEN7()]
+  // static pdate3s = []
 
   static pdate3(){
     this.pdate3s.forEach((e)=>{e.update()})
@@ -165,12 +168,17 @@ class c{
 
   static thirdPerson = true
 
+  static chaosMode = false
+
   static thirdPersonBack = 0.5
 
   static throttle = 1
 
   static spinX = 0
   static spinZ = 0
+
+  static collided = false
+  static lightIntensity = 1
 
   static boost = 100
 
@@ -246,7 +254,10 @@ class c{
     let COLLIDED = collisionChecker.collideAll()
     if(COLLIDED){
       this.vel *= 0.9
+      this.collided = true
       console.log("COLLIDED: "+COLLIDED)
+    }else{
+      this.collided = false
     }
 
     if(this.vel > 2){
@@ -265,9 +276,9 @@ class c{
     light.position.y = camera.position.y+0.4
     light.position.z = camera.position.z-0.2
 
-    light.intensity = Math.sqrt(this.vel)*4
-    if(light.intensity > 5){
-      light.intensity = 5
+    light.intensity = Math.sqrt(this.vel)*4*this.lightIntensity
+    if(light.intensity > 5*this.lightIntensity){
+      light.intensity = 5*this.lightIntensity
     }
     if(this.thirdPerson){
       person.position.x = camera.position.x
@@ -306,10 +317,10 @@ class c{
     document.getElementById("info").style.color = "rgb(255,"+cc+","+cc+")"
     // console.log(this.lpos.y,camera.position.y)
 
-    c.boost += 1.2/(camera.position.y-gw.GPC(camera.position.z))
+    if(this.collided === false){c.boost += 1.2/(camera.position.y-gw.GPC(camera.position.z))
     if(c.boost > 100){
       c.boost = 100
-    }
+    }}
 
 
   }
@@ -484,7 +495,7 @@ class vectorFuncs{
 }
 
 document.addEventListener("mousedown",(e)=>{
-  mesh.rotateY(0.4);
+  mesh.rotateZ(0.4);
   keysHeld["mdl"] = ()=>{
     let ovn = vectorFuncs.originVectorNormalize(mouseX-Width/2,mouseY-Height/2)
     c.spinX += -0.0005*c.vel*3*ovn[1]*c.throttle;c.vel/=(1+c.throttle*0.0001)
@@ -513,6 +524,40 @@ document.addEventListener("keydown",(e)=>{
   let cont = c.vel*5
   console.log(k)
   switch(k){
+
+  case "[":
+    keysHeld[k] = ()=>{c.lightIntensity -= 0.01
+    if(c.lightIntensity < 0){
+      c.lightIntensity = 0
+    }
+  }
+    break;
+
+  case "]":
+    keysHeld[k] = ()=>{c.lightIntensity += 0.01
+    if(c.lightIntensity > 1){
+      c.lightIntensity = 1
+    }
+  }
+    break;
+
+  case "c":
+    c.chaosMode = !c.chaosMode
+    if(c.chaosMode){
+      wing1.material.color.g -= 1
+    } else {
+      wing1.material.color.g += 1
+    }
+    break;
+
+  case "r":
+    alert("setting pixelRatio at higher than 2 may cause extreme lag.")
+    let tr = prompt("your current window ratio is currently "+window.devicePixelRatio)
+    gw.ratio = tr
+    renderer.setPixelRatio( gw.ratio );
+  renderer.setSize(window.innerWidth, window.innerHeight);
+    break;
+
     case "w":
       keysHeld[k] = ()=>{c.spinX += 0.0005*c.vel*3*c.throttle;c.vel/=(1+c.throttle*0.0001)}
       break;
@@ -561,6 +606,9 @@ document.addEventListener("keydown",(e)=>{
     case "5":
       c.throttle = 0.125
       break;
+    case "6":
+      c.throttle = 0.05
+      break;
 
     case "Enter":
       if(c.boost > 20){
@@ -571,7 +619,7 @@ document.addEventListener("keydown",(e)=>{
 
 
     case "ArrowUp":
-      if(e.shiftKey){
+      if(e.shiftKey||c.chaosMode){
         
         keysHeld[k] = ()=>{if(c.boost > 0.1){c.boost-=0.1;c.vel+=0.005}}
       }else{
@@ -610,7 +658,12 @@ document.addEventListener("keyup",(e)=>{
 })
 
 
+
+
 const init = () => {
+
+
+
   camera = new THREE.PerspectiveCamera(120, window.innerWidth / window.innerHeight, 0.1, 1000.0);
   camera.position.set(0, 21, -5);
 
@@ -624,6 +677,8 @@ const init = () => {
   scene.add(light);
 
   renderer = new THREE.WebGLRenderer({ antialias: true , canvas: myCanvas});
+  // renderer.setPixelRatio( 0.1 );
+  renderer.setPixelRatio( gw.ratio );
   renderer.setSize(window.innerWidth, window.innerHeight);
 
   renderer.domElement.disabled = "true"
@@ -679,6 +734,7 @@ let animate = () => {
   camera.rotateX(-c.rotX)
 
   c.update()
+
 }
 function touchHandler(event)
 {
@@ -745,4 +801,42 @@ init2()
 
 
 init();
+
+
+const loader = new THREE.GLTFLoader();
+
+
+  loader.load( './source/test.gltf', function ( gltf ) {
+
+    gltf.scene.position.y += 10
+    gltf.scene.rotateX(1)
+
+  scene.add( gltf.scene );
+
+}, undefined, function ( error ) {
+
+  console.error( error );
+
+} );
+
+
+// let meshTest = new THREE.Mesh(
+//       new THREE.BoxGeometry(14, 14,18),
+//       new THREE.MeshStandardMaterial({ color:  Math.floor(0xff0000)}))
+// meshTest.position.z = 10
+// meshTest.position.y = 5
+
+// let tv = 10
+// let rx = Math.random()*tv-tv/2
+//         let ry = Math.random()*tv-tv/2
+//         let rz = Math.random()*tv-tv/2
+//         meshTest.rotateX(rx)
+//         meshTest.rotateY(ry)
+//         meshTest.rotateZ(rz)
+
+//         gw.colliders[meshTest.id] = [{"x":meshTest.position.x,"y":meshTest.position.y,"z":meshTest.position.z,"rx":rx,"ry":ry,"rz":rz},meshTest.position.z-10,meshTest.position.x+200,meshTest.position.x-200,{"id":meshTest.id,"X":meshTest.position.x+14/2,"x":meshTest.position.x-14/2,"Y":meshTest.position.y+14/2,"y":meshTest.position.y-14/2,"Z":meshTest.position.z+18/2,"z":meshTest.position.z-18/2,}]
+
+// scene.add(meshTest)
+
+
 animate();
