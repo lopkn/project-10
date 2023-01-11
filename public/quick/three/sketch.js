@@ -71,6 +71,9 @@ class gw{
   static rmObj(n){
     scene.remove(scene.getObjectById(n))
     delete this.colliders[n]
+    if(this.colliders[n] !== undefined){
+      console.log("excuse me?")
+    }
   } 
 
 
@@ -165,15 +168,18 @@ class gw{
 
   static CLENSE(z){
     let clarr = []
+    let cldct = {}
     scene.children.forEach((e)=>{
       if(e.position.z +z < camera.position.z){
         clarr.push(e.id)
+        cldct[e.id] = true
       }
     })
 
     clarr.forEach((e)=>{
       this.rmObj(e)
     })
+
   }
 
 
@@ -185,6 +191,8 @@ class c{
   static thirdPerson = true
 
   static chaosMode = false
+  static gliding = false
+  static paused = false
 
   static thirdPersonBack = 0.5
 
@@ -230,8 +238,8 @@ class c{
     camera.rotateX(this.spinX)
     camera.rotateZ(this.spinZ)
 
-    this.spinX *= 1/(this.vel*0.12+1.002)
-    this.spinZ *= 1/(this.vel*0.12+1.002)
+    this.spinX *= 1/(this.vel*0.12*(this.gliding?0.03:1)+1.002)
+    this.spinZ *= 1/(this.vel*0.12*(this.gliding?0.01:1)+1.002)
 
     let lpos = {"x":camera.position.x,"y":camera.position.y,"z":camera.position.z}
     camera.translateZ(-c.vel*2)
@@ -333,9 +341,9 @@ class c{
     document.getElementById("info").style.color = "rgb(255,"+cc+","+cc+")"
     // console.log(this.lpos.y,camera.position.y)
 
-    if(this.collided === false){c.boost += 1.2/(camera.position.y-gw.GPC(camera.position.z))
-    if(c.boost > 100){
-      c.boost = 100
+    if(this.collided === false){c.boost += (this.gliding?2:1)*1.3/(camera.position.y-gw.GPC(camera.position.z))
+    if(c.boost > 100+this.chaosMode*50){
+      c.boost = 100+this.chaosMode*50
     }}
 
 
@@ -558,13 +566,28 @@ document.addEventListener("keydown",(e)=>{
     break;
 
   case "c":
-    c.chaosMode = !c.chaosMode
     if(c.chaosMode){
-      wing1.material.color.g -= 1
-    } else {
       wing1.material.color.g += 1
+      c.chaosMode = !c.chaosMode
+    } else if(c.boost > 10){
+      c.boost -= 10
+      wing1.material.color.g -= 1
+      c.chaosMode = !c.chaosMode
     }
     break;
+
+  case "x":
+    if(c.gliding){
+      wing1.material.color.r += 1
+      wing1.material.color.b -= 1
+      c.gliding = !c.gliding
+    } else {
+      wing1.material.color.r -= 1
+      wing1.material.color.b += 1
+      c.gliding = !c.gliding
+    }
+    break;
+
 
   case "r":
     alert("setting pixelRatio at higher than 2 may cause extreme lag.")
@@ -574,17 +597,35 @@ document.addEventListener("keydown",(e)=>{
   renderer.setSize(window.innerWidth, window.innerHeight);
     break;
 
+  case " ":
+    c.paused = !c.paused
+    if(c.paused){
+    let timg = document.createElement("img")
+    timg.src = "../../images/noInt.png"
+    timg.style.position = "absolute"
+    timg.style.top = "0px"
+    timg.style.left = "0px"
+    timg.style.height = Math.floor(Height)+"px"
+    timg.style.width = Math.floor(Width)+"px"
+    timg.style.zIndex = 50
+    timg.id = "timg"
+    document.body.appendChild(timg)} else {
+      document.getElementById("timg").remove()
+    }
+
+    break;
+
     case "w":
-      keysHeld[k] = ()=>{c.spinX += 0.0005*c.vel*3*c.throttle;c.vel/=(1+c.throttle*0.0001)}
+      keysHeld[k] = ()=>{c.spinX += 0.0005*c.vel*3*c.throttle/(c.gliding?c.vel*8:1);c.vel/=(1+c.throttle*0.0001)}
       break;
     case "d":
-      keysHeld[k] = ()=>{c.spinZ -= 0.0005*c.vel*3*c.throttle}
+      keysHeld[k] = ()=>{c.spinZ -= 0.0005*c.vel*3*c.throttle/(c.gliding?c.vel*8:1)}
       break;
     case "a":
-      keysHeld[k] = ()=>{c.spinZ += 0.0005*c.vel*3*c.throttle}
+      keysHeld[k] = ()=>{c.spinZ += 0.0005*c.vel*3*c.throttle/(c.gliding?c.vel*8:1)}
       break;
     case "s":
-      keysHeld[k] = ()=>{c.spinX -= 0.0005*c.vel*3*c.throttle;c.vel/=(1+c.throttle*0.0001)}
+      keysHeld[k] = ()=>{c.spinX -= 0.0005*c.vel*3*c.throttle/(c.gliding?c.vel*8:1);c.vel/=(1+c.throttle*0.0001)}
       break;
     case "i":
       keysHeld[k] = ()=>{if(c.thirdPerson){c.rotX -= 0.005}else{c.rotX += 0.005}}
@@ -733,7 +774,7 @@ let animate = () => {
   }
 
   throttleCounter++
-  if(throttleCounter%2 === 0){
+  if(throttleCounter%2 === 0 || c.paused){
     return;
   }
 

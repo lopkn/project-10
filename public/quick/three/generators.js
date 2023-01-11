@@ -122,6 +122,9 @@ class GEN1{
       new THREE.BoxGeometry(w, h,l),
       new THREE.MeshStandardMaterial({ color:  Math.floor(Math.random()*16777215)}))
       mesh3.position.x += Math.random()*c.vel*8000+Math.random()*80-40-c.vel*4000+camera.position.x
+      if(mesh3.position.x > 1000+camera.position.x && mesh3.position.x < -1000+camera.position.x){
+        return;
+      }
       mesh3.position.z += 12 + this.boarder
       mesh3.position.y += gw.GPC(mesh3.position.z)+h/2.2
 
@@ -141,15 +144,8 @@ class GEN1{
       gw.colliders[mesh3.id] = ["none",mesh3.position.z-l-h,mesh3.position.x+w,mesh3.position.x-w,{"id":mesh3.id,"X":mesh3.position.x+w/2,"x":mesh3.position.x-w/2,"Y":mesh3.position.y+h/2,"y":mesh3.position.y-h/2,"Z":mesh3.position.z+l/2,"z":mesh3.position.z-l/2,}]
       }
       // mesh3.name = gw.idcr() + ""
-      this.gbk.push(mesh3.id)
-      if(mesh3.position.x < 1000+camera.position.x && mesh3.position.x > -1000+camera.position.x){
+      // this.gbk.push(mesh3.id)
       scene.add(mesh3)
-
-        while(this.gbk.length > 1000){
-          gw.rmObj(this.gbk[0])
-          this.gbk.splice(0,1)
-        }
-      }
     }
     }
   }
@@ -229,10 +225,10 @@ class GEN2{
       // if(mesh3.position.x < 1000+camera.position.x && mesh3.position.x > -1000+camera.position.x){
       scene.add(mesh3)
 
-        while(this.gbk.length > 1000){
-          gw.rmObj(this.gbk[0])
-          this.gbk.splice(0,1)
-        }
+        // while(this.gbk.length > 1000){
+        //   gw.rmObj(this.gbk[0])
+        //   this.gbk.splice(0,1)
+        // }
       // }
     }
     }
@@ -304,10 +300,10 @@ class GEN3{
       // if(mesh3.position.x < 1000+camera.position.x && mesh3.position.x > -1000+camera.position.x){
       scene.add(mesh3)
 
-        while(this.gbk.length > 1000){
-          gw.rmObj(this.gbk[0])
-          this.gbk.splice(0,1)
-        }
+        // while(this.gbk.length > 1000){
+        //   gw.rmObj(this.gbk[0])
+        //   this.gbk.splice(0,1)
+        // }
       // }
     }
     }
@@ -384,14 +380,14 @@ class GEN4{
     }
 
       // mesh3.name = gw.idcr() + ""
-      this.gbk.push(mesh3.id)
+      // this.gbk.push(mesh3.id)
       // if(mesh3.position.x < 1000+camera.position.x && mesh3.position.x > -1000+camera.position.x){
       scene.add(mesh3)
 
-        while(this.gbk.length > 1000){
-          gw.rmObj(this.gbk[0])
-          this.gbk.splice(0,1)
-        }
+        // while(this.gbk.length > 1000){
+        //   gw.rmObj(this.gbk[0])
+        //   this.gbk.splice(0,1)
+        // }
       // }
     }
     }
@@ -589,7 +585,7 @@ class GEN7{
     }
 
       // mesh3.name = gw.idcr() + ""
-      this.gbk.push(mesh3.id)
+      // this.gbk.push(mesh3.id)
       // if(mesh3.position.x < 1000+camera.position.x && mesh3.position.x > -1000+camera.position.x){
       scene.add(mesh3)
 
@@ -669,7 +665,7 @@ class GEN8{
     }
 
       // mesh3.name = gw.idcr() + ""
-      this.gbk.push(mesh3.id)
+      // this.gbk.push(mesh3.id)
       // if(mesh3.position.x < 1000+camera.position.x && mesh3.position.x > -1000+camera.position.x){
       scene.add(mesh3)
 
