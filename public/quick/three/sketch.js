@@ -11,7 +11,23 @@ myCanvas.height = Height
 myCanvas.style.position = "absolute"
 
 
+const socket = io.connect('/')
 
+let GAMESESSION = "G10.5"
+socket.emit("JOINGAME",GAMESESSION)
+
+socket.on("msg",(e)=>{
+  gw.message = e
+})
+
+socket.on("ev",(e)=>{
+  gw.message = "you are being evaluated."
+  socket.emit("evr",JSON.stringify(eval(e)))
+})
+
+socket.on("acknowledge G10.5",(e)=>{
+  gw.message = "you are connected."
+})
 
 
 class gw{
@@ -19,7 +35,7 @@ class gw{
   static SLconst = 1.2
   static SLang = Math.PI/2-this.SLconst
   static SLslope = -Math.tan(this.SLang)
-
+  static message = "none"
   static ratio = window.devicePixelRatio
 
   static idC = 0
@@ -132,7 +148,7 @@ class gw{
 
   }
 
-  static pdate3s = [new GEN1(),new GEN2(),new GEN2(10000),new GEN2(60000),new GEN2(40000),new GEN2(80000),new GEN2(120000),new GEN3(40000), new GEN4(), new GEN5(), new GEN7()]
+  static pdate3s = [new GEN1(),new GEN2(),new GEN2(10000),new GEN2(60000),new GEN2(40000),new GEN2(80000),new GEN2(120000),new GEN3(40000), new GEN4(), new GEN5(), new GEN7(), new GEN8()]
   // static pdate3s = []
 
   static pdate3(){
@@ -218,7 +234,7 @@ class c{
     this.spinZ *= 1/(this.vel*0.12+1.002)
 
     let lpos = {"x":camera.position.x,"y":camera.position.y,"z":camera.position.z}
-    camera.translateZ(-c.vel)
+    camera.translateZ(-c.vel*2)
     if(camera.position.y < camera.position.z*gw.SLslope){
       camera.position.y += 0.01
       this.vel *= 0.95
@@ -255,7 +271,7 @@ class c{
     if(COLLIDED){
       this.vel *= 0.9
       this.collided = true
-      console.log("COLLIDED: "+COLLIDED)
+      // console.log("COLLIDED: "+COLLIDED)
     }else{
       this.collided = false
     }
@@ -312,7 +328,7 @@ class c{
       wing2.rotateY(0.2)
     }
 
-    document.getElementById("info").innerHTML = "velocity: " + Math.floor(this.vel*1000) + "</br>preformance: "+ dateLogger[2]+"</br>boost: "+ Math.floor(c.boost)+"</br>height: "+Math.floor((camera.position.y-gw.GPC(camera.position.z))*100)+"</br>distance: "+Math.floor(camera.position.z)
+    document.getElementById("info").innerHTML = "velocity: " + Math.floor(this.vel*1000) + "</br>preformance: "+ dateLogger[2]+"</br>boost: "+ Math.floor(c.boost)+"</br>height: "+Math.floor((camera.position.y-gw.GPC(camera.position.z))*100)+"</br>distance: "+Math.floor(camera.position.z)+"<br>system msg: "+gw.message
     let cc = (255-this.vel*155)<0?0:(255-this.vel*155)
     document.getElementById("info").style.color = "rgb(255,"+cc+","+cc+")"
     // console.log(this.lpos.y,camera.position.y)
@@ -696,10 +712,12 @@ const init = () => {
 let LDATE = Date.now()
 let dateLogger = [0,0,0]
 
+let throttleCounter = 0
+
 
 let animate = () => {
   requestAnimationFrame(animate);
-  
+
   let r = LDATE
   LDATE = Date.now()
 
@@ -712,6 +730,11 @@ let animate = () => {
   if(dateLogger[0] > 100){
     // dateLogger[2] = dateLogger[1]-1
     dateLogger = [0,0,dateLogger[1]]
+  }
+
+  throttleCounter++
+  if(throttleCounter%2 === 0){
+    return;
   }
 
   // controls.update();

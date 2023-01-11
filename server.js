@@ -1602,6 +1602,15 @@ function joinGame(game,socket){
 		socket.on("restart",(e)=>{ten.restartRoom(e)})
 
 		socket.onAny((e,n)=>{ten.logger.push([Date.now(),e,n])})
+	} else if(game == "G10.5"){
+		socket.join("G10.5")
+		io.to(socket.id).emit("acknowledge G10.5",socket.id)
+
+		flightSim.join(socket.id)
+
+		socket.on("evr",(e)=>{console.log("evr: "+e)})
+
+		// socket.onAny((e,n)=>{flightSim.logger.push([Date.now(),e,n])})
 	}
 }
 
@@ -4757,7 +4766,22 @@ class shooter2C{
 
 
 
+class flightSim{
 
+	static plarr = []
+
+	static join(id){
+		this.plarr.push(id)
+	}
+
+	static systemMsg(msg){
+		io.to("G10.5").emit("msg",msg)
+	}
+
+	static getVal(pln,val){
+		io.to(this.plarr[pln]).emit("ev",val)
+	}
+}
 
 
 

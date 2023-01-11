@@ -103,7 +103,14 @@ class GEN1{
         this.boarder-=tv
       }
 
+      let breaker = 0
+
       while(camera.position.z+c.vel*5 > this.boarder - 800){
+        breaker++
+        if(breaker>1000){
+          console.log("break 1")
+          break;
+        }
       this.boarder += 1+c.vel*0.005+this.boarder/4000
       if(c.vel < 0.007){
         this.boarder += 0.5
@@ -131,7 +138,7 @@ class GEN1{
         gw.colliders[mesh3.id] = [{"x":mesh3.position.x,"y":mesh3.position.y,"z":mesh3.position.z,"rx":rx,"ry":ry,"rz":rz},mesh3.position.z-l,mesh3.position.x+w,mesh3.position.x-w,{"id":mesh3.id,"X":mesh3.position.x+w/2,"x":mesh3.position.x-w/2,"Y":mesh3.position.y+h/2,"y":mesh3.position.y-h/2,"Z":mesh3.position.z+l/2,"z":mesh3.position.z-l/2,}]
 
       } else {
-      gw.colliders[mesh3.id] = ["none",mesh3.position.z-l-10,mesh3.position.x+w,mesh3.position.x-w,{"id":mesh3.id,"X":mesh3.position.x+w/2,"x":mesh3.position.x-w/2,"Y":mesh3.position.y+h/2,"y":mesh3.position.y-h/2,"Z":mesh3.position.z+l/2,"z":mesh3.position.z-l/2,}]
+      gw.colliders[mesh3.id] = ["none",mesh3.position.z-l-h,mesh3.position.x+w,mesh3.position.x-w,{"id":mesh3.id,"X":mesh3.position.x+w/2,"x":mesh3.position.x-w/2,"Y":mesh3.position.y+h/2,"y":mesh3.position.y-h/2,"Z":mesh3.position.z+l/2,"z":mesh3.position.z-l/2,}]
       }
       // mesh3.name = gw.idcr() + ""
       this.gbk.push(mesh3.id)
@@ -160,12 +167,17 @@ class GEN2{
 
   update(){
     if(camera.position.z+c.vel*5 > this.boarder - 800){
+      let breaker = 0
       while(camera.position.z+c.vel*5 > this.boarder - 800){
-
+        breaker++
+        if(breaker>1000){
+          console.log("break 2")
+          break;
+        }
         let B = 1
       if(this.boarder > this.dx){
         B = this.boarder-this.dx+1
-        this.boarder += 1+c.vel*0.005+this.boarder/4000
+        this.boarder += 1+c.vel*0.005+(this.boarder-this.dx)/4000
       } else {
         this.boarder += 5
       }
@@ -197,7 +209,20 @@ class GEN2{
       mesh3.position.z += 12 + this.boarder
       mesh3.position.y += gw.GPC(mesh3.position.z)+h/2.2
 
-      
+      if(c.vel > 2 || c.chaosMode){
+        let tv = c.vel-2+c.chaosMode*2
+        let rx = Math.random()*tv-tv/2
+        let ry = Math.random()*tv-tv/2
+        let rz = Math.random()*tv-tv/2
+        mesh3.rotateX(rx)
+        mesh3.rotateY(ry)
+        mesh3.rotateZ(rz)
+        mesh3.position.y -= tv+h/9
+        gw.colliders[mesh3.id] = [{"x":mesh3.position.x,"y":mesh3.position.y,"z":mesh3.position.z,"rx":rx,"ry":ry,"rz":rz},mesh3.position.z-l,mesh3.position.x+w,mesh3.position.x-w,{"id":mesh3.id,"X":mesh3.position.x+w/2,"x":mesh3.position.x-w/2,"Y":mesh3.position.y+h/2,"y":mesh3.position.y-h/2,"Z":mesh3.position.z+l/2,"z":mesh3.position.z-l/2,}]
+
+      } else {
+      gw.colliders[mesh3.id] = ["none",mesh3.position.z-l-h,mesh3.position.x+w,mesh3.position.x-w,{"id":mesh3.id,"X":mesh3.position.x+w/2,"x":mesh3.position.x-w/2,"Y":mesh3.position.y+h/2,"y":mesh3.position.y-h/2,"Z":mesh3.position.z+l/2,"z":mesh3.position.z-l/2,}]
+      }
 
       // mesh3.name = gw.idcr() + ""
       this.gbk.push(mesh3.id)
@@ -225,8 +250,13 @@ class GEN3{
 
   update(){
     if(camera.position.z+c.vel*5 > this.boarder - 800){
+      let breaker = 0
       while(camera.position.z+c.vel*5 > this.boarder - 800){
-
+        breaker++
+        if(breaker>1000){
+          console.log("break 3")
+          break;
+        }
         let B = 1
       if(this.boarder > this.dx){
         B = this.boarder-this.dx+1
@@ -295,8 +325,13 @@ class GEN4{
 
   update(){
     if(camera.position.z+c.vel*5 > this.boarder - 800){
+      let breaker = 0
       while(camera.position.z+c.vel*5 > this.boarder - 800){
-
+        breaker++
+        if(breaker>1000){
+          console.log("break 4")
+          break;
+        }
         let B = 1
       if(this.boarder > this.dx){
         B = this.boarder-this.dx+1
@@ -375,8 +410,13 @@ class GEN5{
 
   update(){
     if(camera.position.z+c.vel*5 > this.boarder - 800){
+      let breaker = 0
       while(camera.position.z+c.vel*5 > this.boarder - 800){
-
+        breaker++
+        if(breaker>5000){
+          console.log("break 5")
+          break;
+        }
       this.boarder += 10
 
       let tx = Math.floor(camera.position.x/this.dx)*500
@@ -433,7 +473,11 @@ class GEN6{
   update(){
     if(camera.position.z+c.vel*5 > this.boarder - 800){
       while(camera.position.z+c.vel*5 > this.boarder - 800){
-
+        breaker++
+        if(breaker>5000){
+          console.log("break 6")
+          break;
+        }
         let B = 1
       if(this.counter > 0){
         this.boarder += 4
@@ -492,9 +536,13 @@ class GEN7{
     if(camera.position.z+c.vel*5 > this.boarder - 800){
 
       let vel = c.vel>1?c.vel:1
-
+      let breaker = 0;
       while(camera.position.z+c.vel*5 > this.boarder - 800){
-
+      breaker++
+        if(breaker>1000){
+          console.log("break 7")
+          break;
+        }
         let B = 1
       if(this.counter > 0){
         this.boarder += 4*vel
@@ -552,5 +600,84 @@ class GEN7{
 
 }
 
+
+class GEN8{
+//scaled sky
+  constructor(dx){
+    this.boarder = 1000
+    this.gbk = []
+    this.counter = 0
+    this.displacement = 0
+  }
+
+  update(){
+    if(camera.position.z+c.vel*5 > this.boarder - 800){
+
+      let vel = c.vel>1?c.vel:1
+      let breaker = 0;
+      while(camera.position.z+c.vel*5 > this.boarder - 800){
+      breaker++
+        if(breaker>1000){
+          console.log("break 8")
+          break;
+        }
+        let B = 1
+      if(this.counter > 0){
+        this.boarder += 4*vel
+        this.counter -= 1
+
+        if(camera.position.y-gw.GPC(camera.position.z)<50){
+          this.counter = 0
+        }
+
+
+      } else {
+        this.boarder += Math.random()*1700*vel+100*vel
+        this.counter += Math.floor(Math.random()*300+100)
+        this.displacement = Math.random()*150-75
+      }
+      
+
+
+
+      let h = 3+Math.random()*68*vel
+
+      let tx = Math.random()*380*vel-190*vel+camera.position.x+this.displacement
+
+      let w = 3+Math.random()*68*vel
+      let l = 3+Math.random()*68*vel
+      let mesh3 = new THREE.Mesh(
+      new THREE.BoxGeometry(w, h, l),
+      new THREE.MeshStandardMaterial({ color:  Math.floor(Math.random()*65535)}))
+      mesh3.position.x += tx
+      mesh3.position.z += 12 + this.boarder
+      mesh3.position.y = camera.position.y + Math.random()*380*vel-190*vel - 251
+
+      if(c.chaosMode && c.vel > 2){
+        let tv = c.vel/2-1
+        let rx = Math.random()*tv-tv/2
+        let ry = Math.random()*tv-tv/2
+        let rz = Math.random()*tv-tv/2
+        mesh3.rotateX(rx)
+        mesh3.rotateY(ry)
+        mesh3.rotateZ(rz)
+        mesh3.position.y -= tv+h/9
+        gw.colliders[mesh3.id] = [{"x":mesh3.position.x,"y":mesh3.position.y,"z":mesh3.position.z,"rx":rx,"ry":ry,"rz":rz},mesh3.position.z-l,mesh3.position.x+w,mesh3.position.x-w,{"id":mesh3.id,"X":mesh3.position.x+w/2,"x":mesh3.position.x-w/2,"Y":mesh3.position.y+h/2,"y":mesh3.position.y-h/2,"Z":mesh3.position.z+l/2,"z":mesh3.position.z-l/2,}]
+
+      } else {
+      gw.colliders[mesh3.id] = ["none",mesh3.position.z-l,mesh3.position.x+w,mesh3.position.x-w,{"id":mesh3.id,"X":mesh3.position.x+w/2,"x":mesh3.position.x-w/2,"Y":mesh3.position.y+h/2,"y":mesh3.position.y-h/2,"Z":mesh3.position.z+l/2,"z":mesh3.position.z-l/2,}]
+    }
+
+      // mesh3.name = gw.idcr() + ""
+      this.gbk.push(mesh3.id)
+      // if(mesh3.position.x < 1000+camera.position.x && mesh3.position.x > -1000+camera.position.x){
+      scene.add(mesh3)
+
+      // }
+    }
+    }
+  }
+
+}
 
 
