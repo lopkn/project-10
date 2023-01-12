@@ -69,11 +69,14 @@ class gw{
   }
 
   static rmObj(n){
+    if(scene.getObjectById(n).material){
+      scene.getObjectById(n).material.dispose()
+    }
+    if(scene.getObjectById(n).geometry){
+      scene.getObjectById(n).geometry.dispose()
+    }
     scene.remove(scene.getObjectById(n))
     delete this.colliders[n]
-    if(this.colliders[n] !== undefined){
-      console.log("excuse me?")
-    }
   } 
 
 
@@ -238,14 +241,15 @@ class c{
     camera.rotateX(this.spinX)
     camera.rotateZ(this.spinZ)
 
-    this.spinX *= 1/(this.vel*0.12*(this.gliding?0.03:1)+1.002)
-    this.spinZ *= 1/(this.vel*0.12*(this.gliding?0.01:1)+1.002)
+    this.spinX *= 1/(this.vel*0.12*(this.gliding?0.06:1)+1.002)
+    this.spinZ *= 1/(this.vel*0.12*(this.gliding?0.06:1)+1.002)
 
     let lpos = {"x":camera.position.x,"y":camera.position.y,"z":camera.position.z}
     camera.translateZ(-c.vel*2)
     if(camera.position.y < camera.position.z*gw.SLslope){
-      camera.position.y += 0.01
-      this.vel *= 0.95
+      // camera.position.y += 0.01
+      camera.position.y = camera.position.z*gw.SLslope
+      this.vel *= 0.98
     }
 
 
@@ -264,7 +268,7 @@ class c{
     // if(this.vel > 1){
     //   this.vel *= 1/(this.vel*0.001+1)
     // }
-    if(this.vel > 0.3){
+    if(this.vel > 0.3 && !this.gliding){
       this.vel *= 0.3/(this.vel*0.0001+0.3)
     }
 
@@ -277,7 +281,7 @@ class c{
 
     let COLLIDED = collisionChecker.collideAll()
     if(COLLIDED){
-      this.vel *= 0.9
+      this.vel *= c.gliding?0.97:0.9
       this.collided = true
       // console.log("COLLIDED: "+COLLIDED)
     }else{
@@ -289,10 +293,11 @@ class c{
       scene.background.b -= tv*15
       scene.background.g -= tv*10
       scene.background.r -= tv
-    } else if(camera.position.y-gw.GPC(camera.position.z)>60){if(this.vel>0.3){
-      this.vel /= (Math.sqrt(camera.position.y-gw.GPC(camera.position.z)-60)*0.00006+1)
+    } else if(camera.position.y-gw.GPC(camera.position.z)>60){
+      if(this.vel>0.3){
+      this.vel /= (Math.sqrt(camera.position.y-gw.GPC(camera.position.z)-60)*0.00006*(this.gliding?0.2:1)+1)
     } else {
-      this.vel /= (Math.sqrt(camera.position.y-gw.GPC(camera.position.z)-60)*0.00003+1)
+      this.vel /= (Math.sqrt(camera.position.y-gw.GPC(camera.position.z)-60)*0.00003*(this.gliding?0:1)+1)
     }}
 
 
@@ -342,8 +347,8 @@ class c{
     // console.log(this.lpos.y,camera.position.y)
 
     if(this.collided === false){c.boost += (this.gliding?2:1)*1.3/(camera.position.y-gw.GPC(camera.position.z))
-    if(c.boost > 100+this.chaosMode*50){
-      c.boost = 100+this.chaosMode*50
+    if(c.boost > 100+this.chaosMode*50-this.gliding*150){
+      c.boost = 100+this.chaosMode*50-this.gliding*150
     }}
 
 
@@ -616,16 +621,16 @@ document.addEventListener("keydown",(e)=>{
     break;
 
     case "w":
-      keysHeld[k] = ()=>{c.spinX += 0.0005*c.vel*3*c.throttle/(c.gliding?c.vel*8:1);c.vel/=(1+c.throttle*0.0001)}
+      keysHeld[k] = ()=>{c.spinX += 0.0005*c.vel*3*c.throttle/(c.gliding?c.vel*4:1);c.vel/=(c.gliding?(1-c.throttle*0.0001):(1+c.throttle*0.0001))}
       break;
     case "d":
-      keysHeld[k] = ()=>{c.spinZ -= 0.0005*c.vel*3*c.throttle/(c.gliding?c.vel*8:1)}
+      keysHeld[k] = ()=>{c.spinZ -= 0.0005*c.vel*3*c.throttle/(c.gliding?c.vel*4:1)}
       break;
     case "a":
-      keysHeld[k] = ()=>{c.spinZ += 0.0005*c.vel*3*c.throttle/(c.gliding?c.vel*8:1)}
+      keysHeld[k] = ()=>{c.spinZ += 0.0005*c.vel*3*c.throttle/(c.gliding?c.vel*4:1)}
       break;
     case "s":
-      keysHeld[k] = ()=>{c.spinX -= 0.0005*c.vel*3*c.throttle/(c.gliding?c.vel*8:1);c.vel/=(1+c.throttle*0.0001)}
+      keysHeld[k] = ()=>{c.spinX -= 0.0005*c.vel*3*c.throttle/(c.gliding?c.vel*4:1);c.vel/=(c.gliding?(1-c.throttle*0.0001):(1+c.throttle*0.0001))}
       break;
     case "i":
       keysHeld[k] = ()=>{if(c.thirdPerson){c.rotX -= 0.005}else{c.rotX += 0.005}}

@@ -107,7 +107,7 @@ class GEN1{
 
       while(camera.position.z+c.vel*5 > this.boarder - 800){
         breaker++
-        if(breaker>1000){
+        if(breaker>20){
           console.log("break 1")
           break;
         }
@@ -166,7 +166,7 @@ class GEN2{
       let breaker = 0
       while(camera.position.z+c.vel*5 > this.boarder - 800){
         breaker++
-        if(breaker>1000){
+        if(breaker>20){
           console.log("break 2")
           break;
         }
@@ -231,6 +231,7 @@ class GEN2{
         // }
       // }
     }
+
     }
   }
 
@@ -249,7 +250,7 @@ class GEN3{
       let breaker = 0
       while(camera.position.z+c.vel*5 > this.boarder - 800){
         breaker++
-        if(breaker>1000){
+        if(breaker>20){
           console.log("break 3")
           break;
         }
@@ -324,7 +325,7 @@ class GEN4{
       let breaker = 0
       while(camera.position.z+c.vel*5 > this.boarder - 800){
         breaker++
-        if(breaker>1000){
+        if(breaker>20){
           console.log("break 4")
           break;
         }
@@ -409,7 +410,7 @@ class GEN5{
       let breaker = 0
       while(camera.position.z+c.vel*5 > this.boarder - 800){
         breaker++
-        if(breaker>5000){
+        if(breaker>20){
           console.log("break 5")
           break;
         }
@@ -470,7 +471,7 @@ class GEN6{
     if(camera.position.z+c.vel*5 > this.boarder - 800){
       while(camera.position.z+c.vel*5 > this.boarder - 800){
         breaker++
-        if(breaker>5000){
+        if(breaker>20){
           console.log("break 6")
           break;
         }
@@ -535,7 +536,7 @@ class GEN7{
       let breaker = 0;
       while(camera.position.z+c.vel*5 > this.boarder - 800){
       breaker++
-        if(breaker>1000){
+        if(breaker>20){
           console.log("break 7")
           break;
         }
@@ -613,7 +614,7 @@ class GEN8{
       let breaker = 0;
       while(camera.position.z+c.vel*5 > this.boarder - 800){
       breaker++
-        if(breaker>1000){
+        if(breaker>20){
           console.log("break 8")
           break;
         }
