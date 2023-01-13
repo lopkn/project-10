@@ -32,6 +32,13 @@ function rotate(roll, pitch, yaw, point) {
 }
 
 
+function dist3(x,y,z,a,b,c){
+  let i = a-x
+  let o = b-y
+  let p = c-z
+  return(Math.sqrt(i*i+o*o+p*p))
+}
+
 class collisionChecker{
 
   //["none",Z,X,x,{X,x,Y,y,Z,z}]
@@ -86,6 +93,94 @@ class collisionChecker{
     return(ans)
   }
 
+}
+
+class missile{
+  constructor(x,y,z){
+    this.body = new THREE.Mesh(
+      new THREE.BoxGeometry(1,1,3),
+      new THREE.MeshStandardMaterial({ color:  0xff0000}))
+    this.body.position.x = x
+    this.body.position.y = y
+    this.body.position.z = z
+    this.body.name = "missile"
+
+    this.cX = (Math.random()*25-1.25)*c.vel
+    this.cY = (Math.random()*25-1.25)*c.vel
+    this.cZ = (Math.random()*25-1.25)*c.vel
+
+    this.cP = 30+Math.random()*45
+
+
+    scene.add(this.body)
+
+    this.myVel = {"vx":0,"vy":0,"vz":0}
+
+    gw.missiles[this.body.id] = this
+
+    this.counter = 0
+
+  }
+
+  lookA(){
+    this.body.lookAt(this.body.position.x+this.myVel.vx,this.body.position.y+this.myVel.vy,this.body.position.z+this.myVel.vz)
+  }
+
+  updateVel(){
+
+    let d = dist3(camera.position.x,camera.position.y,camera.position.z,this.body.position.x,this.body.position.y,this.body.position.z)
+
+    // let vm = c.vel>1?c.vel:1
+    let vm = 1
+
+    if(d < 15){
+      this.explode()
+    }
+
+    if(this.body.position.z > camera.position.z+c.frameVel.z*this.cP-10){
+
+    this.myVel.vx += (camera.position.x+this.cX+c.frameVel.x*this.cP - this.body.position.x)*0.08/d
+    this.myVel.vy += (camera.position.y+this.cZ+c.frameVel.y*this.cP - this.body.position.y)*0.08/d-0.002
+    // if(this.myVel.vz < c.vel*3 || (c.vel < 0.5&&this.myVel.vz < 1.5)){
+    this.myVel.vz += (camera.position.z+this.cZ+c.frameVel.z*this.cP - this.body.position.z)*0.08/d
+    // }
+    this.myVel.vx *= 0.90
+    this.myVel.vy *= 0.90
+    this.myVel.vz *= 0.90
+  }
+
+
+    
+
+
+    this.body.position.x+=this.myVel.vx
+    this.body.position.y+=this.myVel.vy
+    this.body.position.z+=this.myVel.vz
+
+    // if(this.body.position.z > camera.position.z + 400){
+    //   this.del()
+    // }
+  }
+
+  update(){
+    this.counter ++
+    if(this.counter%5 === 0 && this.body.position.z > camera.position.z-4){
+      this.lookA()
+    }
+      this.updateVel()
+  }
+
+  explode(){
+    // c.my3Vel.y += 0.5
+    c.vel *= 0.9
+    this.del()
+  }
+
+  del(){
+    let id = this.body.id
+    gw.rmObj(id)
+    delete gw.missiles[id]
+  }
 }
 
 class GEN1{

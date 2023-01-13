@@ -40,6 +40,8 @@ class gw{
 
   static idC = 0
 
+  static missiles = {}
+
   static gbk = []
 
   static colliders = {}
@@ -173,11 +175,22 @@ class gw{
     let clarr = []
     let cldct = {}
     scene.children.forEach((e)=>{
-      if(e.position.z +z < camera.position.z){
+      if(e.position.z +z < camera.position.z && e.name !== "missile"){
         clarr.push(e.id)
         cldct[e.id] = true
       }
     })
+
+    
+
+    // for(let i = gw.missiles.length-1; i > -1; i--){
+    //   let e = gw.missiles[i]
+    //   if(e.body.position.z > camera.position.z + 400){
+    //     gw.missiles.splice(i,1)
+    //     clarr.push(e.body.id)
+    //   }
+    // }
+
 
     clarr.forEach((e)=>{
       this.rmObj(e)
@@ -186,12 +199,18 @@ class gw{
   }
 
 
+
+
 }
 
 class c{
   static vel = 0.004
 
+  static my3Vel = {"vx":0,"vy":0,"vz":0}
+
   static thirdPerson = true
+
+  static frameVel = {"x":0,"y":0,"z":0}
 
   static chaosMode = false
   static gliding = false
@@ -215,7 +234,18 @@ class c{
   // static lpos = {"x":-5,"y":15,"z":7}
   static clenseCounter = 0
 
+  static my3VelUpdate(){
+    camera.position.x += vx
+    camera.position.y += vy
+    camera.position.z += vz
+  }
+
    static update(){
+
+    let missilesObj = Object.values(gw.missiles)
+    missilesObj.forEach((e)=>{
+      e.update()
+    })
 
     this.clenseCounter++
     if(this.clenseCounter > 500){
@@ -246,6 +276,10 @@ class c{
 
     let lpos = {"x":camera.position.x,"y":camera.position.y,"z":camera.position.z}
     camera.translateZ(-c.vel*2)
+
+    this.frameVel = {"x":camera.position.x-lpos.x,"y":camera.position.y-lpos.y,"z":camera.position.z-lpos.z}
+
+
     if(camera.position.y < camera.position.z*gw.SLslope){
       // camera.position.y += 0.01
       camera.position.y = camera.position.z*gw.SLslope
@@ -698,6 +732,9 @@ document.addEventListener("keydown",(e)=>{
     case "o":
       keysHeld[k] = ()=>{c.thirdPersonBack += 0.001}
       break;
+    case "O":
+      keysHeld[k] = ()=>{c.thirdPersonBack += 0.004}
+      break;
     case "u":
       keysHeld[k] = ()=>{c.thirdPersonBack -= 0.001}
       break;
@@ -781,6 +818,11 @@ let animate = () => {
   throttleCounter++
   if(throttleCounter%2 === 0 || c.paused){
     return;
+  }
+
+  if(Math.random()>0.99){
+    new missile(camera.position.x+Math.random()*150-75,camera.position.y+Math.random()*50-175,camera.position.z+400)
+    console.log("missile")
   }
 
   // controls.update();
