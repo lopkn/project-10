@@ -157,7 +157,7 @@ class gw{
   }
 
   static pdate3s = [new GEN1(),new GEN2(),new GEN2(10000),new GEN2(60000),new GEN2(40000),new GEN2(80000),new GEN2(120000),new GEN3(40000), new GEN4(), new GEN5(), new GEN7(), new GEN8()]
-  // static pdate3s = []
+  // static pdate3s = [new GEN1()]
 
   static pdate3(){
     this.pdate3s.forEach((e)=>{e.update()})
@@ -820,10 +820,10 @@ let animate = () => {
     return;
   }
 
-  if(Math.random()>0.99){
-    new missile(camera.position.x+Math.random()*150-75,camera.position.y+Math.random()*50-175,camera.position.z+400)
-    console.log("missile")
-  }
+  // if(Math.random()>0.99){
+  //   new missile(camera.position.x+Math.random()*150-75,camera.position.y+Math.random()*50-175,camera.position.z+400)
+  //   console.log("missile")
+  // }
 
   // controls.update();
 
@@ -917,7 +917,7 @@ init();
 const loader = new THREE.GLTFLoader();
 
 
-  loader.load( './source/test.gltf', function ( gltf ) {
+  loader.load( './source/test2.gltf', function ( gltf ) {
 
     gltf.scene.position.y += 10
     gltf.scene.rotateX(1)

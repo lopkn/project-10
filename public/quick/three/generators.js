@@ -95,6 +95,8 @@ class collisionChecker{
 
 }
 
+
+
 class missile{
   constructor(x,y,z){
     this.body = new THREE.Mesh(
