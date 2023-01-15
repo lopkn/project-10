@@ -386,8 +386,16 @@ class c{
       wing2.rotateY(0.2)
     }
 
-    document.getElementById("info").innerHTML = "velocity: " + Math.floor(this.vel*1000) + "</br>preformance: "+ dateLogger[2]+"</br>boost: "+ Math.floor(c.boost)+"</br>height: "+Math.floor(planeHeight*100)+"</br>distance: "+Math.floor(camera.position.z)+"<br>system msg: "+gw.message
-    let cc = (255-this.vel*155)<0?0:(255-this.vel*155)
+    document.getElementById("info").innerHTML = 
+    "velocity: " + Math.floor(this.vel*1000) +
+    "</br>frame cap: "+ (MASTERTHROTTLE?30:60) +
+    "</br>preformance: "+ dateLogger[2]+
+    "</br>boost: "+ Math.floor(c.boost)+
+    "</br>height: "+Math.floor(planeHeight*100)+
+    "</br>distance: "+Math.floor(camera.position.z)+
+    "</br>system msg: "+gw.message
+
+        let cc = (255-this.vel*155)<0?0:(255-this.vel*155)
     document.getElementById("info").style.color = "rgb(255,"+cc+","+cc+")"
     // console.log(this.lpos.y,camera.position.y)
 
@@ -541,7 +549,15 @@ class c{
       wing2.rotateY(0.2)
     }
 
-    document.getElementById("info").innerHTML = "velocity: " + Math.floor(this.vel*1000) + "</br>preformance: "+ dateLogger[2]+"</br>boost: "+ Math.floor(c.boost)+"</br>height: "+Math.floor(planeHeight*100)+"</br>distance: "+Math.floor(camera.position.z)+"<br>system msg: "+gw.message
+    document.getElementById("info").innerHTML = 
+    "velocity: " + Math.floor(this.vel*1000) +
+    "</br>frame cap: "+ (MASTERTHROTTLE?30:60) +
+    "</br>preformance: "+ dateLogger[2]+
+    "</br>boost: "+ Math.floor(c.boost)+
+    "</br>height: "+Math.floor(planeHeight*100)+
+    "</br>distance: "+Math.floor(camera.position.z)+
+    "</br>system msg: "+gw.message
+
     let cc = (255-this.vel*155)<0?0:(255-this.vel*155)
     document.getElementById("info").style.color = "rgb(255,"+cc+","+cc+")"
     // console.log(this.lpos.y,camera.position.y)
