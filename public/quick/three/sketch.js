@@ -1,4 +1,5 @@
 let camera, scene, renderer, controls, mesh, light, plane, person, wing1, wing2;
+let MASTERTHROTTLE = true
 
 let myCanvas = document.getElementById("myCanvas")
 
@@ -771,6 +772,9 @@ document.addEventListener("keydown",(e)=>{
   }
     break;
 
+  case "t":
+    MASTERTHROTTLE = !MASTERTHROTTLE
+  break;
   case "c":
     if(c.chaosMode){
       wing1.material.color.g += 1
@@ -992,7 +996,7 @@ let animate = () => {
   }
 
   throttleCounter++
-  if(throttleCounter%2 !== 0 || c.paused){
+  if((throttleCounter%2 !== 0 && MASTERTHROTTLE)|| c.paused){
     return;
   }
 
@@ -1022,9 +1026,13 @@ let animate = () => {
   camera.rotateY(-c.rotZ)
   camera.rotateX(-c.rotX)
 
-  c.Nupdate()
+  if(MASTERTHROTTLE){
+  c.Nupdate()} else {
+    c.update()
+  }
 
 }
+
 function touchHandler(event)
 {
 

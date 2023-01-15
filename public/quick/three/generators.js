@@ -86,7 +86,7 @@ class collisionChecker{
 
 
          // let r = this.fastColcheck(e[1],e[2],e[3],e[4],{"x":e[0].x+pt.x,"y":e[0].y+pt.y,"z":e[0].z+pt.z})
-        let r = this.colCheck(e[4],camera.position)
+        let r = this.colCheck(e[4],{"x":e[0].x+pt.x,"y":e[0].y+pt.y,"z":e[0].z+pt.z})
          if(r){
           ans = r
          }
@@ -238,6 +238,7 @@ class GEN1{
         mesh3.rotateY(ry)
         mesh3.rotateZ(rz)
         mesh3.position.y -= tv+h/9
+        mesh3.name = "GEN1"
 
         let d = dist3(h,w,l,0,0,0)/2
 
@@ -316,11 +317,13 @@ class GEN2{
         mesh3.rotateX(rx)
         mesh3.rotateY(ry)
         mesh3.rotateZ(rz)
+        mesh3.name = "GEN2"
+
         mesh3.position.y -= tv+h/9
         
         let d = dist3(h,w,l,0,0,0)/2
 
-        gw.colliders[mesh3.id] = [{"x":mesh3.position.x,"y":mesh3.position.y,"z":mesh3.position.z,"rx":rx,"ry":ry,"rz":rz},mesh3.position.z-d,mesh3.position.x+d,mesh3.position.x-d,{"id":mesh3.id,"X":mesh3.position.x+w/2,"x":mesh3.position.x-w/2,"Y":mesh3.position.y+h/2,"y":mesh3.position.y-h/2,"Z":mesh3.position.z+l/2,"z":mesh3.position.z-l/2,}]
+        gw.colliders[mesh3.id] = [{"x":mesh3.position.x,"y":mesh3.position.y,"z":mesh3.position.z,"rx":rx,"ry":ry,"rz":rz},mesh3.position.z-d,mesh3.position.x+d,mesh3.position.x-d,{"id":mesh3.id,"X":mesh3.position.x+w/2,"x":mesh3.position.x-w/2,"Y":mesh3.position.y+h/2,"y":mesh3.position.y-h/2,"Z":mesh3.position.z+l/2,"z":mesh3.position.z-l/2}]
 
       } else {
       gw.colliders[mesh3.id] = ["none",mesh3.position.z-l-h,mesh3.position.x+w,mesh3.position.x-w,{"id":mesh3.id,"X":mesh3.position.x+w/2,"x":mesh3.position.x-w/2,"Y":mesh3.position.y+h/2,"y":mesh3.position.y-h/2,"Z":mesh3.position.z+l/2,"z":mesh3.position.z-l/2,}]
@@ -393,6 +396,7 @@ class GEN3{
       mesh3.position.x += tx
       mesh3.position.z += 12 + this.boarder
       mesh3.position.y += gw.GPC(mesh3.position.z)+h/2.2
+        mesh3.name = "GEN3"
 
       if(c.vel > 2){
         let tv = c.vel-2
@@ -470,6 +474,8 @@ class GEN4{
       mesh3.position.x += tx
       mesh3.position.z += 12 + this.boarder
       mesh3.position.y += gw.GPC(mesh3.position.z)+h/2.2
+        mesh3.name = "GEN4"
+
 
       if(c.chaosMode && c.vel > 2){
         let tv = c.vel-2
@@ -535,6 +541,8 @@ class GEN5{
       mesh3.position.z += this.boarder
       mesh3.position.y += gw.GPC(mesh3.position.z)+0.5
       mesh3.rotateX(0.37)
+        mesh3.name = "GEN5"
+
 
       if(c.vel > 2){
         let tv = c.vel-2
@@ -553,6 +561,8 @@ class GEN5{
       mesh4.position.z += this.boarder
       mesh4.position.y += gw.GPC(mesh4.position.z)+0.5
       mesh4.rotateX(0.37)
+        mesh4.name = "GEN5.2"
+
 
       if(c.vel > 2){
         let tv = c.vel-2
@@ -615,6 +625,7 @@ class GEN6{
       mesh3.position.x += tx
       mesh3.position.z += 12 + this.boarder
       mesh3.position.y += gw.GPC(mesh3.position.z)+h/1.9
+        mesh3.name = "GEN6"
 
       // mesh3.name = gw.idcr() + ""
       this.gbk.push(mesh3.id)
@@ -688,6 +699,7 @@ class GEN7{
         mesh3.rotateX(rx)
         mesh3.rotateY(ry)
         mesh3.rotateZ(rz)
+        mesh3.name = "GEN7"
         mesh3.position.y -= tv+h/9
         // gw.colliders[mesh3.id] = [{"x":mesh3.position.x,"y":mesh3.position.y,"z":mesh3.position.z,"rx":rx,"ry":ry,"rz":rz},mesh3.position.z-l,mesh3.position.x+w,mesh3.position.x-w,{"id":mesh3.id,"X":mesh3.position.x+w/2,"x":mesh3.position.x-w/2,"Y":mesh3.position.y+h/2,"y":mesh3.position.y-h/2,"Z":mesh3.position.z+l/2,"z":mesh3.position.z-l/2,}]
 
@@ -773,6 +785,8 @@ class GEN8{
         mesh3.rotateY(ry)
         mesh3.rotateZ(rz)
         mesh3.position.y -= tv+h/9
+        mesh3.name = "GEN8"
+
         // gw.colliders[mesh3.id] = [{"x":mesh3.position.x,"y":mesh3.position.y,"z":mesh3.position.z,"rx":rx,"ry":ry,"rz":rz},mesh3.position.z-l,mesh3.position.x+w,mesh3.position.x-w,{"id":mesh3.id,"X":mesh3.position.x+w/2,"x":mesh3.position.x-w/2,"Y":mesh3.position.y+h/2,"y":mesh3.position.y-h/2,"Z":mesh3.position.z+l/2,"z":mesh3.position.z-l/2,}]
         let d = dist3(h,w,l,0,0,0)/2
 
