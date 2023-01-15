@@ -11,6 +11,9 @@ myCanvas.height = Height
 myCanvas.style.position = "absolute"
 
 
+let music1 = new Audio()
+music1.src = "../../tl-music/N4Weave.mp3"
+
 const socket = io.connect('/')
 
 let GAMESESSION = "G10.5"
@@ -630,10 +633,16 @@ document.addEventListener("keydown",(e)=>{
 
   case "r":
     alert("setting pixelRatio at higher than 2 may cause extreme lag.")
-    let tr = prompt("your current window ratio is currently "+window.devicePixelRatio)
-    gw.ratio = tr
+    let tr2 = prompt("your current window ratio is currently "+window.devicePixelRatio)
+    gw.ratio = tr2
     renderer.setPixelRatio( gw.ratio );
   renderer.setSize(window.innerWidth, window.innerHeight);
+    break;
+  case "f":
+    alert("default fov is 120")
+    let tr = prompt("your current camera fov is "+camera.fov)
+    camera.fov = Math.floor(tr)
+    camera.updateProjectionMatrix();
     break;
 
   case " ":
@@ -763,6 +772,7 @@ const init = () => {
 
 
 
+
   camera = new THREE.PerspectiveCamera(120, window.innerWidth / window.innerHeight, 0.1, 1000.0);
   camera.position.set(0, 21, -5);
 
@@ -818,6 +828,10 @@ let animate = () => {
   throttleCounter++
   if(throttleCounter%2 === 0 || c.paused){
     return;
+  }
+
+  if(music1.paused){
+    try{music1.play()}catch{}
   }
 
   // if(Math.random()>0.99){
