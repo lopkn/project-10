@@ -242,7 +242,163 @@ class c{
     camera.position.y += vy
     camera.position.z += vz
   }
+  static Nupdate(){
 
+    let missilesObj = Object.values(gw.missiles)
+    missilesObj.forEach((e)=>{
+      e.update()
+    })
+
+    this.clenseCounter++
+    if(this.clenseCounter > 500){
+      gw.CLENSE(200)
+      this.clenseCounter=0
+    }
+
+    gw.pdate3()
+
+    if(this.spinX > 0.03){
+      this.spinX = 0.03
+    } else if(this.spinX < -0.03){
+      this.spinX = -0.03
+    }
+    if(this.spinZ > 3){
+      this.spinZ = 3
+    } else if(this.spinZ < -3){
+      this.spinZ = -3
+    }
+
+    camera.rotateX(this.spinX*2)
+    camera.rotateZ(this.spinZ*2)
+
+    let trs = 1/(this.vel*0.12*(this.gliding?0.06:1)+1.002)
+
+    this.spinX *= trs*trs
+    this.spinZ *= trs*trs
+
+    let lpos = {"x":camera.position.x,"y":camera.position.y,"z":camera.position.z}
+    camera.translateZ(-c.vel*4)
+
+    this.frameVel = {"x":camera.position.x-lpos.x,"y":camera.position.y-lpos.y,"z":camera.position.z-lpos.z}
+
+
+    if(camera.position.y < camera.position.z*gw.SLslope){
+      camera.position.y = camera.position.z*gw.SLslope
+      this.vel *= 0.96
+    }
+
+
+    plane.position.z = camera.position.z
+    plane.position.x = camera.position.x
+    plane.position.y = gw.GPC(camera.position.z)
+
+    let tdy = lpos.y-camera.position.y
+
+    if(tdy > 0){
+    this.vel += Math.sqrt(tdy)/1500
+    } else{
+      this.vel -= Math.sqrt(-tdy)/1450
+      //725
+      if(this.vel < 0){
+      this.vel = 0.0000001
+      }
+      //originally outside
+    }
+
+    
+    // if(this.vel > 1){
+    //   this.vel *= 1/(this.vel*0.001+1)
+    // }
+    if(this.vel > 0.3 && !this.gliding){
+      this.vel *= 0.3/(this.vel*0.0001+0.3)
+    }
+
+
+    scene.background.b = this.vel
+    scene.background.r = this.vel*0.5
+    scene.background.g = this.vel*0.5
+
+    scene.fog.color = scene.background
+
+    let COLLIDED = collisionChecker.collideAll()
+    if(COLLIDED){
+      this.vel *= c.gliding?0.97:0.9
+      this.collided = true
+      // console.log("COLLIDED: "+COLLIDED)
+    }else{
+      this.collided = false
+    }
+
+    let planeHeight = camera.position.y-gw.GPC(camera.position.z)
+
+
+    if(this.vel > 2){
+      let tv = this.vel -2
+      scene.background.b -= tv*15
+      scene.background.g -= tv*10
+      scene.background.r -= tv
+    } else if(planeHeight > 60){
+      if(this.vel>0.3){
+      this.vel /= (Math.sqrt(planeHeight-60)*0.00006*(this.gliding?0.2:1)+1)
+    } else {
+      this.vel /= (Math.sqrt(planeHeight-60)*0.00003*(this.gliding?0:1)+1)
+    }}
+
+
+    light.position.x = camera.position.x
+    light.position.y = camera.position.y+0.4
+    light.position.z = camera.position.z-0.2
+
+    light.intensity = Math.sqrt(this.vel)*4*this.lightIntensity
+    if(light.intensity > 5*this.lightIntensity){
+      light.intensity = 5*this.lightIntensity
+    }
+    if(this.thirdPerson){
+      person.position.x = camera.position.x
+      person.position.y = camera.position.y
+      person.position.z = camera.position.z
+
+      person.rotation.x = camera.rotation.x
+      person.rotation.y = camera.rotation.y
+      person.rotation.z = camera.rotation.z
+
+      wing1.position.x = camera.position.x
+      wing1.position.y = camera.position.y
+      wing1.position.z = camera.position.z
+
+      wing1.rotation.x = camera.rotation.x
+      wing1.rotation.y = camera.rotation.y
+      wing1.rotation.z = camera.rotation.z
+
+      wing1.translateX(0.18)
+      wing1.rotateY(-0.2)
+
+      wing2.position.x = camera.position.x
+      wing2.position.y = camera.position.y
+      wing2.position.z = camera.position.z
+
+      wing2.rotation.x = camera.rotation.x
+      wing2.rotation.y = camera.rotation.y
+      wing2.rotation.z = camera.rotation.z
+
+      wing2.translateX(-0.18)
+      wing2.rotateY(0.2)
+    }
+
+    document.getElementById("info").innerHTML = "velocity: " + Math.floor(this.vel*1000) + "</br>preformance: "+ dateLogger[2]+"</br>boost: "+ Math.floor(c.boost)+"</br>height: "+Math.floor(planeHeight*100)+"</br>distance: "+Math.floor(camera.position.z)+"<br>system msg: "+gw.message
+    let cc = (255-this.vel*155)<0?0:(255-this.vel*155)
+    document.getElementById("info").style.color = "rgb(255,"+cc+","+cc+")"
+    // console.log(this.lpos.y,camera.position.y)
+
+    if(this.collided === false){
+      c.boost += (this.gliding?2:1)*2.6/planeHeight
+      if(c.boost > 100+this.chaosMode*50-this.gliding*150){
+        c.boost = 100+this.chaosMode*50-this.gliding*150
+      }
+    }
+
+
+  }
    static update(){
 
     let missilesObj = Object.values(gw.missiles)
@@ -816,8 +972,10 @@ let dateLogger = [0,0,0]
 let throttleCounter = 0
 
 
+
+
 let animate = () => {
-  requestAnimationFrame(animate);
+  // requestAnimationFrame(animate);
 
   let r = LDATE
   LDATE = Date.now()
@@ -828,13 +986,13 @@ let animate = () => {
 
   dateLogger[0] += 1
   dateLogger[1] += (LDATE-r)
-  if(dateLogger[0] > 100){
+  if(dateLogger[0] > 60){
     // dateLogger[2] = dateLogger[1]-1
     dateLogger = [0,0,dateLogger[1]]
   }
 
   throttleCounter++
-  if(throttleCounter%2 === 0 || c.paused){
+  if(throttleCounter%2 !== 0 || c.paused){
     return;
   }
 
@@ -864,7 +1022,7 @@ let animate = () => {
   camera.rotateY(-c.rotZ)
   camera.rotateX(-c.rotX)
 
-  c.update()
+  c.Nupdate()
 
 }
 function touchHandler(event)
@@ -973,4 +1131,8 @@ const loader = new THREE.GLTFLoader();
 // scene.add(meshTest)
 
 
-animate();
+// animate();
+
+setInterval(()=>{
+  animate()
+},1000/60)
