@@ -260,14 +260,12 @@ class c{
 
     if(this.spinX > 0.03){
       this.spinX = 0.03
+    } else if(this.spinX < -0.03){
+      this.spinX = -0.03
     }
     if(this.spinZ > 3){
       this.spinZ = 3
-    }
-    if(this.spinX < -0.03){
-      this.spinX = -0.03
-    }
-    if(this.spinZ < -3){
+    } else if(this.spinZ < -3){
       this.spinZ = -3
     }
 
@@ -284,7 +282,6 @@ class c{
 
 
     if(camera.position.y < camera.position.z*gw.SLslope){
-      // camera.position.y += 0.01
       camera.position.y = camera.position.z*gw.SLslope
       this.vel *= 0.98
     }
@@ -294,14 +291,20 @@ class c{
     plane.position.x = camera.position.x
     plane.position.y = gw.GPC(camera.position.z)
 
-    this.vel += Math.sqrt(Math.abs((lpos.y-camera.position.y)))/1500
-    if(lpos.y-camera.position.y < 0){
-      this.vel -= Math.sqrt(Math.abs((lpos.y-camera.position.y)))/725
+    let tdy = lpos.y-camera.position.y
+
+    if(tdy > 0){
+    this.vel += Math.sqrt(tdy)/1500
+    } else{
+      this.vel -= Math.sqrt(-tdy)/1450
+      //725
+      if(this.vel < 0){
+      this.vel = 0.0000001
+      }
+      //originally outside
     }
 
-    if(this.vel < 0){
-      this.vel = 0.0000001
-    }
+    
     // if(this.vel > 1){
     //   this.vel *= 1/(this.vel*0.001+1)
     // }
@@ -325,16 +328,19 @@ class c{
       this.collided = false
     }
 
+    let planeHeight = camera.position.y-gw.GPC(camera.position.z)
+
+
     if(this.vel > 2){
       let tv = this.vel -2
       scene.background.b -= tv*15
       scene.background.g -= tv*10
       scene.background.r -= tv
-    } else if(camera.position.y-gw.GPC(camera.position.z)>60){
+    } else if(planeHeight > 60){
       if(this.vel>0.3){
-      this.vel /= (Math.sqrt(camera.position.y-gw.GPC(camera.position.z)-60)*0.00006*(this.gliding?0.2:1)+1)
+      this.vel /= (Math.sqrt(planeHeight-60)*0.00006*(this.gliding?0.2:1)+1)
     } else {
-      this.vel /= (Math.sqrt(camera.position.y-gw.GPC(camera.position.z)-60)*0.00003*(this.gliding?0:1)+1)
+      this.vel /= (Math.sqrt(planeHeight-60)*0.00003*(this.gliding?0:1)+1)
     }}
 
 
@@ -378,15 +384,17 @@ class c{
       wing2.rotateY(0.2)
     }
 
-    document.getElementById("info").innerHTML = "velocity: " + Math.floor(this.vel*1000) + "</br>preformance: "+ dateLogger[2]+"</br>boost: "+ Math.floor(c.boost)+"</br>height: "+Math.floor((camera.position.y-gw.GPC(camera.position.z))*100)+"</br>distance: "+Math.floor(camera.position.z)+"<br>system msg: "+gw.message
+    document.getElementById("info").innerHTML = "velocity: " + Math.floor(this.vel*1000) + "</br>preformance: "+ dateLogger[2]+"</br>boost: "+ Math.floor(c.boost)+"</br>height: "+Math.floor(planeHeight*100)+"</br>distance: "+Math.floor(camera.position.z)+"<br>system msg: "+gw.message
     let cc = (255-this.vel*155)<0?0:(255-this.vel*155)
     document.getElementById("info").style.color = "rgb(255,"+cc+","+cc+")"
     // console.log(this.lpos.y,camera.position.y)
 
-    if(this.collided === false){c.boost += (this.gliding?2:1)*1.3/(camera.position.y-gw.GPC(camera.position.z))
-    if(c.boost > 100+this.chaosMode*50-this.gliding*150){
-      c.boost = 100+this.chaosMode*50-this.gliding*150
-    }}
+    if(this.collided === false){
+      c.boost += (this.gliding?2:1)*1.3/planeHeight
+      if(c.boost > 100+this.chaosMode*50-this.gliding*150){
+        c.boost = 100+this.chaosMode*50-this.gliding*150
+      }
+    }
 
 
   }
@@ -830,9 +838,9 @@ let animate = () => {
     return;
   }
 
-  if(music1.paused){
-    try{music1.play()}catch{}
-  }
+  // if(music1.paused){
+  //   try{music1.play()}catch{}
+  // }
 
   // if(Math.random()>0.99){
   //   new missile(camera.position.x+Math.random()*150-75,camera.position.y+Math.random()*50-175,camera.position.z+400)
@@ -846,16 +854,14 @@ let animate = () => {
 
   if(c.thirdPerson){
     camera.translateZ(c.thirdPersonBack)
-  }
-
-  renderer.render(scene, camera); 
-  
-  if(c.thirdPerson){
+    renderer.render(scene, camera); 
     camera.translateZ(-c.thirdPersonBack)
+
+  } else {
+  renderer.render(scene, camera); 
   }
 
   camera.rotateY(-c.rotZ)
-
   camera.rotateX(-c.rotX)
 
   c.update()
@@ -943,6 +949,9 @@ const loader = new THREE.GLTFLoader();
   console.error( error );
 
 } );
+
+// --=- -c=c- --=- -c=c-
+// DD D D F C DG A D'C'D AA A
 
 
 // let meshTest = new THREE.Mesh(
