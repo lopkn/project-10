@@ -1,6 +1,9 @@
 let camera, scene, renderer, controls, mesh, light, plane, person, wing1, wing2;
 let MASTERTHROTTLE = true
 
+let pastCookie = {"antialias":true}
+try{pastCookie = JSON.parse(document.cookie)}catch{console.log("no cookies stored")}
+
 let myCanvas = document.getElementById("myCanvas")
 
 let Height = window.innerWidth >window.innerHeight?window.innerHeight:window.innerWidth
@@ -40,7 +43,7 @@ class gw{
   static SLang = Math.PI/2-this.SLconst
   static SLslope = -Math.tan(this.SLang)
   static message = "none"
-  static ratio = window.devicePixelRatio
+  static ratio = pastCookie.resolution===undefined?window.devicePixelRatio:pastCookie.resolution
 
   static idC = 0
 
@@ -323,7 +326,7 @@ class c{
 
     let COLLIDED = collisionChecker.collideAll()
     if(COLLIDED){
-      this.vel *= c.gliding?0.97:0.9
+      this.vel *= c.gliding?0.94:0.805
       this.collided = true
       // console.log("COLLIDED: "+COLLIDED)
     }else{
@@ -788,9 +791,14 @@ document.addEventListener("keydown",(e)=>{
   }
     break;
 
-  case "t":
+  case "y":
     MASTERTHROTTLE = !MASTERTHROTTLE
+    // FPSI = FPSI>18?100/6:100/3
   break;
+  case "Y":
+    pastCookie.antialias = !pastCookie.antialias
+    document.cookie = JSON.stringify(pastCookie)
+    break;
   case "c":
     if(c.chaosMode){
       wing1.material.color.g += 1
@@ -818,9 +826,15 @@ document.addEventListener("keydown",(e)=>{
   case "r":
     alert("setting pixelRatio at higher than 2 may cause extreme lag.")
     let tr2 = prompt("your current window ratio is currently "+window.devicePixelRatio)
+    if(!isNaN(parseFloat(tr2))){
     gw.ratio = tr2
     renderer.setPixelRatio( gw.ratio );
-  renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    if(tr2 < 2.8){
+      pastCookie.resolution = tr2
+      document.cookie = JSON.stringify(pastCookie)
+    }
+    }
     break;
   case "f":
     alert("default fov is 120")
@@ -848,16 +862,16 @@ document.addEventListener("keydown",(e)=>{
     break;
 
     case "w":
-      keysHeld[k] = ()=>{c.spinX += 0.0005*c.vel*3*c.throttle/(c.gliding?c.vel*4:1);c.vel/=(c.gliding?(1-c.throttle*0.0001):(1+c.throttle*0.0001))}
+      keysHeld[k] = ()=>{c.spinX += 0.0005*c.vel*3*c.throttle/(c.gliding?c.vel*4/(c.vel>1?1:c.vel*0.8+0.2):1);c.vel/=(c.gliding?(1-c.throttle*0.0001):(1+c.throttle*0.0001))}
       break;
     case "d":
-      keysHeld[k] = ()=>{c.spinZ -= 0.0005*c.vel*3*c.throttle/(c.gliding?c.vel*4:1)}
+      keysHeld[k] = ()=>{c.spinZ -= 0.0005*c.vel*3*c.throttle/(c.gliding?c.vel*4/(c.vel>1?1:c.vel*0.8+0.2):1)}
       break;
     case "a":
-      keysHeld[k] = ()=>{c.spinZ += 0.0005*c.vel*3*c.throttle/(c.gliding?c.vel*4:1)}
+      keysHeld[k] = ()=>{c.spinZ += 0.0005*c.vel*3*c.throttle/(c.gliding?c.vel*4/(c.vel>1?1:c.vel*0.8+0.2):1)}
       break;
     case "s":
-      keysHeld[k] = ()=>{c.spinX -= 0.0005*c.vel*3*c.throttle/(c.gliding?c.vel*4:1);c.vel/=(c.gliding?(1-c.throttle*0.0001):(1+c.throttle*0.0001))}
+      keysHeld[k] = ()=>{c.spinX -= 0.0005*c.vel*3*c.throttle/(c.gliding?c.vel*4/(c.vel>1?1:c.vel*0.8+0.2):1);c.vel/=(c.gliding?(1-c.throttle*0.0001):(1+c.throttle*0.0001))}
       break;
     case "i":
       keysHeld[k] = ()=>{if(c.thirdPerson){c.rotX -= 0.005}else{c.rotX += 0.005}}
@@ -969,7 +983,7 @@ const init = () => {
 
   scene.add(light);
 
-  renderer = new THREE.WebGLRenderer({ antialias: true , canvas: myCanvas});
+  renderer = new THREE.WebGLRenderer({ antialias: pastCookie.antialias , canvas: myCanvas});
   // renderer.setPixelRatio( 0.1 );
   renderer.setPixelRatio( gw.ratio );
   renderer.setSize(window.innerWidth, window.innerHeight);
@@ -1160,3 +1174,21 @@ const loader = new THREE.GLTFLoader();
 setInterval(()=>{
   animate()
 },1000/60)
+
+
+// let then = Date.now()
+// let FPSI = 100/3
+
+// function animate2() {
+//     requestAnimationFrame(animate2);
+//     let now = Date.now();
+//     let elapsed = now - then;
+//     if (elapsed > FPSI) {
+
+//         then = now - (elapsed % FPSI);
+
+//         animate()
+
+//     }
+// }
+// animate2()
