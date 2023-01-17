@@ -211,7 +211,7 @@ class GEN1{
           console.log("break 1")
           break;
         }
-      this.boarder += 1+c.vel*0.005+this.boarder/4000
+      this.boarder += 1+c.vel*0.005+this.boarder/3000
       if(c.vel < 0.007){
         this.boarder += 0.5
       }
