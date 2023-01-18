@@ -211,6 +211,9 @@ class gw{
 }
 
 class c{
+
+  static score = [0,0]
+
   static vel = 0.004
 
   static my3Vel = {"vx":0,"vy":0,"vz":0}
@@ -396,6 +399,7 @@ class c{
     "</br>boost: "+ Math.floor(c.boost)+
     "</br>height: "+Math.floor(planeHeight*100)+
     "</br>distance: "+Math.floor(camera.position.z)+
+    "</br>score: "+Math.floor(c.score[1])+
     "</br>system msg: "+gw.message
 
         let cc = (255-this.vel*155)<0?0:(255-this.vel*155)
@@ -409,6 +413,14 @@ class c{
       }
     }
 
+    if(camera.position.z > this.score[0]){
+      let heightbonus = 10/planeHeight
+      if(planeHeight < 0.2){
+        heightbonus = -50
+      }
+      this.score[1] += (camera.position.z-this.score[0])*this.vel + heightbonus
+      this.score[0] = camera.position.z
+    }
 
   }
    static update(){
@@ -559,6 +571,7 @@ class c{
     "</br>boost: "+ Math.floor(c.boost)+
     "</br>height: "+Math.floor(planeHeight*100)+
     "</br>distance: "+Math.floor(camera.position.z)+
+    "</br>score: "+Math.floor(c.score)+
     "</br>system msg: "+gw.message
 
     let cc = (255-this.vel*155)<0?0:(255-this.vel*155)
@@ -570,6 +583,15 @@ class c{
       if(c.boost > 100+this.chaosMode*50-this.gliding*150){
         c.boost = 100+this.chaosMode*50-this.gliding*150
       }
+    }
+
+    if(camera.position.z > this.score[0]){
+      let heightbonus = 10/planeHeight
+      if(planeHeight < 0.2){
+        heightbonus = -50
+      }
+      this.score[1] += (camera.position.z-this.score[0])*this.vel + heightbonus
+      this.score[0] = camera.position.z
     }
 
 
@@ -929,6 +951,7 @@ document.addEventListener("keydown",(e)=>{
       keysHeld[k] = ()=>{if(c.boost > 0.02){c.boost-=0.02;c.vel+=0.001}}}
       break;
     case "ArrowDown":
+    case "0":
       keysHeld[k] = ()=>{c.vel*=0.999}
       break;
 
@@ -1030,9 +1053,9 @@ let animate = () => {
     return;
   }
 
-  // if(music1.paused){
-  //   try{music1.play()}catch{}
-  // }
+  if(music1.paused){
+    try{music1.play()}catch{}
+  }
 
   // if(Math.random()>0.99){
   //   new missile(camera.position.x+Math.random()*150-75,camera.position.y+Math.random()*50-175,camera.position.z+400)
