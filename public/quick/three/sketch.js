@@ -251,6 +251,9 @@ class c{
   }
   static Nupdate(){
 
+    this.collided = false
+
+
     let missilesObj = Object.values(gw.missiles)
     missilesObj.forEach((e)=>{
       e.update()
@@ -292,6 +295,8 @@ class c{
     if(camera.position.y < camera.position.z*gw.SLslope){
       camera.position.y = camera.position.z*gw.SLslope
       this.vel *= 0.96
+      this.boost -= 2
+      this.collided = true
     }
 
 
@@ -332,8 +337,6 @@ class c{
       this.vel *= c.gliding?0.94:0.805
       this.collided = true
       // console.log("COLLIDED: "+COLLIDED)
-    }else{
-      this.collided = false
     }
 
     let planeHeight = camera.position.y-gw.GPC(camera.position.z)
@@ -361,69 +364,32 @@ class c{
       light.intensity = 5*this.lightIntensity
     }
     if(this.thirdPerson){
-      person.position.x = camera.position.x
-      person.position.y = camera.position.y
-      person.position.z = camera.position.z
-
-      person.rotation.x = camera.rotation.x
-      person.rotation.y = camera.rotation.y
-      person.rotation.z = camera.rotation.z
-
-      wing1.position.x = camera.position.x
-      wing1.position.y = camera.position.y
-      wing1.position.z = camera.position.z
-
-      wing1.rotation.x = camera.rotation.x
-      wing1.rotation.y = camera.rotation.y
-      wing1.rotation.z = camera.rotation.z
-
-      wing1.translateX(0.18)
-      wing1.rotateY(-0.2)
-
-      wing2.position.x = camera.position.x
-      wing2.position.y = camera.position.y
-      wing2.position.z = camera.position.z
-
-      wing2.rotation.x = camera.rotation.x
-      wing2.rotation.y = camera.rotation.y
-      wing2.rotation.z = camera.rotation.z
-
-      wing2.translateX(-0.18)
-      wing2.rotateY(0.2)
+      this.fthird()
     }
 
-    document.getElementById("info").innerHTML = 
-    "velocity: " + Math.floor(this.vel*1000) +
-    "</br>frame cap: "+ (MASTERTHROTTLE?30:60) +
-    "</br>preformance: "+ dateLogger[2]+
-    "</br>boost: "+ Math.floor(c.boost)+
-    "</br>height: "+Math.floor(planeHeight*100)+
-    "</br>distance: "+Math.floor(camera.position.z)+
-    "</br>score: "+Math.floor(c.score[1])+
-    "</br>system msg: "+gw.message
-
-        let cc = (255-this.vel*155)<0?0:(255-this.vel*155)
-    document.getElementById("info").style.color = "rgb(255,"+cc+","+cc+")"
+    this.disp(planeHeight)
     // console.log(this.lpos.y,camera.position.y)
 
     if(this.collided === false){
-      c.boost += (this.gliding?2:1)*2.6/planeHeight
+      let ttb = 2.6/planeHeight
+      c.boost += ttb>1?1:ttb
       if(c.boost > 100+this.chaosMode*50-this.gliding*150){
         c.boost = 100+this.chaosMode*50-this.gliding*150
       }
     }
 
     if(camera.position.z > this.score[0]){
-      let heightbonus = 10/planeHeight
+      let heightbonus = 1/planeHeight
       if(planeHeight < 0.2){
         heightbonus = -50
       }
-      this.score[1] += (camera.position.z-this.score[0])*this.vel + heightbonus
+      this.score[1] += (camera.position.z-this.score[0])*(this.vel + heightbonus)
       this.score[0] = camera.position.z
     }
 
   }
    static update(){
+    this.collided = false
 
     let missilesObj = Object.values(gw.missiles)
     missilesObj.forEach((e)=>{
@@ -464,6 +430,8 @@ class c{
     if(camera.position.y < camera.position.z*gw.SLslope){
       camera.position.y = camera.position.z*gw.SLslope
       this.vel *= 0.98
+      this.boost -= 1
+      this.collided = true
     }
 
 
@@ -504,8 +472,6 @@ class c{
       this.vel *= c.gliding?0.97:0.9
       this.collided = true
       // console.log("COLLIDED: "+COLLIDED)
-    }else{
-      this.collided = false
     }
 
     let planeHeight = camera.position.y-gw.GPC(camera.position.z)
@@ -533,6 +499,50 @@ class c{
       light.intensity = 5*this.lightIntensity
     }
     if(this.thirdPerson){
+      this.fthird()
+    }
+
+    this.disp(planeHeight)
+
+    
+    // console.log(this.lpos.y,camera.position.y)
+
+    if(this.collided === false){
+      let ttb = 1.3/planeHeight
+      c.boost += ttb>0.5?0.5:ttb
+      if(c.boost > 100+this.chaosMode*50-this.gliding*150){
+        c.boost = 100+this.chaosMode*50-this.gliding*150
+      }
+    }
+
+    if(camera.position.z > this.score[0]){
+      let heightbonus = 1/planeHeight
+      if(planeHeight < 0.2){
+        heightbonus = -50
+      }
+      this.score[1] += (camera.position.z-this.score[0])*(this.vel + heightbonus)
+      this.score[0] = camera.position.z
+    }
+
+
+  }
+
+  static disp(planeHeight){
+    document.getElementById("info").innerHTML = 
+    "velocity: " + Math.floor(c.vel*1000) +
+    "</br>frame cap: "+ (MASTERTHROTTLE?30:60) +
+    "</br>preformance: "+ dateLogger[2]+
+    "</br>boost: "+ Math.floor(c.boost)+
+    "</br>height: "+Math.floor(planeHeight*100)+
+    "</br>distance: "+Math.floor(camera.position.z)+
+    "</br>score: "+Math.floor(c.score[1])+
+    "</br>system msg: "+gw.message
+
+    let cc = (255-this.vel*155)<0?0:(255-this.vel*155)
+    document.getElementById("info").style.color = "rgb(255,"+cc+","+cc+")"
+  }
+
+  static fthird(){
       person.position.x = camera.position.x
       person.position.y = camera.position.y
       person.position.z = camera.position.z
@@ -562,39 +572,6 @@ class c{
 
       wing2.translateX(-0.18)
       wing2.rotateY(0.2)
-    }
-
-    document.getElementById("info").innerHTML = 
-    "velocity: " + Math.floor(this.vel*1000) +
-    "</br>frame cap: "+ (MASTERTHROTTLE?30:60) +
-    "</br>preformance: "+ dateLogger[2]+
-    "</br>boost: "+ Math.floor(c.boost)+
-    "</br>height: "+Math.floor(planeHeight*100)+
-    "</br>distance: "+Math.floor(camera.position.z)+
-    "</br>score: "+Math.floor(c.score[1])+
-    "</br>system msg: "+gw.message
-
-    let cc = (255-this.vel*155)<0?0:(255-this.vel*155)
-    document.getElementById("info").style.color = "rgb(255,"+cc+","+cc+")"
-    // console.log(this.lpos.y,camera.position.y)
-
-    if(this.collided === false){
-      c.boost += (this.gliding?2:1)*1.3/planeHeight
-      if(c.boost > 100+this.chaosMode*50-this.gliding*150){
-        c.boost = 100+this.chaosMode*50-this.gliding*150
-      }
-    }
-
-    if(camera.position.z > this.score[0]){
-      let heightbonus = 10/planeHeight
-      if(planeHeight < 0.2){
-        heightbonus = -50
-      }
-      this.score[1] += (camera.position.z-this.score[0])*this.vel + heightbonus
-      this.score[0] = camera.position.z
-    }
-
-
   }
 
 }
@@ -936,8 +913,9 @@ document.addEventListener("keydown",(e)=>{
       break;
 
     case "Enter":
-      if(c.boost > 20){
-        c.boost -= 20
+      if(c.boost > 10){
+        c.boost *= 0.5
+        c.boost -= 5
         c.vel *= 1.5
       }
       break;
