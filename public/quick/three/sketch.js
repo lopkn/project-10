@@ -571,7 +571,7 @@ class c{
     "</br>boost: "+ Math.floor(c.boost)+
     "</br>height: "+Math.floor(planeHeight*100)+
     "</br>distance: "+Math.floor(camera.position.z)+
-    "</br>score: "+Math.floor(c.score)+
+    "</br>score: "+Math.floor(c.score[1])+
     "</br>system msg: "+gw.message
 
     let cc = (255-this.vel*155)<0?0:(255-this.vel*155)
