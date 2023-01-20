@@ -809,3 +809,74 @@ class GEN8{
 }
 
 
+class GEN9{
+  //skyway
+  constructor(dx){
+    this.boarder = 0
+    this.dx = dx?dx:500
+    this.counter = 0
+  }
+
+  update(){
+    if(camera.position.z+c.vel*5 > this.boarder - 800){
+      let breaker = 0
+      while(camera.position.z+c.vel*5 > this.boarder - 800){
+        breaker++
+        if(breaker>20){
+          console.log("break 5")
+          break;
+        }
+      this.boarder += 30
+
+      let tx = Math.floor(camera.position.x/this.dx)*500
+
+      this.counter++
+
+      let mesh3 = new THREE.Mesh(
+      new THREE.BoxGeometry(3,3,12),
+      new THREE.MeshStandardMaterial({ color:  0x007000}))
+      mesh3.position.x += tx
+      mesh3.position.z += this.boarder
+      mesh3.position.y += gw.GPC(mesh3.position.z)+ Math.ceil(c.pH/500)*500
+      if(this.counter%2 === 0){
+        mesh3.position.y-=500
+      }
+      mesh3.rotateX(0.37)
+        mesh3.name = "GEN9"
+
+
+      if(c.vel > 2){
+        let tv = c.vel-2
+        mesh3.rotateY(Math.random()*tv-tv/2)
+      }
+
+      scene.add(mesh3)
+
+      tx += 500
+
+      let mesh4 = new THREE.Mesh(
+      new THREE.BoxGeometry(3,3,12),
+      new THREE.MeshStandardMaterial({ color:  0x007000}))
+      mesh4.position.x += tx
+      mesh4.position.z += this.boarder
+      mesh4.position.y += gw.GPC(mesh4.position.z)+ Math.ceil(c.pH/500)*500
+      if(this.counter%2 === 0){
+        mesh4.position.y-=500
+      }
+      mesh4.rotateX(0.37)
+        mesh4.name = "GEN9.2"
+
+
+      if(c.vel > 2){
+        let tv = c.vel-2
+        tv*=0.5
+        mesh4.rotateY(Math.random()*tv-tv/2)
+      }
+      scene.add(mesh4)
+    
+    }
+    }
+  }
+
+}
+

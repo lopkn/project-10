@@ -163,7 +163,7 @@ class gw{
 
   }
 
-  static pdate3s = [new GEN1(),new GEN2(),new GEN2(10000),new GEN2(60000),new GEN2(40000),new GEN2(80000),new GEN2(120000),new GEN3(40000), new GEN4(), new GEN5(), new GEN7(), new GEN8()]
+  static pdate3s = [new GEN9(),new GEN1(),new GEN2(),new GEN2(10000),new GEN2(60000),new GEN2(40000),new GEN2(80000),new GEN2(120000),new GEN3(40000), new GEN4(), new GEN5(), new GEN7(), new GEN8()]
   // static pdate3s = [new GEN1()]
 
   static pdate3(){
@@ -240,6 +240,8 @@ class c{
 
   static rotX = 0
   static rotZ = 0
+
+  static pH = 0
 
   // static lpos = {"x":-5,"y":15,"z":7}
   static clenseCounter = 0
@@ -340,7 +342,7 @@ class c{
     }
 
     let planeHeight = camera.position.y-gw.GPC(camera.position.z)
-
+    this.pH = planeHeight
 
     if(this.vel > 2){
       let tv = this.vel -2
@@ -475,7 +477,7 @@ class c{
     }
 
     let planeHeight = camera.position.y-gw.GPC(camera.position.z)
-
+    this.pH = planeHeight
 
     if(this.vel > 2){
       let tv = this.vel -2
