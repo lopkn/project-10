@@ -983,7 +983,7 @@ class GEN11{
       }
       let abk = this.boarder - this.bk
 
-      let h = 36+60*vel+abk/10000
+      let h = 36+60*vel+180*abk/100000
       let tx = camera.position.x+this.displacement
 
       let w = 3+8*vel

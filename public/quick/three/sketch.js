@@ -1014,6 +1014,10 @@ let throttleCounter = 0
 let animate = () => {
   // requestAnimationFrame(animate);
 
+  if(c.paused){
+    return
+  }
+
   let r = LDATE
   LDATE = Date.now()
 
@@ -1030,7 +1034,7 @@ let animate = () => {
 
   throttleCounter++
   c.update()
-  if((throttleCounter%2 !== 0 && MASTERTHROTTLE)|| c.paused){
+  if((throttleCounter%2 !== 0 && MASTERTHROTTLE)){
     return;
   }
 
@@ -1210,3 +1214,4 @@ setInterval(()=>{
 //rare gen
 //plane dmg
 //gen push
+//hell fix
