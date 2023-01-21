@@ -193,6 +193,7 @@ class GEN1{
   constructor(b){
     this.boarder = b?b:0
     this.bk = b?b:0
+    this.name = "GEN1"
     this.gbk = []
   }
 
@@ -265,6 +266,7 @@ class GEN2{
 
   constructor(dx){
     this.boarder = 0
+    this.name = "GEN2"
     this.gbk = []
     this.dx = dx?dx:20000
   }
@@ -355,6 +357,7 @@ class GEN3{
   constructor(dx){
     this.boarder = 0
     this.gbk = []
+    this.name = "GEN3"
     this.dx = dx?dx:20000
   }
 
@@ -430,6 +433,7 @@ class GEN4{
 //stick
   constructor(dx){
     this.boarder = 0
+    this.name = "GEN4"
     this.gbk = []
     this.dx = dx?dx:30000
   }
@@ -521,6 +525,8 @@ class GEN5{
   //runway
   constructor(dx){
     this.boarder = 0
+    this.name = "GEN5"
+
     this.gbk = []
     this.dx = dx?dx:500
   }
@@ -589,6 +595,7 @@ class GEN6{
   constructor(dx){
     this.boarder = 1000
     this.gbk = []
+    this.name = "GEN6"
     this.counter = 0
     this.displacement = 0
   }
@@ -651,6 +658,7 @@ class GEN7{
 //scaled dense
   constructor(dx){
     this.boarder = 1000
+    this.name = "GEN7"
     this.gbk = []
     this.counter = 0
     this.displacement = 0
@@ -734,6 +742,7 @@ class GEN8{
 //scaled sky
   constructor(dx){
     this.boarder = 1000
+    this.name = "GEN8"
     this.gbk = []
     this.counter = 0
     this.displacement = 0
@@ -817,8 +826,9 @@ class GEN8{
 
 class GEN9{
   //skyway
-  constructor(dx){
-    this.boarder = 0
+  constructor(dx,b){
+    this.name = "GEN9"
+    this.boarder = b?b:0
     this.dx = dx?dx:500
     this.counter = 0
   }
@@ -893,35 +903,43 @@ class GEN9{
 class TRIG1{
 
   constructor(){
-    this.boarder = 1000
+    this.boarder = 100000
     // this.transitor = true
   }
   update(){
     if(camera.position.z < this.boarder){
       return;}
-    // for(let i = gw.pdate3s.length-1; i > -1; i--){
-    //   if(gw.pdate3s[i].transitor !== true){
-    //     gw.pdate3s.splice(i,1)
-    //   }
-    // }
-    gw.pdate3s = [new TRAN1(), new GEN5()]
+    for(let i = gw.pdate3s.length-1; i > -1; i--){
+      if(gw.pdate3s[i].name !== "GEN5"){
+        gw.pdate3s.splice(i,1)
+      }
+    }
+    gw.pdate3s.push(new TRAN1())
   }
 
 }
 
 class TRAN1{
-  // constructor(){
-  // }
+  constructor(){
+    this.name = "TRAN1"
+  }
 
   update(){
-    plane.material.color.r += 0.001
+    plane.material.color.r += 0.0001
     if(plane.material.color.r > 0.28){
       this.transit()
+      gw.pdate3s.forEach((e,i)=>{
+        if(e.name === "TRAN1"){
+          gw.pdate3s.splice(i,1)
+        }
+      })
     }
   }
 
   transit(){
-    gw.pdate3s = [new GEN1(camera.position.z+900), new GEN5(), new GEN9(), new GEN11(camera.position.z)]
+    gw.pdate3s.push(new GEN1(camera.position.z+900)) 
+    gw.pdate3s.push(new GEN9(500,camera.position.z+900))
+    gw.pdate3s.push(new GEN11(camera.position.z))
   }
 }
 
@@ -931,8 +949,10 @@ class GEN11{
 //scaled rt structure
   constructor(dx){
     this.boarder = 1000+dx
+    this.bk = dx
     this.gbk = []
     this.counter = 0
+    this.countMax = 0
     this.displacement = 0
     this.reverse = -1
   }
@@ -951,16 +971,19 @@ class GEN11{
         let B = 1
         let vel = c.vel
       if(this.counter > 0){
-        this.boarder += 4*vel
+        this.boarder += 10*vel
         this.counter -= 1
       } else {
         this.boarder += Math.random()*1000*vel+50*vel
-        this.counter += 30
+        this.counter += 5 + Math.floor(Math.random()*5)
+        this.countMax = this.counter
         this.displacement = Math.random()*450-225
         this.reverse = Math.random()>0.5?-1:1
+        return;
       }
+      let abk = this.boarder - this.bk
 
-      let h = 6+60*vel
+      let h = 36+60*vel+abk/10000
       let tx = camera.position.x+this.displacement
 
       let w = 3+8*vel
@@ -970,15 +993,16 @@ class GEN11{
       new THREE.MeshStandardMaterial({ color:  Math.floor(Math.random()*16777215)}))
       mesh3.position.x += tx
       mesh3.position.z += 12 + this.boarder
-      mesh3.position.y += gw.GPC(mesh3.position.z)+h/1.9
+      mesh3.position.y += gw.GPC(mesh3.position.z)+h/2.2
 
-        let rx = (this.counter-15)/20*this.reverse
-        mesh3.rotateX(rx)
+        let rz = (this.counter-this.countMax/2)/this.countMax*this.reverse*2
+        mesh3.rotateZ(rz)
+      mesh3.position.x -= Math.tan(rz)*h/2.2
+      mesh3.position.y -= h/2-Math.cos(rz)*h/2
         mesh3.name = "GEN11"
-        mesh3.position.y -= h/9
         let d = dist3(h,w,l,0,0,0)/2
 
-        gw.colliders[mesh3.id] = [{"x":mesh3.position.x,"y":mesh3.position.y,"z":mesh3.position.z,"rx":rx,"ry":ry,"rz":rz},mesh3.position.z-d,mesh3.position.x+d,mesh3.position.x-d,{"id":mesh3.id,"X":mesh3.position.x+w/2,"x":mesh3.position.x-w/2,"Y":mesh3.position.y+h/2,"y":mesh3.position.y-h/2,"Z":mesh3.position.z+l/2,"z":mesh3.position.z-l/2,}]
+        gw.colliders[mesh3.id] = [{"x":mesh3.position.x,"y":mesh3.position.y,"z":mesh3.position.z,"rx":0,"ry":0,"rz":rz},mesh3.position.z-d,mesh3.position.x+d,mesh3.position.x-d,{"id":mesh3.id,"X":mesh3.position.x+w/2,"x":mesh3.position.x-w/2,"Y":mesh3.position.y+h/2,"y":mesh3.position.y-h/2,"Z":mesh3.position.z+l/2,"z":mesh3.position.z-l/2,}]
 
 
 
