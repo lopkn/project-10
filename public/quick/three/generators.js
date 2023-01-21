@@ -190,13 +190,14 @@ class missile{
 
 class GEN1{
 
-  constructor(){
-    this.boarder = 0
+  constructor(b){
+    this.boarder = b?b:0
+    this.bk = b?b:0
     this.gbk = []
   }
 
   update(){
-    if(camera.position.z+c.vel*5 > this.boarder - 800){
+    if(camera.position.z+c.vel*50 > this.boarder - 800){
 
       if(c.vel > 2){
         let tv = c.vel-2
@@ -205,19 +206,22 @@ class GEN1{
 
       let breaker = 0
 
-      while(camera.position.z+c.vel*5 > this.boarder - 800){
+      while(camera.position.z+c.vel*50 > this.boarder - 800){
         breaker++
         if(breaker>20){
           console.log("break 1")
           break;
         }
-      this.boarder += 1+c.vel*0.005+this.boarder/3000
+      let abk = this.boarder - this.bk
+      this.boarder += 1+c.vel*0.005+abk/3000
       if(c.vel < 0.007){
         this.boarder += 0.5
       }
-      let h = 1+Math.random()*30+this.boarder*0.01
-      let w = 1+Math.random()*4+c.vel*13*Math.random()+this.boarder*0.001
-      let l = 1+Math.random()*4+c.vel*13*Math.random()+this.boarder*0.001
+
+
+      let h = 1+Math.random()*30+abk*0.01
+      let w = 1+Math.random()*4+c.vel*13*Math.random()+abk*0.001
+      let l = 1+Math.random()*4+c.vel*13*Math.random()+abk*0.001
       let mesh3 = new THREE.Mesh(
       new THREE.BoxGeometry(w, h,l),
       new THREE.MeshStandardMaterial({ color:  Math.floor(Math.random()*16777215)}))
@@ -266,9 +270,9 @@ class GEN2{
   }
 
   update(){
-    if(camera.position.z+c.vel*5 > this.boarder - 800){
+    if(camera.position.z+c.vel*50 > this.boarder - 800){
       let breaker = 0
-      while(camera.position.z+c.vel*5 > this.boarder - 800){
+      while(camera.position.z+c.vel*50 > this.boarder - 800){
         breaker++
         if(breaker>20){
           console.log("break 2")
@@ -355,9 +359,9 @@ class GEN3{
   }
 
   update(){
-    if(camera.position.z+c.vel*5 > this.boarder - 800){
+    if(camera.position.z+c.vel*50 > this.boarder - 800){
       let breaker = 0
-      while(camera.position.z+c.vel*5 > this.boarder - 800){
+      while(camera.position.z+c.vel*50 > this.boarder - 800){
         breaker++
         if(breaker>20){
           console.log("break 3")
@@ -431,9 +435,9 @@ class GEN4{
   }
 
   update(){
-    if(camera.position.z+c.vel*5 > this.boarder - 800){
+    if(camera.position.z+c.vel*50 > this.boarder - 800){
       let breaker = 0
-      while(camera.position.z+c.vel*5 > this.boarder - 800){
+      while(camera.position.z+c.vel*50 > this.boarder - 800){
         breaker++
         if(breaker>20){
           console.log("break 4")
@@ -522,9 +526,9 @@ class GEN5{
   }
 
   update(){
-    if(camera.position.z+c.vel*5 > this.boarder - 800){
+    if(camera.position.z+c.vel*50 > this.boarder - 800){
       let breaker = 0
-      while(camera.position.z+c.vel*5 > this.boarder - 800){
+      while(camera.position.z+c.vel*50 > this.boarder - 800){
         breaker++
         if(breaker>20){
           console.log("break 5")
@@ -540,6 +544,7 @@ class GEN5{
       mesh3.position.x += tx
       mesh3.position.z += this.boarder
       mesh3.position.y += gw.GPC(mesh3.position.z)+0.5
+      mesh3.material.emissive.r = 2
       mesh3.rotateX(0.37)
         mesh3.name = "GEN5"
 
@@ -560,6 +565,7 @@ class GEN5{
       mesh4.position.x += tx
       mesh4.position.z += this.boarder
       mesh4.position.y += gw.GPC(mesh4.position.z)+0.5
+      mesh4.material.emissive.r = 2
       mesh4.rotateX(0.37)
         mesh4.name = "GEN5.2"
 
@@ -588,8 +594,8 @@ class GEN6{
   }
 
   update(){
-    if(camera.position.z+c.vel*5 > this.boarder - 800){
-      while(camera.position.z+c.vel*5 > this.boarder - 800){
+    if(camera.position.z+c.vel*50 > this.boarder - 800){
+      while(camera.position.z+c.vel*50 > this.boarder - 800){
         breaker++
         if(breaker>20){
           console.log("break 6")
@@ -651,11 +657,11 @@ class GEN7{
   }
 
   update(){
-    if(camera.position.z+c.vel*5 > this.boarder - 800){
+    if(camera.position.z+c.vel*50 > this.boarder - 800){
 
       let vel = c.vel>1?c.vel:1
       let breaker = 0;
-      while(camera.position.z+c.vel*5 > this.boarder - 800){
+      while(camera.position.z+c.vel*50 > this.boarder - 800){
       breaker++
         if(breaker>20){
           console.log("break 7")
@@ -734,11 +740,11 @@ class GEN8{
   }
 
   update(){
-    if(camera.position.z+c.vel*5 > this.boarder - 800){
+    if(camera.position.z+c.vel*50 > this.boarder - 800){
 
       let vel = c.vel>1?c.vel:1
       let breaker = 0;
-      while(camera.position.z+c.vel*5 > this.boarder - 800){
+      while(camera.position.z+c.vel*50 > this.boarder - 800){
       breaker++
         if(breaker>20){
           console.log("break 8")
@@ -818,9 +824,9 @@ class GEN9{
   }
 
   update(){
-    if(camera.position.z+c.vel*5 > this.boarder - 800){
+    if(camera.position.z+c.vel*50 > this.boarder - 800){
       let breaker = 0
-      while(camera.position.z+c.vel*5 > this.boarder - 800){
+      while(camera.position.z+c.vel*50 > this.boarder - 800){
         breaker++
         if(breaker>20){
           console.log("break 5")
@@ -838,6 +844,8 @@ class GEN9{
       mesh3.position.x += tx
       mesh3.position.z += this.boarder
       mesh3.position.y += gw.GPC(mesh3.position.z)+ Math.ceil(c.pH/500)*500
+      mesh3.material.emissive.g = 2
+      mesh3.material.emissive.b = 2
       if(this.counter%2 === 0){
         mesh3.position.y-=500
       }
@@ -860,6 +868,8 @@ class GEN9{
       mesh4.position.x += tx
       mesh4.position.z += this.boarder
       mesh4.position.y += gw.GPC(mesh4.position.z)+ Math.ceil(c.pH/500)*500
+      mesh4.material.emissive.g = 2
+      mesh4.material.emissive.b = 2
       if(this.counter%2 === 0){
         mesh4.position.y-=500
       }
@@ -880,3 +890,106 @@ class GEN9{
 
 }
 
+class TRIG1{
+
+  constructor(){
+    this.boarder = 1000
+    // this.transitor = true
+  }
+  update(){
+    if(camera.position.z < this.boarder){
+      return;}
+    // for(let i = gw.pdate3s.length-1; i > -1; i--){
+    //   if(gw.pdate3s[i].transitor !== true){
+    //     gw.pdate3s.splice(i,1)
+    //   }
+    // }
+    gw.pdate3s = [new TRAN1(), new GEN5()]
+  }
+
+}
+
+class TRAN1{
+  // constructor(){
+  // }
+
+  update(){
+    plane.material.color.r += 0.001
+    if(plane.material.color.r > 0.28){
+      this.transit()
+    }
+  }
+
+  transit(){
+    gw.pdate3s = [new GEN1(camera.position.z+900), new GEN5(), new GEN9(), new GEN11(camera.position.z)]
+  }
+}
+
+
+
+class GEN11{
+//scaled rt structure
+  constructor(dx){
+    this.boarder = 1000+dx
+    this.gbk = []
+    this.counter = 0
+    this.displacement = 0
+    this.reverse = -1
+  }
+
+  update(){
+    if(camera.position.z+c.vel*50 > this.boarder - 800){
+
+      // let vel = c.vel>1?c.vel:1
+      let breaker = 0;
+      while(camera.position.z+c.vel*50 > this.boarder - 800){
+      breaker++
+        if(breaker>20){
+          console.log("break 7")
+          break;
+        }
+        let B = 1
+        let vel = c.vel
+      if(this.counter > 0){
+        this.boarder += 4*vel
+        this.counter -= 1
+      } else {
+        this.boarder += Math.random()*1000*vel+50*vel
+        this.counter += 30
+        this.displacement = Math.random()*450-225
+        this.reverse = Math.random()>0.5?-1:1
+      }
+
+      let h = 6+60*vel
+      let tx = camera.position.x+this.displacement
+
+      let w = 3+8*vel
+      let l = 3+8*vel
+      let mesh3 = new THREE.Mesh(
+      new THREE.BoxGeometry(w, h, l),
+      new THREE.MeshStandardMaterial({ color:  Math.floor(Math.random()*16777215)}))
+      mesh3.position.x += tx
+      mesh3.position.z += 12 + this.boarder
+      mesh3.position.y += gw.GPC(mesh3.position.z)+h/1.9
+
+        let rx = (this.counter-15)/20*this.reverse
+        mesh3.rotateX(rx)
+        mesh3.name = "GEN11"
+        mesh3.position.y -= h/9
+        let d = dist3(h,w,l,0,0,0)/2
+
+        gw.colliders[mesh3.id] = [{"x":mesh3.position.x,"y":mesh3.position.y,"z":mesh3.position.z,"rx":rx,"ry":ry,"rz":rz},mesh3.position.z-d,mesh3.position.x+d,mesh3.position.x-d,{"id":mesh3.id,"X":mesh3.position.x+w/2,"x":mesh3.position.x-w/2,"Y":mesh3.position.y+h/2,"y":mesh3.position.y-h/2,"Z":mesh3.position.z+l/2,"z":mesh3.position.z-l/2,}]
+
+
+
+      // mesh3.name = gw.idcr() + ""
+      // this.gbk.push(mesh3.id)
+      // if(mesh3.position.x < 1000+camera.position.x && mesh3.position.x > -1000+camera.position.x){
+      scene.add(mesh3)
+
+      // }
+    }
+    }
+  }
+
+}

@@ -163,7 +163,7 @@ class gw{
 
   }
 
-  static pdate3s = [new GEN9(),new GEN1(),new GEN2(),new GEN2(10000),new GEN2(60000),new GEN2(40000),new GEN2(80000),new GEN2(120000),new GEN3(40000), new GEN4(), new GEN5(), new GEN7(), new GEN8()]
+  static pdate3s = [new TRIG1(),new GEN9(),new GEN1(),new GEN2(),new GEN2(10000),new GEN2(60000),new GEN2(40000),new GEN2(80000),new GEN2(120000),new GEN3(40000), new GEN4(), new GEN5(), new GEN7(), new GEN8()]
   // static pdate3s = [new GEN1()]
 
   static pdate3(){
@@ -1029,8 +1029,14 @@ let animate = () => {
   }
 
   throttleCounter++
+  c.update()
   if((throttleCounter%2 !== 0 && MASTERTHROTTLE)|| c.paused){
     return;
+  }
+
+  if(throttleCounter%5===0){
+    let tv = c.vel>3?3:c.vel
+    scene.fog.far = 500 + c.vel*83
   }
 
   if(music1.paused){
@@ -1059,10 +1065,10 @@ let animate = () => {
   camera.rotateY(-c.rotZ)
   camera.rotateX(-c.rotX)
 
-  if(MASTERTHROTTLE){
-  c.Nupdate()} else {
-    c.update()
-  }
+  // if(MASTERTHROTTLE){
+  // c.Nupdate()} else {
+  //   c.update()
+  // }
 
 }
 
@@ -1195,3 +1201,12 @@ setInterval(()=>{
 //     }
 // }
 // animate2()
+
+
+
+//transition gen
+//frame fix
+//curve gen
+//rare gen
+//plane dmg
+//gen push
