@@ -200,8 +200,8 @@ class GEN1{
   update(){
     if(camera.position.z+c.vel*50 > this.boarder - 800){
 
-      if(c.vel > 2){
-        let tv = c.vel-2
+      if(c.vel > c.chaosLimit){
+        let tv = c.vel-c.chaosLimit
         this.boarder-=tv
       }
 
@@ -234,8 +234,8 @@ class GEN1{
       mesh3.position.y += gw.GPC(mesh3.position.z)+h/2.2
 
 
-      if(c.vel > 2 || c.chaosMode){
-        let tv = c.vel-2+c.chaosMode*2
+      if(c.vel > c.chaosLimit || c.chaosMode){
+        let tv = c.vel-c.chaosLimit+c.chaosMode*2
         let rx = Math.random()*tv-tv/2
         let ry = Math.random()*tv-tv/2
         let rz = Math.random()*tv-tv/2
@@ -264,8 +264,8 @@ class GEN1{
 
 class GEN2{
 
-  constructor(dx){
-    this.boarder = 0
+  constructor(dx,boarder){
+    this.boarder = boarder?boarder:0
     this.name = "GEN2"
     this.gbk = []
     this.dx = dx?dx:20000
@@ -315,8 +315,8 @@ class GEN2{
       mesh3.position.z += 12 + this.boarder
       mesh3.position.y += gw.GPC(mesh3.position.z)+h/2.2
 
-      if(c.vel > 2 || c.chaosMode){
-        let tv = c.vel-2+c.chaosMode*2
+      if(c.vel > c.chaosLimit || c.chaosMode){
+        let tv = c.vel-c.chaosLimit+c.chaosMode*2
         let rx = Math.random()*tv-tv/2
         let ry = Math.random()*tv-tv/2
         let rz = Math.random()*tv-tv/2
@@ -405,8 +405,8 @@ class GEN3{
       mesh3.position.y += gw.GPC(mesh3.position.z)+h/2.2
         mesh3.name = "GEN3"
 
-      if(c.vel > 2){
-        let tv = c.vel-2
+      if(c.vel > c.chaosLimit){
+        let tv = c.vel-c.chaosLimit
         mesh3.rotateX(Math.random()*tv-tv/2)
         mesh3.rotateY(Math.random()*tv-tv/2)
         mesh3.rotateZ(Math.random()*tv-tv/2)
@@ -485,8 +485,8 @@ class GEN4{
         mesh3.name = "GEN4"
 
 
-      if(c.chaosMode && c.vel > 2){
-        let tv = c.vel-2
+      if(c.chaosMode && c.vel > c.chaosLimit){
+        let tv = c.vel-c.chaosLimit
         let rx = Math.random()*tv-tv/2
         let ry = Math.random()*tv-tv/2
         let rz = Math.random()*tv-tv/2
@@ -555,8 +555,8 @@ class GEN5{
         mesh3.name = "GEN5"
 
 
-      if(c.vel > 2){
-        let tv = c.vel-2
+      if(c.vel > c.chaosLimit){
+        let tv = c.vel-c.chaosLimit
         mesh3.rotateY(Math.random()*tv-tv/2)
       }
 
@@ -576,8 +576,8 @@ class GEN5{
         mesh4.name = "GEN5.2"
 
 
-      if(c.vel > 2){
-        let tv = c.vel-2
+      if(c.vel > c.chaosLimit){
+        let tv = c.vel-c.chaosLimit
         mesh4.rotateY(Math.random()*tv-tv/2)
       }
 
@@ -705,8 +705,8 @@ class GEN7{
       mesh3.position.z += 12 + this.boarder
       mesh3.position.y += gw.GPC(mesh3.position.z)+h/1.9
 
-      if(c.chaosMode && c.vel > 2){
-        let tv = c.vel/2-1
+      if(c.chaosMode && c.vel > c.chaosLimit){
+        let tv = c.vel/c.chaosLimit-c.chaosLimit/2
         let rx = Math.random()*tv-tv/2
         let ry = Math.random()*tv-tv/2
         let rz = Math.random()*tv-tv/2
@@ -791,8 +791,8 @@ class GEN8{
       mesh3.position.z += 12 + this.boarder
       mesh3.position.y = camera.position.y + Math.random()*380*vel-190*vel - 251
 
-      if(c.chaosMode && c.vel > 2){
-        let tv = c.vel/2-1
+      if(c.chaosMode && c.vel > c.chaosLimit){
+        let tv = c.vel/c.chaosLimit-c.chaosLimit/2
         let rx = Math.random()*tv-tv/2
         let ry = Math.random()*tv-tv/2
         let rz = Math.random()*tv-tv/2
@@ -839,7 +839,7 @@ class GEN9{
       while(camera.position.z+c.vel*50 > this.boarder - 800){
         breaker++
         if(breaker>20){
-          console.log("break 5")
+          console.log("break 9")
           break;
         }
       this.boarder += 30
@@ -863,8 +863,8 @@ class GEN9{
         mesh3.name = "GEN9"
 
 
-      if(c.vel > 2){
-        let tv = c.vel-2
+      if(c.vel > c.chaosLimit){
+        let tv = c.vel-c.chaosLimit
         mesh3.rotateY(Math.random()*tv-tv/2)
       }
 
@@ -887,8 +887,8 @@ class GEN9{
         mesh4.name = "GEN9.2"
 
 
-      if(c.vel > 2){
-        let tv = c.vel-2
+      if(c.vel > c.chaosLimit){
+        let tv = c.vel-c.chaosLimit
         tv*=0.5
         mesh4.rotateY(Math.random()*tv-tv/2)
       }
@@ -903,7 +903,7 @@ class GEN9{
 class TRIG1{
 
   constructor(){
-    this.boarder = 100000
+    this.boarder = 100
     // this.transitor = true
   }
   update(){
@@ -925,7 +925,7 @@ class TRAN1{
   }
 
   update(){
-    plane.material.color.r += 0.0001
+    plane.material.color.r += 0.001
     if(plane.material.color.r > 0.28){
       this.transit()
       gw.pdate3s.forEach((e,i)=>{
@@ -940,6 +940,15 @@ class TRAN1{
     gw.pdate3s.push(new GEN1(camera.position.z+900)) 
     gw.pdate3s.push(new GEN9(500,camera.position.z+900))
     gw.pdate3s.push(new GEN11(camera.position.z))
+    gw.pdate3s.push(new GEN13(camera.position.z+900))
+    gw.pdate3s.push(new GEN12(camera.position.z))
+    gw.pdate3s.push(new GEN2(camera.position.z+900,camera.position.z+900))
+    gw.pdate3s.push(new GEN2(camera.position.z+20900,camera.position.z+900))
+    gw.pdate3s.push(new GEN2(camera.position.z+60900,camera.position.z+900))
+    gw.pdate3s.push(new GEN2(camera.position.z+80900,camera.position.z+900))
+
+
+
   }
 }
 
@@ -965,13 +974,14 @@ class GEN11{
       while(camera.position.z+c.vel*50 > this.boarder - 800){
       breaker++
         if(breaker>20){
-          console.log("break 7")
+          console.log("break 11")
           break;
         }
         let B = 1
         let vel = c.vel
+      let abk = this.boarder - this.bk
       if(this.counter > 0){
-        this.boarder += 10*vel
+        this.boarder += 10*vel+18*abk/100000
         this.counter -= 1
       } else {
         this.boarder += Math.random()*1000*vel+50*vel
@@ -981,13 +991,12 @@ class GEN11{
         this.reverse = Math.random()>0.5?-1:1
         return;
       }
-      let abk = this.boarder - this.bk
 
       let h = 36+60*vel+180*abk/100000
       let tx = camera.position.x+this.displacement
 
-      let w = 3+8*vel
-      let l = 3+8*vel
+      let w = 5+8*vel
+      let l = 5+8*vel
       let mesh3 = new THREE.Mesh(
       new THREE.BoxGeometry(w, h, l),
       new THREE.MeshStandardMaterial({ color:  Math.floor(Math.random()*16777215)}))
@@ -1010,6 +1019,150 @@ class GEN11{
       // this.gbk.push(mesh3.id)
       // if(mesh3.position.x < 1000+camera.position.x && mesh3.position.x > -1000+camera.position.x){
       scene.add(mesh3)
+
+      // }
+    }
+    }
+  }
+
+}
+
+class GEN12{
+//scaled rt structure
+  constructor(dx){
+    this.boarder = 1000+dx
+    this.bk = dx
+    this.gbk = []
+    this.counter = 0
+    this.countMax = 5
+    this.displacement = 0
+    this.reverse = -1
+    this.xdisp = 20
+  }
+
+  update(){
+    if(camera.position.z+c.vel*50 > this.boarder - 800){
+
+      // let vel = c.vel>1?c.vel:1
+      let breaker = 0;
+      while(camera.position.z+c.vel*50 > this.boarder - 800){
+      breaker++
+        if(breaker>20){
+          console.log("break 12")
+          break;
+        }
+        let B = 1
+        let vel = c.vel
+      if(this.counter > 0){
+        this.boarder += this.xdisp*vel
+        this.counter -= 1
+      } else {
+        this.boarder += Math.random()*1000*vel+50*vel
+        this.counter += 5 + Math.floor(Math.random()*15)
+        this.countMax = this.counter
+        this.displacement = Math.random()*450-225
+        this.reverse = Math.random()>0.5?-1:1
+        this.xdisp = 20 + Math.random()*20
+        return;
+      }
+      let abk = this.boarder - this.bk
+
+      let h = (16+60*vel+180*abk/100000) * (1+this.countMax/(this.counter+3))
+      let tx = camera.position.x+this.displacement
+
+      let w = 3+8*vel*(1+abk/100000)
+      let l = 3+8*vel*(1+abk/100000)
+      let mesh3 = new THREE.Mesh(
+      new THREE.BoxGeometry(w, h, l),
+      new THREE.MeshStandardMaterial({ color: 0x101010, roughness: 0.1}))
+      mesh3.position.x += tx 
+      mesh3.position.z += 12 + this.boarder
+      mesh3.position.y += gw.GPC(mesh3.position.z)+h/2.2
+
+        mesh3.name = "GEN11"
+        let d = dist3(h,w,l,0,0,0)/2
+
+      gw.colliders[mesh3.id] = ["none",mesh3.position.z-l,mesh3.position.x+w,mesh3.position.x-w,{"id":mesh3.id,"X":mesh3.position.x+w/2,"x":mesh3.position.x-w/2,"Y":mesh3.position.y+h/2,"y":mesh3.position.y-h/2,"Z":mesh3.position.z+l/2,"z":mesh3.position.z-l/2,}]
+      scene.add(mesh3)
+
+    }
+    }
+  }
+
+}
+
+class GEN13{
+//scaled sky mines
+  constructor(boarder){
+    this.boarder = boarder?boarder:1000
+    this.name = "GEN13"
+    this.gbk = []
+    this.counter = 0
+    this.displacement = 0
+  }
+
+  update(){
+    if(camera.position.z+c.vel*50 > this.boarder - 800){
+
+      let vel = c.vel>1?c.vel:1
+      let breaker = 0;
+      while(camera.position.z+c.vel*50 > this.boarder - 800){
+      breaker++
+        if(breaker>20){
+          console.log("break 13")
+          break;
+        }
+        let B = 1
+      if(this.counter > 0){
+        this.boarder += 12*vel
+        this.counter -= 1
+
+        if(camera.position.y-gw.GPC(camera.position.z)<90){
+          this.counter = 0
+        }
+
+
+      } else {
+        this.boarder += Math.random()*1700*vel+100*vel
+        this.counter += Math.floor(Math.random()*100+33)
+        this.displacement = Math.random()*150-75
+        return;
+      }
+      
+
+
+
+      let h = 180+Math.random()*168*vel
+      let tx = Math.random()*380*vel-190*vel+camera.position.x+this.displacement
+
+      let w = h * 0.1
+      let l = w
+
+
+      let ty = camera.position.y + Math.random()*380*vel-190*vel - 251
+      for(let i = 0; i < 4; i++){
+      let mesh3 = new THREE.Mesh(
+      new THREE.BoxGeometry(w, h, l),
+      new THREE.MeshStandardMaterial({ color:  Math.floor(Math.random()*65535), roughness:0.2}))
+      mesh3.position.x += tx
+      mesh3.position.z += 12 + this.boarder
+      mesh3.position.y = ty
+
+        let tv = 6.5
+        let rx = Math.random()*tv-tv/2
+        let ry = Math.random()*tv-tv/2
+        let rz = Math.random()*tv-tv/2
+        mesh3.rotateX(rx)
+        mesh3.rotateY(ry)
+        mesh3.rotateZ(rz)
+        mesh3.position.y -= tv+h/9
+        mesh3.name = "GEN13"
+        let d = dist3(h,w,l,0,0,0)/2
+
+        gw.colliders[mesh3.id] = [{"x":mesh3.position.x,"y":mesh3.position.y,"z":mesh3.position.z,"rx":rx,"ry":ry,"rz":rz},mesh3.position.z-d,mesh3.position.x+d,mesh3.position.x-d,{"id":mesh3.id,"X":mesh3.position.x+w/2,"x":mesh3.position.x-w/2,"Y":mesh3.position.y+h/2,"y":mesh3.position.y-h/2,"Z":mesh3.position.z+l/2,"z":mesh3.position.z-l/2,}]
+
+        scene.add(mesh3)
+      }
 
       // }
     }

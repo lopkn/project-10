@@ -216,6 +216,8 @@ class c{
 
   static vel = 0.004
 
+  static chaosLimit = 2
+
   static my3Vel = {"vx":0,"vy":0,"vz":0}
 
   static thirdPerson = true
@@ -251,145 +253,145 @@ class c{
     camera.position.y += vy
     camera.position.z += vz
   }
-  static Nupdate(){
+  // static Nupdate(){
 
-    this.collided = false
-
-
-    let missilesObj = Object.values(gw.missiles)
-    missilesObj.forEach((e)=>{
-      e.update()
-    })
-
-    this.clenseCounter++
-    if(this.clenseCounter > 500){
-      gw.CLENSE(200)
-      this.clenseCounter=0
-    }
-
-    gw.pdate3()
-
-    if(this.spinX > 0.03){
-      this.spinX = 0.03
-    } else if(this.spinX < -0.03){
-      this.spinX = -0.03
-    }
-    if(this.spinZ > 3){
-      this.spinZ = 3
-    } else if(this.spinZ < -3){
-      this.spinZ = -3
-    }
-
-    camera.rotateX(this.spinX*2)
-    camera.rotateZ(this.spinZ*2)
-
-    let trs = 1/(this.vel*0.12*(this.gliding?0.06:1)+1.002)
-
-    this.spinX *= trs*trs
-    this.spinZ *= trs*trs
-
-    let lpos = {"x":camera.position.x,"y":camera.position.y,"z":camera.position.z}
-    camera.translateZ(-c.vel*4)
-
-    this.frameVel = {"x":camera.position.x-lpos.x,"y":camera.position.y-lpos.y,"z":camera.position.z-lpos.z}
+  //   this.collided = false
 
 
-    if(camera.position.y < camera.position.z*gw.SLslope){
-      camera.position.y = camera.position.z*gw.SLslope
-      this.vel *= 0.96
-      this.boost -= 2
-      this.collided = true
-    }
+  //   let missilesObj = Object.values(gw.missiles)
+  //   missilesObj.forEach((e)=>{
+  //     e.update()
+  //   })
+
+  //   this.clenseCounter++
+  //   if(this.clenseCounter > 500){
+  //     gw.CLENSE(200)
+  //     this.clenseCounter=0
+  //   }
+
+  //   gw.pdate3()
+
+  //   if(this.spinX > 0.03){
+  //     this.spinX = 0.03
+  //   } else if(this.spinX < -0.03){
+  //     this.spinX = -0.03
+  //   }
+  //   if(this.spinZ > 3){
+  //     this.spinZ = 3
+  //   } else if(this.spinZ < -3){
+  //     this.spinZ = -3
+  //   }
+
+  //   camera.rotateX(this.spinX*2)
+  //   camera.rotateZ(this.spinZ*2)
+
+  //   let trs = 1/(this.vel*0.12*(this.gliding?0.06:1)+1.002)
+
+  //   this.spinX *= trs*trs
+  //   this.spinZ *= trs*trs
+
+  //   let lpos = {"x":camera.position.x,"y":camera.position.y,"z":camera.position.z}
+  //   camera.translateZ(-c.vel*4)
+
+  //   this.frameVel = {"x":camera.position.x-lpos.x,"y":camera.position.y-lpos.y,"z":camera.position.z-lpos.z}
 
 
-    plane.position.z = camera.position.z
-    plane.position.x = camera.position.x
-    plane.position.y = gw.GPC(camera.position.z)
+  //   if(camera.position.y < camera.position.z*gw.SLslope){
+  //     camera.position.y = camera.position.z*gw.SLslope
+  //     this.vel *= 0.96
+  //     this.boost -= 2
+  //     this.collided = true
+  //   }
 
-    let tdy = lpos.y-camera.position.y
 
-    if(tdy > 0){
-    this.vel += Math.sqrt(tdy)/1500
-    } else{
-      this.vel -= Math.sqrt(-tdy)/1450
-      //725
-      if(this.vel < 0){
-      this.vel = 0.0000001
-      }
-      //originally outside
-    }
+  //   plane.position.z = camera.position.z
+  //   plane.position.x = camera.position.x
+  //   plane.position.y = gw.GPC(camera.position.z)
+
+  //   let tdy = lpos.y-camera.position.y
+
+  //   if(tdy > 0){
+  //   this.vel += Math.sqrt(tdy)/1500
+  //   } else{
+  //     this.vel -= Math.sqrt(-tdy)/1450
+  //     //725
+  //     if(this.vel < 0){
+  //     this.vel = 0.0000001
+  //     }
+  //     //originally outside
+  //   }
 
     
-    // if(this.vel > 1){
-    //   this.vel *= 1/(this.vel*0.001+1)
-    // }
-    if(this.vel > 0.3 && !this.gliding){
-      this.vel *= 0.3/(this.vel*0.0001+0.3)
-    }
+  //   // if(this.vel > 1){
+  //   //   this.vel *= 1/(this.vel*0.001+1)
+  //   // }
+  //   if(this.vel > 0.3 && !this.gliding){
+  //     this.vel *= 0.3/(this.vel*0.0001+0.3)
+  //   }
 
 
-    scene.background.b = this.vel
-    scene.background.r = this.vel*0.5
-    scene.background.g = this.vel*0.5
+  //   scene.background.b = this.vel
+  //   scene.background.r = this.vel*0.5
+  //   scene.background.g = this.vel*0.5
 
-    scene.fog.color = scene.background
+  //   scene.fog.color = scene.background
 
-    let COLLIDED = collisionChecker.collideAll()
-    if(COLLIDED){
-      this.vel *= c.gliding?0.94:0.805
-      this.collided = true
-      // console.log("COLLIDED: "+COLLIDED)
-    }
+  //   let COLLIDED = collisionChecker.collideAll()
+  //   if(COLLIDED){
+  //     this.vel *= c.gliding?0.94:0.805
+  //     this.collided = true
+  //     // console.log("COLLIDED: "+COLLIDED)
+  //   }
 
-    let planeHeight = camera.position.y-gw.GPC(camera.position.z)
-    this.pH = planeHeight
+  //   let planeHeight = camera.position.y-gw.GPC(camera.position.z)
+  //   this.pH = planeHeight
 
-    if(this.vel > 2){
-      let tv = this.vel -2
-      scene.background.b -= tv*15
-      scene.background.g -= tv*10
-      scene.background.r -= tv
-    } else if(planeHeight > 60){
-      if(this.vel>0.3){
-      this.vel /= (Math.sqrt(planeHeight-60)*0.00006*(this.gliding?0.2:1)+1)
-    } else {
-      this.vel /= (Math.sqrt(planeHeight-60)*0.00003*(this.gliding?0:1)+1)
-    }}
+  //   if(this.vel > c.chaosLimit){
+  //     let tv = this.vel - c.chaosLimit
+  //     scene.background.b -= tv*15
+  //     scene.background.g -= tv*10
+  //     scene.background.r -= tv
+  //   } else if(planeHeight > 60){
+  //     if(this.vel>0.3){
+  //     this.vel /= (Math.sqrt(planeHeight-60)*0.00006*(this.gliding?0.2:1)+1)
+  //   } else {
+  //     this.vel /= (Math.sqrt(planeHeight-60)*0.00003*(this.gliding?0:1)+1)
+  //   }}
 
 
-    light.position.x = camera.position.x
-    light.position.y = camera.position.y+0.4
-    light.position.z = camera.position.z-0.2
+  //   light.position.x = camera.position.x
+  //   light.position.y = camera.position.y+0.4
+  //   light.position.z = camera.position.z-0.2
 
-    light.intensity = Math.sqrt(this.vel)*4*this.lightIntensity
-    if(light.intensity > 5*this.lightIntensity){
-      light.intensity = 5*this.lightIntensity
-    }
-    if(this.thirdPerson){
-      this.fthird()
-    }
+  //   light.intensity = Math.sqrt(this.vel)*4*this.lightIntensity
+  //   if(light.intensity > 5*this.lightIntensity){
+  //     light.intensity = 5*this.lightIntensity
+  //   }
+  //   if(this.thirdPerson){
+  //     this.fthird()
+  //   }
 
-    this.disp(planeHeight)
-    // console.log(this.lpos.y,camera.position.y)
+  //   this.disp(planeHeight)
+  //   // console.log(this.lpos.y,camera.position.y)
 
-    if(this.collided === false){
-      let ttb = 2.6/planeHeight
-      c.boost += ttb>1?1:ttb
-      if(c.boost > 100+this.chaosMode*50-this.gliding*150){
-        c.boost = 100+this.chaosMode*50-this.gliding*150
-      }
-    }
+  //   if(this.collided === false){
+  //     let ttb = 2.6/planeHeight
+  //     c.boost += ttb>1?1:ttb
+  //     if(c.boost > 100+this.chaosMode*50-this.gliding*150){
+  //       c.boost = 100+this.chaosMode*50-this.gliding*150
+  //     }
+  //   }
 
-    if(camera.position.z > this.score[0]){
-      let heightbonus = 1/planeHeight
-      if(planeHeight < 0.2){
-        heightbonus = -50
-      }
-      this.score[1] += (camera.position.z-this.score[0])*(this.vel + heightbonus)
-      this.score[0] = camera.position.z
-    }
+  //   if(camera.position.z > this.score[0]){
+  //     let heightbonus = 1/planeHeight
+  //     if(planeHeight < 0.2){
+  //       heightbonus = -50
+  //     }
+  //     this.score[1] += (camera.position.z-this.score[0])*(this.vel + heightbonus)
+  //     this.score[0] = camera.position.z
+  //   }
 
-  }
+  // }
    static update(){
     this.collided = false
 
@@ -479,8 +481,8 @@ class c{
     let planeHeight = camera.position.y-gw.GPC(camera.position.z)
     this.pH = planeHeight
 
-    if(this.vel > 2){
-      let tv = this.vel -2
+    if(this.vel > c.chaosLimit){
+      let tv = this.vel - c.chaosLimit
       scene.background.b -= tv*15
       scene.background.g -= tv*10
       scene.background.r -= tv
@@ -1146,7 +1148,7 @@ init();
 const loader = new THREE.GLTFLoader();
 
 
-  loader.load( './source/test2.gltf', function ( gltf ) {
+  loader.load( './source/Cube.gltf', function ( gltf ) {
 
     gltf.scene.position.y += 10
     gltf.scene.rotateX(1)
@@ -1208,10 +1210,10 @@ setInterval(()=>{
 
 
 
-//transition gen
-//frame fix
-//curve gen
+//transition gen -
+//frame fix -
+//curve gen -
 //rare gen
 //plane dmg
-//gen push
+//gen push -
 //hell fix
