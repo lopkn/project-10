@@ -10,10 +10,12 @@ let Height = window.innerWidth >window.innerHeight?window.innerHeight:window.inn
 let Width = window.innerWidth >window.innerHeight?window.innerWidth:window.innerHeight
 myCanvas.style.top = 0
 myCanvas.style.left = 0
+myCanvas.style.zIndex = 5
 myCanvas.width = Width
 myCanvas.height = Height
 myCanvas.style.position = "absolute"
 
+let ctx = myCanvas.getContext("2d")
 
 let music1 = new Audio()
 music1.src = "../../tl-music/N4Weave.mp3"
@@ -53,6 +55,7 @@ class gw{
 
   static colliders = {}
 
+
   static boarder = 0
 
   // static bder = [{"b":0,"mult":1,"gbk":[],"lim":-6},{"b":0,"mult":0.2,"gbk":[],"lim":20000}]
@@ -78,7 +81,7 @@ class gw{
   }
 
   static rmObj(n){
-    if(scene.getObjectById(n).material){
+    if(scene.getObjectById(n).material && scene.getObjectById(n).material.important !== true){
       scene.getObjectById(n).material.dispose()
     }
     if(scene.getObjectById(n).geometry){
@@ -213,8 +216,16 @@ class gw{
 class c{
 
   static score = [0,0]
+  static collideds = {}
 
-  static vel = 0.004
+  static mechanics = {
+    "wing1":{"damage":1},
+    "wing2":{"damage":1},
+    "lighting":{"damage":1},
+    "boosting":{"damage":1},
+  }
+
+  static vel = 0.04
 
   static chaosLimit = 2
 
@@ -392,7 +403,39 @@ class c{
   //   }
 
   // }
-   static update(){
+
+   static makeLine(x,y,z,a,b,c,mat){
+
+    scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(x,y,z),new THREE.Vector3(a,b,c)]),mat))
+
+   }
+
+   static update(UPDATENO){
+
+    if(UPDATENO%60 === 0){
+
+      this.mechanics.wing1.damage += 0.025
+      this.mechanics.wing2.damage += 0.025
+      this.mechanics.boosting.damage += 0.025
+
+      if(this.mechanics.wing1.damage> 1){
+        this.mechanics.wing1.damage = 1
+      }
+      if(this.mechanics.wing2.damage> 1){
+        this.mechanics.wing2.damage = 1
+      }
+      if(this.mechanics.lighting.damage> 1){
+        this.mechanics.lighting.damage = 1
+      }
+      if(this.mechanics.boosting.damage> 1){
+        this.mechanics.boosting.damage = 1
+      }
+
+      this.updatePlaneColor()
+    }
+      this.mechanics.lighting.damage += 0.0125/60
+
+
     this.collided = false
 
     let missilesObj = Object.values(gw.missiles)
@@ -427,6 +470,8 @@ class c{
 
     let lpos = {"x":camera.position.x,"y":camera.position.y,"z":camera.position.z}
     camera.translateZ(-c.vel*2)
+
+    // this.makeLine(lpos.x,lpos.y,lpos.z,camera.position.x,camera.position.y,camera.position.z,new THREE.MeshStandardMaterial({ color:  0xff0000}))
 
     this.frameVel = {"x":camera.position.x-lpos.x,"y":camera.position.y-lpos.y,"z":camera.position.z-lpos.z}
 
@@ -465,9 +510,9 @@ class c{
     }
 
 
-    scene.background.b = this.vel
-    scene.background.r = this.vel*0.5
-    scene.background.g = this.vel*0.5
+    scene.background.b = this.vel*2/this.chaosLimit
+    scene.background.r = this.vel/this.chaosLimit
+    scene.background.g = this.vel/this.chaosLimit
 
     scene.fog.color = scene.background
 
@@ -475,7 +520,17 @@ class c{
     if(COLLIDED){
       this.vel *= c.gliding?0.97:0.9
       this.collided = true
-      // console.log("COLLIDED: "+COLLIDED)
+      // if(this.collideds[COLLIDED]!==undefined){
+      //   // this.collideds[COLLIDED].amount += 1
+      // } else {
+      //   // this.collideds[COLLIDED] = {"amount":0,"damagePart":this.chooseDamagePart()}
+      // }
+      let part = this.chooseDamagePart()
+      this.mechanics[part].damage -= Math.random()*0.2*c.vel
+      if(this.mechanics[part].damage < 0){
+        this.mechanics[part].damage = 0
+      }
+      this.updatePlaneColor()
     }
 
     let planeHeight = camera.position.y-gw.GPC(camera.position.z)
@@ -498,10 +553,12 @@ class c{
     light.position.y = camera.position.y+0.4
     light.position.z = camera.position.z-0.2
 
-    light.intensity = Math.sqrt(this.vel)*4*this.lightIntensity
+    light.intensity = Math.sqrt(this.vel)*4*this.lightIntensity*this.mechanics.lighting.damage
     if(light.intensity > 5*this.lightIntensity){
       light.intensity = 5*this.lightIntensity
     }
+
+
     if(this.thirdPerson){
       this.fthird()
     }
@@ -529,6 +586,19 @@ class c{
     }
 
 
+  }
+
+  static chooseDamagePart(){
+    let r = Math.random()*4
+    if(r < 1){
+      return("wing1")
+    } else if(r < 2){
+      return("wing2")
+    } else if(r < 3){
+      return("lighting")
+    } else if(r < 4){
+      return("boosting")
+    }
   }
 
   static disp(planeHeight){
@@ -576,6 +646,20 @@ class c{
 
       wing2.translateX(-0.18)
       wing2.rotateY(0.2)
+  }
+
+  static updatePlaneColor(){
+    wing1.material.color.r = wing1.material.Acolor.r -1 + c.mechanics.wing1.damage
+    wing1.material.color.g = wing1.material.Acolor.g -1 + c.mechanics.wing1.damage
+    wing1.material.color.b = wing1.material.Acolor.b -1 + c.mechanics.wing1.damage
+
+    wing2.material.color.r = wing2.material.Acolor.r -1 + c.mechanics.wing2.damage
+    wing2.material.color.g = wing2.material.Acolor.g -1 + c.mechanics.wing2.damage
+    wing2.material.color.b = wing2.material.Acolor.b -1 + c.mechanics.wing2.damage
+
+    person.material.color.r = person.material.Acolor.r -1 + (c.mechanics.boosting.damage+c.mechanics.lighting.damage)/2
+    person.material.color.g = person.material.Acolor.g -1 + (c.mechanics.boosting.damage+c.mechanics.lighting.damage)/2
+    person.material.color.b = person.material.Acolor.b -1 + (c.mechanics.boosting.damage+c.mechanics.lighting.damage)/2
   }
 
 }
@@ -639,26 +723,38 @@ const createWorld = () => {
   // mesh3.name = gw.idcr()
   // scene.add(mesh3)
   // }
-  let mat1 = new THREE.MeshStandardMaterial({ color:  "rgb(255,255,0)"})
-  mat1.opacity = 0.6
-  mat1.depthWrite = false
-  mat1.transparent = true
+  let mat1 = new THREE.MeshStandardMaterial({ color:  "rgb(255,255,0)", opacity: 0.6, transparent: true})
+  let mat2 = new THREE.MeshStandardMaterial({ color:  "rgb(255,255,0)", opacity: 0.6, transparent: true})
+  let mat3 = new THREE.MeshStandardMaterial({ color:  "rgb(255,255,0)", opacity: 0.6, transparent: true})
+
+  // mat1.opacity = 0.6
+  // mat1.depthWrite = false
+  // mat1.transparent = true
+
+  mat1.Acolor = {"r":1,"g":1,"b":0}
+  mat2.Acolor = {"r":1,"g":1,"b":0}
+  mat3.Acolor = {"r":1,"g":1,"b":0}
+
+
   person = new THREE.Mesh(
       new THREE.BoxGeometry(0.1,0.1,0.2),
       mat1
       )
   scene.add(person)
+  person.renderOrder = 2
 
   wing1 = new THREE.Mesh(
       new THREE.BoxGeometry(0.3,0.05,0.15),
-      mat1
+      mat2
       )
+  wing1.renderOrder = 1
   scene.add(wing1)
 
   wing2 = new THREE.Mesh(
       new THREE.BoxGeometry(0.3,0.05,0.15),
-      mat1
+      mat3
       )
+  wing2.renderOrder = 1
   scene.add(wing2)
 
   for(let i = 0; i < 400; i++){
@@ -779,7 +875,7 @@ document.addEventListener("keydown",(e)=>{
   switch(k){
 
   case "[":
-    keysHeld[k] = ()=>{c.lightIntensity -= 0.01
+    keysHeld[k] = ()=>{c.lightIntensity -= 0.005
     if(c.lightIntensity < 0){
       c.lightIntensity = 0
     }
@@ -787,7 +883,7 @@ document.addEventListener("keydown",(e)=>{
     break;
 
   case "]":
-    keysHeld[k] = ()=>{c.lightIntensity += 0.01
+    keysHeld[k] = ()=>{c.lightIntensity += 0.005
     if(c.lightIntensity > 1){
       c.lightIntensity = 1
     }
@@ -804,25 +900,43 @@ document.addEventListener("keydown",(e)=>{
     break;
   case "c":
     if(c.chaosMode){
-      wing1.material.color.g += 1
+      wing1.material.Acolor.g += 1
+      wing2.material.Acolor.g += 1
+      person.material.Acolor.g += 1
+
       c.chaosMode = !c.chaosMode
     } else if(c.boost > 10){
       c.boost -= 10
-      wing1.material.color.g -= 1
+      wing1.material.Acolor.g -= 1
+      wing2.material.Acolor.g -= 1
+      person.material.Acolor.g -= 1
       c.chaosMode = !c.chaosMode
     }
+      c.updatePlaneColor()
     break;
 
   case "x":
     if(c.gliding){
-      wing1.material.color.r += 1
-      wing1.material.color.b -= 1
+      wing1.material.Acolor.r += 1
+      wing1.material.Acolor.b -= 1
+
+      wing2.material.Acolor.r += 1
+      wing2.material.Acolor.b -= 1
+
+      person.material.Acolor.r += 1
+      person.material.Acolor.b -= 1
       c.gliding = !c.gliding
     } else {
-      wing1.material.color.r -= 1
-      wing1.material.color.b += 1
+      wing1.material.Acolor.r -= 1
+      wing1.material.Acolor.b += 1
+      wing2.material.Acolor.r -= 1
+      wing2.material.Acolor.b += 1
+      person.material.Acolor.r -= 1
+      person.material.Acolor.b += 1
       c.gliding = !c.gliding
     }
+      c.updatePlaneColor()
+
     break;
 
 
@@ -865,16 +979,16 @@ document.addEventListener("keydown",(e)=>{
     break;
 
     case "w":
-      keysHeld[k] = ()=>{c.spinX += 0.0005*c.vel*3*c.throttle/(c.gliding?c.vel*4/(c.vel>1?1:c.vel*0.8+0.2):1);c.vel/=(c.gliding?(1-c.throttle*0.0001):(1+c.throttle*0.0001))}
+      keysHeld[k] = ()=>{c.spinX += (0.0005*c.vel*3*c.throttle/(c.gliding?c.vel*4/(c.vel>1?1:c.vel*0.8+0.2):1))*(c.mechanics.wing2.damage+c.mechanics.wing1.damage)/2;c.vel/=(c.gliding?(1-c.throttle*0.0001):(1+c.throttle*0.0001))}
       break;
     case "d":
-      keysHeld[k] = ()=>{c.spinZ -= 0.0005*c.vel*3*c.throttle/(c.gliding?c.vel*4/(c.vel>1?1:c.vel*0.8+0.2):1)}
+      keysHeld[k] = ()=>{c.spinZ -=( 0.0005*c.vel*3*c.throttle/(c.gliding?c.vel*4/(c.vel>1?1:c.vel*0.8+0.2):1))*c.mechanics.wing2.damage}
       break;
     case "a":
-      keysHeld[k] = ()=>{c.spinZ += 0.0005*c.vel*3*c.throttle/(c.gliding?c.vel*4/(c.vel>1?1:c.vel*0.8+0.2):1)}
+      keysHeld[k] = ()=>{c.spinZ +=( 0.0005*c.vel*3*c.throttle/(c.gliding?c.vel*4/(c.vel>1?1:c.vel*0.8+0.2):1) )*c.mechanics.wing1.damage}
       break;
     case "s":
-      keysHeld[k] = ()=>{c.spinX -= 0.0005*c.vel*3*c.throttle/(c.gliding?c.vel*4/(c.vel>1?1:c.vel*0.8+0.2):1);c.vel/=(c.gliding?(1-c.throttle*0.0001):(1+c.throttle*0.0001))}
+      keysHeld[k] = ()=>{c.spinX -= (0.0005*c.vel*3*c.throttle/(c.gliding?c.vel*4/(c.vel>1?1:c.vel*0.8+0.2):1))*(c.mechanics.wing2.damage+c.mechanics.wing1.damage)/2;c.vel/=(c.gliding?(1-c.throttle*0.0001):(1+c.throttle*0.0001))}
       break;
     case "i":
       keysHeld[k] = ()=>{if(c.thirdPerson){c.rotX -= 0.005}else{c.rotX += 0.005}}
@@ -928,9 +1042,9 @@ document.addEventListener("keydown",(e)=>{
     case "ArrowUp":
       if(e.shiftKey||c.chaosMode){
         
-        keysHeld[k] = ()=>{if(c.boost > 0.1){c.boost-=0.1;c.vel+=0.005}}
+        keysHeld[k] = ()=>{if(c.boost > 0.1){c.boost-=0.1;c.vel+=0.005*c.mechanics.boosting.damage}}
       }else{
-      keysHeld[k] = ()=>{if(c.boost > 0.02){c.boost-=0.02;c.vel+=0.001}}}
+      keysHeld[k] = ()=>{if(c.boost > 0.02){c.boost-=0.02;c.vel+=0.001*c.mechanics.boosting.damage}}}
       break;
     case "ArrowDown":
     case "0":
@@ -988,7 +1102,7 @@ const init = () => {
 
   scene.add(light);
 
-  renderer = new THREE.WebGLRenderer({ antialias: pastCookie.antialias , canvas: myCanvas});
+  renderer = new THREE.WebGLRenderer({ antialias: pastCookie.antialias});
   // renderer.setPixelRatio( 0.1 );
   renderer.setPixelRatio( gw.ratio );
   renderer.setSize(window.innerWidth, window.innerHeight);
@@ -1035,7 +1149,7 @@ let animate = () => {
   }
 
   throttleCounter++
-  c.update()
+  c.update(throttleCounter)
   if((throttleCounter%2 !== 0 && MASTERTHROTTLE)){
     return;
   }
@@ -1217,3 +1331,4 @@ setInterval(()=>{
 //plane dmg
 //gen push -
 //hell fix
+//plane line

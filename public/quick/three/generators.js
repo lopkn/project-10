@@ -529,6 +529,10 @@ class GEN5{
 
     this.gbk = []
     this.dx = dx?dx:500
+
+    this.material = new THREE.MeshStandardMaterial({ color:  0xff0000})
+    this.material.important = true
+    this.material.emissive.r = 2
   }
 
   update(){
@@ -546,11 +550,12 @@ class GEN5{
 
       let mesh3 = new THREE.Mesh(
       new THREE.BoxGeometry(1,1,4),
-      new THREE.MeshStandardMaterial({ color:  0xff0000}))
+      // new THREE.MeshStandardMaterial({ color:  0xff0000})
+      this.material
+      )
       mesh3.position.x += tx
       mesh3.position.z += this.boarder
       mesh3.position.y += gw.GPC(mesh3.position.z)+0.5
-      mesh3.material.emissive.r = 2
       mesh3.rotateX(0.37)
         mesh3.name = "GEN5"
 
@@ -567,11 +572,11 @@ class GEN5{
 
       let mesh4 = new THREE.Mesh(
       new THREE.BoxGeometry(1,1,4),
-      new THREE.MeshStandardMaterial({ color:  0xff0000}))
+      this.material
+     )
       mesh4.position.x += tx
       mesh4.position.z += this.boarder
       mesh4.position.y += gw.GPC(mesh4.position.z)+0.5
-      mesh4.material.emissive.r = 2
       mesh4.rotateX(0.37)
         mesh4.name = "GEN5.2"
 
@@ -831,6 +836,12 @@ class GEN9{
     this.boarder = b?b:0
     this.dx = dx?dx:500
     this.counter = 0
+
+    this.material = new THREE.MeshStandardMaterial({ color:  0x007000})
+    this.material.important = true
+    this.material.emissive.g = 2
+    this.material.emissive.b = 2
+
   }
 
   update(){
@@ -850,12 +861,13 @@ class GEN9{
 
       let mesh3 = new THREE.Mesh(
       new THREE.BoxGeometry(3,3,12),
-      new THREE.MeshStandardMaterial({ color:  0x007000}))
+      // new THREE.MeshStandardMaterial({ color:  0x007000})
+      this.material
+      )
       mesh3.position.x += tx
       mesh3.position.z += this.boarder
       mesh3.position.y += gw.GPC(mesh3.position.z)+ Math.ceil(c.pH/500)*500
-      mesh3.material.emissive.g = 2
-      mesh3.material.emissive.b = 2
+
       if(this.counter%2 === 0){
         mesh3.position.y-=500
       }
@@ -873,13 +885,10 @@ class GEN9{
       tx += 500
 
       let mesh4 = new THREE.Mesh(
-      new THREE.BoxGeometry(3,3,12),
-      new THREE.MeshStandardMaterial({ color:  0x007000}))
+      new THREE.BoxGeometry(3,3,12),this.material)
       mesh4.position.x += tx
       mesh4.position.z += this.boarder
       mesh4.position.y += gw.GPC(mesh4.position.z)+ Math.ceil(c.pH/500)*500
-      mesh4.material.emissive.g = 2
-      mesh4.material.emissive.b = 2
       if(this.counter%2 === 0){
         mesh4.position.y-=500
       }
@@ -903,7 +912,7 @@ class GEN9{
 class TRIG1{
 
   constructor(){
-    this.boarder = 100
+    this.boarder = 100000
     // this.transitor = true
   }
   update(){
@@ -925,7 +934,7 @@ class TRAN1{
   }
 
   update(){
-    plane.material.color.r += 0.001
+    plane.material.color.r += 0.0001
     if(plane.material.color.r > 0.28){
       this.transit()
       gw.pdate3s.forEach((e,i)=>{
