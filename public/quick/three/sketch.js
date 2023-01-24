@@ -237,6 +237,7 @@ class c{
 
   static chaosMode = false
   static gliding = false
+  static music = false
   static paused = false
 
   static thirdPersonBack = 0.5
@@ -652,14 +653,19 @@ class c{
     wing1.material.color.r = wing1.material.Acolor.r -1 + c.mechanics.wing1.damage
     wing1.material.color.g = wing1.material.Acolor.g -1 + c.mechanics.wing1.damage
     wing1.material.color.b = wing1.material.Acolor.b -1 + c.mechanics.wing1.damage
+    wing1.material.opacity = 1 -0.4 *c.mechanics.wing1.damage
+
 
     wing2.material.color.r = wing2.material.Acolor.r -1 + c.mechanics.wing2.damage
     wing2.material.color.g = wing2.material.Acolor.g -1 + c.mechanics.wing2.damage
     wing2.material.color.b = wing2.material.Acolor.b -1 + c.mechanics.wing2.damage
+    wing2.material.opacity = 1 -0.4 *c.mechanics.wing2.damage
 
     person.material.color.r = person.material.Acolor.r -1 + (c.mechanics.boosting.damage+c.mechanics.lighting.damage)/2
     person.material.color.g = person.material.Acolor.g -1 + (c.mechanics.boosting.damage+c.mechanics.lighting.damage)/2
     person.material.color.b = person.material.Acolor.b -1 + (c.mechanics.boosting.damage+c.mechanics.lighting.damage)/2
+    person.material.opacity = 1 - 0.4 *(c.mechanics.boosting.damage+c.mechanics.lighting.damage)/2
+
   }
 
 }
@@ -1159,7 +1165,7 @@ let animate = () => {
     scene.fog.far = 500 + c.vel*83
   }
 
-  if(music1.paused){
+  if(music1.paused && c.music){
     try{music1.play()}catch{}
   }
 
