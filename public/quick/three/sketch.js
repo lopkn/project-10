@@ -19,6 +19,14 @@ let ctx = myCanvas.getContext("2d")
 
 let music1 = new Audio()
 music1.src = "../../tl-music/N4Weave.mp3"
+let soundEffect1 = new Audio()
+soundEffect1.src = "./s.mp3"
+let soundEffect2 = new Audio()
+soundEffect2.src = "./s2.mp3"
+let soundEffect3 = new Audio()
+soundEffect3.src = "./s3.mp3"
+let soundEffect4 = new Audio()
+soundEffect4.src = "./s4.mp3"
 
 const socket = io.connect('/')
 
@@ -1048,9 +1056,10 @@ document.addEventListener("keydown",(e)=>{
     case "ArrowUp":
       if(e.shiftKey||c.chaosMode){
         
-        keysHeld[k] = ()=>{if(c.boost > 0.1){c.boost-=0.1;c.vel+=0.005*c.mechanics.boosting.damage}}
+        
+        keysHeld[k] = ()=>{if(c.boost > 0.1){c.boost-=0.1;c.vel+=0.005*c.mechanics.boosting.damage;}}
       }else{
-      keysHeld[k] = ()=>{if(c.boost > 0.02){c.boost-=0.02;c.vel+=0.001*c.mechanics.boosting.damage}}}
+      keysHeld[k] = ()=>{if(c.boost > 0.02){c.boost-=0.02;c.vel+=0.001*c.mechanics.boosting.damage;}}}
       break;
     case "ArrowDown":
     case "0":
@@ -1268,12 +1277,40 @@ init();
 const loader = new THREE.GLTFLoader();
 
 
-  loader.load( './source/Cube.gltf', function ( gltf ) {
+  loader.load( './source/s_building2.gltf', function ( gltf ) {
 
-    gltf.scene.position.y += 10
-    gltf.scene.rotateX(1)
+    let model = gltf.scene
+    gltf.scene.position.y += 40
+    gltf.scene.position.z += 100
+    // gltf.scene.scale.multiplyScalar(5)
+    // let mesh3 = new THREE.Mesh(
+    // new THREE.BoxGeometry(30,170,30),
+    // new THREE.MeshStandardMaterial({ color: 0xffffff }))
+
+    // mesh3.position.z = gltf.scene.position.z
+    // mesh3.position.y = gltf.scene.position.y
+    // mesh3.position.x = gltf.scene.position.x + 50
+
+     let bbox = new THREE.Box3().setFromObject(model);
+        let helper = new THREE.Box3Helper(bbox, new THREE.Color(0, 255, 0));
+        let size = bbox.getSize(new THREE.Vector3());
+        console.log(size)
+    // gltf.scene.rotateY(1)
+    //1.2368643351396535, _y: 0.4719777676633856, _z: -0.918989255293726
+    // gltf.scene.rotateX(1)
+
+    gltf.scene.rotateX(1.2368643351396535)
+    gltf.scene.rotateY(0.4719777676633856)
+    gltf.scene.rotateZ(-0.918989255293726)
+
+
+
+    console.log(gltf.scene.id)
 
   scene.add( gltf.scene );
+
+  
+
 
 }, undefined, function ( error ) {
 
@@ -1328,6 +1365,74 @@ setInterval(()=>{
 // }
 // animate2()
 
+
+function soundEf1(){
+  if(soundEffect1.paused || soundEffect1.currentTime > 0.5){
+    soundEffect1.currentTime = 0
+    soundEffect1.Mycounter = 0
+    soundEffect1.play()
+  } else if(soundEffect1.currentTime > 0.15){
+    soundEffect1.currentTime = 0.02
+    soundEffect1.Mycounter += 1
+    if(soundEffect1.Mycounter%3 === 0 &&soundEffect1.Mycounter>10){
+      soundEffect2.currentTime = 0.02
+      soundEffect2.play()
+    }
+    if(soundEffect1.Mycounter%2 === 0 &&soundEffect1.Mycounter>27){
+      soundEffect3.currentTime = 0.02
+      soundEffect3.play()
+    }
+    if(soundEffect1.Mycounter>37){
+      soundEffect4.currentTime = 0.02
+      soundEffect4.play()
+    }
+  }
+}
+// function soundEf1(){
+//   if(soundEffect1.paused || soundEffect1.currentTime > 0.5){
+//     soundEffect1.currentTime = 0
+//     soundEffect1.playbackRate = 1    
+//     soundEffect1.play()
+//   }else if(soundEffect1.currentTime > 0.2){
+//     soundEffect1.currentTime = 0.02
+//     if(soundEffect1.playbackRate < 3){
+//     soundEffect1.playbackRate += 0.05}
+//     if(soundEffect1.playbackRate > 2.25){
+//     soundEf2()
+//     if(soundEffect1.playbackRate > 3){
+//       soundEf3()
+//     }
+//     }
+//   }
+// }
+
+// function soundEf2(){
+//   if(soundEffect2.paused || soundEffect2.currentTime > 0.5){
+//     soundEffect2.currentTime = 0
+//     soundEffect2.playbackRate = 1    
+//     soundEffect2.play()
+//   }else if(soundEffect2.currentTime > 0.2){
+//     soundEffect2.currentTime = 0.02
+//     if(soundEffect2.playbackRate < 2.25){
+//       console.log(soundEffect2.playbackRate)
+//     soundEffect2.playbackRate += 0.05}else{
+//     soundEf3()}
+
+//   }
+// }
+
+// function soundEf3(){
+//   console.log("?")
+//   if(soundEffect3.paused || soundEffect3.currentTime > 0.5){
+//     soundEffect3.currentTime = 0
+//     soundEffect3.playbackRate = 1    
+//     soundEffect3.play()
+//   }else if(soundEffect3.currentTime > 0.2){
+//     soundEffect3.currentTime = 0.02
+//     if(soundEffect3.playbackRate < 3){
+//     soundEffect3.playbackRate += 0.05}
+//   }
+// }
 
 
 //transition gen -
