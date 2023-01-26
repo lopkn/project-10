@@ -414,8 +414,11 @@ class c{
   // }
 
    static makeLine(x,y,z,a,b,c,mat){
-
-    scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(x,y,z),new THREE.Vector3(a,b,c)]),mat))
+    let l = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,0),new THREE.Vector3(a-x,b-y,c-z)]),mat)
+    l.position.x = x
+    l.position.y = y
+    l.position.z = z
+    scene.add(l)
 
    }
 
@@ -1178,10 +1181,10 @@ let animate = () => {
     try{music1.play()}catch{}
   }
 
-  // if(Math.random()>0.99){
-  //   new missile(camera.position.x+Math.random()*150-75,camera.position.y+Math.random()*50-175,camera.position.z+400)
-  //   console.log("missile")
-  // }
+  if(Math.random()>0.99){
+    new missile2(camera.position.x+Math.random()*150-75,camera.position.y+Math.random()*50-330,camera.position.z+800)
+    console.log("missile")
+  }
 
   // controls.update();
 
