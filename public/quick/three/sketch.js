@@ -73,6 +73,19 @@ class gw{
     return(this.idC)
   }
 
+  static turnZ(amount){
+    if(amount>1){amount = 1}
+    if(amount<-1){amount = -1} 
+    c.spinZ += ( 0.0005*c.vel*3*c.throttle/(c.gliding?c.vel*4/(c.vel>1?1:c.vel*0.8+0.2):1) )*c.mechanics.wing1.damage*amount
+  }
+  static turnX(amount){
+    if(amount>1){amount = 1}
+    if(amount<-1){amount = -1} 
+
+    c.spinX += (0.0005*c.vel*3*c.throttle/(c.gliding?c.vel*4/(c.vel>1?1:c.vel*0.8+0.2):1))*(c.mechanics.wing2.damage+c.mechanics.wing1.damage)/2*amount;
+    c.vel/=(c.gliding?(1-c.throttle*0.0001):(1+c.throttle*0.0001))
+  }
+
   static GPC(z){
     return(z*this.SLslope)
   }
@@ -225,6 +238,10 @@ class c{
 
   static score = [0,0]
   static collideds = {}
+
+  static mouseLocked = false
+  static mouseDisp = {"x":0,"y":0,"sensitivity":1}
+  static turningInfo = {"fx":0,"fz":0}
 
   static mechanics = {
     "wing1":{"damage":1},
@@ -684,7 +701,17 @@ class c{
 let mouseX = 0
 let mouseY = 0
 
-onmousemove = (e)=>{mouseX = (e.clientX); mouseY = (e.clientY)}
+// onmousemove = (e)=>{mouseX = (e.clientX); mouseY = (e.clientY)}
+document.addEventListener("mousemove",(e)=>{
+  mouseX = e.clientX
+  mouseY = e.clientY
+
+  if(c.mouseLocked){
+    c.mouseDisp.x += e.movementX
+    c.mouseDisp.y += e.movementY
+  }
+
+})
 
 const createWorld = () => {
   mesh = new THREE.Mesh(
@@ -863,11 +890,21 @@ class vectorFuncs{
 
 document.addEventListener("mousedown",(e)=>{
   mesh.rotateZ(0.4);
-  keysHeld["mdl"] = ()=>{
-    let ovn = vectorFuncs.originVectorNormalize(mouseX-Width/2,mouseY-Height/2)
-    c.spinX += -0.0005*c.vel*3*ovn[1]*c.throttle;c.vel/=(1+c.throttle*0.0001)
-    c.spinZ -= 0.0005*c.vel*3*ovn[0]*c.throttle
-  }
+  // keysHeld["mdl"] = ()=>{
+  //   let ovn = vectorFuncs.originVectorNormalize(mouseX-Width/2,mouseY-Height/2)
+  //   c.spinX += -0.0005*c.vel*3*ovn[1]*c.throttle;c.vel/=(1+c.throttle*0.0001)
+  //   c.spinZ -= 0.0005*c.vel*3*ovn[0]*c.throttle
+  // }
+
+}
+)
+
+myCanvas.addEventListener("mousedown",()=>{
+  if(c.mouseLocked){
+      myCanvas.requestPointerLock()
+    } else {
+      document.exitPointerLock()
+    }
 })
 
 document.addEventListener("mouseup",(e)=>{
@@ -880,7 +917,22 @@ setInterval(()=>{
   let objk = Object.keys(keysHeld)
   objk.forEach((e)=>{
     keysHeld[e]()
-  },100)
+  })
+
+  c.turningInfo.fz -= c.mouseDisp.x/10
+  c.turningInfo.fx += c.mouseDisp.y/10
+  // < negative
+  if(Math.random()>0.99){
+    console.log(c.mouseDisp.x/5)
+  }
+
+  c.mouseDisp.x *= 0.8
+  c.mouseDisp.y *= 0.8
+
+  gw.turnX(c.turningInfo.fx)
+  gw.turnZ(c.turningInfo.fz)
+
+  c.turningInfo = {"fx":0,"fz":0}
 })
 
 
@@ -906,6 +958,15 @@ document.addEventListener("keydown",(e)=>{
       c.lightIntensity = 1
     }
   }
+    break;
+
+  case "h":
+  c.mouseLocked = !c.mouseLocked
+    // if(!c.mouseLocked){
+    //   async () => {await myCanvas.requestPointerLock()}
+    // } else {
+    //   document.exitPointerLock()
+    // }
     break;
 
   case "y":
@@ -1013,17 +1074,29 @@ document.addEventListener("keydown",(e)=>{
 
     break;
 
+    // case "w":
+    //   keysHeld[k] = ()=>{c.spinX += (0.0005*c.vel*3*c.throttle/(c.gliding?c.vel*4/(c.vel>1?1:c.vel*0.8+0.2):1))*(c.mechanics.wing2.damage+c.mechanics.wing1.damage)/2;c.vel/=(c.gliding?(1-c.throttle*0.0001):(1+c.throttle*0.0001))}
+    //   break;
+    // case "d":
+    //   keysHeld[k] = ()=>{c.spinZ -=( 0.0005*c.vel*3*c.throttle/(c.gliding?c.vel*4/(c.vel>1?1:c.vel*0.8+0.2):1))*c.mechanics.wing2.damage}
+    //   break;
+    // case "a":
+    //   keysHeld[k] = ()=>{c.spinZ +=( 0.0005*c.vel*3*c.throttle/(c.gliding?c.vel*4/(c.vel>1?1:c.vel*0.8+0.2):1) )*c.mechanics.wing1.damage}
+    //   break;
+    // case "s":
+    //   keysHeld[k] = ()=>{c.spinX -= (0.0005*c.vel*3*c.throttle/(c.gliding?c.vel*4/(c.vel>1?1:c.vel*0.8+0.2):1))*(c.mechanics.wing2.damage+c.mechanics.wing1.damage)/2;c.vel/=(c.gliding?(1-c.throttle*0.0001):(1+c.throttle*0.0001))}
+    //   break;
     case "w":
-      keysHeld[k] = ()=>{c.spinX += (0.0005*c.vel*3*c.throttle/(c.gliding?c.vel*4/(c.vel>1?1:c.vel*0.8+0.2):1))*(c.mechanics.wing2.damage+c.mechanics.wing1.damage)/2;c.vel/=(c.gliding?(1-c.throttle*0.0001):(1+c.throttle*0.0001))}
+      keysHeld[k] = ()=>{c.turningInfo.fx += 1}
       break;
     case "d":
-      keysHeld[k] = ()=>{c.spinZ -=( 0.0005*c.vel*3*c.throttle/(c.gliding?c.vel*4/(c.vel>1?1:c.vel*0.8+0.2):1))*c.mechanics.wing2.damage}
+      keysHeld[k] = ()=>{c.turningInfo.fz -= 1}
       break;
     case "a":
-      keysHeld[k] = ()=>{c.spinZ +=( 0.0005*c.vel*3*c.throttle/(c.gliding?c.vel*4/(c.vel>1?1:c.vel*0.8+0.2):1) )*c.mechanics.wing1.damage}
+      keysHeld[k] = ()=>{c.turningInfo.fz += 1}
       break;
     case "s":
-      keysHeld[k] = ()=>{c.spinX -= (0.0005*c.vel*3*c.throttle/(c.gliding?c.vel*4/(c.vel>1?1:c.vel*0.8+0.2):1))*(c.mechanics.wing2.damage+c.mechanics.wing1.damage)/2;c.vel/=(c.gliding?(1-c.throttle*0.0001):(1+c.throttle*0.0001))}
+      keysHeld[k] = ()=>{c.turningInfo.fx -= 1}
       break;
     case "i":
       keysHeld[k] = ()=>{if(c.thirdPerson){c.rotX -= 0.005}else{c.rotX += 0.005}}
@@ -1117,6 +1190,8 @@ document.addEventListener("keyup",(e)=>{
   let k = e.key
   keysHeld[k] = ()=>{}
 })
+
+
 
 
 
@@ -1467,3 +1542,4 @@ function soundEf1(){
 //pause fix
 //2d plane UI
 //help
+//plane trashed fix
