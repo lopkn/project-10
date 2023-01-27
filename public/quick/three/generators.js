@@ -191,29 +191,27 @@ class missile{
 class missile2{
   constructor(x,y,z){
     this.body = new THREE.Mesh(
-      new THREE.BoxGeometry(1,1,3),
+      new THREE.BoxGeometry(2,2,6),
       new THREE.MeshStandardMaterial({ color:  0xff0000}))
     this.body.position.x = x
     this.body.position.y = y
     this.body.position.z = z
-    console.log(z)
     this.body.name = "missile"
-
-    // this.cX = (Math.random()*25-1.25)*c.vel
-    // this.cY = (Math.random()*25-1.25)*c.vel
-    // this.cZ = (Math.random()*25-1.25)*c.vel
-
-    // this.cP = 30+Math.random()*45
 
     this.lastpos = [x,y,z]
 
 
     scene.add(this.body)
 
-    let d = dist3(camera.position.x,camera.position.y,camera.position.z,this.body.position.x,this.body.position.y,this.body.position.z)
-    let dx = this.body.position.x-camera.position.x
-    let dz = this.body.position.z-camera.position.z
-    let dy = this.body.position.y-camera.position.y
+    let aimx = camera.position.x + 400*c.frameVel.x + Math.random()*420*c.frameVel.x
+    let aimy = camera.position.y + 60*c.frameVel.y + Math.random()*120*c.frameVel.y
+    let aimz = camera.position.z + 60*c.frameVel.z + Math.random()*120*c.frameVel.z
+
+
+    let d = dist3(aimx,aimy,aimz,this.body.position.x,this.body.position.y,this.body.position.z)
+    let dx = this.body.position.x-aimx
+    let dz = this.body.position.z-aimz
+    let dy = this.body.position.y-aimy
     this.myVel = {"vx":-dx/d,"vy":-dy/d,"vz":-dz/d}
 
     gw.missiles[this.body.id] = this
@@ -239,9 +237,9 @@ class missile2{
     // this.myVel.vx += (this.myVel.vx-c.frameVel.x)*0.7
     // this.myVel.vy += (this.myVel.vy-c.frameVel.y)*0.7
     // this.myVel.vz += (this.myVel.vz-c.frameVel.z)*0.7
-    this.myVel.vx *= 1.001
-    this.myVel.vy *= 1.001
-    this.myVel.vz *= 1.001
+    this.myVel.vx *= 1.01
+    this.myVel.vy *= 1.01
+    this.myVel.vz *= 1.01
 
     
 
@@ -260,7 +258,7 @@ class missile2{
     if(this.counter%5 === 0 && this.body.position.z > camera.position.z-4){
       this.lookA()
       // if(this.counter%10 === 0){
-        let mat = new THREE.LineBasicMaterial({ color:  "rgb(0,"+(this.counter)+","+0+")", linewidth: 2})
+        let mat = new THREE.LineBasicMaterial({ color:  "rgb(0,"+(this.counter)+",0)", linewidth: 4, opacity:(this.counter/150), transparent:true})
         c.makeLine(this.lastpos[0],this.lastpos[1],this.lastpos[2],this.body.position.x,this.body.position.y,this.body.position.z,mat)
         this.lastpos = [this.body.position.x,this.body.position.y,this.body.position.z]
       // }

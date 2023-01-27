@@ -691,7 +691,7 @@ const createWorld = () => {
     new THREE.MeshStandardMaterial({ color: 0xff9999 })
   );
 
-  plane = new THREE.Mesh(new THREE.PlaneBufferGeometry(1500, 1500),new THREE.MeshStandardMaterial({ color: 0x12401e }))
+  plane = new THREE.Mesh(new THREE.PlaneBufferGeometry(2500, 1500),new THREE.MeshStandardMaterial({ color: 0x12401e }))
   plane.rotateX(-1.2)
   plane.name = "plane"
   scene.add(plane)
@@ -1182,7 +1182,7 @@ let animate = () => {
   }
 
   if(Math.random()>0.99){
-    new missile2(camera.position.x+Math.random()*150-75,camera.position.y+Math.random()*50-330,camera.position.z+800)
+    new missile2(camera.position.x+Math.random()*1050-525,camera.position.y+Math.random()*50-486,camera.position.z+1200)
     console.log("missile")
   }
 
