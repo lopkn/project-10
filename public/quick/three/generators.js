@@ -39,6 +39,12 @@ function dist3(x,y,z,a,b,c){
   return(Math.sqrt(i*i+o*o+p*p))
 }
 
+function posSet(t,x,y,z){
+  t.position.x = x
+  t.position.y = y
+  t.position.z = z
+}
+
 class collisionChecker{
 
   //["none",Z,X,x,{X,x,Y,y,Z,z}]
@@ -78,6 +84,13 @@ class collisionChecker{
       if(tans){
         ans = tans
       }
+      } else if(e[0] === "special"){
+
+        let r = e[1](e[2])
+        if(r){
+          ans = r
+        }
+
       } else {
          let pt = {"x":camera.position.x-e[0].x,"y":camera.position.y-e[0].y,"z":camera.position.z-e[0].z}
          rotate(-e[0].rx,0,0,pt)
@@ -189,7 +202,7 @@ class missile{
 }
 
 class missile2{
-  constructor(x,y,z){
+  constructor(x,y,z,post){
     this.body = new THREE.Mesh(
       new THREE.BoxGeometry(2,2,6),
       new THREE.MeshStandardMaterial({ color:  0xff0000}))
@@ -197,7 +210,10 @@ class missile2{
     this.body.position.y = y
     this.body.position.z = z
     this.body.name = "missile"
-
+    let rr = Math.random()*12+5
+    if(post === undefined){
+    GENV2_1.gen(x,y,z,rr)
+    GENV2_2.gen(x,y,z,rr/2)}
     this.lastpos = [x,y,z]
 
 
@@ -248,7 +264,7 @@ class missile2{
     this.body.position.y+=this.myVel.vy
     this.body.position.z+=this.myVel.vz
 
-    if(this.body.position.z < camera.position.z - 100){
+    if(this.body.position.z < camera.position.z - 100 || this.body.position.z > camera.position.z + 1200){
       this.del()
     }
   }
@@ -1180,7 +1196,7 @@ class GEN12{
       mesh3.position.z += 12 + this.boarder
       mesh3.position.y += gw.GPC(mesh3.position.z)+h/2.2
 
-        mesh3.name = "GEN11"
+        mesh3.name = "GEN12"
         let d = dist3(h,w,l,0,0,0)/2
 
       gw.colliders[mesh3.id] = ["none",mesh3.position.z-l,mesh3.position.x+w,mesh3.position.x-w,{"id":mesh3.id,"X":mesh3.position.x+w/2,"x":mesh3.position.x-w/2,"Y":mesh3.position.y+h/2,"y":mesh3.position.y-h/2,"Z":mesh3.position.z+l/2,"z":mesh3.position.z-l/2,}]
@@ -1292,7 +1308,7 @@ class GEN14{
       while(camera.position.z+c.vel*50 > this.boarder - 800){
       breaker++
         if(breaker>20){
-          console.log("break 12")
+          console.log("break 14")
           break;
         }
         let B = 1
@@ -1322,7 +1338,7 @@ class GEN14{
       mesh3.position.z += 12 + this.boarder
       mesh3.position.y += gw.GPC(mesh3.position.z)+h/2.2
 
-        mesh3.name = "GEN11"
+        mesh3.name = "GEN14"
         let d = dist3(h,w,l,0,0,0)/2
 
       gw.colliders[mesh3.id] = ["none",mesh3.position.z-l,mesh3.position.x+w,mesh3.position.x-w,{"id":mesh3.id,"X":mesh3.position.x+w/2,"x":mesh3.position.x-w/2,"Y":mesh3.position.y+h/2,"y":mesh3.position.y-h/2,"Z":mesh3.position.z+l/2,"z":mesh3.position.z-l/2,}]
@@ -1333,4 +1349,52 @@ class GEN14{
     }
   }
 
+}
+
+class GEN15{
+
+  update(){
+
+  }
+  
+}
+
+class GENV2_1{
+  static gen(x,y,z,r){
+    let mesh3 = new THREE.Mesh(
+      new THREE.SphereGeometry(r,12,8),
+      new THREE.MeshStandardMaterial({ color: 0x101010, roughness: 0.1}))
+      gw.colliders[mesh3.id] = ["special",GENV2_1.cC,[x,y,z,r,mesh3.id]]
+      posSet(mesh3,x,y,z)
+      mesh3.name = "GV2_1"
+    scene.add(mesh3)
+  }
+  static cC(s){
+    let d = dist3(camera.position.x,camera.position.y,camera.position.z,s[0],s[1],s[2])
+    if(d < s[3]){
+      return(s[4])
+    }
+
+    if(Math.random() > 0.999){
+      new missile2(s[0],s[1],s[2],true)
+    }
+
+    return(false)
+  }
+}
+class GENV2_2{
+  static gen(x,y,z,w,l){
+    l = l?l:w
+
+    let GP = gw.GPC(z)
+    let h = y-GP
+
+    let mesh3 = new THREE.Mesh(
+      new THREE.BoxGeometry(w,h,l),
+      new THREE.MeshStandardMaterial({ color: 0x101010, roughness: 0.1}))
+      posSet(mesh3,x,y-h/2,z)
+      gw.colliders[mesh3.id] = ["none",mesh3.position.z-l/2,mesh3.position.x+w,mesh3.position.x-w,{"id":mesh3.id,"X":mesh3.position.x+w/2,"x":mesh3.position.x-w/2,"Y":mesh3.position.y+h/2,"y":mesh3.position.y-h/2,"Z":mesh3.position.z+l/2,"z":mesh3.position.z-l/2,}]
+      mesh3.name = "GV2_2"
+    scene.add(mesh3)
+  }
 }

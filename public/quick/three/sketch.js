@@ -418,6 +418,7 @@ class c{
     l.position.x = x
     l.position.y = y
     l.position.z = z
+    l.name = "line"
     scene.add(l)
 
    }
@@ -983,14 +984,31 @@ document.addEventListener("keydown",(e)=>{
     let timg = document.createElement("img")
     timg.src = "../../images/noInt.png"
     timg.style.position = "absolute"
-    timg.style.top = "0px"
-    timg.style.left = "0px"
-    timg.style.height = Math.floor(Height)+"px"
-    timg.style.width = Math.floor(Width)+"px"
+    //2704,1320
+    let scale = 1
+
+    if(1/(2704/Width) < scale){
+      scale = 1/(2704/Width)
+    }
+    if(1/(1320/Height) < scale){
+      scale = 1/(1320/Height)
+    }
+
+    timg.style.top = Math.floor(Height/2-660*scale)+"px"
+    timg.style.left = Math.floor(Width/2-1352*scale)+"px"
+    timg.style.height = Math.floor(1320*scale)+"px"
+    timg.style.width = Math.floor(2704*scale)+"px"
+    timg.style.boarder = 0
+
     timg.style.zIndex = 50
     timg.id = "timg"
-    document.body.appendChild(timg)} else {
+    document.body.appendChild(timg)
+
+    ctx.fillStyle = "#232323"
+    ctx.fillRect(0,0,Width,Height)
+  } else {
       document.getElementById("timg").remove()
+      ctx.clearRect(0,0,Width,Height)
     }
 
     break;
@@ -1181,10 +1199,10 @@ let animate = () => {
     try{music1.play()}catch{}
   }
 
-  if(Math.random()>0.99){
-    new missile2(camera.position.x+Math.random()*1050-525,camera.position.y+Math.random()*50-486,camera.position.z+1200)
-    console.log("missile")
-  }
+  // if(Math.random()>0.99){
+  //   new missile2(camera.position.x+Math.random()*1050-525,camera.position.y+Math.random()*50-486,camera.position.z+1200)
+  //   console.log("missile")
+  // }
 
   // controls.update();
 
@@ -1444,5 +1462,8 @@ function soundEf1(){
 //rare gen
 //plane dmg
 //gen push -
-//hell fix
+//hell fix?
 //plane line
+//pause fix
+//2d plane UI
+//help
