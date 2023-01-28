@@ -75,8 +75,12 @@ class gw{
 
   static turnZ(amount){
     if(amount>1){amount = 1}
-    if(amount<-1){amount = -1} 
+    if(amount<-1){amount = -1}
+    if(amount > 0){ 
     c.spinZ += ( 0.0005*c.vel*3*c.throttle/(c.gliding?c.vel*4/(c.vel>1?1:c.vel*0.8+0.2):1) )*c.mechanics.wing1.damage*amount
+    } else {
+    c.spinZ += ( 0.0005*c.vel*3*c.throttle/(c.gliding?c.vel*4/(c.vel>1?1:c.vel*0.8+0.2):1) )*c.mechanics.wing2.damage*amount
+    }
   }
   static turnX(amount){
     if(amount>1){amount = 1}
@@ -442,7 +446,8 @@ class c{
 
    static update(UPDATENO){
 
-    if(UPDATENO%60 === 0){
+      this.mechanics.lighting.damage += 0.0125/60
+    if(UPDATENO%60 === 0 && this.collided === false){
 
       this.mechanics.wing1.damage += 0.025
       this.mechanics.wing2.damage += 0.025
@@ -463,7 +468,6 @@ class c{
 
       this.updatePlaneColor()
     }
-      this.mechanics.lighting.damage += 0.0125/60
 
 
     this.collided = false
@@ -522,8 +526,13 @@ class c{
 
     if(tdy > 0){
     this.vel += Math.sqrt(tdy)/1500
+    
+
     } else{
       this.vel -= Math.sqrt(-tdy)/1450
+      // if(Math.random()>0.99){
+      //   console.log("d",Math.sqrt(-tdy)/1450,tdy)
+      // }
       //725
       if(this.vel < 0){
       this.vel = 0.0000001
@@ -571,7 +580,8 @@ class c{
       scene.background.b -= tv*15
       scene.background.g -= tv*10
       scene.background.r -= tv
-    } else if(planeHeight > 60){
+    }
+    if(planeHeight > 60){
       if(this.vel>0.3){
       this.vel /= (Math.sqrt(planeHeight-60)*0.00006*(this.gliding?0.2:1)+1)
     } else {
@@ -922,9 +932,7 @@ setInterval(()=>{
   c.turningInfo.fz -= c.mouseDisp.x/10
   c.turningInfo.fx += c.mouseDisp.y/10
   // < negative
-  if(Math.random()>0.99){
-    console.log(c.mouseDisp.x/5)
-  }
+  
 
   c.mouseDisp.x *= 0.8
   c.mouseDisp.y *= 0.8
@@ -1171,7 +1179,11 @@ document.addEventListener("keydown",(e)=>{
       keysHeld[k] = ()=>{c.thirdPersonBack += 0.004}
       break;
     case "u":
-      keysHeld[k] = ()=>{c.thirdPersonBack -= 0.001}
+      keysHeld[k] = ()=>{c.thirdPersonBack -= 0.001;
+        if(c.thirdPersonBack < 0){
+          c.thirdPersonBack = 0
+        }
+      }
       break;
 
 
@@ -1182,7 +1194,10 @@ document.addEventListener("wheel",(e)=>{
   // console.log(e.deltaY)
   // e.preventDefault()
   if(c.thirdPerson){
-    c.thirdPersonBack += e.deltaY*0.005
+    c.thirdPersonBack += e.deltaY*0.001
+    if(c.thirdPersonBack < 0){
+      c.thirdPersonBack = 0
+    }
   }
 })
 
@@ -1296,10 +1311,7 @@ let animate = () => {
   camera.rotateY(-c.rotZ)
   camera.rotateX(-c.rotX)
 
-  // if(MASTERTHROTTLE){
-  // c.Nupdate()} else {
-  //   c.update()
-  // }
+  update2D()
 
 }
 
@@ -1530,6 +1542,36 @@ function soundEf1(){
 //   }
 // }
 
+
+function update2D(counter){
+  ctx.clearRect(0,0,Width,Height)
+  ctx.beginPath()
+  let ts = 300
+  let tx = Width-120
+  let ty = Height - 60
+  let dxx = ts * 0.18
+  ctx.moveTo(0.13210978686655664*ts+tx+dxx,0.10330539295735229*ts+ty)
+  ctx.lineTo(0.16191018648581582*ts+tx+dxx,-0.04370459371883394*ts+ty)
+  ctx.lineTo(-0.13210978686655664*ts+tx+dxx,-0.10330539295735229*ts+ty)
+  ctx.lineTo(-0.16191018648581582*ts+tx+dxx,0.04370459371883394*ts+ty)
+  ctx.closePath()
+  let dwing1 = c.mechanics.wing1.damage*200
+  ctx.fillStyle = "rgba(200,"+dwing1+","+dwing1+",0.5)"
+  ctx.fill()
+  ctx.beginPath()
+  ctx.moveTo(-0.13210978686655664*ts+tx-dxx,0.10330539295735229*ts+ty)
+  ctx.lineTo(-0.16191018648581582*ts+tx-dxx,-0.04370459371883394*ts+ty)
+  ctx.lineTo(0.13210978686655664*ts+tx-dxx,-0.10330539295735229*ts+ty)
+  ctx.lineTo(0.16191018648581582*ts+tx-dxx,0.04370459371883394*ts+ty)
+  ctx.closePath()
+  let dwing2 = c.mechanics.wing2.damage*200
+  ctx.fillStyle = "rgba(200,"+dwing2+","+dwing2+",0.5)"
+  ctx.fill()
+  let dbody = (c.mechanics.lighting.damage + c.mechanics.boosting.damage)*100
+  ctx.fillStyle = "rgba(200,"+dbody+","+dbody+",0.5)"
+  ctx.fillRect(tx-0.05*ts,ty-0.11*ts,0.1*ts,0.2*ts)
+
+}
 
 //transition gen -
 //frame fix -
