@@ -122,6 +122,7 @@ class missile{
     this.body.position.y = y
     this.body.position.z = z
     this.body.name = "missile"
+    this.body.unClense = true
 
     this.cX = (Math.random()*25-1.25)*c.vel
     this.cY = (Math.random()*25-1.25)*c.vel
@@ -210,6 +211,7 @@ class missile2{
     this.body.position.y = y
     this.body.position.z = z
     this.body.name = "missile"
+    this.body.unClense = true
     let rr = Math.random()*12+5
     if(post === undefined){
     GENV2_1.gen(x,y,z,rr)
@@ -1020,7 +1022,8 @@ class GEN9{
 class TRIG1{
 
   constructor(){
-    this.boarder = 100000
+    // this.boarder = 100000
+    this.boarder = 100
     // this.transitor = true
   }
   update(){
@@ -1042,7 +1045,8 @@ class TRAN1{
   }
 
   update(){
-    plane.material.color.r += 0.0001
+    plane.material.color.r += 0.001
+    // plane.material.color.r += 0.0001
     if(plane.material.color.r > 0.28){
       this.transit()
       gw.pdate3s.forEach((e,i)=>{
@@ -1101,7 +1105,7 @@ class GEN11{
         this.boarder += 10*vel+18*abk/100000
         this.counter -= 1
       } else {
-        this.boarder += Math.random()*1000*vel+50*vel
+        this.boarder += Math.random()*500*vel+25*vel
         this.counter += 5 + Math.floor(Math.random()*5)
         this.countMax = this.counter
         this.displacement = Math.random()*450-225
@@ -1145,7 +1149,7 @@ class GEN11{
 }
 
 class GEN12{
-//scaled rt structure
+//scaled st structure
   constructor(dx){
     this.boarder = 1000+dx
     this.bk = dx
@@ -1174,7 +1178,7 @@ class GEN12{
         this.boarder += this.xdisp*vel
         this.counter -= 1
       } else {
-        this.boarder += Math.random()*1000*vel+50*vel
+        this.boarder += Math.random()*650*vel+40*vel
         this.counter += 5 + Math.floor(Math.random()*15)
         this.countMax = this.counter
         this.displacement = Math.random()*450-225
@@ -1242,18 +1246,26 @@ class GEN13{
       } else {
         this.boarder += Math.random()*1700*vel+100*vel
         this.counter += Math.floor(Math.random()*100+33)
-        this.displacement = Math.random()*150-75
+        this.displacement = (Math.random()*150-75)*vel
         return;
       }
       
 
-
+      let overHeight = c.pH>300?1+(c.pH-300)/300:1
 
       let h = 180+Math.random()*168*vel
+
       let tx = Math.random()*380*vel-190*vel+camera.position.x+this.displacement
 
-      let w = h * 0.1
+      let w = h * (0.07+Math.random()*0.03)
+
+      if(overHeight > 1){
+        w *= overHeight * 0.8
+      }
+
       let l = w
+
+      h *= overHeight
 
 
       let ty = camera.position.y + Math.random()*380*vel-190*vel - 251
@@ -1263,6 +1275,9 @@ class GEN13{
       new THREE.MeshStandardMaterial({ color:  Math.floor(Math.random()*65535), roughness:0.2}))
       mesh3.position.x += tx
       mesh3.position.z += 12 + this.boarder
+      if(overHeight !== 1){
+        mesh3.position.z += h/2
+      }
       mesh3.position.y = ty
 
         let tv = 6.5
@@ -1274,6 +1289,7 @@ class GEN13{
         mesh3.rotateZ(rz)
         mesh3.position.y -= tv+h/9
         mesh3.name = "GEN13"
+        mesh3.trashDisp = h/2
         let d = dist3(h,w,l,0,0,0)/2
 
         gw.colliders[mesh3.id] = [{"x":mesh3.position.x,"y":mesh3.position.y,"z":mesh3.position.z,"rx":rx,"ry":ry,"rz":rz},mesh3.position.z-d,mesh3.position.x+d,mesh3.position.x-d,{"id":mesh3.id,"X":mesh3.position.x+w/2,"x":mesh3.position.x-w/2,"Y":mesh3.position.y+h/2,"y":mesh3.position.y-h/2,"Z":mesh3.position.z+l/2,"z":mesh3.position.z-l/2,}]
@@ -1291,13 +1307,13 @@ class GEN13{
 class GEN14{
 //scaled paral structure
   constructor(dx){
-    this.boarder = 1000+dx
-    this.bk = dx
+    this.boarder = 1000+(dx?dx:0)
+    this.bk = dx?dx:0
     this.gbk = []
     this.countMax = 5
     this.displacement = 0
-    this.reverse = -1
     this.xdisp = 20
+    this.counter = 0
   }
 
   update(){
@@ -1318,23 +1334,23 @@ class GEN14{
         this.counter += 5 + Math.floor(Math.random()*15)
         this.countMax = this.counter
         this.displacement = Math.random()*450-225
-        this.reverse = Math.random()>0.5?-1:1
         this.xdisp = 20 + Math.random()*20
 
       let abk = this.boarder - this.bk
 
-      let h = (16+60*vel+180*abk/100000) * (1+this.countMax/(this.counter+3))
-      let tx = camera.position.x+this.displacement
+      let tx = camera.position.x+this.displacement+c.frameVel.x*350
 
       let w = 3+8*vel*(1+abk/100000)
       let l = 3+8*vel*(1+abk/100000)
 
-      for(let i = -5; i < 5; i++){
+      let rdisp = (1+Math.random())
 
+      for(let i = -5; i < 5; i++){
+      let h = (16+60*vel+180*abk/100000) * (1+this.countMax/(this.counter+3)) *(1+Math.random())
       let mesh3 = new THREE.Mesh(
-      new THREE.BoxGeometry(w, h*(1+Math.random()), l),
-      new THREE.MeshStandardMaterial({ color: 0x101010, roughness: 0.1}))
-      mesh3.position.x += tx + i*w*2
+      new THREE.BoxGeometry(w, h, l),
+      new THREE.MeshStandardMaterial({ color: "rgb(0,"+(Math.floor(Math.random()*32))+",0)"}))
+      mesh3.position.x += tx + i*w*2*rdisp
       mesh3.position.z += 12 + this.boarder
       mesh3.position.y += gw.GPC(mesh3.position.z)+h/2.2
 
@@ -1351,10 +1367,271 @@ class GEN14{
 
 }
 
+// class GEN15{
+
+//   constructor(boarder,tx,ty){
+//     this.boarder = boarder?boarder:0
+//     this.targX = tx?tx:0
+//     this.targY = ty?ty:100
+
+//     this.atargX = this.targX
+//     this.atargY = this.targY
+//     this.counter = 0
+
+//     this.vx = 0
+//     this.vy = 0
+
+//     this.px = this.targX
+//     this.py = this.targY
+//   }
+
+//   update(){
+//     let breaker = 0
+//     while(camera.position.z+c.vel*50 > this.boarder - 800){
+//       this.counter ++
+//       breaker++
+//         if(breaker>20){
+//           console.log("break 15")
+//           break;
+//         }
+
+    
+//         let w = 20
+//         let l = 200
+//         let h = 20
+
+//         this.atargX = camera.position.x + this.targX
+//         this.atargY = camera.position.y + gw.GPC(c.vel*50+800) + this.targY
+
+//         // this.vy += 55*(Math.random()-0.5)
+//         // this.vy *= 0.9
+//         // this.vx += 65*(Math.random()-0.5)
+//         // this.vx *= 0.9
+
+//         // let dy = this.py-this.atargY
+//         // let dx = this.px-this.atargX
+
+//         // this.vy -= dy * 0.5
+//         // this.vx -= dx * 0.7
+
+//         // if(this.vx<-160){this.vx = -160} else if(this.vx > 160){this.vx = 160} 
+//         // if(this.vy<-160){this.vy = -160} else if(this.vy > 160){this.vy = 160} 
+//         //   if(Math.random()>0.8){
+//         // console.log(dx, this.vx, dy,this.vy)}
+//         this.vy = 1
+//         // if(this.counter %2 ==0){
+//         //   this.vy = 55
+//         // }
+//         this.vx = -1
+//         // if(this.counter %2 ==0){
+//         //   this.vx = 55
+//         // }
+
+
+//       let mesh3 = new THREE.Mesh(
+//       new THREE.BoxGeometry(w, h, l),
+//       new THREE.MeshStandardMaterial({ color: 0x401010, roughness: 0.1}))
+
+
+//       let rotpoint = rotate(this.vx,this.vy,0,{"x":0,"y":0,"z":l/2})
+
+//       // let dp = vectorFuncs.dotProduct3(rotpoint.x,rotpoint.y,rotpoint.z,0,0,1)
+
+
+//       mesh3.position.z = rotpoint.z + this.boarder
+//       // let dispedY = (l*Math.sin(rotx)/2)
+//       // let dispedX = (l*Math.sin(roty)/2)
+
+//       let dispedY = -rotpoint.y
+//       let dispedX = rotpoint.x
+
+
+//       // console.log(dispedY * dispedY * Math.cos(roty),Math.cos(roty))
+//       // dispedY = dispedY * dispedY * Math.cos(roty)
+//       // dispedX = dispedX * dispedX * Math.cos(rotx)
+
+
+//       mesh3.position.y = this.py + dispedY
+//       this.py += dispedY*2
+//       mesh3.position.x = this.px + dispedX
+//       this.px += dispedX*2
+
+//       mesh3.rotateX(-this.vx)
+//       mesh3.rotateY(this.vy)
+//       // mesh3.lookAt(this.vx,this.vy,l/2)
+//       mesh3.rotation.z = 0
+
+//       this.boarder += rotpoint.z*2
+
+
+//         mesh3.name = "GEN15"
+//         let d = dist3(h,w,l,0,0,0)/2
+
+//       // gw.colliders[mesh3.id] = ["none",mesh3.position.z-l,mesh3.position.x+w,mesh3.position.x-w,{"id":mesh3.id,"X":mesh3.position.x+w/2,"x":mesh3.position.x-w/2,"Y":mesh3.position.y+h/2,"y":mesh3.position.y-h/2,"Z":mesh3.position.z+l/2,"z":mesh3.position.z-l/2,}]
+//       scene.add(mesh3)
+
+//     }
+//   }
+  
+// }
+
 class GEN15{
 
-  update(){
+  constructor(boarder,tx,ty,px,py,branchable){
+    this.boarder = boarder?boarder:0
+    this.targX = tx?tx:0
+    this.targY = ty?ty:0
 
+    this.atargX = this.targX
+    this.atargY = this.targY
+    this.counter = 0
+
+    this.branchable = branchable
+
+    this.branchees = []
+
+    this.vx = 0
+    this.vy = 0
+
+    this.px = px?px:this.targX
+    this.py = py?py:this.targY
+
+    this.yAxis = new THREE.Vector3(0,1,0)
+    this.xAxis = new THREE.Vector3(1,0,0)
+
+    this.dxChaser = [true,0]
+  }
+
+  update(){
+    this.branchees.forEach((e)=>{
+      e.update()
+    })
+    let breaker = 0
+    while(camera.position.z+c.vel*50 > this.boarder - 900){
+      this.counter ++
+      breaker++
+        if(breaker>20){
+          console.log("break 15")
+          break;
+        }
+
+        this.atargX = camera.position.x + this.targX + c.frameVel.x * (200+this.dxChaser[1])
+        this.atargY = camera.position.y + gw.GPC(c.vel*50+900) + this.targY
+
+        let vel = c.vel > 1.5?(c.vel-1.5)*3:0
+        let w = 20+vel*5
+        let l = 200 + vel*5
+        let h = 20+vel*5
+
+        this.vy += 25*(Math.random()-0.5)*vel
+        this.vx += 35*(Math.random()-0.5)*vel
+        if(vel === 0){
+        this.vy *= 0.6
+        this.vx *= 0.6
+        }
+        let dy = this.py-this.atargY
+
+
+
+        let dx = this.px-this.atargX
+        let dcc = true
+        if(dx > 0){
+          dcc = true
+        } else {
+          dcc= false
+        }
+
+        if(dcc === this.dxChaser[0]){
+          this.dxChaser[1] += 3
+        } else {
+          this.dxChaser = [!this.dxChaser[0],-this.dxChaser[1]/1.5]
+        }
+
+        if(vel === 0){
+        this.vy -= dy * 0.5
+        this.vx -= dx * 0.7
+        } else if(vel < 0.7){
+          this.vy -= dy * 0.7
+          this.vx -= dx * 0.9
+        } else {
+          this.vy -= dy * 0.9
+          this.vx -= dx * 0.95
+        }
+
+        if(c.vel > 2.3 || Math.random()>0.6){
+        if(this.branchable !== false && Math.random()>0.96){
+          this.branchees.push(new GEN15(this.boarder,Math.random()*200-100,Math.random()*200-100,this.px,this.py,false))
+        }}
+         // else {
+          if(Math.random()>0.92 || this.branchees.length > 3){
+            this.branchees.splice(0,1)
+          }
+        // }
+
+
+        if(this.vx<-160+c.frameVel.x*150){this.vx = -160} else if(this.vx > 160+c.frameVel.x*150){this.vx = 160} 
+        if(this.vy<-160){this.vy = -160} else if(this.vy > 160){this.vy = 160} 
+        //   if(Math.random()>0.8){
+        // console.log(dx, this.vx, dy,this.vy)}
+        // this.vy -= 1
+        // // if(this.counter %2 ==0){
+        // //   this.vy = 55
+        // // }
+        // this.vx = -55
+        // // if(this.counter %2 ==0){
+        // //   this.vx = 55
+        // // }
+
+
+      let mesh3 = new THREE.Mesh(
+      new THREE.BoxGeometry(w, h, l+4),
+      new THREE.MeshStandardMaterial({ color: (vel===0?"rgb(26,26,26)":"rgb(0,0,0)"), roughness: (this.counter%2===0?1:0.1),
+       emissive:"rgb("+Math.floor(vel*35*(this.counter%2))+","+(this.branchable===false?Math.floor(vel*35*((this.counter+1)%2)):0)+",0)"}))
+
+
+      let rotx = Math.atan(this.vy/l*2)
+      let roty = Math.atan(this.vx/l*2)
+
+      let rotpoint = rotate(rotx,roty,0,{"x":0,"y":0,"z":l/2})
+
+      // let dp = vectorFuncs.dotProduct3(rotpoint.x,rotpoint.y,rotpoint.z,0,0,1)
+
+
+      mesh3.position.z = rotpoint.z + this.boarder
+      // let dispedY = (l*Math.sin(rotx)/2)
+      // let dispedX = (l*Math.sin(roty)/2)
+
+      let dispedY = -rotpoint.y
+      let dispedX = rotpoint.x
+
+
+      // console.log(dispedY * dispedY * Math.cos(roty),Math.cos(roty))
+      // dispedY = dispedY * dispedY * Math.cos(roty)
+      // dispedX = dispedX * dispedX * Math.cos(rotx)
+
+
+      mesh3.position.y = this.py + dispedY
+      this.py += dispedY*2
+      mesh3.position.x = this.px + dispedX
+      this.px += dispedX*2
+
+      mesh3.rotateOnWorldAxis(this.xAxis,-rotx)
+      mesh3.rotateOnWorldAxis(this.yAxis,roty)
+      mesh3.rotation.z = 0
+
+      this.boarder += rotpoint.z*2
+
+
+        mesh3.name = "GEN15"
+        let d = dist3(h,w,l,0,0,0)/2
+        let rx = mesh3.rotation.x
+        let ry = mesh3.rotation.y
+        let rz = mesh3.rotation.z
+        gw.colliders[mesh3.id] = [{"x":mesh3.position.x,"y":mesh3.position.y,"z":mesh3.position.z,"rx":rx,"ry":ry,"rz":rz},mesh3.position.z-d,mesh3.position.x+d,mesh3.position.x-d,{"id":mesh3.id,"X":mesh3.position.x+w/2,"x":mesh3.position.x-w/2,"Y":mesh3.position.y+h/2,"y":mesh3.position.y-h/2,"Z":mesh3.position.z+l/2,"z":mesh3.position.z-l/2,}]
+
+      scene.add(mesh3)
+
+    }
   }
   
 }

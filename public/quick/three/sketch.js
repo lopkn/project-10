@@ -191,8 +191,9 @@ class gw{
 
   }
 
-  static pdate3s = [new TRIG1(),new GEN9(),new GEN1(),new GEN2(),new GEN2(10000),new GEN2(60000),new GEN2(40000),new GEN2(80000),new GEN2(120000),new GEN3(40000), new GEN4(), new GEN5(), new GEN7(), new GEN8()]
-  // static pdate3s = [new GEN1()]
+  // static pdate3s = [new TRIG1(),new GEN9(),new GEN1(),new GEN2(),new GEN2(10000),new GEN2(60000),new GEN2(40000),new GEN2(80000),new GEN2(120000),new GEN3(40000), new GEN4(), new GEN5(), new GEN7(), new GEN8()]
+  static pdate3s = [new GEN14(),new GEN15(),new GEN15(0,300,-200),new GEN15(0,-300,-200),new GEN15(0,300,300),new GEN15(0,-300,300), new GEN5(), new GEN9()]
+  // static pdate3s = [new GEN15(),new GEN15(0,100,-100),new GEN15(0,-100,-100),new GEN15(0,100,100),new GEN15(0,-100,100)]
 
   static pdate3(){
     this.pdate3s.forEach((e)=>{e.update()})
@@ -210,7 +211,7 @@ class gw{
     let clarr = []
     let cldct = {}
     scene.children.forEach((e)=>{
-      if(e.position.z +z < camera.position.z && e.name !== "missile"){
+      if(e.position.z + z +  (e.trashDisp?e.trashDisp:0)< camera.position.z && e.unClense !== true){
         clarr.push(e.id)
         cldct[e.id] = true
       }
@@ -890,6 +891,10 @@ class vectorFuncs{
 
   static dotProduct(x1,y1,x2,y2){
     return(x1*x2+y1*y2)
+  }
+
+  static dotProduct3(x,y,z,a,b,c){
+    return(x*a+y*b+c*z)
   }
 
   static originVectorNormalize(vx,vy){
@@ -1577,11 +1582,13 @@ function update2D(counter){
 //frame fix -
 //curve gen -
 //rare gen
-//plane dmg
+//plane dmg -
 //gen push -
 //hell fix?
 //plane line
-//pause fix
-//2d plane UI
+//pause fix -?
+//2d plane UI -
 //help
 //plane trashed fix
+//lane generator
+//cross lane generator
