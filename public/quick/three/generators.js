@@ -1022,8 +1022,8 @@ class GEN9{
 class TRIG1{
 
   constructor(){
-    // this.boarder = 100000
-    this.boarder = 100
+    this.boarder = 100000
+    // this.boarder = 100
     // this.transitor = true
   }
   update(){
@@ -1045,8 +1045,8 @@ class TRAN1{
   }
 
   update(){
-    plane.material.color.r += 0.001
-    // plane.material.color.r += 0.0001
+    // plane.material.color.r += 0.001
+    plane.material.color.r += 0.0001
     if(plane.material.color.r > 0.28){
       this.transit()
       gw.pdate3s.forEach((e,i)=>{

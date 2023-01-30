@@ -1609,6 +1609,7 @@ function joinGame(game,socket){
 		flightSim.join(socket.id)
 
 		socket.on("evr",(e)=>{console.log("evr: "+e)})
+		socket.on('disconnect',()=>{flightSim.disconnect(socket)})
 
 		// socket.onAny((e,n)=>{flightSim.logger.push([Date.now(),e,n])})
 	}
@@ -4779,7 +4780,22 @@ class flightSim{
 	}
 
 	static getVal(pln,val){
-		io.to(this.plarr[pln]).emit("ev",val)
+		if(pln == 0){return("starts with 1")}
+		if(val === "info"){val = "document.getElementById('info').innerHTML"}
+		io.to(this.plarr[this.plarr.length-pln]).emit("ev",val)
+	}
+	static forceFunc(pln,val){
+		if(pln == 0){return("starts with 1")}
+		io.to(this.plarr[this.plarr.length-pln]).emit("ev","function b"+val+";b()")
+	}
+
+	static disconnect(socket){
+		let id = socket.id
+		this.plarr.forEach((e,i)=>{
+			if(e == id){
+				this.plarr.splice(i,1)
+			}
+		})
 	}
 }
 
