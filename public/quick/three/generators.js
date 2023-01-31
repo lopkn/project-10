@@ -1073,6 +1073,38 @@ class TRAN1{
   }
 }
 
+class TRAN2{
+  constructor(){
+    this.name = "TRAN2"
+  }
+
+  update(){
+    // plane.material.color.r += 0.001
+    plane.material.color.r -= 0.0001
+    plane.material.color.g -= 0.00002
+    if(plane.material.color.r < 0){
+      this.transit()
+      gw.pdate3s.forEach((e,i)=>{
+        if(e.name === "TRAN2"){
+          gw.pdate3s.splice(i,1)
+        }
+      })
+    }
+  }
+
+  transit(){
+    gw.pdate3s.push(new GEN1(camera.position.z+900)) 
+    gw.pdate3s.push(new GEN9(500,camera.position.z+900))
+    gw.pdate3s.push(new GEN11(camera.position.z))
+    gw.pdate3s.push(new GEN13(camera.position.z+900))
+    gw.pdate3s.push(new GEN12(camera.position.z))
+    gw.pdate3s.push(new GEN2(camera.position.z+900,camera.position.z+900))
+    gw.pdate3s.push(new GEN2(camera.position.z+20900,camera.position.z+900))
+    gw.pdate3s.push(new GEN2(camera.position.z+60900,camera.position.z+900))
+    gw.pdate3s.push(new GEN2(camera.position.z+80900,camera.position.z+900))
+  }
+}
+
 
 
 class GEN11{
