@@ -1177,7 +1177,8 @@ document.addEventListener("keydown",(e)=>{
       break;
 
     case "t":
-      c.thirdPerson = !c.thirdPerson
+      c.thirdPersonBack = 0
+      // c.thirdPerson = !c.thirdPerson
       break;
 
     case "o":
