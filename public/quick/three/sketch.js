@@ -603,9 +603,9 @@ class c{
     }
 
 
-    if(this.thirdPerson){
+    // if(this.thirdPerson){
       this.fthird()
-    }
+    // }
 
     this.disp(planeHeight)
 

@@ -1039,6 +1039,26 @@ class TRIG1{
 
 }
 
+class TRIG1{
+
+  constructor(b){
+    this.boarder = b
+    // this.boarder = 100
+    // this.transitor = true
+  }
+  update(){
+    if(camera.position.z < this.boarder){
+      return;}
+    for(let i = gw.pdate3s.length-1; i > -1; i--){
+      if(gw.pdate3s[i].name !== "GEN5"){
+        gw.pdate3s.splice(i,1)
+      }
+    }
+    gw.pdate3s.push(new TRAN2())
+  }
+
+}
+
 class TRAN1{
   constructor(){
     this.name = "TRAN1"
@@ -1067,6 +1087,7 @@ class TRAN1{
     gw.pdate3s.push(new GEN2(camera.position.z+20900,camera.position.z+900))
     gw.pdate3s.push(new GEN2(camera.position.z+60900,camera.position.z+900))
     gw.pdate3s.push(new GEN2(camera.position.z+80900,camera.position.z+900))
+    gw.pdate3s.push(new TRIG2(camera.position.z+120000))
 
 
 
