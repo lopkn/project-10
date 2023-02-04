@@ -1119,10 +1119,10 @@ class TRAN2{
     gw.pdate3s.push(new GEN11(camera.position.z))
     gw.pdate3s.push(new GEN13(camera.position.z+900))
     gw.pdate3s.push(new GEN12(camera.position.z))
-    gw.pdate3s.push(new GEN2(camera.position.z+900,camera.position.z+900))
-    gw.pdate3s.push(new GEN2(camera.position.z+20900,camera.position.z+900))
-    gw.pdate3s.push(new GEN2(camera.position.z+60900,camera.position.z+900))
-    gw.pdate3s.push(new GEN2(camera.position.z+80900,camera.position.z+900))
+    gw.pdate3s.push(new GEN15(camera.position.z+900,camera.position.z+900))
+    gw.pdate3s.push(new GEN15(camera.position.z+20900,camera.position.z+900,100,100))
+    gw.pdate3s.push(new GEN15(camera.position.z+60900,camera.position.z+900,100,-100))
+    gw.pdate3s.push(new GEN15(camera.position.z+80900,camera.position.z+900))
   }
 }
 
