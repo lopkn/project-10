@@ -190,7 +190,7 @@ document.addEventListener("mousedown",(e)=>{
     return
   }
 
-  if(mouseX > 819 || mouseY > 819){
+  if(mouseX > S1*3 || mouseY > S1*3){
     return;
   }
 
