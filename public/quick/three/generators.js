@@ -1039,7 +1039,7 @@ class TRIG1{
 
 }
 
-class TRIG1{
+class TRIG2{
 
   constructor(b){
     this.boarder = b
@@ -1687,6 +1687,14 @@ class GEN15{
     }
   }
   
+}
+
+class GEN16{
+
+  update(){if(Math.random()>0.99){
+    new missile2(camera.position.x+Math.random()*1050-525,camera.position.y+Math.random()*50-486,camera.position.z+1200)
+    console.log("missile")
+  }}
 }
 
 class GENV2_1{
