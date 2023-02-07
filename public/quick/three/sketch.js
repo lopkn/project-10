@@ -587,9 +587,9 @@ class c{
     }
     if(planeHeight > 60){
       if(this.vel>0.3){
-      this.vel /= (Math.sqrt(planeHeight-60)*0.00006*(this.gliding?0.2:1)+1)
+      this.vel /= (Math.sqrt(planeHeight-60)*0.00006*(this.gliding?0.2:0.8)+1)
     } else {
-      this.vel /= (Math.sqrt(planeHeight-60)*0.00003*(this.gliding?0:1)+1)
+      this.vel /= (Math.sqrt(planeHeight-60)*0.00003*(this.gliding?0:0.8)+1)
     }}
 
 
