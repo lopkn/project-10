@@ -6,10 +6,169 @@ myCanvas.style.top = 0
 myCanvas.style.left = 0
 myCanvas.style.zIndex = 5
 myCanvas.width = Width
+WidthM = Width/2
 myCanvas.height = Height
+HeightM = Height/2
 myCanvas.style.position = "absolute"
 
 let ctx = myCanvas.getContext("2d")
+
+ctx.textAlign = 'center'
+
+class comparer{
+
+	static last = "" + Date.now()
+
+	static compare(d){
+		for(let i = 1; i < d.length+1; i++){
+			let j = d.length-i
+
+			if(d[j] !== this.last[j]){
+				this.update(i)
+			}
+
+		}
+
+		this.last = d
+	}
+
+	static update(t){
+		let c;
+		let a = WidthM + 300 - t*40
+
+		switch(t){
+		case 1:
+
+			break;
+		case 2:
+			
+			break;
+		case 5:
+			for(let i = 0; i < 20; i++){
+				c = new rollingBall(a,Height/2-30,Math.random()*8-4,Math.random()*8-4)
+				c.actLife *= Math.random()*2+1.2
+				parr.push(c)
+			}
+			break;
+		case 6:
+
+				c = new explosionR(a,Height/2-30,"#FFFF00")
+				parr.push(c)
+
+				// for(let i = 0; i < 5; i++){
+				// 	c = new liner(a,Height/2-30,4,3)
+				// 	c.maxActLife = 120
+				// 	c.vx += Math.random()*216-108
+				// 	c.vy += Math.random()*216-108
+				// 	parr.push(c)
+				// }
+
+				for(let i = 0; i < 15; i++){
+					let r= Math.random()*2000+200
+					setTimeout(()=>{
+						c = new explosionR(a+Math.random()*r/1.5-r/3,Height/2-30+Math.random()*r/1.5-r/3,"#FFFF00")
+						c.actLife = 80+Math.random()*150
+						parr.push(c)
+					},r)
+				}
+
+				for(let i = 0; i < 20; i++){
+				c = new rollingBall(a,Height/2-30,Math.random()*16-8,Math.random()*16-8)
+				c.actLife *= Math.random()*2+1.2
+				parr.push(c)
+				}
+
+			break;
+		case 4:
+			c = new liner(a,Height/2-30,4,1,0)
+			c.maxActLife = 20
+			c.vx += Math.random()*216-108
+			c.vy += Math.random()*216-108
+			parr.push(c)
+			break;
+		}
+	}
+
+}
+
+class explosionR{
+	constructor(x,y,color){
+		this.x = x
+		this.y = y
+		this.color = color
+		this.size = 3
+		this.actLife = 600
+		this.counter = 0
+		this.following = false
+
+	}
+
+	update(){
+		this.size += 1
+		this.actLife -= 1
+	}
+	draw(){
+		ctx.strokeStyle = this.color
+		ctx.lineWidth = 1 + this.actLife/10
+		ctx.beginPath()
+		ctx.arc(this.x, this.y, this.size, 0, 2 * Math.PI);
+		ctx.stroke()
+		if(this.actLife < 0){
+			return('del')
+		}
+	}
+}
+
+
+class rollingBall{
+
+
+	constructor(x,y,vx,vy){
+		this.x = x
+		this.y = y
+		this.vx = vx
+		this.vy = vy
+		this.size = 3 + Math.random()*3
+		this.actLife = 400
+		this.counter = 0
+		this.following = false
+
+	}
+
+
+	update(){
+		this.x += this.vx
+		this.y += this.vy
+
+		if(this.x < 0 || this.x > Width){
+			this.vx *= -1
+		}
+		if(this.y < 0 || this.y > Height){
+			this.vy *= -1
+		}
+		this.actLife -= 1
+		this.counter += 1
+	}
+
+	draw(){
+
+		ctx.strokeStyle = Math.random()>0.5?"#FFB0FF":"#FFFFFF"
+		ctx.lineWidth = 1
+		ctx.fillStyle = "rgba(255,0,0,"+(this.actLife/40)+")"
+		if(this.actLife < 40){
+			ctx.lineWidth = this.actLife/40
+		}
+		ctx.beginPath()
+		ctx.arc(this.x, this.y, this.size, 0, 2 * Math.PI);
+		ctx.fill()
+		ctx.stroke()
+		if(this.actLife < 0){
+			return('del')
+		}
+	}
+
+	//credit to daniel 
+}
 
 
 class liner{
@@ -97,6 +256,19 @@ class liner{
 				this.vy += (Math.random()-0.5)*15
 				updated = true
 			}
+		} else if(this.type == 4){
+			if(this.counter%5 == 0){
+				this.x += this.vx
+				this.y += this.vy
+				this.vx += this.nvx
+				this.vy += this.nvy
+				this.nvx = 0
+				this.nvy = 0
+				this.size += 0.6
+				this.vx += (Math.random()-0.5)*55
+				this.vy += (Math.random()-0.5)*55
+				updated = true
+			}
 		}
 
 
@@ -116,7 +288,7 @@ class liner{
 		
 		for(let i = this.oldPath.length-1; i > -1; i--){
 			let e = this.oldPath[i]
-			getCol(this.colType,0.7+0.3*e[4]/this.lineLife,e)
+			getCol(this.colType,e[4]/this.lineLife,e)
     		ctx.lineWidth = this.size
 			ctx.beginPath()
 			ctx.moveTo(e[0],e[1])
@@ -141,22 +313,22 @@ function getCol(type,l,e){
 	let a = Math.random()
 	switch(type){
 		case 0:
-    		ctx.strokeStyle = ("rgba(0,"+e[4]*3.5*(1-a)+",255,"+l+")")
+    		ctx.strokeStyle = ("rgba(0,"+e[4]*3.5*(1-a)+",255,"+(0.7+0.3*l)+")")
 			break;
 		case 1:
-			ctx.strokeStyle = ("rgba("+(1-a)*255+","+(a)*255+",255,"+l+")")
+			ctx.strokeStyle = ("rgba("+(1-a)*255+","+(a)*255+",255,"+(0.7+0.3*l)+")")
 			break;
 		case 2:
-			ctx.strokeStyle = ("rgba(255,"+(1-a)*255+",255,"+l+")")
+			ctx.strokeStyle = ("rgba(255,"+(1-a)*255+",255,"+(0.7+0.3*l)+")")
 			break;
 		case 3:
 			if(Math.random()<0.70){
-			ctx.strokeStyle = ("rgba(255,"+(a*255)+",0,"+l+")")} else {
+			ctx.strokeStyle = ("rgba(255,"+(a*255)+",0,"+(0.7+0.3*l)+")")} else {
 				ctx.strokeStyle = ("rgba(235,0,0,"+l+")")
 			}
 			break;
 		case 4:
-			ctx.strokeStyle = ("rgba(0,"+(1-a)*255+",0,"+l+")")
+			ctx.strokeStyle = ("rgba(0,"+(1-a)*255+",0,"+(0.7+0.3*l)+")")
 			break;
 		case 5:
 			ctx.strokeStyle = ("rgba("+(1-a)*255+",255,"+(1-a)*255+","+l+")")
@@ -175,7 +347,6 @@ if(Math.random()>1-dd*0.005){
 		let a = new liner(mouseX+Math.random()-0.5,mouseY+Math.random()-0.5,Math.floor(Math.random()*3),4+Math.floor(Math.random()*2))
 		a.following = true
 		parr.push(a)
-		console.log("hi?")
 	}
 }
 
@@ -257,8 +428,14 @@ setInterval(()=>{
 	ctx.fillStyle = "#B00000"
 	ctx.strokeStyle = "#900000"
 	ctx.font = "80px Arial"
-	ctx.fillText(Date.now(),Width/2-300,Height/2)
+	let d = "" + Date.now()
+	ctx.fillText(d,Width/2,Height/2)
+	comparer.compare(d)
 	if(Math.random()>0.99){
 		parr.push(new liner(Math.random()*Width,Math.random()*Height,Math.floor(Math.random()*3),Math.floor(Math.random()*2)))
 	}
+
+
+
+
 })
