@@ -25,6 +25,10 @@ class comparer{
 
 			if(d[j] !== this.last[j]){
 				this.update(i)
+
+				if(i == 4 && d[j] == 5){
+					this.update(i,"tl")
+				}
 			}
 
 		}
@@ -32,7 +36,7 @@ class comparer{
 		this.last = d
 	}
 
-	static update(t){
+	static update(t,s){
 		let c;
 		let a = WidthM + 300 - t*40
 
@@ -43,14 +47,20 @@ class comparer{
 		case 2:
 			
 			break;
-		case 5:
+		case 3:
+			c = new explosionR(Math.random()*Width,Math.random()*Height,"rgb(2,"+(125+Math.random()*125)+",255)")
+			c.actLife = Math.random()*20+20
+			c.size += 2
+			parr.push(c)
+			break;
+		case 6:
 			for(let i = 0; i < 20; i++){
 				c = new rollingBall(a,Height/2-30,Math.random()*8-4,Math.random()*8-4)
 				c.actLife *= Math.random()*2+1.2
 				parr.push(c)
 			}
 			break;
-		case 6:
+		case 5:
 
 				c = new explosionR(a,Height/2-30,"#FFFF00")
 				parr.push(c)
@@ -78,15 +88,37 @@ class comparer{
 				parr.push(c)
 				}
 
+				for(let i = 0; i < 360; i++){
+					let r =  Math.random()*3000
+				setTimeout(()=>{c = new explosionR(a+Math.random()*r/2-r/4,Height/2+Math.random()*r/2-r/4,"rgb(2,"+(125+Math.random()*125)+",255)")
+				c.actLife = Math.random()*40+20
+				c.size += 5
+				parr.push(c)},r+1000)
+
+
+				}
 			break;
 		case 4:
 			c = new liner(a,Height/2-30,4,1,0)
-			c.maxActLife = 20
+			c.maxActLife = 40
 			c.vx += Math.random()*216-108
 			c.vy += Math.random()*216-108
 			parr.push(c)
 			break;
 		}
+
+		switch(s){
+		case "tl":
+			for(let i = 0; i < 3; i++){
+				c = new liner(a,Height/2-30,4,1,0)
+				c.maxActLife = 40
+				c.vx += Math.random()*216-108
+				c.vy += Math.random()*216-108
+				parr.push(c)
+			}
+			break;
+		}
+
 	}
 
 }
