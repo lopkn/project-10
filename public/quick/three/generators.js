@@ -32,6 +32,9 @@ function rotate(roll, pitch, yaw, point) {
 }
 
 
+
+
+
 function dist3(x,y,z,a,b,c){
   let i = a-x
   let o = b-y

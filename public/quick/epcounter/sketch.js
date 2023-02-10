@@ -13,10 +13,26 @@ myCanvas.style.position = "absolute"
 
 let ctx = myCanvas.getContext("2d")
 
+let GTOGGLE = false
+
+
 ctx.textAlign = 'center'
 
 class comparer{
 
+
+	static disabled = {
+		"0":0,
+		"1":0,
+		"2":0,
+		"3":0,
+		"4":0,
+		"5":0,
+		"6":0,
+		"7":0,
+		"8":0,
+		"9":0
+	}
 	static last = "" + Date.now()
 
 	static compare(d){
@@ -24,10 +40,11 @@ class comparer{
 			let j = d.length-i
 
 			if(d[j] !== this.last[j]){
-				this.update(i)
 
-				if(i == 4 && d[j] == 5){
-					this.update(i,"tl")
+				if(d[j] == 5){
+					this.update(i+0.5)
+				} else {
+				this.update(i)
 				}
 			}
 
@@ -38,7 +55,14 @@ class comparer{
 
 	static update(t,s){
 		let c;
-		let a = WidthM + 300 - t*40
+		let a = WidthM + 300 - Math.floor(t)*40
+
+		if(this.disabled[t] > 0){
+			this.disabled[t] -= 1
+			return
+		}
+		if(t > 4)
+		console.log(t)
 
 		switch(t){
 		case 1:
@@ -53,14 +77,45 @@ class comparer{
 			c.size += 2
 			parr.push(c)
 			break;
-		case 6:
-			for(let i = 0; i < 20; i++){
-				c = new rollingBall(a,Height/2-30,Math.random()*8-4,Math.random()*8-4)
+		case 7:
+
+			if(GTOGGLE){
+				return
+			}
+			GTOGGLE = true
+			c = new liner(a,Height/2-30,5,6,0)
+			c.maxActLife = 10000000
+			c.vx += Math.random()*50-25
+			c.vy += Math.random()*50-25
+			c.lineLife = 12000
+			c.size += 10
+			c.counter = 18
+			c.lineUp = 0
+			c.myDat = 2
+			parr.push(c)
+
+
+			break;
+		case 5:
+			for(let i = 0; i < 10; i++){
+				c = new rollingBall(a,Height/2-30,Math.random()*4-2,Math.random()*4-2)
 				c.actLife *= Math.random()*2+1.2
 				parr.push(c)
 			}
 			break;
-		case 5:
+		case 5.5:
+			for(let i = 0; i < 15; i++){
+				c = new rollingBall(a,Height/2-30,Math.random()*8-4,Math.random()*8-4)
+				c.actLife *= Math.random()*2+1.2
+				parr.push(c)
+			}
+			c = new rollingBall(a,Height/2-30,Math.random()*8-4,Math.random()*8-4)
+				c.actLife = 6000+Math.random()*6200
+				c.size += 20
+				c.trailer = true
+				parr.push(c)
+			break;
+		case 6.5:
 
 				c = new explosionR(a,Height/2-30,"#FFFF00")
 				parr.push(c)
@@ -86,6 +141,43 @@ class comparer{
 				c = new rollingBall(a,Height/2-30,Math.random()*16-8,Math.random()*16-8)
 				c.actLife *= Math.random()*2+1.2
 				parr.push(c)
+				if(i < 3){
+					c = new rollingBall(a,Height/2-30,Math.random()*8-4,Math.random()*8-4)
+					c.actLife = 6000+Math.random()*6200
+					c.size += 14
+					c.trailer = true
+					parr.push(c)
+				}
+				}
+
+				for(let i = 0; i < 720; i++){
+					let r =  Math.random()*6000
+				setTimeout(()=>{c = new explosionR(a+Math.random()*r/2-r/4,Height/2+Math.random()*r/2-r/4,"rgb(2,"+(125+Math.random()*125)+",255)",0.5)
+				c.actLife = Math.random()*60+30
+				c.size += 8
+				parr.push(c)},r+1000)
+
+
+				}
+			break;
+		case 6:
+
+				c = new explosionR(a,Height/2-30,"#FFFF00")
+				parr.push(c)
+
+				for(let i = 0; i < 35; i++){
+					let r= Math.random()*2000+200
+					setTimeout(()=>{
+						c = new explosionR(a+Math.random()*r/1.5-r/3,Height/2-30+Math.random()*r/1.5-r/3,"#FFFF00")
+						c.actLife = 80+Math.random()*150
+						parr.push(c)
+					},r)
+				}
+
+				for(let i = 0; i < 30; i++){
+				c = new rollingBall(a,Height/2-30,Math.random()*16-8,Math.random()*16-8)
+				c.actLife *= Math.random()*2+1.2
+				parr.push(c)
 				}
 
 				for(let i = 0; i < 360; i++){
@@ -105,11 +197,8 @@ class comparer{
 			c.vy += Math.random()*216-108
 			parr.push(c)
 			break;
-		}
-
-		switch(s){
-		case "tl":
-			for(let i = 0; i < 3; i++){
+		case 4.5:
+			for(let i = 0; i < 5; i++){
 				c = new liner(a,Height/2-30,4,1,0)
 				c.maxActLife = 40
 				c.vx += Math.random()*216-108
@@ -119,13 +208,17 @@ class comparer{
 			break;
 		}
 
+	
+
 	}
 
 }
 
 class explosionR{
-	constructor(x,y,color){
+	constructor(x,y,color,speed,s2){
 		this.x = x
+		this.speed = speed?speed:1
+		this.s2 = s2?s2:1
 		this.y = y
 		this.color = color
 		this.size = 3
@@ -136,8 +229,8 @@ class explosionR{
 	}
 
 	update(){
-		this.size += 1
-		this.actLife -= 1
+		this.size += this.speed
+		this.actLife -= this.s2
 	}
 	draw(){
 		ctx.strokeStyle = this.color
@@ -159,6 +252,7 @@ class rollingBall{
 		this.x = x
 		this.y = y
 		this.vx = vx
+		this.trailer = false
 		this.vy = vy
 		this.size = 3 + Math.random()*3
 		this.actLife = 400
@@ -180,6 +274,15 @@ class rollingBall{
 		}
 		this.actLife -= 1
 		this.counter += 1
+
+
+		if(this.trailer && Math.random()>0.8){
+			let c = new explosionR(this.x,this.y,"rgb(2,"+(125+Math.random()*125)+",255)",0.2-Math.random()*0.16,0.3-Math.random()*0.2)
+			c.actLife = Math.random()*20+10
+			c.size += 12
+			parr.push(c)
+		}
+
 	}
 
 	draw(){
@@ -301,7 +404,34 @@ class liner{
 				this.vy += (Math.random()-0.5)*55
 				updated = true
 			}
+		} else if(this.type == 5){
+			if(this.counter%500 == 0){
+				this.x += this.vx
+				this.y += this.vy
+				this.vx += this.nvx
+				this.vy += this.nvy
+				this.nvx = 0
+				this.nvy = 0
+				this.vx += (Math.random()-0.5)*55
+				this.vy += (Math.random()-0.5)*55
+
+				this.lineUp += 1
+				if(this.lineUp%this.myDat == 0 && this.bounded === false){
+					let c = new liner(this.x,this.y,5,6,0)
+					c.maxActLife = 10000000
+					c.vx = this.vx + Math.random()*100-50
+					c.vy = this.vy + Math.random()*100-50
+					c.lineLife = 6000
+					c.size = this.size - 1
+					c.lineUp = 1
+					c.counter = 18
+					c.myDat = 1+this.myDat
+					parr.push(c)
+				}
+				updated = true
+			}
 		}
+
 
 
 		if(this.actLife < this.maxActLife && this.bounded === false && (updated||this.counter < 20)){
@@ -312,6 +442,7 @@ class liner{
 
 		if(this.x < 0 || this.y < 0 || this.x > Width || this.y > Height){
 			this.bounded = true
+
 		}
 		
 	}
@@ -364,6 +495,9 @@ function getCol(type,l,e){
 			break;
 		case 5:
 			ctx.strokeStyle = ("rgba("+(1-a)*255+",255,"+(1-a)*255+","+l+")")
+			break;
+		case 6:
+			ctx.strokeStyle = ("rgba(0,"+((1-a)*55+200)+",0,"+(l)+")")
 			break;
 	}
 }
