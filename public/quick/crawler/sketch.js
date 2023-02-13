@@ -84,6 +84,7 @@ class txt{
 	}
 	constructor(s,x,y,col,shell){
 		this.referenced = false
+		this.referenceNo = undefined
 		this.s = s
 		this.links = []
 		this.linksFrom = []
@@ -121,6 +122,7 @@ class txt{
 
 		
 		div.ondragend = (e)=>{
+			e.preventDefault()
 			this.dragEnd(e)
 		}
 		div.ondragstart = (e)=>{
@@ -217,8 +219,10 @@ class txt{
 		// }else{
 			texts[l].shell[this.s] = this.shell
 			if(this.referenced === false){
-			console.log("new shell: "+moderator.pushId(this.shell))
+				let a = moderator.pushId(this.shell)
+			console.log("new shell: "+a + " - "+ this.s)
 			this.referenced = true
+			this.referenceNo = a
 			}
 		// }
 	}
@@ -265,6 +269,8 @@ function inputHere(e){
 
 dragBody = false
 
+document.addEventListener('dragover',(e)=>{e.preventDefault()})
+
 document.addEventListener('keydown',(e)=>{
 	if(e.key == "Enter" && document.activeElement.id == "input"){
 		document.getElementById('input').blur()
@@ -303,6 +309,9 @@ function textUp(e){
 		} else if(e.value == "/F"){
 			let t = new txt(":FALSE:",e.x,e.y,"green")
 			texts[t.id] = t
+			return;
+		} else if(e.value == "/RM"){
+			read(mainMem)
 			return;
 		}
 
@@ -458,6 +467,71 @@ function moveAll(){
 // 	}
 
 // }
+
+
+
+function decomp(json,depth,S,sent){
+
+	if(S === undefined){S = ""}
+	if(sent === undefined){sent = 1}
+
+	if(depth > 0){
+
+		if(json["dxp_"] !== undefined){
+			depth -= json["dxp_"]
+		} else {
+			depth -= 0.5
+		}
+
+		let k = Object.keys(json)
+		if(k.length > 0){
+
+			if(k[0][0] == ":"){
+				sent -= 1
+				if(sent <= 0){
+					return(S)
+				}
+			}
+
+		S += " " + k[0]
+		S = decomper(json[k[0]],depth,S,sent)
+		} else {
+			depth = -20
+		}
+
+	}
+
+	return(S)
+
+}
+
+
+function derive1(json){
+
+	if(json[":IS:"] !== undefined){
+
+	}
+	let ret = []
+	let key1 = Object.keys(json)
+	key1.forEach((e)=>{
+		if(e[0] == "-"){
+			console.log("is "+e)
+		} else {
+			console.log("is a set that contains "+e)
+			ret.push(json[e])
+		}
+	})
+	return(ret)
+
+}
+
+
+
+
+
+
+
+
 
 
 let t = new txt("MainMem",Width/2,Height/2,"cyan",mainMem)
