@@ -298,7 +298,7 @@ function textUp(e){
 			t.referenced = true
 			texts[t.id] = t
 			return;
-		} else if(e.value == "/IS"){
+		} else if(e.value == "/IS" || e.value == "/is"){
 			let t = new txt(":IS:",e.x,e.y,"green")
 			texts[t.id] = t
 			return;
