@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+  <body>
+<script>
+
+
+
+//struct [a sin (x + b) + c]
+//srt [struct,struct]
+
+
+function msin(struct,x){
+  return(struct[0] * Math.sin(x + struct[1]) + struct[2])
+}
+
+function srt(multiStruct,x){
+  let out = 0
+  multiStruct.forEach((e)=>{
+    out += msin(e,x)
+  })
+  return(out)
+}
+
+
+function getErr(arrx,arry,multiStruct){
+  let error = 0 
+  arrx.forEach((e,i)=>{
+    error += Math.abs( arry[i] - srt(multiStruct, e) )
+  })
+  return(error)
+}
+
+function redError(arrx,arry,multistruct,times){
+  times*=1000
+  let err = getErr(arrx,arry,multistruct)
+  let oerr = err
+  for(let i = 0; i < times; i++){
+  let rndV = 1
+  let rnd = [Math.floor(Math.random()*multistruct.length),Math.floor(Math.random()*3),Math.random()*rndV-rndV/2]
+  
+  multistruct[rnd[0]][rnd[1]] += rnd[2]
+    
+    let nerr = getErr(arrx,arry,multistruct)
+    if(nerr < err){
+      err = nerr
+    } else {
+      multistruct[rnd[0]][rnd[1]] -= rnd[2]
+    }
+    
+  }
+  
+  console.log("original error: "+err)
+  return(oerr - err)
+  
+}
+
+
+let arrx = [1,3,20,40,80,120,-90]
+let mtStruct = [[0,0,0]]
+let arry = [1,3,20,40,80,120,-90]
+
+let ms2 = [0,0,0,0]
+
+let mySin = (x)=>{return(Math.sin(x))}
+
+
+
+class FM{
+  
+  //f(x*0+1)*2+3
+  static f(x){
+    return(Math.sin(x))
+  }
+  
+  
+  static evaluate(x,s){
+    return(this.f(x*s[0]+s[1])*f[2]+f[3])
+  }
+  
+  static getErr(arrx,arry,struct){
+    let error = 0 
+    arrx.forEach((e,i)=>{
+      error += Math.abs( arry[i] - this.evaluate(e,struct) )
+    })
+    return(error)
+  }
+
+  static corr(arrx,arry,struct,times){
+    times *= 1000
+    let deviation = 10
+    let err = this.getErr(arrx,arry,struct)
+    let oerr = err
+    for(let i = 0; i < times; i++){
+      let ad = [Math.floor(Math.random()*4),Math.random()*deviation-deviation/2]
+      struct[ad[0]] += ad[1]
+      
+      let nerr = this.getErr(arrx,arry,struct)
+      
+      if(nerr < err){
+        err = nerr
+      } else {
+      struct[ad[0]] -= ad[1]
+        
+      }
+      
+    }
+    
+    console.log("original error: "+oerr)
+    return(oerr-err)
+    
+  }
+  
+  
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+</script>
+</body>
+</html>

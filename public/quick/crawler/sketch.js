@@ -234,7 +234,23 @@ class txt{
 
 
 	rightClicked(e){
-		read(this.shell)
+		// read(this.shell)
+		rmenu.aopen(e.clientX+20,e.clientY-80,this)
+	}
+
+	rightClicked2(sw){
+		switch(sw){
+		case 0:
+			derive1(this.shell)
+			break;
+		case 1:
+			read(this.shell)
+			break;
+		case 2:
+			let a = derive1(this.shell)
+			console.log(a[0])
+			break;
+		}
 	}
 }
 
@@ -372,6 +388,114 @@ setInterval(()=>{
 })
 
 
+class rmenu{
+	static open = false
+	static choises = {}
+
+	// static toggle(){
+	// 	this.open = !this.open
+	// 	if(this.open){
+	// 		this.aopen()
+	// 	} else {
+	// 		this.aclose()
+	// 	}
+	// }
+
+	static aopen(x,y,t){
+		this.open = true
+		this.move(x,y)
+		this.c.style.visibility = "visible"
+		document.addEventListener("mousedown",(e)=>{this.openClick(e,t)},{once:true})
+	}
+
+	static aclose(){
+		this.open = false
+		this.c.style.visibility = "hidden"
+
+	}
+
+	static create(x,y,w,h){
+		let c = document.createElement('canvas')
+		c.width = w
+		c.height = h
+		this.w = w
+		this.h = h
+		this.x = x
+		this.y = y
+		c.style.top = y
+		c.style.left = x
+		c.style.position = "absolute"
+		c.id = "rmenu"
+		c.style.visibility = "hidden"
+		c.style.zIndex = "16"
+
+
+
+		document.body.appendChild(c)
+		this.c = c
+		this.ctx = document.getElementById("rmenu").getContext("2d")
+		return(this)
+	}
+
+	static move(x,y){
+		this.x = x
+		this.y = y
+		this.c.style.top = Math.floor(y)+"px"
+		this.c.style.left = Math.floor(x)+"px"
+		return(this)
+	}
+
+	static draw(){
+		this.ctx.fillStyle = "#A0A0A0"
+		this.ctx.fillRect(0,0,this.w,this.h)
+
+		for(let a = 0; a < this.w; a+=40){
+			this.ctx.strokeStyle = "#000000"
+			this.ctx.lineWidth = 3
+			this.ctx.beginPath()
+			this.ctx.moveTo(this.x+a,this.y)
+			this.ctx.lineTo(this.x+a,this.y+this.h)
+			this.ctx.stroke()
+		}
+		for(let b = 0; b < this.h; b+=40){
+			this.ctx.strokeStyle = "#000000"
+			this.ctx.lineWidth = 3
+			this.ctx.beginPath()
+			this.ctx.moveTo(this.x,this.y+b)
+			this.ctx.lineTo(this.x+this.w,this.y+b)
+			this.ctx.stroke()
+		}
+
+		this.ctx.fillStyle = "#00FF00"
+		this.ctx.fillRect(this.x,this.y,40,40)
+
+
+		return(this)
+	}
+
+	static openClick(e,t){
+		if(e.clientX > this.x && e.clientY > this.y && e.clientX < this.x+this.w && e.clientY < this.y+this.h){
+			this.down(e,t)
+		}
+
+		this.aclose()
+
+	}
+
+	static down(e,t){
+		let ax = e.clientX - this.x
+		let ay = e.clientY - this.y
+
+		let boxId = Math.floor(ax/40)+6*Math.floor(ay/40)
+		console.log(boxId)
+		t.rightClicked2(boxId)
+	}
+
+
+}
+rmenu.create(0,0,240,320).draw()
+
+
 function myLine(id,id2,col,size){
 		ctx.strokeStyle = col
 		ctx.lineWidth = size
@@ -506,25 +630,59 @@ function decomp(json,depth,S,sent){
 }
 
 
+function decomp2(json,depth,values){
+
+}
+
+
 function derive1(json){
 
 	if(json[":IS:"] !== undefined){
 
 	}
-	let ret = []
+	let ret = [[],[]]
 	let key1 = Object.keys(json)
 	key1.forEach((e)=>{
 		if(e[0] == "-"){
-			console.log("is "+e)
+			// console.log("is "+e)
+			ret[0].push("is "+e)
 		} else {
-			console.log("is a set that contains "+e)
-			ret.push(json[e])
+			// console.log("is a set that contains "+e)
+			ret[0].push("is a set that contains "+e)
+			ret[1].push(json[e])
 		}
 	})
 	return(ret)
 
 }
+function derive2(json,depth){
 
+	if(json[":IS:"] !== undefined){
+
+	}
+	let ret = [[],[],[],[]]
+	let ret2 = {"is":[],'can':[],"contains":[]}
+	let key1 = Object.keys(json)
+	key1.forEach((e)=>{
+		if(e[0] == "-"){
+			// console.log("is "+e)
+			ret[0].push("is "+e)
+			ret[1].push(e)
+		} else {
+			// console.log("is a set that contains "+e)
+			ret[2].push("is a set that contains "+e)
+			ret[3].push(json[e])
+
+			if(depth > 0){
+				let a = derive2(json[e],depth-1)
+
+			}
+
+		}
+	})
+	return(ret)
+
+}
 
 
 
