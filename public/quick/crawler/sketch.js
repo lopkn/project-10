@@ -666,12 +666,14 @@ function derive2(json,depth){
 	key1.forEach((e)=>{
 		if(e[0] == "-"){
 			// console.log("is "+e)
-			ret[0].push("is "+e)
-			ret[1].push(e)
+			// ret[0].push("is "+e)
+			// ret[1].push(e)
+			ret2.is.push(e)
 		} else {
 			// console.log("is a set that contains "+e)
 			ret[2].push("is a set that contains "+e)
 			ret[3].push(json[e])
+			ret2.contains.push()
 
 			if(depth > 0){
 				let a = derive2(json[e],depth-1)
@@ -684,7 +686,13 @@ function derive2(json,depth){
 
 }
 
-
+// // your life cycle
+// while($you.isAlive)
+// {	
+// 	$you.encoding;	
+// 	$you.friend with me;
+// }	
+//-hugo
 
 
 

@@ -1577,7 +1577,7 @@ function joinGame(game,socket){
 		io.to(socket.id).emit("acknowledge G10.2",socket.id)
 		shooter2C.initiatePlayer(socket.id)
 		socket.on("click",(e)=>{shooter2C.playerClick(e[0],e[1],e[2],e[3]);})
-		socket.on("placeWall",(e)=>{shooter2C.placeWall(e[0],e[1],e[2],e[3],e[4],e[4]=="body"?{id:e[5]}:undefined);console.log(e)})
+		socket.on("placeWall",(e)=>{shooter2C.placeWall(e[0],e[1],e[2],e[3],e[4],(e[4]=="body"||e[4]=="mbdy")?{id:e[5]}:undefined);console.log(e)})
 		socket.on("keys",(e)=>{shooter2C.playerKeyUpdate(e)})
 		socket.on('disconnect',()=>{shooter2C.disconnect(socket)})
 	} else if(game == "G10.3"){
@@ -4221,29 +4221,42 @@ class shooter2C{
 	static pushBullet(x,y,vx,vy,id,type){
 		switch(type){
 			case "norm":
-				this.bullets.push({"shooter":id,"type":"norm","x":x,"y":y,"vx":vx,"vy":vy,
+				this.bullets.push({"shooter":id,"type":"norm","x":x,"y":y,"vx":vx,"vy":vy,"wallMult":1,
 					"lingerance":10,"tailLength":10,"tail":[],"life":2000,"slowd":0.95})
 				break;
 			case "scat":
-				this.bullets.push({"shooter":id,"type":"scat","x":x,"y":y,"vx":vx,"vy":vy,
+				this.bullets.push({"shooter":id,"type":"scat","x":x,"y":y,"vx":vx,"vy":vy,"wallMult":1,
 					"tailLength":6,"dmgmult":3,"lingerance":6,"tail":[],"life":2000,"slowd":0.95})
 				break;
 			case "lazr":
-				this.bullets.push({"shooter":id,"type":"lazr","x":x,"y":y,"vx":vx,"vy":vy,
+				this.bullets.push({"shooter":id,"type":"lazr","x":x,"y":y,"vx":vx,"vy":vy,"wallMult":1,
 					"tailLength":20,"dmgmult":0.1,"lingerance":20,"tail":[],"life":200,"slowd":1})
 				break;
 			case "cnon":
-				this.bullets.push({"shooter":id,"type":"cnon","x":x,"y":y,"vx":vx,"vy":vy,
+				this.bullets.push({"shooter":id,"type":"cnon","x":x,"y":y,"vx":vx,"vy":vy,"wallMult":1,
 					"tailLength":10,"lingerance":10,"tail":[],"life":200,
 					"slowd":1,"dmgmult":9,"extra":{"tailmult":3}})
 				break;
 
 			case "heal":
-				this.bullets.push({"shooter":id,"type":"heal","x":x,"y":y,"vx":vx,"vy":vy,
+				this.bullets.push({"shooter":id,"type":"heal","x":x,"y":y,"vx":vx,"vy":vy,"wallMult":1,
 					"lingerance":2,"dmgmult":-1,"tailLength":2,"tail":[],"life":2000,"slowd":0.95})
+				break;
+			case "grnd":
+				this.bullets.push({"shooter":id,"type":"grnd","x":x,"y":y,"vx":vx,"vy":vy,"wallMult":1,"deathVel":10,
+					"lingerance":4,"dmgmult":0,"tailLength":4,"tail":[],"life":2000,"slowd":0.82,"extra":{"tailmult":8},
+					"onDeath":(b)=>{
+						for(let i = 0; i < 20; i++){let a = this.pushBullet(b.x,b.y,Math.random()*150-75,Math.random()*150-75,id,"norm")
+							a.slowd = 0.95
+							a.dmgmult = 6
+							a.extra = {"tailmult":3}
+							a.tailLength = 6; a.lingerance = 6;
+					}}
+				})
 				break;
 
 		}
+		return(this.bullets[this.bullets.length-1])
 	}
 
 	static playerClick(id,x,y,w){
@@ -4276,6 +4289,9 @@ class shooter2C{
 			case "heal":
 				this.pushBullet(p.x,p.y,(n[2]-p.x)*160,(n[3]-p.y)*160,id,"heal")
 				break;
+			case "grnd":
+				this.pushBullet(p.x,p.y,(n[2]-p.x)*80+p.vx,(n[3]-p.y)*80+p.vy,id,"grnd")
+				break;
 		}
 		p.reloading += reload;
 	}
@@ -4289,7 +4305,7 @@ class shooter2C{
 		if(type == undefined){
 			type = "norm"
 		}
-		if(distance(x1,y1,x2,y2) < 40 && type=="norm"){
+		if(distance(x1,y1,x2,y2) < 40 && (type=="norm" || type == "metl")){
 			return
 		}
 
@@ -4301,6 +4317,23 @@ class shooter2C{
 					"hp":1000,"midpt":myMath.midPointOfLine(x1,y1,x2,y2),
 					"defense":1,
 					"frad":distance(x1,y1,x2,y2)/2
+				}
+				break;
+			case "metl":
+				this.walls[a] = {
+					"type":"metl","x1":x1,"y1":y1,"x2":x2,"y2":y2,
+					"hp":1000,"midpt":myMath.midPointOfLine(x1,y1,x2,y2),
+					"defense":5,
+					"frad":distance(x1,y1,x2,y2)/2
+				}
+				break;
+			case "rflc":
+				this.walls[a] = {
+					"type":"rflc","x1":x1,"y1":y1,"x2":x2,"y2":y2,
+					"hp":1000,"midpt":myMath.midPointOfLine(x1,y1,x2,y2),
+					"defense":5,"wallMult":1.04,
+					"frad":distance(x1,y1,x2,y2)/2,
+					"onDamage":(w,b)=>{if(b.dmgmult === undefined){b.dmgmult = 1.2};if(b.dmgmult>0){b.dmgmult*=1.2};return(b)}
 				}
 				break;
 			case "player":
@@ -4318,6 +4351,15 @@ class shooter2C{
 				this.players[options.id].boidyVect.push([x1-pp.x,y1-pp.y,x2-pp.x,y2-pp.y])
 				this.players[options.id].boidy.push(a)
 				break;
+			case "mbdy":
+			this.walls[a] = {"frad":distance(x1,y1,x2,y2)/2,"plid":options.id,"type":"mbdy","x1":0,"y1":0,"x2":0,"y2":0,"hp":1000,
+					"defense":4,"midpt":myMath.midPointOfLine(x1,y1,x2,y2),
+					"frad":distance(x1,y1,x2,y2)/2
+				}
+				let ppr = this.players[options.id]
+				this.players[options.id].boidyVect.push([x1-ppr.x,y1-ppr.y,x2-ppr.x,y2-ppr.y])
+				this.players[options.id].boidy.push(a)
+				break;
 			case "bhol":
 				this.walls[a] = {
 					"type":"bhol","x":x1,"y":y1,"radius":160,"velmult":0.95,
@@ -4330,6 +4372,14 @@ class shooter2C{
 				this.walls[a] = {
 					"type":"ghol","x":x1,"y":y1,"radius":460,"velmult":0.98,
 					"midpt":[x1,y1],"handle":"ghol","hp":4000,
+					"defense":1,
+					"frad":x2
+				}
+				break;
+			case "whol":
+				this.walls[a] = {
+					"type":"whol","x":x1,"y":y1,"radius":360,"velmult":0.98,
+					"midpt":[x1,y1],"handle":"whol","hp":2000,
 					"defense":1,
 					"frad":x2
 				}
@@ -4377,14 +4427,27 @@ class shooter2C{
 				p.reloading -= 1
 			}
 			let cont = false
-			p.boidy.forEach((BOI)=>{
+			p.boidy.forEach((BOI,i)=>{
 				if(this.walls[BOI] == undefined){
+					p.boidy.splice(i,1)
+					p.boidyVect.splice(i,1)
 					cont = true
 				}
 			})
 			if(cont){
 				continue
 			}
+
+			let dd = 0
+				p.boidy.forEach((e)=>{
+					if(this.walls[e].type == "player"){
+						dd += 1
+					}
+				})
+
+				if(dd < 3){
+				continue
+				}
 
 			let tv = [0,0]
 			if(p.keys.w == "a"){
@@ -4484,6 +4547,11 @@ class shooter2C{
 			let B = this.bullets[k]
 			B.life--
 			if(B.life < 0){
+
+				if(this.bullets[k].onDeath !== undefined){
+					this.bullets[k].onDeath(this.bullets[k])
+				}
+
 				this.bullets.splice(k,1)
 				continue;
 			}
@@ -4560,6 +4628,22 @@ class shooter2C{
 										lastCol[wallsArr[j]] = "infinite"
 									}
 									break;
+								case "whol":
+									if(distance(B.x,B.y,w.x,w.y) < w.radius){
+										let td = distance(w.x,w.y,B.x,B.y)
+										let ad = 1000000/(td*td)
+										let nor = vectorNormalize([0,0,w.x-B.x,w.y-B.y])
+										ad = ad>50?50:ad
+										i.vx -= nor[2]*ad
+										i.vy -= nor[3]*ad
+										// bspeed += distance(B.x,B.y,B.vx+nor[2]*ad,B.vy+nor[2]*ad)-bspeed
+										this.damageWall(wallsArr[j],B)
+										// if(td > 50){
+										// bspeed *= w.velmult}
+										coled = "dn"
+										lastCol[wallsArr[j]] = "infinite"
+									}
+									break;
 							}
 					}
 				}
@@ -4593,9 +4677,14 @@ class shooter2C{
 						this.drawers.push([i.type,i.tailLength,i.x,i.y,tcol[0],tcol[1],i.extra])
 						i.x = tcol[0]
 						i.y = tcol[1]
-						i.vx = 0.6*(tcol[2]-tcol[0])
-						i.vy = 0.6*(tcol[3]-tcol[1])
-						bspeed *= 0.6
+						i.vx = B.wallMult*(tcol[2]-tcol[0])*(tw.wallMult?tw.wallMult:0.6)
+						i.vy = B.wallMult*(tcol[3]-tcol[1])*(tw.wallMult?tw.wallMult:0.6)
+						bspeed *= B.wallMult*(tw.wallMult?tw.wallMult:0.6)
+
+						if(tw.onDamage !== undefined){
+							tw.onDamage(tw,B)
+						}
+
 					} else {
 						this.drawers.push([i.type,i.tailLength,i.x,i.y,tcol[0],tcol[1],i.extra])
 						i.vx = (i.vx - (tcol[0] - i.x)) * 0.3
@@ -4636,7 +4725,7 @@ class shooter2C{
 				
 			let sp = B.vx*B.vx + B.vy*B.vy 
 
-				if(B.life > 6 && ( sp < 1)){
+				if(B.life > 6 &&  sp < 1+(B.deathVel?B.deathVel:0)){
 					B.life = 5
 				}
 		}
@@ -4646,8 +4735,11 @@ class shooter2C{
 		this.send()
 
 	}
+	static wallTypes = {
+		"norm":true,"metl":true,"rflc":true,"player":true,"body":true,"mbdy":true
+	}
 	static damageWall(wid,b){
-		if(this.walls[wid].type == "norm" || this.walls[wid].type == "player" || this.walls[wid].type == "body"){
+		if(this.wallTypes[this.walls[wid].type]){
 		let vy = b.vy
 		let vx = b.vx
 		this.walls[wid].hp -= 0.005*(vx*vx+vy*vy)*(b.dmgmult?b.dmgmult:1)/this.walls[wid].defense

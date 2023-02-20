@@ -33,9 +33,9 @@ class player{
 	static snapping = false
 	static gridSize = 80
 	static weaponCounter = 1
-	static weaponDict = {"1":"norm","2":"scat","3":"lazr","4":"cnon","5":"heal"}
+	static weaponDict = {"1":"norm","2":"scat","3":"lazr","4":"cnon","5":"heal","6":"grnd"}
 	static wallCounter = 1
-	static wallDict = {"1":"norm","2":"bhol","3":"ghol","4":"body"}
+	static wallDict = {"1":"norm","2":"bhol","3":"ghol","4":"body","5":"metl","6":"rflc","7":"mbdy","8":"whol"}
 }
 class map{
 	
@@ -139,6 +139,8 @@ function tick(){
 			mainCTX.strokeStyle = "#00FFFF"
 		} else if(e[0] == "heal"){
 			mainCTX.strokeStyle = "#FF0000"
+		} else if(e[0] == "grnd"){
+			mainCTX.strokeStyle = "#007000"
 		}
 		mainCTX.moveTo(e[2]-cameraX,e[3]-cameraY)
 		mainCTX.lineTo(e[4]-cameraX,e[5]-cameraY)
@@ -147,6 +149,7 @@ function tick(){
 
 
 	let wallsArr = Object.keys(map.walls)
+	let rwc = Math.random()
 	for(let j = 0 ; j < wallsArr.length; j++){
 		let i = map.walls[wallsArr[j]]
 		if(i.type == "norm" || i.type == "player" || i.type == "body"){
@@ -156,10 +159,33 @@ function tick(){
 		mainCTX.moveTo(i.x1-cameraX,i.y1-cameraY)
 		mainCTX.lineTo(i.x2-cameraX,i.y2-cameraY)
 		mainCTX.stroke()
+		}else if(i.type == "metl" || i.type == "mbdy"){
+		mainCTX.beginPath()
+		mainCTX.lineWidth = 9
+		mainCTX.strokeStyle = "rgba(205,205,225,"+(i.hp/2000+0.5)+")"
+		mainCTX.moveTo(i.x1-cameraX,i.y1-cameraY)
+		mainCTX.lineTo(i.x2-cameraX,i.y2-cameraY)
+		mainCTX.stroke()
+		}else if(i.type == "rflc"){
+		mainCTX.beginPath()
+		mainCTX.lineWidth = 9
+		mainCTX.strokeStyle = "rgba(155,205,"+(205+rwc*50)+","+(i.hp/2000+0.5)+")"
+		mainCTX.moveTo(i.x1-cameraX,i.y1-cameraY)
+		mainCTX.lineTo(i.x2-cameraX,i.y2-cameraY)
+		mainCTX.stroke()
 		} else if(i.type == "bhol" || i.type == "ghol"){
 			mainCTX.beginPath()
 			mainCTX.lineWidth = 3
 			mainCTX.strokeStyle = i.type == "bhol"?"#FF0000":"#0000FF"
+			mainCTX.moveTo(i.x-i.radius-cameraX,i.y-cameraY)
+			mainCTX.lineTo(i.x+i.radius-cameraX,i.y-cameraY)
+			mainCTX.moveTo(i.x-cameraX,i.y-i.radius-cameraY)
+			mainCTX.lineTo(i.x-cameraX,i.y+i.radius-cameraY)
+			mainCTX.stroke()
+		}else if(i.type == "whol"){
+			mainCTX.beginPath()
+			mainCTX.lineWidth = 3
+			mainCTX.strokeStyle = "#707000"
 			mainCTX.moveTo(i.x-i.radius-cameraX,i.y-cameraY)
 			mainCTX.lineTo(i.x+i.radius-cameraX,i.y-cameraY)
 			mainCTX.moveTo(i.x-cameraX,i.y-i.radius-cameraY)
