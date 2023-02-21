@@ -1577,7 +1577,7 @@ function joinGame(game,socket){
 		io.to(socket.id).emit("acknowledge G10.2",socket.id)
 		shooter2C.initiatePlayer(socket.id)
 		socket.on("click",(e)=>{shooter2C.playerClick(e[0],e[1],e[2],e[3]);})
-		socket.on("placeWall",(e)=>{shooter2C.placeWall(e[0],e[1],e[2],e[3],e[4],(e[4]=="body"||e[4]=="mbdy")?{id:e[5]}:undefined);console.log(e)})
+		socket.on("placeWall",(e)=>{shooter2C.placeWall(e[0],e[1],e[2],e[3],e[4],(e[4]=="body"||e[4]=="mbdy")?{id:e[5]}:undefined)})
 		socket.on("keys",(e)=>{shooter2C.playerKeyUpdate(e)})
 		socket.on('disconnect',()=>{shooter2C.disconnect(socket)})
 	} else if(game == "G10.3"){
@@ -4248,7 +4248,7 @@ class shooter2C{
 					"onDeath":(b)=>{
 						for(let i = 0; i < 20; i++){let a = this.pushBullet(b.x,b.y,Math.random()*150-75,Math.random()*150-75,id,"norm")
 							a.slowd = 0.95
-							a.dmgmult = 6
+							a.dmgmult = 12
 							a.extra = {"tailmult":3}
 							a.tailLength = 6; a.lingerance = 6;
 					}}
@@ -4379,8 +4379,8 @@ class shooter2C{
 			case "whol":
 				this.walls[a] = {
 					"type":"whol","x":x1,"y":y1,"radius":360,"velmult":0.98,
-					"midpt":[x1,y1],"handle":"whol","hp":2000,
-					"defense":1,
+					"midpt":[x1,y1],"handle":"whol","hp":1000,
+					"defense":0.2,
 					"frad":x2
 				}
 				break;
@@ -4631,9 +4631,9 @@ class shooter2C{
 								case "whol":
 									if(distance(B.x,B.y,w.x,w.y) < w.radius){
 										let td = distance(w.x,w.y,B.x,B.y)
-										let ad = 1000000/(td*td)
+										let ad = 1500000/(td*td)
 										let nor = vectorNormalize([0,0,w.x-B.x,w.y-B.y])
-										ad = ad>50?50:ad
+										ad = ad>80?80:ad
 										i.vx -= nor[2]*ad
 										i.vy -= nor[3]*ad
 										// bspeed += distance(B.x,B.y,B.vx+nor[2]*ad,B.vy+nor[2]*ad)-bspeed
@@ -4751,6 +4751,16 @@ class shooter2C{
 		this.updateWall(wid)
 		return(true)
 		} else if(this.walls[wid].type == "bhol"){
+			b.shooter = ""
+		this.walls[wid].hp -= 1
+		if(this.walls[wid].hp < 0){
+			delete this.walls[wid]
+			this.wallPushers[wid] = "_DEL"
+			return(false)
+		}
+		this.updateWall(wid)
+		return(true)
+		} else if(this.walls[wid].type == "whol"){
 			b.shooter = ""
 		this.walls[wid].hp -= 1
 		if(this.walls[wid].hp < 0){

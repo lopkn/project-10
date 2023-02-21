@@ -11,6 +11,36 @@ myCanvas.height = Height
 HeightM = Height/2
 myCanvas.style.position = "absolute"
 
+let sounds = true
+
+let soundNameDict = {
+	"Sf3":"./../../soundEffects/sinF3.mp3",
+	"Sc4":"./../../soundEffects/sinC4.mp3",
+}
+
+let soundDict = {
+	"Sf3":[],
+	"Sc4":[]
+}
+
+function ps(s){
+	if(sounds === false){
+		return
+	}
+	let arr = soundDict[s]
+	for(let i = 0; i < arr.length; i++){
+		if(arr[i].paused){
+			arr[i].play()
+			return("this");
+		} else {
+		}
+	}
+	let a = new Audio(soundNameDict[s])
+	arr.push(a)
+	a.play()
+	return(a)
+}
+
 let ctx = myCanvas.getContext("2d")
 
 let GTOGGLE = false
@@ -268,9 +298,14 @@ class rollingBall{
 
 		if(this.x < 0 || this.x > Width){
 			this.vx *= -1
+			if(this.trailer){
+				console.log(ps("Sc4"))
+			}
 		}
 		if(this.y < 0 || this.y > Height){
 			this.vy *= -1
+			if(this.trailer){
+			ps("Sf3")}
 		}
 		this.actLife -= 1
 		this.counter += 1
