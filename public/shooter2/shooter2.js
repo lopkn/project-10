@@ -10,6 +10,11 @@ socket.on("CROBJECT",(e)=>{crobject(e)})
 socket.on("upwalls",upwalls)
 socket.on("cameraUp",(e)=>{cameraX = e[0]-410;cameraY = e[1]-410})
 
+function StCcord(x,y){
+	return([ (x-cameraX)  ])
+}
+
+
 function ALTF3(){
 	altf3 = (n,e)=>{player.dataNodes.push([n,JSON.stringify(e).length,Date.now()])}
 	socket.onAny((n,e)=>{altf3(n,e)})
@@ -36,6 +41,14 @@ class player{
 	static weaponDict = {"1":"norm","2":"scat","3":"lazr","4":"cnon","5":"heal","6":"grnd"}
 	static wallCounter = 1
 	static wallDict = {"1":"norm","2":"bhol","3":"ghol","4":"body","5":"metl","6":"rflc","7":"mbdy","8":"whol"}
+
+	static zoom = 1
+	static zoomR = 410*(1-this.zoom)
+
+	static rezoom(x){
+		this.zoom = x
+		this.zoomR = 410*(1-this.zoom)
+	}
 }
 class map{
 	
@@ -111,13 +124,13 @@ function tick(){
 	mainCTX.strokeStyle = "#404040"
 	mainCTX.lineWidth = 2
 	mainCTX.beginPath()
-	for(let i = -1; i < 10; i++){
-		mainCTX.moveTo(i*player.gridSize + CXR,0)
-		mainCTX.lineTo(i*player.gridSize + CXR,840)
+	for(let i = -player.gridSize; i < 840/player.zoom; i+= player.gridSize){
+		mainCTX.moveTo( (i + CXR)*player.zoom,0)
+		mainCTX.lineTo( (i + CXR)*player.zoom,840)
 	}
-	for(let i = -1; i < 10; i++){
-		mainCTX.moveTo(0,i*player.gridSize + CYR)
-		mainCTX.lineTo(840,i*player.gridSize + CYR)
+	for(let i = -player.gridSize; i < 840/player.zoom; i+= player.gridSize){
+		mainCTX.moveTo(0,(i + CYR)*player.zoom)
+		mainCTX.lineTo(840,(i + CYR)*player.zoom)
 	}
 	mainCTX.stroke()
 
@@ -133,7 +146,7 @@ function tick(){
 		if(e[6]==undefined){
 			e[6] = {}
 		}
-		mainCTX.lineWidth = (e[1]+1) * (e[6].tailmult == undefined?1:e[6].tailmult)
+		mainCTX.lineWidth = (e[1]+1) * (e[6].tailmult == undefined?1:e[6].tailmult) * player.zoom
 		if(e[0] == "norm" || e[0] == "scat" || e[0] == "cnon"){
 		mainCTX.strokeStyle = "#FFFF00"} else if(e[0] == "lazr"){
 			mainCTX.strokeStyle = "#00FFFF"
@@ -142,8 +155,8 @@ function tick(){
 		} else if(e[0] == "grnd"){
 			mainCTX.strokeStyle = "#007000"
 		}
-		mainCTX.moveTo(e[2]-cameraX,e[3]-cameraY)
-		mainCTX.lineTo(e[4]-cameraX,e[5]-cameraY)
+		mainCTX.moveTo((e[2]-cameraX)*player.zoom + player.zoomR,(e[3]-cameraY)*player.zoom + player.zoomR)
+		mainCTX.lineTo((e[4]-cameraX)*player.zoom + player.zoomR,(e[5]-cameraY)*player.zoom + player.zoomR)
 		mainCTX.stroke()
 	}
 
@@ -156,31 +169,31 @@ function tick(){
 		mainCTX.beginPath()
 		mainCTX.lineWidth = 3
 		mainCTX.strokeStyle = "rgba(255,255,255,"+(i.hp/2000+0.5)+")"
-		mainCTX.moveTo(i.x1-cameraX,i.y1-cameraY)
-		mainCTX.lineTo(i.x2-cameraX,i.y2-cameraY)
+		mainCTX.moveTo((i.x1-cameraX)*player.zoom+player.zoomR,(i.y1-cameraY)*player.zoom+player.zoomR)
+		mainCTX.lineTo((i.x2-cameraX)*player.zoom+player.zoomR,(i.y2-cameraY)*player.zoom+player.zoomR)
 		mainCTX.stroke()
 		}else if(i.type == "metl" || i.type == "mbdy"){
 		mainCTX.beginPath()
 		mainCTX.lineWidth = 9
 		mainCTX.strokeStyle = "rgba(205,205,225,"+(i.hp/2000+0.5)+")"
-		mainCTX.moveTo(i.x1-cameraX,i.y1-cameraY)
-		mainCTX.lineTo(i.x2-cameraX,i.y2-cameraY)
+		mainCTX.moveTo((i.x1-cameraX)*player.zoom+player.zoomR,(i.y1-cameraY)*player.zoom+player.zoomR)
+		mainCTX.lineTo((i.x2-cameraX)*player.zoom+player.zoomR,(i.y2-cameraY)*player.zoom+player.zoomR)
 		mainCTX.stroke()
 		}else if(i.type == "rflc"){
 		mainCTX.beginPath()
 		mainCTX.lineWidth = 9
 		mainCTX.strokeStyle = "rgba(155,205,"+(205+rwc*50)+","+(i.hp/2000+0.5)+")"
-		mainCTX.moveTo(i.x1-cameraX,i.y1-cameraY)
-		mainCTX.lineTo(i.x2-cameraX,i.y2-cameraY)
+		mainCTX.moveTo((i.x1-cameraX)*player.zoom+player.zoomR,(i.y1-cameraY)*player.zoom+player.zoomR)
+		mainCTX.lineTo((i.x2-cameraX)*player.zoom+player.zoomR,(i.y2-cameraY)*player.zoom+player.zoomR)
 		mainCTX.stroke()
 		} else if(i.type == "bhol" || i.type == "ghol"){
 			mainCTX.beginPath()
 			mainCTX.lineWidth = 3
 			mainCTX.strokeStyle = i.type == "bhol"?"#FF0000":"#0000FF"
-			mainCTX.moveTo(i.x-i.radius-cameraX,i.y-cameraY)
-			mainCTX.lineTo(i.x+i.radius-cameraX,i.y-cameraY)
-			mainCTX.moveTo(i.x-cameraX,i.y-i.radius-cameraY)
-			mainCTX.lineTo(i.x-cameraX,i.y+i.radius-cameraY)
+			mainCTX.moveTo( (i.x-i.radius-cameraX)*player.zoom+player.zoomR,(i.y-cameraY)*player.zoom+player.zoomR)
+			mainCTX.lineTo( (i.x+i.radius-cameraX)*player.zoom+player.zoomR,(i.y-cameraY)*player.zoom+player.zoomR)
+			mainCTX.moveTo( (i.x-cameraX)*player.zoom+player.zoomR,(i.y-i.radius-cameraY)*player.zoom+player.zoomR)
+			mainCTX.lineTo( (i.x-cameraX)*player.zoom+player.zoomR,(i.y+i.radius-cameraY)*player.zoom+player.zoomR)
 			mainCTX.stroke()
 		}else if(i.type == "whol"){
 			mainCTX.beginPath()
@@ -288,6 +301,7 @@ document.addEventListener("keydown",(e)=>{
   console.log(key)
 
 })
+
 
 document.addEventListener("keyup",(e)=>{
   e.preventDefault()

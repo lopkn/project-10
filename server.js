@@ -4246,7 +4246,7 @@ class shooter2C{
 				this.bullets.push({"shooter":id,"type":"grnd","x":x,"y":y,"vx":vx,"vy":vy,"wallMult":1,"deathVel":10,
 					"lingerance":4,"dmgmult":0,"tailLength":4,"tail":[],"life":2000,"slowd":0.82,"extra":{"tailmult":8},
 					"onDeath":(b)=>{
-						for(let i = 0; i < 20; i++){let a = this.pushBullet(b.x,b.y,Math.random()*150-75,Math.random()*150-75,id,"norm")
+						for(let i = 0; i < 20; i++){let a = this.pushBullet(b.x,b.y,Math.random()*150-75,Math.random()*150-75,b.shooter,"norm")
 							a.slowd = 0.95
 							a.dmgmult = 12
 							a.extra = {"tailmult":3}
@@ -4266,6 +4266,7 @@ class shooter2C{
 		}
 		let n = vectorNormalize([p.x,p.y,x+p.x-410,y+p.y-410])
 		p.rotation = [n[2]-p.x,n[3]-p.y]
+		p.unmovePos[2] = true
 		let reload = 0
 		switch(w){
 			case "norm":
@@ -4400,7 +4401,7 @@ class shooter2C{
 
 		if(type == undefined || type == "ntri"){
 
-		this.players[id] = {"reloading":0,"rotation":[0,1],"boidyVect":[[0,-40,30,30],[30,30,-30,30],[-30,30,0,-40]],"boidy":[],"x":410,"y":410,"vx":0,"vy":0,"hp":100,"id":id,"keys":{}}
+		this.players[id] = {"reloading":0,"unmovePos":[0,0],"rotation":[0,1],"boidyVect":[[0,-40,30,30],[30,30,-30,30],[-30,30,0,-40]],"boidy":[],"x":410,"y":410,"vx":0,"vy":0,"hp":100,"id":id,"keys":{}}
 
 		let a = this.placeWall(410,390,395,425,"player",{"id":id})
 		this.players[id].boidy.push(a)
@@ -4493,9 +4494,12 @@ class shooter2C{
 				}
 			}
 
+			if(distance(p.unmovePos[0],p.unmovePos[1],p.x,p.y) > 1 || p.unmovePos[2]){
 			p.boidy.forEach((B)=>{
 				this.updateWall(B)
 			})
+			p.unmovePos = [p.x,p.y,false]
+			}
 
 			io.to(objt[i]).emit("cameraUp",[p.x,p.y])
 		}
@@ -4631,7 +4635,7 @@ class shooter2C{
 								case "whol":
 									if(distance(B.x,B.y,w.x,w.y) < w.radius){
 										let td = distance(w.x,w.y,B.x,B.y)
-										let ad = 1500000/(td*td)
+										let ad = 1000000/(td*td)
 										let nor = vectorNormalize([0,0,w.x-B.x,w.y-B.y])
 										ad = ad>80?80:ad
 										i.vx -= nor[2]*ad
@@ -4725,7 +4729,7 @@ class shooter2C{
 				
 			let sp = B.vx*B.vx + B.vy*B.vy 
 
-				if(B.life > 6 &&  sp < 1+(B.deathVel?B.deathVel:0)){
+				if(B.life > 6 &&  sp < 5+(B.deathVel?B.deathVel:0)){
 					B.life = 5
 				}
 		}
