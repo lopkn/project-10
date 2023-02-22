@@ -1577,7 +1577,7 @@ function joinGame(game,socket){
 		io.to(socket.id).emit("acknowledge G10.2",socket.id)
 		shooter2C.initiatePlayer(socket.id)
 		socket.on("click",(e)=>{shooter2C.playerClick(e[0],e[1],e[2],e[3]);})
-		socket.on("placeWall",(e)=>{shooter2C.placeWall(e[0],e[1],e[2],e[3],e[4],(e[4]=="body"||e[4]=="mbdy")?{id:e[5]}:undefined)})
+		socket.on("placeWall",(e)=>{shooter2C.placeWall(socket.id,e[0],e[1],e[2],e[3],e[4],(e[4]=="body"||e[4]=="mbdy")?{id:e[5]}:undefined)})
 		socket.on("keys",(e)=>{shooter2C.playerKeyUpdate(e)})
 		socket.on('disconnect',()=>{shooter2C.disconnect(socket)})
 	} else if(game == "G10.3"){
@@ -4220,6 +4220,8 @@ class shooter2C{
 
 	static pushBullet(x,y,vx,vy,id,type){
 		switch(type){
+
+
 			case "norm":
 				this.bullets.push({"shooter":id,"type":"norm","x":x,"y":y,"vx":vx,"vy":vy,"wallMult":1,
 					"lingerance":10,"tailLength":10,"tail":[],"life":2000,"slowd":0.95})
@@ -4249,7 +4251,7 @@ class shooter2C{
 						for(let i = 0; i < 20; i++){let a = this.pushBullet(b.x,b.y,Math.random()*150-75,Math.random()*150-75,b.shooter,"norm")
 							a.slowd = 0.95
 							a.dmgmult = 12
-							a.extra = {"tailmult":3}
+							a.extra = {"tailmult":3,"tailLength":6}
 							a.tailLength = 6; a.lingerance = 6;
 					}}
 				})
@@ -4301,23 +4303,40 @@ class shooter2C{
 		this.nuuIDGEN++
 		return(this.nuuIDGEN)
 	}
-	static placeWall(x1,y1,x2,y2,type,options,special){
+
+	static wallCost(l,t,p){
+		l/=10
+		let player = this.players[p]
+		if(player.materials > l){
+			player.materials -= l
+			io.to(p).emit("spec",["mat",Math.floor(player.materials)])
+			return(false)
+		}
+		return(true)
+	}
+
+	static placeWall(player,x1,y1,x2,y2,type,options,special){
 		
 		if(type == undefined){
 			type = "norm"
 		}
-		if(distance(x1,y1,x2,y2) < 40 && (type=="norm" || type == "metl")){
+		let wLength = distance(x1,y1,x2,y2)
+		if(this.wallCost(wLength,type,player) && type != "player"){return}
+
+		if(wLength < 40 && (type=="norm" || type == "metl" || type == "refl")){
 			return
 		}
 
 		let a = this.getNewNUUID()
+
+
 		switch(type){
 			case "norm":
 				this.walls[a] = {
 					"type":"norm","x1":x1,"y1":y1,"x2":x2,"y2":y2,
 					"hp":1000,"midpt":myMath.midPointOfLine(x1,y1,x2,y2),
 					"defense":1,
-					"frad":distance(x1,y1,x2,y2)/2
+					"frad":wLength/2
 				}
 				break;
 			case "metl":
@@ -4325,7 +4344,7 @@ class shooter2C{
 					"type":"metl","x1":x1,"y1":y1,"x2":x2,"y2":y2,
 					"hp":1000,"midpt":myMath.midPointOfLine(x1,y1,x2,y2),
 					"defense":5,
-					"frad":distance(x1,y1,x2,y2)/2
+					"frad":wLength/2
 				}
 				break;
 			case "rflc":
@@ -4333,31 +4352,32 @@ class shooter2C{
 					"type":"rflc","x1":x1,"y1":y1,"x2":x2,"y2":y2,
 					"hp":1000,"midpt":myMath.midPointOfLine(x1,y1,x2,y2),
 					"defense":5,"wallMult":1.04,
-					"frad":distance(x1,y1,x2,y2)/2,
+					"frad":wLength/2,
 					"onDamage":(w,b)=>{if(b.dmgmult === undefined){b.dmgmult = 1.2};if(b.dmgmult>0){b.dmgmult*=1.2};return(b)}
 				}
 				break;
 			case "player":
 				this.walls[a] = {"frad":distance(x1,y1,x2,y2)/2,"plid":options.id,"type":"player","x1":x1,"y1":y1,"x2":x2,"y2":y2,"hp":1000,
 					"defense":0.5,"midpt":myMath.midPointOfLine(x1,y1,x2,y2),
-					"frad":distance(x1,y1,x2,y2)/2
+					"frad":wLength/2,
+					"compression":["type","x1","y1","x2","y2","hp"]
 				}
 				break;
 			case "body":
 			this.walls[a] = {"frad":distance(x1,y1,x2,y2)/2,"plid":options.id,"type":"body","x1":0,"y1":0,"x2":0,"y2":0,"hp":1000,
-					"defense":0.2,"midpt":myMath.midPointOfLine(x1,y1,x2,y2),
-					"frad":distance(x1,y1,x2,y2)/2
+					"defense":0.2,"midpt":myMath.midPointOfLine(x1,y1,x2,y2)
 				}
 				let pp = this.players[options.id]
 				this.players[options.id].boidyVect.push([x1-pp.x,y1-pp.y,x2-pp.x,y2-pp.y])
+				pp.unmovePos[2] = true
 				this.players[options.id].boidy.push(a)
 				break;
 			case "mbdy":
-			this.walls[a] = {"frad":distance(x1,y1,x2,y2)/2,"plid":options.id,"type":"mbdy","x1":0,"y1":0,"x2":0,"y2":0,"hp":1000,
-					"defense":4,"midpt":myMath.midPointOfLine(x1,y1,x2,y2),
-					"frad":distance(x1,y1,x2,y2)/2
+			this.walls[a] = {"frad":wLength/2,"plid":options.id,"type":"mbdy","x1":0,"y1":0,"x2":0,"y2":0,"hp":1000,
+					"defense":4,"midpt":myMath.midPointOfLine(x1,y1,x2,y2)
 				}
 				let ppr = this.players[options.id]
+				ppr.unmovePos[2] = true
 				this.players[options.id].boidyVect.push([x1-ppr.x,y1-ppr.y,x2-ppr.x,y2-ppr.y])
 				this.players[options.id].boidy.push(a)
 				break;
@@ -4401,32 +4421,43 @@ class shooter2C{
 
 		if(type == undefined || type == "ntri"){
 
-		this.players[id] = {"reloading":0,"unmovePos":[0,0],"rotation":[0,1],"boidyVect":[[0,-40,30,30],[30,30,-30,30],[-30,30,0,-40]],"boidy":[],"x":410,"y":410,"vx":0,"vy":0,"hp":100,"id":id,"keys":{}}
+		this.players[id] = {"reloading":0,"unmovePos":[0,0],"rotation":[0,1],
+		"boidyVect":[[0,-40,30,30],[30,30,-30,30],[-30,30,0,-40]],
+		"boidy":[],"x":410,"y":410,"vx":0,"vy":0,"hp":100,"id":id,"keys":{},
+		"materials":100
+	}
 
-		let a = this.placeWall(410,390,395,425,"player",{"id":id})
+		let a = this.placeWall(id,410,390,395,425,"player",{"id":id,"force":true})
 		this.players[id].boidy.push(a)
-		 a = this.placeWall(425,425,395,425,"player",{"id":id})
+		 a = this.placeWall(id,425,425,395,425,"player",{"id":id,"force":true})
 		 this.players[id].boidy.push(a)
 
-		 a = this.placeWall(410,390,425,425,"player",{"id":id})
+		 a = this.placeWall(id,410,390,425,425,"player",{"id":id,"force":true})
 		 this.players[id].boidy.push(a)
 		} else if(type == "shld") {
-			this.players[id].boidy.push(this.placeWall(0,0,0,0,"player",{"id":id},{"defense":10}))
+			this.players[id].boidy.push(this.placeWall(id,0,0,0,0,"player",{"id":id,"force":true},{"defense":10}))
 		}
 
 		this.sendAllWombjects(id)
 	}
 
+	static pvuCounter = 0
+
 	static playerVelUpdate(){
 
-
-
+		this.pvuCounter += 1
 		let objt = Object.keys(this.players)
 		for(let i = 0; i < objt.length; i++){
 			let p = this.players[objt[i]]
 			if(p.reloading > 0){
 				p.reloading -= 1
 			}
+
+			if(this.pvuCounter % 60 == 0){
+				p.materials += 25
+				io.to(p.id).emit("spec",["mat",Math.floor(p.materials)])
+			}
+
 			let cont = false
 			p.boidy.forEach((BOI,i)=>{
 				if(this.walls[BOI] == undefined){
@@ -4785,13 +4816,32 @@ class shooter2C{
 	}
 }
 	static send(){
+
+		this.drawers.forEach((e)=>{
+			e.splice(1,1)
+		})
+
 		io.to("G10.2").emit("drawers",[this.drawers])
 	}
 
 
 	static updateWall(nuuid){
 
-		this.wallPushers[nuuid] = this.walls[nuuid]
+		// this.wallPushers[nuuid] = this.walls[nuuid]
+		this.wallPushers[nuuid] = this.wallCompressor(nuuid)
+	}
+
+	static wallCompressor(nuuid){
+		let w = this.walls[nuuid]
+		if(w.compression === undefined){
+			return(w)
+		}
+		// return(w.compression(w))
+		let r = {}
+		w.compression.forEach((e)=>{
+			r[e] = w[e]
+		})
+		return(r)
 	}
 
 	static pointLineCollision(x1,y1,x2,y2,x3,y3,x4,y4){

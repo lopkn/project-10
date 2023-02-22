@@ -7,11 +7,19 @@ socket.on("drawers",(e)=>{drawDrawers(e[0]);tick();})
 // socket.on("walls",(e)=>{drawWalls(e)})
 socket.on("acknowledge G10.2",acknowledge)
 socket.on("CROBJECT",(e)=>{crobject(e)})
+socket.on("spec",(e)=>{spec(e)})
 socket.on("upwalls",upwalls)
 socket.on("cameraUp",(e)=>{cameraX = e[0]-410;cameraY = e[1]-410})
 
 function StCcord(x,y){
 	return([ (x-cameraX)  ])
+}
+
+
+function spec(s){
+	if(s[0] == "mat"){
+		player.materials = s[1]
+	}
 }
 
 
@@ -34,6 +42,7 @@ class player{
 	static debugging = false
 	static dataNodes = []
 	static weapon = "norm"
+	static materials = 100
 	static wall = "norm"
 	static snapping = false
 	static gridSize = 80
@@ -81,6 +90,10 @@ function crobject(e){
 	map.players = e[1]
 }
 
+
+	let bulletAtt = {"norm":10,"scat":6,"lazr":20,"cnon":10,"heal":2,"grnd":4}
+
+
 function tick(){
 	socket.emit("keys",[ID,keyHolds])
 	mainCTX.clearRect(0,0,840,840)
@@ -106,6 +119,9 @@ function tick(){
 				break;
 			case "CROBJECT":
 				mainCTX.strokeStyle = "#FFFF00"
+				break;
+			case "spec":
+				mainCTX.strokeStyle = "#00FFFF"
 				break;
 		}
 		
@@ -167,28 +183,28 @@ function tick(){
 		let i = map.walls[wallsArr[j]]
 		if(i.type == "norm" || i.type == "player" || i.type == "body"){
 		mainCTX.beginPath()
-		mainCTX.lineWidth = 3
+		mainCTX.lineWidth = 3*player.zoom
 		mainCTX.strokeStyle = "rgba(255,255,255,"+(i.hp/2000+0.5)+")"
 		mainCTX.moveTo((i.x1-cameraX)*player.zoom+player.zoomR,(i.y1-cameraY)*player.zoom+player.zoomR)
 		mainCTX.lineTo((i.x2-cameraX)*player.zoom+player.zoomR,(i.y2-cameraY)*player.zoom+player.zoomR)
 		mainCTX.stroke()
 		}else if(i.type == "metl" || i.type == "mbdy"){
 		mainCTX.beginPath()
-		mainCTX.lineWidth = 9
+		mainCTX.lineWidth = 9*player.zoom
 		mainCTX.strokeStyle = "rgba(205,205,225,"+(i.hp/2000+0.5)+")"
 		mainCTX.moveTo((i.x1-cameraX)*player.zoom+player.zoomR,(i.y1-cameraY)*player.zoom+player.zoomR)
 		mainCTX.lineTo((i.x2-cameraX)*player.zoom+player.zoomR,(i.y2-cameraY)*player.zoom+player.zoomR)
 		mainCTX.stroke()
 		}else if(i.type == "rflc"){
 		mainCTX.beginPath()
-		mainCTX.lineWidth = 9
+		mainCTX.lineWidth = 9*player.zoom
 		mainCTX.strokeStyle = "rgba(155,205,"+(205+rwc*50)+","+(i.hp/2000+0.5)+")"
 		mainCTX.moveTo((i.x1-cameraX)*player.zoom+player.zoomR,(i.y1-cameraY)*player.zoom+player.zoomR)
 		mainCTX.lineTo((i.x2-cameraX)*player.zoom+player.zoomR,(i.y2-cameraY)*player.zoom+player.zoomR)
 		mainCTX.stroke()
 		} else if(i.type == "bhol" || i.type == "ghol"){
 			mainCTX.beginPath()
-			mainCTX.lineWidth = 3
+			mainCTX.lineWidth = 3*player.zoom
 			mainCTX.strokeStyle = i.type == "bhol"?"#FF0000":"#0000FF"
 			mainCTX.moveTo( (i.x-i.radius-cameraX)*player.zoom+player.zoomR,(i.y-cameraY)*player.zoom+player.zoomR)
 			mainCTX.lineTo( (i.x+i.radius-cameraX)*player.zoom+player.zoomR,(i.y-cameraY)*player.zoom+player.zoomR)
@@ -197,7 +213,7 @@ function tick(){
 			mainCTX.stroke()
 		}else if(i.type == "whol"){
 			mainCTX.beginPath()
-			mainCTX.lineWidth = 3
+			mainCTX.lineWidth = 3*player.zoom
 			mainCTX.strokeStyle = "#707000"
 			mainCTX.moveTo(i.x-i.radius-cameraX,i.y-cameraY)
 			mainCTX.lineTo(i.x+i.radius-cameraX,i.y-cameraY)
@@ -219,6 +235,7 @@ function tick(){
 	mainCTX.fillText("snapping: "+(player.snapping?"on":"off"),560,800)
 	mainCTX.fillStyle = "rgba(0,"+(150+ala*55)+",0,"+(alb*0.2+0.8)+")"
 	mainCTX.fillText("position: "+Math.floor(cameraX/20)+" "+Math.floor(cameraY/20),20,770)
+	mainCTX.fillText("materials: "+player.materials,320,770)
 }
 
 
@@ -228,7 +245,19 @@ let mainCTX = document.getElementById("myCanvas").getContext("2d")
 
 function drawDrawers(e){
 	// mainCTX.clearRect(0,0,840,840)
+
+	// console.log(JSON.stringify(e))
+
+
+	// if(e[0]){
+	// 	console.log(e[0][1])
+	// }
+
 	e.forEach((i)=>{
+		let a = i[5]?(i[5].tailLength?i[5].tailLength:bulletAtt[i[0]]):bulletAtt[i[0]]
+		// let a = 1
+		// if(i[4] && i[5])
+		i.splice(1,0,a)
 		map.bullets.push(i)
 	})
 }
