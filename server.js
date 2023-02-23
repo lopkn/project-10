@@ -4256,9 +4256,38 @@ class shooter2C{
 					}}
 				})
 				break;
+			case "msl":
+				this.bullets.push({"shooter":id,"type":"msl","x":x,"y":y,"vx":vx,"vy":vy,"wallMult":0,"deathVel":619.8,
+					"lingerance":4,"dmgmult":0,"tailLength":4,"tail":[],"life":50,"slowd":1,"extra":{"tailmult":8},
+					"onDeath":(b)=>{
+						for(let i = 0; i < 20; i++){let a = this.pushBullet(b.x,b.y,Math.random()*150-75+vx,Math.random()*150-75+vy,b.shooter,"norm")
+							a.slowd = 0.95
+							a.dmgmult = 12
+							a.extra = {"tailmult":3,"tailLength":6}
+							a.tailLength = 6; a.lingerance = 6;
+					}}
+				})
+				break;
+			case "msl2":
+				this.bullets.push({"shooter":id,"type":"msl2","x":x,"y":y,"vx":vx/3,"vy":vy/3,"wallMult":0,"deathVel":20,
+					"lingerance":4,"dmgmult":0,"tailLength":4,"tail":[],"life":50,"slowd":1.04,"extra":{"tailmult":8},
+					"onDeath":(b)=>{
+						for(let i = 0; i < 20; i++){let a = this.pushBullet(b.x,b.y,Math.random()*150-75+vx,Math.random()*150-75+vy,b.shooter,"norm")
+							a.slowd = 0.95
+							a.dmgmult = 12
+							a.extra = {"tailmult":3,"tailLength":6}
+							a.tailLength = 6; a.lingerance = 6;
+					}}
+				})
+				break;
 
 		}
 		return(this.bullets[this.bullets.length-1])
+	}
+
+	static playerLook(p,x,y){
+		let n = vectorFuncs.originVectorNormalize(x-p.x,y-p.y)
+		p.rotation = [n[0],n[1]]
 	}
 
 	static playerClick(id,x,y,w){
@@ -4295,6 +4324,9 @@ class shooter2C{
 			case "grnd":
 				this.pushBullet(p.x,p.y,(n[2]-p.x)*80+p.vx,(n[3]-p.y)*80+p.vy,id,"grnd")
 				break;
+			case "msl":
+				this.pushBullet(p.x,p.y,(n[2]-p.x)*25,(n[3]-p.y)*25,id,"msl")
+				break;
 		}
 		p.reloading += reload;
 	}
@@ -4320,16 +4352,16 @@ class shooter2C{
 		if(type == undefined){
 			type = "norm"
 		}
+		let p = this.players[player]
 		let wLength = distance(x1,y1,x2,y2)
-		if(this.wallCost(wLength,type,player) && type != "player"){return}
-
-		if(wLength < 40 && (type=="norm" || type == "metl" || type == "refl")){
+		if(type != "player" && !options?.force && this.wallCost(wLength,type,player)){return}
+		if(wLength < 40 && (type=="norm" || type == "metl" || type == "rflc") && !options?.force){
 			return
 		}
 
 		let a = this.getNewNUUID()
 
-
+		let tarr;
 		switch(type){
 			case "norm":
 				this.walls[a] = {
@@ -4403,6 +4435,57 @@ class shooter2C{
 					"midpt":[x1,y1],"handle":"whol","hp":1000,
 					"defense":0.2,
 					"frad":x2
+				}
+				break;
+			case "box":
+				tarr = [[40,30,40,-30],[40,-30,-40,-30],[-40,-30,-40,30],[-40,30,40,30]]
+				this.playerLook(p,x1,y1)
+				for(let i = 0; i < tarr.length; i++){
+					let ar = tarr[i]
+				// this.walls[p.boidy[k]].x1 = ((p.boidyVect[k][0] * p.rotation[1] + p.boidyVect[k][1] * p.rotation[0]) + p.x)
+					let xx1 = (ar[0] * p.rotation[1] + ar[1] * p.rotation[0])+ x1
+				// this.walls[p.boidy[k]].y1 = ((p.boidyVect[k][1] * p.rotation[1] - p.boidyVect[k][0] * p.rotation[0]) + p.y)
+					let yy1 = (ar[1] * p.rotation[1] - ar[0] * p.rotation[0]) + y1
+				// this.walls[p.boidy[k]].x2 = ((p.boidyVect[k][2] * p.rotation[1] + p.boidyVect[k][3] * p.rotation[0]) + p.x)
+					let xx2 = (ar[2] * p.rotation[1] + ar[3] * p.rotation[0]) + x1
+				// this.walls[p.boidy[k]].y2 = ((p.boidyVect[k][3] * p.rotation[1] - p.boidyVect[k][2] * p.rotation[0]) + p.y)
+					let yy2 = (ar[3] * p.rotation[1] - ar[2] * p.rotation[0]) + y1
+					this.placeWall(player,xx1,yy1,xx2,yy2,"norm",{"force":true})
+				}
+				// this.placeWall(player,40,40,40,-40,"norm",{"force":true})
+				return;
+				break;
+			case "turr":
+				tarr = [[40,30,40,-30],[40,-30,-40,-30],[-40,-30,-40,30],[-40,30,40,30]]
+				this.playerLook(p,x1,y1)
+				this.walls[a] = {"type":"turr","x":x1,"y":y1,"radius":460,"velmult":0.98,
+					"midpt":[x1,y1],"handle":"none","hp":1000,
+					"defense":0.2,
+					"time":Math.floor(Math.random()*20),
+					"frad":x2,"plid":player};
+				this.walldo[a] = (TIMES)=>{if(TIMES%20===this.walls[a].time){
+
+					let obpr = Object.keys(this.players)
+					for(let i = 0; i < obpr.length; i++){
+						let TTP = obpr[i]
+						let TPP = this.players[TTP]
+						if(distance(TPP.x,TPP.y,x1,y1) < this.walls[a].radius && TTP != player){
+							let nrm = vectorFuncs.originVectorNormalize(TPP.x-x1,TPP.y-y1)
+							let abb = this.pushBullet(x1,y1,nrm[0]*45,nrm[1]*45,player,"norm")
+							abb.dmgmult =  6
+							break;
+						}
+					}
+
+				}}
+				for(let i = 0; i < tarr.length; i++){
+					let ar = tarr[i]
+					let xx1 = (ar[0] * p.rotation[1] + ar[1] * p.rotation[0])+ x1
+					let yy1 = (ar[1] * p.rotation[1] - ar[0] * p.rotation[0]) + y1
+					let xx2 = (ar[2] * p.rotation[1] + ar[3] * p.rotation[0]) + x1
+					let yy2 = (ar[3] * p.rotation[1] - ar[2] * p.rotation[0]) + y1
+					let pw = this.placeWall(player,xx1,yy1,xx2,yy2,"norm",{"force":true},{"plid":player})
+					this.walls[pw].onDeath = (w,b)=>{this.delWall(a)}
 				}
 				break;
 		}
@@ -4568,7 +4651,18 @@ class shooter2C{
 
 	}
 
+	static RSTotal = 0
+	static rpuCounter = 0
+	static walldo = {}
 	static repeat(){
+		this.rpuCounter += 1
+		let RSTIME = Date.now()
+
+		let objkWD = Object.values(this.walldo)
+		objkWD.forEach((e)=>{
+			e(this.rpuCounter)
+		})
+
 		this.drawers = []
 		if(Object.keys(this.wallPushers).length > 0){
 			io.to("G10.2").emit("upwalls",this.wallPushers)
@@ -4759,7 +4853,6 @@ class shooter2C{
 
 				
 			let sp = B.vx*B.vx + B.vy*B.vy 
-
 				if(B.life > 6 &&  sp < 5+(B.deathVel?B.deathVel:0)){
 					B.life = 5
 				}
@@ -4769,22 +4862,39 @@ class shooter2C{
 
 		this.send()
 
+
+		this.RSTotal += Date.now()-RSTIME
+		if(this.rpuCounter % 40 === 0){
+			this.RSTotal = 0
+		}
+
 	}
 	static wallTypes = {
 		"norm":true,"metl":true,"rflc":true,"player":true,"body":true,"mbdy":true
 	}
+
+	static delWall(wid){
+		delete this.walldo[wid]
+		delete this.walls[wid]
+		this.wallPushers[wid] = "_DEL"
+	}
+
 	static damageWall(wid,b){
 		if(this.wallTypes[this.walls[wid].type]){
 		let vy = b.vy
 		let vx = b.vx
 		this.walls[wid].hp -= 0.005*(vx*vx+vy*vy)*(b.dmgmult?b.dmgmult:1)/this.walls[wid].defense
 		if(this.walls[wid].hp < 0){
+			if(this.walls[wid].onDeath !== undefined){
+				this.walls[wid].onDeath(this.walls[wid],b)
+			}
 			delete this.walls[wid]
 			this.wallPushers[wid] = "_DEL"
 			return(false)
 		}
 		this.updateWall(wid)
 		return(true)
+		
 		} else if(this.walls[wid].type == "bhol"){
 			b.shooter = ""
 		this.walls[wid].hp -= 1
@@ -4878,35 +4988,35 @@ class shooter2C{
 		delete this.players[s.id]
 	}
 
-	static p5re(MX,MY,px2,py2,MA,MB,MC,MD){
+	// static p5re(MX,MY,px2,py2,MA,MB,MC,MD){ // unused 23Feb12:58
 
-  let a = this.pointLineCollision(MX,MY,px2,py2,MA,MB,MC,MD)
+  // let a = this.pointLineCollision(MX,MY,px2,py2,MA,MB,MC,MD)
 
   
-		if(a[4]){
-    let nn = vectorNormal(MA,MB,MC,MD)    
-    let nv = [px2-a[0],py2-a[1]]
+	// 	if(a[4]){
+  //   let nn = vectorNormal(MA,MB,MC,MD)    
+  //   let nv = [px2-a[0],py2-a[1]]
 
     
-    let nv1 = [nv[0] * nn[2], nv[1] * nn[3]]
-    let mult = 2 * (nv[0] * nn[0] + nv[1] * nn[1])
-    let nn2 = [nv[0]-nn[0]*mult,nv[1]-nn[1]*mult]
+  //   // let nv1 = [nv[0] * nn[2], nv[1] * nn[3]] // commented 23Feb12:55
+  //   let mult = 2 * (nv[0] * nn[0] + nv[1] * nn[1])
+  //   let nn2 = [nv[0]-nn[0]*mult,nv[1]-nn[1]*mult]
     
-    // line(a[0],a[1],a[0]+nn2[0],a[1]+nn2[1])
+  //   // line(a[0],a[1],a[0]+nn2[0],a[1]+nn2[1])
     
-    	return([a[0],a[1],a[0]+nn2[0],a[1]+nn2[1]])
+  //   	return([a[0],a[1],a[0]+nn2[0],a[1]+nn2[1]])
     
-  	} else {
-  		return("noCol")
-  	}
-	}
+  // 	} else {
+  // 		return("noCol")
+  // 	}
+	// }
 	static p5rre(a,px2,py2,MA,MB,MC,MD){
 		if(a[4]){
     let nn = vectorNormal(MA,MB,MC,MD)    
     let nv = [px2-a[0],py2-a[1]]
 
     
-    let nv1 = [nv[0] * nn[2], nv[1] * nn[3]]
+    // let nv1 = [nv[0] * nn[2], nv[1] * nn[3]] // commented 23Feb12:55
     let mult = 2 * (nv[0] * nn[0] + nv[1] * nn[1])
     let nn2 = [nv[0]-nn[0]*mult,nv[1]-nn[1]*mult]
     

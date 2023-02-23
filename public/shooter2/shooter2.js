@@ -22,6 +22,12 @@ function spec(s){
 	}
 }
 
+function drawCircle(x,y,size){
+	ctx.beginPath()
+		ctx.arc(x, y, size, 0, 2 * Math.PI);
+		ctx.stroke()
+}
+
 
 function ALTF3(){
 	altf3 = (n,e)=>{player.dataNodes.push([n,JSON.stringify(e).length,Date.now()])}
@@ -47,9 +53,9 @@ class player{
 	static snapping = false
 	static gridSize = 80
 	static weaponCounter = 1
-	static weaponDict = {"1":"norm","2":"scat","3":"lazr","4":"cnon","5":"heal","6":"grnd"}
+	static weaponDict = {"1":"norm","2":"scat","3":"lazr","4":"cnon","5":"heal","6":"grnd","7":"msl"}
 	static wallCounter = 1
-	static wallDict = {"1":"norm","2":"bhol","3":"ghol","4":"body","5":"metl","6":"rflc","7":"mbdy","8":"whol"}
+	static wallDict = {"1":"norm","2":"bhol","3":"ghol","4":"body","5":"metl","6":"rflc","7":"mbdy","8":"whol","9":"box","10":"turr"}
 
 	static zoom = 1
 	static zoomR = 410*(1-this.zoom)
@@ -91,7 +97,7 @@ function crobject(e){
 }
 
 
-	let bulletAtt = {"norm":10,"scat":6,"lazr":20,"cnon":10,"heal":2,"grnd":4}
+	let bulletAtt = {"norm":10,"scat":6,"lazr":20,"cnon":10,"heal":2,"grnd":4,"msl":4}
 
 
 function tick(){
@@ -170,6 +176,8 @@ function tick(){
 			mainCTX.strokeStyle = "#FF0000"
 		} else if(e[0] == "grnd"){
 			mainCTX.strokeStyle = "#007000"
+		} else if(e[0] === "msl"){
+			mainCTX.strokeStyle = "#A06000"
 		}
 		mainCTX.moveTo((e[2]-cameraX)*player.zoom + player.zoomR,(e[3]-cameraY)*player.zoom + player.zoomR)
 		mainCTX.lineTo((e[4]-cameraX)*player.zoom + player.zoomR,(e[5]-cameraY)*player.zoom + player.zoomR)
@@ -300,18 +308,30 @@ document.addEventListener("keydown",(e)=>{
   		break;
     case "q":
   		player.weaponCounter -= 1
+  		if(player.weaponCounter < 1){
+  			player.weaponCounter = Object.values(player.weaponDict).length
+  		}
   		player.weapon = player.weaponDict[player.weaponCounter]
   		break;
   	case "e":
   		player.weaponCounter += 1
+  		if(player.weaponCounter > Object.values(player.weaponDict).length){
+  			player.weaponCounter = 1
+  		}
   		player.weapon = player.weaponDict[player.weaponCounter]
   		break;
   	case "z":
   		player.wallCounter -= 1
+  		if(player.wallCounter < 1){
+  			player.wallCounter = Object.values(player.wallDict).length
+  		}
   		player.wall = player.wallDict[player.wallCounter]
   		break;
   	case "c":
   		player.wallCounter += 1
+  		if(player.wallCounter > Object.values(player.wallDict).length){
+  			player.wallCounter = 1
+  		}
   		player.wall = player.wallDict[player.wallCounter]
   		break;
   	case "p":
