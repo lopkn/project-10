@@ -4333,7 +4333,7 @@ class shooter2C{
 
 	static getNewNUUID(){
 		this.nuuIDGEN++
-		return(this.nuuIDGEN)
+		return(this.nuuIDGEN.toString(36))
 	}
 
 	static wallCost(l,t,p){
@@ -4472,6 +4472,39 @@ class shooter2C{
 						if(distance(TPP.x,TPP.y,x1,y1) < this.walls[a].radius && TTP != player){
 							let nrm = vectorFuncs.originVectorNormalize(TPP.x-x1,TPP.y-y1)
 							let abb = this.pushBullet(x1,y1,nrm[0]*45,nrm[1]*45,player,"norm")
+							abb.dmgmult =  6
+							break;
+						}
+					}
+
+				}}
+				for(let i = 0; i < tarr.length; i++){
+					let ar = tarr[i]
+					let xx1 = (ar[0] * p.rotation[1] + ar[1] * p.rotation[0])+ x1
+					let yy1 = (ar[1] * p.rotation[1] - ar[0] * p.rotation[0]) + y1
+					let xx2 = (ar[2] * p.rotation[1] + ar[3] * p.rotation[0]) + x1
+					let yy2 = (ar[3] * p.rotation[1] - ar[2] * p.rotation[0]) + y1
+					let pw = this.placeWall(player,xx1,yy1,xx2,yy2,"norm",{"force":true},{"plid":player})
+					this.walls[pw].onDeath = (w,b)=>{this.delWall(a)}
+				}
+				break;
+			case "turr2":
+				tarr = [[40,30,40,-30],[40,-30,-40,-30],[-40,-30,-40,30],[-40,30,40,30]]
+				this.playerLook(p,x1,y1)
+				this.walls[a] = {"type":"turr2","x":x1,"y":y1,"radius":860,"velmult":0.98,
+					"midpt":[x1,y1],"handle":"none","hp":1000,
+					"defense":0.2,
+					"time":Math.floor(Math.random()*4),
+					"frad":x2,"plid":player};
+				this.walldo[a] = (TIMES)=>{if(TIMES%4===this.walls[a].time){
+
+					let obpr = Object.keys(this.players)
+					for(let i = 0; i < obpr.length; i++){
+						let TTP = obpr[i]
+						let TPP = this.players[TTP]
+						if(distance(TPP.x,TPP.y,x1,y1) < this.walls[a].radius && TTP != player){
+							let nrm = vectorFuncs.originVectorNormalize(TPP.x-x1,TPP.y-y1)
+							let abb = this.pushBullet(x1,y1,nrm[0]*65+TPP.vx*1.7+Math.random()*45-22.5,nrm[1]*65+Math.random()*45-22.5+TPP.vy*1.7,player,"norm")
 							abb.dmgmult =  6
 							break;
 						}

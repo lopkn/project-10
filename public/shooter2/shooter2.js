@@ -55,10 +55,12 @@ class player{
 	static weaponCounter = 1
 	static weaponDict = {"1":"norm","2":"scat","3":"lazr","4":"cnon","5":"heal","6":"grnd","7":"msl"}
 	static wallCounter = 1
-	static wallDict = {"1":"norm","2":"bhol","3":"ghol","4":"body","5":"metl","6":"rflc","7":"mbdy","8":"whol","9":"box","10":"turr"}
+	static wallDict = {"1":"norm","2":"bhol","3":"ghol","4":"body","5":"metl","6":"rflc","7":"mbdy","8":"whol","9":"box","10":"turr","11":"turr2"}
 
 	static zoom = 1
 	static zoomR = 410*(1-this.zoom)
+
+	static levelTrip = 1
 
 	static rezoom(x){
 		this.zoom = x
@@ -100,7 +102,26 @@ function crobject(e){
 	let bulletAtt = {"norm":10,"scat":6,"lazr":20,"cnon":10,"heal":2,"grnd":4,"msl":4}
 
 
+let tripVel = 0
+
+let cttr = 0
 function tick(){
+	cttr++
+	if(cttr%2===0){
+	tripVel += (Math.random()-0.5)/20
+	}
+	player.levelTrip += tripVel/2
+	player.levelTrip *= 0.99
+		if(player.levelTrip < 0.4){
+			player.levelTrip = 0.4
+			if(Math.random()>0.9){
+				tripVel = 0
+			}
+		} else if (player.levelTrip > 6){
+			tripVel = 0
+			player.levelTrip = 6
+		}
+
 	socket.emit("keys",[ID,keyHolds])
 	mainCTX.clearRect(0,0,840,840)
 
@@ -143,8 +164,30 @@ function tick(){
 
 	let CXR = player.gridSize-(cameraX%player.gridSize)
 	let CYR = player.gridSize-(cameraY%player.gridSize)
+
+
+	mainCTX.strokeStyle = "#101040"
+	mainCTX.lineWidth = 3/player.levelTrip
+	mainCTX.beginPath()
+
+	player.rezoom(player.zoom/player.levelTrip)
+
+for(let i = -player.gridSize-player.gridSize*Math.floor(1+player.zoomR/player.gridSize/player.zoom); i < 900/player.zoom+player.gridSize/player.levelTrip; i+= player.gridSize){
+		mainCTX.moveTo( (i + CXR)*player.zoom+player.zoomR,0)
+		mainCTX.lineTo( (i + CXR)*player.zoom+player.zoomR,840)
+	}
+	for(let i = -player.gridSize-player.gridSize*Math.floor(1+player.zoomR/player.gridSize/player.zoom); i < 900/player.zoom+player.gridSize/player.levelTrip; i+= player.gridSize){
+		mainCTX.moveTo(0,(i + CYR)*player.zoom+player.zoomR)
+		mainCTX.lineTo(840,(i + CYR)*player.zoom+player.zoomR)
+	}
+
+	player.rezoom(player.zoom*player.levelTrip)
+
+
+	mainCTX.stroke()
+
 	mainCTX.strokeStyle = "#404040"
-	mainCTX.lineWidth = 2
+	mainCTX.lineWidth = 3
 	mainCTX.beginPath()
 	for(let i = -player.gridSize-player.gridSize*Math.floor(1+player.zoomR/player.gridSize/player.zoom); i < 900/player.zoom; i+= player.gridSize){
 		mainCTX.moveTo( (i + CXR)*player.zoom+player.zoomR,0)
@@ -154,7 +197,9 @@ function tick(){
 		mainCTX.moveTo(0,(i + CYR)*player.zoom+player.zoomR)
 		mainCTX.lineTo(840,(i + CYR)*player.zoom+player.zoomR)
 	}
-	mainCTX.stroke()
+
+mainCTX.stroke()
+
 
 
 	for(let i = map.bullets.length-1; i > -1; i--){
@@ -249,6 +294,52 @@ function tick(){
 
 let mainCTX = document.getElementById("myCanvas").getContext("2d")
 
+
+
+var ZOOMSETTINGS = {"windowWidth":window.innerWidth, "windowHeight":window.innerHeight,"expectWidth":1560,"expectHeight":940}
+
+var allzoom = 1
+
+
+
+
+function windowRescale(e){
+
+  if(e != undefined && !isNaN(parseFloat(e))){
+    allzoom = parseFloat(e)
+    document.body.style.zoom = allzoom
+    document.body.style.MozTransform = "scale("+allzoom+")";
+    document.body.style.MozTransformOrigin = "0 0";
+    return(allzoom)
+    return;
+  }
+
+  let zoomScale = 1
+
+  ZOOMSETTINGS = {"windowWidth":window.innerWidth, "windowHeight":window.innerHeight,"expectWidth":840,"expectHeight":840}
+
+  if(ZOOMSETTINGS.windowWidth < ZOOMSETTINGS.expectWidth){
+    zoomScale = ZOOMSETTINGS.windowWidth/ZOOMSETTINGS.expectWidth
+  }
+
+  if(ZOOMSETTINGS.windowHeight < ZOOMSETTINGS.expectHeight){
+    let tzoomScale = ZOOMSETTINGS.windowHeight/ZOOMSETTINGS.expectHeight
+    if(tzoomScale < zoomScale){
+      zoomScale = tzoomScale
+    }
+  }
+
+
+  allzoom = zoomScale
+  document.body.style.zoom = allzoom
+  document.body.style.MozTransform = "scale("+allzoom+")";
+  document.body.style.MozTransformOrigin = "0 0";
+  return(zoomScale)
+
+}
+
+windowRescale()
+
 	// mainCTX.clearRect(0,0,840,840)
 
 function drawDrawers(e){
@@ -285,7 +376,7 @@ function drawWalls(e){
 var mouseX = 0
 var mouseY = 0
 
-onmousemove = (e)=>{mouseX = (e.clientX - 5); mouseY = (e.clientY - 2)}
+onmousemove = (e)=>{mouseX = (e.clientX - 5*allzoom)/allzoom; mouseY = (e.clientY - 2*allzoom)/allzoom}
 
 document.addEventListener("mousedown",(e)=>{
 	socket.emit("click",[ID,mouseX,mouseY,player.weapon])
