@@ -146,13 +146,13 @@ function tick(){
 	mainCTX.strokeStyle = "#404040"
 	mainCTX.lineWidth = 2
 	mainCTX.beginPath()
-	for(let i = -player.gridSize; i < 840/player.zoom; i+= player.gridSize){
-		mainCTX.moveTo( (i + CXR)*player.zoom,0)
-		mainCTX.lineTo( (i + CXR)*player.zoom,840)
+	for(let i = -player.gridSize-player.gridSize*Math.floor(1+player.zoomR/player.gridSize/player.zoom); i < 900/player.zoom; i+= player.gridSize){
+		mainCTX.moveTo( (i + CXR)*player.zoom+player.zoomR,0)
+		mainCTX.lineTo( (i + CXR)*player.zoom+player.zoomR,840)
 	}
-	for(let i = -player.gridSize; i < 840/player.zoom; i+= player.gridSize){
-		mainCTX.moveTo(0,(i + CYR)*player.zoom)
-		mainCTX.lineTo(840,(i + CYR)*player.zoom)
+	for(let i = -player.gridSize-player.gridSize*Math.floor(1+player.zoomR/player.gridSize/player.zoom); i < 900/player.zoom; i+= player.gridSize){
+		mainCTX.moveTo(0,(i + CYR)*player.zoom+player.zoomR)
+		mainCTX.lineTo(840,(i + CYR)*player.zoom+player.zoomR)
 	}
 	mainCTX.stroke()
 
@@ -304,7 +304,7 @@ document.addEventListener("keydown",(e)=>{
 
   switch(key){
   	case "r":
-  		placing = [true,mouseX+cameraX,mouseY+cameraY]
+  		placing = [true,mouseX/player.zoom-player.zoomR/player.zoom+cameraX,mouseY/player.zoom-player.zoomR/player.zoom+cameraY]
   		break;
     case "q":
   		player.weaponCounter -= 1
@@ -360,8 +360,8 @@ document.addEventListener("keyup",(e)=>{
   	if(player.snapping){
   		placing[1] += player.gridSize/2
   		placing[2] += player.gridSize/2
-  		let mx = mouseX+cameraX+player.gridSize/2
-  		let my = mouseY+cameraY+player.gridSize/2
+  		let mx = mouseX/player.zoom-player.zoomR/player.zoom+cameraX+player.gridSize/2
+  		let my = mouseY/player.zoom-player.zoomR/player.zoom+cameraY+player.gridSize/2
   		if(placing[1] < 0){
   			placing[1] -= player.gridSize
   		}
@@ -376,7 +376,7 @@ document.addEventListener("keyup",(e)=>{
   		}
   		socket.emit("placeWall",[placing[1]-(placing[1]%player.gridSize),placing[2]-(placing[2]%player.gridSize),mx-(mx%player.gridSize),my-(my%player.gridSize),player.wall,ID])
   	} else {
-  	socket.emit("placeWall",[placing[1],placing[2],mouseX+cameraX,mouseY+cameraY,player.wall,ID])}
+  	socket.emit("placeWall",[placing[1],placing[2],mouseX/player.zoom-player.zoomR/player.zoom+cameraX,mouseY/player.zoom-player.zoomR/player.zoom+cameraY,player.wall,ID])}
   	placing = [false]
   }
 
