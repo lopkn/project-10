@@ -3,7 +3,7 @@ let GAMESESSION = "G10.2"
 socket.emit("JOINGAME",GAMESESSION)
 
 
-socket.on("drawers",(e)=>{drawDrawers(e[0]);tick();})
+socket.on("drawers",(e)=>{drawDrawers(e[0],e[1]);tick();})
 // socket.on("walls",(e)=>{drawWalls(e)})
 socket.on("acknowledge G10.2",acknowledge)
 socket.on("CROBJECT",(e)=>{crobject(e)})
@@ -166,25 +166,25 @@ function tick(){
 	let CYR = player.gridSize-(cameraY%player.gridSize)
 
 
-	mainCTX.strokeStyle = "#101040"
-	mainCTX.lineWidth = 3/player.levelTrip
-	mainCTX.beginPath()
+// 	mainCTX.strokeStyle = "#101040"
+// 	mainCTX.lineWidth = 3/player.levelTrip
+// 	mainCTX.beginPath()
 
-	player.rezoom(player.zoom/player.levelTrip)
+// 	player.rezoom(player.zoom/player.levelTrip)
 
-for(let i = -player.gridSize-player.gridSize*Math.floor(1+player.zoomR/player.gridSize/player.zoom); i < 900/player.zoom+player.gridSize/player.levelTrip; i+= player.gridSize){
-		mainCTX.moveTo( (i + CXR)*player.zoom+player.zoomR,0)
-		mainCTX.lineTo( (i + CXR)*player.zoom+player.zoomR,840)
-	}
-	for(let i = -player.gridSize-player.gridSize*Math.floor(1+player.zoomR/player.gridSize/player.zoom); i < 900/player.zoom+player.gridSize/player.levelTrip; i+= player.gridSize){
-		mainCTX.moveTo(0,(i + CYR)*player.zoom+player.zoomR)
-		mainCTX.lineTo(840,(i + CYR)*player.zoom+player.zoomR)
-	}
+// for(let i = -player.gridSize-player.gridSize*Math.floor(1+player.zoomR/player.gridSize/player.zoom); i < 900/player.zoom+player.gridSize/player.levelTrip; i+= player.gridSize){
+// 		mainCTX.moveTo( (i + CXR)*player.zoom+player.zoomR,0)
+// 		mainCTX.lineTo( (i + CXR)*player.zoom+player.zoomR,840)
+// 	}
+// 	for(let i = -player.gridSize-player.gridSize*Math.floor(1+player.zoomR/player.gridSize/player.zoom); i < 900/player.zoom+player.gridSize/player.levelTrip; i+= player.gridSize){
+// 		mainCTX.moveTo(0,(i + CYR)*player.zoom+player.zoomR)
+// 		mainCTX.lineTo(840,(i + CYR)*player.zoom+player.zoomR)
+// 	}
 
-	player.rezoom(player.zoom*player.levelTrip)
+// 	player.rezoom(player.zoom*player.levelTrip)
 
 
-	mainCTX.stroke()
+	// mainCTX.stroke()
 
 	mainCTX.strokeStyle = "#404040"
 	mainCTX.lineWidth = 3
@@ -223,6 +223,8 @@ mainCTX.stroke()
 			mainCTX.strokeStyle = "#007000"
 		} else if(e[0] === "msl"){
 			mainCTX.strokeStyle = "#A06000"
+		} else if(e[0] === "trak"){
+			mainCTX.strokeStyle = "#A0A000"
 		}
 		mainCTX.moveTo((e[2]-cameraX)*player.zoom + player.zoomR,(e[3]-cameraY)*player.zoom + player.zoomR)
 		mainCTX.lineTo((e[4]-cameraX)*player.zoom + player.zoomR,(e[5]-cameraY)*player.zoom + player.zoomR)
@@ -255,7 +257,7 @@ mainCTX.stroke()
 		mainCTX.moveTo((i.x1-cameraX)*player.zoom+player.zoomR,(i.y1-cameraY)*player.zoom+player.zoomR)
 		mainCTX.lineTo((i.x2-cameraX)*player.zoom+player.zoomR,(i.y2-cameraY)*player.zoom+player.zoomR)
 		mainCTX.stroke()
-		} else if(i.type == "bhol" || i.type == "ghol"){
+		}  else if(i.type == "bhol" || i.type == "ghol"){
 			mainCTX.beginPath()
 			mainCTX.lineWidth = 3*player.zoom
 			mainCTX.strokeStyle = i.type == "bhol"?"#FF0000":"#0000FF"
@@ -329,6 +331,13 @@ function windowRescale(e){
     }
   }
 
+  if(ZOOMSETTINGS.windowHeight > ZOOMSETTINGS.expectHeight && ZOOMSETTINGS.windowWidth > ZOOMSETTINGS.expectWidth){
+  	let b1 = ZOOMSETTINGS.windowHeight/ZOOMSETTINGS.expectHeight
+  	let b2 = ZOOMSETTINGS.windowWidth/ZOOMSETTINGS.expectWidth
+  	let a = b1 > b2?b2:b1
+  	zoomScale = a
+  }
+
 
   allzoom = zoomScale
   document.body.style.zoom = allzoom
@@ -342,23 +351,20 @@ windowRescale()
 
 	// mainCTX.clearRect(0,0,840,840)
 
-function drawDrawers(e){
-	// mainCTX.clearRect(0,0,840,840)
+function drawDrawers(e,dynam){
 
-	// console.log(JSON.stringify(e))
-
-
-	// if(e[0]){
-	// 	console.log(e[0][1])
-	// }
 
 	e.forEach((i)=>{
 		let a = i[5]?(i[5].tailLength?i[5].tailLength:bulletAtt[i[0]]):bulletAtt[i[0]]
-		// let a = 1
-		// if(i[4] && i[5])
 		i.splice(1,0,a)
 		map.bullets.push(i)
 	})
+
+	if(dynam){
+	dynam.forEach((i)=>{
+		i.splice(1,0,3)
+		map.bullets.push(i)
+	})}
 }
 function drawWalls(e){
 	// console.log(e)

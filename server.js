@@ -1575,7 +1575,7 @@ function joinGame(game,socket){
 	} else if(game == "G10.2"){
 		socket.join("G10.2")
 		io.to(socket.id).emit("acknowledge G10.2",socket.id)
-		shooter2C.initiatePlayer(socket.id)
+		shooter2C.initiatePlayer(socket.id,"tank")
 		socket.on("click",(e)=>{shooter2C.playerClick(e[0],e[1],e[2],e[3]);})
 		socket.on("placeWall",(e)=>{shooter2C.placeWall(socket.id,e[0],e[1],e[2],e[3],e[4],(e[4]=="body"||e[4]=="mbdy")?{id:e[5]}:undefined)})
 		socket.on("keys",(e)=>{shooter2C.playerKeyUpdate(e)})
@@ -4442,13 +4442,9 @@ class shooter2C{
 				this.playerLook(p,x1,y1)
 				for(let i = 0; i < tarr.length; i++){
 					let ar = tarr[i]
-				// this.walls[p.boidy[k]].x1 = ((p.boidyVect[k][0] * p.rotation[1] + p.boidyVect[k][1] * p.rotation[0]) + p.x)
 					let xx1 = (ar[0] * p.rotation[1] + ar[1] * p.rotation[0])+ x1
-				// this.walls[p.boidy[k]].y1 = ((p.boidyVect[k][1] * p.rotation[1] - p.boidyVect[k][0] * p.rotation[0]) + p.y)
 					let yy1 = (ar[1] * p.rotation[1] - ar[0] * p.rotation[0]) + y1
-				// this.walls[p.boidy[k]].x2 = ((p.boidyVect[k][2] * p.rotation[1] + p.boidyVect[k][3] * p.rotation[0]) + p.x)
 					let xx2 = (ar[2] * p.rotation[1] + ar[3] * p.rotation[0]) + x1
-				// this.walls[p.boidy[k]].y2 = ((p.boidyVect[k][3] * p.rotation[1] - p.boidyVect[k][2] * p.rotation[0]) + p.y)
 					let yy2 = (ar[3] * p.rotation[1] - ar[2] * p.rotation[0]) + y1
 					this.placeWall(player,xx1,yy1,xx2,yy2,"norm",{"force":true})
 				}
@@ -4469,7 +4465,7 @@ class shooter2C{
 					for(let i = 0; i < obpr.length; i++){
 						let TTP = obpr[i]
 						let TPP = this.players[TTP]
-						if(distance(TPP.x,TPP.y,x1,y1) < this.walls[a].radius && TTP != player){
+						if(distance(TPP.x,TPP.y,x1,y1) < this.walls[a].radius && TTP != player&& !TPP.dead){
 							let nrm = vectorFuncs.originVectorNormalize(TPP.x-x1,TPP.y-y1)
 							let abb = this.pushBullet(x1,y1,nrm[0]*45,nrm[1]*45,player,"norm")
 							abb.dmgmult =  6
@@ -4502,7 +4498,7 @@ class shooter2C{
 					for(let i = 0; i < obpr.length; i++){
 						let TTP = obpr[i]
 						let TPP = this.players[TTP]
-						if(distance(TPP.x,TPP.y,x1,y1) < this.walls[a].radius && TTP != player){
+						if(distance(TPP.x,TPP.y,x1,y1) < this.walls[a].radius && TTP != player && !TPP.dead){
 							let nrm = vectorFuncs.originVectorNormalize(TPP.x-x1,TPP.y-y1)
 							let abb = this.pushBullet(x1,y1,nrm[0]*65+TPP.vx*1.7+Math.random()*45-22.5,nrm[1]*65+Math.random()*45-22.5+TPP.vy*1.7,player,"norm")
 							abb.dmgmult =  6
@@ -4540,7 +4536,7 @@ class shooter2C{
 		this.players[id] = {"reloading":0,"unmovePos":[0,0],"rotation":[0,1],
 		"boidyVect":[[0,-40,30,30],[30,30,-30,30],[-30,30,0,-40]],
 		"boidy":[],"x":410,"y":410,"vx":0,"vy":0,"hp":100,"id":id,"keys":{},
-		"materials":100
+		"materials":100,"speed":1.5,"boidyAll":3
 	}
 
 		let a = this.placeWall(id,410,390,395,425,"player",{"id":id,"force":true})
@@ -4552,6 +4548,23 @@ class shooter2C{
 		 this.players[id].boidy.push(a)
 		} else if(type == "shld") {
 			this.players[id].boidy.push(this.placeWall(id,0,0,0,0,"player",{"id":id,"force":true},{"defense":10}))
+		} else if(type == "tank") {
+			this.players[id] = {"reloading":0,"unmovePos":[0,0],"rotation":[0,1],
+		"boidyVect":[[10,-40,30,30],[30,30,-30,30],[-30,30,-10,-40],[-10,-40,10,-40]],
+		"boidy":[],"x":410,"y":410,"vx":0,"vy":0,"hp":100,"id":id,"keys":{},
+		"materials":100,"speed":1.1,"tracking":true,"boidyAll":4
+		}
+		let a = this.placeWall(id,410,390,395,425,"player",{"id":id,"force":true},{"defense":3})
+		this.players[id].boidy.push(a)
+		 a = this.placeWall(id,425,425,395,425,"player",{"id":id,"force":true},{"defense":3})
+		 this.players[id].boidy.push(a)
+
+		 a = this.placeWall(id,410,390,425,425,"player",{"id":id,"force":true},{"defense":3})
+		 this.players[id].boidy.push(a)
+		 a = this.placeWall(id,410,390,425,425,"player",{"id":id,"force":true},{"defense":3})
+		 this.players[id].boidy.push(a)
+
+
 		}
 
 		this.sendAllWombjects(id)
@@ -4565,6 +4578,10 @@ class shooter2C{
 		let objt = Object.keys(this.players)
 		for(let i = 0; i < objt.length; i++){
 			let p = this.players[objt[i]]
+			if(p.dead){
+				continue
+			}
+
 			if(p.reloading > 0){
 				p.reloading -= 1
 			}
@@ -4593,7 +4610,8 @@ class shooter2C{
 					}
 				})
 
-				if(dd < 3){
+				if(dd < p.boidyAll){
+					p.dead = true
 				continue
 				}
 
@@ -4613,8 +4631,8 @@ class shooter2C{
 
 			let ttv = vectorNormalize([0,0,tv[0],tv[1]])
 		
-			p.vx += ttv[2]*1.5
-			p.vy += ttv[3]*1.5
+			p.vx += ttv[2]*p.speed
+			p.vy += ttv[3]*p.speed
 			p.vx *= 0.97
 			p.vy *= 0.97
 
@@ -4964,7 +4982,28 @@ class shooter2C{
 			e.splice(1,1)
 		})
 
-		io.to("G10.2").emit("drawers",[this.drawers])
+		// io.to("G10.2").emit("drawers",[this.drawers])
+
+		let pobjk = Object.keys(this.players)
+		pobjk.forEach((e)=>{
+			let p = this.players[e]
+			if(p.tracking && pobjk.length > 1){
+				let op;
+				for(let J = 0; J < pobjk.length; J++){
+					if(e !== pobjk[J] && !this.players[pobjk[J]].dead){
+						op = this.players[pobjk[J]]
+						continue;
+					}
+				}
+				if(op === undefined){op = p}
+
+				io.to(e).emit("drawers",[this.drawers,[["trak",p.x,p.y,op.x,op.y]]])
+			// this.drawers.push([i.type,i.tailLength,i.x,i.y,i.x+i.vx,i.y+i.vy,i.extra])
+			} else {
+				io.to(e).emit("drawers",[this.drawers])
+			}
+		})
+
 	}
 
 
