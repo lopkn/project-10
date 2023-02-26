@@ -191,10 +191,10 @@ class gw{
 
   }
 
-  // static pdate3s = [new TRIG1(),new GEN9(),new GEN1(),new GEN2(),new GEN2(10000),new GEN2(60000),new GEN2(40000),new GEN2(80000),new GEN2(120000),new GEN3(40000), new GEN4(), new GEN5(), new GEN7(), new GEN8()]
+  static pdate3s = [new TRIG1(),new GEN9(),new GEN1(),new GEN2(),new GEN2(10000),new GEN2(60000),new GEN2(40000),new GEN2(80000),new GEN2(120000),new GEN3(40000), new GEN4(), new GEN5(), new GEN7(), new GEN8()]
   // static pdate3s = [new GEN14(),new GEN15(),new GEN15(0,300,-200),new GEN15(0,-300,-200),new GEN15(0,300,300),new GEN15(0,-300,300), new GEN5(), new GEN9()]
   
-  static pdate3s = [new GEN14(),new GEN15(),new GEN15(0,300,-200),new GEN15(0,-300,-200),new GEN15(0,300,300),new GEN15(0,-300,300), new GEN5(), new GEN9(),new TRIG1(),new GEN9(),new GEN1(),new GEN2(),new GEN2(10000),new GEN2(60000),new GEN2(40000),new GEN2(80000),new GEN2(120000),new GEN3(40000), new GEN4(), new GEN5(), new GEN7(), new GEN8()]
+  // static pdate3s = [new GEN14(),new GEN15(),new GEN15(0,300,-200),new GEN15(0,-300,-200),new GEN15(0,300,300),new GEN15(0,-300,300), new GEN5(), new GEN9(),new TRIG1(),new GEN9(),new GEN1(),new GEN2(),new GEN2(10000),new GEN2(60000),new GEN2(40000),new GEN2(80000),new GEN2(120000),new GEN3(40000), new GEN4(), new GEN5(), new GEN7(), new GEN8()]
 
   // static pdate3s = [new GEN5(), new GEN9()]
 
@@ -649,7 +649,7 @@ class c{
     document.getElementById("info").innerHTML = 
     "velocity: " + Math.floor(c.vel*1000) +
     "</br>frame cap: "+ (MASTERTHROTTLE?30:60) +
-    "</br>preformance: "+ dateLogger[2]+
+    "</br>performance: "+ dateLogger[2]+
     "</br>boost: "+ Math.floor(c.boost)+
     "</br>height: "+Math.floor(planeHeight*100)+
     "</br>distance: "+Math.floor(camera.position.z)+
@@ -1299,12 +1299,12 @@ let animate = () => {
     try{music1.play()}catch{}
   }
 
-  if(Math.random()>0.99){
-    new missile2(camera.position.x+Math.random()*1050-525,camera.position.y+Math.random()*50-486,camera.position.z+1200)
-    console.log("missile")
-  }
+  // if(Math.random()>0.99){
+  //   new missile2(camera.position.x+Math.random()*1050-525,camera.position.y+Math.random()*50-486,camera.position.z+1200)
+  //   console.log("missile")
+  // }
 
-  // controls.update();
+  // // controls.update();
 
   camera.rotateX(c.rotX)
   camera.rotateY(c.rotZ)

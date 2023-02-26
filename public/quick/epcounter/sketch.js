@@ -112,7 +112,7 @@ class comparer{
 			if(GTOGGLE){
 				return
 			}
-			GTOGGLE = true
+			// GTOGGLE = true
 			c = new liner(a,Height/2-30,5,6,0)
 			c.maxActLife = 10000000
 			c.vx += Math.random()*50-25

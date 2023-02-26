@@ -44,6 +44,13 @@ function unALTF3(){
 var ID = ""
 var cameraX = 0
 var cameraY = 0
+
+weaponInfo = {
+	"heal":{"repeating":2},
+	"dril":{"repeating":2}
+
+}
+
 class player{
 	static debugging = false
 	static dataNodes = []
@@ -53,9 +60,13 @@ class player{
 	static snapping = false
 	static gridSize = 80
 	static weaponCounter = 1
-	static weaponDict = {"1":"norm","2":"scat","3":"lazr","4":"cnon","5":"heal","6":"grnd","7":"msl"}
+	static weaponDict = {"1":"norm","2":"scat","3":"lazr","4":"cnon","5":"heal","6":"grnd","7":"msl","8":"dril","9":"msl2","10":"snpr"}
 	static wallCounter = 1
-	static wallDict = {"1":"norm","2":"bhol","3":"ghol","4":"body","5":"metl","6":"rflc","7":"mbdy","8":"whol","9":"box","10":"turr","11":"turr2"}
+	static wallDict = {
+		"1":"norm","2":"bhol","3":"ghol","4":"body","5":"metl",
+		"6":"rflc","7":"mbdy","8":"whol","9":"box","10":"turr",
+		"11":"turr2","12":"Bmr"
+	}
 
 	static zoom = 1
 	static zoomR = 410*(1-this.zoom)
@@ -99,7 +110,7 @@ function crobject(e){
 }
 
 
-	let bulletAtt = {"norm":10,"scat":6,"lazr":20,"cnon":10,"heal":2,"grnd":4,"msl":4}
+	let bulletAtt = {"norm":10,"scat":6,"lazr":20,"cnon":10,"heal":2,"grnd":4,"msl":4,"msl2":4,"dril":3}
 
 
 let tripVel = 0
@@ -107,22 +118,27 @@ let tripVel = 0
 let cttr = 0
 function tick(){
 	cttr++
-	if(cttr%2===0){
-	tripVel += (Math.random()-0.5)/20
-	}
-	player.levelTrip += tripVel/2
-	player.levelTrip *= 0.99
-		if(player.levelTrip < 0.4){
-			player.levelTrip = 0.4
-			if(Math.random()>0.9){
-				tripVel = 0
-			}
-		} else if (player.levelTrip > 6){
-			tripVel = 0
-			player.levelTrip = 6
-		}
+	// if(cttr%2===0){
+	// tripVel += (Math.random()-0.5)/20
+	// }
+	// player.levelTrip += tripVel/2
+	// player.levelTrip *= 0.99
+	// 	if(player.levelTrip < 0.4){
+	// 		player.levelTrip = 0.4
+	// 		if(Math.random()>0.9){
+	// 			tripVel = 0
+	// 		}
+	// 	} else if (player.levelTrip > 6){
+	// 		tripVel = 0
+	// 		player.levelTrip = 6
+	// 	}
 
 	socket.emit("keys",[ID,keyHolds])
+
+	if(player.clickheld && weaponInfo[player.weaponDict[player.weaponCounter]]?.repeating &&cttr%weaponInfo[player.weaponDict[player.weaponCounter]]?.repeating === 0){
+		socket.emit("click",[ID,mouseX,mouseY])
+	}
+
 	mainCTX.clearRect(0,0,840,840)
 
 
@@ -221,9 +237,9 @@ mainCTX.stroke()
 			mainCTX.strokeStyle = "#FF0000"
 		} else if(e[0] == "grnd"){
 			mainCTX.strokeStyle = "#007000"
-		} else if(e[0] === "msl"){
-			mainCTX.strokeStyle = "#A06000"
-		} else if(e[0] === "trak"){
+		} else if(e[0] === "msl" || e[0] == "msl2"){
+			mainCTX.strokeStyle = "#A00000"
+		} else if(e[0] === "trak" || e[0] === "dril"){
 			mainCTX.strokeStyle = "#A0A000"
 		}
 		mainCTX.moveTo((e[2]-cameraX)*player.zoom + player.zoomR,(e[3]-cameraY)*player.zoom + player.zoomR)
@@ -270,10 +286,10 @@ mainCTX.stroke()
 			mainCTX.beginPath()
 			mainCTX.lineWidth = 3*player.zoom
 			mainCTX.strokeStyle = "#707000"
-			mainCTX.moveTo(i.x-i.radius-cameraX,i.y-cameraY)
-			mainCTX.lineTo(i.x+i.radius-cameraX,i.y-cameraY)
-			mainCTX.moveTo(i.x-cameraX,i.y-i.radius-cameraY)
-			mainCTX.lineTo(i.x-cameraX,i.y+i.radius-cameraY)
+			mainCTX.moveTo( (i.x-i.radius-cameraX)*player.zoom+player.zoomR,(i.y-cameraY)*player.zoom+player.zoomR)
+			mainCTX.lineTo( (i.x+i.radius-cameraX)*player.zoom+player.zoomR,(i.y-cameraY)*player.zoom+player.zoomR)
+			mainCTX.moveTo( (i.x-cameraX)*player.zoom+player.zoomR,(i.y-i.radius-cameraY)*player.zoom+player.zoomR)
+			mainCTX.lineTo( (i.x-cameraX)*player.zoom+player.zoomR,(i.y+i.radius-cameraY)*player.zoom+player.zoomR)
 			mainCTX.stroke()
 		}
 	}
@@ -386,6 +402,11 @@ onmousemove = (e)=>{mouseX = (e.clientX - 5*allzoom)/allzoom; mouseY = (e.client
 
 document.addEventListener("mousedown",(e)=>{
 	socket.emit("click",[ID,mouseX,mouseY,player.weapon])
+	player.clickheld = true
+})
+
+document.addEventListener("mouseup",(e)=>{
+	player.clickheld = false
 })
 
 var placing = [false]

@@ -1575,7 +1575,7 @@ function joinGame(game,socket){
 	} else if(game == "G10.2"){
 		socket.join("G10.2")
 		io.to(socket.id).emit("acknowledge G10.2",socket.id)
-		shooter2C.initiatePlayer(socket.id,"tank")
+		shooter2C.initiatePlayer(socket.id,"ntri")
 		socket.on("click",(e)=>{shooter2C.playerClick(e[0],e[1],e[2],e[3]);})
 		socket.on("placeWall",(e)=>{shooter2C.placeWall(socket.id,e[0],e[1],e[2],e[3],e[4],(e[4]=="body"||e[4]=="mbdy")?{id:e[5]}:undefined)})
 		socket.on("keys",(e)=>{shooter2C.playerKeyUpdate(e)})
@@ -4242,7 +4242,11 @@ class shooter2C{
 
 			case "heal":
 				this.bullets.push({"shooter":id,"type":"heal","x":x,"y":y,"vx":vx,"vy":vy,"wallMult":1,
-					"lingerance":2,"dmgmult":-1,"tailLength":2,"tail":[],"life":2000,"slowd":0.95})
+					"lingerance":2,"dmgmult":-1,"tailLength":2,"tail":[],"life":20,"slowd":0.95})
+				break;
+			case "dril":
+				this.bullets.push({"shooter":id,"type":"dril","x":x,"y":y,"vx":vx,"vy":vy,"wallMult":0.2,
+					"lingerance":2,"dmgmult":3,"tailLength":2,"tail":[],"life":2,"slowd":0.9,"extra":{"tailmult":3}})
 				break;
 			case "grnd":
 				this.bullets.push({"shooter":id,"type":"grnd","x":x,"y":y,"vx":vx,"vy":vy,"wallMult":1,"deathVel":10,
@@ -4269,12 +4273,13 @@ class shooter2C{
 				})
 				break;
 			case "msl2":
-				this.bullets.push({"shooter":id,"type":"msl2","x":x,"y":y,"vx":vx/3,"vy":vy/3,"wallMult":0,"deathVel":20,
-					"lingerance":4,"dmgmult":0,"tailLength":4,"tail":[],"life":50,"slowd":1.04,"extra":{"tailmult":8},
+				this.bullets.push({"shooter":id,"type":"msl2","x":x,"y":y,"vx":vx/6,"vy":vy/6,"wallMult":0,"deathVel":10,
+					"lingerance":4,"dmgmult":0,"tailLength":4,"tail":[],"life":50,"slowd":1.08,"extra":{"tailmult":8},"date":Date.now(),
 					"onDeath":(b)=>{
-						for(let i = 0; i < 20; i++){let a = this.pushBullet(b.x,b.y,Math.random()*150-75+vx,Math.random()*150-75+vy,b.shooter,"norm")
+						let dd = Date.now()
+						for(let i = 0; i < 20; i++){let a = this.pushBullet(b.x,b.y,Math.random()*170-95+vx*1.5,Math.random()*170-95+vy*1.5,b.shooter,"norm")
 							a.slowd = 0.95
-							a.dmgmult = 12
+							a.dmgmult = ((dd-b.date)*(dd-b.date)/250000)
 							a.extra = {"tailmult":3,"tailLength":6}
 							a.tailLength = 6; a.lingerance = 6;
 					}}
@@ -4292,9 +4297,15 @@ class shooter2C{
 
 	static playerClick(id,x,y,w){
 		let p = this.players[id]
-		if(p.reloading > 0 || p.reloading == undefined){
+		if(p.reloading > 0 || p.reloading == undefined || p.dead){
 			return;
 		}
+		if(w === undefined){
+			w = p.lastWeapon
+		} else {
+			p.lastWeapon = w
+		}
+
 		let n = vectorNormalize([p.x,p.y,x+p.x-410,y+p.y-410])
 		p.rotation = [n[2]-p.x,n[3]-p.y]
 		p.unmovePos[2] = true
@@ -4302,30 +4313,48 @@ class shooter2C{
 		switch(w){
 			case "norm":
 				this.pushBullet(p.x,p.y,(n[2]-p.x)*160,(n[3]-p.y)*160,id,"norm")
+		reload += 10
+				break;
+		reload += 10
+			case "snpr":
+				this.pushBullet(p.x,p.y,(n[2]-p.x)*190+p.vx,(n[3]-p.y)*190+p.vy,id,"norm")
+		reload += 10
 				break;
 			case "scat":
 			for(let i = 0; i < 5; i++){
 				
 				this.pushBullet(p.x,p.y,(n[2]-p.x)*110+Math.random()*40-20,(n[3]-p.y)*110+Math.random()*40-20,id,"scat")
 			}
+		reload += 10
 				break;
 			case "lazr":
 				
 				this.pushBullet(p.x,p.y,(n[2]-p.x)*1100,(n[3]-p.y)*1100,id,"lazr")
+		reload += 10
 				break;
 			case "cnon":
 				p.vx -= (n[2]-p.x)*10
 				p.vy -= (n[3]-p.y)*10
 				this.pushBullet(p.x,p.y,(n[2]-p.x)*100,(n[3]-p.y)*100,id,"cnon")
+		reload += 10
 				break;
 			case "heal":
 				this.pushBullet(p.x,p.y,(n[2]-p.x)*160,(n[3]-p.y)*160,id,"heal")
 				break;
+			case "dril":
+				this.pushBullet(p.x,p.y,(n[2]-p.x)*160,(n[3]-p.y)*160,id,"dril")
+				break;
 			case "grnd":
 				this.pushBullet(p.x,p.y,(n[2]-p.x)*80+p.vx,(n[3]-p.y)*80+p.vy,id,"grnd")
+		reload += 10
 				break;
 			case "msl":
 				this.pushBullet(p.x,p.y,(n[2]-p.x)*25,(n[3]-p.y)*25,id,"msl")
+		reload += 10
+				break;
+			case "msl2":
+				this.pushBullet(p.x,p.y,(n[2]-p.x)*25,(n[3]-p.y)*25,id,"msl2")
+				reload += 50
 				break;
 		}
 		p.reloading += reload;
@@ -4339,6 +4368,13 @@ class shooter2C{
 	static wallCost(l,t,p){
 		l/=10
 		let player = this.players[p]
+		if(t == "turr2"){
+			l = 100
+		} else if(t == "turr"){
+			l = 50
+		} else if(t == "ghol" ||t == "bhol"||t == "whol"){
+			l = 50
+		}
 		if(player.materials > l){
 			player.materials -= l
 			io.to(p).emit("spec",["mat",Math.floor(player.materials)])
@@ -4451,6 +4487,19 @@ class shooter2C{
 				// this.placeWall(player,40,40,40,-40,"norm",{"force":true})
 				return;
 				break;
+			case "Bmr":
+				tarr = [[40,30,40,-30],[40,-30,-40,-30],[-40,-30,-40,30],[-40,30,40,30],[40,30,-40,-30],[-40,30,40,-30]]
+				this.playerLook(p,x1,y1)
+				for(let i = 0; i < tarr.length; i++){
+					let ar = tarr[i]
+					let xx1 = (ar[0] * p.rotation[1] + ar[1] * p.rotation[0])+ x1
+					let yy1 = (ar[1] * p.rotation[1] - ar[0] * p.rotation[0]) + y1
+					let xx2 = (ar[2] * p.rotation[1] + ar[3] * p.rotation[0]) + x1
+					let yy2 = (ar[3] * p.rotation[1] - ar[2] * p.rotation[0]) + y1
+					this.placeWall(player,xx1,yy1,xx2,yy2,"metl",{"force":true})
+				}
+				return;
+				break;
 			case "turr":
 				tarr = [[40,30,40,-30],[40,-30,-40,-30],[-40,-30,-40,30],[-40,30,40,30]]
 				this.playerLook(p,x1,y1)
@@ -4500,7 +4549,23 @@ class shooter2C{
 						let TPP = this.players[TTP]
 						if(distance(TPP.x,TPP.y,x1,y1) < this.walls[a].radius && TTP != player && !TPP.dead){
 							let nrm = vectorFuncs.originVectorNormalize(TPP.x-x1,TPP.y-y1)
-							let abb = this.pushBullet(x1,y1,nrm[0]*65+TPP.vx*1.7+Math.random()*45-22.5,nrm[1]*65+Math.random()*45-22.5+TPP.vy*1.7,player,"norm")
+							let shx = nrm[0]*65+TPP.vx*1.7+Math.random()*45-22.5 // bullet supposed to go here
+							let shy = nrm[1]*65+Math.random()*45-22.5+TPP.vy*1.7
+							let obwl = Object.values(this.walls)
+							let willCollide = false
+							for(let j = 0; j < obwl.length; j++){
+								let W = obwl[j]
+								if(player === W.plid || TPP.id === W.plid){
+									continue;
+								}
+								let col = this.pointLineCollision(x1,y1,x1+shx*20,shy*20,W.x1,W.y1,W.x2,W.y2)
+								if(col[4]){
+									willCollide = true
+									break;
+								}
+							}
+							if(willCollide){continue}
+							let abb = this.pushBullet(x1,y1,shx,shy,player,"norm")
 							abb.dmgmult =  6
 							break;
 						}
@@ -4552,7 +4617,7 @@ class shooter2C{
 			this.players[id] = {"reloading":0,"unmovePos":[0,0],"rotation":[0,1],
 		"boidyVect":[[10,-40,30,30],[30,30,-30,30],[-30,30,-10,-40],[-10,-40,10,-40]],
 		"boidy":[],"x":410,"y":410,"vx":0,"vy":0,"hp":100,"id":id,"keys":{},
-		"materials":100,"speed":1.1,"tracking":true,"boidyAll":4
+		"materials":100,"speed":0.5,"tracking":true,"boidyAll":4
 		}
 		let a = this.placeWall(id,410,390,395,425,"player",{"id":id,"force":true},{"defense":3})
 		this.players[id].boidy.push(a)
