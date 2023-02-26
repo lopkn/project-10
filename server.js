@@ -1575,7 +1575,8 @@ function joinGame(game,socket){
 	} else if(game == "G10.2"){
 		socket.join("G10.2")
 		io.to(socket.id).emit("acknowledge G10.2",socket.id)
-		shooter2C.initiatePlayer(socket.id,"tank")
+		
+		socket.on("initiate",(e)=>{shooter2C.initiatePlayer(socket.id,e)})
 		socket.on("click",(e)=>{shooter2C.playerClick(e[0],e[1],e[2],e[3]);})
 		socket.on("placeWall",(e)=>{shooter2C.placeWall(socket.id,e[0],e[1],e[2],e[3],e[4],(e[4]=="body"||e[4]=="mbdy")?{id:e[5]}:undefined)})
 		socket.on("keys",(e)=>{shooter2C.playerKeyUpdate(e)})
@@ -4234,6 +4235,10 @@ class shooter2C{
 				this.bullets.push({"shooter":id,"type":"lazr","x":x,"y":y,"vx":vx,"vy":vy,"wallMult":1,"deathVel":1002500,
 					"tailLength":20,"dmgmult":0.1,"lingerance":20,"tail":[],"life":200,"slowd":1})
 				break;
+			case "lzr2":
+				this.bullets.push({"shooter":id,"type":"lzr2","x":x,"y":y,"vx":vx,"vy":vy,"wallMult":1,"unBouncer":0,
+					"tailLength":2,"dmgmult":0.01,"lingerance":2,"tail":[],"life":1,"slowd":1,"extra":{"tailmult":2}})
+				break;
 			case "cnon":
 				this.bullets.push({"shooter":id,"type":"cnon","x":x,"y":y,"vx":vx,"vy":vy,"wallMult":1,
 					"tailLength":10,"lingerance":10,"tail":[],"life":200,
@@ -4262,7 +4267,7 @@ class shooter2C{
 				break;
 			case "msl":
 				this.bullets.push({"shooter":id,"type":"msl","x":x,"y":y,"vx":vx,"vy":vy,"wallMult":0,"deathVel":619.8,
-					"lingerance":4,"dmgmult":0,"tailLength":4,"tail":[],"life":50,"slowd":1,"extra":{"tailmult":8},
+					"lingerance":4,"dmgmult":0,"tailLength":4,"tail":[],"life":50,"slowd":1,"extra":{"tailmult":8},"unBouncer":1,
 					"onDeath":(b)=>{
 						for(let i = 0; i < 20; i++){let a = this.pushBullet(b.x,b.y,Math.random()*150-75+vx,Math.random()*150-75+vy,b.shooter,"norm")
 							a.slowd = 0.95
@@ -4273,7 +4278,7 @@ class shooter2C{
 				})
 				break;
 			case "msl2":
-				this.bullets.push({"shooter":id,"type":"msl2","x":x,"y":y,"vx":vx/6,"vy":vy/6,"wallMult":0,"deathVel":10,
+				this.bullets.push({"shooter":id,"type":"msl2","x":x,"y":y,"vx":vx/6,"vy":vy/6,"wallMult":0,"deathVel":10,"unBouncer":1,
 					"lingerance":4,"dmgmult":0,"tailLength":4,"tail":[],"life":50,"slowd":1.08,"extra":{"tailmult":8},"date":Date.now(),
 					"onDeath":(b)=>{
 						let dd = Date.now()
@@ -4336,6 +4341,9 @@ class shooter2C{
 				this.pushBullet(p.x,p.y,(n[2]-p.x)*1100,(n[3]-p.y)*1100,id,"lazr")
 		reload += 10
 				break;
+			case "lzr2":
+				this.pushBullet(p.x,p.y,(n[2]-p.x)*1100,(n[3]-p.y)*1100,id,"lzr2")
+				break;
 			case "cnon":
 				p.vx -= (n[2]-p.x)*10
 				p.vy -= (n[3]-p.y)*10
@@ -4374,10 +4382,14 @@ class shooter2C{
 		let player = this.players[p]
 		if(t == "turr2"){
 			l = 100
-		} else if(t == "turr"){
+		} else if(t == "turr" || t=== "Bmr"){
 			l = 50
 		} else if(t == "ghol" ||t == "bhol"||t == "whol"){
 			l = 50
+		} else if(t == "metl"){
+			l *= 2
+		} else if(t == "rflc"){
+			l *= 4
 		}
 		if(player.materials > l){
 			player.materials -= l
@@ -4441,7 +4453,14 @@ class shooter2C{
 					"defense":0.2,"midpt":myMath.midPointOfLine(x1,y1,x2,y2)
 				}
 				let pp = this.players[options.id]
-				this.players[options.id].boidyVect.push([x1-pp.x,y1-pp.y,x2-pp.x,y2-pp.y])
+				let ar = [x1-pp.x,y1-pp.y,x2-pp.x,y2-pp.y]
+				let xx1 = (ar[0] * pp.rotation[1] - ar[1] * pp.rotation[0]) 
+				let yy1 = (ar[1] * pp.rotation[1] + ar[0] * pp.rotation[0]) 
+				let xx2 = (ar[2] * pp.rotation[1] - ar[3] * pp.rotation[0]) 
+				let yy2 = (ar[3] * pp.rotation[1] + ar[2] * pp.rotation[0])
+
+				// this.players[options.id].boidyVect.push([x1-pp.x,y1-pp.y,x2-pp.x,y2-pp.y])
+				this.players[options.id].boidyVect.push([xx1,yy1,xx2,yy2])
 				pp.unmovePos[2] = true
 				this.players[options.id].boidy.push(a)
 				break;
@@ -4450,8 +4469,14 @@ class shooter2C{
 					"defense":4,"midpt":myMath.midPointOfLine(x1,y1,x2,y2)
 				}
 				let ppr = this.players[options.id]
+				let aar = [x1-ppr.x,y1-ppr.y,x2-ppr.x,y2-ppr.y]
+
+				this.players[options.id].boidyVect.push([
+					(aar[0] * ppr.rotation[1] - aar[1] * ppr.rotation[0]),
+					(aar[1] * ppr.rotation[1] + aar[0] * ppr.rotation[0]),
+					(aar[2] * ppr.rotation[1] - aar[3] * ppr.rotation[0]),
+					(aar[3] * ppr.rotation[1] + aar[2] * ppr.rotation[0])])
 				ppr.unmovePos[2] = true
-				this.players[options.id].boidyVect.push([x1-ppr.x,y1-ppr.y,x2-ppr.x,y2-ppr.y])
 				this.players[options.id].boidy.push(a)
 				break;
 			case "bhol":
@@ -4608,6 +4633,7 @@ class shooter2C{
 		"boidy":[],"x":410,"y":410,"vx":0,"vy":0,"hp":100,"id":id,"keys":{},
 		"materials":100,"speed":1.5,"boidyAll":3
 	}
+		io.to(id).emit("spec",["zoom",1])
 
 		let a = this.placeWall(id,410,390,395,425,"player",{"id":id,"force":true})
 		this.players[id].boidy.push(a)
@@ -4624,6 +4650,7 @@ class shooter2C{
 		"boidy":[],"x":410,"y":410,"vx":0,"vy":0,"hp":100,"id":id,"keys":{},
 		"materials":100,"speed":0.5,"tracking":true,"boidyAll":4
 		}
+		io.to(id).emit("spec",["zoom",0.8])
 		let a = this.placeWall(id,410,390,395,425,"player",{"id":id,"force":true},{"defense":3})
 		this.players[id].boidy.push(a)
 		 a = this.placeWall(id,425,425,395,425,"player",{"id":id,"force":true},{"defense":3})
@@ -4632,6 +4659,24 @@ class shooter2C{
 		 a = this.placeWall(id,410,390,425,425,"player",{"id":id,"force":true},{"defense":3})
 		 this.players[id].boidy.push(a)
 		 a = this.placeWall(id,410,390,425,425,"player",{"id":id,"force":true},{"defense":3})
+		 this.players[id].boidy.push(a)
+
+
+		} else if(type == "snpr") {
+			this.players[id] = {"reloading":0,"unmovePos":[0,0],"rotation":[0,1],
+		"boidyVect":[[0,-50,0,70],[0,-15,-23,-35],[0,20,40,-20],[40,-20,0,-50]],
+		"boidy":[],"x":410,"y":410,"vx":0,"vy":0,"hp":100,"id":id,"keys":{},
+		"materials":100,"speed":0.35,"tracking":true,"boidyAll":4
+		}
+		io.to(id).emit("spec",["zoom",0.5])
+		let a = this.placeWall(id,410,390,395,425,"player",{"id":id,"force":true},{"defense":3})
+		this.players[id].boidy.push(a)
+		 a = this.placeWall(id,425,425,395,425,"player",{"id":id,"force":true},{"defense":3})
+		 this.players[id].boidy.push(a)
+
+		 a = this.placeWall(id,410,390,425,425,"player",{"id":id,"force":true},{"defense":0.3})
+		 this.players[id].boidy.push(a)
+		 a = this.placeWall(id,410,390,425,425,"player",{"id":id,"force":true},{"defense":0.3})
 		 this.players[id].boidy.push(a)
 
 
@@ -4923,7 +4968,8 @@ class shooter2C{
 
 					let WALL = this.walls[tj]
 					let angleDamageMult = 1
-					if(WALL.type == "norm"){
+					let DAM;
+					if(B.unBouncer === undefined){
 						let m1 = i.vy/i.vx //slope of bullet
 						let m2 = (WALL.y1-WALL.y2)/(WALL.x1-WALL.x2) //slope of wall
 						let angle;
@@ -4936,10 +4982,13 @@ class shooter2C{
 						}
 						if(angle > Math.PI/2){angle = Math.PI-angle}
 					  angleDamageMult = angle*2/Math.PI
+						DAM = this.damageWall(tj,B,{"vx":i.vx,"vy":i.vy,"x":i.x,"y":i.y,"adp":angleDamageMult},tcol)
+					} else {
+						angleDamageMult = B.unBouncer
+						DAM = this.damageWall(tj,B,{"vx":i.vx,"vy":i.vy,"x":i.x,"y":i.y,"adp":1},tcol)
 					}
 
 
-					let DAM = this.damageWall(tj,B,{"vx":i.vx,"vy":i.vy,"x":i.x,"y":i.y,"adp":angleDamageMult},tcol)
 					if(DAM){
 						let tw = this.walls[tj]
 						tcol = this.p5rre(tcol,colsave[f][2][0],colsave[f][2][1],tw.x1,tw.y1,tw.x2,tw.y2)
@@ -4985,8 +5034,12 @@ class shooter2C{
 
 
 			// B.tail.push([i.tailLength,i.x,i.y,i.x+i.vx,i.y+i.vy])
-			this.drawers.push([i.type,i.tailLength,i.x,i.y,i.x+i.vx,i.y+i.vy,i.extra])
-	
+			// this.drawers.push([i.type,i.tailLength,i.x,i.y,i.x+i.vx,i.y+i.vy,i.extra])
+	this.drawers.push([i.type,i.tailLength,
+				parseFloat(i.x.toPrecision(4)),
+				parseFloat(i.y.toPrecision(4)),
+				parseFloat((i.x+i.vx).toPrecision(4)),
+				parseFloat((i.y+i.vy).toPrecision(4)),i.extra])
 			
 
 			let vnorm = vectorNormalize([0,0,i.vx,i.vy])

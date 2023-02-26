@@ -2,7 +2,10 @@ const socket = io.connect('/')
 let GAMESESSION = "G10.2"
 socket.emit("JOINGAME",GAMESESSION)
 
-
+let COOKIE = {"playerType":"ntri"}
+try{
+	COOKIE = JSON.parse(document.cookie)
+}catch(e){}
 socket.on("drawers",(e)=>{drawDrawers(e[0],e[1]);tick();})
 // socket.on("walls",(e)=>{drawWalls(e)})
 socket.on("acknowledge G10.2",acknowledge)
@@ -10,6 +13,9 @@ socket.on("CROBJECT",(e)=>{crobject(e)})
 socket.on("spec",(e)=>{spec(e)})
 socket.on("upwalls",upwalls)
 socket.on("cameraUp",(e)=>{cameraX = e[0]-410;cameraY = e[1]-410})
+
+
+
 
 function StCcord(x,y){
 	return([ (x-cameraX)  ])
@@ -19,6 +25,8 @@ function StCcord(x,y){
 function spec(s){
 	if(s[0] == "mat"){
 		player.materials = s[1]
+	} if(s[0] == "zoom"){
+		player.rezoom(s[1])
 	}
 }
 
@@ -47,7 +55,8 @@ var cameraY = 0
 
 weaponInfo = {
 	"heal":{"repeating":2},
-	"dril":{"repeating":2}
+	"dril":{"repeating":2},
+	"lzr2":{"repeating":2}
 
 }
 
@@ -60,7 +69,7 @@ class player{
 	static snapping = false
 	static gridSize = 80
 	static weaponCounter = 1
-	static weaponDict = {"1":"norm","2":"scat","3":"lazr","4":"cnon","5":"heal","6":"grnd","7":"msl","8":"dril","9":"msl2","10":"snpr"}
+	static weaponDict = {"1":"norm","2":"scat","3":"lazr","4":"cnon","5":"heal","6":"grnd","7":"msl","8":"dril","9":"msl2","10":"snpr","11":"lzr2"}
 	static wallCounter = 1
 	static wallDict = {
 		"1":"norm","2":"bhol","3":"ghol","4":"body","5":"metl",
@@ -89,6 +98,7 @@ class map{
 function acknowledge(e){
 	ID = e
 	console.log(e)
+	socket.emit("initiate",COOKIE.playerType)
 }
 
 function upwalls(e){
@@ -110,7 +120,7 @@ function crobject(e){
 }
 
 
-	let bulletAtt = {"norm":10,"scat":6,"lazr":20,"cnon":10,"heal":2,"grnd":4,"msl":4,"msl2":4,"dril":3}
+	let bulletAtt = {"norm":10,"scat":6,"lazr":20,"cnon":10,"heal":2,"grnd":4,"msl":4,"msl2":4,"dril":3,"lzr2":3}
 
 
 let tripVel = 0
@@ -231,7 +241,7 @@ mainCTX.stroke()
 		}
 		mainCTX.lineWidth = (e[1]+1) * (e[6].tailmult == undefined?1:e[6].tailmult) * player.zoom
 		if(e[0] == "norm" || e[0] == "scat" || e[0] == "cnon"){
-		mainCTX.strokeStyle = "#FFFF00"} else if(e[0] == "lazr"){
+		mainCTX.strokeStyle = "#FFFF00"} else if(e[0] == "lazr" || e[0] == "lzr2"){
 			mainCTX.strokeStyle = "#00FFFF"
 		} else if(e[0] == "heal"){
 			mainCTX.strokeStyle = "#FF0000"
