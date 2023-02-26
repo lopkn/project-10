@@ -1575,7 +1575,7 @@ function joinGame(game,socket){
 	} else if(game == "G10.2"){
 		socket.join("G10.2")
 		io.to(socket.id).emit("acknowledge G10.2",socket.id)
-		shooter2C.initiatePlayer(socket.id,"ntri")
+		shooter2C.initiatePlayer(socket.id,"tank")
 		socket.on("click",(e)=>{shooter2C.playerClick(e[0],e[1],e[2],e[3]);})
 		socket.on("placeWall",(e)=>{shooter2C.placeWall(socket.id,e[0],e[1],e[2],e[3],e[4],(e[4]=="body"||e[4]=="mbdy")?{id:e[5]}:undefined)})
 		socket.on("keys",(e)=>{shooter2C.playerKeyUpdate(e)})
@@ -4231,7 +4231,7 @@ class shooter2C{
 					"tailLength":6,"dmgmult":3,"lingerance":6,"tail":[],"life":2000,"slowd":0.95})
 				break;
 			case "lazr":
-				this.bullets.push({"shooter":id,"type":"lazr","x":x,"y":y,"vx":vx,"vy":vy,"wallMult":1,
+				this.bullets.push({"shooter":id,"type":"lazr","x":x,"y":y,"vx":vx,"vy":vy,"wallMult":1,"deathVel":1002500,
 					"tailLength":20,"dmgmult":0.1,"lingerance":20,"tail":[],"life":200,"slowd":1})
 				break;
 			case "cnon":
@@ -4310,14 +4310,18 @@ class shooter2C{
 		p.rotation = [n[2]-p.x,n[3]-p.y]
 		p.unmovePos[2] = true
 		let reload = 0
+		let theBullet;
 		switch(w){
 			case "norm":
 				this.pushBullet(p.x,p.y,(n[2]-p.x)*160,(n[3]-p.y)*160,id,"norm")
-		reload += 10
+		reload += 4
 				break;
 		reload += 10
 			case "snpr":
-				this.pushBullet(p.x,p.y,(n[2]-p.x)*190+p.vx,(n[3]-p.y)*190+p.vy,id,"norm")
+				theBullet = this.pushBullet(p.x,p.y,(n[2]-p.x)*190+p.vx,(n[3]-p.y)*190+p.vy,id,"norm")
+				theBullet.dmgmult = 5
+				theBullet.wallMult = 0.1
+				theBullet.deathVel = 200
 		reload += 10
 				break;
 			case "scat":
@@ -4350,11 +4354,11 @@ class shooter2C{
 				break;
 			case "msl":
 				this.pushBullet(p.x,p.y,(n[2]-p.x)*25,(n[3]-p.y)*25,id,"msl")
-		reload += 10
+		reload += 20
 				break;
 			case "msl2":
 				this.pushBullet(p.x,p.y,(n[2]-p.x)*25,(n[3]-p.y)*25,id,"msl2")
-				reload += 50
+				reload += 30
 				break;
 		}
 		p.reloading += reload;
@@ -4405,7 +4409,8 @@ class shooter2C{
 					"hp":1000,"midpt":myMath.midPointOfLine(x1,y1,x2,y2),
 					"defense":1,
 					"frad":wLength/2
-				}
+				}//walls can be optimized to have slopes calculated
+				//walls can be optimized to have update specific queues
 				break;
 			case "metl":
 				this.walls[a] = {
@@ -4915,16 +4920,46 @@ class shooter2C{
 						let tj = colsave[f][1]
 						let tcol = colsave[f][0]
 					lastCol[tj] = "single"
-					let DAM = this.damageWall(tj,B)
+
+					let WALL = this.walls[tj]
+					let angleDamageMult = 1
+					if(WALL.type == "norm"){
+						let m1 = i.vy/i.vx //slope of bullet
+						let m2 = (WALL.y1-WALL.y2)/(WALL.x1-WALL.x2) //slope of wall
+						let angle;
+						if(m2 == Infinity || m2 == -Infinity){
+							angle = Math.PI/2-Math.abs(Math.atan(m1))
+						} else if(m1 == Infinity || m1 == -Infinity){
+							angle = Math.PI/2-Math.abs(Math.atan(m2))
+						} else {
+							angle = Math.abs(Math.atan((m1-m2)/(1+m1*m2)))
+						}
+						if(angle > Math.PI/2){angle = Math.PI-angle}
+					  angleDamageMult = angle*2/Math.PI
+					}
+
+
+					let DAM = this.damageWall(tj,B,{"vx":i.vx,"vy":i.vy,"x":i.x,"y":i.y,"adp":angleDamageMult},tcol)
 					if(DAM){
 						let tw = this.walls[tj]
 						tcol = this.p5rre(tcol,colsave[f][2][0],colsave[f][2][1],tw.x1,tw.y1,tw.x2,tw.y2)
 						this.drawers.push([i.type,i.tailLength,i.x,i.y,tcol[0],tcol[1],i.extra])
 						i.x = tcol[0]
 						i.y = tcol[1]
-						i.vx = B.wallMult*(tcol[2]-tcol[0])*(tw.wallMult?tw.wallMult:0.6)
-						i.vy = B.wallMult*(tcol[3]-tcol[1])*(tw.wallMult?tw.wallMult:0.6)
-						bspeed *= B.wallMult*(tw.wallMult?tw.wallMult:0.6)
+						let reverseADmgMult = 1-angleDamageMult
+						// let actualMult = 1-(1-B.wallMult)*angleDamageMult
+						let actualMult = (1 - (1 - B.wallMult)*angleDamageMult)*(1-(tw.wallMult?1-tw.wallMult:0.4)*angleDamageMult)
+						if(actualMult < 0){actualMult = 0}
+						// let actualMult = (tw.wallMult?1-(1-tw.wallMult)*angleDamageMult:1-0.4*angleDamageMult)
+						// let actualMult = (tw.wallMult?tw.wallMult:1-0.4*reverseADmgMult)
+						// i.vx = B.wallMult*(tcol[2]-tcol[0])*(tw.wallMult?tw.wallMult:0.6)*reverseADmgMult
+						// i.vx = B.wallMult*(tcol[2]-tcol[0])*(tw.wallMult?tw.wallMult:0.6)
+						// i.vy = B.wallMult*(tcol[3]-tcol[1])*(tw.wallMult?tw.wallMult:0.6)
+						// bspeed *= B.wallMult*(tw.wallMult?tw.wallMult:0.6)
+
+						i.vx = actualMult*(tcol[2]-tcol[0])
+						i.vy = actualMult*(tcol[3]-tcol[1])
+						bspeed *= actualMult
 
 						if(tw.onDamage !== undefined){
 							tw.onDamage(tw,B)
@@ -4938,7 +4973,6 @@ class shooter2C{
 						i.x = tcol[0]
 						i.y = tcol[1]
 					}
-				// }
 				}
 
 			}
@@ -4995,11 +5029,30 @@ class shooter2C{
 		this.wallPushers[wid] = "_DEL"
 	}
 
-	static damageWall(wid,b){
-		if(this.wallTypes[this.walls[wid].type]){
-		let vy = b.vy
-		let vx = b.vx
-		this.walls[wid].hp -= 0.005*(vx*vx+vy*vy)*(b.dmgmult?b.dmgmult:1)/this.walls[wid].defense
+	static damageWall(wid,b,o,tcol){
+		let WALL = this.walls[wid]
+		if(this.wallTypes[WALL.type]){
+			let vy
+			let vx
+			let dp = 1
+			if(o){
+		 		vy = o.vy
+		 		dp = o.adp
+		 		vx = o.vx
+			} else {
+				vy = b.vy
+		 		vx = b.vx
+			}
+		// if(WALL.type == "norm"){
+		// 	let m1 = b.vy/b.vx //slope of bullet
+		// 	let m2 = (WALL.y1-WALL.y2)/(WALL.x1-WALL.x2) //slope of wall
+		// 	let angle = Math.abs(Math.atan((m1-m2)/(1+m1*m2)))
+		// 	if(angle > Math.PI/2){angle = Math.PI-angle}
+		//   dp = angle*2/Math.PI
+		// 	console.log(dp)
+
+		// }
+		WALL.hp -= 0.0065*(vx*vx+vy*vy)*(b.dmgmult?b.dmgmult:1)/this.walls[wid].defense*dp
 		if(this.walls[wid].hp < 0){
 			if(this.walls[wid].onDeath !== undefined){
 				this.walls[wid].onDeath(this.walls[wid],b)
