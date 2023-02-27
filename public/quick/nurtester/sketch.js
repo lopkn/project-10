@@ -129,7 +129,35 @@ mainCanvas.style.left = "0px"
 
 let callStack = []
 let ramStack = {}
-let memory = {}
+let memory = {"-1":{"name":"mainMem","id":-1,"iterators":[]}}
+
+class memChunk{
+	static cid = 0
+	static GetId(){
+		this.cid++
+		return(this.cid)
+	}
+	constructor(name,iterators,id){
+		this.name = name //sweet
+		this.id = id?id:memChunk.GetId() //1
+		this.iterators = iterators?iterators:[] //[0.6,2,0.3,3]
+	}
+
+	thinkOf(x){
+		
+		
+	}
+
+	func(x){
+
+	}
+}
+
+
+memory["-1"] = new memChunk("mainMem",[1,1],-1)
+memory["1"] = new memChunk("words",[])
+
+
 
 let result;
 
@@ -270,10 +298,10 @@ class p{
 	}
 
 	static recognizeWord(word,place,str){
-		if(this.objectBank.["a word"].instances[word]){
-		if(this.objectBank.["a word"].instances[word].recognition !== undefined){
+		if(this.objectBank["a word"].instances[word]){
+		if(this.objectBank["a word"].instances[word].recognition !== undefined){
 
-			let recognized = this.objectBank.["a word"].instances[word].recognition
+			let recognized = this.objectBank["a word"].instances[word].recognition
 			if(recognized.stringSpaceFunc !== undefined){
 				recognized.stringSpaceFunc(word,place,str)
 			}
@@ -282,8 +310,8 @@ class p{
 		}
 
 
-		if(this.objectBank.["a word"].instances[word].attributes?.["part of speech"] !== undefined){
-			let pos = this.objectBank.["a word"].instances[word].attributes.["part of speech"]
+		if(this.objectBank["a word"].instances[word].attributes?.["part of speech"] !== undefined){
+			let pos = this.objectBank["a word"].instances[word].attributes["part of speech"]
 			this.posPush(pos)
 		}
 
