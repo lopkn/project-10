@@ -127,7 +127,7 @@ mainCanvas.style.left = "0px"
 
 
 
-let callStack = []
+let callStack = ["checkBodyFuncs_"]
 let ramStack = {}
 let memory = {"-1":{"name":"mainMem","id":-1,"iterators":[]}}
 
@@ -144,8 +144,8 @@ class memChunk{
 	}
 
 	thinkOf(x){
-		
-		
+
+
 	}
 
 	func(x){
@@ -161,183 +161,317 @@ memory["1"] = new memChunk("words",[])
 
 let result;
 
+// class p{
+
+// 	// static wordBank = {
+
+// 	// "say":{"recognition":{
+// 	// 	"stringSpaceFunc":(w,p,s)=>{
+// 	// 	if(p==0){console.log(s.substring(4))}
+// 	// 	}},
+// 	// 	"attributes":{
+// 	// 		"part of speech":"verb"
+// 	// 	}
+// 	// },
+// 	// // "is":{
+// 	// // 	"recognition":{
+// 	// // 		"stringSpaceFunc":(w,p,s)=>{
+// 	// // 			if(p==0){
+// 	// // 				console.log(this.analyzeTruthful(s.substring(3)))
+// 	// // 			} else {
+
+// 	// // 			}
+// 	// // 		}
+// 	// // 	}
+// 	// // }
+
+// 	// }
+
+// 	static statementBank = {
+// 		"1+1=2":true
+// 	}
+
+// 	static objectBank = {
+// 		"a word":{
+// 			"instances":{
+// 				"say":{"recognition":{
+// 					"stringSpaceFunc":(w,p,s)=>{
+// 					if(p==0){console.log(s.substring(4))}
+// 					}},
+// 					"attributes":{
+// 						"part of speech":"verb"
+// 					}
+// 				},
+// 				"is":{"recognition":{
+// 					"stringSpaceFunc":(w,p,s)=>{
+// 						if(p==0){
+// 							console.log(this.analyzeTruthful(s.substring(3)))
+// 						} else {
+// 							let split = s.split(" ")
+// 							let first = []
+// 							for(let i = 0; i < p; i++){
+// 								first.push(split[i])
+// 							}
+// 							first = first.join(" ")
+
+// 							let second = []
+// 							for(let i = p+1; i < s.length; i++){
+// 								second.push(split[i])
+// 							}
+// 							second = second.join(" ")
+
+// 							console.log(first,second)
+
+// 						}
+// 					}},
+// 					"attributes":{
+// 						"part of speech":"verb"
+// 					}
+// 				},
+// 				"a":{
+// 					"attributes":{
+// 						"part of speech":"adjective"
+// 					}
+// 				}
+// 				// "means":{"recognition":{
+// 				// 	"stringSpaceFunc":(w,p,s)=>{
+// 				// 		if(p==0){}else if(p==1){
+
+// 				// 		}
+// 				// 	}},
+// 				// 	"attributes":{
+// 				// 		"part of speech":"verb"
+// 				// 	}
+// 				// },
+// 			}
+// 		},
+// 		"a statement":{
+// 			"instances":{
+// 				"1+1=2":true
+// 			}
+// 		}
+// 	}
+
+// 	static analyzeTruthful(str){
+// 		if(this.statementBank[str] !== undefined){
+// 			return(this.statementBank[str])
+// 		} else {
+// 			this.stringProcess(str)
+// 		}
+// 	}
+
+// 	static stringIsStatement(str){
+
+// 	}
+
+// 	static containedOrParallel(str,ostr){
+
+// 		let obj = this.objectBank
+
+// 		let objArr = Object.keys(this.objectBank)
+// 	}
+
+
+// 	static process(input){
+// 		if(input === undefined){
+// 			return
+// 		}
+
+// 		if(typeof(input) === "string"){
+// 			this.stringProcess(input)
+// 		}
+
+// 	}
+
+// 	static stringProcess(str){
+// 		let words = str.split(" ")
+// 		for(let i = 0; i < words.length; i++){
+// 			this.recognizeWord(words[i],i,str)
+// 		}
+// 	}
+
+// 	static recognizeWord(word,place,str){
+// 		if(this.objectBank["a word"].instances[word]){
+// 		if(this.objectBank["a word"].instances[word].recognition !== undefined){
+
+// 			let recognized = this.objectBank["a word"].instances[word].recognition
+// 			if(recognized.stringSpaceFunc !== undefined){
+// 				recognized.stringSpaceFunc(word,place,str)
+// 			}
+
+// 			}
+// 		}
+
+
+// 		if(this.objectBank["a word"].instances[word].attributes?.["part of speech"] !== undefined){
+// 			let pos = this.objectBank["a word"].instances[word].attributes["part of speech"]
+// 			this.posPush(pos)
+// 		}
+
+
+// 		}
+
+// 		static posAnalyzer = ""
+
+// 		static posPush(pos){
+// 			if(typeof(pos) === "string"){
+// 				this.posAnalyzer += "-"+pos
+// 				this.posCollapse()
+// 			}
+// 		}
+
+// 		static posCollapse(){
+// 			if(this.posCollapser[this.posAnalyzer]){
+// 				this.posAnalyzer = this.posCollapser[this.posAnalyzer]
+// 			}
+// 		}
+
+// 		static posCollapser = {"-noun-verb-noun":"-statement"}
+
+
+// }
+
+
+
+// // a statement is an object
+
 setInterval(()=>{
 
-	result = p.process(callStack[0])
+	result = p2.process(callStack[0])
 	callStack.splice(0,1)
 
 },2000)
 
-class p{
 
-	// static wordBank = {
 
-	// "say":{"recognition":{
-	// 	"stringSpaceFunc":(w,p,s)=>{
-	// 	if(p==0){console.log(s.substring(4))}
-	// 	}},
-	// 	"attributes":{
-	// 		"part of speech":"verb"
-	// 	}
-	// },
-	// // "is":{
-	// // 	"recognition":{
-	// // 		"stringSpaceFunc":(w,p,s)=>{
-	// // 			if(p==0){
-	// // 				console.log(this.analyzeTruthful(s.substring(3)))
-	// // 			} else {
 
-	// // 			}
-	// // 		}
-	// // 	}
-	// // }
-
-	// }
-
-	static statementBank = {
-		"1+1=2":true
+class MIF{
+	constructor(){
+		this.constant = ""
 	}
 
-	static objectBank = {
-		"a word":{
-			"instances":{
-				"say":{"recognition":{
-					"stringSpaceFunc":(w,p,s)=>{
-					if(p==0){console.log(s.substring(4))}
-					}},
-					"attributes":{
-						"part of speech":"verb"
-					}
-				},
-				"is":{"recognition":{
-					"stringSpaceFunc":(w,p,s)=>{
-						if(p==0){
-							console.log(this.analyzeTruthful(s.substring(3)))
-						} else {
-							let split = s.split(" ")
-							let first = []
-							for(let i = 0; i < p; i++){
-								first.push(split[i])
-							}
-							first = first.join(" ")
+	call(val){
 
-							let second = []
-							for(let i = p+1; i < s.length; i++){
-								second.push(split[i])
-							}
-							second = second.join(" ")
+	}
 
-							console.log(first,second)
+}
 
-						}
-					}},
-					"attributes":{
-						"part of speech":"verb"
-					}
-				},
-				"a":{
-					"attributes":{
-						"part of speech":"adjective"
-					}
-				}
-				// "means":{"recognition":{
-				// 	"stringSpaceFunc":(w,p,s)=>{
-				// 		if(p==0){}else if(p==1){
+class MIB{
+	constructor(){
+		this.subject = ""
+		this.condition = ""
+		this.meeter = ""
+		this.arr = []
+		this.trigger = 0.5
+	}
 
-				// 		}
-				// 	}},
-				// 	"attributes":{
-				// 		"part of speech":"verb"
-				// 	}
-				// },
-			}
-		},
-		"a statement":{
-			"instances":{
-				"1+1=2":true
-			}
+	call(val){
+		let tempVal = val
+		if(typeof(val) === "boolean"){
+			tempVal = val > this.trigger ? true : false
 		}
-	}
 
-	static analyzeTruthful(str){
-		if(this.statementBank[str] !== undefined){
-			return(this.statementBank[str])
-		} else {
-			this.stringProcess(str)
+		if(tempVal === false){
+			return("ignore")
 		}
+
+		if(MIB.cheese(p2.getObj(this.subject),this.condition,this.meeter)){
+			this.arr.forEach((e)=>{				
+				p2.call(e)
+			})
+			return(val)
+		}
+
+		return(false)
 	}
 
-	static stringIsStatement(str){
-
+	static cheese(x,cond,y){
+		switch(cond){
+			case "eql":
+				return(x === y)
+				break;
+			case "":
+			case "equal":
+				return(x == y)
+				break;
+			case "ueql":
+				return(x !== y)
+				break;
+			case "unequal":
+				return(x != y)
+				break;
+			case ">":
+				return(x > y)
+				break;
+			case "<":
+				return(x < y)
+				break;
+		}
+		console.log("unknown condition: "+cond)
+		return("unknown")
 	}
 
-	static containedOrParallel(str,ostr){
-
-		let obj = this.objectBank
-
-		let objArr = Object.keys(this.objectBank)
-	}
+}
 
 
-	static process(input){
-		if(input === undefined){
+class p2{
+
+	static mem = {"ram":{},"processes":{"checkBodyFuncs_":1.5}}
+	static memRef = {"1.5":new MIB()}
+
+
+	static process(s){
+		if(s === undefined || s === ""){
 			return
 		}
-
-		if(typeof(input) === "string"){
-			this.stringProcess(input)
+		let letterDict = {}
+		let wordDict = {}
+		for(let i = 0; i < s; i++){
+			letterDict[i] = s[i]
 		}
+		let split = s.split(" ")
+		split.forEach((e,i)=>{
+			wordDict[i] = e
+		})
+		this.mem.ram.letterDict = letterDict
+		this.mem.ram.wordDict = wordDict
+
+
+		this.progress(s)
 
 	}
 
-	static stringProcess(str){
-		let words = str.split(" ")
-		for(let i = 0; i < words.length; i++){
-			this.recognizeWord(words[i],i,str)
+	static progress(s){
+		if(this.mem.ram.wordDict[0] === "hi"){
+			this.do("say","hi")
+		}
+
+		if(this.mem.ram.wordDict[0] === "checkBodyFuncs_"){
+			callStack.push("");callStack.push("");callStack.push("");callStack.push("");callStack.push("checkBodyFuncs_");
+			this.call(this.mem.processes["checkBodyFuncs_"],1)
 		}
 	}
 
-	static recognizeWord(word,place,str){
-		if(this.objectBank["a word"].instances[word]){
-		if(this.objectBank["a word"].instances[word].recognition !== undefined){
 
-			let recognized = this.objectBank["a word"].instances[word].recognition
-			if(recognized.stringSpaceFunc !== undefined){
-				recognized.stringSpaceFunc(word,place,str)
-			}
+	static call(item,calltype){
+		this.getObj(item).call(calltype)
+	}
 
-			}
+	static getObj(item){
+		if(typeof(item) === "number"){
+			item = this.memRef[item]
 		}
+		return(item)
+	}
 
-
-		if(this.objectBank["a word"].instances[word].attributes?.["part of speech"] !== undefined){
-			let pos = this.objectBank["a word"].instances[word].attributes["part of speech"]
-			this.posPush(pos)
+	static do(what,how){
+		if(what === "say"){
+			console.log(how)
 		}
-
-
-		}
-
-		static posAnalyzer = ""
-
-		static posPush(pos){
-			if(typeof(pos) === "string"){
-				this.posAnalyzer += "-"+pos
-				this.posCollapse()
-			}
-		}
-
-		static posCollapse(){
-			if(this.posCollapser[this.posAnalyzer]){
-				this.posAnalyzer = this.posCollapser[this.posAnalyzer]
-			}
-		}
-
-		static posCollapser = {"-noun-verb-noun":"-statement"}
+	}
 
 
 }
 
 
-
-// a statement is an object
+// 
