@@ -56,7 +56,8 @@ var cameraY = 0
 weaponInfo = {
 	"heal":{"repeating":2},
 	"dril":{"repeating":2},
-	"lzr2":{"repeating":2}
+	"lzr2":{"repeating":2},
+	"mchg":{"repeating":4}
 
 }
 
@@ -69,7 +70,7 @@ class player{
 	static snapping = false
 	static gridSize = 80
 	static weaponCounter = 1
-	static weaponDict = {"1":"norm","2":"scat","3":"lazr","4":"cnon","5":"heal","6":"grnd","7":"msl","8":"dril","9":"msl2","10":"snpr","11":"lzr2"}
+	static weaponDict = {"1":"norm","2":"scat","3":"lazr","4":"cnon","5":"heal","6":"grnd","7":"msl","8":"dril","9":"msl2","10":"snpr","11":"lzr2","12":"mchg"}
 	static wallCounter = 1
 	static wallDict = {
 		"1":"norm","2":"bhol","3":"ghol","4":"body","5":"metl",

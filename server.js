@@ -4321,6 +4321,10 @@ class shooter2C{
 				this.pushBullet(p.x,p.y,(n[2]-p.x)*160,(n[3]-p.y)*160,id,"norm")
 		reload += 4
 				break;
+			case "mchg":
+				this.pushBullet(p.x,p.y,(n[2]-p.x)*160+Math.random()*20-10,(n[3]-p.y)*160+Math.random()*20-10,id,"scat")
+		reload += 3
+				break;
 		reload += 10
 			case "snpr":
 				theBullet = this.pushBullet(p.x,p.y,(n[2]-p.x)*190+p.vx,(n[3]-p.y)*190+p.vy,id,"norm")

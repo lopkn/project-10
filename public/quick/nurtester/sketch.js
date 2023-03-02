@@ -357,10 +357,13 @@ class MIF{
 }
 
 class MIB{
-	constructor(){
-		this.subject = ""
-		this.condition = ""
-		this.meeter = ""
+	constructor(sub,cond,meet,arr,trig){
+		if(sub){
+			this.subject = sub
+		}
+		if(cond){
+		this.condition = cond
+		this.meeter = meet}
 		this.arr = []
 		this.trigger = 0.5
 	}
@@ -375,6 +378,7 @@ class MIB{
 			return("ignore")
 		}
 
+
 		if(MIB.cheese(p2.getObj(this.subject),this.condition,this.meeter)){
 			this.arr.forEach((e)=>{				
 				p2.call(e)
@@ -386,6 +390,15 @@ class MIB{
 	}
 
 	static cheese(x,cond,y){
+		if(x === undefined){
+			return(false)
+		}
+		if(cond === undefined){
+			return(x?true:false)
+		}
+		if(y === undefined){
+			return(false)
+		}
 		switch(cond){
 			case "eql":
 				return(x === y)
@@ -414,11 +427,28 @@ class MIB{
 }
 
 
-class p2{
+class p2{//why human hard, yes, can not get people what think, relationship bad, why i need friend, how no lonely, cannot independent trash
+	///how real, problem many, time none, not that. other problem also no time, how r u a problem,
+	/// thats a problem, i cringe no want u see, me only, im suseptable to trash, trash aka cringe
+	//idk she fine?????
 
-	static mem = {"ram":{},"processes":{"checkBodyFuncs_":1.5}}
-	static memRef = {"1.5":new MIB()}
+	static mem = {"ram":{"actions":[]},"processes":{"checkBodyFuncs_":1.5,"relate":1},"myConditions":{"bored":["info",true]}}
+	static memRef = {"0.5":{"call":(x)=>{console.log(x?x:"im Bored")}}}
 
+	static cid = 0
+	static GetId(){
+		this.cid++
+		return(this.cid)
+	}
+
+	static construct(){
+		let m = this.memRef
+		m["1.5"] = new MIB()
+		m["1.5"].subject = this.mem.myConditions.bored
+		m["1.5"].arr.push(0.5)
+		let n = this.GetId()
+		m[n] = {"call":(x)=>{}}
+	}
 
 	static process(s){
 		if(s === undefined || s === ""){
@@ -444,6 +474,8 @@ class p2{
 	static progress(s){
 		if(this.mem.ram.wordDict[0] === "hi"){
 			this.do("say","hi")
+		} else if(this.mem.ram.wordDict[0] === "say"){
+			this.do("say",wordDict.join(" "))
 		}
 
 		if(this.mem.ram.wordDict[0] === "checkBodyFuncs_"){
@@ -460,6 +492,8 @@ class p2{
 	static getObj(item){
 		if(typeof(item) === "number"){
 			item = this.memRef[item]
+		} else if(item[0] === "info"){
+			item = item[1]
 		}
 		return(item)
 	}
@@ -473,5 +507,7 @@ class p2{
 
 }
 
+
+p2.construct()
 
 // 
