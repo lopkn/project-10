@@ -4325,7 +4325,6 @@ class shooter2C{
 				this.pushBullet(p.x,p.y,(n[2]-p.x)*160+Math.random()*20-10,(n[3]-p.y)*160+Math.random()*20-10,id,"scat")
 		reload += 3
 				break;
-		reload += 10
 			case "snpr":
 				theBullet = this.pushBullet(p.x,p.y,(n[2]-p.x)*190+p.vx,(n[3]-p.y)*190+p.vy,id,"norm")
 				theBullet.dmgmult = 5
@@ -4343,7 +4342,7 @@ class shooter2C{
 			case "lazr":
 				
 				this.pushBullet(p.x,p.y,(n[2]-p.x)*1100,(n[3]-p.y)*1100,id,"lazr")
-		reload += 10
+		reload += 30
 				break;
 			case "lzr2":
 				this.pushBullet(p.x,p.y,(n[2]-p.x)*1100,(n[3]-p.y)*1100,id,"lzr2")
@@ -4362,15 +4361,15 @@ class shooter2C{
 				break;
 			case "grnd":
 				this.pushBullet(p.x,p.y,(n[2]-p.x)*80+p.vx,(n[3]-p.y)*80+p.vy,id,"grnd")
-		reload += 10
+		reload += 20
 				break;
 			case "msl":
 				this.pushBullet(p.x,p.y,(n[2]-p.x)*25,(n[3]-p.y)*25,id,"msl")
-		reload += 20
+		reload += 30
 				break;
 			case "msl2":
 				this.pushBullet(p.x,p.y,(n[2]-p.x)*25,(n[3]-p.y)*25,id,"msl2")
-				reload += 30
+				reload += 40
 				break;
 		}
 		p.reloading += reload;
