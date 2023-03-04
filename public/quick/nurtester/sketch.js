@@ -383,7 +383,10 @@ class MIB{
 			this.arr.forEach((e)=>{				
 				p2.call(e)
 			})
-			return(val)
+		} else {
+			this.arr.forEach((e)=>{				
+				p2.call(e)
+			})
 		}
 
 		return(false)
@@ -427,12 +430,9 @@ class MIB{
 }
 
 
-class p2{//why human hard, yes, can not get people what think, relationship bad, why i need friend, how no lonely, cannot independent trash
-	///how real, problem many, time none, not that. other problem also no time, how r u a problem,
-	/// thats a problem, i cringe no want u see, me only, im suseptable to trash, trash aka cringe
-	//idk she fine?????
+class p2{
 
-	static mem = {"ram":{"actions":[]},"processes":{"checkBodyFuncs_":1.5,"relate":1},"myConditions":{"bored":["info",true]}}
+	static mem = {"ram":{"actions":[]},"processes":{"checkBodyFuncs_":1.5},"myConditions":{"bored":["info",true]}}
 	static memRef = {"0.5":{"call":(x)=>{console.log(x?x:"im Bored")}}}
 
 	static cid = 0

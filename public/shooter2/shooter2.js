@@ -2,7 +2,7 @@ const socket = io.connect('/')
 let GAMESESSION = "G10.2"
 socket.emit("JOINGAME",GAMESESSION)
 
-let COOKIE = {"playerType":"ntri"}
+let COOKIE = {"playerType":"tank"}
 try{
 	COOKIE = JSON.parse(document.cookie)
 }catch(e){}

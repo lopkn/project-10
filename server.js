@@ -5039,10 +5039,10 @@ class shooter2C{
 			// B.tail.push([i.tailLength,i.x,i.y,i.x+i.vx,i.y+i.vy])
 			// this.drawers.push([i.type,i.tailLength,i.x,i.y,i.x+i.vx,i.y+i.vy,i.extra])
 	this.drawers.push([i.type,i.tailLength,
-				parseFloat(i.x.toPrecision(4)),
-				parseFloat(i.y.toPrecision(4)),
-				parseFloat((i.x+i.vx).toPrecision(4)),
-				parseFloat((i.y+i.vy).toPrecision(4)),i.extra])
+				parseFloat(i.x.toFixed(2)),
+				parseFloat(i.y.toFixed(2)),
+				parseFloat((i.x+i.vx).toFixed(2)),
+				parseFloat((i.y+i.vy).toFixed(2)),i.extra])
 			
 
 			let vnorm = vectorNormalize([0,0,i.vx,i.vy])
