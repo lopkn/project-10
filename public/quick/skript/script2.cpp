@@ -12,10 +12,11 @@ int main()
   "idiotic ",
   "moronic ","bloody unintelligent ","catastrophicalaly brain dead ",
   "vapid ","pig headed ","cretinous ","naive ","senseless ",
-  // "homosexual ",
+  // "homosexual ","gay",
   "degenerate ","aberrant ","delerious ","apeish ","puerile ","lame and dopey ", "uneducated ",
   "asinine ","unintellectual ","fallacious ","daft ","slow ", "obtuse ",
-  "feeble ", "uneducated ","invalid ","inconsequential ","frivolous ","protohominid ","negligable "
+  "feeble ", "uneducated ","invalid ","inconsequential ","frivolous ","protohominid ","negligable ",
+  "rancid","primal brained"
 };
 
 const std::string adverbs[20]={
