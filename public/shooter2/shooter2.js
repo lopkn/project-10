@@ -57,7 +57,7 @@ weaponInfo = {
 	"heal":{"repeating":2},
 	"dril":{"repeating":2},
 	"lzr2":{"repeating":2},
-	"mchg":{"repeating":4}
+	"mchg":{"repeating":3}
 
 }
 

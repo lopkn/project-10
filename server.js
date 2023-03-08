@@ -4319,11 +4319,11 @@ class shooter2C{
 		switch(w){
 			case "norm":
 				this.pushBullet(p.x,p.y,(n[2]-p.x)*160,(n[3]-p.y)*160,id,"norm")
-		reload += 4
+				reload += 4
 				break;
 			case "mchg":
-				this.pushBullet(p.x,p.y,(n[2]-p.x)*160+Math.random()*20-10,(n[3]-p.y)*160+Math.random()*20-10,id,"scat")
-		reload += 3
+				this.pushBullet(p.x,p.y,(n[2]-p.x)*160+Math.random()*30-15,(n[3]-p.y)*160+Math.random()*30-15,id,"scat")
+				reload += 2
 				break;
 			case "snpr":
 				theBullet = this.pushBullet(p.x,p.y,(n[2]-p.x)*190+p.vx,(n[3]-p.y)*190+p.vy,id,"norm")
