@@ -4343,6 +4343,7 @@ class shooter2C{
 				
 				this.pushBullet(p.x,p.y,(n[2]-p.x)*1100,(n[3]-p.y)*1100,id,"lazr")
 		reload += 30
+		p.materials -= 5
 				break;
 			case "lzr2":
 				this.pushBullet(p.x,p.y,(n[2]-p.x)*1100,(n[3]-p.y)*1100,id,"lzr2")
@@ -4362,14 +4363,17 @@ class shooter2C{
 			case "grnd":
 				this.pushBullet(p.x,p.y,(n[2]-p.x)*80+p.vx,(n[3]-p.y)*80+p.vy,id,"grnd")
 		reload += 20
+		p.materials -= 5
 				break;
 			case "msl":
 				this.pushBullet(p.x,p.y,(n[2]-p.x)*25,(n[3]-p.y)*25,id,"msl")
 		reload += 30
+		p.materials -= 5
 				break;
 			case "msl2":
 				this.pushBullet(p.x,p.y,(n[2]-p.x)*25,(n[3]-p.y)*25,id,"msl2")
 				reload += 40
+		p.materials -= 5
 				break;
 		}
 		p.reloading += reload;
