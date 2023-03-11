@@ -4143,14 +4143,11 @@ function touchHandler(event)
     event.preventDefault();
 }
 
-function myh(e){
-	 
-}
 
 function init() 
 {
     document.addEventListener("touchstart", touchHandler, true);
-    document.addEventListener("touchmove", (e)=>{myh(e);touchHandler(e)}, true);
+    document.addEventListener("touchmove", (e)=>{touchHandler(e)}, true);
     document.addEventListener("touchend", touchHandler, true);
     document.addEventListener("touchcancel", touchHandler, true);    
     // document.addEventListener('touchmove', function() { e.preventDefault();GI.debuggingInfo = "cancled" }, { passive:false });
