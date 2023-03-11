@@ -13,6 +13,11 @@ let ctx = document.getElementById("myCanvas").getContext("2d")
 let mouseX = 0
 let mouseY = 0
 onmousemove = (e)=>{mouseX = (e.clientX); mouseY = (e.clientY)}
+document.addEventListener("keydown",(e)=>{
+  if(e.key == "u"){
+    unDo()
+  }
+})
 let mouseIsPressed = false
 document.addEventListener("mousedown",()=>{mouseIsPressed = true;draw()
 
@@ -82,7 +87,7 @@ class piece{
   
   move(x,y){
     let space = x+","+y
-
+    histPush()
     chkALL(-1)
     delete pieces[this.space]
     
@@ -150,7 +155,7 @@ function histPush(){
   let arr = []
   let objk = Object.values(pieces)
   objk.forEach((e)=>{
-    arr.push({"name":e.name,"space":e.space})
+    arr.push({"name":e.name,"x":e.x,"y":e.y,"enemy":e.enemy})
   })
   if(HIST.length > 40){
     HIST.splice(1,0)
@@ -159,8 +164,15 @@ function histPush(){
 }
 
 function unDo(){
+  if(HIST.length < 1){return}
   chkALL(-1)
   pieces = {}
+  let arr = HIST[HIST.length-1]
+  arr.forEach((e)=>{
+    new piece(e.name,e.x,e.y,e.enemy)
+  })
+  HIST.pop()
+  draw()
 }
 
 
@@ -201,7 +213,7 @@ function draw() {
       fill("rgb(0,"+(masterDict[e]*50+100)+",0)")
     } else if(masterDict[e] < 0){
       fill("rgb("+(-masterDict[e]*50+100)+",0,0)")
-    }
+    } else {fill("white")}
     text(masterDict[e],s[0]*spacing+spacing*0.1,s[1]*spacing+spacing*0.3)
     
     textSize(spacing/6)
@@ -273,6 +285,9 @@ function newBoard(){
   
 }
 newBoard()
+draw()
+draw()
+draw()
 setInterval(()=>{
   draw()
 },1000)
