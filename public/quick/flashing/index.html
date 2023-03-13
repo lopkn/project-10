@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="icon" href="../../images/psim2.png">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable = no, maximum-scale=1, minimum-scale=1">
+  <title>HAPPY FLASHING</title>
+    <!-- undulating, jangulating, mesmirising balls.-->
+    <link rel="manifest" href="./manifest.json">
+    <link rel="apple-touch-icon" href="../../images/psim2.png">
+    <meta name="apple-mobile-web-app-status-bar" content = "#FF00FF">
+</head>
+<body style="padding:0;margin:0;background-color: black;">
+  
+  
+
+  <div draggable="false" ondragstart="return false">
+
+<canvas id="myCanvas" disabled="true" style = "z-index: 1;touch-action: none; user-select: none;
+-webkit-user-select: none;
+-moz-user-select: none;"></canvas>
+
+
+  </div>
+
+
+
+<!-- <script src="/socket.io/socket.io.js"></script> -->
+
+<script>
+
+let myCanvas = document.getElementById("myCanvas")
+
+  myCanvas.width = window.innerWidth
+  myCanvas.height = window.innerHeight
+  // myCanvas.style.width = Math.floor(D+50)+"px"
+  // myCanvas.style.height = Math.floor(D+50)+"px"
+  myCanvas.style.top = "0px"
+  myCanvas.style.left = "0px"
+
+let ctx = document.getElementById("myCanvas").getContext("2d")
+
+let rectWidth = 30
+
+function fill(x){
+  ctx.fillStyle = x
+}
+function rect(x,y,w,h){
+  ctx.fillRect(x,y,w,h)
+}
+
+function draw() {
+  rectWidth=Math.random()*4000+20
+  for(let i = 0; i < window.innerWidth/rectWidth+1; i++){
+    for(let j = 0; j < window.innerHeight/rectWidth+1; j++){
+      fill("rgb("+(Math.random()>0.5?255:0)+","+(Math.random()>0.5?255:0)+","+(Math.random()>0.5?255:0)+")")
+      rect(i*rectWidth,j*rectWidth,rectWidth,rectWidth)
+    }
+  }
+}
+
+
+setInterval(()=>{
+  draw()
+})
+
+</script>
+</body>
+</html>
+
+
