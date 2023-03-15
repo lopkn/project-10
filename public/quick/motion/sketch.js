@@ -60,15 +60,18 @@ document.addEventListener("keydown",(e)=>{
 // }
 
 function getAccel(){
-  DeviceMotionEvent.requestPermission().then(response => {
+  try{DeviceMotionEvent.requestPermission().then(response => {
         if (response == 'granted') {
-          window.addEventListener('deviceorientation',(event) => {})
+          window.addEventListener('deviceorientation',(e) => {})
         } else {
           console.log(response)
           console.log("hey")
         }
 
-      })
+      })} catch{
+    window.addEventListener('deviceorientation',(e) => {console.log(e)})
+    window.addEventListener('devicemotion',(e) => {console.log(e)})
+  }
 }
 
 

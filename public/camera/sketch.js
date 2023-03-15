@@ -15,9 +15,9 @@ camera_button.addEventListener('click', async function() {
 
 click_button.addEventListener('click', function() {
     canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-    let image_data_url = canvas.toDataURL('image/jpeg');
+    // let image_data_url = canvas.toDataURL('image/jpeg');
 
-    canvas.getContext('2d').drawImage(image,0,0,canvas.width,canvas.height)
+    // canvas.getContext('2d').drawImage(image,0,0,canvas.width,canvas.height)
 
     // data url of the image
     // setTimeout(()=>{
@@ -237,7 +237,6 @@ class photop{
             }
 
             let timg = this.img[dstr]
-
             let c = this.compCol(timg.col,org.col,10)
             D[dstr] = true
             if(c === false){
@@ -305,7 +304,7 @@ class photop{
     static flhowl2(x,y){
         let arr = [[x,y]]
         let xystr = x+","+y
-        if(this.img[xystr] == undefined){
+        if(this.img[xystr] == undefined || this.image[xystr] == false){
             this.img[xystr] = this.getPix(x,y)
         }
 
@@ -315,6 +314,7 @@ class photop{
         while(arr.length > 0){
         let nextArr = []
         arr.forEach((e)=>{
+            console.log(org)
             this.flow42(e[0],e[1],asd,org).forEach((E)=>{nextArr.push(E)})
         })
         arr = nextArr

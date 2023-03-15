@@ -1,15 +1,15 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html>
 <head>
 <link rel="icon" href="../../images/psim2.png">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable = no, maximum-scale=1, minimum-scale=1">
-  <title>LCHS - calculator</title>
+  <title>LCHS - calculator</title> -->
     <!-- undulating, jangulating, mesmirising balls.-->
  <!--    <link rel="manifest" href="./manifest.json">
     <link rel="apple-touch-icon" href="../../images/psim2.png">
     <meta name="apple-mobile-web-app-status-bar" content = "#FF00FF"> -->
-</head>
+<!-- </head>
 <body style="padding:0;margin:0;background-color: black;">
   
   
@@ -18,15 +18,125 @@
 
 <canvas id="myCanvas" disabled="true" style = "z-index: 1;touch-action: none; user-select: none;
 -webkit-user-select: none;
--moz-user-select: none;"></canvas>
+-moz-user-select: none;"></canvas> -->
 
 <!-- <button id = "start" ></button> -->
-<script src="sketch.js"></script>
-<button id="accelPermsButton" onclick="getAccel()" style="height:50px;">Get Accelerometer Permissions</button>
+<!-- <script src="sketch.js"></script> -->
+<!-- <button id="accelPermsButton" onclick="getAccel()" style="height:50px;">Get Accelerometer Permissions</button>
 <div id = "text" style = "color:white"></div>
 
 
 
+
+</body>
+</html> -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Accelerometer Demo</title>
+
+    <style>
+    .indicatorDot{
+        width: 30px;
+        height: 30px;
+        background-color: #ffab56;
+        border-radius: 50%;
+        position:fixed;
+    }
+    </style>
+
+<script>    
+var px = 50; // Position x and y
+var py = 50;
+var vx = 0.0; // Velocity x and y
+var vy = 0.0;
+var updateRate = 1/60; // Sensor refresh rate
+
+function getAccel(){
+    try{DeviceMotionEvent.requestPermission().then(response => {
+        if (response == 'granted') {
+       // Add a listener to get smartphone orientation 
+           // in the alpha-beta-gamma axes (units in degrees)
+            window.addEventListener('deviceorientation',(event) => {
+                // Expose each orientation angle in a more readable way
+                rotation_degrees = event.alpha;
+                frontToBack_degrees = event.beta;
+                leftToRight_degrees = event.gamma;
+                
+                // Update velocity according to how tilted the phone is
+                // Since phones are narrower than they are long, double the increase to the x velocity
+                vx = vx + leftToRight_degrees * updateRate*2; 
+                vy = vy + frontToBack_degrees * updateRate;
+                
+                // Update position and clip it to bounds
+                px = px + vx*.5;
+                if (px > 98 || px < 0){ 
+                    px = Math.max(0, Math.min(98, px)) // Clip px between 0-98
+                    vx = 0;
+                }
+
+                py = py + vy*.5;
+                if (py > 98 || py < 0){
+                    py = Math.max(0, Math.min(98, py)) // Clip py between 0-98
+                    vy = 0;
+                }
+                
+                dot = document.getElementsByClassName("indicatorDot")[0]
+                dot.setAttribute('style', "left:" + (px) + "%;" +
+                                              "top:" + (py) + "%;");
+                
+            });
+        }
+    });
+}catch{
+  window.addEventListener('deviceorientation',(event) => {
+                // Expose each orientation angle in a more readable way
+                rotation_degrees = event.alpha;
+                frontToBack_degrees = event.beta;
+                leftToRight_degrees = event.gamma;
+                
+                // Update velocity according to how tilted the phone is
+                // Since phones are narrower than they are long, double the increase to the x velocity
+                vx = vx + leftToRight_degrees * updateRate*2; 
+                vy = vy + frontToBack_degrees * updateRate;
+                
+                // Update position and clip it to bounds
+                px = px + vx*.5;
+                if (px > 98 || px < 0){ 
+                    px = Math.max(0, Math.min(98, px)) // Clip px between 0-98
+                    vx = 0;
+                }
+
+                py = py + vy*.5;
+                if (py > 98 || py < 0){
+                    py = Math.max(0, Math.min(98, py)) // Clip py between 0-98
+                    vy = 0;
+                }
+                
+                dot = document.getElementsByClassName("indicatorDot")[0]
+                dot.setAttribute('style', "left:" + (px) + "%;" +
+                                              "top:" + (py) + "%;");
+                
+            });
+}
+
+
+}
+
+</script>
+
+
+</head>
+<body style="background-color:lightblue;">
+
+<div id="main">
+    <button id="accelPermsButton" onclick="getAccel()" style="height:50px;">Get Accelerometer Permissions</button>
+
+
+    <div class="indicatorDot" style="left:30%; top:30%;"></div>
+</div>
 
 </body>
 </html>
