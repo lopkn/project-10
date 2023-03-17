@@ -104,8 +104,49 @@ class andJunction{
   constructor(join1,join2){
     this.join1 = join1
     this.join2 = join2
-    this.not = true
+    this.not = false
   }
+
+  getResult(dict){
+    if(this.not){
+      return(!(this.join1.getResult(dict)&&this.join2.getResult(dict)))
+    }
+    return(this.join1.getResult(dict)&&this.join2.getResult(dict))
+  }
+
+  evaluate(set,ansSet){
+    let error = 0
+    let errSet1 = []
+    let errSet2 = []
+    set.forEach((e,i)=>{
+      let a = this.getResult(e)
+      if(a === ansSet[i]){
+        errSet2.push(i)
+        error ++
+      } else {
+        errSet1.push(i)
+      }
+    })
+
+    return({
+      ""
+    })
+
+  }
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

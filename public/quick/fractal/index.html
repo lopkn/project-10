@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="icon" href="../../images/psim2.png">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable = no, maximum-scale=1, minimum-scale=1">
+  <title>fractal</title>
+    <!-- undulating, jangulating, mesmirising balls.-->
+    <link rel="manifest" href="./manifest.json">
+    <link rel="apple-touch-icon" href="../../images/psim2.png">
+    <meta name="apple-mobile-web-app-status-bar" content = "#FF00FF">
+</head>
+<body style="padding:0;margin:0;background-color: black;">
+  
+  
+
+  <div draggable="false" ondragstart="return false">
+
+<canvas id="myCanvas" disabled="true" style = "z-index: 1;touch-action: none; user-select: none;
+-webkit-user-select: none;
+-moz-user-select: none;"></canvas>
+
+
+  </div>
+
+
+
+<!-- <script src="/socket.io/socket.io.js"></script> -->
+
+<script>
+
+let myCanvas = document.getElementById("myCanvas")
+
+  myCanvas.width = window.innerWidth
+  myCanvas.height = window.innerHeight
+  // myCanvas.style.width = Math.floor(D+50)+"px"
+  // myCanvas.style.height = Math.floor(D+50)+"px"
+  myCanvas.style.top = "0px"
+  myCanvas.style.left = "0px"
+
+let ctx = document.getElementById("myCanvas").getContext("2d")
+
+// let rectWidth = 30
+mouseX = 0; mouseY = 0
+onmousemove = (e)=>{mouseX = e.clientX; mouseY = e.clientY}
+
+function fill(x){
+  ctx.fillStyle = x
+}
+function rect(x,y,w,h){
+  ctx.fillRect(x,y,w,h)
+}
+
+function dist(x,y,x2,y2){
+  let a = x2-x1
+  let b = y2-y1
+  return(Math.sqrt(a*a+b*b))
+}
+
+
+function addEach(dict){
+  // a^2 - b^2 + 2abi
+  let tx = dict.x*dict.x - dict.y*dict.y
+  let ty = 2 * dict.x * dict.y
+  return({"x":tx+0.5,"y":ty+0.5})
+}
+
+function findOut(dict,times){
+  for(let i = 0; i < times; i++){
+    
+  }
+}
+
+let points = []
+
+function draw() {
+  points.forEach((e)=>{
+    fill(e.col)
+    rect(e.x,e.y,1)
+  })
+}
+
+draw()
+// setInterval(()=>{
+//   draw()
+// })
+
+</script>
+</body>
+</html>
+
+
