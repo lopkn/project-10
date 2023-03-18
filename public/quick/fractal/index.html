@@ -6,9 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable = no, maximum-scale=1, minimum-scale=1">
   <title>fractal</title>
     <!-- undulating, jangulating, mesmirising balls.-->
-    <link rel="manifest" href="./manifest.json">
+   <!--  <link rel="manifest" href="./manifest.json">
     <link rel="apple-touch-icon" href="../../images/psim2.png">
-    <meta name="apple-mobile-web-app-status-bar" content = "#FF00FF">
+    <meta name="apple-mobile-web-app-status-bar" content = "#FF00FF"> -->
 </head>
 <body style="padding:0;margin:0;background-color: black;">
   
@@ -31,6 +31,9 @@
 
 let myCanvas = document.getElementById("myCanvas")
 
+  Width = window.innerWidth
+  Height = window.innerHeight
+
   myCanvas.width = window.innerWidth
   myCanvas.height = window.innerHeight
   // myCanvas.style.width = Math.floor(D+50)+"px"
@@ -52,23 +55,29 @@ function rect(x,y,w,h){
 }
 
 function dist(x,y,x2,y2){
-  let a = x2-x1
-  let b = y2-y1
+  let a = x2-x
+  let b = y2-y
   return(Math.sqrt(a*a+b*b))
 }
 
 
-function addEach(dict){
+function addEach(dict,ddict){
   // a^2 - b^2 + 2abi
   let tx = dict.x*dict.x - dict.y*dict.y
   let ty = 2 * dict.x * dict.y
-  return({"x":tx+0.5,"y":ty+0.5})
+  return({"x":tx+ddict.x,"y":ty+ddict.y})
 }
 
 function findOut(dict,times){
+  let oldDict = {"x":0,"y":0};
+  let mem = {}
   for(let i = 0; i < times; i++){
-    
+    oldDict = addEach(oldDict,dict)
+    if(dist(oldDict.x,oldDict.y,0,0) >= 2){
+      return("out:" + i)
+    }
   }
+  return("nope")
 }
 
 let points = []
@@ -76,9 +85,33 @@ let points = []
 function draw() {
   points.forEach((e)=>{
     fill(e.col)
-    rect(e.x,e.y,1)
+    rect(e.x*zoom+Width/1.5,e.y*zoom+Height/2,5,5)
   })
 }
+
+document.addEventListener("mousedown",(e)=>{
+  downEmulate({"x":mouseX,"y":mouseY})
+})
+
+  let zoom = 400
+
+function downEmulate(rr){
+
+  let tx = rr.x
+  let ty = rr.y
+
+  let r = findOut({"x":(tx-Width/1.5)/zoom,"y":(ty-Height/2)/zoom},20)
+  if(r == "nope"){
+    // points.push({"x":(tx-Width/1.5)/150,"y":(ty-Height/2)/150,"col":"white"})
+    let e = {"x":(tx-Width/1.5)/zoom,"y":(ty-Height/2)/zoom,"col":"white"}
+    fill(e.col)
+    rect(e.x*zoom+Width/1.5,e.y*zoom+Height/2,5,5)
+
+  } else {
+  }
+  draw()
+}
+
 
 draw()
 // setInterval(()=>{
