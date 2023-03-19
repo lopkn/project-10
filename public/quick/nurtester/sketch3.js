@@ -119,7 +119,7 @@ class dataFlipper{
   constructor(dataPoint){
     this.dataPoint = dataPoint
     this.not = false
-    this.blame = [0,0]
+    this.blame = [0,0,0]
   }
 
   getResult(dict){
@@ -151,20 +151,39 @@ class dataFlipper{
   }
 
   blameShift(dict,myAns,shiftID){
-    if(this.blame[0] === shiftID){
-      this.blame[1] += 1
-    } else {
-      this.blame = [shiftID,1]
+    if(this.blame[0] !== shiftID){
+      this.blame = [shiftID,0,0]
     }
+      if(myAns === "u"){
+        this.blame[2] += 1
+        return;
+      }
+      this.blame[1] += 1
   }
 
   blameDownComplete(set,id){
-    this.blame = {"0":null,"errors":this.blame[1],"originId":id,"errorRate":this.blame[1]/set.length,"setSize":set.length}
+    if(this.blame[0] === null){
+      this.blame = [id,0,0]
+    }
+    this.blame = {"0":null,"errors":this.blame[1],"originId":id,"errorRate":this.blame[1]/(set.length-this.blame[2]),
+    "setSize":(set.length-this.blame[2]),"ignorables":this.blame[2]}
   }
 
 
   sendFunctionDown(func){
     func(this)
+  }
+
+  flipDown(id){
+    if(this.blame.originId === id){
+      if(this.blame.errorRate > 0.5){
+        this.not = !this.not
+        this.blame.errorRate = 1-this.blame.errorRate
+        this.blame.errors = this.blame.setSize-this.blame.errors
+        return(false)
+      }
+      return(true)
+    }
   }
 
 }
@@ -175,7 +194,7 @@ class andJunction{
     this.join1 = join1
     this.join2 = join2
     this.not = false
-    this.blame = [0,0]
+    this.blame = [0,0,0]
   }
 
   getResult(dict){
@@ -213,7 +232,11 @@ class andJunction{
 
 
   blameDownComplete(set,id){
-    this.blame = {"0":null,"errors":this.blame[1],"originId":id,"errorRate":this.blame[1]/set.length,"setSize":set.length}
+    if(this.blame[0] === null){
+      this.blame = [id,0,0]
+    }
+    this.blame = {"0":null,"errors":this.blame[1],"originId":id,"errorRate":this.blame[1]/(set.length-this.blame[2]),
+    "setSize":(set.length-this.blame[2]),"ignorables":this.blame[2]}
     this.join1.blameDownComplete(set,id)
     this.join2.blameDownComplete(set,id)
   }
@@ -228,36 +251,61 @@ class andJunction{
 
   blameShiftSet(set,ansSet,id){
     set.forEach((e,i)=>{
-      this.blameShift(e,ansSet[i],id)
+      if(!this.blameShift(e,ansSet[i],id)){console.log("wrong at data: "+i)}
     })
     this.blameDownComplete(set,id)
+  }
+
+  flipDown(id){ // flipping should be down up not up down. fix later
+    if(this.join1.flipDown(id) && this.join2.flipDown(id) && this.blame.originId === id){
+      if(this.blame.errorRate > 0.5){
+        this.not = !this.not
+        this.blame.errorRate = 1-this.blame.errorRate
+        this.blame.errors = this.blame.setSize-this.blame.errors
+        return(false)
+      }
+      return(true)
+    }
+    return(false)
   }
 
 
   blameShift(dict,myAns,shiftID){
 
     if(this.getResult(dict) === myAns){
-      return;
+      return(true);
+    }
+    if(this.blame[0] !== shiftID){
+      this.blame = [shiftID,0,0]
+    }
+    if(myAns === "u"){
+      this.blame[2] += 1
+      this.join1.blameShift(dict,"u",shiftID)
+      this.join2.blameShift(dict,"u",shiftID)
+      return("u")
     }
 
-    if(this.blame[0] === shiftID){
       this.blame[1] += 1
-    } else {
-      this.blame = [shiftID,1]
-    }
 
 
     let myResult = this.getDetailedResult(dict)
     if(this.not){
 
       if(myAns === true){ // if the answer shouldve been true, but both of them answered true
-        this.join1.blameShift(dict,false,shiftID)
+
+
+        // this.join1.blameShift(dict,false,shiftID)
+        // this.join2.blameShift(dict,false,shiftID)
+
+
+        this.join1.blameShift(dict,"u",shiftID)
         this.join2.blameShift(dict,false,shiftID)
+
       } else { // if the answer shouldve been false, someone answered didnt answer true
         if(myResult[0] === false){
           this.join1.blameShift(dict,true,shiftID)
         }
-        if(myResult[1] === true){
+        if(myResult[1] === false){
           this.join2.blameShift(dict,true,shiftID)
         }
       }
@@ -272,8 +320,15 @@ class andJunction{
           this.join2.blameShift(dict,true,shiftID)
         }
       } else { // if the answer shouldve been false: both answered true, so both were wrong
-        this.join1.blameShift(dict,false,shiftID)
+
+
+        // this.join1.blameShift(dict,false,shiftID)
+        // this.join2.blameShift(dict,false,shiftID)
+
+
+        this.join1.blameShift(dict,"u",shiftID)
         this.join2.blameShift(dict,false,shiftID)
+
       }
     }
 
