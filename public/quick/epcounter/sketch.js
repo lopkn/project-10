@@ -126,6 +126,25 @@ class comparer{
 
 
 			break;
+		case 7.5:
+
+			if(GTOGGLE){
+				return
+			}
+			// GTOGGLE = true
+			c = new liner(a,Height/2-30,5,7,0)
+			c.maxActLife = 10000000
+			c.vx += Math.random()*50-25
+			c.vy += Math.random()*50-25
+			c.lineLife = 12000
+			c.size += 10
+			c.counter = 18
+			c.lineUp = 0
+			c.myDat = 2
+			parr.push(c)
+
+
+			break;
 		case 5:
 			for(let i = 0; i < 10; i++){
 				c = new rollingBall(a,Height/2-30,Math.random()*4-2,Math.random()*4-2)
@@ -452,7 +471,7 @@ class liner{
 
 				this.lineUp += 1
 				if(this.lineUp%this.myDat == 0 && this.bounded === false){
-					let c = new liner(this.x,this.y,5,6,0)
+					let c = new liner(this.x,this.y,5,this.colType,0)
 					c.maxActLife = 10000000
 					c.vx = this.vx + Math.random()*100-50
 					c.vy = this.vy + Math.random()*100-50
@@ -533,6 +552,9 @@ function getCol(type,l,e){
 			break;
 		case 6:
 			ctx.strokeStyle = ("rgba(0,"+((1-a)*55+200)+",0,"+(l)+")")
+			break;
+		case 7:
+			ctx.strokeStyle = ("rgba("+((1-a)*55+200)+",0,0,"+(l)+")")
 			break;
 	}
 }
