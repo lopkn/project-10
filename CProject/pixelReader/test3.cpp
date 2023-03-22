@@ -2,6 +2,7 @@
 #include <SFML/Graphics.hpp>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
+#include <stdlib.h>
 
 using namespace std;
 
@@ -47,7 +48,7 @@ int main(int, char**)
 
 
 
-    sf::RenderWindow window(sf::VideoMode(RESOL+1, RESOL+1), "SFML works?");
+    sf::RenderWindow window(sf::VideoMode(RESOL, RESOL), "SFML works?");
     window.setFramerateLimit(60);
     sf::CircleShape shape(100.f);
     shape.setFillColor(sf::Color::Green);
@@ -66,6 +67,11 @@ int main(int, char**)
     r1.setFillColor(sf::Color(200,0,150,255));
     r1.setPosition(2,2);
 
+    sf::RectangleShape r2;
+    r2.setSize(sf::Vector2f(RESOL+12,RESOL+12));
+    r2.setFillColor(sf::Color(0,0,0,200));
+    r2.setPosition(-1,-1);
+
 
 text.setCharacterSize(24); // in pixels, not points!
 
@@ -75,9 +81,10 @@ text.setFillColor(sf::Color::Red);
     y = 0;
 
 
-
+    int overIntensity = 15;
 
     XColor MARR [RESOL*RESOL];
+    int CMARR [RESOL*RESOL][3]; 
     XColor NMARR [RESOL*RESOL];
 
     XImage *image2;
@@ -87,6 +94,11 @@ text.setFillColor(sf::Color::Red);
     int height = scrn->height;
     int width  = scrn->width;
 
+
+    int allpxMean = 0;
+    int frameCounter = 0;
+
+
     while (window.isOpen())
     {
         sf::Event event;
@@ -95,18 +107,20 @@ text.setFillColor(sf::Color::Red);
             if (event.type == sf::Event::Closed)
                 window.close();
         }
+        frameCounter ++;
 	float time = Clock.getElapsedTime().asSeconds();
 	
 	// if(time < 0.5){
         // continue;}
 	Clock.restart();
-        window.clear();
+        // window.clear();
+    window.draw(r2);
 
     int curPositionX = window.getPosition().x;
     int curPositionY = window.getPosition().y;
 
 	XFree (image2);
-    image2 = XGetImage (d, XRootWindow (d, XDefaultScreen (d)), curPositionX+RESOL+1, curPositionY+37, RESOL+1, RESOL+1, AllPlanes, XYPixmap);
+    image2 = XGetImage (d, XRootWindow (d, XDefaultScreen (d)), curPositionX+RESOL+10, curPositionY+37, RESOL, RESOL, AllPlanes, XYPixmap);
     // XColor tcol = getPix(2,2,image2);
     // XQueryColor (d, XDefaultColormap(d, XDefaultScreen (d)), &tcol);
     // cout << to_string(tcol.red)+"-"+to_string(tcol.green)+"-"+to_string(tcol.blue)+"\n";
@@ -120,16 +134,56 @@ text.setFillColor(sf::Color::Red);
     }
     XQueryColors (d, XDefaultColormap(d, XDefaultScreen (d)), NMARR, RESOL*RESOL);
 
+
+    int allpx = 0;
+
     for(y = 0; y < RESOL; y+=1){
-        for(x = 0; x < RESOL; x+=1){
+
+        int lineLengNum = 0;
+
+        for(x = 0; x < RESOL-1; x+=1){
             int coor = x+y*RESOL;
-            if(MARR[coor].red != NMARR[coor].red){
-                MARR[coor] = NMARR[coor];
-                r1.setPosition(x,y);
+            if(CMARR[coor] != abs(NMARR[coor].red/overIntensity)){
+                CMARR[coor] = abs(NMARR[coor].red/overIntensity);
+
+                lineLengNum++;
+                // r1.setPosition(x,y);
+                // window.draw(r1);
+            } else if(lineLengNum != 0){
+                r1.setSize(sf::Vector2f(lineLengNum,1));
+                r1.setPosition(x-lineLengNum,y);
+                allpx += lineLengNum;
+                lineLengNum = 0;
                 window.draw(r1);
             }
+
         }
+        x = RESOL-1;
+        int coor = x+y*RESOL;
+            if(CMARR[coor] != abs(NMARR[coor].red/overIntensity)){
+                CMARR[coor] = abs(NMARR[coor].red/overIntensity);
+                lineLengNum++;
+            }
+        if(lineLengNum != 0){
+                r1.setSize(sf::Vector2f(lineLengNum,1));
+                r1.setPosition(x-lineLengNum,y);
+                allpx += lineLengNum;
+                window.draw(r1);
+            }
     }
+    if(frameCounter%10 != 1){
+        allpxMean += allpx;
+    }
+
+    if(frameCounter % 10 == 0){
+        if(allpxMean/9 > RESOL*RESOL*0.4){
+            overIntensity+=RESOL*RESOL*100/abs(allpxMean/9);
+        } else if(overIntensity > 15){
+            overIntensity *= 0.7 ;
+        }
+        allpxMean = 0;
+    }
+
 
 
     // for(y = 0; y < 199; y+=1){
@@ -151,7 +205,7 @@ text.setFillColor(sf::Color::Red);
 
     // cout << (to_string(col.red/256)+"-"+to_string(col.green/256)+"-"+to_string(col.blue/256));
 
-	text.setString(to_string(time));
+	text.setString(to_string(time) + "-overintensity:" + to_string(overIntensity));
     // text.setString(to_string(col[0])+"-"+to_string(col[1])+"-"+to_string(col[2]));
     // cout << to_string(col[0])+"-"+to_string(col[1])+"-"+to_string(col[2]);
     // cout << "\n";
@@ -159,7 +213,8 @@ text.setFillColor(sf::Color::Red);
         // window.draw(shape);
         window.draw(text);
         window.draw(r1);
-        window.display();
+        if(frameCounter%10 != 1){
+        window.display();}
     }
 
     return 0;
