@@ -64,8 +64,18 @@ int main(int, char**)
 
     sf::RectangleShape r1;
     r1.setSize(sf::Vector2f(1,1));
-    r1.setFillColor(sf::Color(200,0,150,255));
+    r1.setFillColor(sf::Color(200,0,150,200));
     r1.setPosition(2,2);
+
+    sf::RectangleShape r3;
+    r3.setSize(sf::Vector2f(1,1));
+    r3.setFillColor(sf::Color(0,150,0,150));
+    r3.setPosition(2,2);
+
+    sf::RectangleShape r4;
+    r4.setSize(sf::Vector2f(1,1));
+    r4.setFillColor(sf::Color(0,0,150,100));
+    r4.setPosition(2,2);
 
     sf::RectangleShape r2;
     r2.setSize(sf::Vector2f(RESOL+12,RESOL+12));
@@ -81,7 +91,7 @@ text.setFillColor(sf::Color::Red);
     y = 0;
 
 
-    int overIntensity = 15;
+    int overIntensity = 415;
 
     XColor MARR [RESOL*RESOL];
     int CMARR [RESOL*RESOL][3]; 
@@ -108,18 +118,18 @@ text.setFillColor(sf::Color::Red);
                 window.close();
         }
         frameCounter ++;
-	float time = Clock.getElapsedTime().asSeconds();
-	
-	// if(time < 0.5){
+    float time = Clock.getElapsedTime().asSeconds();
+    
+    // if(time < 0.5){
         // continue;}
-	Clock.restart();
+    Clock.restart();
         // window.clear();
     window.draw(r2);
 
     int curPositionX = window.getPosition().x;
     int curPositionY = window.getPosition().y;
 
-	XFree (image2);
+    XFree (image2);
     image2 = XGetImage (d, XRootWindow (d, XDefaultScreen (d)), curPositionX+RESOL+10, curPositionY+37, RESOL, RESOL, AllPlanes, XYPixmap);
     // XColor tcol = getPix(2,2,image2);
     // XQueryColor (d, XDefaultColormap(d, XDefaultScreen (d)), &tcol);
@@ -139,47 +149,116 @@ text.setFillColor(sf::Color::Red);
 
     for(y = 0; y < RESOL; y+=1){
 
-        int lineLengNum = 0;
+        int lineLengNum[3] = {0,0,0};
 
         for(x = 0; x < RESOL-1; x+=1){
             int coor = x+y*RESOL;
-            if(CMARR[coor] != abs(NMARR[coor].red/overIntensity)){
-                CMARR[coor] = abs(NMARR[coor].red/overIntensity);
+            if(CMARR[coor][0] != abs(NMARR[coor].red/overIntensity)){            //RED
+                CMARR[coor][0] = abs(NMARR[coor].red/overIntensity);
 
-                lineLengNum++;
+                lineLengNum[0]++;
+                // continue;
                 // r1.setPosition(x,y);
                 // window.draw(r1);
-            } else if(lineLengNum != 0){
-                r1.setSize(sf::Vector2f(lineLengNum,1));
-                r1.setPosition(x-lineLengNum,y);
-                allpx += lineLengNum;
-                lineLengNum = 0;
+            } else if(lineLengNum[0] != 0){
+                r1.setSize(sf::Vector2f(lineLengNum[0],1));
+                r1.setPosition(x-lineLengNum[0],y);
+                allpx += lineLengNum[0];
+                lineLengNum[0] = 0;
                 window.draw(r1);
             }
+
+
+            // if(CMARR[coor][2] != abs(NMARR[coor].blue/overIntensity/4)){            //BLUE
+            //     CMARR[coor][2] = abs(NMARR[coor].blue/overIntensity/4);
+
+            //     lineLengNum[2]++;
+            //     // r1.setPosition(x,y);
+            //     // window.draw(r1);
+            // } else if(lineLengNum[2] != 0){
+            //     r4.setSize(sf::Vector2f(lineLengNum[2],1));
+            //     r4.setPosition(x-lineLengNum[2],y);
+            //     allpx += lineLengNum[2];
+            //     lineLengNum[2] = 0;
+            //     window.draw(r4);
+            // }
+
+            // if(CMARR[coor][1] != abs(NMARR[coor].green/overIntensity/16)){            //GREEN
+            //     CMARR[coor][1] = abs(NMARR[coor].green/overIntensity/16);
+
+            //     lineLengNum[1]++;
+            //     // continue;fundamental problem
+
+            // } else if(lineLengNum[1] != 0){
+            //     r3.setSize(sf::Vector2f(lineLengNum[1],1));
+            //     r3.setPosition(x-lineLengNum[1],y);
+            //     allpx += lineLengNum[1];
+            //     lineLengNum[1] = 0;
+            //     window.draw(r3);
+            // }
+
+
 
         }
         x = RESOL-1;
         int coor = x+y*RESOL;
-            if(CMARR[coor] != abs(NMARR[coor].red/overIntensity)){
-                CMARR[coor] = abs(NMARR[coor].red/overIntensity);
-                lineLengNum++;
+
+        if(CMARR[coor][0] != abs(NMARR[coor].red/overIntensity)){             //red
+                CMARR[coor][0] = abs(NMARR[coor].red/overIntensity);
+                lineLengNum[0]++;
             }
-        if(lineLengNum != 0){
-                r1.setSize(sf::Vector2f(lineLengNum,1));
-                r1.setPosition(x-lineLengNum,y);
-                allpx += lineLengNum;
+        if(lineLengNum[0] != 0){
+                r1.setSize(sf::Vector2f(lineLengNum[0],1));
+                r1.setPosition(x-lineLengNum[0],y);
+                allpx += lineLengNum[0];
                 window.draw(r1);
             }
+
+    
+        // if(CMARR[coor][2] != abs(NMARR[coor].blue/overIntensity/4)){             //blue
+        //         CMARR[coor][2] = abs(NMARR[coor].blue/overIntensity/4);
+        //         lineLengNum[2]++;
+        //     }
+        // if(lineLengNum[2] != 0){
+        //         r4.setSize(sf::Vector2f(lineLengNum[2],1));
+        //         r4.setPosition(x-lineLengNum[2],y);
+        //         allpx += lineLengNum[2];
+        //         window.draw(r4);
+        //     }
+
+        //     if(CMARR[coor][1] != abs(NMARR[coor].green/overIntensity/16)){             //green
+        //         CMARR[coor][1] = abs(NMARR[coor].green/overIntensity/16);
+        //         lineLengNum[1]++;
+        //     }
+        // if(lineLengNum[1] != 0){
+        //         r3.setSize(sf::Vector2f(lineLengNum[1],1));
+        //         r3.setPosition(x-lineLengNum[1],y);
+        //         allpx += lineLengNum[1];
+        //         window.draw(r3);
+        //     }
     }
+
+
+
+
     if(frameCounter%10 != 1){
         allpxMean += allpx;
     }
 
     if(frameCounter % 10 == 0){
-        if(allpxMean/9 > RESOL*RESOL*0.4){
-            overIntensity+=RESOL*RESOL*100/abs(allpxMean/9);
-        } else if(overIntensity > 15){
-            overIntensity *= 0.7 ;
+        if(allpxMean/9 > RESOL*RESOL*0.2){
+            // overIntensity+=RESOL*RESOL*100/abs(allpxMean/9);
+            // overIntensity *= RESOL*RESOL*2/abs(allpxMean/9);
+            overIntensity = overIntensity* 1.1 + RESOL*RESOL*100/abs(allpxMean/9);
+        } else if(overIntensity > 415){
+            overIntensity *= 0.9;
+
+            for(int D = 0; D < RESOL*RESOL; D++){
+                CMARR[D][0] = NMARR[D].red/overIntensity;
+                CMARR[D][1] = NMARR[D].green/overIntensity/16;
+                CMARR[D][2] = NMARR[D].blue/overIntensity/4;
+            }
+
         }
         allpxMean = 0;
     }
@@ -205,7 +284,7 @@ text.setFillColor(sf::Color::Red);
 
     // cout << (to_string(col.red/256)+"-"+to_string(col.green/256)+"-"+to_string(col.blue/256));
 
-	text.setString(to_string(time) + "-overintensity:" + to_string(overIntensity));
+    text.setString(to_string(time) + "-overintensity:" + to_string(overIntensity));
     // text.setString(to_string(col[0])+"-"+to_string(col[1])+"-"+to_string(col[2]));
     // cout << to_string(col[0])+"-"+to_string(col[1])+"-"+to_string(col[2]);
     // cout << "\n";
