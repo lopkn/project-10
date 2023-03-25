@@ -90,22 +90,27 @@ function draw() {
 }
 
 document.addEventListener("mousedown",(e)=>{
-  downEmulate({"x":mouseX,"y":mouseY})
+  let x = mouseX;
+  let y = mouseY;
+  for(let i = 0; i < 200; i++){
+  setTimeout(()=>{for(let j = 0; j < 200; j++){
+  downEmulate({"x":x+i-100,"y":y+j-100})
+  }},i) }
 })
 
-  let zoom = 400
+  let zoom = 800
 
 function downEmulate(rr){
 
   let tx = rr.x
   let ty = rr.y
 
-  let r = findOut({"x":(tx-Width/1.5)/zoom,"y":(ty-Height/2)/zoom},20)
+  let r = findOut({"x":(tx-Width/1.5)/zoom,"y":(ty-Height/2)/zoom},100)
   if(r == "nope"){
     // points.push({"x":(tx-Width/1.5)/150,"y":(ty-Height/2)/150,"col":"white"})
     let e = {"x":(tx-Width/1.5)/zoom,"y":(ty-Height/2)/zoom,"col":"white"}
     fill(e.col)
-    rect(e.x*zoom+Width/1.5,e.y*zoom+Height/2,5,5)
+    rect(e.x*zoom+Width/1.5,e.y*zoom+Height/2,1,1)
 
   } else {
   }

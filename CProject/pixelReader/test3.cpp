@@ -169,33 +169,33 @@ text.setFillColor(sf::Color::Red);
             }
 
 
-            // if(CMARR[coor][2] != abs(NMARR[coor].blue/overIntensity/4)){            //BLUE
-            //     CMARR[coor][2] = abs(NMARR[coor].blue/overIntensity/4);
+            if(CMARR[coor][2] != abs(NMARR[coor].blue/overIntensity/4)){            //BLUE
+                CMARR[coor][2] = abs(NMARR[coor].blue/overIntensity/4);
 
-            //     lineLengNum[2]++;
-            //     // r1.setPosition(x,y);
-            //     // window.draw(r1);
-            // } else if(lineLengNum[2] != 0){
-            //     r4.setSize(sf::Vector2f(lineLengNum[2],1));
-            //     r4.setPosition(x-lineLengNum[2],y);
-            //     allpx += lineLengNum[2];
-            //     lineLengNum[2] = 0;
-            //     window.draw(r4);
-            // }
+                lineLengNum[2]++;
+                // r1.setPosition(x,y);
+                // window.draw(r1);
+            } else if(lineLengNum[2] != 0){
+                r4.setSize(sf::Vector2f(lineLengNum[2],1));
+                r4.setPosition(x-lineLengNum[2],y);
+                allpx += lineLengNum[2];
+                lineLengNum[2] = 0;
+                window.draw(r4);
+            }
 
-            // if(CMARR[coor][1] != abs(NMARR[coor].green/overIntensity/16)){            //GREEN
-            //     CMARR[coor][1] = abs(NMARR[coor].green/overIntensity/16);
+            if(CMARR[coor][1] != abs(NMARR[coor].green/overIntensity/16)){            //GREEN
+                CMARR[coor][1] = abs(NMARR[coor].green/overIntensity/16);
 
-            //     lineLengNum[1]++;
-            //     // continue;fundamental problem
+                lineLengNum[1]++;
+                // continue;fundamental problem
 
-            // } else if(lineLengNum[1] != 0){
-            //     r3.setSize(sf::Vector2f(lineLengNum[1],1));
-            //     r3.setPosition(x-lineLengNum[1],y);
-            //     allpx += lineLengNum[1];
-            //     lineLengNum[1] = 0;
-            //     window.draw(r3);
-            // }
+            } else if(lineLengNum[1] != 0){
+                r3.setSize(sf::Vector2f(lineLengNum[1],1));
+                r3.setPosition(x-lineLengNum[1],y);
+                allpx += lineLengNum[1];
+                lineLengNum[1] = 0;
+                window.draw(r3);
+            }
 
 
 
@@ -215,27 +215,27 @@ text.setFillColor(sf::Color::Red);
             }
 
     
-        // if(CMARR[coor][2] != abs(NMARR[coor].blue/overIntensity/4)){             //blue
-        //         CMARR[coor][2] = abs(NMARR[coor].blue/overIntensity/4);
-        //         lineLengNum[2]++;
-        //     }
-        // if(lineLengNum[2] != 0){
-        //         r4.setSize(sf::Vector2f(lineLengNum[2],1));
-        //         r4.setPosition(x-lineLengNum[2],y);
-        //         allpx += lineLengNum[2];
-        //         window.draw(r4);
-        //     }
+        if(CMARR[coor][2] != abs(NMARR[coor].blue/overIntensity/4)){             //blue
+                CMARR[coor][2] = abs(NMARR[coor].blue/overIntensity/4);
+                lineLengNum[2]++;
+            }
+        if(lineLengNum[2] != 0){
+                r4.setSize(sf::Vector2f(lineLengNum[2],1));
+                r4.setPosition(x-lineLengNum[2],y);
+                allpx += lineLengNum[2];
+                window.draw(r4);
+            }
 
-        //     if(CMARR[coor][1] != abs(NMARR[coor].green/overIntensity/16)){             //green
-        //         CMARR[coor][1] = abs(NMARR[coor].green/overIntensity/16);
-        //         lineLengNum[1]++;
-        //     }
-        // if(lineLengNum[1] != 0){
-        //         r3.setSize(sf::Vector2f(lineLengNum[1],1));
-        //         r3.setPosition(x-lineLengNum[1],y);
-        //         allpx += lineLengNum[1];
-        //         window.draw(r3);
-        //     }
+            if(CMARR[coor][1] != abs(NMARR[coor].green/overIntensity/16)){             //green
+                CMARR[coor][1] = abs(NMARR[coor].green/overIntensity/16);
+                lineLengNum[1]++;
+            }
+        if(lineLengNum[1] != 0){
+                r3.setSize(sf::Vector2f(lineLengNum[1],1));
+                r3.setPosition(x-lineLengNum[1],y);
+                allpx += lineLengNum[1];
+                window.draw(r3);
+            }
     }
 
 
