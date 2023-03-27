@@ -998,7 +998,9 @@ onmousemove = function(e){mouseX = (e.clientX - 5*allzoom +scrollX)/allzoom; mou
 
 var sounds = {
   "music.R10":"tl-music/R10-4Discovery.mp3",
-  "music.R11":"tl-music/R11-2Menu.mp3"
+  "music.R11":"tl-music/R11-2Menu.mp3",
+  "music.R21":"tl-music/R21.mp3",
+  "music.R23":"tl-music/R23.mp3"
 }
 var currentSounds = []
 
