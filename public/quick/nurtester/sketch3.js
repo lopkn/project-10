@@ -338,6 +338,28 @@ class andJunction{
 }
 
 
+class andJunction2{
+
+  constructor(j1,j2){
+    this.join1 = j1;
+    this.join2 = j2;
+    this.not = false;
+  }
+
+  getResult(dict){
+    if(this.not){
+      return(!(this.join1.getResult(dict)&&this.join2.getResult(dict)))
+    }
+    return(this.join1.getResult(dict)&&this.join2.getResult(dict))
+  }
+
+  getDResult(dict){
+    return([this.not,this.join1.getResult(dict),this.join2.getResult(dict)])
+  }
+
+}
+
+
 class shell{
   constructor(c){
     this.x = 50
