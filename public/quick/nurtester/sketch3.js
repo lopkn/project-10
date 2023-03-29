@@ -354,9 +354,107 @@ class andJunction2{
   }
 
   getDResult(dict){
-    return([this.not,this.join1.getResult(dict),this.join2.getResult(dict)])
+    let jd1 = this.join1.getResult(dict)
+    let jd2 = this.join2.getResult(dict)
+    if(this.not){
+      return([this.not,jd1,jd2,!(jd1&&jd2)])
+    }
+    return([this.not,jd1,jd2,jd1&&jd2])
   }
 
+  GDRE(dict,exp){
+    let a = this.getDResult(dict)
+    if(this.not){ // TT results in F
+      if(exp === a[3]){ // the answer is correct
+        if(exp === false){ //the answer is false
+          return("ca") //they answered TT, anything else would flip it
+        } else {
+          if(a[1] === a[2]){
+            return("c")
+          }
+          return(a[2]?"cc1":"cc2")
+        }
+      } else { // the answer is not correct
+        if(exp === false){ //answer shouldve been false
+          if(a[1] === a[2]){ // they both answered false
+            return("w")
+          }
+          return(a[2]?"wc1":"wc2") // WRONG DEPENDENT? FIX LATER
+        } else { // the answer shouldve been true
+          return("wa")
+        }
+      }
+    } else {
+      if(exp === a[3]){ // the answer is correct
+        if(exp === true){ //the answer should be true
+          return("ca") //it gave TT, Changing 1 would flip
+        } else { // the answer is false
+          if(a[1] === a[2]){
+            return("c") // it gave FF, changing 2 would flip
+          }
+          return(a[2]?"cc1":"cc2") //FTTF dependent
+        }
+      } else { // the answer is wrong
+        if(exp === true){ //the answer should be true
+          if(a[1] === a[2]){
+            return("w") // it gave FF changing 2 would flip
+          }
+          return(a[2]?"wc1":"wc2") //FTTF
+        } else { //the answer should be false
+          return("wa") //it gave TT changing any one would flip
+        }
+      }
+    }
+  }
+
+  GDREA(set,ansSet,flip){
+    let ddct = {"w":0,"c":0,"wc1":0,"wc2":0,"cc1":0,"cc2":0,"wa":0,"ca":0}
+    set.forEach((e,i)=>{
+      let da = ansSet[i]
+
+      let a = this.GDRE(e,da)
+      ddct[a]++
+
+    })
+
+    let arb = [
+              ddct.c + ddct.cc2 + ddct.cc1 + ddct.ca,
+              ddct.c + ddct.wa + ddct.cc2 + ddct.wc1,
+              ddct.c + ddct.wa + ddct.wc2 + ddct.cc1,
+              ddct.w + ddct.cc2 + ddct.cc1 + ddct.wa
+              ]
+
+
+    arb.forEach((e,i)=>{
+      arb[i] /= set.length
+    })
+
+    if(flip !== true){
+    return([arb,ddct])} else {
+
+
+
+      return([arb,ddct])
+    }
+  }
+
+
+
+
+
+}
+
+
+function branch(stick,x,y){
+  if(y === 1){
+    x.join1 = new andJunction2(x,stick)
+    return
+  }
+  x.join2 = new andJunction2(x,stick)
+}
+
+function branchC(num,x,y){
+  branch(new dataFlipper(num),x,y)
 }
 
 
@@ -394,6 +492,8 @@ function draw(){
   ctx.fillRect(0,0,Width,Height)
   nur.forEach((e)=>{e.draw()})
 }
+
+let n4 = new andJunction2(n1,n2)
 
 setInterval(()=>{draw()},100)
 

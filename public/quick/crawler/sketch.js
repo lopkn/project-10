@@ -274,12 +274,12 @@ myCanvas.addEventListener('mousedown',(e)=>{
 
 function inputHere(e){
 	document.getElementById('input').style.visibility = "visible"
-			document.getElementById('input').style.left = Math.floor(mouseX) + "px"
-			document.getElementById('input').style.top = Math.floor(mouseY) + "px"
-			document.getElementById('input').x = mouseX
-			document.getElementById('input').y = mouseY
-			inputting = e
-			document.getElementById('input').focus();
+	document.getElementById('input').style.left = Math.floor(mouseX) + "px"
+	document.getElementById('input').style.top = Math.floor(mouseY) + "px"
+	document.getElementById('input').x = mouseX
+	document.getElementById('input').y = mouseY
+	inputting = e
+	document.getElementById('input').focus();
 }
 
 
