@@ -106,8 +106,7 @@ ctx = canvas.getContext("2d")
 
 
 
-let dataSet = [{"1":false,"2":false},{"1":true,"2":false},{"1":false,"2":true},{"1":true,"2":true}]
-let ansSet = [false,true,true,true]
+
 
 // let n6 = new nur()
 // let n7 = new nur()
@@ -407,6 +406,46 @@ class andJunction2{
     }
   }
 
+  GDREAF(set,ansSet){
+    let out = this.GDREA(set,ansSet,true)
+
+    // let ddct = {"w":0,"c":0,"wc1":0,"wc2":0,"cc1":0,"cc2":0,"wa":0,"ca":0}
+    // w, wc1, wc2, wa, c, cc1, cc2, ca
+    let supposed1 = []
+    let supposed2 = []
+    set.forEach((e,i)=>{
+      let da = ansSet[i]
+      let a = this.GDRE(e,da)
+
+      supposed1[i] = this.join1.getResult(e)
+      supposed2[i] = this.join2.getResult(e)
+
+      if(a[0] !== "c"){
+        console.log(a,i)
+      }
+
+
+      if(a == "w" || a === "wc1" || a === "wa"){
+        supposed1[i] = !supposed1[i]
+      }
+      if(a == "w" || a === "wc2"){
+        supposed2[i] = !supposed2[i]
+      }
+
+
+    })
+    console.log("===")
+
+    if(this.join1.GDREAF){
+      this.join1.GDREAF(set,supposed1)
+    }
+    if(this.join2.GDREAF){
+      this.join2.GDREAF(set,supposed2)
+    }
+
+
+  }
+
   GDREA(set,ansSet,flip){
     let ddct = {"w":0,"c":0,"wc1":0,"wc2":0,"cc1":0,"cc2":0,"wa":0,"ca":0}
     set.forEach((e,i)=>{
@@ -430,9 +469,27 @@ class andJunction2{
     })
 
     if(flip !== true){
-    return([arb,ddct])} else {
+      return([arb,ddct])
+    } else {
 
+      let org = 0.5
+      let choice = 0
 
+      arb.forEach((e,i)=>{
+        let dd = e
+        if(dd < 0.5){dd = 1-dd}
+        if(dd > org){choice = i;org = dd}
+      })
+      if(choice == 1){
+        this.join1.not = !this.join1.not
+      }
+      if(choice == 2){
+        this.join2.not = !this.join2.not
+      }
+      if(choice == 3){
+        this.join2.not = !this.join2.not
+        this.join1.not = !this.join1.not
+      }
 
       return([arb,ddct])
     }
@@ -493,7 +550,12 @@ function draw(){
   nur.forEach((e)=>{e.draw()})
 }
 
+let dataSet = [{"1":false,"2":false},{"1":true,"2":false},{"1":false,"2":true},{"1":true,"2":true}]
+let ansSet = [false,true,true,false]
+
+
 let n4 = new andJunction2(n1,n2)
+let n5 = new andJunction2(new andJunction2(n1,n2),new andJunction2(n1,n2))
 
 setInterval(()=>{draw()},100)
 
