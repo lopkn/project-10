@@ -121,6 +121,10 @@ class dataFlipper{
     this.blame = [0,0,0]
   }
 
+  export(){
+    return((this.not?"!":"+")+"{"+this.dataPoint+"}")
+  }
+
   getResult(dict){
     if(this.not){
       return(!dict[this.dataPoint])
@@ -496,7 +500,9 @@ class andJunction2{
   }
 
 
-
+  export(){
+    return((this.not?"!":"+") + "["+this.join1.export()+"&"+this.join2.export()+"]")
+  }
 
 
 }
@@ -547,7 +553,61 @@ nur[2].x = 300
 function draw(){
   ctx.fillStyle = "#000000"
   ctx.fillRect(0,0,Width,Height)
-  nur.forEach((e)=>{e.draw()})
+  // nur.forEach((e)=>{e.draw()})
+}
+  ctx.font = "bold 20px Courier New"
+
+function drawNode(arr){
+    ctx.beginPath();
+    ctx.fillStyle = "#ffffff"
+    ctx.arc(arr[1], arr[2], 20, 0, 2 * Math.PI);
+    ctx.fillStyle = this.col
+    ctx.fill()
+    ctx.stroke();
+    ctx.fillStyle = "#000000"
+    ctx.fillText(arr[0],arr[1]-10,arr[2]+3,50)
+    ctx.fillStyle = "#ffffff"
+}
+
+function drawExport(str){
+  let parseLvl = 0
+  let currentLevel = [100,100]
+  let nodeStack = []
+  let reading = true
+  let readValue = ""
+
+  for(let i = 0; i < str.length; i++){
+    let letter = str[i]
+
+    if(letter === "+"){
+      nodeStack.push(["+",currentLevel[0],currentLevel[1]])
+      currentLevel[1] += 50
+    } else if(letter === "!"){
+      nodeStack.push(["!",currentLevel[0],currentLevel[1]])
+      currentLevel[1] += 50
+    } else if(letter === "&"){
+      currentLevel[0] += 50
+    } else if(letter === "]"){
+      currentLevel[1] -= 50
+    } else if(letter === "["){
+      drawNode(nodeStack[nodeStack.length-1])
+      nodeStack.pop()
+    } else if(letter === "{"){
+      reading = true
+      readValue = ""
+    } else if(letter === "}"){
+      reading = false
+      nodeStack[nodeStack.length-1][0] += readValue
+      drawNode(nodeStack[nodeStack.length-1])
+      console.log(nodeStack[nodeStack.length-1])
+      currentLevel[1] -= 50
+      nodeStack.pop()
+    } else if(reading){
+      readValue += letter
+    }
+
+  }
+
 }
 
 let dataSet = [{"1":false,"2":false},{"1":true,"2":false},{"1":false,"2":true},{"1":true,"2":true}]
@@ -555,9 +615,9 @@ let ansSet = [false,true,true,false]
 
 
 let n4 = new andJunction2(n1,n2)
-let n5 = new andJunction2(new andJunction2(n1,n2),new andJunction2(n1,n2))
+let n5 = new andJunction2(new andJunction2(new dataFlipper(1),new dataFlipper(2)),new andJunction2(new dataFlipper(1),new dataFlipper(2)))
 
-setInterval(()=>{draw()},100)
+// setInterval(()=>{draw()},100)
 
 
 

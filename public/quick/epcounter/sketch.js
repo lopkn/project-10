@@ -107,6 +107,18 @@ class comparer{
 			c.size += 2
 			parr.push(c)
 			break;
+		case 8:
+			let a = setInterval(()=>{
+				c = new liner(a,Height/2-30,4,7,0)
+				c.maxActLife = 40
+				c.vx += Math.random()*216-108
+				c.vy += Math.random()*216-108
+				parr.push(c)
+			},500)
+
+			setTimeout(()=>{clearInterval(a)},100000)
+
+			break;
 		case 7:
 
 			if(GTOGGLE){
