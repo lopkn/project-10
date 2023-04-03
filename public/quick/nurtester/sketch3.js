@@ -425,7 +425,7 @@ class andJunction2{
       supposed2[i] = this.join2.getResult(e)
 
       if(a[0] !== "c"){
-        console.log(a,i)
+        // console.log(a,i)
       }
 
 
@@ -438,13 +438,14 @@ class andJunction2{
 
 
     })
-    console.log("===")
+    // console.log("===")
 
     if(this.join1.GDREAF){
       this.join1.GDREAF(set,supposed1)
     }
     if(this.join2.GDREAF){
       this.join2.GDREAF(set,supposed2)
+      console.log(supposed1,supposed2)
     }
 
 
@@ -599,7 +600,6 @@ function drawExport(str){
       reading = false
       nodeStack[nodeStack.length-1][0] += readValue
       drawNode(nodeStack[nodeStack.length-1])
-      console.log(nodeStack[nodeStack.length-1])
       currentLevel[1] -= 50
       nodeStack.pop()
     } else if(reading){
@@ -612,6 +612,7 @@ function drawExport(str){
 
 let dataSet = [{"1":false,"2":false},{"1":true,"2":false},{"1":false,"2":true},{"1":true,"2":true}]
 let ansSet = [false,true,true,false]
+let ansSet2 = [true,true,true,false]
 
 
 let n4 = new andJunction2(n1,n2)
