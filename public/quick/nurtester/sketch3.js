@@ -566,6 +566,9 @@ function drawNode(arr){
     ctx.fill()
     ctx.stroke();
     ctx.fillStyle = "#000000"
+    if(arr[0][0] == "!"){
+      ctx.fillStyle = "#ff0000"
+    }
     ctx.fillText(arr[0],arr[1]-10,arr[2]+3,50)
     ctx.fillStyle = "#ffffff"
 }
