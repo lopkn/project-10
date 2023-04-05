@@ -367,6 +367,11 @@ class andJunction2{
 
   GDRE(dict,exp){
     let a = this.getDResult(dict)
+
+    if(exp === "ANY"){
+      return("ANY")
+    }
+
     if(this.not){ // TT results in F
       if(exp === a[3]){ // the answer is correct
         if(exp === false){ //the answer is false
@@ -429,9 +434,11 @@ class andJunction2{
       }
 
 
-      if(a == "w" || a === "wc1" || a === "wa"){
+      if(a == "w" || a === "wa" || a === "wc1"){
         supposed1[i] = !supposed1[i]
       }
+
+
       if(a == "w" || a === "wc2"){
         supposed2[i] = !supposed2[i]
       }
@@ -616,6 +623,7 @@ function drawExport(str){
 let dataSet = [{"1":false,"2":false},{"1":true,"2":false},{"1":false,"2":true},{"1":true,"2":true}]
 let ansSet = [false,true,true,false]
 let ansSet2 = [true,true,true,false]
+let ansSet3 = [false,true,true,true]
 
 
 let n4 = new andJunction2(n1,n2)
@@ -624,6 +632,18 @@ let n5 = new andJunction2(new andJunction2(new dataFlipper(1),new dataFlipper(2)
 // setInterval(()=>{draw()},100)
 
 
+
+
+
+
+
+
+
+
+//Xa  : flipping anyone would cause the answer to become flipped
+//Xc1 : flipping ONLY the first joint will cause the answer to be flipped
+//Xc2 : flipping ONLY the second joint will cause the answer to be flipped
+//w/c : flipping both inputs will cause a flip
 
 
 
