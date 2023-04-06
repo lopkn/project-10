@@ -106,23 +106,6 @@ using namespace std;
   string x;
   cin >> x;
 
-//   const std::string stupids[30] = {
-//   "idiotic ",
-//   "moronic ","bloody unintelligent ","catastrophicalaly brain dead ",
-//   "vapid ","pig headed ","cretinous ","naive ","senseless ",
-//   // "homosexual ","gay",
-//   "degenerate ","aberrant ","delerious ","apeish ","puerile ","lame and dopey ", "uneducated ",
-//   "asinine ","unintellectual ","fallacious ","daft ","slow ", "obtuse ",
-//   "feeble ", "uneducated ","invalid ","inconsequential ","frivolous ","protohominid ","negligable ",
-//   "rancid","primal brained"
-// };
-
-// const std::string adverbs[20]={
-//   "trivially ","horrendously ","heinously ","erroneously ","notably ","exceptionally ",
-//   "abnormally ","abhorrently ","atrociously ","direly "," hideously ","dreadfully ","awfully ","harrowingly ",
-//   "unbelievably ","improbably ","implausibly ","disturbingly ","excrutiatingly ", "catastrophicalaly "
-// };
-
   string OU = mm(8);
 
   cout << OU << "\n";

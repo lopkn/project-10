@@ -633,17 +633,26 @@ let n5 = new andJunction2(new andJunction2(new dataFlipper(1),new dataFlipper(2)
 
 
 
-
-
-
-
-
-
-
 //Xa  : flipping anyone would cause the answer to become flipped
 //Xc1 : flipping ONLY the first joint will cause the answer to be flipped
 //Xc2 : flipping ONLY the second joint will cause the answer to be flipped
 //w/c : flipping both inputs will cause a flip
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

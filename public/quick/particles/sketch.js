@@ -119,6 +119,14 @@ document.getElementById("help").innerHTML =
 </br>
 </br>
 </br>
+</br> PARTICLE CATEGORIES (under construction)
+</br> Category A: Default particles
+</br> Category B: semi Default particles
+</br> Category C: universal decayers
+</br> Category D: viruses
+</br>
+</br>
+</br>
 </strong>
 `
 
