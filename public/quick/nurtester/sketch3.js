@@ -633,6 +633,7 @@ let n5 = new andJunction2(new andJunction2(new dataFlipper(1),new dataFlipper(2)
 
 
 
+
 //Xa  : flipping anyone would cause the answer to become flipped
 //Xc1 : flipping ONLY the first joint will cause the answer to be flipped
 //Xc2 : flipping ONLY the second joint will cause the answer to be flipped
@@ -641,19 +642,16 @@ let n5 = new andJunction2(new andJunction2(new dataFlipper(1),new dataFlipper(2)
 
 
 
+// key: 00, 10, 01, 11
+// ans: F   T   T   F
+// pv1: F   F   F   T
+// rst: C   W   W   W
+// FLIP
+// pv2: T   T   T   F
+// rst: W   C   C   C
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+// the answer to the key should be T. Both of the nodes below answered false. they should both be True
+//sKey: 00, 10, 01, 11
+// ans: T   aF  aF  T
 
 

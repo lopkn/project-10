@@ -421,22 +421,22 @@ document.addEventListener("keydown",(e)=>{
 
 	if(e.altKey || GI.functionals.alt){
 		e.preventDefault()
-	if(k == "ArrowUp"){
+	if(k == "ArrowUp" || k === "w"){
 		GI.cam[r[0]+"y"] -= r[1]
-	}else if(k == "ArrowDown"){
+	}else if(k == "ArrowDown" || k === "s"){
 		GI.cam[r[0]+"y"] += r[1]
-	}else if(k == "ArrowRight"){
+	}else if(k == "ArrowRight" || k === "d"){
 		GI.cam[r[0]+"x"] += r[1]
-	}else if(k == "ArrowLeft"){
+	}else if(k == "ArrowLeft" || k === "a"){
 		GI.cam[r[0]+"x"] -= r[1]
 	}}
-	if(k == "ArrowUp"){
+	if(k == "ArrowUp" || k === "w"){
 		GI.cam[r[0]+"y"] -= r[1]
-	}else if(k == "ArrowDown"){
+	}else if(k == "ArrowDown" || k === "s"){
 		GI.cam[r[0]+"y"] += r[1]
-	}else if(k == "ArrowRight"){
+	}else if(k == "ArrowRight" || k === "d"){
 		GI.cam[r[0]+"x"] += r[1]
-	}else if(k == "ArrowLeft"){
+	}else if(k == "ArrowLeft" || k === "a"){
 		GI.cam[r[0]+"x"] -= r[1]
 	}
 
