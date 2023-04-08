@@ -8,15 +8,15 @@ int main()
   int a;
   srand (time(NULL));
 
-  const std::string stupids[30] = {
+  const std::string stupids[31] = {
   "idiotic ",
-  "moronic ","bloody unintelligent ","catastrophicalaly brain dead ",
-  "vapid ","pig headed ","cretinous ","naive ","senseless ",
+  "moronic ","bloody unintelligent ","catastrophicalaly brain dead ",//4
+  "vapid ","pig headed ","cretinous ","naive ","senseless ",//9
   // "homosexual ","gay",
-  "degenerate ","aberrant ","delerious ","apeish ","puerile ","lame and dopey ", "uneducated ",
-  "asinine ","unintellectual ","fallacious ","daft ","slow ", "obtuse ",
-  "feeble ", "uneducated ","invalid ","inconsequential ","frivolous ","protohominid ","negligable ",
-  "rancid","primal brained"
+  "degenerate ","aberrant ","delerious ","apeish ","puerile ","lame and dopey ", "uneducated ",//16
+  "asinine ","unintellectual ","fallacious ","daft ","slow ", "obtuse ",//22
+  "feeble ", "uneducated ","invalid ","inconsequential ","frivolous ","protohominid ","negligable ",//29
+  "rancid","primal brained"//31
 };
 
 const std::string adverbs[20]={
