@@ -59,13 +59,13 @@ let starttime = 0
 let started = false
 
 
-
+let Actime = 10
 
 
 function bstop(){
 	let d = Date.now()
 	let diff = d-starttime
-	let diffratio = diff/10000
+	let diffratio = diff/1000/Actime
 
 	if(diffratio > 1.7 || diffratio < 0.3){
 		alert("what a loser")

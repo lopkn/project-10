@@ -114,8 +114,17 @@ text.setFillColor(sf::Color::Red);
         sf::Event event;
         while (window.pollEvent(event))
         {
-            if (event.type == sf::Event::Closed)
+            if (event.type == sf::Event::Closed){
                 window.close();
+            }
+
+            if (event.type == sf::Event::TextEntered)
+            {
+                if (event.text.unicode < 128){
+                    std::cout << "ASCII character typed: " << static_cast<char>(event.text.unicode) << std::endl;
+                }
+            }
+
         }
         frameCounter ++;
     float time = Clock.getElapsedTime().asSeconds();
