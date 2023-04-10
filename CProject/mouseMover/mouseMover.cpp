@@ -43,6 +43,10 @@ int main(int, char**)
     XSync(dpy, false);
     // XWarpPointer(dpy,None,root_window,0,0,0,0,400,100);
     XSync(dpy, false);
+
+    
+
+    
 }
 
 
