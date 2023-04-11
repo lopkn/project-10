@@ -24,6 +24,10 @@ document.addEventListener("keydown",(e)=>{
 let mouseIsPressed = false
 document.addEventListener("mousedown",()=>{mouseIsPressed = true
   draw()
+
+  manager.clicked()
+
+
   setTimeout(draw,10)
 })
 document.addEventListener("mouseup",()=>{mouseIsPressed = false
@@ -42,7 +46,7 @@ function draw() {
   rect(0,0,width,height)
 
 
-  manager.cardsAll[manager.currentCard].render()
+  manager.cardsAll[manager.currentCard].render(manager.currentlyFlipped)
 
 }
 
@@ -116,15 +120,14 @@ class card{
   constructor(question){
     this.question = question
     this.drawSteps = []
-    this.flipped = false;
     this.tags = [];
     this.id = -5;
   }
 
 
-  render(){
+  render(flipped){
 
-    if(this.flipped === false){
+    if(flipped === false){
       ctx.fillStyle = "#FFFFFF"
       ctx.textAlign = "center"
       ctx.font = "bold 20px Courier New"
@@ -145,10 +148,7 @@ class manager{
 
 
   static currentCard = 1;
-
-
-
-
+  static currentlyFlipped = false
 
   static idCount = 0;
   static giveId(){
@@ -180,6 +180,10 @@ class manager{
   // static getLowest(tag){
   //   let item = this.tagsAll[tag]
   // }
+
+  static clicked(){
+
+  }
 
 }
 
