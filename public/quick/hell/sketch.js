@@ -25,8 +25,11 @@ let mouseIsPressed = false
 document.addEventListener("mousedown",()=>{mouseIsPressed = true
   draw()
 
+  if(mouseX < D){
   manager.clicked()
-
+    } else {
+      manager.clickedOut()
+  }
 
   setTimeout(draw,10)
 })
@@ -117,9 +120,9 @@ init()
 
 
 class card{
-  constructor(question){
+  constructor(question,answer){
     this.question = question
-    this.drawSteps = []
+    this.drawSteps = [answer]
     this.tags = [];
     this.id = -5;
   }
@@ -132,14 +135,29 @@ class card{
       ctx.textAlign = "center"
       ctx.font = "bold 20px Courier New"
       ctx.fillText(this.question,D/2,D/2)
+      ctx.fillText(this.id,25,20)
       return;
     }
 
     this.drawSteps.forEach((e)=>{
       this.renderSteps(e)
     })
+      ctx.fillStyle = "#FFFFFF"
+      ctx.textAlign = "center"
+      ctx.font = "bold 20px Courier New"
+      ctx.fillText(this.id,25,20)
+
   }
 
+
+  renderSteps(x){
+    if(typeof(x) == "string"){
+      ctx.fillStyle = "#FFFFFF"
+      ctx.textAlign = "center"
+      ctx.font = "bold 20px Courier New"
+      ctx.fillText(x,D/2,D/2)
+    }
+  }
 
 }
 
@@ -161,10 +179,19 @@ class manager{
 
   }
 
-  static newCard(q,tags){
-    let newCard = new card(q)
+  static newCard(q,ans,tags){
+    let newCard = new card(q,ans)
     newCard.tags = tags
     newCard.id = this.giveId()
+
+
+    tags.forEach((e)=>{
+      if(this.tagsAll[e] === undefined){
+        this.tagsAll[e] = []
+      }
+      this.tagsAll[e].push(newCard.id)
+    })
+
     this.cardsAll[newCard.id] = newCard
   }
 
@@ -174,20 +201,40 @@ class manager{
 
 
   static tagsAll = {
-    "@element@":[]
+    // "@element@":[]
   }
 
-  // static getLowest(tag){
-  //   let item = this.tagsAll[tag]
-  // }
+  static getCardAmount(tag,dict){
+    dict[tag] = true
+    let amount = 0
+    this.tagsAll[tag].forEach((e)=>{
+      if(typeof(e) === "string" && e[0] === "@"){
+        if(dict[e] === true){
+          return;
+        }
+        amount += this.getCardAmount(e)
+        return;
+      }
+      amount += 1
+    })
+    return(amount)
+  }
+
+  static getRandomCard(tag){
+    
+  }
 
   static clicked(){
+    this.currentlyFlipped = !this.currentlyFlipped
+  }
+
+  static clickedOut(){
 
   }
 
 }
 
-manager.newCard("does this work?",["TEST"])
+manager.newCard("does this work?","yes",["TEST"])
 
 
 
