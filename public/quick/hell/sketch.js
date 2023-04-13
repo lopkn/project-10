@@ -167,7 +167,7 @@ class manager{
 
   static currentCard = 1;
   static currentlyFlipped = false
-
+  static currentTag = "@all@"
   static idCount = 0;
   static giveId(){
     this.idCount++;
@@ -191,6 +191,7 @@ class manager{
       }
       this.tagsAll[e].push(newCard.id)
     })
+    this.tagsAll["@all@"].push(newCard.id)
 
     this.cardsAll[newCard.id] = newCard
   }
@@ -201,10 +202,10 @@ class manager{
 
 
   static tagsAll = {
-    // "@element@":[]
+    "@all@":[]
   }
 
-  static getCardAmount(tag,dict){
+  static getCardAmount(tag,dict,arr){
     dict[tag] = true
     let amount = 0
     this.tagsAll[tag].forEach((e)=>{
@@ -212,16 +213,18 @@ class manager{
         if(dict[e] === true){
           return;
         }
-        amount += this.getCardAmount(e)
+        amount += this.getCardAmount(e,dict,arr).amount
         return;
       }
+      arr.push(e)
       amount += 1
     })
-    return(amount)
+    return({"amount":amount,"arr":arr})
   }
 
   static getRandomCard(tag){
-    
+    let arr = this.getCardAmount(tag,{},[]).arr
+    return(arr[Math.floor(Math.random()*arr.length)])
   }
 
   static clicked(){
@@ -229,12 +232,14 @@ class manager{
   }
 
   static clickedOut(){
-
+    this.currentlyFlipped = false;
+    this.currentCard = this.getRandomCard(this.currentTag)
   }
 
 }
 
 manager.newCard("does this work?","yes",["TEST"])
+manager.newCard("does this work too?","yes",["TEST"])
 
 
 
