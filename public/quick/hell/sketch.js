@@ -156,6 +156,8 @@ class card{
       ctx.textAlign = "center"
       ctx.font = "bold 20px Courier New"
       ctx.fillText(x,D/2,D/2)
+    } else {
+      x.draw()
     }
   }
 
@@ -194,6 +196,7 @@ class manager{
     this.tagsAll["@all@"].push(newCard.id)
 
     this.cardsAll[newCard.id] = newCard
+    return(newCard.id)
   }
 
 
@@ -236,6 +239,50 @@ class manager{
     this.currentCard = this.getRandomCard(this.currentTag)
   }
 
+
+
+
+  static enterEditingNew(){
+    
+  }
+
+
+}
+
+
+class T{//t for text
+  constructor(text){
+    this.text = text
+    this.color = "white"
+    this.font = "bold 20px Courier New"
+    this.x = D/2
+    this.y = D/2
+  }
+  draw(){
+      ctx.fillStyle = this.color
+      ctx.textAlign = "center"
+      ctx.font = this.font
+      ctx.fillText(this.text,this.x,this.y)
+  }
+}
+
+class S{//s for scribble
+  constructor(arr){
+    this.arr = arr
+    this.color = "white"
+    this.size = 20
+  }
+  draw(){
+    ctx.strokeStyle = this.color
+    let from = this.arr[0]
+    ctx.beginPath()
+    for(let i = 1; i < this.arr.length; i++){
+      ctx.moveTo(from[0],from[1])
+      from = this.arr[i]
+      ctx.moveTo(from[0],from[1])
+    }
+    ctx.stroke()
+  }
 }
 
 manager.newCard("does this work?","yes",["TEST"])
