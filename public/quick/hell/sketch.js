@@ -243,7 +243,9 @@ class manager{
 
 
   static enterEditingNew(){
-    
+    let question = prompt("question")
+    let answer = prompt("answer")
+    this.newCard(question,answer,[])
   }
 
 
