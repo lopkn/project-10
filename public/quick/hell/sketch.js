@@ -19,7 +19,10 @@ let mouseX = 0
 let mouseY = 0
 onmousemove = (e)=>{mouseX = (e.clientX); mouseY = (e.clientY)}
 document.addEventListener("keydown",(e)=>{
-  
+  let key = e.key
+  if(key == "n"){
+    manager.enterEditingNew()
+  }
 })
 let mouseIsPressed = false
 document.addEventListener("mousedown",()=>{mouseIsPressed = true
