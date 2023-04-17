@@ -295,5 +295,9 @@ manager.newCard("does this work too?","yes",["TEST"])
 
 
 
+manager.newCard("how to test for carboxylic acid (COOH)?","Add Na2CO3. Organic salt is formed and gas bubbles appear",["@chem@"])
+manager.newCard("how to test for alcohol?"," 1. add NA metal (gas bubbles)\n 2. add PCl5 (fumes)\n 3. add acid (fruity smell)",["@chem@"])
+manager.newCard("how to test for ketones?","2,4-DNP. Orange percipitate is formed",["@chem@"])
+manager.newCard("how to test for aldehydes?","tollens reagent. Silver mirror is formed on surface",["@chem@"])
 
 
