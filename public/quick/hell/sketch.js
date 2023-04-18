@@ -22,6 +22,14 @@ document.addEventListener("keydown",(e)=>{
   let key = e.key
   if(key == "n"){
     manager.enterEditingNew()
+  } else if(key === "t"){
+    let newTag = tagify(prompt("random shuffle tag?"))
+
+    if(manager.tagsAll[newTag] !== undefined && manager.tagsAll[newTag].length > 0){
+      manager.currentTag = newTag
+    } else {
+      alert("no tags named that")
+    }
   }
 })
 let mouseIsPressed = false
@@ -164,6 +172,10 @@ class card{
     }
   }
 
+  export(){
+    
+  }
+
 }
 
 
@@ -174,6 +186,10 @@ class manager{
   static currentlyFlipped = false
   static currentTag = "@all@"
   static idCount = 0;
+
+  static editing = false;
+  static editingStyle = "Text"
+
   static giveId(){
     this.idCount++;
     return(this.idCount)
@@ -184,8 +200,12 @@ class manager{
 
   }
 
-  static newCard(q,ans,tags){
+  static newCard(q,ans,atags){
     let newCard = new card(q,ans)
+    let tags = []
+    atags.forEach((e)=>{
+      tags.push(tagify(e))
+    })
     newCard.tags = tags
     newCard.id = this.giveId()
 
@@ -249,9 +269,55 @@ class manager{
     let question = prompt("question")
     let answer = prompt("answer")
     this.newCard(question,answer,[])
+    this.editing = true
   }
 
 
+  static createTextbox(x,y){
+    let inp = document.createElement("text")
+    inp.style.left = Math.floor(x)+"px"
+    inp.style.top = Math.floor(y)+"px"
+    inp.style.position: = "absolute"
+    inp.style.zIndex = 5;
+    inp.style.backgroundColor = "rgba(0,255,0,0.2)";
+    inp.style.color = "white";
+    inp.style.fontSize = "20px";
+    inp.style.borderColor = "rgb(0,0,255,0.2)"; 
+    inp.id = "input"
+
+    //inp. on pressed enter = ()=>{
+    // this.createTextboxEnd(inp)
+    //}
+
+    document.body.appendChild(inp)
+    //focus on inp
+
+
+
+  }
+
+  static createTextboxEnd(inp){
+
+    new T(inp.value)
+
+
+    inp.remove()
+  }
+
+  //option list stack. Get values, redbackground with an incorrect value.
+  //link values to eval???
+
+}
+
+
+function tagify(str){
+  if(str[0] !== "@"){
+    str = "@" + str
+  }
+  if(str[str.length-1] !== "@"){
+    str = str + "@"
+  }
+  return(str)
 }
 
 
@@ -299,5 +365,22 @@ manager.newCard("how to test for carboxylic acid (COOH)?","Add Na2CO3. Organic s
 manager.newCard("how to test for alcohol?"," 1. add NA metal (gas bubbles)\n 2. add PCl5 (fumes)\n 3. add acid (fruity smell)",["@chem@"])
 manager.newCard("how to test for ketones?","2,4-DNP. Orange percipitate is formed",["@chem@"])
 manager.newCard("how to test for aldehydes?","tollens reagent. Silver mirror is formed on surface",["@chem@"])
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
