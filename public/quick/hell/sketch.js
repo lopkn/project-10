@@ -368,14 +368,9 @@ manager.newCard("how to test for aldehydes?","tollens reagent. Silver mirror is 
 
 
 
-
-
-
-
-
-
-
-
+manager.newCard("trend of solubility of HYDROXIDE and SULFATE down group 2","Hydroxides: more soluable down\nSulfates: less soluable down",["@chem@"])
+manager.newCard("Flame colors: Li, Na, K, Rb, Cs, Cu, Pb\nCa, Sr, Ba","red, yellow, lilac, red, blue, blueGreen!, lame grey\nbrickRead, crimson red, green",["@chem@"])//seperate please
+manager.newCard("Halogens reactivity down the group Increases or decreases?","increases",["@chem@"])
 
 
 
