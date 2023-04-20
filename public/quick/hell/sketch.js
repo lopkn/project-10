@@ -374,8 +374,8 @@ manager.newCard("Halogens reactivity down the group Increases or decreases?","in
 
 
 
-
-
-
+manager.newCard("PLUS C WHEN INTEGRATING","REMEMBER TO PLUS C",["@math@"])
+manager.newCard("what is log a (x) in terms of log b ()?","log b (x) / log b (a)",["@math@"])
+manager.newCard("definition of segment of circle? whats the area of a segment?","segment = the semicircle\narea = 0.5 * r^2 * sin(angle)")
 
 
