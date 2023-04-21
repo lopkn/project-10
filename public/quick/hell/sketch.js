@@ -203,9 +203,10 @@ class manager{
   static newCard(q,ans,atags){
     let newCard = new card(q,ans)
     let tags = []
+    if(atags !== undefined){
     atags.forEach((e)=>{
       tags.push(tagify(e))
-    })
+    })} 
     newCard.tags = tags
     newCard.id = this.giveId()
 
@@ -277,7 +278,7 @@ class manager{
     let inp = document.createElement("text")
     inp.style.left = Math.floor(x)+"px"
     inp.style.top = Math.floor(y)+"px"
-    inp.style.position: = "absolute"
+    inp.style.position = "absolute"
     inp.style.zIndex = 5;
     inp.style.backgroundColor = "rgba(0,255,0,0.2)";
     inp.style.color = "white";
@@ -368,7 +369,7 @@ manager.newCard("how to test for aldehydes?","tollens reagent. Silver mirror is 
 
 
 
-manager.newCard("trend of solubility of HYDROXIDE and SULFATE down group 2","Hydroxides: more soluable down\nSulfates: less soluable down",["@chem@"])
+manager.newCard("trend of solubility of HYDROXIDE and SULFATE down group 2","Hydroxides: more soluable down\nSulfates: less soluable down (small big rule)",["@chem@"])
 manager.newCard("Flame colors: Li, Na, K, Rb, Cs, Cu, Pb\nCa, Sr, Ba","red, yellow, lilac, red, blue, blueGreen!, lame grey\nbrickRead, crimson red, green",["@chem@"])//seperate please
 manager.newCard("Halogens reactivity down the group Increases or decreases?","increases",["@chem@"])
 
@@ -377,5 +378,107 @@ manager.newCard("Halogens reactivity down the group Increases or decreases?","in
 manager.newCard("PLUS C WHEN INTEGRATING","REMEMBER TO PLUS C",["@math@"])
 manager.newCard("what is log a (x) in terms of log b ()?","log b (x) / log b (a)",["@math@"])
 manager.newCard("definition of segment of circle? whats the area of a segment?","segment = the semicircle\narea = 0.5 * r^2 * sin(angle)")
+
+
+
+
+
+manager.newCard("pV = nRT; unit of v?","m^3, (remember that T is in kelvin",["@chem@"])
+manager.newCard("steps to write ionic equations?","1. keep all elements that are not aqueous\n2. get charge of each atom\n3. cancel out useless elements",["@chem@"])
+manager.newCard("Mass spectrometer uses ___ field to accelerate\nand ____ field to deflect ions","electric field, magnetic field",["@chem@"])
+manager.newCard("explain first and second abnormally low IE","new orbital, opposite spin in P orbital",["@chem@"])
+manager.newCard("name all chemical bonding structures","Giant metallic, Giant covalent, Giant ionic, Simple molecular",["@chem@"])
+manager.newCard("Trend of IE across Period and Group","Period: Increase of effective nuclear charge\nGroup: Decrease because radius increase",["@chem@"])
+manager.newCard("Cation is + or -?","-; Cats die.",["@chem@"])
+manager.newCard("polarising power means","FOR CATION. increases with higher charge or smaller size.\nMore easily distort the bond",["@chem@"])
+manager.newCard("covalent bonding definition","electrostatic attraction between two nuclei and shared pairs of electrons",["@chem@"])
+manager.newCard("electronegativity definition","ability of an atom to attract bonding electrons",["@chem@"])
+manager.newCard("whats inbetween 'ionic bond' and 'covalent bond'","polar covalent bond",["@chem@"])
+manager.newCard("true or false dipole is from + to -","true",["@chem@"])
+manager.newCard("Molecule shapes from 2 bonds to 6 bonds","linear, trigonal planar, tetrahedral 109.5, bipyramidal 120-90\noctahedral 90",["@chem@"])
+manager.newCard("each pair of lone electrons decreases bond angle by","2-2.5",["@chem@"])
+manager.newCard("Boiling point for metal increase or decrease down a group","decrease",["@chem@"])
+manager.newCard("Hazard vs risk","Hazards have different risks. Same hazard: is acidic, different risks: can die or can burn",["@chem@"])
+manager.newCard("formula for acid rain","2NO + O2 - > 2NO2; H2O + NO2 -> HNO3 + HNO2",["@chem@"])
+manager.newCard("SO2 pollutant is formed in atmosphere by","impurities of burning coal; power station",["@chem@"])
+manager.newCard("CH4 + Cl2 (free radical sub) -> ","CH3Cl + HCl",["@chem@"])
+manager.newCard("Structural isomerism means","same molecular formula \n(chain, position, functional group[ketone <-> aldehydes])",["@chem@"])
+manager.newCard("Geometrical isomerism means","Cis trans. Cis == E, trans == Z",["@chem@"])
+manager.newCard("Alkene + bromine test. Qualitative or quantitative?","qualitative",["@chem@","@bio@"])
+manager.newCard("Major or minor product is determined by","Major: Hydrogen is connected to the carbon with lowest carbocation",["@chem@"])
+manager.newCard("State standard condition","100kPa, 298K, 1 mol",["@chem@"])//?
+manager.newCard("Enthalpy diagram Up or down is exothermic?","down",["@chem@"])//may delete for easy
+manager.newCard("Standard enthalpy change of FORMATION and ATOMIZATION","",["@chem@"])// NO ANSWER YET
+manager.newCard("Note: bond enthalpy is only in gasses form","Note: water has a lower density because the LATTICE is inefficient at packing",["@chem@"])//note
+manager.newCard("Name all intermolecular forces","London forces (includes instantaneous & induced dipoles)\npermanent dipole\nhydrogen bonds",["@chem@"])
+manager.newCard("Cr2O72- oxidation number equation","2x + 7(-2) = -2",["@chem@"])
+manager.newCard("Oxidation number and Electron number trend During OXIDATION","increase, decrease (opposite for reduction)",["@chem@"])
+manager.newCard("Cl2 + NaOH -> (balance and complete)","Cl2 + 2NaOH -> NaCl + NaOCl + H2O",["@chem@"])
+manager.newCard("Metals and Halogens are generally reducing or oxidizing agents?","metal: reducing agent\nhalogen: oxidizing agent",["@chem@"])
+manager.newCard("IONIC HALF EQUATIONS steps","1. Get reactants and product; 2. add Water to balance oxygen\n3. balance H+ from water; 4: balance charge with electrons",["@chem@"])// memorise products
+manager.newCard("Trend of reactivity of group 1","increase down the group, larger size: easier to lose electron",["@chem@"])
+manager.newCard("Metal oxide + water ->","metal hydroxide",["@chem@"])
+manager.newCard("Metal + water ->","metal oxide + H2",["@chem@"])
+
+
+
+manager.newCard("Group 1(cept lithium) and 2 thermal stability trend of NO3","",["@chem@"])//
+manager.newCard("","",["@chem@"])
+manager.newCard("","",["@chem@"])
+manager.newCard("","",["@chem@"])
+manager.newCard("","",["@chem@"])
+manager.newCard("","",["@chem@"])
+manager.newCard("","",["@chem@"])
+manager.newCard("","",["@chem@"])
+
+
+
+
+//cannot form hydrogen bond: insoluble
+
+
+
+// add soluability table
+// thermal decomposition 
+// Add questions for cycles 1 and 2
+
+
+//electrode test. KMno4 to which side?
+
+//research chlorine 9:6:1
+
+//whats quantum shell
+//hazard warning 
+//revise the 3 way hesses law crossing out equational thingy
+
+
+//nucleophile vs electrophile
+
+
+//that fuel table
+
+
+//CH4 + Cl -> HCl only? or H2
+
+//positive inductive effect?
+
+//when to use Cis or E
+//cis trans: only 1 different
+//E-Z: all 4 different 
+
+
+
+//test for equations Carbonates, sulfates, ammoniuk
+
+
+
+
+
+
+
+
+
+
+
 
 
