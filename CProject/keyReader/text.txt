@@ -1,0 +1,31 @@
+Device 'PixArt Microsoft USB Optical Mouse':
+	Device Enabled (173):	1
+	Coordinate Transformation Matrix (175):	1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000
+	libinput Natural Scrolling Enabled (310):	0
+	libinput Natural Scrolling Enabled Default (311):	0
+	libinput Scroll Methods Available (315):	0, 0, 1
+	libinput Scroll Method Enabled (316):	0, 0, 0
+	libinput Scroll Method Enabled Default (317):	0, 0, 0
+	libinput Button Scrolling Button (318):	2
+	libinput Button Scrolling Button Default (319):	2
+	libinput Button Scrolling Button Lock Enabled (320):	0
+	libinput Button Scrolling Button Lock Enabled Default (321):	0
+	libinput Middle Emulation Enabled (322):	0
+	libinput Middle Emulation Enabled Default (323):	0
+	libinput Accel Speed (324):	-0.750000
+	libinput Accel Speed Default (325):	0.000000
+	libinput Accel Profiles Available (326):	1, 1
+	libinput Accel Profile Enabled (327):	1, 0
+	libinput Accel Profile Enabled Default (328):	1, 0
+	libinput Left Handed Enabled (329):	0
+	libinput Left Handed Enabled Default (330):	0
+	libinput Send Events Modes Available (295):	1, 0
+	libinput Send Events Mode Enabled (296):	0, 0
+	libinput Send Events Mode Enabled Default (297):	0, 0
+	Device Node (298):	"/dev/input/event5"
+	Device Product ID (299):	1118, 203
+	libinput Drag Lock Buttons (312):	<no items>
+	libinput Horizontal Scroll Enabled (313):	1
+	libinput Scrolling Pixel Distance (331):	15
+	libinput Scrolling Pixel Distance Default (332):	15
+	libinput High Resolution Wheel Scroll Enabled (314):	1
