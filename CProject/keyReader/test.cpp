@@ -88,7 +88,10 @@ void myDo(int x,std::string s1){
 		system("xinput --set-prop \"PixArt Microsoft USB Optical Mouse\" \"libinput Accel Speed\" -0.75");
 		myPlay("bitMid.wav",s1);
 	} else if(x == 73 && inputMode == 1){
-		system("xinput --set-prop \"PixArt Microsoft USB Optical Mouse\" \"libinput Accel Speed\" 0");
+		system("xinput --set-prop \"PixArt Microsoft USB Optical Mouse\" \"libinput Accel Speed\" -0.3");
+		myPlay("bitHigh.wav",s1);
+	} else if(x == 77 && inputMode == 1){
+		system("xinput --set-prop \"PixArt Microsoft USB Optical Mouse\" \"libinput Accel Speed\" 1");
 		myPlay("bitHigh.wav",s1);
 	} else if(x == 55){
 		system("xinput --set-prop \"PixArt Microsoft USB Optical Mouse\" \"libinput Accel Speed\" -0.75");
