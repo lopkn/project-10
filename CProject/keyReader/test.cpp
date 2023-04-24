@@ -53,12 +53,8 @@ void INThandler(int x){
 // ~/.config/autokey/data/actual scripts/NOTE2.mp3 may be useful, nvm its wav
 
 void myPlay(std::string wavFile, std::string s1){
-	std::string s2 = "sudo -u '#" + s1 +"' XDG_RUNTIME_DIR=/run/user/"+s1+" aplay --quiet "+wavFile+" 2>/dev/null &";
-	// std::string s2 = "sudo -u '#" + s1 +"' XDG_RUNTIME_DIR=/run/user/"+s1+" aplay "+wavFile+" >>/dev/null 2>>/dev/null 0>>/dev/null &";
-	// std::string s2 = "{ sudo -u '#" + s1 +"' XDG_RUNTIME_DIR=/run/user/"+s1+" aplay -q "+wavFile+" >>/dev/null 2>>/dev/null; } &";
-	// std::string s2 = "sudo -u '#" + s1 +"' XDG_RUNTIME_DIR=/run/user/"+s1+" aplay -q "+wavFile+" &";
-	// std::string s2 = "echo a >>/dev/null 2>>/dev/null &";
-	// std::cout << s2 << std::endl;
+	std::string s2 = "dummy=$(sudo -u '#" + s1 +"' XDG_RUNTIME_DIR=/run/user/"+s1+" aplay "+wavFile+" 2>/dev/null) &";
+
 	int i3 = std::system(s2.c_str());
 }
 

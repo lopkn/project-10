@@ -7,7 +7,6 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <linux/input.h>
-// #include <sys/types.h>
 #include <unistd.h>
 #include <signal.h>
 #include <stdlib.h>
