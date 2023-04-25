@@ -58,14 +58,14 @@ void myPlay(std::string wavFile, std::string s1){
 	int i3 = std::system(s2.c_str());
 }
 
-void myMouseMove(){
+Display *d;
+Display *dpy; 
+Window root_window;
+
+
+void myMouseMove(int x, int y){
 	// XColor c;
-    Display *d = XOpenDisplay((char *) NULL);
-    Display *dpy = XOpenDisplay(0);
-
-
-    Window root_window;
-    root_window = XRootWindow(dpy, 0);
+    
 
     // XImage *image;
     // image = XGetImage (d, XRootWindow (d, XDefaultScreen (d)), 200, 200, 1, 1, AllPlanes, XYPixmap);
@@ -74,13 +74,30 @@ void myMouseMove(){
     // XQueryColor (d, XDefaultColormap(d, XDefaultScreen (d)), &c);
     // cout << c.red/256 << " " << c.green/256 << " " << c.blue/256 << "\n";
 
-    XWarpPointer(dpy,None,root_window,0,0,0,0,100,100);
+    // XWarpPointer(dpy,None,root_window,0,0,0,0,x,y);
+    // XSync(dpy, false);
+    // Display *dpyy = dpy;
+    XWarpPointer(dpy,None,root_window,0,0,0,0,x,y);
     XSync(dpy, false);
-    // XWarpPointer(dpy,None,root_window,0,0,0,0,400,100);
-    XSync(dpy, false);
+    XFlush(dpy);
 }
 
 
+int * myGetMousePos(){
+	int rootX,rootY,winX,winY;
+		Window root, child;
+		unsigned int mask;
+		XQueryPointer(dpy,DefaultRootWindow(dpy),&root,&child,
+                        &rootX,&rootY,&winX,&winY,&mask);
+	static int pos[2];
+	pos[0] = rootX;
+	pos[1] = rootY;
+	return(pos);
+}
+
+
+int keysounds = 0;
+//0: none, 1: apx
 
 void myDo(int x,std::string s1){
 
@@ -132,15 +149,51 @@ void myDo(int x,std::string s1){
 		myPlay("allClose.wav",s1);
 	}
 
-	else if(x == 18){
-		myPlay("bitLow.wav",s1);
-	}else if(x == 19){
-		std::cout << std::endl << "\n";
+	else if(x == 43 && keyRepeats%3 == 0){
+		keysounds++;
+		if(keysounds == 1){
+			myPlay("Asounds.wav",s1);
+		} else if(keysounds == 2){
+			keysounds = 0;
+		}
+	}
+
+
+	if(keysounds == 1){
+		if(x == 19){
+			myPlay("Reload.wav",s1);
+
+		}else if(x == 16 ){
+			myPlay("Qskill.wav",s1);
+		}else if(x == 44 ){
+			myPlay("Uskill.wav",s1);
+		}else if(x == 18){
+			myPlay("Interact.wav",s1);
+		}else if(x == 33){
+			myPlay("Fenemy.wav",s1);
+		}else if(x == 34){
+			myPlay("Grenade.wav",s1);
+		}else if(x == 45){
+			int * pos = myGetMousePos();
+			std::cout<<pos[0] << "-"<<pos[1]<<std::endl;
+			myMouseMove(pos[0], pos[1]+10);
+		}
 	}
 }
 
+
+
+
 int main()
 {
+
+	d = XOpenDisplay((char *) NULL);
+	dpy = XOpenDisplay(0);
+	root_window = XRootWindow(dpy, 0);
+
+
+	//xlib stuff
+
 		remove("text.txt");
 		system("xinput --list-props \"PixArt Microsoft USB Optical Mouse\" >> text.txt");
 		system("xinput --set-prop \"PixArt Microsoft USB Optical Mouse\" \"libinput Accel Speed\" -0.75");
@@ -162,7 +215,6 @@ int main()
                 if(ev.type == 1 && ev.value == 1){
 
                         myDo(ev.code,s1);
-                        // printf("Key: %i State: %i\n",ev.code,ev.value);
                         std::cout << "Key: " << ev.code << " State: " << ev.value << std::endl;
                 }
         }
