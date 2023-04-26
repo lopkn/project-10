@@ -34,6 +34,7 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
+#include <cstring>
 
 
 int inputMode = 0;
@@ -63,10 +64,11 @@ Display *dpy;
 Window root_window;
 
 
+
+
+
 void myMouseMove(int x, int y){
 	// XColor c;
-    
-
     // XImage *image;
     // image = XGetImage (d, XRootWindow (d, XDefaultScreen (d)), 200, 200, 1, 1, AllPlanes, XYPixmap);
     // c.pixel = XGetPixel (image, 0, 0);
@@ -82,7 +84,6 @@ void myMouseMove(int x, int y){
     XFlush(dpy);
 }
 
-
 int * myGetMousePos(){
 	int rootX,rootY,winX,winY;
 		Window root, child;
@@ -94,6 +95,139 @@ int * myGetMousePos(){
 	pos[1] = rootY;
 	return(pos);
 }
+
+XColor getPix(int x,int y, XImage *image){
+    XColor c;
+    c.pixel = XGetPixel(image,x,y);
+    return(c);
+}//pasted
+
+const int scanEach = 40;
+const int scanRes = scanEach*scanEach;
+const int scanEachH = scanEach/2;
+int ocor[scanRes];
+
+void myXset();
+
+int * myCorrecter(int narr[scanRes]){
+
+	
+	int adx = 0;
+	int ady = 0;
+
+	float currentMinima;
+	for(int z = 0; z < scanRes; z++){
+		currentMinima += abs(ocor[z]-narr[z]);
+	}
+	currentMinima = currentMinima/scanRes-1;
+
+	std::cout << int(currentMinima) << std::endl;
+
+	for(int dy = -scanEach+1; dy < scanEach; dy++){
+	for(int dx = -scanEach+1; dx < scanEach; dx++){
+		float ttdx = 0;
+		int processed = 0;
+		int position = -1;
+		for(int y = dx; y < dx+scanEach; y++){
+			for(int x = dy; x < dy+scanEach; x++){
+				position++;
+				int index = x+y*scanEach;
+				if(x < 0 || x >= scanEach || y < 0 || y >= scanEach){
+					continue;
+				}
+				processed++;
+				int tdx = abs(ocor[index]-narr[position]);
+				ttdx += tdx;
+			}
+		}
+		ttdx = ttdx/processed;
+		if(ttdx < currentMinima){
+			currentMinima = ttdx;
+			adx = dx;
+			ady = dy;
+		}
+		std::string cr;
+		if(int(ttdx/2) < 10 && int(ttdx/2) >= 0){
+			cr = std::to_string(int(ttdx/2));
+		} else if(ttdx < 0){
+			cr = "#";
+		} else {
+			cr = "@";
+		}
+		// std::cout<<cr;
+		}
+		// std::cout<<std::endl;
+	}
+	std::cout << "done: " << adx << " - " << ady << " <- " << currentMinima <<std::endl;
+	// memcpy(ocor,narr,sizeof(ocor));
+	static int pos[2];
+	pos[0] = adx;
+	pos[1] = ady;
+	return(pos);
+}
+
+void myXset(){
+	int * pos = myGetMousePos();
+	    XColor NMARR [scanRes];
+    XImage *image;
+    image = XGetImage (dpy, XRootWindow (dpy, XDefaultScreen (dpy)), pos[0]-scanEachH,pos[1]-scanEachH, scanEach, scanEach, AllPlanes, XYPixmap);
+    for(int y = 0; y < scanEach; y+=1){
+        for(int x = 0; x < scanEach; x+=1){
+            int coor = x+y*scanEach;
+            NMARR[coor] = getPix(x,y,image);
+        }
+    }
+
+    XFree (image);
+    XQueryColors (dpy, XDefaultColormap(dpy, XDefaultScreen (dpy)), NMARR, scanRes);
+    for(int z = 0; z < scanRes; z++){
+    	ocor[z] = NMARR[z].red/256;
+    }
+}
+
+int * myXaim(){
+	int * pos = myGetMousePos();
+	int dx = 0;
+	int dy = 0;
+	int x = 0;
+	int y = 0;
+    XColor NMARR [scanRes];
+	XColor c;
+    XImage *image;
+    image = XGetImage (dpy, XRootWindow (dpy, XDefaultScreen (dpy)), pos[0]-scanEachH,pos[1]-scanEachH, scanEach, scanEach, AllPlanes, XYPixmap);
+
+    for(y = 0; y < scanEach; y+=1){
+        for(x = 0; x < scanEach; x+=1){
+            int coor = x+y*scanEach;
+            NMARR[coor] = getPix(x,y,image);
+        }
+    }
+
+    XFree (image);
+
+
+    XQueryColors (dpy, XDefaultColormap(dpy, XDefaultScreen (dpy)), NMARR, scanRes);
+    std::cout << NMARR[0].red/256 << "\n";
+    int ncor[scanRes];
+    for(int z = 0; z < scanRes; z++){
+    	ncor[z] = NMARR[z].red/256;
+    }
+
+    int * poss = myCorrecter(ncor);
+    dx = poss[0];
+    dy = poss[1];
+
+
+    static int moveRel[2];
+    moveRel[0] = dx;
+    moveRel[1] = dy;
+	myMouseMove(pos[0]-dx, pos[1]-dy);
+	myXset();
+	return(moveRel);
+}
+
+
+
 
 
 int keysounds = 0;
@@ -147,6 +281,8 @@ void myDo(int x,std::string s1){
 		system("xinput --set-prop \"PixArt Microsoft USB Optical Mouse\" \"Coordinate Transformation Matrix\" 1 0 0 0 1 0 0 0 1");
 		extraSlow = false;
 		myPlay("allClose.wav",s1);
+	} else if(x == 50){
+		myPlay("map.wav",s1);
 	}
 
 	else if(x == 43 && keyRepeats%3 == 0){
@@ -175,8 +311,11 @@ void myDo(int x,std::string s1){
 			myPlay("Grenade.wav",s1);
 		}else if(x == 45){
 			int * pos = myGetMousePos();
-			std::cout<<pos[0] << "-"<<pos[1]<<std::endl;
-			myMouseMove(pos[0], pos[1]+10);
+			std::cout<<"xMousepos: "<<pos[0] << "-"<<pos[1]<<std::endl;
+			myXaim();
+			// myMouseMove(pos[0], pos[1]+10);
+		} else if(x == 46){
+			myXset();
 		}
 	}
 }
@@ -191,7 +330,9 @@ int main()
 	dpy = XOpenDisplay(0);
 	root_window = XRootWindow(dpy, 0);
 
-
+	for(int z = 0; z < scanRes; z++){
+	ocor[z] = 0;
+	}
 	//xlib stuff
 
 		remove("text.txt");
@@ -225,3 +366,5 @@ int main()
 
 //Eye tracker aim bot
 //suvat equa
+
+//g++ -c test.cpp -lX11&&g++ test.o -o sfml-app -lsfml-graphics -lsfml-window -lsfml-system -lX11 && sudo ./sfml-app
