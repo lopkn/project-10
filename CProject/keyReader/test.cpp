@@ -309,6 +309,8 @@ void myDo(int x,std::string s1){
 			myPlay("Fenemy.wav",s1);
 		}else if(x == 34){
 			myPlay("Grenade.wav",s1);
+		}else if(x == 47){
+			myPlay("Punch.wav",s1);
 		}else if(x == 45){
 			int * pos = myGetMousePos();
 			std::cout<<"xMousepos: "<<pos[0] << "-"<<pos[1]<<std::endl;
