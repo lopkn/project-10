@@ -3,22 +3,6 @@
 #include <chrono> 
 #include <thread>
 
-// void mySleep(int x){
-// 	std::this_thread::sleep_for(std::chrono::milliseconds(x));
-// }
-
-
-// int main(){
-// 	system("aplay ding2.wav &");
-// 	system("aplay ding2.wav &");
-// 	system("aplay ding2.wav &");
-
-
-// 	mySleep(500);
-// 	system("aplay ding3.wav");
-// 	std::cout << "done \n\n";
-// 	return 0;
-// }
 
 #include <stdio.h>
 #include <fcntl.h>
@@ -28,14 +12,20 @@
 #include <signal.h>
 #include <stdlib.h>
 
-
+#include <map>
 #include <iostream>
 #include <SFML/Graphics.hpp>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
 #include <cstring>
-
+std::string s1;
+std::map<int, char> keyMap = {
+    { 16, 'q' },{ 17, 'w' },{ 57, ' ' },
+    { 18, 'e' },{ 19, 'r' },{ 20, 't' },{ 21, 'y' },{ 22, 'u' },{ 23, 'i' },{ 24, 'o' },{ 25, 'p' },
+    { 30, 'a' },{ 31, 's' },{ 32, 'd' },{ 33, 'f' },{ 34, 'g' },{ 35, 'h' },{ 36, 'j' },{ 37, 'k' },{ 38, 'l' },
+    { 44, 'z' },{ 45, 'x' },{ 46, 'c' },{ 47, 'v' },{ 48, 'b' },{ 49, 'n' },{ 50, 'm' },
+};
 
 int inputMode = 0;
 int lastKey = 400;
@@ -64,7 +54,33 @@ Display *dpy;
 Window root_window;
 
 
-
+std::string myHeatDict(int val){
+	if(val < 0){
+		return(" ");
+	} else if(val < 26){
+		return("1");
+	} else if(val < 52){
+		return("2");
+	} else if(val < 77){
+		return("3");
+	} else if(val < 103){
+		return("4");
+	} else if(val < 128){
+		return("5");
+	} else if(val < 154){
+		return("6");
+	} else if(val < 180){
+		return("7");
+	} else if(val < 205){
+		return("8");
+	} else if(val < 231){
+		return("9");
+	} else if(val < 256){
+		return(".");
+	} else {
+		return("#");
+	}
+}
 
 
 void myMouseMove(int x, int y){
@@ -102,15 +118,34 @@ XColor getPix(int x,int y, XImage *image){
     return(c);
 }//pasted
 
-const int scanEach = 40;
+const int scanEach = 50;
 const int scanRes = scanEach*scanEach;
 const int scanEachH = scanEach/2;
 int ocor[scanRes];
+
+bool mapLocked = true;
+
+bool heatMapToggle = false;
+
+void myHeatMap(int narr[scanRes]){
+	std::cout << "\n====HEATMAP====\n";
+	for(int j = 0; j < scanEach; j++){
+		std::cout<<"\n";
+		for(int i = 0; i < scanEach; i++){
+			std::cout << myHeatDict(narr[i+j*scanEach]);
+		}
+	}
+	std::cout << "\n====HEATMAP====\n";
+}
+
 
 void myXset();
 
 int * myCorrecter(int narr[scanRes]){
 
+	if(heatMapToggle){
+		myHeatMap(narr);
+	}
 	
 	int adx = 0;
 	int ady = 0;
@@ -146,20 +181,13 @@ int * myCorrecter(int narr[scanRes]){
 			adx = dx;
 			ady = dy;
 		}
-		std::string cr;
-		if(int(ttdx/2) < 10 && int(ttdx/2) >= 0){
-			cr = std::to_string(int(ttdx/2));
-		} else if(ttdx < 0){
-			cr = "#";
-		} else {
-			cr = "@";
-		}
+		
 		// std::cout<<cr;
+
 		}
 		// std::cout<<std::endl;
 	}
-	std::cout << "done: " << adx << " - " << ady << " <- " << currentMinima <<std::endl;
-	// memcpy(ocor,narr,sizeof(ocor));
+	std::cout << "done: " << adx << " - " << ady << " <- " << currentMinima << std::endl;
 	static int pos[2];
 	pos[0] = adx;
 	pos[1] = ady;
@@ -221,19 +249,67 @@ int * myXaim(){
     static int moveRel[2];
     moveRel[0] = dx;
     moveRel[1] = dy;
-	myMouseMove(pos[0]-dx, pos[1]-dy);
-	myXset();
+	myMouseMove(pos[0]-dy, pos[1]-dx);
+	if(!mapLocked){
+	myXset();}
 	return(moveRel);
+}
+
+bool commanding = false;
+
+std::string commandString = "";
+
+void executeCommandString(std::string str){
+	if(str == "heatmap"){
+		heatMapToggle = !heatMapToggle;
+		std::cout << ">heatmap toggled\n";
+		return;
+	} else if(str == "maplock"){
+		mapLocked = !mapLocked;
+		std::cout << ">maplock toggled\n";
+		return;
+	}
+}
+
+void endCommand(){
+	std::cout << "\n==command==\n"+commandString+"\n will be executed \n";
+
+	executeCommandString(commandString);
+
+
+	commandString = "";
+	commanding = false;
+	myPlay("execute.wav",s1);
+}
+void updateCommand(int x){
+	if(keyMap.count(x)){
+		commandString = commandString + keyMap[x];
+	} else if(x == 14){
+		commandString.pop_back();
+	} else if(x == 28){
+		endCommand();
+	} else if(x == 53){
+		std::cout << "\n>=command=<\n>"+commandString+"<\n";
+	}
+
 }
 
 
 
 
-
-int keysounds = 0;
+int keysounds = 1;
 //0: none, 1: apx
 
 void myDo(int x,std::string s1){
+
+
+	if(x == 98){ 
+		std::cout << "returning to mouse speed -0.75\n";
+		system("xinput --set-prop \"PixArt Microsoft USB Optical Mouse\" \"libinput Accel Speed\" -0.75");
+		system("xinput --set-prop \"PixArt Microsoft USB Optical Mouse\" \"Coordinate Transformation Matrix\" 1 0 0 0 1 0 0 0 1");
+		myPlay("allClose.wav",s1);
+		exit(0);
+	}
 
 	if(lastKey == x){
 		keyRepeats += 1;
@@ -241,6 +317,24 @@ void myDo(int x,std::string s1){
 		keyRepeats = 1;
 		lastKey = x;
 	}
+
+	if(x == 53 && keyRepeats%3==0){
+		if(commanding){
+			endCommand();
+		} else {
+			myPlay("command.wav",s1);
+			std::cout << "\n entering command mode \n";
+			commanding = true;
+		}
+		return;
+	}
+
+	if(commanding){
+		myPlay("command"+std::to_string((rand()%5)+1)+".wav",s1);
+		updateCommand(x);
+		return;
+	}
+
 	if(x == 78){
 		if(inputMode != 1){
 		myPlay("ding2.wav",s1);
@@ -249,12 +343,6 @@ void myDo(int x,std::string s1){
 			inputMode = 0;
 			myPlay("close.wav",s1);
 		}
-	} else if(x == 98){ 
-		std::cout << "returning to mouse speed -0.75\n";
-		system("xinput --set-prop \"PixArt Microsoft USB Optical Mouse\" \"libinput Accel Speed\" -0.75");
-		system("xinput --set-prop \"PixArt Microsoft USB Optical Mouse\" \"Coordinate Transformation Matrix\" 1 0 0 0 1 0 0 0 1");
-		myPlay("allClose.wav",s1);
-		exit(0);
 	} else if(x == 74){
 		if(extraSlow == false){
 			extraSlow = true;
@@ -324,7 +412,6 @@ void myDo(int x,std::string s1){
 
 
 
-
 int main()
 {
 
@@ -342,7 +429,7 @@ int main()
 		system("xinput --set-prop \"PixArt Microsoft USB Optical Mouse\" \"libinput Accel Speed\" -0.75");
 		std::cout << "properties file updated.\nmouse speed set to -0.75 (default value 22apr23)" << std::endl;
 		std::cout << "Parent Process id : " << getpid() << std::endl;
-		std::string s1 = std::getenv("SUDO_UID");
+		s1 = std::getenv("SUDO_UID");
 		std::cout << s1 << " is the current user ID \n\n";
 
 		// int G = system("sudo -u '#1002' XDG_RUNTIME_DIR=/run/user/1002 aplay start.wav >>/dev/null 2>>/dev/null &");
