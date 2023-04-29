@@ -4393,8 +4393,8 @@ class shooter2C{
 			l = 50
 		} else if(t == "ghol" ||t == "bhol"||t == "whol"){
 			l = 50
-		} else if(t == "metl"){
-			l *= 2
+		} else if(t == "metl" || t == "mbdy"){
+			l *= 3
 		} else if(t == "rflc"){
 			l *= 4
 		}
