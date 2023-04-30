@@ -12,7 +12,7 @@ Device 'PixArt Microsoft USB Optical Mouse':
 	libinput Button Scrolling Button Lock Enabled Default (321):	0
 	libinput Middle Emulation Enabled (322):	0
 	libinput Middle Emulation Enabled Default (323):	0
-	libinput Accel Speed (324):	0.323529
+	libinput Accel Speed (324):	-0.750000
 	libinput Accel Speed Default (325):	0.000000
 	libinput Accel Profiles Available (326):	1, 1
 	libinput Accel Profile Enabled (327):	1, 0

@@ -285,7 +285,9 @@ void updateCommand(int x){
 	if(keyMap.count(x)){
 		commandString = commandString + keyMap[x];
 	} else if(x == 14){
-		commandString.pop_back();
+		if(commandString.length() > 0){
+			commandString.pop_back();
+		}
 	} else if(x == 28){
 		endCommand();
 	} else if(x == 53){
