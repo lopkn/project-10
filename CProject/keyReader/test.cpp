@@ -41,6 +41,13 @@ void INThandler(int x){
         exit(0);
 }
 
+uint64_t timeNow(){
+	using namespace std::chrono;
+    uint64_t ms = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+    return(ms);
+}
+
+
 // ~/.config/autokey/data/actual scripts/NOTE2.mp3 may be useful, nvm its wav
 
 void myPlay(std::string wavFile, std::string s1){
@@ -267,6 +274,9 @@ void executeCommandString(std::string str){
 	} else if(str == "maplock"){
 		mapLocked = !mapLocked;
 		std::cout << ">maplock toggled\n";
+		return;
+	} else if(str == "time.now()" || str == "tnow" || str == "time.now" || str == "time"){
+		std::cout << ">time now is: " << timeNow() << std::endl;
 		return;
 	}
 }
