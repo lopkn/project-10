@@ -262,6 +262,8 @@ int * myXaim(){
 	return(moveRel);
 }
 
+
+
 bool commanding = false;
 
 std::string commandString = "";
@@ -284,8 +286,14 @@ void executeCommandString(std::string str){
 void endCommand(){
 	std::cout << "\n==command==\n"+commandString+"\n will be executed \n";
 
+
 	executeCommandString(commandString);
 
+	// while(commandString.length > 0){
+	// 	std:string executeSnippet;
+	// 	executeCommandString(executeSnippet);
+	// 	commandString.erase(0,executeSnippet.length)
+	// }
 
 	commandString = "";
 	commanding = false;
@@ -422,7 +430,9 @@ void myDo(int x,std::string s1){
 	}
 }
 
-
+void repeating(){
+	return;
+}
 
 int main()
 {
@@ -450,7 +460,7 @@ int main()
         struct input_event ev;
 
         signal(SIGINT, INThandler);
-
+        uint64_t lastTime = timeNow();
         while(1)
         {
                 read(device,&ev, sizeof(ev));
@@ -458,6 +468,11 @@ int main()
 
                         myDo(ev.code,s1);
                         std::cout << "Key: " << ev.code << " State: " << ev.value << std::endl;
+                }
+                uint64_t now = timeNow();
+                if(now != lastTime){
+					lastTime = now;
+					repeating();
                 }
         }
         return 0;
