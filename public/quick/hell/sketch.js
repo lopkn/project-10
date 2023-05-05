@@ -453,7 +453,7 @@ manager.newCard("","",["@chem@"])
 
 
 //nucleophile vs electrophile
-
+//nucleophilic must have lone pair
 
 //that fuel table
 
@@ -461,6 +461,8 @@ manager.newCard("","",["@chem@"])
 //CH4 + Cl -> HCl only? or H2
 
 //positive inductive effect?
+
+
 
 //when to use Cis or E
 //cis trans: only 1 different
