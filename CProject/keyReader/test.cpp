@@ -24,7 +24,8 @@ std::map<int, char> keyMap = {
     { 16, 'q' },{ 17, 'w' },{ 57, ' ' },
     { 18, 'e' },{ 19, 'r' },{ 20, 't' },{ 21, 'y' },{ 22, 'u' },{ 23, 'i' },{ 24, 'o' },{ 25, 'p' },
     { 30, 'a' },{ 31, 's' },{ 32, 'd' },{ 33, 'f' },{ 34, 'g' },{ 35, 'h' },{ 36, 'j' },{ 37, 'k' },{ 38, 'l' },
-    { 44, 'z' },{ 45, 'x' },{ 46, 'c' },{ 47, 'v' },{ 48, 'b' },{ 49, 'n' },{ 50, 'm' },
+    { 44, 'z' },{ 45, 'x' },{ 46, 'c' },{ 47, 'v' },{ 48, 'b' },{ 49, 'n' },{ 50, 'm' },{ 26, '[' },{ 27, ']' }
+
 };
 
 int inputMode = 0;
@@ -58,8 +59,9 @@ void myPlay(std::string wavFile, std::string s1){
 
 Display *d;
 Display *dpy; 
+int dfs;
 Window root_window;
-
+Window w;
 
 std::string myHeatDict(int val){
 	if(val < 0){
@@ -205,7 +207,7 @@ void myXset(){
 	int * pos = myGetMousePos();
 	    XColor NMARR [scanRes];
     XImage *image;
-    image = XGetImage (dpy, XRootWindow (dpy, XDefaultScreen (dpy)), pos[0]-scanEachH,pos[1]-scanEachH, scanEach, scanEach, AllPlanes, XYPixmap);
+    image = XGetImage (dpy, XRootWindow (dpy, dfs), pos[0]-scanEachH,pos[1]-scanEachH, scanEach, scanEach, AllPlanes, XYPixmap);
     for(int y = 0; y < scanEach; y+=1){
         for(int x = 0; x < scanEach; x+=1){
             int coor = x+y*scanEach;
@@ -214,7 +216,7 @@ void myXset(){
     }
 
     XFree (image);
-    XQueryColors (dpy, XDefaultColormap(dpy, XDefaultScreen (dpy)), NMARR, scanRes);
+    XQueryColors (dpy, XDefaultColormap(dpy, dfs), NMARR, scanRes);
     for(int z = 0; z < scanRes; z++){
     	ocor[z] = NMARR[z].red/256;
     }
@@ -229,7 +231,7 @@ int * myXaim(){
     XColor NMARR [scanRes];
 	XColor c;
     XImage *image;
-    image = XGetImage (dpy, XRootWindow (dpy, XDefaultScreen (dpy)), pos[0]-scanEachH,pos[1]-scanEachH, scanEach, scanEach, AllPlanes, XYPixmap);
+    image = XGetImage (dpy, XRootWindow (dpy, dfs), pos[0]-scanEachH,pos[1]-scanEachH, scanEach, scanEach, AllPlanes, XYPixmap);
 
     for(y = 0; y < scanEach; y+=1){
         for(x = 0; x < scanEach; x+=1){
@@ -241,7 +243,7 @@ int * myXaim(){
     XFree (image);
 
 
-    XQueryColors (dpy, XDefaultColormap(dpy, XDefaultScreen (dpy)), NMARR, scanRes);
+    XQueryColors (dpy, XDefaultColormap(dpy, dfs), NMARR, scanRes);
     std::cout << NMARR[0].red/256 << "\n";
     int ncor[scanRes];
     for(int z = 0; z < scanRes; z++){
@@ -434,12 +436,42 @@ void repeating(){
 	return;
 }
 
+void myThread(){
+	while(true){
+		std::cout << "hello?\n";
+	    XFillRectangle(dpy,w,DefaultGC(dpy,dfs),20,20,10,10);
+
+
+
+		std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	}
+}
+
+void myScreen(){
+	XEvent e;
+	while(1){
+
+	        	XNextEvent(dpy,&e);
+	        	if(e.type == Expose){
+	        		XFillRectangle(dpy,w,DefaultGC(dpy,dfs),20,20,10,10);
+	        	}
+	}
+}
+
 int main()
 {
 
-	d = XOpenDisplay((char *) NULL);
-	dpy = XOpenDisplay(0);
+	// d = XOpenDisplay((char *) NULL);
+	dpy = XOpenDisplay(NULL);
 	root_window = XRootWindow(dpy, 0);
+
+	//test
+	dfs = XDefaultScreen(dpy);
+	w = XCreateSimpleWindow(dpy, XRootWindow(dpy,dfs),10,10,100,100,1,BlackPixel(dpy,dfs),WhitePixel(dpy,dfs));
+	XSelectInput(dpy,w, ExposureMask | KeyPressMask);
+	XMapWindow(dpy,w);
+	//test
+
 
 	for(int z = 0; z < scanRes; z++){
 	ocor[z] = 0;
@@ -460,26 +492,42 @@ int main()
         struct input_event ev;
 
         signal(SIGINT, INThandler);
-        uint64_t lastTime = timeNow();
+        // uint64_t lastTime = timeNow();
+
+
+        XEvent e;
+        std::thread mtrd(myThread);
+        std::thread mtrd2(myScreen);
         while(1)
         {
+
+
+        	
+	        	// XNextEvent(dpy,&e);
+        		std::cout<<"beraerear\n";
                 read(device,&ev, sizeof(ev));
+
                 if(ev.type == 1 && ev.value == 1){
 
                         myDo(ev.code,s1);
                         std::cout << "Key: " << ev.code << " State: " << ev.value << std::endl;
                 }
-                uint64_t now = timeNow();
-                if(now != lastTime){
-					lastTime = now;
-					repeating();
-                }
+
+		     //            uint64_t now = timeNow();
+		     //            if(now != lastTime){
+							// lastTime = now;
+							// repeating();
+			    //     		// XFillRectangle(dpy,w,DefaultGC(dpy,dfs),20,20,10,10);
+		     //            }
+
         }
+        XCloseDisplay(dpy);
         return 0;
 }
 
 
 
+//matrix correlation
 //Eye tracker aim bot
 //suvat equa
 
