@@ -1,2 +1,4 @@
+node_modules
+process.env
 errorlog.json
 disc/token.json

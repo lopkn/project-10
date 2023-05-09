@@ -1458,19 +1458,24 @@ function fastdistance(x1,y1,x2,y2) {
 
 ///////////////////////////////////////////////////////////////
 var express = require('express');
+var bodyParser = require('body-parser');
 var app = express();
 var server = app.listen(3000);
 app.use(express.static('public'));
-
+app.use(bodyParser.urlencoded({ extended: true }));
+app.post('/post-test', (req, res) => {
+    console.log('Got body:', req.body);
+    res.sendStatus(200);
+})
 console.log("server is opened")
 // console.log(perSeed.noise2D(0.2,0,0))
 // console.log("seeds: " + JSON.stringify(perSeeds))
 
 
 var socket = require('socket.io');
-
-var ranStrucLists = {"GoldOre":["gold ore vein1",1,"gold ore vein2",1,"gold ore vein3",1,"gold ore vein4",1]}
 var io = socket(server);
+var ranStrucLists = {"GoldOre":["gold ore vein1",1,"gold ore vein2",1,"gold ore vein3",1,"gold ore vein4",1]}
+
 INFUNCS.io = io
 
 re8L.io = io

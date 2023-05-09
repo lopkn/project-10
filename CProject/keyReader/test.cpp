@@ -504,7 +504,7 @@ int main()
 
         	
 	        	// XNextEvent(dpy,&e);
-        		std::cout<<"beraerear\n";
+        		// std::cout<<"beraerear\n";
                 read(device,&ev, sizeof(ev));
 
                 if(ev.type == 1 && ev.value == 1){
