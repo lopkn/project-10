@@ -32,6 +32,10 @@ std::map<int, char> keyMap = {
 //71 72 73
 
 
+void recoilReader(){
+
+}
+
 struct AST{
 	bool firedown = false;
 	int downMode = 1;
@@ -376,16 +380,13 @@ void myDo(int x,std::string s1){
 		// 	inputMode = 0;
 		// 	myPlay("close.wav",s1);
 		// }
-		inputMode = -1;
-	} else if(x == 74){
-		if(extraSlow == false){
-			extraSlow = true;
-			myPlay("bitExtLow.wav",s1);
-			system("xinput --set-prop \"PixArt Microsoft USB Optical Mouse\" \"Coordinate Transformation Matrix\" 0.1 0 0 0 0.1 0 0 0 1");
-		} else {
-			extraSlow = false;
-			system("xinput --set-prop \"PixArt Microsoft USB Optical Mouse\" \"Coordinate Transformation Matrix\" 1 0 0 0 1 0 0 0 1");
+		if(keyRepeats%2 == 0){
+			myPlay("close.wav",s1);
+			inputMode = 0;
+			return;
 		}
+		myPlay("AUDinput.wav",s1);
+		inputMode = -1;
 	} else if(inputMode == -1){
 		if(x == 82){
 			inputMode = 0;
@@ -396,6 +397,18 @@ void myDo(int x,std::string s1){
 		}if(x == 80){
 			inputMode = 2;
 			myPlay("AUDrecoil.wav",s1);
+		} else {
+			inputMode = 0;
+			return;
+		}
+	} else if(x == 74){
+		if(extraSlow == false){
+			extraSlow = true;
+			myPlay("bitExtLow.wav",s1);
+			system("xinput --set-prop \"PixArt Microsoft USB Optical Mouse\" \"Coordinate Transformation Matrix\" 0.1 0 0 0 0.1 0 0 0 1");
+		} else {
+			extraSlow = false;
+			system("xinput --set-prop \"PixArt Microsoft USB Optical Mouse\" \"Coordinate Transformation Matrix\" 1 0 0 0 1 0 0 0 1");
 		}
 	} else if(inputMode == 1){
 		 if(x == 71){
@@ -418,6 +431,17 @@ void myDo(int x,std::string s1){
 		myPlay("allClose.wav",s1);
 	} else if(x == 50){
 		myPlay("map.wav",s1);
+	} else if(inputMode == 2){//antirecoil 
+		if(x == 71){
+			myPlay("AUDprowler.wav",s1);
+			mast.downMode = 1;
+		} else if(x == 72){
+			myPlay("AUDnemesis.wav",s1);
+			mast.downMode = 2;
+		} else if(x == 73){
+			myPlay("AUDprowler.wav",s1);
+			mast.downMode = 3;
+		}
 	}
 
 	else if(x == 43 && keyRepeats%3 == 0){
@@ -455,6 +479,8 @@ void myDo(int x,std::string s1){
 			mast.firedown = !mast.firedown;
 			if(mast.firedown){
 				myPlay("ding2.wav",s1);
+			} else {
+				myPlay("AUDmanual.wav",s1);
 			}
 		}
 	} else if(keysounds == 0){
