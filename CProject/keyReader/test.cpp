@@ -27,6 +27,17 @@ std::map<int, char> keyMap = {
     { 44, 'z' },{ 45, 'x' },{ 46, 'c' },{ 47, 'v' },{ 48, 'b' },{ 49, 'n' },{ 50, 'm' },{ 26, '[' },{ 27, ']' }
 
 };
+//79 80 81
+//75 76 77
+//71 72 73
+
+
+struct AST{
+	bool firedown = false;
+	int downMode = 1;
+	//prowler, nemesis
+};
+AST mast;
 
 int inputMode = 0;
 int lastKey = 400;
@@ -358,13 +369,14 @@ void myDo(int x,std::string s1){
 	}
 
 	if(x == 78){
-		if(inputMode != 1){
-		myPlay("ding2.wav",s1);
-			inputMode = 1;
-		} else {
-			inputMode = 0;
-			myPlay("close.wav",s1);
-		}
+		// if(inputMode != 1){
+		// myPlay("ding2.wav",s1);
+		// 	inputMode = 1;
+		// } else {
+		// 	inputMode = 0;
+		// 	myPlay("close.wav",s1);
+		// }
+		inputMode = -1;
 	} else if(x == 74){
 		if(extraSlow == false){
 			extraSlow = true;
@@ -374,18 +386,31 @@ void myDo(int x,std::string s1){
 			extraSlow = false;
 			system("xinput --set-prop \"PixArt Microsoft USB Optical Mouse\" \"Coordinate Transformation Matrix\" 1 0 0 0 1 0 0 0 1");
 		}
-	} else if(x == 71 && inputMode == 1){
-		myPlay("bitLow.wav",s1);
-		system("xinput --set-prop \"PixArt Microsoft USB Optical Mouse\" \"libinput Accel Speed\" -1");
-	} else if(x == 72 && inputMode == 1){
-		system("xinput --set-prop \"PixArt Microsoft USB Optical Mouse\" \"libinput Accel Speed\" -0.75");
-		myPlay("bitMid.wav",s1);
-	} else if(x == 73 && inputMode == 1){
-		system("xinput --set-prop \"PixArt Microsoft USB Optical Mouse\" \"libinput Accel Speed\" -0.3");
-		myPlay("bitHigh.wav",s1);
-	} else if(x == 77 && inputMode == 1){
-		system("xinput --set-prop \"PixArt Microsoft USB Optical Mouse\" \"libinput Accel Speed\" 1");
-		myPlay("bitHigh.wav",s1);
+	} else if(inputMode == -1){
+		if(x == 82){
+			inputMode = 0;
+			myPlay("close.wav",s1);
+		}if(x == 79){
+			inputMode = 1;
+			myPlay("ding2.wav",s1);
+		}if(x == 80){
+			inputMode = 2;
+			myPlay("AUDrecoil.wav",s1);
+		}
+	} else if(inputMode == 1){
+		 if(x == 71){
+			myPlay("bitLow.wav",s1);
+			system("xinput --set-prop \"PixArt Microsoft USB Optical Mouse\" \"libinput Accel Speed\" -1");
+		} else if(x == 72){
+			system("xinput --set-prop \"PixArt Microsoft USB Optical Mouse\" \"libinput Accel Speed\" -0.75");
+			myPlay("bitMid.wav",s1);
+		} else if(x == 73){
+			system("xinput --set-prop \"PixArt Microsoft USB Optical Mouse\" \"libinput Accel Speed\" -0.3");
+			myPlay("bitHigh.wav",s1);
+		} else if(x == 77 ){
+			system("xinput --set-prop \"PixArt Microsoft USB Optical Mouse\" \"libinput Accel Speed\" 1");
+			myPlay("bitHigh.wav",s1);
+		}
 	} else if(x == 55){
 		system("xinput --set-prop \"PixArt Microsoft USB Optical Mouse\" \"libinput Accel Speed\" -0.75");
 		system("xinput --set-prop \"PixArt Microsoft USB Optical Mouse\" \"Coordinate Transformation Matrix\" 1 0 0 0 1 0 0 0 1");
@@ -421,7 +446,19 @@ void myDo(int x,std::string s1){
 			myPlay("Grenade.wav",s1);
 		}else if(x == 47){
 			myPlay("Punch.wav",s1);
-		}else if(x == 45){
+		} else if(x == 45){
+			// for(int i = 0; i < 5; i++){
+			// 	std::this_thread::sleep_for(std::chrono::milliseconds(50));
+			// 	int * pos = myGetMousePos();
+			// 	myMouseMove(pos[0], pos[1]+7);
+			// }
+			mast.firedown = !mast.firedown;
+			if(mast.firedown){
+				myPlay("ding2.wav",s1);
+			}
+		}
+	} else if(keysounds == 0){
+		if(x == 45){
 			int * pos = myGetMousePos();
 			std::cout<<"xMousepos: "<<pos[0] << "-"<<pos[1]<<std::endl;
 			myXaim();
@@ -436,27 +473,36 @@ void repeating(){
 	return;
 }
 
-void myThread(){
+void myMouseThread(){
+	char devname[] = "/dev/input/event5";
+    int device = open(devname, O_RDONLY);
+    struct input_event ev;
+
+    signal(SIGINT, INThandler);
 	while(true){
-		std::cout << "hello?\n";
-	    XFillRectangle(dpy,w,DefaultGC(dpy,dfs),20,20,10,10);
+		read(device,&ev, sizeof(ev));
 
+        if(ev.type == EV_KEY && ev.value == 1 && ev.code == BTN_MOUSE && mast.firedown){
+            std::cout << "dragging down" << "\n";
+            for(int i = 0; i < 4; i++){
+				std::this_thread::sleep_for(std::chrono::milliseconds(50));
+				int * pos = myGetMousePos();
+				myMouseMove(pos[0], pos[1]+7);
+			}
+        }
 
-
-		std::this_thread::sleep_for(std::chrono::milliseconds(500));
 	}
 }
+// void myScreen(){
+// 	XEvent e;
+// 	while(1){
 
-void myScreen(){
-	XEvent e;
-	while(1){
-
-	        	XNextEvent(dpy,&e);
-	        	if(e.type == Expose){
-	        		XFillRectangle(dpy,w,DefaultGC(dpy,dfs),20,20,10,10);
-	        	}
-	}
-}
+// 	        	XNextEvent(dpy,&e);
+// 	        	if(e.type == Expose){
+// 	        		XFillRectangle(dpy,w,DefaultGC(dpy,dfs),20,20,10,10);
+// 	        	}
+// 	}
+// }
 
 int main()
 {
@@ -467,14 +513,14 @@ int main()
 
 	//test
 	dfs = XDefaultScreen(dpy);
-	w = XCreateSimpleWindow(dpy, XRootWindow(dpy,dfs),10,10,100,100,1,BlackPixel(dpy,dfs),WhitePixel(dpy,dfs));
-	XSelectInput(dpy,w, ExposureMask | KeyPressMask);
-	XMapWindow(dpy,w);
+		// w = XCreateSimpleWindow(dpy, XRootWindow(dpy,dfs),10,10,100,100,1,BlackPixel(dpy,dfs),WhitePixel(dpy,dfs));
+		// XSelectInput(dpy,w, ExposureMask | KeyPressMask);
+		// XMapWindow(dpy,w);
 	//test
 
 
 	for(int z = 0; z < scanRes; z++){
-	ocor[z] = 0;
+		ocor[z] = 0;
 	}
 	//xlib stuff
 
@@ -496,8 +542,7 @@ int main()
 
 
         XEvent e;
-        std::thread mtrd(myThread);
-        std::thread mtrd2(myScreen);
+        std::thread mtrd(myMouseThread);
         while(1)
         {
 
@@ -530,5 +575,6 @@ int main()
 //matrix correlation
 //Eye tracker aim bot
 //suvat equa
+//link to different files
 
 //g++ -c test.cpp -lX11&&g++ test.o -o sfml-app -lsfml-graphics -lsfml-window -lsfml-system -lX11 && sudo ./sfml-app
