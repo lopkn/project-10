@@ -30,15 +30,17 @@ std::map<int, char> keyMap = {
 //79 80 81
 //75 76 77
 //71 72 73
+void recoilReader(int xarr[100][3], int size);
 
 
-void recoilReader(){
-
-}
 
 struct AST{
 	bool firedown = false;
 	int downMode = 1;
+	int prowlerAST[100][3] = {{50,0,7},{50,0,7},{50,0,7},{50,0,7}};
+	int nemesisAST[100][3] = {{50,0,5},{50,0,5},{50,0,6}};
+	// int carAST[100][3] = {{64,1,8},{64,1,7},{64,1,7},{64,1,7},{64,2,7},{64,2,7},{64,2,7},{64,2,7},{64,1,1},{64,0,1},{64,0,1},{64,-2,1},{64,-2,3},{64,-2,3},{64,0,3},{64,0,1},{64,0,1},{64,0,1},{64,0,1},{64,0,1}};
+	int carAST[100][3] = {{64,1,6},{64,2,7},{64,3,7},{64,4,8},{64,3,7},{64,2,7},{64,2,7},{65,0,7},{64,-1,6},{65,-2,5},{65,-2,3},{65,-2,3},{65,-2,3}};
 	//prowler, nemesis
 };
 AST mast;
@@ -391,10 +393,10 @@ void myDo(int x,std::string s1){
 		if(x == 82){
 			inputMode = 0;
 			myPlay("close.wav",s1);
-		}if(x == 79){
+		} else if(x == 79){
 			inputMode = 1;
 			myPlay("ding2.wav",s1);
-		}if(x == 80){
+		} else if(x == 80){
 			inputMode = 2;
 			myPlay("AUDrecoil.wav",s1);
 		} else {
@@ -498,7 +500,17 @@ void myDo(int x,std::string s1){
 void repeating(){
 	return;
 }
-
+void recoilReader(int xarr[100][3],int size){
+	// int rw = (sizeof(xarr[0])/(sizeof(int)));
+	for(int i = 0; i < size; i++){
+			if(xarr[i][0] == 0){
+				break;
+			}
+			std::this_thread::sleep_for(std::chrono::milliseconds(xarr[i][0]));
+			int * pos = myGetMousePos();
+			myMouseMove(pos[0]+xarr[i][1], pos[1]+xarr[i][2]);
+	}
+}
 void myMouseThread(){
 	char devname[] = "/dev/input/event5";
     int device = open(devname, O_RDONLY);
@@ -509,12 +521,27 @@ void myMouseThread(){
 		read(device,&ev, sizeof(ev));
 
         if(ev.type == EV_KEY && ev.value == 1 && ev.code == BTN_MOUSE && mast.firedown){
+
+        	long long int t1 = (ev.time.tv_sec*1000000+ev.time.tv_usec);
+        	// std::cout << t1 << "\n";
+        	// sleep(5);
+        	long long int t2 = timeNow()*1000;
+        	// std::cout << t2 << "\n";
+        	// std::cout << abs(t1-t2) << "\n";
+        	// std::cout<< EV_REL << "\n";
+        	if(abs(t1-t2) > 500000){
+        		std::cout<< "kill1\n";
+        		continue;
+        	}
+
             std::cout << "dragging down" << "\n";
-            for(int i = 0; i < 4; i++){
-				std::this_thread::sleep_for(std::chrono::milliseconds(50));
-				int * pos = myGetMousePos();
-				myMouseMove(pos[0], pos[1]+7);
-			}
+   //          for(int i = 0; i < 4; i++){
+			// 	std::this_thread::sleep_for(std::chrono::milliseconds(50));
+			// 	int * pos = myGetMousePos();
+			// 	myMouseMove(pos[0], pos[1]+7);
+			// }
+			int size = (sizeof(mast.nemesisAST)/(sizeof(mast.nemesisAST[0])));
+			recoilReader(mast.nemesisAST,100);
         }
 
 	}
