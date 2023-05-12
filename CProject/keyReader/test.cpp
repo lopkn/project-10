@@ -41,6 +41,8 @@ struct AST{
 	int nemesisAST[100][3] = {{50,0,5},{50,0,5},{50,0,6}};
 	// int carAST[100][3] = {{64,1,8},{64,1,7},{64,1,7},{64,1,7},{64,2,7},{64,2,7},{64,2,7},{64,2,7},{64,1,1},{64,0,1},{64,0,1},{64,-2,1},{64,-2,3},{64,-2,3},{64,0,3},{64,0,1},{64,0,1},{64,0,1},{64,0,1},{64,0,1}};
 	int carAST[100][3] = {{64,1,6},{64,2,7},{64,3,7},{64,4,8},{64,3,7},{64,2,7},{64,2,7},{65,0,7},{64,-1,6},{65,-2,5},{65,-2,3},{65,-2,3},{65,-2,3}};
+
+	int (*ASTs[3])[100][3] = {&prowlerAST,&nemesisAST,&carAST};
 	//prowler, nemesis
 };
 AST mast;
@@ -540,8 +542,10 @@ void myMouseThread(){
 			// 	int * pos = myGetMousePos();
 			// 	myMouseMove(pos[0], pos[1]+7);
 			// }
-			int size = (sizeof(mast.nemesisAST)/(sizeof(mast.nemesisAST[0])));
-			recoilReader(mast.nemesisAST,100);
+			// int size = (sizeof(mast.prowlerAST)/(sizeof(mast.prowlerAST[0])));
+			// int x[100][3];
+			// x = *(mast.ASTs[mast.downMode-1]);
+			recoilReader(*mast.ASTs[mast.downMode-1],100);
         }
 
 	}
