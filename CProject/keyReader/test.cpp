@@ -30,9 +30,9 @@ std::map<int, char> keyMap = {
 //79 80 81
 //75 76 77
 //71 72 73
+
+void scanr();
 void recoilReader(int xarr[100][3], int size);
-
-
 
 struct AST{
 	bool firedown = false;
@@ -41,8 +41,9 @@ struct AST{
 	int nemesisAST[100][3] = {{50,0,5},{50,0,5},{50,0,6}};
 	// int carAST[100][3] = {{64,1,8},{64,1,7},{64,1,7},{64,1,7},{64,2,7},{64,2,7},{64,2,7},{64,2,7},{64,1,1},{64,0,1},{64,0,1},{64,-2,1},{64,-2,3},{64,-2,3},{64,0,3},{64,0,1},{64,0,1},{64,0,1},{64,0,1},{64,0,1}};
 	int carAST[100][3] = {{64,1,6},{64,2,7},{64,3,7},{64,4,8},{64,3,7},{64,2,7},{64,2,7},{65,0,7},{64,-1,6},{65,-2,5},{65,-2,3},{65,-2,3},{65,-2,3}};
+	int r99AST[100][3] = {{64,0,6},{64,-1,7},{64,-2,7},{64,-2,8},{64,-2,7},{64,-1,7},{64,0,7},{65,0,7},{64,0,6},{65,0,5},{65,0,3},{65,0,3},{65,0,3}};
 
-	int (*ASTs[3])[100][3] = {&prowlerAST,&nemesisAST,&carAST};
+	int (*ASTs[3])[100][3] = {&r99AST,&nemesisAST,&carAST};
 	//prowler, nemesis
 };
 AST mast;
@@ -283,7 +284,10 @@ int * myXaim(){
 	return(moveRel);
 }
 
-
+struct cmdinfo{
+	int colpx[3] = {0,0,0};
+};
+cmdinfo CMDINFO;
 
 bool commanding = false;
 
@@ -293,6 +297,19 @@ void executeCommandString(std::string str){
 	if(str == "heatmap"){
 		heatMapToggle = !heatMapToggle;
 		std::cout << ">heatmap toggled\n";
+		return;
+	} else if(str == "colgrab"){
+		int * pos = myGetMousePos();
+		XImage *image;
+		image = XGetImage (dpy, XRootWindow (dpy, dfs), pos[0],pos[1], 1, 1, AllPlanes, XYPixmap);
+
+	    XColor SCAN = getPix(0,0,image);
+	    XFree (image);
+	    XQueryColor (dpy, XDefaultColormap(dpy, dfs), &SCAN);
+		std::cout << ">color grabbed: " << SCAN.red/256 << "-" << SCAN.green/256 << "-" << SCAN.blue/256 << "\n";
+		colpx[0] = SCAN.red/256;
+		colpx[1] = SCAN.green/256;
+		colpx[2] = SCAN.blue/256;
 		return;
 	} else if(str == "maplock"){
 		mapLocked = !mapLocked;
@@ -486,6 +503,8 @@ void myDo(int x,std::string s1){
 			} else {
 				myPlay("AUDmanual.wav",s1);
 			}
+		} else if (x == 46){
+			scanr();
 		}
 	} else if(keysounds == 0){
 		if(x == 45){
@@ -498,6 +517,76 @@ void myDo(int x,std::string s1){
 		}
 	}
 }
+
+void arrAverager2D(XColor scan[],int width, int height){
+
+	float averaged1D[height*2];
+	for(int i = 0; i < height; i++){
+		float av = 0;
+		float av2 = 0;
+		for(int j = 0; j < width; j++){
+			av += scan[i*width+j].red;
+			av2 += (scan[i*width+j].red)*j;
+		}
+		averaged1D[i] = av2/av;
+		averaged1D[i+height] = av;
+	}
+
+	float actX;
+	for(int i = 0; i < height; i++){
+		averaged1D[i];
+	}
+
+	// float averaged1D[height];
+	// for(int i = 0; i < height; i++){
+	// 	float av = 0;
+	// 	for(int j = 0; j < width; j++){
+	// 		av += scan[i*width+j].red;
+	// 	}
+	// 	averaged1D[i] = av/width;
+	// }
+
+	// float av = 0;
+	// for(int i = 0; i < height; i++){
+	// 	av += averaged1D[i];
+	// }
+	// av /= height;
+	// std::cout << av << "\n";
+}
+
+void arrVectorAverager2D(XColor scan[],int width, int height){
+
+	float vectorField[width*height];
+	float moveVector[2] = {0,0};
+
+	for(int i = 0; i < height; i++){
+		for(int j = 0; j < width; j++){
+			float pxval = scan[i*width+j].red;
+			moveVector[0] += pxval * (j - width/2);
+			moveVector[1] += pxval * (i - height/2);
+		}
+	}
+
+}
+
+void scanr(){
+	const int scanx = 100;
+	const int scany = 100;
+	int pos[2] = {920,540};
+	XColor SCAN [scanx*scany];
+    XImage *image;
+	image = XGetImage (dpy, XRootWindow (dpy, dfs), pos[0]-scanx/2,pos[1]-scany/2, scanx, scany, AllPlanes, XYPixmap);
+    for(int y = 0; y < scany; y+=1){
+        for(int x = 0; x < scanx; x+=1){
+            int coor = x+y*scanx;
+            SCAN[coor] = getPix(x,y,image);
+        }
+    }
+    XFree (image);
+    XQueryColors (dpy, XDefaultColormap(dpy, dfs), SCAN, scanx*scany);
+    arrAverager2D(SCAN,scanx,scany);
+}
+
 
 void repeating(){
 	return;
@@ -520,6 +609,7 @@ void myMouseThread(){
 
     signal(SIGINT, INThandler);
 	while(true){
+		// poll(device,&ev,0)
 		read(device,&ev, sizeof(ev));
 
         if(ev.type == EV_KEY && ev.value == 1 && ev.code == BTN_MOUSE && mast.firedown){
