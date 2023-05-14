@@ -42,9 +42,11 @@ struct AST{
 	// int carAST[100][3] = {{64,1,8},{64,1,7},{64,1,7},{64,1,7},{64,2,7},{64,2,7},{64,2,7},{64,2,7},{64,1,1},{64,0,1},{64,0,1},{64,-2,1},{64,-2,3},{64,-2,3},{64,0,3},{64,0,1},{64,0,1},{64,0,1},{64,0,1},{64,0,1}};
 	int carAST[100][3] = {{64,1,6},{64,2,7},{64,3,7},{64,4,8},{64,3,7},{64,2,7},{64,2,7},{65,0,7},{64,-1,6},{65,-2,5},{65,-2,3},{65,-2,3},{65,-2,3}};
 	int r99AST[100][3] = {{64,0,6},{64,-1,7},{64,-2,7},{64,-2,8},{64,-2,7},{64,-1,7},{64,0,7},{65,0,7},{64,0,6},{65,0,5},{65,0,3},{65,0,3},{65,0,3}};
+	int flatlineAST[100][3] = {{50,1,9},{100,2,5},{100,3,5},{100,1,6},{100,2,5},{100,-1,4},{100,-1,1},{100,-2,0},{100,-3,0},{100,-3,0}};
 
-	int (*ASTs[3])[100][3] = {&r99AST,&nemesisAST,&carAST};
-	//prowler, nemesis
+	int (*ASTs[5])[100][3] = {&prowlerAST,&nemesisAST,&carAST,&flatlineAST,&r99AST};
+	std::string ASTsounds[5] = {"AUDprowler.wav","AUDnemesis.wav","AUDcar.wav","AUDr99.wav"};
+	//prowler, nemesisx
 };
 AST mast;
 
@@ -307,9 +309,9 @@ void executeCommandString(std::string str){
 	    XFree (image);
 	    XQueryColor (dpy, XDefaultColormap(dpy, dfs), &SCAN);
 		std::cout << ">color grabbed: " << SCAN.red/256 << "-" << SCAN.green/256 << "-" << SCAN.blue/256 << "\n";
-		colpx[0] = SCAN.red/256;
-		colpx[1] = SCAN.green/256;
-		colpx[2] = SCAN.blue/256;
+		CMDINFO.colpx[0] = SCAN.red/256;
+		CMDINFO.colpx[1] = SCAN.green/256;
+		CMDINFO.colpx[2] = SCAN.blue/256;
 		return;
 	} else if(str == "maplock"){
 		mapLocked = !mapLocked;
@@ -460,8 +462,15 @@ void myDo(int x,std::string s1){
 			myPlay("AUDnemesis.wav",s1);
 			mast.downMode = 2;
 		} else if(x == 73){
-			myPlay("AUDprowler.wav",s1);
+			myPlay("AUDcar.wav",s1);
 			mast.downMode = 3;
+		} else if(x == 77){
+			mast.downMode += 1;
+			myPlay(mast.ASTsounds[mast.downMode-1],s1);
+			std::cout << mast.ASTsounds[mast.downMode-1]<<"\n";
+		} else if(x == 75 && mast.downMode > 1){
+			mast.downMode -= 1;
+			myPlay(mast.ASTsounds[mast.downMode-1],s1);
 		}
 	}
 
@@ -594,6 +603,9 @@ void repeating(){
 void recoilReader(int xarr[100][3],int size){
 	// int rw = (sizeof(xarr[0])/(sizeof(int)));
 	for(int i = 0; i < size; i++){
+			// if(SDL_GetMouseState() & SDL_BUTTON_LMASK){
+			// 	std::cout<<"is up\n";
+			// }
 			if(xarr[i][0] == 0){
 				break;
 			}
