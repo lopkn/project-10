@@ -620,8 +620,10 @@ void recoilReader(int xarr[100][3],int size, int device){
 			if(xarr[i][0] == 0){
 				break;
 			}
-						int ret = poll(fds,1,0);
-				    	if(ret > 0  &&  (fds[0].revents & POLLIN)){
+						// int ret = poll(fds,1,0);
+			bool stop = false;
+						while(poll(fds,1,0)){
+							if((fds[0].revents & POLLIN)){
 				    		input_event ev;
 				    		ssize_t s = read(fds[0].fd, &ev, sizeof(input_event));
 				           if (s == -1){
@@ -629,9 +631,28 @@ void recoilReader(int xarr[100][3],int size, int device){
 				           }
 				           if(ev.type == EV_KEY && ev.value == 0 && ev.code == BTN_MOUSE){
 					   		std::cout << "breaking: mouse is up\n";
+					   		// break;
+					   		stop=true;
 					   		break;
+				           } else {
+				           	std::cout<<"what?\n";
 				           }
 				    	}
+						}
+						if(stop){break;}//im genius
+				    	// if(ret > 0  &&  (fds[0].revents & POLLIN)){
+				    	// 	input_event ev;
+				    	// 	ssize_t s = read(fds[0].fd, &ev, sizeof(input_event));
+				     //       if (s == -1){
+				     //           std::cout<<"error\n";
+				     //       }
+				     //       if(ev.type == EV_KEY && ev.value == 0 && ev.code == BTN_MOUSE){
+					   	// 	std::cout << "breaking: mouse is up\n";
+					   	// 	break;
+				     //       } else {
+				     //       	std::cout<<"what?\n";
+				     //       }
+				    	// }
 			std::this_thread::sleep_for(std::chrono::milliseconds(xarr[i][0]));
 			int * pos = myGetMousePos();
 			if(mast.aimprint){
