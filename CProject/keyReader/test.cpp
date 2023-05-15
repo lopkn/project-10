@@ -12,6 +12,8 @@
 #include <signal.h>
 #include <stdlib.h>
 
+#include <poll.h>
+
 #include <map>
 #include <iostream>
 #include <SFML/Graphics.hpp>
@@ -36,13 +38,14 @@ void recoilReader(int xarr[100][3], int size);
 
 struct AST{
 	bool firedown = false;
+	bool aimprint = false;
 	int downMode = 1;
 	int prowlerAST[100][3] = {{50,0,7},{50,0,7},{50,0,7},{50,0,7}};
 	int nemesisAST[100][3] = {{50,0,5},{50,0,5},{50,0,6}};
 	// int carAST[100][3] = {{64,1,8},{64,1,7},{64,1,7},{64,1,7},{64,2,7},{64,2,7},{64,2,7},{64,2,7},{64,1,1},{64,0,1},{64,0,1},{64,-2,1},{64,-2,3},{64,-2,3},{64,0,3},{64,0,1},{64,0,1},{64,0,1},{64,0,1},{64,0,1}};
-	int carAST[100][3] = {{64,1,6},{64,2,7},{64,3,7},{64,4,8},{64,3,7},{64,2,7},{64,2,7},{65,0,7},{64,-1,6},{65,-2,5},{65,-2,3},{65,-2,3},{65,-2,3}};
+	int carAST[100][3] = {{64,1,6},{64,2,7},{64,3,7},{64,3,8},{64,1,7},{64,0,7},{64,0,7},{65,0,7},{64,-1,6},{65,-1,5},{65,-1,3},{65,-1,3},{65,-1,3}};
 	int r99AST[100][3] = {{64,0,6},{64,-1,7},{64,-2,7},{64,-2,8},{64,-2,7},{64,-1,7},{64,0,7},{65,0,7},{64,0,6},{65,0,5},{65,0,3},{65,0,3},{65,0,3}};
-	int flatlineAST[100][3] = {{50,1,9},{100,2,5},{100,3,5},{100,1,6},{100,2,5},{100,-1,4},{100,-1,1},{100,-2,0},{100,-3,0},{100,-3,0}};
+	int flatlineAST[100][3] = {{50,1,9},{100,2,5},{100,3,5},{100,1,6},{100,2,5},{100,-1,4},{100,-1,1},{100,-2,0},{100,-3,0},{100,-3,0},{100,0,0},{100,0,0},{100,4,2},{100,3,0},{100,5,0},{100,5,0},{100,5,3},{100,4,4},{100,5,5},{100,1,4}};
 
 	int (*ASTs[5])[100][3] = {&prowlerAST,&nemesisAST,&carAST,&flatlineAST,&r99AST};
 	std::string ASTsounds[5] = {"AUDprowler.wav","AUDnemesis.wav","AUDcar.wav","AUDr99.wav"};
@@ -316,6 +319,10 @@ void executeCommandString(std::string str){
 	} else if(str == "maplock"){
 		mapLocked = !mapLocked;
 		std::cout << ">maplock toggled\n";
+		return;
+	} else if(str == "aimprint"){
+		mast.aimprint = !mast.aimprint;
+		std::cout << ">aimprint toggled\n";
 		return;
 	} else if(str == "time.now()" || str == "tnow" || str == "time.now" || str == "time"){
 		std::cout << ">time now is: " << timeNow() << std::endl;
@@ -600,8 +607,12 @@ void scanr(){
 void repeating(){
 	return;
 }
-void recoilReader(int xarr[100][3],int size){
+void recoilReader(int xarr[100][3],int size, int device){
 	// int rw = (sizeof(xarr[0])/(sizeof(int)));
+    struct pollfd fds[1];
+    fds[0].fd = device;
+    fds[0].events = POLLIN;
+
 	for(int i = 0; i < size; i++){
 			// if(SDL_GetMouseState() & SDL_BUTTON_LMASK){
 			// 	std::cout<<"is up\n";
@@ -609,8 +620,23 @@ void recoilReader(int xarr[100][3],int size){
 			if(xarr[i][0] == 0){
 				break;
 			}
+						int ret = poll(fds,1,0);
+				    	if(ret > 0  &&  (fds[0].revents & POLLIN)){
+				    		input_event ev;
+				    		ssize_t s = read(fds[0].fd, &ev, sizeof(input_event));
+				           if (s == -1){
+				               std::cout<<"error\n";
+				           }
+				           if(ev.type == EV_KEY && ev.value == 0 && ev.code == BTN_MOUSE){
+					   		std::cout << "breaking: mouse is up\n";
+					   		break;
+				           }
+				    	}
 			std::this_thread::sleep_for(std::chrono::milliseconds(xarr[i][0]));
 			int * pos = myGetMousePos();
+			if(mast.aimprint){
+				std::cout << "aiming: "<<xarr[i][1]<<" = "<<xarr[i][2]<<"\n";
+			}
 			myMouseMove(pos[0]+xarr[i][1], pos[1]+xarr[i][2]);
 	}
 }
@@ -620,10 +646,30 @@ void myMouseThread(){
     struct input_event ev;
 
     signal(SIGINT, INThandler);
+
+
+    // int timeOut = 0;
+    // struct pollfd fds[1];
+    // fds[0].fd = device;
+    // fds[0].events = POLLIN;
+    // char buf[1000];
+    // while(true){
+    // 	int ret = poll(fds,1,1);
+    // 	if(ret > 0  &&  (fds[0].revents & POLLIN)){
+    // 		ssize_t s = read(fds[0].fd, buf, sizeof(buf));
+    //        if (s == -1){
+    //            std::cout<<"error\n";
+    //        }
+    //        // printf("read %zd bytes: %.*s\n",
+    //        //         s, (int) s, buf);
+    // 		std::cout << "hey?\n";
+    // 		// std::this_thread::sleep_for(std::chrono::milliseconds(150));
+    // 	}
+    // }
+
 	while(true){
 		// poll(device,&ev,0)
 		read(device,&ev, sizeof(ev));
-
         if(ev.type == EV_KEY && ev.value == 1 && ev.code == BTN_MOUSE && mast.firedown){
 
         	long long int t1 = (ev.time.tv_sec*1000000+ev.time.tv_usec);
@@ -647,7 +693,7 @@ void myMouseThread(){
 			// int size = (sizeof(mast.prowlerAST)/(sizeof(mast.prowlerAST[0])));
 			// int x[100][3];
 			// x = *(mast.ASTs[mast.downMode-1]);
-			recoilReader(*mast.ASTs[mast.downMode-1],100);
+			recoilReader(*mast.ASTs[mast.downMode-1],100,device);
         }
 
 	}
