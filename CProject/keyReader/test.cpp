@@ -38,17 +38,21 @@ void recoilReader(int xarr[100][3], int size);
 
 struct AST{
 	bool firedown = false;
-	bool aimprint = false;
+	bool aimprint = true;
 	int downMode = 1;
+	int weaponSetter = 3;
+	int weaponSet[3] = {1,2,3};
 	int prowlerAST[100][3] = {{50,0,7},{50,0,7},{50,0,7},{50,0,7}};
 	int nemesisAST[100][3] = {{50,0,5},{50,0,5},{50,0,6}};
 	// int carAST[100][3] = {{64,1,8},{64,1,7},{64,1,7},{64,1,7},{64,2,7},{64,2,7},{64,2,7},{64,2,7},{64,1,1},{64,0,1},{64,0,1},{64,-2,1},{64,-2,3},{64,-2,3},{64,0,3},{64,0,1},{64,0,1},{64,0,1},{64,0,1},{64,0,1}};
 	int carAST[100][3] = {{64,1,6},{64,2,7},{64,3,7},{64,3,8},{64,1,7},{64,0,7},{64,0,7},{65,0,7},{64,-1,6},{65,-1,5},{65,-1,3},{65,-1,3},{65,-1,3}};
 	int r99AST[100][3] = {{64,0,6},{64,-1,7},{64,-2,7},{64,-2,8},{64,-2,7},{64,-1,7},{64,0,7},{65,0,7},{64,0,6},{65,0,5},{65,0,3},{65,0,3},{65,0,3}};
-	int flatlineAST[100][3] = {{50,1,9},{100,2,5},{100,3,5},{100,1,6},{100,2,5},{100,-1,4},{100,-1,1},{100,-2,0},{100,-3,0},{100,-3,0},{100,0,0},{100,0,0},{100,4,2},{100,3,0},{100,5,0},{100,5,0},{100,5,3},{100,4,4},{100,5,5},{100,1,4}};
+	int flatlineAST[100][3] = {{50,1,9},{100,2,5},{100,3,5},{100,1,6},{100,2,5},{100,-1,4},{100,-1,1},{100,-2,0},{100,-3,0},{100,-3,0},{100,0,4},{100,0,5},{100,4,2},{100,3,0},{100,5,0},{100,5,0},{100,5,3},{100,4,4},{100,5,5},{100,1,4}};
+	int rampageAST[100][3] = {{100,-1,6},{200,4,4},{200,2,5},{200,-3,4},{200,-1,7}};
 
-	int (*ASTs[5])[100][3] = {&prowlerAST,&nemesisAST,&carAST,&flatlineAST,&r99AST};
-	std::string ASTsounds[5] = {"AUDprowler.wav","AUDnemesis.wav","AUDcar.wav","AUDr99.wav"};
+
+	int (*ASTs[6])[100][3] = {&prowlerAST,&nemesisAST,&carAST,&r99AST,&flatlineAST,&rampageAST};
+	std::string ASTsounds[6] = {"AUDprowler.wav","AUDnemesis.wav","AUDcar.wav","AUDr99.wav","AUDflatline.wav","AUDrampage.wav"};
 	//prowler, nemesisx
 };
 AST mast;
@@ -269,10 +273,10 @@ int * myXaim(){
 
 
     XQueryColors (dpy, XDefaultColormap(dpy, dfs), NMARR, scanRes);
-    std::cout << NMARR[0].red/256 << "\n";
+    std::cout << NMARR[0].blue/256 << "\n";
     int ncor[scanRes];
     for(int z = 0; z < scanRes; z++){
-    	ncor[z] = NMARR[z].red/256;
+    	ncor[z] = NMARR[z].blue/256;
     }
 
     int * poss = myCorrecter(ncor);
@@ -324,6 +328,9 @@ void executeCommandString(std::string str){
 		mast.aimprint = !mast.aimprint;
 		std::cout << ">aimprint toggled\n";
 		return;
+	} else if(str == "setweapon"){
+		mast.weaponSetter = 0;
+		std::cout << ">setting weapon combination. press NUM5 to select\n";
 	} else if(str == "time.now()" || str == "tnow" || str == "time.now" || str == "time"){
 		std::cout << ">time now is: " << timeNow() << std::endl;
 		return;
@@ -463,18 +470,23 @@ void myDo(int x,std::string s1){
 		myPlay("map.wav",s1);
 	} else if(inputMode == 2){//antirecoil 
 		if(x == 71){
-			myPlay("AUDprowler.wav",s1);
-			mast.downMode = 1;
+			mast.downMode = mast.weaponSet[0];
+			myPlay(mast.ASTsounds[mast.downMode-1],s1);
 		} else if(x == 72){
-			myPlay("AUDnemesis.wav",s1);
-			mast.downMode = 2;
+			mast.downMode = mast.weaponSet[1];
+			myPlay(mast.ASTsounds[mast.downMode-1],s1);
 		} else if(x == 73){
-			myPlay("AUDcar.wav",s1);
-			mast.downMode = 3;
+			mast.downMode = mast.weaponSet[2];
+			myPlay(mast.ASTsounds[mast.downMode-1],s1);
 		} else if(x == 77){
 			mast.downMode += 1;
 			myPlay(mast.ASTsounds[mast.downMode-1],s1);
 			std::cout << mast.ASTsounds[mast.downMode-1]<<"\n";
+		} else if(x == 76 && mast.weaponSetter < 3){
+			mast.weaponSet[mast.weaponSetter] = mast.downMode;
+			std::cout<<"set weapon ["<<mast.downMode<<"] to slot ["<<mast.weaponSetter<<"]\n";
+			myPlay("ding2.wav",s1);
+			mast.weaponSetter++;
 		} else if(x == 75 && mast.downMode > 1){
 			mast.downMode -= 1;
 			myPlay(mast.ASTsounds[mast.downMode-1],s1);
@@ -635,7 +647,7 @@ void recoilReader(int xarr[100][3],int size, int device){
 					   		stop=true;
 					   		break;
 				           } else {
-				           	std::cout<<"what?\n";
+				           	// std::cout<<"what?\n";
 				           }
 				    	}
 						}
