@@ -49,10 +49,11 @@ struct AST{
 	int r99AST[100][3] = {{64,0,6},{64,-1,7},{64,-2,7},{64,-2,8},{64,-2,7},{64,-1,7},{64,0,7},{65,0,7},{64,0,6},{65,0,5},{65,0,3},{65,0,3},{65,0,3}};
 	int flatlineAST[100][3] = {{50,1,9},{100,2,5},{100,3,5},{100,1,6},{100,2,5},{100,-1,4},{100,-1,1},{100,-2,0},{100,-3,0},{100,-3,0},{100,0,4},{100,0,5},{100,4,2},{100,3,0},{100,5,0},{100,5,0},{100,5,3},{100,4,4},{100,5,5},{100,1,4}};
 	int rampageAST[100][3] = {{100,-1,6},{200,4,4},{200,2,5},{200,-3,4},{200,-1,7}};
+	int spitfireAST[100][3] = {{20,2,14},{140,0,4},{140,7,7},{140,0,7},{140,0,11},{140,2,4},{140,-2,0},{140,-2,1},{140,-2,0},{140,-2,2},{140,1,2},{140,3,3},{140,3,3},{140,3,2}};
 
 
-	int (*ASTs[6])[100][3] = {&prowlerAST,&nemesisAST,&carAST,&r99AST,&flatlineAST,&rampageAST};
-	std::string ASTsounds[6] = {"AUDprowler.wav","AUDnemesis.wav","AUDcar.wav","AUDr99.wav","AUDflatline.wav","AUDrampage.wav"};
+	int (*ASTs[7])[100][3] = {&spitfireAST,&prowlerAST,&nemesisAST,&carAST,&r99AST,&flatlineAST,&rampageAST};
+	std::string ASTsounds[7] = {"AUDprowler.wav","AUDnemesis.wav","AUDcar.wav","AUDr99.wav","AUDflatline.wav","AUDrampage.wav"};
 	//prowler, nemesisx
 };
 AST mast;
