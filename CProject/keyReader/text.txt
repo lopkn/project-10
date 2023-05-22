@@ -22,7 +22,7 @@ Device 'PixArt Microsoft USB Optical Mouse':
 	libinput Send Events Modes Available (294):	1, 0
 	libinput Send Events Mode Enabled (295):	0, 0
 	libinput Send Events Mode Enabled Default (296):	0, 0
-	Device Node (297):	"/dev/input/event5"
+	Device Node (297):	"/dev/input/event2"
 	Device Product ID (298):	1118, 203
 	libinput Drag Lock Buttons (311):	<no items>
 	libinput Horizontal Scroll Enabled (312):	1

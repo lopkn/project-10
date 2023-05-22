@@ -50,10 +50,12 @@ struct AST{
 	int flatlineAST[100][3] = {{50,1,9},{100,2,5},{100,3,5},{100,1,6},{100,2,5},{100,-1,4},{100,-1,1},{100,-2,0},{100,-3,0},{100,-3,0},{100,0,4},{100,0,5},{100,4,2},{100,3,0},{100,5,0},{100,5,0},{100,5,3},{100,4,4},{100,5,5},{100,1,4}};
 	int rampageAST[100][3] = {{100,-1,6},{200,4,4},{200,2,5},{200,-3,4},{200,-1,7}};
 	int spitfireAST[100][3] = {{20,2,14},{140,0,4},{140,7,7},{140,0,7},{140,0,11},{140,2,4},{140,-2,0},{140,-2,1},{140,-2,0},{140,-2,2},{140,1,2},{140,3,3},{140,3,3},{140,3,2}};
-	int lstarAST[100][3] = {{50,5,8},{100,5,8},{100,4,8},{100,3,8},{100,-4,8},{100,-6,8},{100,-6,8},{100,-6,8},{100,-3,8},{100,0,8},{100,0,8},{100,0,8},{100,0,8},{100,0,8},{100,0,8},{100,0,8},{100,0,8},{100,0,8}};
+	int lstarAST[100][3] = {{50,5,8},{100,4,8},{100,4,8},{100,3,8},{100,-3,8},{100,-4,6},{100,-3,6},{100,-3,7},{100,-3,7},{100,3,6},{100,3,8},{100,3,8},{100,3,8},{100,0,8},{100,0,8},{100,0,8},{100,0,8},{100,0,8}};
+	int re45AST[100][3] = {{39,0,4},{78,0,4},{78,-2,4},{78,-3,4},{78,-3,4},{78,-3,4} ,{78,-3,3},{78,-3,3},{78,-3,3},{78,-3,3},{78,-3,4},{78,-3,3},{78,-3,3},{78,-3,4},{78,-3,3},{78,-3,3},{78,-3,3},{78,-3,3},{78,-3,3}};
 
-	int (*ASTs[8])[100][3] = {&lstarAST,&prowlerAST,&nemesisAST,&carAST,&r99AST,&flatlineAST,&rampageAST,&spitfireAST};
-	std::string ASTsounds[8] = {"AUDprowler.wav","AUDnemesis.wav","AUDcar.wav","AUDr99.wav","AUDflatline.wav","AUDrampage.wav",""};
+	const static int weaponCount = 9;
+	int (*ASTs[weaponCount])[100][3] = {&re45AST,&prowlerAST,&nemesisAST,&carAST,&r99AST,&flatlineAST,&rampageAST,&spitfireAST,&lstarAST};
+	std::string ASTsounds[weaponCount] = {"","AUDprowler.wav","AUDnemesis.wav","AUDcar.wav","AUDr99.wav","AUDflatline.wav","AUDrampage.wav","AUDspitfire.wav","AUDlstar.wav"};
 	//prowler, nemesisx
 };
 AST mast;
@@ -332,6 +334,7 @@ void executeCommandString(std::string str){
 	} else if(str == "setweapon"){
 		mast.weaponSetter = 0;
 		std::cout << ">setting weapon combination. press NUM5 to select\n";
+		myPlay("AUDweaponset.wav",s1);
 	} else if(str == "time.now()" || str == "tnow" || str == "time.now" || str == "time"){
 		std::cout << ">time now is: " << timeNow() << std::endl;
 		return;
@@ -480,16 +483,32 @@ void myDo(int x,std::string s1){
 			mast.downMode = mast.weaponSet[2];
 			myPlay(mast.ASTsounds[mast.downMode-1],s1);
 		} else if(x == 77){
-			mast.downMode += 1;
+			if(mast.downMode < mast.weaponCount){
+				mast.downMode += 1;
+			} else {
+				mast.downMode = 1;
+			}
 			myPlay(mast.ASTsounds[mast.downMode-1],s1);
 			std::cout << mast.ASTsounds[mast.downMode-1]<<"\n";
-		} else if(x == 76 && mast.weaponSetter < 3){
+		} else if(x == 76){
+
+			if(mast.weaponSetter < 3){
+
 			mast.weaponSet[mast.weaponSetter] = mast.downMode;
 			std::cout<<"set weapon ["<<mast.downMode<<"] to slot ["<<mast.weaponSetter<<"]\n";
 			myPlay("ding2.wav",s1);
 			mast.weaponSetter++;
-		} else if(x == 75 && mast.downMode > 1){
-			mast.downMode -= 1;
+			} else if(keyRepeats == 3){
+				mast.weaponSetter = 0;
+				std::cout << "setting weapon combination. press NUM5 to select\n";
+				myPlay("AUDweaponset.wav",s1);
+			}
+		} else if(x == 75 ){
+			if(mast.downMode > 1){
+				mast.downMode -= 1;
+			} else {
+				mast.downMode = mast.weaponCount;
+			}
 			myPlay(mast.ASTsounds[mast.downMode-1],s1);
 		}
 	}
