@@ -64,6 +64,10 @@ int inputMode = 0;
 int lastKey = 400;
 int keyRepeats = 0;
 
+
+int keyboardEventX = 3;
+int mouseEventX = 2;
+
 bool extraSlow = false;
 
 //input Reference
@@ -694,7 +698,7 @@ void recoilReader(int xarr[100][3],int size, int device){
 	}
 }
 void myMouseThread(){
-	char devname[] = "/dev/input/event5";
+	char devname[] = "/dev/input/event2";
     int device = open(devname, O_RDONLY);
     struct input_event ev;
 
@@ -765,6 +769,11 @@ void myMouseThread(){
 int main()
 {
 
+	std::cout << "eventX keyboard matches check\n";
+	std::system("ls -l /dev/input/by-id/ | grep -e '600-event-kbd' -e 'event-mouse' | cut -c 25-");
+	std::cout << "\ncurrent keyboard and mouse eventX used: "+std::to_string(keyboardEventX)+" - "+std::to_string(mouseEventX);
+	std::cout << "\nverify correct device is being used for input\n\n\n";
+
 	// d = XOpenDisplay((char *) NULL);
 	dpy = XOpenDisplay(NULL);
 	root_window = XRootWindow(dpy, 0);
@@ -791,7 +800,7 @@ int main()
 		std::cout << s1 << " is the current user ID \n\n";
 
 		// int G = system("sudo -u '#1002' XDG_RUNTIME_DIR=/run/user/1002 aplay start.wav >>/dev/null 2>>/dev/null &");
-        char devname[] = "/dev/input/event2";
+        char devname[] = "/dev/input/event3";
         int device = open(devname, O_RDONLY);
         struct input_event ev;
 
@@ -809,7 +818,6 @@ int main()
 	        	// XNextEvent(dpy,&e);
         		// std::cout<<"beraerear\n";
                 read(device,&ev, sizeof(ev));
-
                 if(ev.type == 1 && ev.value == 1){
 
                         myDo(ev.code,s1);
