@@ -418,13 +418,7 @@ void myDo(int x,std::string s1){
 	}
 
 	if(x == 78){
-		// if(inputMode != 1){
-		// myPlay("ding2.wav",s1);
-		// 	inputMode = 1;
-		// } else {
-		// 	inputMode = 0;
-		// 	myPlay("close.wav",s1);
-		// }
+		
 		if(keyRepeats%2 == 0){
 			myPlay("close.wav",s1);
 			inputMode = 0;
@@ -544,11 +538,7 @@ void myDo(int x,std::string s1){
 		}else if(x == 47){
 			myPlay("Punch.wav",s1);
 		} else if(x == 45){
-			// for(int i = 0; i < 5; i++){
-			// 	std::this_thread::sleep_for(std::chrono::milliseconds(50));
-			// 	int * pos = myGetMousePos();
-			// 	myMouseMove(pos[0], pos[1]+7);
-			// }
+			
 			mast.firedown = !mast.firedown;
 			if(mast.firedown){
 				myPlay("ding2.wav",s1);
@@ -563,7 +553,7 @@ void myDo(int x,std::string s1){
 			int * pos = myGetMousePos();
 			std::cout<<"xMousepos: "<<pos[0] << "-"<<pos[1]<<std::endl;
 			myXaim();
-			// myMouseMove(pos[0], pos[1]+10);
+		
 		} else if(x == 46){
 			myXset();
 		}
@@ -589,21 +579,8 @@ void arrAverager2D(XColor scan[],int width, int height){
 		averaged1D[i];
 	}
 
-	// float averaged1D[height];
-	// for(int i = 0; i < height; i++){
-	// 	float av = 0;
-	// 	for(int j = 0; j < width; j++){
-	// 		av += scan[i*width+j].red;
-	// 	}
-	// 	averaged1D[i] = av/width;
-	// }
+	
 
-	// float av = 0;
-	// for(int i = 0; i < height; i++){
-	// 	av += averaged1D[i];
-	// }
-	// av /= height;
-	// std::cout << av << "\n";
 }
 
 void arrVectorAverager2D(XColor scan[],int width, int height){
@@ -644,19 +621,16 @@ void repeating(){
 	return;
 }
 void recoilReader(int xarr[100][3],int size, int device){
-	// int rw = (sizeof(xarr[0])/(sizeof(int)));
+	
     struct pollfd fds[1];
     fds[0].fd = device;
     fds[0].events = POLLIN;
 
 	for(int i = 0; i < size; i++){
-			// if(SDL_GetMouseState() & SDL_BUTTON_LMASK){
-			// 	std::cout<<"is up\n";
-			// }
+	
 			if(xarr[i][0] == 0){
 				break;
 			}
-						// int ret = poll(fds,1,0);
 			bool stop = false;
 						while(poll(fds,1,0)){
 							if((fds[0].revents & POLLIN)){
@@ -667,28 +641,16 @@ void recoilReader(int xarr[100][3],int size, int device){
 				           }
 				           if(ev.type == EV_KEY && ev.value == 0 && ev.code == BTN_MOUSE){
 					   		std::cout << "breaking: mouse is up\n";
-					   		// break;
+				
 					   		stop=true;
 					   		break;
 				           } else {
-				           	// std::cout<<"what?\n";
+	
 				           }
 				    	}
 						}
 						if(stop){break;}//im genius
-				    	// if(ret > 0  &&  (fds[0].revents & POLLIN)){
-				    	// 	input_event ev;
-				    	// 	ssize_t s = read(fds[0].fd, &ev, sizeof(input_event));
-				     //       if (s == -1){
-				     //           std::cout<<"error\n";
-				     //       }
-				     //       if(ev.type == EV_KEY && ev.value == 0 && ev.code == BTN_MOUSE){
-					   	// 	std::cout << "breaking: mouse is up\n";
-					   	// 	break;
-				     //       } else {
-				     //       	std::cout<<"what?\n";
-				     //       }
-				    	// }
+
 			std::this_thread::sleep_for(std::chrono::milliseconds(xarr[i][0]));
 			int * pos = myGetMousePos();
 			if(mast.aimprint){
@@ -705,66 +667,29 @@ void myMouseThread(){
     signal(SIGINT, INThandler);
 
 
-    // int timeOut = 0;
-    // struct pollfd fds[1];
-    // fds[0].fd = device;
-    // fds[0].events = POLLIN;
-    // char buf[1000];
-    // while(true){
-    // 	int ret = poll(fds,1,1);
-    // 	if(ret > 0  &&  (fds[0].revents & POLLIN)){
-    // 		ssize_t s = read(fds[0].fd, buf, sizeof(buf));
-    //        if (s == -1){
-    //            std::cout<<"error\n";
-    //        }
-    //        // printf("read %zd bytes: %.*s\n",
-    //        //         s, (int) s, buf);
-    // 		std::cout << "hey?\n";
-    // 		// std::this_thread::sleep_for(std::chrono::milliseconds(150));
-    // 	}
-    // }
 
 	while(true){
-		// poll(device,&ev,0)
+
 		read(device,&ev, sizeof(ev));
         if(ev.type == EV_KEY && ev.value == 1 && ev.code == BTN_MOUSE && mast.firedown){
 
         	long long int t1 = (ev.time.tv_sec*1000000+ev.time.tv_usec);
-        	// std::cout << t1 << "\n";
-        	// sleep(5);
+
         	long long int t2 = timeNow()*1000;
-        	// std::cout << t2 << "\n";
-        	// std::cout << abs(t1-t2) << "\n";
-        	// std::cout<< EV_REL << "\n";
+ 
         	if(abs(t1-t2) > 500000){
         		std::cout<< "kill1\n";
         		continue;
         	}
 
             std::cout << "dragging down" << "\n";
-   //          for(int i = 0; i < 4; i++){
-			// 	std::this_thread::sleep_for(std::chrono::milliseconds(50));
-			// 	int * pos = myGetMousePos();
-			// 	myMouseMove(pos[0], pos[1]+7);
-			// }
-			// int size = (sizeof(mast.prowlerAST)/(sizeof(mast.prowlerAST[0])));
-			// int x[100][3];
-			// x = *(mast.ASTs[mast.downMode-1]);
+ 
 			recoilReader(*mast.ASTs[mast.downMode-1],100,device);
         }
 
 	}
 }
-// void myScreen(){
-// 	XEvent e;
-// 	while(1){
 
-// 	        	XNextEvent(dpy,&e);
-// 	        	if(e.type == Expose){
-// 	        		XFillRectangle(dpy,w,DefaultGC(dpy,dfs),20,20,10,10);
-// 	        	}
-// 	}
-// }
 
 int main()
 {
