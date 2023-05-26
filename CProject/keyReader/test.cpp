@@ -469,6 +469,7 @@ void myDo(int x,std::string s1){
 		extraSlow = false;
 		myPlay("allClose.wav",s1);
 	} else if(x == 50){
+		myMouseMove(1000,700);
 		myPlay("map.wav",s1);
 	} else if(inputMode == 2){//antirecoil 
 		if(x == 71){
