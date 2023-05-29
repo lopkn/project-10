@@ -18,6 +18,8 @@
     "@chriscourses/perlin-noise": "^1.0.5",
     "express": "^4.17.1",
     "instagram-web-api": "^2.2.2",
+    "openai": "^3.2.1",
+    "readline-sync": "^1.4.10",
     "simplex-noise": "^3.0.1",
     "socket.io": "^4.0.1",
     "uuid": "^8.3.2"
