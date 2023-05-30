@@ -431,10 +431,23 @@ manager.newCard("does this work too?","yes",["TEST"])
 manager.newCard("what is standard enthalpy change of lattice","energy forming 1 mol of solid ionic compound",["@chem@"])
 manager.newCard("what is first electron affinity energy","the energy of gaseous ion formed by adding 1 mol electrons",["@chem@"])
 manager.newCard("whats the outter layer of virus","capsid",["@bio@"])
+manager.newCard("","",["@bio@"])
 manager.newCard("","",["@chem@"])
 manager.newCard("","",["@chem@"])
 manager.newCard("","",["@chem@"])
-manager.newCard("","",["@chem@"])
+
+
+
+/// ====== new questions area
+
+
+// plant and respiration electron cycles
+// why use lambdavirus/how is it special
+// whats the difference between retrovirus & rnavirus?
+
+
+/// end of new questions area
+
 
 
 
