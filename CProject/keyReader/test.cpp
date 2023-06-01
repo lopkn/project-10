@@ -86,6 +86,10 @@ uint64_t timeNow(){
     return(ms);
 }
 
+void usleep(int x){
+	std::this_thread::sleep_for(std::chrono::milliseconds(x));
+}
+
 
 // ~/.config/autokey/data/actual scripts/NOTE2.mp3 may be useful, nvm its wav
 
