@@ -41,6 +41,7 @@ void recoilReader(int xarr[100][3], int size);
 struct AST{
 	bool firedown = false;
 	bool aimprint = true;
+	bool stopsound = false;
 	int downMode = 1;
 	int weaponSetter = 3;
 	int weaponSet[3] = {1,2,3};
@@ -94,6 +95,9 @@ void usleep(int x){
 // ~/.config/autokey/data/actual scripts/NOTE2.mp3 may be useful, nvm its wav
 
 void myPlay(std::string wavFile, std::string s1){
+	if(mast.stopsound){
+		return;
+	}
 	std::string s2 = "dummy=$(sudo -u '#" + s1 +"' XDG_RUNTIME_DIR=/run/user/"+s1+" aplay "+wavFile+" 2>/dev/null) &";
 
 	int i3 = std::system(s2.c_str());
@@ -340,6 +344,10 @@ void executeCommandString(std::string str){
 	} else if(str == "aimprint"){
 		mast.aimprint = !mast.aimprint;
 		std::cout << ">aimprint toggled\n";
+		return;
+	} else if(str == "stopsound"){
+		mast.stopsound = !mast.stopsound;
+		std::cout << ">sound toggled\n";
 		return;
 	} else if(str == "setweapon"){
 		mast.weaponSetter = 0;
@@ -667,7 +675,7 @@ void recoilReader(int xarr[100][3],int size, int device){
 	}
 }
 void myMouseThread(){
-	char devname[] = "/dev/input/event2";
+	char devname[] = "/dev/input/event3";
     int device = open(devname, O_RDONLY);
     struct input_event ev;
 
@@ -732,7 +740,7 @@ int main()
 		std::cout << s1 << " is the current user ID \n\n";
 
 		// int G = system("sudo -u '#1002' XDG_RUNTIME_DIR=/run/user/1002 aplay start.wav >>/dev/null 2>>/dev/null &");
-        char devname[] = "/dev/input/event3";
+        char devname[] = "/dev/input/event2";
         int device = open(devname, O_RDONLY);
         struct input_event ev;
 
