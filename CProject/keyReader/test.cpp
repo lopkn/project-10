@@ -27,7 +27,7 @@ std::map<int, char> keyMap = {
     { 18, 'e' },{ 19, 'r' },{ 20, 't' },{ 21, 'y' },{ 22, 'u' },{ 23, 'i' },{ 24, 'o' },{ 25, 'p' },
     { 30, 'a' },{ 31, 's' },{ 32, 'd' },{ 33, 'f' },{ 34, 'g' },{ 35, 'h' },{ 36, 'j' },{ 37, 'k' },{ 38, 'l' },
     { 44, 'z' },{ 45, 'x' },{ 46, 'c' },{ 47, 'v' },{ 48, 'b' },{ 49, 'n' },{ 50, 'm' },{ 26, '[' },{ 27, ']' },
-    { 43, 'S'},{ 2, '1'},{ 3, '2'},{ 4, '3'},{ 5, '4'},{ 6, '5'},{ 7, '6'},{ 8, '7'},{ 9, '8'},{ 10, '9'},{ 11, '0'}
+    { 43, 'S'},{ 2, '1'},{ 3, '2'},{ 4, '3'},{ 5, '4'},{ 6, '5'},{ 7, '6'},{ 8, '7'},{ 9, '8'},{ 10, '9'},{ 11, '0'},{39,';'}
 
 
 };
@@ -397,12 +397,14 @@ void executeCommandString(std::string str){
 		mast.weaponSetter = 0;
 		std::cout << ">setting weapon combination. press NUM5 to select\n";
 		myPlay("AUDweaponset.wav",s1);
-	} else if(str == "scan"){
+	} else if(str == "scan" || str == "scan red"){
 		int * pos = myGetMousePos();
-		XColor * scan = myXscan(pos[0],pos[1]);
-		for(int j = 0; j < 20; j++){
-			for(int i = 0; i < 20; i++){
-				std::cout << myHeatDict2(scan[i+j*20].red/256);
+		int resX = 60;
+		int resY = 40;
+		XColor * scan = myXscan(pos[0]-resX/2,pos[1]-resY/2,resX,resY,2,3);
+		for(int j = 0; j < resY; j++){
+			for(int i = 0; i < resX; i++){
+				std::cout << myHeatDict2(scan[i+j*resX].red/256);
 			}
 			std::cout<<"\n";
 		}
@@ -416,7 +418,16 @@ void executeCommandString(std::string str){
 void endCommand(){
 	std::cout << "\n==command==\n"+commandString+"\n will be executed \n";
 
+	std::string delimiter = ";";
 
+	size_t pos = 0;
+	std::string token;
+	while ((pos = commandString.find(delimiter)) != std::string::npos) {
+	    token = commandString.substr(0, pos);
+	    // std::cout << token << std::endl;
+	    executeCommandString(token);
+	    commandString.erase(0, pos + delimiter.length());
+	}
 	executeCommandString(commandString);
 
 	// while(commandString.length > 0){
