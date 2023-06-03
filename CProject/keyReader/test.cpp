@@ -51,7 +51,7 @@ struct AST{
 	int carAST[100][3] = {{64,1,6},{64,2,7},{64,3,7},{64,3,8},{64,1,7},{64,0,7},{64,0,7},{65,0,7},{64,-1,6},{65,-1,5},{65,-1,3},{65,-1,3},{65,-1,3}};
 	int r99AST[100][3] = {{64,0,6},{64,-1,7},{64,-2,7},{64,-2,8},{64,-2,7},{64,-1,7},{64,0,7},{65,0,7},{64,0,6},{65,0,5},{65,0,3},{65,0,3},{65,0,3}};
 	int flatlineAST[100][3] = {{50,1,9},{100,2,5},{100,3,5},{100,1,6},{100,2,5},{100,-1,4},{100,-1,1},{100,-2,0},{100,-3,0},{100,-3,0},{100,0,4},{100,0,5},{100,4,2},{100,3,0},{100,5,0},{100,5,0},{100,5,3},{100,4,4},{100,5,5},{100,1,4}};
-	int rampageAST[100][3] = {{100,-1,6},{200,4,4},{200,2,5},{200,-3,4},{200,-1,7}};
+	int rampageAST[100][3] = {{50,-1,6},{200,4,4},{200,2,5},{200,-3,4},{200,-1,7},{200,-3,5},{200,-3,4},{200,-3,3},{200,-3,3},{200,0,3},{200,3,4},{200,3,4},{200,3,4}};
 	int spitfireAST[100][3] = {{20,2,14},{140,0,4},{140,7,7},{140,0,7},{140,0,11},{140,2,4},{140,-2,0},{140,-2,1},{140,-2,0},{140,-2,2},{140,1,2},{140,3,3},{140,3,3},{140,3,2}};
 	int lstarAST[100][3] = {{50,5,8},{100,4,8},{100,4,8},{100,3,8},{100,-3,8},{100,-4,6},{100,-3,6},{100,-3,7},{100,-3,7},{100,3,6},{100,3,8},{100,3,8},{100,3,8},{100,0,8},{100,0,8},{100,0,8},{100,0,8},{100,0,8}};
 	int re45AST[100][3] = {{39,0,4},{78,0,4},{78,-2,4},{78,-3,4},{78,-3,4},{78,-3,4} ,{78,-3,3},{78,-3,3},{78,-3,3},{78,-3,3},{78,-3,4},{78,-3,3},{78,-3,3},{78,-3,4},{78,-3,3},{78,-3,3},{78,-3,3},{78,-3,3},{78,-3,3}};
@@ -68,8 +68,8 @@ int lastKey = 400;
 int keyRepeats = 0;
 
 
-int keyboardEventX = 3;
-int mouseEventX = 2;
+int keyboardEventX = 2;
+int mouseEventX = 3;
 
 bool extraSlow = false;
 
@@ -136,6 +136,33 @@ std::string myHeatDict(int val){
 		return("#");
 	}
 }
+std::string myHeatDict2(int val){
+	if(val < 0){
+		return(" ");
+	} else if(val < 26){
+		return(".");
+	} else if(val < 52){
+		return(":");
+	} else if(val < 77){
+		return("-");
+	} else if(val < 103){
+		return("=");
+	} else if(val < 128){
+		return("+");
+	} else if(val < 154){
+		return("n");
+	} else if(val < 180){
+		return("m");
+	} else if(val < 205){
+		return("M");
+	} else if(val < 231){
+		return("%");
+	} else if(val < 256){
+		return("#");
+	} else {
+		return("@");
+	}
+}
 
 
 void myMouseMove(int x, int y){
@@ -187,7 +214,7 @@ void myHeatMap(int narr[scanRes]){
 	for(int j = 0; j < scanEach; j++){
 		std::cout<<"\n";
 		for(int i = 0; i < scanEach; i++){
-			std::cout << myHeatDict(narr[i+j*scanEach]);
+			std::cout << myHeatDict2(narr[i+j*scanEach]);
 		}
 	}
 	std::cout << "\n====HEATMAP====\n";
@@ -195,6 +222,23 @@ void myHeatMap(int narr[scanRes]){
 
 
 void myXset();
+XColor * myXscan(int xstart, int ystart, int xwid = 20, int ywid = 20, int xskip = 1, int yskip = 1){
+	const int res = xwid*ywid;
+	XColor scanArr[res];
+	static XColor *scanArrP = scanArr;
+	XImage *image;
+    image = XGetImage (dpy, XRootWindow (dpy, dfs), xstart,ystart, xwid*xskip, ywid*yskip, AllPlanes, XYPixmap);
+
+	for(int i = 0; i < xwid; i++){
+		for(int j = 0; j < ywid; j++){
+			scanArr[i+j*xwid] = getPix(i*xskip,j*yskip,image);
+		}
+	}
+    XFree(image);
+
+    XQueryColors (dpy, XDefaultColormap(dpy, dfs), scanArr, xwid*ywid);
+    return(scanArrP);
+}
 
 int * myCorrecter(int narr[scanRes]){
 
@@ -353,6 +397,16 @@ void executeCommandString(std::string str){
 		mast.weaponSetter = 0;
 		std::cout << ">setting weapon combination. press NUM5 to select\n";
 		myPlay("AUDweaponset.wav",s1);
+	} else if(str == "scan"){
+		int * pos = myGetMousePos();
+		XColor * scan = myXscan(pos[0],pos[1]);
+		for(int j = 0; j < 20; j++){
+			for(int i = 0; i < 20; i++){
+				std::cout << myHeatDict2(scan[i+j*20].red/256);
+			}
+			std::cout<<"\n";
+		}
+
 	} else if(str == "time.now()" || str == "tnow" || str == "time.now" || str == "time"){
 		std::cout << ">time now is: " << timeNow() << std::endl;
 		return;
@@ -709,7 +763,7 @@ void myMouseThread(){
 int main()
 {
 
-	std::cout << "eventX keyboard matches check\n";
+	std::cout << "\n\n\neventX keyboard matches check\n";
 	std::system("ls -l /dev/input/by-id/ | grep -e '600-event-kbd' -e 'event-mouse' | cut -c 25-");
 	std::cout << "\ncurrent keyboard and mouse eventX used: "+std::to_string(keyboardEventX)+" - "+std::to_string(mouseEventX);
 	std::cout << "\nverify correct device is being used for input\n\n\n";
