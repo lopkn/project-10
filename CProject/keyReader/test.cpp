@@ -364,6 +364,26 @@ bool commanding = false;
 std::string commandString = "";
 
 void executeCommandString(std::string str){
+
+
+	std::string strBuffer[100];
+
+	std::string delimiter = " ";
+	size_t pos = 0;
+	std::string token;
+	int bufferSize = 0;
+	while ((pos = str.find(delimiter)) != std::string::npos) {
+	    token = str.substr(0, pos);
+	    strBuffer[bufferSize] = token;
+	    bufferSize++;
+	    str.erase(0, pos + delimiter.length());
+	}
+	strBuffer[bufferSize] = str;
+	bufferSize++;
+	std::cout << "h"<<strBuffer[99] << "h\n";
+
+
+
 	if(str == "heatmap"){
 		heatMapToggle = !heatMapToggle;
 		std::cout << ">heatmap toggled\n";
@@ -805,6 +825,7 @@ int main()
 		std::cout << s1 << " is the current user ID \n\n";
 
 		// int G = system("sudo -u '#1002' XDG_RUNTIME_DIR=/run/user/1002 aplay start.wav >>/dev/null 2>>/dev/null &");
+		myPlay("start.wav",s1);
         char devname[] = "/dev/input/event2";
         int device = open(devname, O_RDONLY);
         struct input_event ev;
