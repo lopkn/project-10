@@ -1,0 +1,2 @@
+# g++ -c test2.cpp $(pkg-config --libs --cflags cairo) -lX11&&g++ test2.o -o sfml-app -lsfml-graphics -lsfml-window -lsfml-system -lX11 -L/usr/X11R6/lib -lXfixes $(pkg-config --libs --cflags cairo) && sudo ./sfml-app
+g++ -c test.cpp $(pkg-config --libs --cflags cairo) -lX11&&g++ test.o -o sfml-app -lsfml-graphics -lsfml-window -lsfml-system -lX11 -lXfixes $(pkg-config --libs --cflags cairo) && sudo ./sfml-app

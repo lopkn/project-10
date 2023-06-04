@@ -4,6 +4,8 @@
 #include <thread>
 
 
+
+
 #include <stdio.h>
 #include <fcntl.h>
 #include <linux/input.h>
@@ -21,6 +23,19 @@
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
 #include <cstring>
+
+
+//STUFF
+
+#include <X11/extensions/shape.h>
+#include <X11/extensions/Xfixes.h>
+
+#include <cairo.h>
+#include <cairo-xlib.h>
+
+//STUFF
+
+
 std::string s1;
 std::map<int, char> keyMap = {
     { 16, 'q' },{ 17, 'w' },{ 57, ' ' },
@@ -419,7 +434,7 @@ void executeCommandString(std::string str){
 		myPlay("AUDweaponset.wav",s1);
 	} else if(str == "scan" || str == "scan red"){
 		int * pos = myGetMousePos();
-		int resX = 60;
+		int resX = 100;
 		int resY = 40;
 		XColor * scan = myXscan(pos[0]-resX/2,pos[1]-resY/2,resX,resY,2,3);
 		for(int j = 0; j < resY; j++){
