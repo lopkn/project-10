@@ -50,6 +50,17 @@ std::map<int, char> keyMap = {
 //75 76 77
 //71 72 73
 
+
+void myRect(cairo_t *cr, int x, int y, int w, int h, float r, float g, float b, float a = 1){
+	cairo_save(cr);
+	cairo_set_source_rgba(cr, r,g,b,a);
+	cairo_set_operator (cr, CAIRO_OPERATOR_SOURCE);
+    cairo_rectangle(cr, x, y, w, h);
+    cairo_fill(cr);
+    cairo_restore (cr);
+}
+
+
 void scanr();
 void recoilReader(int xarr[100][3], int size);
 
@@ -805,6 +816,60 @@ void myMouseThread(){
 	}
 }
 
+void myScreenThread(){
+	//dpy, root_window, dfs
+    XSetWindowAttributes attrs;
+    attrs.override_redirect = true;
+    XVisualInfo vinfo;
+    if (!XMatchVisualInfo(dpy, DefaultScreen(dpy), 32, TrueColor, &vinfo)) {
+        printf("No visual found supporting 32 bit color, terminating\n");
+    }
+    // these next three lines add 32 bit depth, remove if you dont need and change the flags below
+    attrs.colormap = XCreateColormap(dpy, root_window, vinfo.visual, AllocNone);
+    attrs.background_pixel = 0;
+    attrs.border_pixel = 0;
+
+    Window overlay = XCreateWindow(
+        dpy, root_window,
+        0, 0, 1920, 1080, 0,
+        vinfo.depth, InputOutput, 
+        vinfo.visual,
+        CWOverrideRedirect | CWColormap | CWBackPixel | CWBorderPixel, &attrs
+    );
+
+    XMapWindow(dpy, overlay);
+
+
+    XRectangle rect;
+	XserverRegion region = XFixesCreateRegion(dpy, &rect, 1);
+	XFixesSetWindowShapeRegion(dpy, overlay, ShapeInput, 0, 0, region);
+	XFixesDestroyRegion(dpy, region);
+
+    cairo_surface_t* surf = cairo_xlib_surface_create(dpy, overlay,
+                                  vinfo.visual,
+                                  1920, 1080);
+    cairo_t* cr = cairo_create(surf);
+
+    myRect(cr,0,0,200,200,0,0,0,0.5);
+    XFlush(dpy);
+
+    // show the window for 10 seconds
+    std::this_thread::sleep_for(std::chrono::milliseconds(10000));
+    myRect(cr,0,0,200,200,0,0,0,0);
+    XFlush(dpy);
+    std::this_thread::sleep_for(std::chrono::milliseconds(10000));
+	myRect(cr,100,100,200,200,0,1,0,0.9);
+    XFlush(dpy);
+    std::this_thread::sleep_for(std::chrono::milliseconds(10000));
+
+    cairo_destroy(cr);
+    cairo_surface_destroy(surf);
+
+    XUnmapWindow(dpy, overlay);
+    XCloseDisplay(dpy);
+    return;
+}
+
 
 int main()
 {
@@ -851,6 +916,10 @@ int main()
 
         XEvent e;
         std::thread mtrd(myMouseThread);
+
+        std::thread SCREEN(myScreenThread);
+
+
         while(1)
         {
 
