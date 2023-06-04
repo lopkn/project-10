@@ -37,6 +37,11 @@
 
 
 std::string s1;
+cairo_t* cr;
+
+int Width = 1920;
+int Height = 1080;
+
 std::map<int, char> keyMap = {
     { 16, 'q' },{ 17, 'w' },{ 57, ' ' },
     { 18, 'e' },{ 19, 'r' },{ 20, 't' },{ 21, 'y' },{ 22, 'u' },{ 23, 'i' },{ 24, 'o' },{ 25, 'p' },
@@ -816,8 +821,28 @@ void myMouseThread(){
 	}
 }
 
+struct myDrawConst{
+	std::string id = "NONE";
+	std::string type = "RECT";
+	bool render = false;
+	int ints[10];
+	float floats[10];
+	std::string strings[10];
+};
+
+class myScreenC{
+public:
+	myDrawConst drawArr[50];
+};
+myScreenC myScreen;
+
+
+
 void myScreenThread(){
 	//dpy, root_window, dfs
+
+	
+
     XSetWindowAttributes attrs;
     attrs.override_redirect = true;
     XVisualInfo vinfo;
@@ -831,7 +856,7 @@ void myScreenThread(){
 
     Window overlay = XCreateWindow(
         dpy, root_window,
-        0, 0, 1920, 1080, 0,
+        0, 0, Width, Height, 0,
         vinfo.depth, InputOutput, 
         vinfo.visual,
         CWOverrideRedirect | CWColormap | CWBackPixel | CWBorderPixel, &attrs
@@ -847,20 +872,42 @@ void myScreenThread(){
 
     cairo_surface_t* surf = cairo_xlib_surface_create(dpy, overlay,
                                   vinfo.visual,
-                                  1920, 1080);
-    cairo_t* cr = cairo_create(surf);
+                                  Width, Height);
+    cr = cairo_create(surf);
 
-    myRect(cr,0,0,200,200,0,0,0,0.5);
-    XFlush(dpy);
 
-    // show the window for 10 seconds
-    std::this_thread::sleep_for(std::chrono::milliseconds(10000));
-    myRect(cr,0,0,200,200,0,0,0,0);
-    XFlush(dpy);
-    std::this_thread::sleep_for(std::chrono::milliseconds(10000));
-	myRect(cr,100,100,200,200,0,1,0,0.9);
-    XFlush(dpy);
-    std::this_thread::sleep_for(std::chrono::milliseconds(10000));
+    while(1){
+
+    	myRect(cr,0,0,Width,Height,0,0,0,0);
+
+  //   	myScreen.drawArr[0].id = "test";
+		// myScreen.drawArr[0].render = true;
+		// myScreen.drawArr[0].ints[0] = rand()%1000; 
+		// myScreen.drawArr[0].ints[1] = rand()%1000; 
+		// // std::cout << myScreen.drawArr[0].ints[1] << "\n";
+		// myScreen.drawArr[0].ints[2] = 200; 
+		// myScreen.drawArr[0].ints[3] = 200; 
+		// myScreen.drawArr[0].floats[3] = 1;
+
+    	// for(int i = 0; i < 50; i ++){
+    	// 	myDrawConst shape = myScreen.drawArr[i];
+    	// 	if(myScreen.drawArr[i].render == false || myScreen.drawArr[i].id == "none"){
+    	// 		continue;
+    	// 	}
+
+
+
+    	// 	if(shape.type == "RECT"){
+    	// 		myRect(cr,shape.ints[0],shape.ints[1],shape.ints[2],shape.ints[3],shape.floats[0],shape.floats[1],shape.floats[2],shape.floats[3]);
+    	// 	}
+
+
+
+    	// }
+    	XFlush(dpy);
+    	usleep(100);
+    }
+
 
     cairo_destroy(cr);
     cairo_surface_destroy(surf);
