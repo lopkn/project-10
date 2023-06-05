@@ -830,12 +830,28 @@ struct myDrawConst{
 	std::string strings[10];
 };
 
+// struct myRectStruct
+
 class myScreenC{
 public:
 	myDrawConst drawArr[50];
 };
 myScreenC myScreen;
 
+
+// class myDrawParticle{
+// public:
+// 	int life;
+
+
+// 	void myDrawParticle(int ix1, int iy1, int iw, int ih, int ii1){
+// 		life = ii1;
+// 	};
+
+// 	void draw(){
+
+// 	}
+// }
 
 
 void myScreenThread(){
@@ -880,14 +896,17 @@ void myScreenThread(){
 
     	myRect(cr,0,0,Width,Height,0,0,0,0);
 
-  //   	myScreen.drawArr[0].id = "test";
-		// myScreen.drawArr[0].render = true;
-		// myScreen.drawArr[0].ints[0] = rand()%1000; 
-		// myScreen.drawArr[0].ints[1] = rand()%1000; 
-		// // std::cout << myScreen.drawArr[0].ints[1] << "\n";
-		// myScreen.drawArr[0].ints[2] = 200; 
-		// myScreen.drawArr[0].ints[3] = 200; 
-		// myScreen.drawArr[0].floats[3] = 1;
+    	myScreen.drawArr[0].id = "test";
+		myScreen.drawArr[0].render = true;
+		myScreen.drawArr[0].ints[0] = rand()%1000; 
+		myScreen.drawArr[0].ints[1] = rand()%1000; 
+		// std::cout << myScreen.drawArr[0].ints[1] << "\n";
+		myScreen.drawArr[0].ints[2] = 200; 
+		myScreen.drawArr[0].ints[3] = 200; 
+		myScreen.drawArr[0].floats[0] = rand()%1000/1000;
+		myScreen.drawArr[0].floats[1] = rand()%1000/1000;
+		myScreen.drawArr[0].floats[2] = rand()%1000/1000;
+		myScreen.drawArr[0].floats[3] = 1;
 
     	// for(int i = 0; i < 50; i ++){
     	// 	myDrawConst shape = myScreen.drawArr[i];
