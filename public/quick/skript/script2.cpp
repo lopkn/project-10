@@ -19,10 +19,10 @@ int main()
   "rancid","primal brained"//31
 };
 
-const std::string adverbs[20]={
+const std::string adverbs[21]={
   "trivially ","horrendously ","heinously ","erroneously ","notably ","exceptionally ",
   "abnormally ","abhorrently ","atrociously ","direly "," hideously ","dreadfully ","awfully ","harrowingly ",
-  "unbelievably ","improbably ","implausibly ","disturbingly ","excrutiatingly ", "catastrophicalaly "
+  "unbelievably ","improbably ","implausibly ","disturbingly ","excrutiatingly ", "catastrophicalaly ","absurdly "
 };
 
   a = rand() % 30;

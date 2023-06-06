@@ -108,7 +108,7 @@ class comparer{
 			parr.push(c)
 			break;
 		case 8:
-			let a = setInterval(()=>{
+			let G = setInterval(()=>{
 				c = new liner(a,Height/2-30,4,7,0)
 				c.maxActLife = 40
 				c.vx += Math.random()*216-108
@@ -116,7 +116,7 @@ class comparer{
 				parr.push(c)
 			},500)
 
-			setTimeout(()=>{clearInterval(a)},100000)
+			setTimeout(()=>{clearInterval(G)},100000)
 
 			break;
 		case 7:
