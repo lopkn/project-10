@@ -791,7 +791,7 @@ void recoilReader(int xarr[100][3],int size, int device){
 	}
 }
 void myMouseThread(){
-	char devname[] = "/dev/input/event3";
+	char devname[] = "/dev/input/event5";
     int device = open(devname, O_RDONLY);
     struct input_event ev;
 
