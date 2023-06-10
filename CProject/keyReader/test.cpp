@@ -86,10 +86,12 @@ struct AST{
 	int spitfireAST[100][3] = {{20,2,14},{140,0,4},{140,7,7},{140,0,7},{140,0,11},{140,2,4},{140,-2,0},{140,-2,1},{140,-2,0},{140,-2,2},{140,1,2},{140,3,3},{140,3,3},{140,3,2}};
 	int lstarAST[100][3] = {{50,5,8},{100,4,8},{100,4,8},{100,3,8},{100,-3,8},{100,-4,6},{100,-3,6},{100,-3,7},{100,-3,7},{100,3,6},{100,3,8},{100,3,8},{100,3,8},{100,0,8},{100,0,8},{100,0,8},{100,0,8},{100,0,8}};
 	int re45AST[100][3] = {{39,0,4},{78,0,4},{78,-2,4},{78,-3,4},{78,-3,4},{78,-3,4} ,{78,-3,3},{78,-3,3},{78,-3,3},{78,-3,3},{78,-3,4},{78,-3,3},{78,-3,3},{78,-3,4},{78,-3,3},{78,-3,3},{78,-3,3},{78,-3,3},{78,-3,3}};
+	int havocAST[100][3] = {{500,-2,10},{100,-2,10}};
 
-	const static int weaponCount = 9;
-	int (*ASTs[weaponCount])[100][3] = {&re45AST,&prowlerAST,&nemesisAST,&carAST,&r99AST,&flatlineAST,&rampageAST,&spitfireAST,&lstarAST};
-	std::string ASTsounds[weaponCount] = {"","AUDprowler.wav","AUDnemesis.wav","AUDcar.wav","AUDr99.wav","AUDflatline.wav","AUDrampage.wav","AUDspitfire.wav","AUDlstar.wav"};
+
+	const static int weaponCount = 10;
+	int (*ASTs[weaponCount])[100][3] = {&havocAST,&prowlerAST,&nemesisAST,&carAST,&r99AST,&flatlineAST,&rampageAST,&spitfireAST,&lstarAST,&re45AST};
+	std::string ASTsounds[weaponCount] = {"","AUDprowler.wav","AUDnemesis.wav","AUDcar.wav","AUDr99.wav","AUDflatline.wav","AUDrampage.wav","AUDspitfire.wav","AUDlstar.wav",""};
 	//prowler, nemesisx
 };
 AST mast;
@@ -763,6 +765,8 @@ void recoilReader(int xarr[100][3],int size, int device){
 				break;
 			}
 			bool stop = false;
+			std::this_thread::sleep_for(std::chrono::milliseconds(xarr[i][0]));
+			
 						while(poll(fds,1,0)){
 							if((fds[0].revents & POLLIN)){
 				    		input_event ev;
@@ -782,7 +786,6 @@ void recoilReader(int xarr[100][3],int size, int device){
 						}
 						if(stop){break;}//im genius
 
-			std::this_thread::sleep_for(std::chrono::milliseconds(xarr[i][0]));
 			int * pos = myGetMousePos();
 			if(mast.aimprint){
 				std::cout << "aiming: "<<xarr[i][1]<<" = "<<xarr[i][2]<<"\n";
