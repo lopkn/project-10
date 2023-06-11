@@ -86,12 +86,13 @@ struct AST{
 	int spitfireAST[100][3] = {{20,2,14},{140,0,4},{140,7,7},{140,0,7},{140,0,11},{140,2,4},{140,-2,0},{140,-2,1},{140,-2,0},{140,-2,2},{140,1,2},{140,3,3},{140,3,3},{140,3,2}};
 	int lstarAST[100][3] = {{50,5,8},{100,4,8},{100,4,8},{100,3,8},{100,-3,8},{100,-4,6},{100,-3,6},{100,-3,7},{100,-3,7},{100,3,6},{100,3,8},{100,3,8},{100,3,8},{100,0,8},{100,0,8},{100,0,8},{100,0,8},{100,0,8}};
 	int re45AST[100][3] = {{39,0,4},{78,0,4},{78,-2,4},{78,-3,4},{78,-3,4},{78,-3,4} ,{78,-3,3},{78,-3,3},{78,-3,3},{78,-3,3},{78,-3,4},{78,-3,3},{78,-3,3},{78,-3,4},{78,-3,3},{78,-3,3},{78,-3,3},{78,-3,3},{78,-3,3}};
-	int havocAST[100][3] = {{500,-2,10},{100,-2,10}};
+	int havocAST[100][3] = {{500,-2,10},{90,-2,10},{90,-2,10},{90,1,6},{100,1,5},{100,2,6},{100,2,5},{90,1,5},{90,0,5},{90,0,5},{90,-3,0},{90,-3,0},{90,-3,0},{90,-3,0},{90,0,5},{90,3,0},{90,3,0},{90,4,0},{90,4,2},{90,0,4},{90,0,4},{90,0,4},{90,0,3},{90,0,3},{90,0,3},{90,0,3},{90,0,3},{90,0,3},{90,0,3},{90,0,3},{90,0,3}};
+	int devotionAST[100][3] = {{20,0,22},{250,0,14},{170,0,13},{150,1,9},{110,2,7},{90,2,6},{90,2,5},{90,2,4},{90,2,4},{90,2,4},{90,2,4},{90,4,3},{90,4,2},{90,4,2},{90,4,2},{90,4,2},{90,2,4},{90,-4,3},{90,-4,3},{90,-4,3},{90,-3,2},{90,-3,3},{90,-3,2},{90,-3,3},{90,-3,2},{90,-3,3},{90,-3,2},{90,-3,2},{90,-3,3},{90,-3,3},{90,-3,2}};
+	int jitterAST[100][3] = {{50,7,0},{20,-7,0},{140,7,0},{20,-7,0},{20,-7,0},{140,7,0},{140,7,0},{20,-7,0},{20,-7,0},{140,7,0},{140,7,0},{20,-7,0},{20,-7,0},{140,7,0},{140,7,0},{20,-7,0},{20,-7,0},{140,7,0},{140,7,0},{20,-7,0},{20,-7,0},{140,7,0},{140,7,0},{20,-7,0},{20,-7,0},{140,7,0},{140,7,0},{20,-7,0},{20,-7,0},{140,7,0},{140,7,0},{20,-7,0},{20,-7,0},{140,7,0}};
 
-
-	const static int weaponCount = 10;
-	int (*ASTs[weaponCount])[100][3] = {&havocAST,&prowlerAST,&nemesisAST,&carAST,&r99AST,&flatlineAST,&rampageAST,&spitfireAST,&lstarAST,&re45AST};
-	std::string ASTsounds[weaponCount] = {"","AUDprowler.wav","AUDnemesis.wav","AUDcar.wav","AUDr99.wav","AUDflatline.wav","AUDrampage.wav","AUDspitfire.wav","AUDlstar.wav",""};
+	const static int weaponCount = 12;
+	int (*ASTs[weaponCount])[100][3] = {&jitterAST,&devotionAST,&prowlerAST,&nemesisAST,&carAST,&r99AST,&flatlineAST,&rampageAST,&spitfireAST,&lstarAST,&re45AST,&havocAST};
+	std::string ASTsounds[weaponCount] = {"","","AUDprowler.wav","AUDnemesis.wav","AUDcar.wav","AUDr99.wav","AUDflatline.wav","AUDrampage.wav","AUDspitfire.wav","AUDlstar.wav","",""};
 	//prowler, nemesisx
 };
 AST mast;
@@ -199,17 +200,6 @@ std::string myHeatDict2(int val){
 
 
 void myMouseMove(int x, int y){
-	// XColor c;
-    // XImage *image;
-    // image = XGetImage (d, XRootWindow (d, XDefaultScreen (d)), 200, 200, 1, 1, AllPlanes, XYPixmap);
-    // c.pixel = XGetPixel (image, 0, 0);
-    // XFree (image);
-    // XQueryColor (d, XDefaultColormap(d, XDefaultScreen (d)), &c);
-    // cout << c.red/256 << " " << c.green/256 << " " << c.blue/256 << "\n";
-
-    // XWarpPointer(dpy,None,root_window,0,0,0,0,x,y);
-    // XSync(dpy, false);
-    // Display *dpyy = dpy;
     XWarpPointer(dpy,None,root_window,0,0,0,0,x,y);
     XSync(dpy, false);
     XFlush(dpy);
@@ -434,6 +424,9 @@ void executeCommandString(std::string str){
 		CMDINFO.colpx[1] = SCAN.green/256;
 		CMDINFO.colpx[2] = SCAN.blue/256;
 		return;
+	} else if(str == "screencap" || str == "screenshot" || str == "cap"){
+		std::string s2 = ("sudo -u '#" + s1 +"' XDG_RUNTIME_DIR=/run/user/" + s1 + " gnome-screenshot &");
+		std::system(s2.c_str());
 	} else if(str == "maplock"){
 		mapLocked = !mapLocked;
 		std::cout << ">maplock toggled\n";
@@ -766,7 +759,7 @@ void recoilReader(int xarr[100][3],int size, int device){
 			}
 			bool stop = false;
 			std::this_thread::sleep_for(std::chrono::milliseconds(xarr[i][0]));
-			
+
 						while(poll(fds,1,0)){
 							if((fds[0].revents & POLLIN)){
 				    		input_event ev;
@@ -774,6 +767,7 @@ void recoilReader(int xarr[100][3],int size, int device){
 				           if (s == -1){
 				               std::cout<<"error\n";
 				           }
+				           // std::cout << ev.type << "-" << ev.value << "-" << ev.code << "\n";
 				           if(ev.type == EV_KEY && ev.value == 0 && ev.code == BTN_MOUSE){
 					   		std::cout << "breaking: mouse is up\n";
 				
@@ -860,8 +854,6 @@ myScreenC myScreen;
 void myScreenThread(){
 	//dpy, root_window, dfs
 
-	
-
     XSetWindowAttributes attrs;
     attrs.override_redirect = true;
     XVisualInfo vinfo;
@@ -899,33 +891,35 @@ void myScreenThread(){
 
     	myRect(cr,0,0,Width,Height,0,0,0,0);
 
-    	myScreen.drawArr[0].id = "test";
-		myScreen.drawArr[0].render = true;
-		myScreen.drawArr[0].ints[0] = rand()%1000; 
-		myScreen.drawArr[0].ints[1] = rand()%1000; 
-		// std::cout << myScreen.drawArr[0].ints[1] << "\n";
-		myScreen.drawArr[0].ints[2] = 200; 
-		myScreen.drawArr[0].ints[3] = 200; 
-		myScreen.drawArr[0].floats[0] = rand()%1000/1000;
-		myScreen.drawArr[0].floats[1] = rand()%1000/1000;
-		myScreen.drawArr[0].floats[2] = rand()%1000/1000;
-		myScreen.drawArr[0].floats[3] = 1;
+  //   	for(int i = 0; i < 25; i++){
+  //   	myScreen.drawArr[i].id = "test";
+		// myScreen.drawArr[i].render = true;
+		// myScreen.drawArr[i].ints[0] = rand()%1000; 
+		// myScreen.drawArr[i].ints[1] = rand()%1000; 
+		// // std::cout << myScreen.drawArr[0].ints[1] << "\n";
+		// myScreen.drawArr[i].ints[2] = 200; 
+		// myScreen.drawArr[i].ints[3] = 200; 
+		// myScreen.drawArr[i].floats[0] = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);;
+		// myScreen.drawArr[i].floats[1] = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);;
+		// myScreen.drawArr[i].floats[2] = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);;
+		// myScreen.drawArr[i].floats[3] = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);;
+		// }
 
-    	// for(int i = 0; i < 50; i ++){
-    	// 	myDrawConst shape = myScreen.drawArr[i];
-    	// 	if(myScreen.drawArr[i].render == false || myScreen.drawArr[i].id == "none"){
-    	// 		continue;
-    	// 	}
-
-
-
-    	// 	if(shape.type == "RECT"){
-    	// 		myRect(cr,shape.ints[0],shape.ints[1],shape.ints[2],shape.ints[3],shape.floats[0],shape.floats[1],shape.floats[2],shape.floats[3]);
-    	// 	}
+  //   	for(int i = 0; i < 50; i ++){
+  //   		myDrawConst shape = myScreen.drawArr[i];
+  //   		if(myScreen.drawArr[i].render == false || myScreen.drawArr[i].id == "none"){
+  //   			continue;
+  //   		}
 
 
 
-    	// }
+  //   		if(shape.type == "RECT"){
+  //   			myRect(cr,shape.ints[0],shape.ints[1],shape.ints[2],shape.ints[3],shape.floats[0],shape.floats[1],shape.floats[2],shape.floats[3]);
+  //   		}
+
+
+
+  //   	}
     	XFlush(dpy);
     	usleep(100);
     }
