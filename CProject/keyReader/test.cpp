@@ -13,7 +13,7 @@
 #include <unistd.h>
 #include <signal.h>
 #include <stdlib.h>
-
+#include <list>
 #include <poll.h>
 
 #include <map>
@@ -894,32 +894,32 @@ void myScreenThread(){
 
     	myRect(cr,0,0,Width,Height,0,0,0,0);
 
-    	for(int i = 0; i < 50; i++){
-    	myScreen.drawArr[i].id = "test";
-		myScreen.drawArr[i].render = true;
-		myScreen.drawArr[i].ints[0] = rand()%1800; 
-		myScreen.drawArr[i].ints[1] = rand()%1000; 
-		// std::cout << myScreen.drawArr[0].ints[1] << "\n";
-		myScreen.drawArr[i].ints[2] = rand()%20+10; 
-		myScreen.drawArr[i].ints[3] = 20; 
-		myScreen.drawArr[i].floats[0] = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);;
-		myScreen.drawArr[i].floats[1] = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);;
-		myScreen.drawArr[i].floats[2] = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);;
-		myScreen.drawArr[i].floats[3] = 1;
-		}
+  //   	for(int i = 0; i < 50; i++){
+  //   	myScreen.drawArr[i].id = "test";
+		// myScreen.drawArr[i].render = true;
+		// myScreen.drawArr[i].ints[0] = rand()%1800; 
+		// myScreen.drawArr[i].ints[1] = rand()%1000; 
+		// // std::cout << myScreen.drawArr[0].ints[1] << "\n";
+		// myScreen.drawArr[i].ints[2] = rand()%20+10; 
+		// myScreen.drawArr[i].ints[3] = 20; 
+		// myScreen.drawArr[i].floats[0] = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);;
+		// myScreen.drawArr[i].floats[1] = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);;
+		// myScreen.drawArr[i].floats[2] = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);;
+		// myScreen.drawArr[i].floats[3] = 1;
+		// }
 
-    	for(int i = 0; i < 50; i ++){
-    		myDrawConst shape = myScreen.drawArr[i];
-    		if(myScreen.drawArr[i].render == false || myScreen.drawArr[i].id == "none"){
-    			continue;
-    		}
-    		if(shape.type == "RECT"){
-    			myRect(cr,shape.ints[0],shape.ints[1],shape.ints[2],shape.ints[3],shape.floats[0],shape.floats[1],shape.floats[2],shape.floats[3]);
-    		}
+  //   	for(int i = 0; i < 50; i ++){
+  //   		myDrawConst shape = myScreen.drawArr[i];
+  //   		if(myScreen.drawArr[i].render == false || myScreen.drawArr[i].id == "none"){
+  //   			continue;
+  //   		}
+  //   		if(shape.type == "RECT"){
+  //   			myRect(cr,shape.ints[0],shape.ints[1],shape.ints[2],shape.ints[3],shape.floats[0],shape.floats[1],shape.floats[2],shape.floats[3]);
+  //   		}
 
 
 
-    	}
+  //   	}
     	XFlush(dpy);
     	usleep(100);
     }
