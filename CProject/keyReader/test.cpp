@@ -57,6 +57,24 @@ std::map<int, char> keyMap = {
 //71 72 73
 
 
+std::vector<std::string> split(std::string str,std::string delimiter){
+	std::vector<std::string> t;
+
+	size_t pos = 0;
+	std::string token;
+	while ((pos = str.find(delimiter)) != std::string::npos) {
+	    token = str.substr(0, pos);
+	    t.push_back(token);
+	    str.erase(0, pos + delimiter.length());
+	}
+	t.push_back(str);
+
+    // for(int i = 0; i < t.size(); i++){
+    //     std::cout<<t[i]<<"\n";
+    // }
+	return(t);
+}
+
 void myRect(cairo_t *cr, int x, int y, int w, int h, float r, float g, float b, float a = 1){
 	cairo_save(cr);
 	cairo_set_source_rgba(cr, r,g,b,a);
@@ -405,21 +423,23 @@ std::string commandString = "";
 void executeCommandString(std::string str){
 
 
-	std::string strBuffer[100];
+	// std::string strBuffer[100];
 
-	std::string delimiter = " ";
-	size_t pos = 0;
-	std::string token;
-	int bufferSize = 0;
-	while ((pos = str.find(delimiter)) != std::string::npos) {
-	    token = str.substr(0, pos);
-	    strBuffer[bufferSize] = token;
-	    bufferSize++;
-	    str.erase(0, pos + delimiter.length());
-	}
-	strBuffer[bufferSize] = str;
-	bufferSize++;
-	std::cout << "h"<<strBuffer[99] << "h\n";
+	// std::string delimiter = " ";
+	// size_t pos = 0;
+	// std::string token;
+	// int bufferSize = 0;
+	// while ((pos = str.find(delimiter)) != std::string::npos) {
+	    // token = str.substr(0, pos);
+	    // strBuffer[bufferSize] = token;
+	    // bufferSize++;
+	    // str.erase(0, pos + delimiter.length());
+	// }
+	// strBuffer[bufferSize] = str;
+	// bufferSize++;
+	// std::cout << "h"<<strBuffer[99] << "h\n";
+
+	std::vector<std::string> spl = split(new std::string(*str)," ");
 
 
 
@@ -434,6 +454,7 @@ void executeCommandString(std::string str){
 		std::cout << "> [setweapon] sets the weapon combinations\n";
 		std::cout << "> [time/tnow/time.now] gives times in epoch ms\n";
 		std::cout << "> [keycord] records all key events\n";
+		std::cout << "> [scan] print out an askii of xscan (red)\n";
 		std::cout << "> === help ===\n\n";
 	}
 	else if(str == "heatmap"){
@@ -458,15 +479,15 @@ void executeCommandString(std::string str){
 		std::system(s2.c_str());
 	} else if(str == "maplock"){
 		mapLocked = !mapLocked;
-		std::cout << ">maplock toggled\n";
+		std::cout << ">maplock toggled: "<< mapLocked <<"\n";
 		return;
 	} else if(str == "aimprint"){
 		mast.aimprint = !mast.aimprint;
-		std::cout << ">aimprint toggled\n";
+		std::cout << ">aimprint toggled: "<< mast.aimprint <<"\n";
 		return;
 	} else if(str == "stopsound"){
 		mast.stopsound = !mast.stopsound;
-		std::cout << ">sound toggled\n";
+		std::cout << ">sound toggled: "<<mast.stopsound<<"\n";
 		return;
 	} else if(str == "setweapon"){
 		mast.weaponSetter = 0;
@@ -488,9 +509,29 @@ void executeCommandString(std::string str){
 		std::cout << ">time now is: " << timeNow() << std::endl;
 		return;
 	} else if(str == "keycord"){
-		std::cout << ">keycording toggled."
+		mast.keyCord = !mast.keyCord;
+		std::cout << ">keycording toggled: "<< mast.keyCord <<"\n";
 		return;
 	}
+
+
+
+
+	if(spl.size() > 0){
+
+		for(int i = 0; i < 5; i++){
+			spl.push_back("");
+		}
+
+		if(spl[0] == "play"){
+			myPlay(spl[1]+".wav",s1);
+		}
+
+
+
+	}
+
+
 }
 
 void endCommand(){
@@ -502,7 +543,6 @@ void endCommand(){
 	std::string token;
 	while ((pos = commandString.find(delimiter)) != std::string::npos) {
 	    token = commandString.substr(0, pos);
-	    // std::cout << token << std::endl;
 	    executeCommandString(token);
 	    commandString.erase(0, pos + delimiter.length());
 	}
@@ -931,6 +971,7 @@ void myScreenThread(){
 
     	myRect(cr,0,0,Width,Height,0,0,0,0);
 
+  ////Colorrender
   //   	for(int i = 0; i < 50; i++){
   //   	myScreen.drawArr[i].id = "test";
 		// myScreen.drawArr[i].render = true;
@@ -953,10 +994,8 @@ void myScreenThread(){
   //   		if(shape.type == "RECT"){
   //   			myRect(cr,shape.ints[0],shape.ints[1],shape.ints[2],shape.ints[3],shape.floats[0],shape.floats[1],shape.floats[2],shape.floats[3]);
   //   		}
-
-
-
   //   	}
+  ////Colorrender
 
     	int size = myScreen.drawArr.size();
     	for(int i = size-1; i > -1; i--){
@@ -1078,8 +1117,10 @@ int main()
 
 
 
-
-
+//check:
+//eventX <- int 
+//Vector commands
+//Vector rendering
 
 
 
