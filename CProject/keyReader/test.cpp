@@ -13,7 +13,8 @@
 #include <unistd.h>
 #include <signal.h>
 #include <stdlib.h>
-#include <list>
+// #include <list>
+#include <vector>
 #include <poll.h>
 
 #include <map>
@@ -73,6 +74,9 @@ struct AST{
 	bool firedown = false;
 	bool aimprint = true;
 	bool stopsound = false;
+	bool keyCord = false;
+
+
 	int downMode = 1;
 	int weaponSetter = 3;
 	int weaponSet[3] = {1,2,3};
@@ -229,7 +233,6 @@ const int scanEachH = scanEach/2;
 int ocor[scanRes];
 
 bool mapLocked = true;
-
 bool heatMapToggle = false;
 
 void myHeatMap(int narr[scanRes]){
@@ -263,7 +266,17 @@ XColor * myXscan(int xstart, int ystart, int xwid = 20, int ywid = 20, int xskip
     return(scanArrP);
 }
 
+void imageContrast(XColor * carr, int xwid, int ywid){
+	int res = xwid*ywid
+	int outarr[res];
+	for(int i = 0; i < xwid; i++){
+		for(int j = 0; j < ywid; j++){
+			
+		}
 
+	}
+
+}
 
 
 int * myCorrecter(int narr[scanRes]){
@@ -410,9 +423,22 @@ void executeCommandString(std::string str){
 
 
 
-	if(str == "heatmap"){
+	if(str == "help"){ 
+		std::cout << "> === help === \n";
+		std::cout << "> [heatmap] toggle heatmap\n";
+		std::cout << "> [colgrab] pixel color at cursor\n";
+		std::cout << "> [cap/screencap/screenshot] screencapture\n";
+		std::cout << "> [maplock] toggle maplock\n";
+		std::cout << "> [aimprint] toggles printout for mouse movement when stabalizing\n";
+		std::cout << "> [stopsound] toggles sound\n";
+		std::cout << "> [setweapon] sets the weapon combinations\n";
+		std::cout << "> [time/tnow/time.now] gives times in epoch ms\n";
+		std::cout << "> [keycord] records all key events\n";
+		std::cout << "> === help ===\n\n";
+	}
+	else if(str == "heatmap"){
 		heatMapToggle = !heatMapToggle;
-		std::cout << ">heatmap toggled\n";
+		std::cout << ">heatmap toggled: "<< heatMapToggle <<"\n";
 		return;
 	} else if(str == "colgrab"){
 		int * pos = myGetMousePos();
@@ -460,6 +486,9 @@ void executeCommandString(std::string str){
 
 	} else if(str == "time.now()" || str == "tnow" || str == "time.now" || str == "time"){
 		std::cout << ">time now is: " << timeNow() << std::endl;
+		return;
+	} else if(str == "keycord"){
+		std::cout << ">keycording toggled."
 		return;
 	}
 }
@@ -791,7 +820,12 @@ void recoilReader(int xarr[100][3],int size, int device){
 	}
 }
 void myMouseThread(){
-	char devname[] = "/dev/input/event5";
+	char devname[] = "/dev/input/event";
+	char mouseEX[32];
+	sprintf(mouseEX, "%d", mouseEventX);
+	strcat(devname, mouseEX);
+
+
     int device = open(devname, O_RDONLY);
     struct input_event ev;
 
@@ -828,13 +862,16 @@ struct myDrawConst{
 	int ints[10];
 	float floats[10];
 	std::string strings[10];
+	int life = 50;
 };
 
 // struct myRectStruct
 
+
 class myScreenC{
 public:
-	myDrawConst drawArr[50];
+	myDrawConst drawArr1[50];
+	std::vector<myDrawConst> drawArr;
 };
 myScreenC myScreen;
 
@@ -920,6 +957,23 @@ void myScreenThread(){
 
 
   //   	}
+
+    	int size = myScreen.drawArr.size();
+    	for(int i = size-1; i > -1; i--){
+
+    		myDrawConst shape = myScreen.drawArr[i];
+    		shape.life -= 1;
+    		if(shape.life < 1){
+    			myScreen.drawArr.erase(myScreen.drawArr.begin()+i);
+    			continue;
+    		}
+
+    		if(shape.type == "RECT"){
+    			myRect(cr,shape.ints[0],shape.ints[1],shape.ints[2],shape.ints[3],shape.floats[0],shape.floats[1],shape.floats[2],shape.floats[3]);
+    		}
+    	}
+
+
     	XFlush(dpy);
     	usleep(100);
     }
@@ -969,7 +1023,13 @@ int main()
 
 		// int G = system("sudo -u '#1002' XDG_RUNTIME_DIR=/run/user/1002 aplay start.wav >>/dev/null 2>>/dev/null &");
 		myPlay("start.wav",s1);
-        char devname[] = "/dev/input/event2";
+        char devname[] = "/dev/input/event";
+        char integer_string[32];
+
+		sprintf(integer_string, "%d", keyboardEventX);
+		strcat(devname, integer_string);
+
+
         int device = open(devname, O_RDONLY);
         struct input_event ev;
 
@@ -988,21 +1048,18 @@ int main()
 
 
         	
-	        	// XNextEvent(dpy,&e);
-        		// std::cout<<"beraerear\n";
+	
                 read(device,&ev, sizeof(ev));
+                if(mast.keyCord){
+                	std::cout << "Keycord: " << ev.type << " - " << ev.code << " - " << ev.value << " \n";
+                }
                 if(ev.type == 1 && ev.value == 1){
 
                         myDo(ev.code,s1);
                         std::cout << "Key: " << ev.code << " State: " << ev.value << std::endl;
                 }
 
-		     //            uint64_t now = timeNow();
-		     //            if(now != lastTime){
-							// lastTime = now;
-							// repeating();
-			    //     		// XFillRectangle(dpy,w,DefaultGC(dpy,dfs),20,20,10,10);
-		     //            }
+
 
         }
         XCloseDisplay(dpy);
@@ -1015,5 +1072,20 @@ int main()
 //Eye tracker aim bot
 //suvat equa
 //link to different files
+
+//std system call of analyzing audio
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 //g++ -c test.cpp -lX11&&g++ test.o -o sfml-app -lsfml-graphics -lsfml-window -lsfml-system -lX11 && sudo ./sfml-app
