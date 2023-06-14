@@ -125,7 +125,7 @@ int keyRepeats = 0;
 
 
 int keyboardEventX = 2;
-int mouseEventX = 3;
+int mouseEventX = 5;
 
 bool extraSlow = false;
 
@@ -285,7 +285,7 @@ XColor * myXscan(int xstart, int ystart, int xwid = 20, int ywid = 20, int xskip
 }
 
 void imageContrast(XColor * carr, int xwid, int ywid){
-	int res = xwid*ywid
+	int res = xwid*ywid;
 	int outarr[res];
 	for(int i = 0; i < xwid; i++){
 		for(int j = 0; j < ywid; j++){
@@ -438,8 +438,8 @@ void executeCommandString(std::string str){
 	// strBuffer[bufferSize] = str;
 	// bufferSize++;
 	// std::cout << "h"<<strBuffer[99] << "h\n";
-
-	std::vector<std::string> spl = split(new std::string(*str)," ");
+	std::string str2 = str;
+	std::vector<std::string> spl = split(str2," ");
 
 
 
@@ -910,7 +910,7 @@ struct myDrawConst{
 
 class myScreenC{
 public:
-	myDrawConst drawArr1[50];
+	myDrawConst drawArr1[150];
 	std::vector<myDrawConst> drawArr;
 };
 myScreenC myScreen;
@@ -967,35 +967,81 @@ void myScreenThread(){
     cr = cairo_create(surf);
 
 
+    for(int i = 0; i < 150; i++){
+    	myScreen.drawArr1[i].id = "test";
+		myScreen.drawArr1[i].render = true;
+		myScreen.drawArr1[i].ints[0] = rand()%1800; 
+		myScreen.drawArr1[i].ints[1] = rand()%1000; 
+		// std::cout << myScreen.drawArr1[0].ints[1] << "\n";
+		myScreen.drawArr1[i].ints[2] = rand()%40+10; 
+		myScreen.drawArr1[i].ints[3] = 40; 
+		myScreen.drawArr1[i].ints[4] = 0; 
+		myScreen.drawArr1[i].ints[5] = 0; 
+		myScreen.drawArr1[i].floats[0] = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);;
+		myScreen.drawArr1[i].floats[1] = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);;
+		myScreen.drawArr1[i].floats[2] = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);;
+		// myScreen.drawArr1[i].floats[0] = 1;
+		// myScreen.drawArr1[i].floats[1] = 1;
+		// myScreen.drawArr1[i].floats[2] = 1;
+		myScreen.drawArr1[i].floats[3] = 0.5;
+		}
+
     while(1){
 
     	myRect(cr,0,0,Width,Height,0,0,0,0);
 
-  ////Colorrender
-  //   	for(int i = 0; i < 50; i++){
-  //   	myScreen.drawArr[i].id = "test";
-		// myScreen.drawArr[i].render = true;
-		// myScreen.drawArr[i].ints[0] = rand()%1800; 
-		// myScreen.drawArr[i].ints[1] = rand()%1000; 
-		// // std::cout << myScreen.drawArr[0].ints[1] << "\n";
-		// myScreen.drawArr[i].ints[2] = rand()%20+10; 
-		// myScreen.drawArr[i].ints[3] = 20; 
-		// myScreen.drawArr[i].floats[0] = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);;
-		// myScreen.drawArr[i].floats[1] = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);;
-		// myScreen.drawArr[i].floats[2] = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);;
-		// myScreen.drawArr[i].floats[3] = 1;
-		// }
+  //Colorrender
+    	for(int i = 0; i < 150; i++){
+    	myScreen.drawArr1[i].id = "test";
+		myScreen.drawArr1[i].render = true;
+		myScreen.drawArr1[i].ints[0] += int(myScreen.drawArr1[i].floats[4]); 
+		myScreen.drawArr1[i].ints[1] += int(myScreen.drawArr1[i].floats[5]); 
 
-  //   	for(int i = 0; i < 50; i ++){
-  //   		myDrawConst shape = myScreen.drawArr[i];
-  //   		if(myScreen.drawArr[i].render == false || myScreen.drawArr[i].id == "none"){
-  //   			continue;
-  //   		}
-  //   		if(shape.type == "RECT"){
-  //   			myRect(cr,shape.ints[0],shape.ints[1],shape.ints[2],shape.ints[3],shape.floats[0],shape.floats[1],shape.floats[2],shape.floats[3]);
-  //   		}
-  //   	}
-  ////Colorrender
+		myScreen.drawArr1[i].floats[4] += static_cast <float> (rand()) / static_cast <float> (RAND_MAX); 
+		myScreen.drawArr1[i].floats[5] += static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+		myScreen.drawArr1[i].floats[4] -= 0.5;
+		myScreen.drawArr1[i].floats[5] -= 0.5;
+
+		if(myScreen.drawArr1[i].floats[4] > 5){
+			myScreen.drawArr1[i].floats[4] = 5;
+		}if(myScreen.drawArr1[i].floats[4] < -5){
+			myScreen.drawArr1[i].floats[4] = -5;
+		}
+
+		if(myScreen.drawArr1[i].floats[5] > 50){
+			myScreen.drawArr1[i].floats[5] = 50;
+		}if(myScreen.drawArr1[i].floats[5] < 7){
+			myScreen.drawArr1[i].floats[5] = 7;
+		}
+
+
+		if(myScreen.drawArr1[i].ints[0]>1920){
+			myScreen.drawArr1[i].ints[0]=0;
+		}
+		if(myScreen.drawArr1[i].ints[0]<0){
+			myScreen.drawArr1[i].ints[0]=1920;
+		}
+		if(myScreen.drawArr1[i].ints[1]>1080){
+			myScreen.drawArr1[i].ints[1]=0;
+		}
+		// std::cout << myScreen.drawArr1[0].ints[1] << "\n";
+		// myScreen.drawArr1[i].ints[2] = rand()%20+10; 
+		// myScreen.drawArr1[i].ints[3] = 20; 
+		// myScreen.drawArr1[i].floats[0] = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);;
+		// myScreen.drawArr1[i].floats[1] = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);;
+		// myScreen.drawArr1[i].floats[2] = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);;
+		}
+
+    	for(int i = 0; i < 150; i ++){
+    		myDrawConst shape = myScreen.drawArr1[i];
+    		if(myScreen.drawArr1[i].render == false || myScreen.drawArr1[i].id == "none"){
+    			continue;
+    		}
+    		if(shape.type == "RECT"){
+    			myRect(cr,shape.ints[0],shape.ints[1],shape.ints[2],shape.ints[3],shape.floats[0],shape.floats[1],shape.floats[2],shape.floats[3]);
+    		}
+    	}
+  //Colorrender
 
     	int size = myScreen.drawArr.size();
     	for(int i = size-1; i > -1; i--){
@@ -1014,7 +1060,7 @@ void myScreenThread(){
 
 
     	XFlush(dpy);
-    	usleep(100);
+    	usleep(60);
     }
 
 
