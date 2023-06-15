@@ -41,7 +41,7 @@ std::string s1;
 cairo_t* cr;
 
 int Width = 1920;
-int Height = 1080;
+int Height = 1200;
 
 std::map<int, char> keyMap = {
     { 16, 'q' },{ 17, 'w' },{ 57, ' ' },
@@ -124,8 +124,8 @@ int lastKey = 400;
 int keyRepeats = 0;
 
 
-int keyboardEventX = 2;
-int mouseEventX = 5;
+int keyboardEventX = 1;
+int mouseEventX = 2;
 
 bool extraSlow = false;
 
@@ -876,6 +876,7 @@ void myMouseThread(){
 	while(true){
 
 		read(device,&ev, sizeof(ev));
+		// std::cout << ev.value << " - "<< ev.type << " - "<< ev.code <<"\n";
         if(ev.type == EV_KEY && ev.value == 1 && ev.code == BTN_MOUSE && mast.firedown){
 
         	long long int t1 = (ev.time.tv_sec*1000000+ev.time.tv_usec);
@@ -957,9 +958,17 @@ void myScreenThread(){
 
 
     XRectangle rect;
-	XserverRegion region = XFixesCreateRegion(dpy, &rect, 1);
+	XserverRegion region = XFixesCreateRegion (dpy, NULL, 0);
+	// XserverRegion region = XFixesCreateRegion(dpy, &rect, 1);
+	XFixesSetWindowShapeRegion (dpy, overlay, ShapeBounding, 0, 0, 0);
 	XFixesSetWindowShapeRegion(dpy, overlay, ShapeInput, 0, 0, region);
 	XFixesDestroyRegion(dpy, region);
+
+
+    
+    // XFixesSetWindowShapeRegion (d, w, ShapeInput, 0, 0, region);
+
+    // XFixesDestroyRegion (d, region);
 
     cairo_surface_t* surf = cairo_xlib_surface_create(dpy, overlay,
                                   vinfo.visual,
@@ -1015,13 +1024,13 @@ void myScreenThread(){
 		}
 
 
-		if(myScreen.drawArr1[i].ints[0]>1920){
+		if(myScreen.drawArr1[i].ints[0]>Width){
 			myScreen.drawArr1[i].ints[0]=0;
 		}
 		if(myScreen.drawArr1[i].ints[0]<0){
-			myScreen.drawArr1[i].ints[0]=1920;
+			myScreen.drawArr1[i].ints[0]=Width;
 		}
-		if(myScreen.drawArr1[i].ints[1]>1080){
+		if(myScreen.drawArr1[i].ints[1]>Height){
 			myScreen.drawArr1[i].ints[1]=0;
 		}
 		// std::cout << myScreen.drawArr1[0].ints[1] << "\n";
@@ -1060,7 +1069,8 @@ void myScreenThread(){
 
 
     	XFlush(dpy);
-    	usleep(60);
+    	usleep(40);
+    	// return;
     }
 
 
@@ -1124,16 +1134,17 @@ int main()
 
         XEvent e;
         std::thread mtrd(myMouseThread);
+        //PREFORMANCE ISSUES
 
-        std::thread SCREEN(myScreenThread);
+        // std::thread SCREEN(myScreenThread);
 
 
         while(1)
         {
-
+        	// usleep(2);
 
         	
-	
+				
                 read(device,&ev, sizeof(ev));
                 if(mast.keyCord){
                 	std::cout << "Keycord: " << ev.type << " - " << ev.code << " - " << ev.value << " \n";
@@ -1169,7 +1180,7 @@ int main()
 //Vector rendering
 
 
-
+//replace cal batteries
 
 
 
