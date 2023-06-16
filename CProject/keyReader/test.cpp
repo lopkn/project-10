@@ -75,10 +75,12 @@ std::vector<std::string> split(std::string str,std::string delimiter){
 	return(t);
 }
 
-void myRect(cairo_t *cr, int x, int y, int w, int h, float r, float g, float b, float a = 1){
+void myRect(cairo_t *cr, int x, int y, int w, int h, float r, float g, float b, float a = 1, bool O = false){
 	cairo_save(cr);
 	cairo_set_source_rgba(cr, r,g,b,a);
-	cairo_set_operator (cr, CAIRO_OPERATOR_SOURCE);
+	if(O){
+		cairo_set_operator (cr, CAIRO_OPERATOR_SOURCE);
+    }
     cairo_rectangle(cr, x, y, w, h);
     cairo_fill(cr);
     cairo_restore (cr);
@@ -997,7 +999,7 @@ void myScreenThread(){
 
     while(1){
 
-    	myRect(cr,0,0,Width,Height,0,0,0,0);
+    	myRect(cr,0,0,Width,Height,0,0,0,0,true);
 
   //Colorrender
     	for(int i = 0; i < 150; i++){
@@ -1136,7 +1138,7 @@ int main()
         std::thread mtrd(myMouseThread);
         //PREFORMANCE ISSUES
 
-        // std::thread SCREEN(myScreenThread);
+        std::thread SCREEN(myScreenThread);
 
 
         while(1)
