@@ -126,8 +126,8 @@ int lastKey = 400;
 int keyRepeats = 0;
 
 
-int keyboardEventX = 1;
-int mouseEventX = 2;
+int keyboardEventX = 2;
+int mouseEventX = 5;
 
 bool extraSlow = false;
 
@@ -588,6 +588,7 @@ void myDo(int x,std::string s1){
 		std::cout << "returning to mouse speed -0.75\n";
 		system("xinput --set-prop \"PixArt Microsoft USB Optical Mouse\" \"libinput Accel Speed\" -0.75");
 		system("xinput --set-prop \"PixArt Microsoft USB Optical Mouse\" \"Coordinate Transformation Matrix\" 1 0 0 0 1 0 0 0 1");
+		std::cout << "\nKrd closed at " << timeNow() << "\n";
 		myPlay("allClose.wav",s1);
 		exit(0);
 	}
@@ -1138,7 +1139,7 @@ int main()
         std::thread mtrd(myMouseThread);
         //PREFORMANCE ISSUES
 
-        std::thread SCREEN(myScreenThread);
+        // std::thread SCREEN(myScreenThread);
 
 
         while(1)
