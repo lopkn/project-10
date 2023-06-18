@@ -890,8 +890,8 @@ void myMouseThread(){
         		std::cout<< "kill1\n";
         		continue;
         	}
-
-            std::cout << "dragging down" << "\n";
+        	int * pos = myGetMousePos();
+            std::cout << "dragging down from: "<< pos[0] << "=" << pos[1] << "\n";
  
 			recoilReader(*mast.ASTs[mast.downMode-1],100,device);
         }
