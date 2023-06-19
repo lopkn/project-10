@@ -50,7 +50,7 @@ struct myDrawConst{
 	int ints[10];
 	float floats[10];
 	std::string strings[10];
-	int life = 150;
+	int life = 70;
 };
 
 //instanciate
@@ -70,7 +70,7 @@ std::map<int, char> keyMap = {
     { 18, 'e' },{ 19, 'r' },{ 20, 't' },{ 21, 'y' },{ 22, 'u' },{ 23, 'i' },{ 24, 'o' },{ 25, 'p' },
     { 30, 'a' },{ 31, 's' },{ 32, 'd' },{ 33, 'f' },{ 34, 'g' },{ 35, 'h' },{ 36, 'j' },{ 37, 'k' },{ 38, 'l' },
     { 44, 'z' },{ 45, 'x' },{ 46, 'c' },{ 47, 'v' },{ 48, 'b' },{ 49, 'n' },{ 50, 'm' },{ 26, '[' },{ 27, ']' },
-    { 43, 'S'},{ 2, '1'},{ 3, '2'},{ 4, '3'},{ 5, '4'},{ 6, '5'},{ 7, '6'},{ 8, '7'},{ 9, '8'},{ 10, '9'},{ 11, '0'},{39,';'}
+    { 43, 'S'},{ 2, '1'},{ 3, '2'},{ 4, '3'},{ 5, '4'},{ 6, '5'},{ 7, '6'},{ 8, '7'},{ 9, '8'},{ 10, '9'},{ 11, '0'},{39,';'},{52,'.'}
 
 
 };
@@ -312,7 +312,7 @@ void myHeatMap(int narr[scanRes]){
 void myXset();
 XColor * myXscan(int xstart, int ystart, int xwid = 20, int ywid = 20, int xskip = 1, int yskip = 1){
 	const int res = xwid*ywid;
-	XColor scanArr[res];
+	XColor scanArr[res+xwid]; /// ??????!!!!!???
 	static XColor *scanArrP = scanArr;
 	XImage *image;
     image = XGetImage (dpy, XRootWindow (dpy, dfs), xstart,ystart, xwid*xskip, ywid*yskip, AllPlanes, XYPixmap);
@@ -324,7 +324,7 @@ XColor * myXscan(int xstart, int ystart, int xwid = 20, int ywid = 20, int xskip
 	}
     XFree(image);
 
-    XQueryColors (dpy, XDefaultColormap(dpy, dfs), scanArr, xwid*ywid);
+    XQueryColors (dpy, XDefaultColormap(dpy, dfs), scanArr, res);
     return(scanArrP);
 }
 
@@ -455,6 +455,72 @@ int * myXaim(){
 	return(moveRel);
 }
 
+
+void scx(std::string x1,std::string x2,std::string x3){
+				auto start = std::chrono::high_resolution_clock::now();
+    		// operation to be timed ...
+
+			int * pos = myGetMousePos();
+			int resX = 200;
+			int resY = 200;
+			if(x1 == ""){
+				x1 = "1";
+			}
+			if(x3 == ""){
+				x3 = "1";
+			}
+			int res =  stoi(x1);
+			float alp = stof(x3);
+			XColor * scan = myXscan(pos[0]-resX/2*res,pos[1]-resY/2*res,resX,resY,res,res);
+			std::cout << "xscan done\n";
+			for(int j = 0; j < resY; j++){
+				float DDX = -1;
+				for(int i = 0; i < resX; i++){
+					// std::cout << myHeatDict2(scan[i+j*resX].red/256);
+					float dx;
+					if(x2 == "blue" || x2 == "b"){
+						 dx = static_cast <float> (scan[i+j*resX].blue/static_cast <float>(65536));
+					} else if(x2 == "green" || x2 == "g"){
+						 dx = static_cast <float> (scan[i+j*resX].green/static_cast <float>(65536));
+					} else {
+						 dx = static_cast <float> (scan[i+j*resX].red/static_cast <float>(65536));
+					}
+					if(DDX-0.05 <= dx && dx <= DDX+0.05){
+						myScreen.drawArr[myScreen.drawArr.size()-1].ints[2] += res;
+						continue;
+					}
+					DDX = dx;
+					myDrawConst t;
+					t.type = "RECT";
+					t.ints[0] = pos[0]- (resX/2-i)*res;
+					t.ints[1] = pos[1]- (resY/2-j)*res;
+					t.ints[2] = res;
+					t.ints[3] = res;
+
+					if(x2 == "blue" || x2== "b"){
+					t.floats[0] = 0;
+					t.floats[1] = 0;
+					t.floats[2] = dx;
+					} else if(x2== "green" ||x2 == "g"){
+					t.floats[0] = 0;
+					t.floats[1] = dx;
+					t.floats[2] = 0;
+					} else {
+					t.floats[0] = dx;
+					t.floats[1] = 0;
+					t.floats[2] = 0;
+					}
+					
+					t.floats[3] = alp;
+					myScreen.drawArr.push_back(t);
+				}
+			}
+			      	 auto finish = std::chrono::high_resolution_clock::now();
+    	std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(finish-start).count() << "ns, drawing size: \n";
+ 
+}
+
+
 struct cmdinfo{
 	int colpx[3] = {0,0,0};
 };
@@ -582,39 +648,7 @@ void executeCommandString(std::string str){
 			// myScreen.drawArr.push_back(t);
 			// }
 		} else if(spl[0] == "scanx"){///scanx
-
-			int * pos = myGetMousePos();
-			int resX = 100;
-			int resY = 100;
-			if(spl[1] == ""){
-				spl[1] = "1";
-			}
-			int res =  stoi(spl[1]);
-			XColor * scan = myXscan(pos[0]-resX/2*res,pos[1]-resY/2*res,resX,resY,res,res);
-
-			for(int j = 0; j < resY; j++){
-				float DDX = -1;
-				for(int i = 0; i < resX; i++){
-					// std::cout << myHeatDict2(scan[i+j*resX].red/256);
-					float dx = static_cast <float> (scan[i+j*resX].red/static_cast <float>(65536));
-					if(DDX-0.05 <= dx && dx <= DDX+0.05){
-						myScreen.drawArr[myScreen.drawArr.size()-1].ints[2] += res;
-						continue;
-					}
-					DDX = dx;
-					myDrawConst t;
-					t.type = "RECT";
-					t.ints[0] = pos[0]-resX/2*res+i*res;
-					t.ints[1] = pos[1]-resY/2*res+j*res;
-					t.ints[2] = res;
-					t.ints[3] = res;
-					t.floats[0] = dx;
-					t.floats[1] = 0;
-					t.floats[2] = 0;
-					t.floats[3] = 1;
-					myScreen.drawArr.push_back(t);
-				}
-			}
+			scx(spl[1],spl[2],spl[3]);
 		}
 
 
@@ -826,6 +860,12 @@ void myDo(int x,std::string s1){
 		} else if(x == 50){
 			myMouseMove(1000,700);
 			myPlay("map.wav",s1);
+		} else if(x == 36){
+			scx("1","b","0.5");
+		} else if(x == 37){
+			scx("1","g","0.5");
+		} else if(x == 38){
+			scx("1","r","0.5");
 		} else if(x == 45){
 			
 			mast.firedown = !mast.firedown;
@@ -952,7 +992,7 @@ void recoilReader(int xarr[100][3],int size, int device){
 }
 void myMouseThread(){
 	char devname[] = "/dev/input/event";
-	char mouseEX[32];
+	char mouseEX[64];
 	sprintf(mouseEX, "%d", mouseEventX);
 	strcat(devname, mouseEX);
 
@@ -1072,8 +1112,7 @@ void myScreenThread(){
 		// }
 
     while(1){
-    	myRect(cr,0,0,Width,Height,0,0,0,0,true);
-    	
+
     	cairo_push_group(cr);
     	// cairo_set_source_rgba(cr,0,0,0,0);
     	// cairo_set_operator(cr,CAIRO_OPERATOR_SOURCE);
@@ -1131,13 +1170,14 @@ void myScreenThread(){
   //   		}
   //   	}
   // //Colorrender
-    	auto start = std::chrono::high_resolution_clock::now();
-    // operation to be timed ...
-   
+
+
+    // 	auto start = std::chrono::high_resolution_clock::now();
+    // // operation to be timed ...
+    //   	 auto finish = std::chrono::high_resolution_clock::now();
+    // 	std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(finish-start).count() << "ns, drawing size: "<<size<<"\n";
+ 
     	int size = myScreen.drawArr.size();
-    	if(size > 5){
-    		std::cout << "drawing size : " << size << "\n";
-    	}
     	for(int i = size-1; i > -1; i--){
 
     		myDrawConst shape = myScreen.drawArr[i];
@@ -1155,16 +1195,17 @@ void myScreenThread(){
 
 
     	}
-    	 auto finish = std::chrono::high_resolution_clock::now();
-    	std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(finish-start).count() << "ns\n";
     	usleep(10);
 
     	cairo_pop_group_to_source(cr);
+    	cairo_save(cr);
+    	myRect(cr,0,0,Width,Height,0,0,0,0,true);
+    	cairo_restore(cr);
+
     	cairo_paint(cr);
     	cairo_surface_flush(surf);
     	XSync(dpy,false);
     	XFlush(dpy);
-    	
     	usleep(40);
     	// return;
     }
@@ -1181,7 +1222,7 @@ void myScreenThread(){
 
 int main()
 {
-
+	XInitThreads();
 	std::cout << "\n\n\neventX keyboard matches check\n";
 	std::system("ls -l /dev/input/by-id/ | grep -e '600-event-kbd' -e 'event-mouse' | cut -c 25-");
 	std::cout << "\ncurrent keyboard and mouse eventX used: "+std::to_string(keyboardEventX)+" - "+std::to_string(mouseEventX);
@@ -1215,7 +1256,7 @@ int main()
 		// int G = system("sudo -u '#1002' XDG_RUNTIME_DIR=/run/user/1002 aplay start.wav >>/dev/null 2>>/dev/null &");
 		myPlay("start.wav",s1);
         char devname[] = "/dev/input/event";
-        char integer_string[32];
+        char integer_string[64];
 
 		sprintf(integer_string, "%d", keyboardEventX);
 		strcat(devname, integer_string);
