@@ -43,6 +43,28 @@ cairo_t* cr;
 int Width = 1920;
 int Height = 1200;
 
+struct myDrawConst{
+	std::string id = "NONE";
+	std::string type = "RECT";
+	bool render = false;
+	int ints[10];
+	float floats[10];
+	std::string strings[10];
+	int life = 150;
+};
+
+//instanciate
+
+
+// struct myRectStruct
+
+class myScreenC{
+public:
+	myDrawConst drawArr1[150];
+	std::vector<myDrawConst> drawArr;
+};
+myScreenC myScreen;
+
 std::map<int, char> keyMap = {
     { 16, 'q' },{ 17, 'w' },{ 57, ' ' },
     { 18, 'e' },{ 19, 'r' },{ 20, 't' },{ 21, 'y' },{ 22, 'u' },{ 23, 'i' },{ 24, 'o' },{ 25, 'p' },
@@ -55,7 +77,6 @@ std::map<int, char> keyMap = {
 //79 80 81
 //75 76 77
 //71 72 73
-
 
 std::vector<std::string> split(std::string str,std::string delimiter){
 	std::vector<std::string> t;
@@ -76,16 +97,37 @@ std::vector<std::string> split(std::string str,std::string delimiter){
 }
 
 void myRect(cairo_t *cr, int x, int y, int w, int h, float r, float g, float b, float a = 1, bool O = false){
-	cairo_save(cr);
+	// cairo_save(cr);
 	cairo_set_source_rgba(cr, r,g,b,a);
 	if(O){
 		cairo_set_operator (cr, CAIRO_OPERATOR_SOURCE);
+    } else{
+    	cairo_set_operator (cr, CAIRO_OPERATOR_OVER);
     }
-    cairo_rectangle(cr, x, y, w, h);
-    cairo_fill(cr);
-    cairo_restore (cr);
-}
 
+
+
+    cairo_rectangle(cr, x, y, w, h);
+    
+
+    cairo_fill(cr);
+
+    return;
+    // cairo_restore (cr);
+}
+void myPix(cairo_t *cr, int x, int y, int z, float r, float g, float b, float a = 1, bool O = false){
+	cairo_set_source_rgba(cr, r,g,b,a);
+	cairo_move_to(cr, x,y);
+    cairo_line_to(cr, x+z,y);
+    if(O){
+		cairo_set_operator (cr, CAIRO_OPERATOR_SOURCE);
+    } else{
+    	cairo_set_operator (cr, CAIRO_OPERATOR_OVER);
+    }
+    cairo_set_line_width(cr, 1);
+    cairo_stroke(cr);
+    return;
+}
 
 void scanr();
 void recoilReader(int xarr[100][3], int size);
@@ -425,21 +467,7 @@ std::string commandString = "";
 void executeCommandString(std::string str){
 
 
-	// std::string strBuffer[100];
 
-	// std::string delimiter = " ";
-	// size_t pos = 0;
-	// std::string token;
-	// int bufferSize = 0;
-	// while ((pos = str.find(delimiter)) != std::string::npos) {
-	    // token = str.substr(0, pos);
-	    // strBuffer[bufferSize] = token;
-	    // bufferSize++;
-	    // str.erase(0, pos + delimiter.length());
-	// }
-	// strBuffer[bufferSize] = str;
-	// bufferSize++;
-	// std::cout << "h"<<strBuffer[99] << "h\n";
 	std::string str2 = str;
 	std::vector<std::string> spl = split(str2," ");
 
@@ -527,6 +555,66 @@ void executeCommandString(std::string str){
 
 		if(spl[0] == "play"){
 			myPlay(spl[1]+".wav",s1);
+		} else if(spl[0] == "rect"){
+			myDrawConst t;
+			t.ints[0] = 500;
+			t.ints[1] = 500;
+			t.ints[2] = 500;
+			t.ints[3] = 500;
+			t.floats[0] = 1;
+			t.floats[1] = 0;
+			t.floats[2] = 0;
+			t.floats[3] = 0.6;
+
+			myScreen.drawArr.push_back(t);
+			
+			// for(int i = 0; i < 10000; i++){
+			// myDrawConst t;
+			// t.ints[0] = 2*(i%100);
+			// t.ints[1] = int(i/100)*2;
+			// t.ints[2] = 2;
+			// t.ints[3] = 2;
+			// t.floats[0] = 1;
+			// t.floats[1] = 0;
+			// t.floats[2] = 0;
+			// t.floats[3] = 0.6;
+
+			// myScreen.drawArr.push_back(t);
+			// }
+		} else if(spl[0] == "scanx"){///scanx
+
+			int * pos = myGetMousePos();
+			int resX = 100;
+			int resY = 100;
+			if(spl[1] == ""){
+				spl[1] = "1";
+			}
+			int res =  stoi(spl[1]);
+			XColor * scan = myXscan(pos[0]-resX/2*res,pos[1]-resY/2*res,resX,resY,res,res);
+
+			for(int j = 0; j < resY; j++){
+				float DDX = -1;
+				for(int i = 0; i < resX; i++){
+					// std::cout << myHeatDict2(scan[i+j*resX].red/256);
+					float dx = static_cast <float> (scan[i+j*resX].red/static_cast <float>(65536));
+					if(DDX-0.05 <= dx && dx <= DDX+0.05){
+						myScreen.drawArr[myScreen.drawArr.size()-1].ints[2] += res;
+						continue;
+					}
+					DDX = dx;
+					myDrawConst t;
+					t.type = "RECT";
+					t.ints[0] = pos[0]-resX/2*res+i*res;
+					t.ints[1] = pos[1]-resY/2*res+j*res;
+					t.ints[2] = res;
+					t.ints[3] = res;
+					t.floats[0] = dx;
+					t.floats[1] = 0;
+					t.floats[2] = 0;
+					t.floats[3] = 1;
+					myScreen.drawArr.push_back(t);
+				}
+			}
 		}
 
 
@@ -578,7 +666,7 @@ void updateCommand(int x){
 
 
 
-int keysounds = 1;
+int keysounds = 0;
 //0: none, 1: apx
 
 void myDo(int x,std::string s1){
@@ -668,9 +756,6 @@ void myDo(int x,std::string s1){
 		system("xinput --set-prop \"PixArt Microsoft USB Optical Mouse\" \"Coordinate Transformation Matrix\" 1 0 0 0 1 0 0 0 1");
 		extraSlow = false;
 		myPlay("allClose.wav",s1);
-	} else if(x == 50){
-		myMouseMove(1000,700);
-		myPlay("map.wav",s1);
 	} else if(inputMode == 2){//antirecoil 
 		if(x == 71){
 			mast.downMode = mast.weaponSet[0];
@@ -738,6 +823,9 @@ void myDo(int x,std::string s1){
 			myPlay("Grenade.wav",s1);
 		}else if(x == 47){
 			myPlay("Punch.wav",s1);
+		} else if(x == 50){
+			myMouseMove(1000,700);
+			myPlay("map.wav",s1);
 		} else if(x == 45){
 			
 			mast.firedown = !mast.firedown;
@@ -899,25 +987,10 @@ void myMouseThread(){
 	}
 }
 
-struct myDrawConst{
-	std::string id = "NONE";
-	std::string type = "RECT";
-	bool render = false;
-	int ints[10];
-	float floats[10];
-	std::string strings[10];
-	int life = 50;
-};
-
-// struct myRectStruct
 
 
-class myScreenC{
-public:
-	myDrawConst drawArr1[150];
-	std::vector<myDrawConst> drawArr;
-};
-myScreenC myScreen;
+
+
 
 
 // class myDrawParticle{
@@ -979,87 +1052,96 @@ void myScreenThread(){
     cr = cairo_create(surf);
 
 
-    for(int i = 0; i < 150; i++){
-    	myScreen.drawArr1[i].id = "test";
-		myScreen.drawArr1[i].render = true;
-		myScreen.drawArr1[i].ints[0] = rand()%1800; 
-		myScreen.drawArr1[i].ints[1] = rand()%1000; 
-		// std::cout << myScreen.drawArr1[0].ints[1] << "\n";
-		myScreen.drawArr1[i].ints[2] = rand()%40+10; 
-		myScreen.drawArr1[i].ints[3] = 40; 
-		myScreen.drawArr1[i].ints[4] = 0; 
-		myScreen.drawArr1[i].ints[5] = 0; 
-		myScreen.drawArr1[i].floats[0] = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);;
-		myScreen.drawArr1[i].floats[1] = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);;
-		myScreen.drawArr1[i].floats[2] = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);;
-		// myScreen.drawArr1[i].floats[0] = 1;
-		// myScreen.drawArr1[i].floats[1] = 1;
-		// myScreen.drawArr1[i].floats[2] = 1;
-		myScreen.drawArr1[i].floats[3] = 0.5;
-		}
-
-    while(1){
-
-    	myRect(cr,0,0,Width,Height,0,0,0,0,true);
-
-  //Colorrender
-    	for(int i = 0; i < 150; i++){
-    	myScreen.drawArr1[i].id = "test";
-		myScreen.drawArr1[i].render = true;
-		myScreen.drawArr1[i].ints[0] += int(myScreen.drawArr1[i].floats[4]); 
-		myScreen.drawArr1[i].ints[1] += int(myScreen.drawArr1[i].floats[5]); 
-
-		myScreen.drawArr1[i].floats[4] += static_cast <float> (rand()) / static_cast <float> (RAND_MAX); 
-		myScreen.drawArr1[i].floats[5] += static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-		myScreen.drawArr1[i].floats[4] -= 0.5;
-		myScreen.drawArr1[i].floats[5] -= 0.5;
-
-		if(myScreen.drawArr1[i].floats[4] > 5){
-			myScreen.drawArr1[i].floats[4] = 5;
-		}if(myScreen.drawArr1[i].floats[4] < -5){
-			myScreen.drawArr1[i].floats[4] = -5;
-		}
-
-		if(myScreen.drawArr1[i].floats[5] > 50){
-			myScreen.drawArr1[i].floats[5] = 50;
-		}if(myScreen.drawArr1[i].floats[5] < 7){
-			myScreen.drawArr1[i].floats[5] = 7;
-		}
-
-
-		if(myScreen.drawArr1[i].ints[0]>Width){
-			myScreen.drawArr1[i].ints[0]=0;
-		}
-		if(myScreen.drawArr1[i].ints[0]<0){
-			myScreen.drawArr1[i].ints[0]=Width;
-		}
-		if(myScreen.drawArr1[i].ints[1]>Height){
-			myScreen.drawArr1[i].ints[1]=0;
-		}
-		// std::cout << myScreen.drawArr1[0].ints[1] << "\n";
-		// myScreen.drawArr1[i].ints[2] = rand()%20+10; 
-		// myScreen.drawArr1[i].ints[3] = 20; 
+  //   for(int i = 0; i < 150; i++){
+  //   	myScreen.drawArr1[i].id = "test";
+		// myScreen.drawArr1[i].render = true;
+		// myScreen.drawArr1[i].ints[0] = rand()%1800; 
+		// myScreen.drawArr1[i].ints[1] = rand()%1000; 
+		// // std::cout << myScreen.drawArr1[0].ints[1] << "\n";
+		// myScreen.drawArr1[i].ints[2] = rand()%40+10; 
+		// myScreen.drawArr1[i].ints[3] = 40; 
+		// myScreen.drawArr1[i].ints[4] = 0; 
+		// myScreen.drawArr1[i].ints[5] = 0; 
 		// myScreen.drawArr1[i].floats[0] = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);;
 		// myScreen.drawArr1[i].floats[1] = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);;
 		// myScreen.drawArr1[i].floats[2] = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);;
-		}
+		// // myScreen.drawArr1[i].floats[0] = 1;
+		// // myScreen.drawArr1[i].floats[1] = 1;
+		// // myScreen.drawArr1[i].floats[2] = 1;
+		// myScreen.drawArr1[i].floats[3] = 0.5;
+		// }
 
-    	for(int i = 0; i < 150; i ++){
-    		myDrawConst shape = myScreen.drawArr1[i];
-    		if(myScreen.drawArr1[i].render == false || myScreen.drawArr1[i].id == "none"){
-    			continue;
-    		}
-    		if(shape.type == "RECT"){
-    			myRect(cr,shape.ints[0],shape.ints[1],shape.ints[2],shape.ints[3],shape.floats[0],shape.floats[1],shape.floats[2],shape.floats[3]);
-    		}
-    	}
-  //Colorrender
+    while(1){
+    	myRect(cr,0,0,Width,Height,0,0,0,0,true);
+    	
+    	cairo_push_group(cr);
+    	// cairo_set_source_rgba(cr,0,0,0,0);
+    	// cairo_set_operator(cr,CAIRO_OPERATOR_SOURCE);
+    	// cairo_paint(cr);
+    	// cairo_set_operator(cr,CAIRO_OPERATOR_OVER);
+  // //Colorrender
+  //   	for(int i = 0; i < 150; i++){
+  //   	myScreen.drawArr1[i].id = "test";
+		// myScreen.drawArr1[i].render = true;
+		// myScreen.drawArr1[i].ints[0] += int(myScreen.drawArr1[i].floats[4]); 
+		// myScreen.drawArr1[i].ints[1] += int(myScreen.drawArr1[i].floats[5]); 
 
+		// myScreen.drawArr1[i].floats[4] += static_cast <float> (rand()) / static_cast <float> (RAND_MAX); 
+		// myScreen.drawArr1[i].floats[5] += static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+		// myScreen.drawArr1[i].floats[4] -= 0.5;
+		// myScreen.drawArr1[i].floats[5] -= 0.5;
+
+		// if(myScreen.drawArr1[i].floats[4] > 5){
+		// 	myScreen.drawArr1[i].floats[4] = 5;
+		// }if(myScreen.drawArr1[i].floats[4] < -5){
+		// 	myScreen.drawArr1[i].floats[4] = -5;
+		// }
+
+		// if(myScreen.drawArr1[i].floats[5] > 50){
+		// 	myScreen.drawArr1[i].floats[5] = 50;
+		// }if(myScreen.drawArr1[i].floats[5] < 7){
+		// 	myScreen.drawArr1[i].floats[5] = 7;
+		// }
+
+
+		// if(myScreen.drawArr1[i].ints[0]>Width){
+		// 	myScreen.drawArr1[i].ints[0]=0;
+		// }
+		// if(myScreen.drawArr1[i].ints[0]<0){
+		// 	myScreen.drawArr1[i].ints[0]=Width;
+		// }
+		// if(myScreen.drawArr1[i].ints[1]>Height){
+		// 	myScreen.drawArr1[i].ints[1]=0;
+		// }
+		// // std::cout << myScreen.drawArr1[0].ints[1] << "\n";
+		// // myScreen.drawArr1[i].ints[2] = rand()%20+10; 
+		// // myScreen.drawArr1[i].ints[3] = 20; 
+		// // myScreen.drawArr1[i].floats[0] = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);;
+		// // myScreen.drawArr1[i].floats[1] = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);;
+		// // myScreen.drawArr1[i].floats[2] = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);;
+		// }
+
+  //   	for(int i = 0; i < 150; i ++){
+  //   		myDrawConst shape = myScreen.drawArr1[i];
+  //   		if(myScreen.drawArr1[i].render == false || myScreen.drawArr1[i].id == "none"){
+  //   			continue;
+  //   		}
+  //   		if(shape.type == "RECT"){
+  //   			myRect(cr,shape.ints[0],shape.ints[1],shape.ints[2],shape.ints[3],shape.floats[0],shape.floats[1],shape.floats[2],shape.floats[3]);
+  //   		}
+  //   	}
+  // //Colorrender
+    	auto start = std::chrono::high_resolution_clock::now();
+    // operation to be timed ...
+   
     	int size = myScreen.drawArr.size();
+    	if(size > 5){
+    		std::cout << "drawing size : " << size << "\n";
+    	}
     	for(int i = size-1; i > -1; i--){
 
     		myDrawConst shape = myScreen.drawArr[i];
-    		shape.life -= 1;
+    		myScreen.drawArr[i].life -= 1;
     		if(shape.life < 1){
     			myScreen.drawArr.erase(myScreen.drawArr.begin()+i);
     			continue;
@@ -1067,11 +1149,22 @@ void myScreenThread(){
 
     		if(shape.type == "RECT"){
     			myRect(cr,shape.ints[0],shape.ints[1],shape.ints[2],shape.ints[3],shape.floats[0],shape.floats[1],shape.floats[2],shape.floats[3]);
+    		} else if (shape.type == "PIX"){
+    			myPix(cr,shape.ints[0],shape.ints[1],shape.ints[2],shape.floats[0],shape.floats[1],shape.floats[2],shape.floats[3]);
     		}
+
+
     	}
+    	 auto finish = std::chrono::high_resolution_clock::now();
+    	std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(finish-start).count() << "ns\n";
+    	usleep(10);
 
-
+    	cairo_pop_group_to_source(cr);
+    	cairo_paint(cr);
+    	cairo_surface_flush(surf);
+    	XSync(dpy,false);
     	XFlush(dpy);
+    	
     	usleep(40);
     	// return;
     }
@@ -1137,9 +1230,9 @@ int main()
 
         XEvent e;
         std::thread mtrd(myMouseThread);
-        //PREFORMANCE ISSUES
+        //PREFORMANCE ISSUES <- unfound eventX
 
-        // std::thread SCREEN(myScreenThread);
+        std::thread SCREEN(myScreenThread);
 
 
         while(1)
