@@ -50,7 +50,7 @@ struct myDrawConst{
 	int ints[10];
 	float floats[10];
 	std::string strings[10];
-	int life = 70;
+	int life = 170;
 };
 
 //instanciate
@@ -456,7 +456,7 @@ int * myXaim(){
 }
 
 
-void scx(std::string x1,std::string x2,std::string x3){
+void scx(std::string x1,std::string x2,std::string x3,std::string x4 = ""){
 				auto start = std::chrono::high_resolution_clock::now();
     		// operation to be timed ...
 
@@ -486,7 +486,9 @@ void scx(std::string x1,std::string x2,std::string x3){
 						 dx = static_cast <float> (scan[i+j*resX].red/static_cast <float>(65536));
 					}
 					if(DDX-0.05 <= dx && dx <= DDX+0.05){
+						if(x4 == ""){
 						myScreen.drawArr[myScreen.drawArr.size()-1].ints[2] += res;
+						}
 						continue;
 					}
 					DDX = dx;
@@ -648,7 +650,7 @@ void executeCommandString(std::string str){
 			// myScreen.drawArr.push_back(t);
 			// }
 		} else if(spl[0] == "scanx"){///scanx
-			scx(spl[1],spl[2],spl[3]);
+			scx(spl[1],spl[2],spl[3],spl[4]);
 		}
 
 
@@ -861,11 +863,11 @@ void myDo(int x,std::string s1){
 			myMouseMove(1000,700);
 			myPlay("map.wav",s1);
 		} else if(x == 36){
-			scx("1","b","0.5");
+			scx("1","b","0.5","3");
 		} else if(x == 37){
-			scx("1","g","0.5");
+			scx("1","g","0.5","3");
 		} else if(x == 38){
-			scx("1","r","0.5");
+			scx("1","r","0.5","3");
 		} else if(x == 45){
 			
 			mast.firedown = !mast.firedown;
