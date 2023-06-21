@@ -50,7 +50,7 @@ struct myDrawConst{
 	int ints[10];
 	float floats[10];
 	std::string strings[10];
-	int life = 170;
+	int life = 70;
 };
 
 //instanciate
@@ -70,7 +70,7 @@ std::map<int, char> keyMap = {
     { 18, 'e' },{ 19, 'r' },{ 20, 't' },{ 21, 'y' },{ 22, 'u' },{ 23, 'i' },{ 24, 'o' },{ 25, 'p' },
     { 30, 'a' },{ 31, 's' },{ 32, 'd' },{ 33, 'f' },{ 34, 'g' },{ 35, 'h' },{ 36, 'j' },{ 37, 'k' },{ 38, 'l' },
     { 44, 'z' },{ 45, 'x' },{ 46, 'c' },{ 47, 'v' },{ 48, 'b' },{ 49, 'n' },{ 50, 'm' },{ 26, '[' },{ 27, ']' },
-    { 43, 'S'},{ 2, '1'},{ 3, '2'},{ 4, '3'},{ 5, '4'},{ 6, '5'},{ 7, '6'},{ 8, '7'},{ 9, '8'},{ 10, '9'},{ 11, '0'},{39,';'},{52,'.'}
+    { 43, 'S'},{ 2, '1'},{ 3, '2'},{ 4, '3'},{ 5, '4'},{ 6, '5'},{ 7, '6'},{ 8, '7'},{ 9, '8'},{ 10, '9'},{ 11, '0'},{39,';'},{52,'.'},{51,','}
 
 
 };
@@ -575,6 +575,8 @@ void executeCommandString(std::string str){
 	} else if(str == "screencap" || str == "screenshot" || str == "cap"){
 		std::string s2 = ("sudo -u '#" + s1 +"' XDG_RUNTIME_DIR=/run/user/" + s1 + " gnome-screenshot &");
 		std::system(s2.c_str());
+	} else if(str == "list"){
+		std::system("ls -l /dev/input/by-id/")
 	} else if(str == "maplock"){
 		mapLocked = !mapLocked;
 		std::cout << ">maplock toggled: "<< mapLocked <<"\n";
