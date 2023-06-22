@@ -553,6 +553,8 @@ void executeCommandString(std::string str){
 		std::cout << "> [time/tnow/time.now] gives times in epoch ms\n";
 		std::cout << "> [keycord] records all key events\n";
 		std::cout << "> [scan] print out an askii of xscan (red)\n";
+		std::cout << "> [scanx] <int> <r/g/b> <int> <char> render out a pixmap of xscan\n";
+		std::cout << "> [list] list all eventx inputs\n";
 		std::cout << "> === help ===\n\n";
 	}
 	else if(str == "heatmap"){
