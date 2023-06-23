@@ -578,7 +578,7 @@ void executeCommandString(std::string str){
 		std::string s2 = ("sudo -u '#" + s1 +"' XDG_RUNTIME_DIR=/run/user/" + s1 + " gnome-screenshot &");
 		std::system(s2.c_str());
 	} else if(str == "list"){
-		std::system("ls -l /dev/input/by-id/")
+		std::system("ls -l /dev/input/by-id/");
 	} else if(str == "maplock"){
 		mapLocked = !mapLocked;
 		std::cout << ">maplock toggled: "<< mapLocked <<"\n";
