@@ -842,6 +842,7 @@ void myDo(int x,std::string s1){
 		if(keysounds == 1){
 			myPlay("Asounds.wav",s1);
 		} else if(keysounds == 2){
+			myPlay("allClose.wav",s1);
 			keysounds = 0;
 		}
 	}
@@ -868,10 +869,13 @@ void myDo(int x,std::string s1){
 			myPlay("map.wav",s1);
 		} else if(x == 36){
 			scx("1","b","0.5","3");
+			myPlay("map.wav",s1);
 		} else if(x == 37){
 			scx("1","g","0.5","3");
+			myPlay("map.wav",s1);
 		} else if(x == 38){
 			scx("1","r","0.5","3");
+			myPlay("map.wav",s1);
 		} else if(x == 45){
 			
 			mast.firedown = !mast.firedown;
