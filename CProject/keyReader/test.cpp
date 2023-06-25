@@ -713,8 +713,8 @@ void myDo(int x,std::string s1){
 
 
 	if(x == 98){ 
-		std::cout << "returning to mouse speed -0.75\n";
-		system("xinput --set-prop \"PixArt Microsoft USB Optical Mouse\" \"libinput Accel Speed\" -0.75");
+		std::cout << "returning to mouse speed 0\n";
+		system("xinput --set-prop \"PixArt Microsoft USB Optical Mouse\" \"libinput Accel Speed\" 0");
 		system("xinput --set-prop \"PixArt Microsoft USB Optical Mouse\" \"Coordinate Transformation Matrix\" 1 0 0 0 1 0 0 0 1");
 		std::cout << "\nKrd closed at " << timeNow() << "\n";
 		myPlay("allClose.wav",s1);
@@ -792,7 +792,7 @@ void myDo(int x,std::string s1){
 			myPlay("bitHigh.wav",s1);
 		}
 	} else if(x == 55){
-		system("xinput --set-prop \"PixArt Microsoft USB Optical Mouse\" \"libinput Accel Speed\" -0.75");
+		system("xinput --set-prop \"PixArt Microsoft USB Optical Mouse\" \"libinput Accel Speed\" 0");
 		system("xinput --set-prop \"PixArt Microsoft USB Optical Mouse\" \"Coordinate Transformation Matrix\" 1 0 0 0 1 0 0 0 1");
 		extraSlow = false;
 		myPlay("allClose.wav",s1);
@@ -1257,8 +1257,8 @@ int main()
 
 		remove("text.txt");
 		system("xinput --list-props \"PixArt Microsoft USB Optical Mouse\" >> text.txt");
-		system("xinput --set-prop \"PixArt Microsoft USB Optical Mouse\" \"libinput Accel Speed\" -0.75");
-		std::cout << "properties file updated.\nmouse speed set to -0.75 (default value 22apr23)" << std::endl;
+		system("xinput --set-prop \"PixArt Microsoft USB Optical Mouse\" \"libinput Accel Speed\" 0");
+		std::cout << "properties file updated.\nmouse speed set to 0 (default value 22apr23)" << std::endl;
 		std::cout << "Parent Process id : " << getpid() << std::endl;
 		s1 = std::getenv("SUDO_UID");
 		std::cout << s1 << " is the current user ID \n\n";
