@@ -50,7 +50,8 @@ function rect(x,y,w,h){
 }
 
 function draw() {
-  rectWidth=Math.random()*4000+20
+  rectWidth=Math.random()*4000+2
+  rectWidth=10
   for(let i = 0; i < window.innerWidth/rectWidth+1; i++){
     for(let j = 0; j < window.innerHeight/rectWidth+1; j++){
       fill("rgb("+(Math.random()>0.5?255:0)+","+(Math.random()>0.5?255:0)+","+(Math.random()>0.5?255:0)+")")
