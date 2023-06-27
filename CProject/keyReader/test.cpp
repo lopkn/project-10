@@ -549,7 +549,7 @@ void executeCommandString(std::string str){
 		std::cout << "> [maplock] toggle maplock\n";
 		std::cout << "> [aimprint] toggles printout for mouse movement when stabalizing\n";
 		std::cout << "> [stopsound] toggles sound\n";
-		std::cout << "> [setweapon] sets the weapon combinations\n";
+		std::cout << "> [setweapon] sets the weapon combinations (press 5 to set)\n";
 		std::cout << "> [time/tnow/time.now] gives times in epoch ms\n";
 		std::cout << "> [keycord] records all key events\n";
 		std::cout << "> [scan] print out an askii of xscan (red)\n";
@@ -596,6 +596,7 @@ void executeCommandString(std::string str){
 		std::cout << ">setting weapon combination. press NUM5 to select\n";
 		myPlay("AUDweaponset.wav",s1);
 	} else if(str == "scan" || str == "scan red"){
+
 		int * pos = myGetMousePos();
 		int resX = 100;
 		int resY = 40;
@@ -608,8 +609,10 @@ void executeCommandString(std::string str){
 		}
 
 	} else if(str == "time.now()" || str == "tnow" || str == "time.now" || str == "time"){
+
 		std::cout << ">time now is: " << timeNow() << std::endl;
 		return;
+
 	} else if(str == "keycord"){
 		mast.keyCord = !mast.keyCord;
 		std::cout << ">keycording toggled: "<< mast.keyCord <<"\n";
