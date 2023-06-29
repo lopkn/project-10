@@ -496,6 +496,67 @@ manager.newCard("","",["@chem@"])
 
 
 
+// Backpack >>>
+
+
+// [
+// Laptop
+// Ipad
+// Airpods
+// ]
+// CHARGING CABLES
+
+
+
+// GIP >>>
+
+// Mom memorial photo album
+
+// clothes
+// DOCUMENTS (TO DO)
+// Grades
+// awards
+
+
+// To Do >>>
+// Sticks
+
+// Copy for reference letter
+
+
+
+// SPEND the money
+
+// Google takeout
+// Minecraft download worlds
+// Onenote export
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// 3/7
+
+// Every aud
+
+// Rank 1-n ()
+
 
 
 
