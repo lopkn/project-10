@@ -514,6 +514,12 @@ manager.newCard("","",["@chem@"])
 
 // clothes
 // DOCUMENTS (TO DO)
+//passport
+//cup
+//android pad
+//calculator
+//calculator cable
+
 // Grades
 // awards
 
