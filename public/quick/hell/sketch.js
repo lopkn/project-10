@@ -528,7 +528,7 @@ manager.newCard("","",["@chem@"])
 // Sticks
 
 // Copy for reference letter
-
+// socks shoes
 
 
 // SPEND the money
