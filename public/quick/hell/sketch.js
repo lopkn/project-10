@@ -529,7 +529,8 @@ manager.newCard("","",["@chem@"])
 
 // Copy for reference letter
 // socks shoes
-
+// ocean park
+// argument
 
 // SPEND the money
 
