@@ -519,6 +519,7 @@ manager.newCard("","",["@chem@"])
 //android pad
 //calculator
 //calculator cable
+//everything inside basket
 
 // Grades
 // awards
@@ -530,7 +531,6 @@ manager.newCard("","",["@chem@"])
 // Copy for reference letter
 // socks shoes
 // ocean park
-// argument
 
 // SPEND the money
 
