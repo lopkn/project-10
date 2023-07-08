@@ -533,6 +533,9 @@ manager.newCard("","",["@chem@"])
 // ocean park
 // ppt
 // debate
+//ipad plan
+//qthing
+//decision maker
 
 // SPEND the money
 
