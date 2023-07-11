@@ -536,6 +536,8 @@ manager.newCard("","",["@chem@"])
 //ipad plan
 //qthing
 //decision maker
+// letter
+// 
 
 // SPEND the money
 
