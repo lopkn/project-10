@@ -537,7 +537,7 @@ manager.newCard("","",["@chem@"])
 //qthing
 //decision maker
 // letter
-// 
+
 
 // SPEND the money
 
@@ -546,6 +546,11 @@ manager.newCard("","",["@chem@"])
 // Onenote export
 
 
+
+//inquirer
+//req #something
+//ask -tf "hello?"
+//ret 120
 
 
 
