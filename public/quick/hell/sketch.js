@@ -544,6 +544,9 @@ manager.newCard("","",["@chem@"])
 // Google takeout
 // Minecraft download worlds
 // Onenote export
+// credit card thing
+// eat fooooood
+// remember simp
 
 
 
