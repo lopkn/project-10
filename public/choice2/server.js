@@ -14,6 +14,7 @@ class main{
 	static pushBlock(b){
 		this.cid++;
 		this.blocks[this.cid] = b;
+		return(this.cid)
 	}
 
 
@@ -30,7 +31,7 @@ class qBlock{
 }
 
 function mnew(q,dt,df){
-	main.pushBlock(new qBlock(q,dt,df))
+	return(main.pushBlock(new qBlock(q,dt,df)))
 }
 
 
@@ -58,6 +59,12 @@ while(main.currentID != 0){
 	}
 
 	let ans = prompt("True or false?  >")
+
+	if(ans[0] == "a"){
+		let aid = mnew(ans.substring(2),0,0)
+		main.currentID = aid;
+	}
+
 	if(ans[0] == "t" || ans[0] == "T" || ans[0] == "y" || ans[0] == "Y"){
 		q.executable(1);
 		main.currentID = q.defaultTrue;
@@ -78,7 +85,8 @@ console.log("program exited")
 //inquirer
 //req #something
 //b you are dumb
-//ret 120
+//go 120
+//ret true
 
 
 
