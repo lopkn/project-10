@@ -530,9 +530,6 @@ manager.newCard("","",["@chem@"])
 
 // Copy for reference letter
 // socks shoes
-// ocean park
-// ppt
-// debate
 //ipad plan
 //qthing
 //decision maker
@@ -541,12 +538,11 @@ manager.newCard("","",["@chem@"])
 
 // SPEND the money
 
-// Google takeout
 // Minecraft download worlds
 // Onenote export
 // credit card thing
 // eat fooooood
-// remember simp
+// remember current + simp
 
 
 
