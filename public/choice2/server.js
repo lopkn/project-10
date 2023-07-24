@@ -37,10 +37,12 @@ function mnew(q,dt,df){
 
 
 
-mnew("does this work?",1,0)
+mnew("you doing good?",1,0)
 
 
-
+mnew("should hate speech be allowed?",0,3)
+mnew("do you have a clear boarder of what constitutes hate speech?",0,4)
+mnew("do you agree that anything can be considered hate speech by someone, given specific circumstances?",5,-1)
 
 
 while(main.currentID != 0){
@@ -63,6 +65,15 @@ while(main.currentID != 0){
 	if(ans[0] == "a"){
 		let aid = mnew(ans.substring(2),0,0)
 		main.currentID = aid;
+	}
+	if(ans[0] == "d"){
+		if(ans[1] == "t"){
+			q.defaultTrue = ans.substring(3)
+		}
+		if(ans[1] == "f"){
+			q.defaultFalse = ans.substring(3)
+			
+		}
 	}
 
 	if(ans[0] == "t" || ans[0] == "T" || ans[0] == "y" || ans[0] == "Y"){
@@ -88,6 +99,6 @@ console.log("program exited")
 //go 120
 //ret true
 
-
+//dumb button: tag dumb and cast majority vote
 
 
