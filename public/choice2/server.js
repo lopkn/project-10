@@ -94,11 +94,14 @@ console.log("program exited")
 
 
 //inquirer
+
 //req #something
 //b you are dumb
 //go 120
 //ret true
 
 //dumb button: tag dumb and cast majority vote
+//dispute variable: dispute assumed/concluded variables
+//force variable: force wrong variables will lead to wrong conclusions
 
-
+//build a time based heat tracker for autoselect
