@@ -510,11 +510,12 @@ manager.newCard("","",["@chem@"])
 
 // GIP >>>
 
-// Mom memorial photo album
+// Mom memorial photo album /
 
 // clothes
-// DOCUMENTS (TO DO)
-//passport
+// DOCUMENTS (TO DO) /
+//passport /
+
 //cup
 //android pad
 //calculator
@@ -529,19 +530,15 @@ manager.newCard("","",["@chem@"])
 // Sticks
 
 // Copy for reference letter
-// socks shoes
 //ipad plan
 //qthing
 //decision maker
-// letter
 
 
-// SPEND the money
 
 // Minecraft download worlds
 // Onenote export
 // credit card thing
-// eat fooooood
 // remember current + simp
 
 
