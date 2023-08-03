@@ -24,8 +24,8 @@ function rect(x,y,w,h){
 
 class camera{
 	static team = "p1";
-	static x = 0;
-	static y = 0;
+	static x = 1.2;
+	static y = 1.2;
 	static particles = [];
 }
 
@@ -86,13 +86,16 @@ function mouseToBoardUpdate(){
 
 let mouseDownPlace = [0,0]
 let pieceSelected = "none"
+let mouseDown = false
 document.addEventListener("mousedown",(e)=>{
-    mouseDownPlace = [mouseBoardX,mouseBoardY]
+    mouseDownPlace = [mouseBoardX,mouseBoardY,mouseX,mouseY]
 	mouseToBoardUpdate()
+    mouseDown = true
 
 })
 
 document.addEventListener("mouseup",(e)=>{
+    mouseDown = false
 	mouseToBoardUpdate()
 
 	if(mouseDownPlace[0] == mouseBoardX && mouseDownPlace[1] == mouseBoardY){
@@ -189,6 +192,15 @@ function render(){
 
 	fill(255,0,0,0.3)
 	mrect(mouseBoardX,mouseBoardY)
+
+	if(mouseDown){
+		ctx.lineWidth = 5;
+		ctx.strokeStyle = "rgba(255,150,40,0.6)"
+		ctx.beginPath()
+		ctx.moveTo(mouseDownPlace[2],mouseDownPlace[3])
+		ctx.lineTo(mouseX,mouseY)
+		ctx.stroke()
+	}
 }
 board.emptyNew()
 board.spawnRates = ["pawn",0.7,"king",0.85,"knight",0.95,"bishop",0.98,"rook"]
@@ -201,7 +213,7 @@ setInterval(()=>{render()},30)
 let gameInterval = setInterval(()=>{
 	let x = Math.floor(Math.random()*8)
 	let y = board.topTile;
-	while(board.tiles[x+","+y]?.piece != undefined){
+	while(board.tiles[x+","+y] == undefined || board.tiles[x+","+y].piece != undefined){
 		y+=1
 	}
 	if(y > 2){return;}
@@ -219,11 +231,11 @@ let gameInterval = setInterval(()=>{
 
 	if(Math.random()>0.8){
 		let y = -1
-		while(Math.random()>0.5){
+		while(Math.random()>0.4){
 			y-=1
 		}
 		let x = Math.floor(Math.random()*8)
-		if(board.tiles[x+","+y] == undefined){board.tiles[x+","+y] = {}}
+		if(board.tiles[x+","+y] == undefined){board.tiles[x+","+y] = {}; if(y < board.topTile){board.topTile=y}}
 	}
 
 },10000)

@@ -19,6 +19,8 @@ class board {
 		}
 		for(let i = 0; i < 8; i++){
 			this.tiles[i+","+10].piece = new piece("pawn",i,10,"p1",{"direction":"y-"})
+			this.tiles[i+","+5].piece = new piece("knight",i,5,"p1",{"direction":"y-"})
+			this.tiles[i+","+4].piece = new piece("knight",i,4,"p1",{"direction":"y-"})
 		}
 			this.tiles[0+","+11].piece = new piece("rook",0,11,"p1",)
 			this.tiles[1+","+11].piece = new piece("knight",1,11,"p1")
@@ -329,6 +331,7 @@ class piece {
 		this.y = y
 
 		if(board.tiles[pos].piece != undefined){
+			kill(this.x,this.y)
 			console.log(board.tiles[pos].piece.team+" "+board.tiles[pos].piece.id+" has been killed!")
 		}
 
@@ -449,6 +452,65 @@ class explosionR{
 		ctx.arc(bts[0],bts[1], this.size, 0, 2 * Math.PI);
 		ctx.stroke()
 		
+	}
+}
+
+
+function kill(x,y){
+	for(let i = 0; i < 16; i++){
+		let dx = Math.random()-0.5
+		let dy = Math.random()-0.5
+		camera.particles.push(new bloodParticle(x+0.5+0.6*dx,y+0.5+0.6*dy,dx*14,14*dy,Math.random()*0.03,Math.random()*3+3,false))
+	}
+	camera.particles.push(new explosionR(x+0.5+(Math.random()-0.5)*0.7,y+0.5+(Math.random()-0.5)*0.7,
+			"rgba("+(Math.random()*235+20)+","+(Math.random()*15)+","+(Math.random()*15)+","+(Math.random()*0.3+0.3)+")",2,6+Math.random()*2,0.2))
+	for(let i = 0; i < 3;i++){
+		setTimeout(()=>{camera.particles.push(new explosionR(x+0.5+(Math.random()-0.5)*0.7,y+0.5+(Math.random()-0.5)*0.7,
+			"rgba("+(Math.random()*235+20)+","+(Math.random()*15)+","+(Math.random()*15)+","+(Math.random()*0.3+0.3)+")",2,6+Math.random()*2,0.2))},Math.random()*400)
+	}
+}
+
+
+class bloodParticle{
+	constructor(x,y,vx,vy,rv,size,duplicator){
+		this.x = x
+		this.y = y
+		this.vx = vx/100
+		this.vy = vy/100
+		this.rv = rv/300
+		this.size = size
+		this.actualSize = size
+		this.duplicator = duplicator?duplicator:false
+		this.color = "rgba("+(Math.random()*235+20)+","+(Math.random()*15)+","+(Math.random()*15)+","+(Math.random()*0.3+0.3)+")"
+		this.lastTime = Date.now()
+		this.life = 1000+Math.random()*3000
+	}
+	update(t){
+
+		let dt = (t-this.lastTime)
+		if(this.life < 1000){
+		this.actualSize = this.size * Math.sqrt(this.life) / 31.62}
+		this.life -= (t-this.lastTime)/2
+		this.lastTime = t
+		this.vx += (Math.random()-0.5)*this.rv*dt
+		this.vy += (Math.random()-0.5)*this.rv*dt
+		this.vx *= (this.life>700?0.9:this.life/700)
+		this.vy *= (this.life>700?0.9:this.life/700)
+		this.x += this.vx
+		this.y += this.vy
+	}
+	draw(){
+		if(this.life < 0){
+			return('del')
+		}
+		ctx.strokeStyle = this.color
+		ctx.fillStyle = this.color
+		ctx.lineWidth = (1 + this.actLife/10)*this.lineWidth
+		ctx.beginPath()
+		let bts = board_to_screen(this.x,this.y)
+		ctx.arc(bts[0],bts[1], this.actualSize, 0, 2 * Math.PI);
+		ctx.fill()
+		// ctx.stroke()
 	}
 }
 
