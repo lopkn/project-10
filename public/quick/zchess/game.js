@@ -519,6 +519,7 @@ class bloodParticle{
 		let bts = board_to_screen(this.x,this.y)
 		ctx.arc(bts[0],bts[1], this.actualSize, 0, 2 * Math.PI);
 		ctx.fill()
+		ctx.closePath()
 		// ctx.stroke()
 	}
 }

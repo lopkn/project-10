@@ -113,17 +113,43 @@ document.addEventListener("mousedown",(e)=>{
 let gameStart = "mode"
 
 function specialRender(){
+	
+
+	ctx.fillStyle = "#488000"
+	mrect(0,0)
+	// ctx.fillStyle = "#500299"
+	// mrect(0,2)
+	// mrect(0,4)
 	fill(255,255,255)
 	drawText("Choose game mode:",0,-1)
 	drawText("Normal",1,0)
 	drawText("King's Raid",1,2)
 	drawText("Knight's Raid",1,4)
-	fill(255,0,0)
-	mrect(0,0)
-	ctx.fillStyle = "#500299"
-	mrect(0,2)
-	ctx.fillStyle = "#488000"
-	mrect(0,4)
+
+	fill(155,0,255,Math.random())
+	ctx.beginPath()
+	let coord1 = board_to_screen(0.1,0.85)
+	let coord2 = board_to_screen(0.9,0.85)
+	let coord3 = board_to_screen(0.5,0)
+	ctx.moveTo(coord1[0],coord1[1]+2*tileSize)
+	ctx.lineTo(coord2[0],coord2[1]+2*tileSize)
+	ctx.lineTo(coord3[0],coord3[1]+2*tileSize)
+	ctx.fill()
+	ctx.closePath()
+	ctx.beginPath()
+	ctx.moveTo(coord1[0],coord1[1]+4*tileSize)
+	ctx.lineTo(coord2[0],coord2[1]+4*tileSize)
+	ctx.lineTo(coord3[0],coord3[1]+4*tileSize)
+	ctx.fill()
+	ctx.closePath()
+
+	ctx.fillStyle = "#999900"
+	drawText("K",0,2)
+	drawText("N",0,4)
+
+	
+
+
 }
 
 document.addEventListener("mouseup",(e)=>{
@@ -168,7 +194,7 @@ document.addEventListener("mouseup",(e)=>{
 ctx.font = "bold 40px Courier New"
 
 function drawText(l,x,y){
-	ctx.fillText(l,(x+camera.x)*tileSize+12.5,(y+camera.y)*tileSize+37.5)
+	ctx.fillText(l,(x+camera.x+0.26)*tileSize,(y+camera.y)*tileSize+37.5)
 }
 
 function drawPiece(l,x,y,team,cd){
@@ -176,7 +202,7 @@ function drawPiece(l,x,y,team,cd){
 	fill(255,255,255)} else {
 		fill(0,100,0)
 	}
-	ctx.fillText(l,(x+camera.x)*tileSize+12.5,(y+camera.y)*tileSize+37.5)
+	ctx.fillText(l,(x+camera.x+0.26)*tileSize,(y+camera.y)*tileSize+37.5)
 	if(cd != 0){
 		if(team == camera.team){
 			fill(0,0,150,0.3)} else {
