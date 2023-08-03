@@ -26,6 +26,7 @@ class camera{
 	static team = "p1";
 	static x = 0;
 	static y = 0;
+	static particles = [];
 }
 
 function fill(r,g,b,a){
@@ -46,6 +47,7 @@ function mrect(x,y,w,h){
 	h = h?h:1
 	rect((x+camera.x)*tileSize,(y+camera.y)*tileSize,tileSize*w,tileSize*h)
 }
+
 
 let keyDowns = {}
 
@@ -70,7 +72,7 @@ document.addEventListener("keyup",(e)=>{
 	clearInterval(keyDowns[k])
 	keyDowns[k] = undefined
 })
-onmousemove = (e)=>{mouseX = (e.clientX); mouseY = (e.clientY); mouseToBoardUpdate()}
+onmousemove = (e)=>{mouseX = (e.clientX); mouseY = (e.clientY-2); mouseToBoardUpdate()}
 function mouseToBoardUpdate(){
 	nx = Math.floor(mouseX/tileSize-camera.x)
 	ny = Math.floor(mouseY/tileSize-camera.y)
@@ -96,7 +98,7 @@ document.addEventListener("mouseup",(e)=>{
 	if(mouseDownPlace[0] == mouseBoardX && mouseDownPlace[1] == mouseBoardY){
 		let t = board.tiles[mouseBoardX+","+mouseBoardY]
 		if(t != undefined && t.piece != undefined && t.piece.team == camera.team){
-			t.piece.temporaryLegals = t.piece.legals()
+			t.piece.temporaryLegals = t.piece.legals().arr
 			pieceSelected = t.piece
 			return;	
 		}
@@ -174,29 +176,56 @@ function render(){
 	ctx.stroke()
 
 
+	let tn = Date.now()
+	for(let i = camera.particles.length-1; i > -1; i--){
+		let p = camera.particles[i]
+		p.update(tn)
+		if(p.draw()=="del"){
+			camera.particles.splice(i,1)
+		}
+	} 
+	//particles.push(new explosionR(300,300,"#FFFF00"))
 
 
 	fill(255,0,0,0.3)
 	mrect(mouseBoardX,mouseBoardY)
 }
 board.emptyNew()
-setInterval(()=>{render()},60)
+board.spawnRates = ["pawn",0.7,"king",0.85,"knight",0.95,"bishop",0.98,"rook"]
+setInterval(()=>{render()},30)
 
 	board.tiles[3+",0"].piece = new piece("pawn",3,0,"zombies",{"direction":"y+"})
 	board.tiles[5+",0"].piece = new piece("pawn",5,0,"zombies",{"direction":"y+"})
 	board.tiles[6+",0"].piece = new piece("pawn",6,0,"zombies",{"direction":"y+"})
 
-setInterval(()=>{
+let gameInterval = setInterval(()=>{
 	let x = Math.floor(Math.random()*8)
-	if(board.tiles[x+",0"].piece != undefined){
-		return;
+	let y = board.topTile;
+	while(board.tiles[x+","+y]?.piece != undefined){
+		y+=1
 	}
-	let name = "pawn"
-	if(Math.random()>0.7){name = "king"}
-	if(Math.random()>0.85){name = "knight"}
-	if(Math.random()>0.95){name = "bishop"}
-	if(Math.random()>0.98){name = "rook"}
-	board.tiles[x+",0"].piece = new piece(name,x,0,"zombies",{"direction":"y+"})
+	if(y > 2){return;}
+
+	let name = board.spawnRates[0]
+	let rng = Math.random()
+	for(let i = 0; i < board.spawnRates.length/2;i++){
+		if(rng < board.spawnRates[i*2+1]){name = board.spawnRates[i*2];break;}
+	}
+	// if(Math.random()>0.7){name = "king"}
+	// if(Math.random()>0.85){name = "knight"}
+	// if(Math.random()>0.95){name = "bishop"}
+	// if(Math.random()>0.98){name = "rook"}
+	board.tiles[x+","+y].piece = new piece(name,x,y,"zombies",{"direction":"y+"})
+
+	if(Math.random()>0.8){
+		let y = -1
+		while(Math.random()>0.5){
+			y-=1
+		}
+		let x = Math.floor(Math.random()*8)
+		if(board.tiles[x+","+y] == undefined){board.tiles[x+","+y] = {}}
+	}
+
 },10000)
 
 

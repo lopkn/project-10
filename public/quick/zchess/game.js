@@ -10,20 +10,24 @@ function ipos(str){
 class board {
 	// undefined: empty,{} empty movable, {"piece"}
 	static tiles = {}
-
+	static topTile = 0;
 	static emptyNew(){
 		for(let i = 0; i < 8; i++){
 			for(let j = 0; j < 12; j++){
 				this.tiles[i+","+j] = {};
 			}
 		}
-		for(let i = 2; i < 6; i++){
+		for(let i = 0; i < 8; i++){
 			this.tiles[i+","+10].piece = new piece("pawn",i,10,"p1",{"direction":"y-"})
 		}
-			this.tiles[2+","+11].piece = new piece("rook",2,11,"p1",)
-			this.tiles[3+","+11].piece = new piece("bishop",3,11,"p1")
+			this.tiles[0+","+11].piece = new piece("rook",0,11,"p1",)
+			this.tiles[1+","+11].piece = new piece("knight",1,11,"p1")
+			this.tiles[2+","+11].piece = new piece("bishop",2,11,"p1",)
+			this.tiles[3+","+11].piece = new piece("queen",3,11,"p1")
 			this.tiles[4+","+11].piece = new piece("king",4,11,"p1")
-			this.tiles[5+","+11].piece = new piece("knight",5,11,"p1")
+			this.tiles[5+","+11].piece = new piece("bishop",5,11,"p1")
+			this.tiles[6+","+11].piece = new piece("knight",6,11,"p1")
+			this.tiles[7+","+11].piece = new piece("rook",7,11,"p1")
 	}
 }
 
@@ -60,13 +64,15 @@ class piece {
 			this.legals = ()=>{
 				let loop = true
 				let legals = []
+				let legalDict = {}
 				for(let i = 1;i<this.range+1;i++){
 					let pos = spos(this.x+i,this.y)
 					let gtt = getTileTeam(pos,this.team)
 					if(gtt == false || gtt == "block"){break};
 					if(gtt == "phase"){continue;}
-					if(gtt == "capture"){legals.push(pos);break}
+					if(gtt == "capture"){legals.push(pos);legalDict[pos]=gtt;break}
 					legals.push(pos)
+					legalDict[pos]=gtt
 
 				}
 				for(let i = 1;i<this.range+1;i++){
@@ -74,8 +80,9 @@ class piece {
 					let gtt = getTileTeam(pos,this.team)
 					if(gtt == false || gtt == "block"){break};
 					if(gtt == "phase"){continue;}
-					if(gtt == "capture"){legals.push(pos);break}
+					if(gtt == "capture"){legals.push(pos);legalDict[pos]=gtt;break}
 					legals.push(pos)
+					legalDict[pos]=gtt
 
 				}
 				for(let i = 1;i<this.range+1;i++){
@@ -83,53 +90,93 @@ class piece {
 					let gtt = getTileTeam(pos,this.team)
 					if(gtt == false || gtt == "block"){break};
 					if(gtt == "phase"){continue;}
-					if(gtt == "capture"){legals.push(pos);break}
+					if(gtt == "capture"){legals.push(pos);legalDict[pos]=gtt;break}
 					legals.push(pos)
-
+					legalDict[pos]=gtt;
 				}
 				for(let i = 1;i<this.range+1;i++){
 					let pos = spos(this.x,this.y-i)
 					let gtt = getTileTeam(pos,this.team)
 					if(gtt == false || gtt == "block"){break};
 					if(gtt == "phase"){continue;}
-					if(gtt == "capture"){legals.push(pos);break}
+					if(gtt == "capture"){legals.push(pos);legalDict[pos]=gtt;break}
 					legals.push(pos)
-
+					legalDict[pos]=gtt;
 				}
-				return(legals)
+				return({"arr":legals,"dict":legalDict})
 			}
-		}else if(id == "bishop"){
-			this.maxCD = 12
+		}else if(id == "queen"){
+			this.maxCD = 16
 			this.range = 5
-			this.renderLetter = "B"
+			this.renderLetter = "Q"
 			this.legals = ()=>{
 				let loop = true
 				let legals = []
+				let legalDict = {}
+				for(let i = 1;i<this.range+1;i++){
+					let pos = spos(this.x+i,this.y)
+					let gtt = getTileTeam(pos,this.team)
+					if(gtt == false || gtt == "block"){break};
+					if(gtt == "phase"){continue;}
+					if(gtt == "capture"){legals.push(pos);legalDict[pos]=gtt;break}
+					legals.push(pos)
+					legalDict[pos]=gtt
+
+				}
+				for(let i = 1;i<this.range+1;i++){
+					let pos = spos(this.x,this.y+i)
+					let gtt = getTileTeam(pos,this.team)
+					if(gtt == false || gtt == "block"){break};
+					if(gtt == "phase"){continue;}
+					if(gtt == "capture"){legals.push(pos);legalDict[pos]=gtt;break}
+					legals.push(pos)
+					legalDict[pos]=gtt
+
+				}
+				for(let i = 1;i<this.range+1;i++){
+					let pos = spos(this.x-i,this.y)
+					let gtt = getTileTeam(pos,this.team)
+					if(gtt == false || gtt == "block"){break};
+					if(gtt == "phase"){continue;}
+					if(gtt == "capture"){legals.push(pos);legalDict[pos]=gtt;break}
+					legals.push(pos)
+					legalDict[pos]=gtt;
+				}
+				for(let i = 1;i<this.range+1;i++){
+					let pos = spos(this.x,this.y-i)
+					let gtt = getTileTeam(pos,this.team)
+					if(gtt == false || gtt == "block"){break};
+					if(gtt == "phase"){continue;}
+					if(gtt == "capture"){legals.push(pos);legalDict[pos]=gtt;break}
+					legals.push(pos)
+					legalDict[pos]=gtt;
+				}
 				for(let i = 1;i<this.range+1;i++){
 					let pos = spos(this.x+i,this.y+i)
 					let gtt = getTileTeam(pos,this.team)
 					if(gtt == false || gtt == "block"){break};
 					if(gtt == "phase"){continue;}
-					if(gtt == "capture"){legals.push(pos);break}
+					if(gtt == "capture"){legals.push(pos);legalDict[pos]=gtt;break}
 					legals.push(pos)
-
+					legalDict[pos]=gtt;
 				}
 				for(let i = 1;i<this.range+1;i++){
 					let pos = spos(this.x-i,this.y+i)
 					let gtt = getTileTeam(pos,this.team)
 					if(gtt == false || gtt == "block"){break};
 					if(gtt == "phase"){continue;}
-					if(gtt == "capture"){legals.push(pos);break}
+					if(gtt == "capture"){legals.push(pos);legalDict[pos]=gtt;break}
 					legals.push(pos)
-
+					legalDict[pos]=gtt;
 				}
 				for(let i = 1;i<this.range+1;i++){
 					let pos = spos(this.x-i,this.y-i)
 					let gtt = getTileTeam(pos,this.team)
 					if(gtt == false || gtt == "block"){break};
 					if(gtt == "phase"){continue;}
-					if(gtt == "capture"){legals.push(pos);break}
+					if(gtt == "capture"){legals.push(pos);legalDict[pos]=gtt;break}
 					legals.push(pos)
+					legalDict[pos]=gtt;
 
 				}
 				for(let i = 1;i<this.range+1;i++){
@@ -137,11 +184,60 @@ class piece {
 					let gtt = getTileTeam(pos,this.team)
 					if(gtt == false || gtt == "block"){break};
 					if(gtt == "phase"){continue;}
-					if(gtt == "capture"){legals.push(pos);break}
+					if(gtt == "capture"){legals.push(pos);legalDict[pos]=gtt;break}
 					legals.push(pos)
+					legalDict[pos]=gtt;
 
 				}
-				return(legals)
+				return({"arr":legals,"dict":legalDict})
+			}
+		} else if(id == "bishop"){
+			this.maxCD = 12
+			this.range = 5
+			this.renderLetter = "B"
+			this.legals = ()=>{
+				let loop = true
+				let legals = []
+				let legalDict = {}
+				for(let i = 1;i<this.range+1;i++){
+					let pos = spos(this.x+i,this.y+i)
+					let gtt = getTileTeam(pos,this.team)
+					if(gtt == false || gtt == "block"){break};
+					if(gtt == "phase"){continue;}
+					if(gtt == "capture"){legals.push(pos);legalDict[pos]=gtt;break}
+					legals.push(pos)
+					legalDict[pos]=gtt;
+				}
+				for(let i = 1;i<this.range+1;i++){
+					let pos = spos(this.x-i,this.y+i)
+					let gtt = getTileTeam(pos,this.team)
+					if(gtt == false || gtt == "block"){break};
+					if(gtt == "phase"){continue;}
+					if(gtt == "capture"){legals.push(pos);legalDict[pos]=gtt;break}
+					legals.push(pos)
+					legalDict[pos]=gtt;
+				}
+				for(let i = 1;i<this.range+1;i++){
+					let pos = spos(this.x-i,this.y-i)
+					let gtt = getTileTeam(pos,this.team)
+					if(gtt == false || gtt == "block"){break};
+					if(gtt == "phase"){continue;}
+					if(gtt == "capture"){legals.push(pos);legalDict[pos]=gtt;break}
+					legals.push(pos)
+					legalDict[pos]=gtt;
+
+				}
+				for(let i = 1;i<this.range+1;i++){
+					let pos = spos(this.x+i,this.y-i)
+					let gtt = getTileTeam(pos,this.team)
+					if(gtt == false || gtt == "block"){break};
+					if(gtt == "phase"){continue;}
+					if(gtt == "capture"){legals.push(pos);legalDict[pos]=gtt;break}
+					legals.push(pos)
+					legalDict[pos]=gtt;
+
+				}
+				return({"arr":legals,"dict":legalDict})
 			}
 		} else if(id == "knight"){
 			this.maxCD = 10
@@ -149,12 +245,13 @@ class piece {
 			this.jumps = [[2,1],[1,2],[-1,2],[-2,1],[1,-2],[-1,-2],[-2,-1],[2,-1]]
 			this.legals = ()=>{
 				let legals = []
+				let legalDict = {}
 				this.jumps.forEach((s)=>{
 					let e = spos(s[0]+this.x,s[1]+this.y)
 					let gtt = getTileTeam(e,this.team)
-					if(gtt == "capture" || gtt == "empty"){legals.push(e)}
+					if(gtt == "capture" || gtt == "empty"){legals.push(e);legalDict[e]=gtt;}
 				})
-				return(legals)
+				return({"arr":legals,"dict":legalDict})
 			}
 		} else if(id == "king"){
 			this.maxCD = 20
@@ -162,12 +259,13 @@ class piece {
 			this.jumps = [[0,1],[0,-1],[-1,1],[1,-1],[1,0],[-1,0],[-1,-1],[1,1]]
 			this.legals = ()=>{
 				let legals = []
+				let legalDict = {}
 				this.jumps.forEach((s)=>{
 					let e = spos(s[0]+this.x,s[1]+this.y)
 					let gtt = getTileTeam(e,this.team)
-					if(gtt == "capture" || gtt == "empty"){legals.push(e)}
+					if(gtt == "capture" || gtt == "empty"){legals.push(e);legalDict[e]=gtt;}
 				})
-				return(legals)
+				return({"arr":legals,"dict":legalDict})
 			}
 		} else if(id == "pawn"){
 			this.maxCD = 7
@@ -175,19 +273,33 @@ class piece {
 			if(this.tags.direction == "y+"){
 				this.legals = ()=>{
 					let legals = []
-					if(getTileTeam(spos(this.x,this.y+1),this.team) == "empty"){legals.push(spos(this.x,this.y+1))}
-					if(getTileTeam(spos(this.x+1,this.y+1),this.team) == "capture"){legals.push(spos(this.x+1,this.y+1))}
-					if(getTileTeam(spos(this.x-1,this.y+1),this.team) == "capture"){legals.push(spos(this.x-1,this.y+1))}
-					return(legals)
+					let legalDict = {}
+					if(getTileTeam(spos(this.x,this.y+1),this.team) == "empty"){legals.push(spos(this.x,this.y+1))
+						legalDict[spos(this.x,this.y+1)]="empty"
+					}
+					if(getTileTeam(spos(this.x+1,this.y+1),this.team) == "capture"){legals.push(spos(this.x+1,this.y+1))
+						legalDict[spos(this.x+1,this.y+1)]="capture"
+					}
+					if(getTileTeam(spos(this.x-1,this.y+1),this.team) == "capture"){legals.push(spos(this.x-1,this.y+1))
+						legalDict[spos(this.x-1,this.y+1)]="capture"
+					}
+					return({"arr":legals,"dict":legalDict})
 				}
 			}
 			if(this.tags.direction == "y-"){
 				this.legals = ()=>{
 					let legals = []
-					if(getTileTeam(spos(this.x,this.y-1),this.team) == "empty"){legals.push(spos(this.x,this.y-1))}
-					if(getTileTeam(spos(this.x+1,this.y-1),this.team) == "capture"){legals.push(spos(this.x+1,this.y-1))}
-					if(getTileTeam(spos(this.x-1,this.y-1),this.team) == "capture"){legals.push(spos(this.x-1,this.y-1))}
-					return(legals)
+					let legalDict = {}
+					if(getTileTeam(spos(this.x,this.y-1),this.team) == "empty"){legals.push(spos(this.x,this.y-1))
+						legalDict[spos(this.x,this.y-1)]="empty"
+					}
+					if(getTileTeam(spos(this.x+1,this.y-1),this.team) == "capture"){legals.push(spos(this.x+1,this.y-1))
+						legalDict[spos(this.x+1,this.y-1)]="capture"
+					}
+					if(getTileTeam(spos(this.x-1,this.y-1),this.team) == "capture"){legals.push(spos(this.x-1,this.y-1))
+						legalDict[spos(this.x-1,this.y-1)]="capture"
+					}
+					return({"arr":legals,"dict":legalDict})
 				}
 			}
 		}
@@ -205,7 +317,7 @@ class piece {
 
 	move(x,y){
 		let pos = spos(x,y)
-		let moves = this.legals()
+		let moves = this.legals().arr
 		let movable = false
 		for(let i = 0; i < moves.length; i++)
 			{if(moves[i]==pos){movable=true;break;}}
@@ -230,7 +342,7 @@ class piece {
 		if(this.cooldown == 0){return(0)}
 		let tn = Date.now()
 		this.cooldown = (this.coolUntil - tn)/1000
-		if(this.cooldown < 0){
+		if(this.cooldown <= 0){
 			this.cooldown = 0
 			this.cooldownFinish()
 			return(0)
@@ -242,25 +354,49 @@ class piece {
 			setTimeout(()=>{
 				AImoveRandom(this)
 			},Math.random()*4000)
+		} else {
+			camera.particles.push(new explosionR(this.x+0.5,this.y+0.5,"rgba(255,255,0,0.5)",10,18,0.2))
 		}
 	}
 
 
 }
 function AImoveRandom(piece){
-	let legal = piece.legals()
+	let legals = piece.legals()
+	let legal = legals.arr
 	if(legal.length == 0){
 		setTimeout(()=>{
 				AImoveRandom(piece)
 			},Math.random()*4000+3000)
 		return
 	}
+
+	//capture piece
+	let capturables = []
+	legal.forEach((e)=>{
+		if(legals.dict[e] == "capture"){
+			capturables.push(e)
+		}
+	})
+	if(capturables.length > 0){
+		let moveString = capturables[Math.floor(Math.random()*capturables.length)]
+		let ip = ipos(moveString)
+		attemptMove(piece.x,piece.y,ip.x,ip.y,piece.team)
+	}
+	//capture piece
+
 	while(piece.cooldown == 0 && piece == board.tiles[spos(piece.x,piece.y)].piece){
 		let moveString = legal[Math.floor(Math.random()*legal.length)]
 		let ip = ipos(moveString)
+
+		
+		//move front
 		if(ipos.y < piece.y && Math.random()>0.6){
 			continue;
 		}
+		//move front
+
+
 		attemptMove(piece.x,piece.y,ip.x,ip.y,piece.team)
 	}
 }
@@ -274,3 +410,52 @@ function attemptMove(x,y,tx,ty,team){
 	}
 	return(movePiece(x,y,tx,ty,team))
 }
+
+
+
+
+
+
+function board_to_screen(x,y){
+	return([(x+camera.x)*tileSize,(y+camera.y)*tileSize])
+}
+
+class explosionR{
+	constructor(x,y,color,speed,s2,size){
+		this.x = x
+		this.speed = speed?speed:1
+		this.s2 = (s2?s2:1)/5
+		this.y = y
+		this.color = color
+		this.size = 3
+		this.lineWidth = size?size:1
+		this.actLife = 600
+		this.lastTime = Date.now()		
+	}
+
+	update(t){
+		this.size += this.speed*(t-this.lastTime)/50
+		this.actLife -= this.s2*(t-this.lastTime)
+		this.lastTime = t
+	}
+	draw(){
+		if(this.actLife < 0){
+			return('del')
+		}
+		ctx.strokeStyle = this.color
+		ctx.lineWidth = (1 + this.actLife/10)*this.lineWidth
+		ctx.beginPath()
+		let bts = board_to_screen(this.x,this.y)
+		ctx.arc(bts[0],bts[1], this.size, 0, 2 * Math.PI);
+		ctx.stroke()
+		
+	}
+}
+
+
+
+
+
+
+
+
