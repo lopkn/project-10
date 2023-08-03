@@ -23,7 +23,9 @@ function rect(x,y,w,h){
 }
 
 class camera{
+	static gamemode = "none"
 	static team = "p1";
+	static pieceFrequency = 1000;
 	static x = 1.2;
 	static y = 1.2;
 	static particles = [];
@@ -75,7 +77,7 @@ document.addEventListener("keyup",(e)=>{
 onmousemove = (e)=>{mouseX = (e.clientX); mouseY = (e.clientY-2); mouseToBoardUpdate();
 	if(mouseDown){
 		let pos = spos(mouseDownPlace[0],mouseDownPlace[1])
-		if(board.tiles[pos] == undefined || board.tiles[pos].piece == undefined || board.tiles[pos].piece.team != camera.team){
+		if(board.tiles[pos] == undefined || board.tiles[pos].piece == undefined){
 			camera.x += (mouseX-mouseDeltaMovement[0])/tileSize
 			camera.y += (mouseY-mouseDeltaMovement[1])/tileSize
     		mouseDeltaMovement = [mouseX,mouseY]
@@ -108,11 +110,50 @@ document.addEventListener("mousedown",(e)=>{
 
 })
 
+let gameStart = "mode"
+
+function specialRender(){
+	fill(255,255,255)
+	drawText("Choose game mode:",0,-1)
+	drawText("Normal",1,0)
+	drawText("King's Raid",1,2)
+	drawText("Knight's Raid",1,4)
+	fill(255,0,0)
+	mrect(0,0)
+	ctx.fillStyle = "#500299"
+	mrect(0,2)
+	ctx.fillStyle = "#488000"
+	mrect(0,4)
+}
+
 document.addEventListener("mouseup",(e)=>{
     mouseDown = false
 	mouseToBoardUpdate()
 
 	if(mouseDownPlace[0] == mouseBoardX && mouseDownPlace[1] == mouseBoardY){
+		if(gameStart != "started"){
+			if(gameStart == "mode"){
+				if(mouseBoardX == 0){
+					if(mouseBoardY == 0){
+						camera.gamemode = "Normal"
+						gameStart = "started"
+						startGame()
+
+					} else if(mouseBoardY == 2){
+						camera.gamemode = "King's Raid"
+						gameStart = "started"
+						startGame()
+
+					} else if(mouseBoardY == 4){
+						camera.gamemode = "Knight's Raid"
+						gameStart = "started"
+						startGame()
+					}
+				}
+			}
+
+			return;
+		}
 		let t = board.tiles[mouseBoardX+","+mouseBoardY]
 		if(t != undefined && t.piece != undefined && t.piece.team == camera.team){
 			t.piece.temporaryLegals = t.piece.legals().arr
@@ -125,6 +166,11 @@ document.addEventListener("mouseup",(e)=>{
 })
 
 ctx.font = "bold 40px Courier New"
+
+function drawText(l,x,y){
+	ctx.fillText(l,(x+camera.x)*tileSize+12.5,(y+camera.y)*tileSize+37.5)
+}
+
 function drawPiece(l,x,y,team,cd){
 	if(team == camera.team){
 	fill(255,255,255)} else {
@@ -215,10 +261,41 @@ function render(){
 		ctx.lineTo(mouseX,mouseY)
 		ctx.stroke()
 	}
+	specialRender();
 }
-board.emptyNew()
-board.spawnRates = ["pawn",0.7,"king",0.85,"knight",0.95,"bishop",0.98,"rook"]
+
 setInterval(()=>{render()},30)
+
+
+
+function startGame(){
+specialRender = ()=>{}
+board.emptyNew()
+
+
+if(camera.gamemode == "Knight's Raid"){
+			board.tiles[4+","+11].piece = new piece("knight",4,11,"p1")
+			board.tiles["4,11"].piece.maxCD = 0.2
+} else if(camera.gamemode == "King's Raid"){
+			board.tiles[4+","+11].piece = new piece("king",4,11,"p1")
+			board.tiles["4,11"].piece.maxCD = 0.2
+} else if(camera.gamemode == "Normal"){
+	for(let i = 0; i < 8; i++){
+		board.tiles[i+","+10].piece = new piece("pawn",i,10,"p1",{"direction":"y-"})
+		board.tiles[0+","+11].piece = new piece("rook",0,11,"p1",)
+		board.tiles[1+","+11].piece = new piece("knight",1,11,"p1")
+		board.tiles[2+","+11].piece = new piece("bishop",2,11,"p1",)
+		board.tiles[3+","+11].piece = new piece("queen",3,11,"p1")
+		board.tiles[4+","+11].piece = new piece("king",4,11,"p1")
+		board.tiles[5+","+11].piece = new piece("bishop",5,11,"p1")
+		board.tiles[6+","+11].piece = new piece("knight",6,11,"p1")
+		board.tiles[7+","+11].piece = new piece("rook",7,11,"p1")
+	}
+	board.AIwait = ()=>{ruturn(Math.random()*4000)}
+	board.AIblowkWait = ()=>{ruturn(Math.random()*4000+3000)}
+	camera.pieceFrequency = 10000
+}
+board.spawnRates = ["pawn",0.7,"king",0.85,"knight",0.95,"bishop",0.98,"rook"]
 
 	board.tiles[3+",0"].piece = new piece("pawn",3,0,"zombies",{"direction":"y+"})
 	board.tiles[5+",0"].piece = new piece("pawn",5,0,"zombies",{"direction":"y+"})
@@ -252,9 +329,9 @@ let gameInterval = setInterval(()=>{
 		if(board.tiles[x+","+y] == undefined){board.tiles[x+","+y] = {}; if(y < board.topTile){board.topTile=y}}
 	}
 
-},10000)
+},camera.pieceFrequency)
 
-
+}
 
 
 //touch handler

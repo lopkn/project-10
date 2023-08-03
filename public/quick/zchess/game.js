@@ -11,6 +11,12 @@ class board {
 	// undefined: empty,{} empty movable, {"piece"}
 	static tiles = {}
 	static topTile = 0;
+	static AIwait(){
+		return(10)
+	}
+	static AIblockWait(){
+		return(300)
+	}
 	static emptyNew(){
 		for(let i = 0; i < 8; i++){
 			for(let j = 0; j < 12; j++){
@@ -18,18 +24,18 @@ class board {
 			}
 		}
 		for(let i = 0; i < 8; i++){
-			this.tiles[i+","+10].piece = new piece("pawn",i,10,"p1",{"direction":"y-"})
+			// this.tiles[i+","+10].piece = new piece("pawn",i,10,"p1",{"direction":"y-"})
 			// this.tiles[i+","+5].piece = new piece("knight",i,5,"p1",{"direction":"y-"})
 			// this.tiles[i+","+4].piece = new piece("knight",i,4,"p1",{"direction":"y-"})
 		}
-			this.tiles[0+","+11].piece = new piece("rook",0,11,"p1",)
-			this.tiles[1+","+11].piece = new piece("knight",1,11,"p1")
-			this.tiles[2+","+11].piece = new piece("bishop",2,11,"p1",)
-			this.tiles[3+","+11].piece = new piece("queen",3,11,"p1")
-			this.tiles[4+","+11].piece = new piece("king",4,11,"p1")
-			this.tiles[5+","+11].piece = new piece("bishop",5,11,"p1")
-			this.tiles[6+","+11].piece = new piece("knight",6,11,"p1")
-			this.tiles[7+","+11].piece = new piece("rook",7,11,"p1")
+			// this.tiles[0+","+11].piece = new piece("rook",0,11,"p1",)
+			// this.tiles[1+","+11].piece = new piece("knight",1,11,"p1")
+			// this.tiles[2+","+11].piece = new piece("bishop",2,11,"p1",)
+			// this.tiles[3+","+11].piece = new piece("queen",3,11,"p1")
+			// this.tiles[4+","+11].piece = new piece("king",4,11,"p1")
+			// this.tiles[5+","+11].piece = new piece("bishop",5,11,"p1")
+			// this.tiles[6+","+11].piece = new piece("knight",6,11,"p1")
+			// this.tiles[7+","+11].piece = new piece("rook",7,11,"p1")
 	}
 }
 
@@ -257,6 +263,7 @@ class piece {
 			}
 		} else if(id == "king"){
 			this.maxCD = 20
+			if(this.team=="zombies"){this.maxCD = 20}
 			this.renderLetter = "K"
 			this.jumps = [[0,1],[0,-1],[-1,1],[1,-1],[1,0],[-1,0],[-1,-1],[1,1]]
 			this.legals = ()=>{
@@ -356,7 +363,8 @@ class piece {
 		if(this.team == "zombies"){
 			setTimeout(()=>{
 				AImoveRandom(this)
-			},Math.random()*4000)
+			// },Math.random()*4000)
+			},10)
 		} else {
 			camera.particles.push(new explosionR(this.x+0.5,this.y+0.5,"rgba(255,255,0,0.5)",10,18,0.2))
 		}
@@ -370,7 +378,8 @@ function AImoveRandom(piece){
 	if(legal.length == 0){
 		setTimeout(()=>{
 				AImoveRandom(piece)
-			},Math.random()*4000+3000)
+			// },Math.random()*4000+3000)
+			},300)
 		return
 	}
 
