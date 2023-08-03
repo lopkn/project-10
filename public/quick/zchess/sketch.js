@@ -98,6 +98,9 @@ let mouseDeltaMovement = [0,0]
 let pieceSelected = "none"
 let mouseDown = false
 document.addEventListener("mousedown",(e)=>{
+	mouseX = (e.clientX); mouseY = (e.clientY-2);
+	mouseToBoardUpdate()
+	console.log(e.clientX,e.clientY)
     mouseDownPlace = [mouseBoardX,mouseBoardY,mouseX,mouseY]
     mouseDeltaMovement = [mouseX,mouseY]
 	mouseToBoardUpdate()
