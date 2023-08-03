@@ -252,7 +252,7 @@ let gameInterval = setInterval(()=>{
 		if(board.tiles[x+","+y] == undefined){board.tiles[x+","+y] = {}; if(y < board.topTile){board.topTile=y}}
 	}
 
-},1000)
+},10000)
 
 
 
