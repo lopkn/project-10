@@ -19,8 +19,8 @@ class board {
 		}
 		for(let i = 0; i < 8; i++){
 			this.tiles[i+","+10].piece = new piece("pawn",i,10,"p1",{"direction":"y-"})
-			this.tiles[i+","+5].piece = new piece("knight",i,5,"p1",{"direction":"y-"})
-			this.tiles[i+","+4].piece = new piece("knight",i,4,"p1",{"direction":"y-"})
+			// this.tiles[i+","+5].piece = new piece("knight",i,5,"p1",{"direction":"y-"})
+			// this.tiles[i+","+4].piece = new piece("knight",i,4,"p1",{"direction":"y-"})
 		}
 			this.tiles[0+","+11].piece = new piece("rook",0,11,"p1",)
 			this.tiles[1+","+11].piece = new piece("knight",1,11,"p1")
@@ -243,7 +243,7 @@ class piece {
 			}
 		} else if(id == "knight"){
 			this.maxCD = 10
-			this.renderLetter = "K"
+			this.renderLetter = "N"
 			this.jumps = [[2,1],[1,2],[-1,2],[-2,1],[1,-2],[-1,-2],[-2,-1],[2,-1]]
 			this.legals = ()=>{
 				let legals = []
@@ -257,7 +257,7 @@ class piece {
 			}
 		} else if(id == "king"){
 			this.maxCD = 20
-			this.renderLetter = "G"
+			this.renderLetter = "K"
 			this.jumps = [[0,1],[0,-1],[-1,1],[1,-1],[1,0],[-1,0],[-1,-1],[1,1]]
 			this.legals = ()=>{
 				let legals = []
