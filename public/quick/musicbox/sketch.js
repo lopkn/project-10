@@ -939,7 +939,7 @@ function init(){
 var sampler = new Tone.Sampler({
 	urls: {
 
-		"C2":auds2[1],
+	"C2":auds2[1],
 	"C#2":auds2[2],
 	"D2":auds2[3],
 	"D#2":auds2[4],

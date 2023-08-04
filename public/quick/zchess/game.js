@@ -113,6 +113,77 @@ class piece {
 				}
 				return({"arr":legals,"dict":legalDict})
 			}
+		} else if(id == "cannon"){
+			this.range = 9
+			this.maxCD = 15
+			this.renderLetter = "C"
+			this.legals = ()=>{
+				let loop = true
+				let legals = []
+				let legalDict = {}
+				let jumped = false
+				for(let i = 1;i<this.range+1;i++){
+					let pos = spos(this.x+i,this.y)
+					let gtt = getTileTeam(pos,this.team)
+					if(jumped){
+						if(gtt == false || gtt == "block"){break};
+						if(gtt == "phase"){continue;}
+						if(gtt == "capture"){legals.push(pos);legalDict[pos]=gtt;break}
+					} else {
+						if(gtt == false || gtt == "block" || gtt == "capture"){jumped = true; continue};
+						if(gtt == "phase"){continue;}
+						legals.push(pos)
+						legalDict[pos]=gtt
+					}
+				}
+				jumped = false
+				for(let i = 1;i<this.range+1;i++){
+					let pos = spos(this.x,this.y+i)
+					let gtt = getTileTeam(pos,this.team)
+					if(jumped){
+						if(gtt == false || gtt == "block"){break};
+						if(gtt == "phase"){continue;}
+						if(gtt == "capture"){legals.push(pos);legalDict[pos]=gtt;break}
+					} else {
+						if(gtt == false || gtt == "block" || gtt == "capture"){jumped = true; continue};
+						if(gtt == "phase"){continue;}
+						legals.push(pos)
+						legalDict[pos]=gtt
+					}
+
+				}
+				jumped = false
+				for(let i = 1;i<this.range+1;i++){
+					let pos = spos(this.x-i,this.y)
+					let gtt = getTileTeam(pos,this.team)
+					if(jumped){
+						if(gtt == false || gtt == "block"){break};
+						if(gtt == "phase"){continue;}
+						if(gtt == "capture"){legals.push(pos);legalDict[pos]=gtt;break}
+					} else {
+						if(gtt == false || gtt == "block" || gtt == "capture"){jumped = true; continue};
+						if(gtt == "phase"){continue;}
+						legals.push(pos)
+						legalDict[pos]=gtt
+					}
+				}
+				jumped = false
+				for(let i = 1;i<this.range+1;i++){
+					let pos = spos(this.x,this.y-i)
+					let gtt = getTileTeam(pos,this.team)
+					if(jumped){
+						if(gtt == false || gtt == "block"){break};
+						if(gtt == "phase"){continue;}
+						if(gtt == "capture"){legals.push(pos);legalDict[pos]=gtt;break}
+					} else {
+						if(gtt == false || gtt == "block" || gtt == "capture"){jumped = true; continue};
+						if(gtt == "phase"){continue;}
+						legals.push(pos)
+						legalDict[pos]=gtt
+					}
+				}
+				return({"arr":legals,"dict":legalDict})
+			}
 		}else if(id == "queen"){
 			this.maxCD = 16
 			this.range = 5
@@ -326,11 +397,13 @@ class piece {
 
 	move(x,y){
 		let pos = spos(x,y)
-		let moves = this.legals().arr
-		let movable = false
-		for(let i = 0; i < moves.length; i++)
-			{if(moves[i]==pos){movable=true;break;}}
-		if(movable === false){return(false)}
+		let legals = this.legals()
+		let moves = legals.arr
+		if(legals.dict[pos] == undefined){return(false)}
+		// let movable = false
+		// for(let i = 0; i < moves.length; i++)
+		// 	{if(moves[i]==pos){movable=true;break;}}
+		// if(movable === false){return(false)}
 
 		board.tiles[spos(this.x,this.y)].piece = undefined
 
@@ -345,7 +418,7 @@ class piece {
 		board.tiles[pos].piece = this;
 		this.cooldown = this.maxCD
 		this.coolUntil = Date.now() + 1000*this.maxCD
-		return(true)
+		return(legals.dict[pos])
 	}	
 
 	CDcheck(){
@@ -393,11 +466,16 @@ function AImoveRandom(piece){
 	if(capturables.length > 0){
 		let moveString = capturables[Math.floor(Math.random()*capturables.length)]
 		let ip = ipos(moveString)
-		attemptMove(piece.x,piece.y,ip.x,ip.y,piece.team)
+		let result = attemptMove(piece.x,piece.y,ip.x,ip.y,piece.team)
+		if(result == "capture"){
+			// camera.playSound("./sounds/captureF.wav")
+			camera.playSoundF("0")
+		}
 	}
 	//capture piece
 
 	while(piece.cooldown == 0 && piece == board.tiles[spos(piece.x,piece.y)].piece){
+
 		let moveString = legal[Math.floor(Math.random()*legal.length)]
 		let ip = ipos(moveString)
 

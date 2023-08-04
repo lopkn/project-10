@@ -17,19 +17,46 @@ document.getElementById("help").innerHTML = `help menu unfinished`
 
 let CTX = {"main":myCanvas.getContext("2d")}
 let ctx = CTX.main
+ctx.textAlign = "center"
 
 function rect(x,y,w,h){
 	ctx.fillRect(x,y,w,h)
 }
 
+
+function initSounds(arr){
+	arr.forEach((E)=>{
+		let e = "./sounds/"+E+".wav"
+		let audio = new Audio(e)
+		audio.preload = "auto";
+		audio.load()
+		camera.sounds[e] = audio
+	})
+}
+
 class camera{
 	static gamemode = "none"
 	static team = "p1";
-	static pieceFrequency = 1000;
+	static pieceFrequency = 1300;
 	static x = 1.2;
 	static y = 1.2;
 	static particles = [];
+	static sounds = {}
+	static soundArr = []
+
+	// static playSound(url){
+	// 	let click = this.sounds[url].cloneNode()
+	// 	click.play()
+	// }
+	static playSound(url){
+		let audio = new Audio(url).play()
+	}
+	static playSoundF(no){
+		sampler1.triggerAttack([soundMapper[no]])
+	}
+	static captureStreak = 0;
 }
+initSounds(["move","captureF","capture","captureS1","captureS2","captureS3","captureS4","captureS5","captureS6","captureS7","captureS8"])
 
 function fill(r,g,b,a){
 	a = a?a:1
@@ -102,7 +129,6 @@ let mouseDown = false
 document.addEventListener("mousedown",(e)=>{
 	mouseX = (e.clientX); mouseY = (e.clientY-2);
 	mouseToBoardUpdate()
-	console.log(e.clientX,e.clientY)
     mouseDownPlace = [mouseBoardX,mouseBoardY,mouseX,mouseY]
     mouseDeltaMovement = [mouseX,mouseY]
 	mouseToBoardUpdate()
@@ -143,7 +169,7 @@ function specialRender(){
 	ctx.fill()
 	ctx.closePath()
 
-	ctx.fillStyle = "#999900"
+	ctx.fillStyle = "#F9F900"
 	drawText("K",0,2)
 	drawText("N",0,4)
 
@@ -188,13 +214,32 @@ document.addEventListener("mouseup",(e)=>{
 		}
 	}
 	pieceSelected = "none"
-	attemptMove(mouseDownPlace[0],mouseDownPlace[1],mouseBoardX,mouseBoardY,camera.team)
+	let move = attemptMove(mouseDownPlace[0],mouseDownPlace[1],mouseBoardX,mouseBoardY,camera.team)
+	if(move !== false){
+		console.log(move)
+		if(move == "empty"){
+			camera.captureStreak = 0;
+			// camera.playSound("./sounds/move.wav")
+			camera.playSoundF(1)
+		} else if(move == "capture" && camera.captureStreak < 4){
+			camera.captureStreak += 1;
+			camera.playSoundF(2)
+			camera.playSound("./sounds/capture.wav")
+		} else {
+			camera.captureStreak += 1;
+			let a = camera.captureStreak>8?9+Math.floor((camera.captureStreak-9)/2):camera.captureStreak
+			a = a>13?13:a
+			// camera.playSound("./sounds/captureS"+(a-4)+".wav")
+			camera.playSoundF(a-3)
+		}
+	}
 })
 
 ctx.font = "bold 40px Courier New"
 
 function drawText(l,x,y){
-	ctx.fillText(l,(x+camera.x+0.26)*tileSize,(y+camera.y)*tileSize+37.5)
+	ctx.textAlign = "left"
+	ctx.fillText(l,(x+camera.x+0.26)*tileSize,(y+camera.y+0.75)*tileSize)
 }
 
 function drawPiece(l,x,y,team,cd){
@@ -202,7 +247,7 @@ function drawPiece(l,x,y,team,cd){
 	fill(255,255,255)} else {
 		fill(0,100,0)
 	}
-	ctx.fillText(l,(x+camera.x+0.26)*tileSize,(y+camera.y)*tileSize+37.5)
+	ctx.fillText(l,(x+camera.x+0.5)*tileSize,(y+camera.y+0.75)*tileSize)
 	if(cd != 0){
 		if(team == camera.team){
 			fill(0,0,150,0.3)} else {
@@ -245,6 +290,7 @@ function render(){
 	arr.forEach((e)=>{
 		let pos = ipos(e)
 		let tile = board.tiles[e]
+		ctx.textAlign = "center"
 		if(tile.piece != undefined){
 			tile.piece.CDcheck()
 			drawPiece(tile.piece.renderLetter,pos.x,pos.y,tile.piece.team,tile.piece.cooldown/tile.piece.maxCD)
@@ -290,7 +336,7 @@ function render(){
 	specialRender();
 }
 
-setInterval(()=>{render()},30)
+setInterval(()=>{if(document.hasFocus()){render()}},35)
 
 
 
@@ -308,7 +354,8 @@ if(camera.gamemode == "Knight's Raid"){
 } else if(camera.gamemode == "Normal"){
 	for(let i = 0; i < 8; i++){
 		board.tiles[i+","+10].piece = new piece("pawn",i,10,"p1",{"direction":"y-"})
-		board.tiles[0+","+11].piece = new piece("rook",0,11,"p1",)
+	}
+	board.tiles[0+","+11].piece = new piece("rook",0,11,"p1",)
 		board.tiles[1+","+11].piece = new piece("knight",1,11,"p1")
 		board.tiles[2+","+11].piece = new piece("bishop",2,11,"p1",)
 		board.tiles[3+","+11].piece = new piece("queen",3,11,"p1")
@@ -316,7 +363,7 @@ if(camera.gamemode == "Knight's Raid"){
 		board.tiles[5+","+11].piece = new piece("bishop",5,11,"p1")
 		board.tiles[6+","+11].piece = new piece("knight",6,11,"p1")
 		board.tiles[7+","+11].piece = new piece("rook",7,11,"p1")
-	}
+		board.tiles[7+","+9].piece = new piece("cannon",7,9,"p1")
 	board.AIwait = ()=>{ruturn(Math.random()*4000)}
 	board.AIblowkWait = ()=>{ruturn(Math.random()*4000+3000)}
 	camera.pieceFrequency = 10000
@@ -332,8 +379,9 @@ let gameInterval = setInterval(()=>{
 	let y = board.topTile;
 	while(board.tiles[x+","+y] == undefined || board.tiles[x+","+y].piece != undefined){
 		y+=1
+		if(y > 2){return;}
+		
 	}
-	if(y > 2){return;}
 
 	let name = board.spawnRates[0]
 	let rng = Math.random()
@@ -425,9 +473,82 @@ function init()
     document.addEventListener("touchcancel", touchHandler, true);    
     // document.addEventListener('touchmove', function() { e.preventDefault();GI.debuggingInfo = "cancled" }, { passive:false });
 }
-init()
 //touch handler
 
+
+//noise n' stuff
+
+var sampler1 = new Tone.Sampler({
+	urls: {
+
+		"C2":"./sounds/captureF.wav",
+		"C4":"./sounds/move.wav",
+		"C#4":"./sounds/capture.wav",
+		"D4":"./sounds/captureS1.wav",
+		"D#4":"./sounds/captureS2.wav",
+		"E4":"./sounds/captureS3.wav",
+		"E#4":"./sounds/captureS4.wav",
+		"F4":"./sounds/captureS5.wav",
+		"F#4":"./sounds/captureS6.wav",
+		"G4":"./sounds/captureS7.wav",
+		"G#4":"./sounds/captureS8.wav"
+
+	},
+}).toDestination();
+let soundMapper = {
+	"0":"C2",
+	"1":"C4",
+	"2":"C#4",
+	"3":"D4",
+	"4":"D#4",
+	"5":"E4",
+	"6":"F4",
+	"7":"F#4",
+	"8":"G4",
+	"9":"G#4",
+	"10":"A4",
+	"11":"A#4",
+	"12":"B4",
+	"13":"C5",
+	"14":"C#5",
+	"15":"D5",
+	"16":"D#5",
+	"17":"E5",
+	"18":"F5",
+	"19":"F#5",
+	"20":"G5",
+	"21":"G#5",
+	"22":"A5",
+	"23":"A#5",
+	"24":"B5",
+	"25":"C6",
+	"26":"C#6",
+	"27":"D6",
+	"28":"D#6",
+	"29":"E6",
+	"30":"F6",
+	"31":"F#6",
+	"32":"G6",
+	"33":"G#6",
+	"34":"A6",
+	"35":"A#6",
+	"36":"B6",
+	"37":"C7"
+}
+
+function playSoundF(no){
+	sampler1.triggerAttack([soundMapper[no]])
+}
+
+Tone.loaded().then(() => {
+	sampler1.triggerAttack(["C4"])
+})
+document.querySelector('button')?.addEventListener('click', async () => {
+	await Tone.start()
+	console.log('audio is ready')
+})
+
+//noise n' stuff
 
 
 
