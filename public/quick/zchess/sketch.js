@@ -224,13 +224,13 @@ document.addEventListener("mouseup",(e)=>{
 		} else if(move == "capture" && camera.captureStreak < 4){
 			camera.captureStreak += 1;
 			camera.playSoundF(2)
-			camera.playSound("./sounds/capture.wav")
+			// camera.playSound("./sounds/capture.wav")
 		} else {
 			camera.captureStreak += 1;
 			let a = camera.captureStreak>8?9+Math.floor((camera.captureStreak-9)/2):camera.captureStreak
 			a = a>13?13:a
 			// camera.playSound("./sounds/captureS"+(a-4)+".wav")
-			camera.playSoundF(a-3)
+			camera.playSoundF(a-1)
 		}
 	}
 })
@@ -364,8 +364,8 @@ if(camera.gamemode == "Knight's Raid"){
 		board.tiles[6+","+11].piece = new piece("knight",6,11,"p1")
 		board.tiles[7+","+11].piece = new piece("rook",7,11,"p1")
 		board.tiles[7+","+9].piece = new piece("cannon",7,9,"p1")
-	board.AIwait = ()=>{ruturn(Math.random()*4000)}
-	board.AIblowkWait = ()=>{ruturn(Math.random()*4000+3000)}
+	board.AIwait = ()=>{return(Math.random()*4000)}
+	board.AIblowkWait = ()=>{return(Math.random()*4000+3000)}
 	camera.pieceFrequency = 10000
 }
 board.spawnRates = ["pawn",0.7,"king",0.85,"knight",0.95,"bishop",0.98,"rook"]

@@ -437,7 +437,7 @@ class piece {
 			setTimeout(()=>{
 				AImoveRandom(this)
 			// },Math.random()*4000)
-			},10)
+			},board.AIwait())
 		} else {
 			camera.particles.push(new explosionR(this.x+0.5,this.y+0.5,"rgba(255,255,0,0.5)",10,18,0.2))
 		}
@@ -452,7 +452,7 @@ function AImoveRandom(piece){
 		setTimeout(()=>{
 				AImoveRandom(piece)
 			// },Math.random()*4000+3000)
-			},300)
+			},board.AIblockWait())
 		return
 	}
 
