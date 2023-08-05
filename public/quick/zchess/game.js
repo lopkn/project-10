@@ -371,6 +371,11 @@ class piece {
 				this.legals = ()=>{
 					let legals = []
 					let legalDict = {}
+					if(this.y == 10){
+						if(getTileTeam(spos(this.x,this.y-2),this.team) == "empty"){legals.push(spos(this.x,this.y-2))
+							legalDict[spos(this.x,this.y-2)]="empty"
+						}
+					}
 					if(getTileTeam(spos(this.x,this.y-1),this.team) == "empty"){legals.push(spos(this.x,this.y-1))
 						legalDict[spos(this.x,this.y-1)]="empty"
 					}
