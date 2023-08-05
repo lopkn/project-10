@@ -147,6 +147,9 @@ function specialRender(){
 	// mrect(0,2)
 	// mrect(0,4)
 	fill(255,255,255)
+	ctx.textAlign = "left"
+	ctx.font = "bold 40px Courier New"
+
 	drawText("Choose game mode:",0,-1)
 	drawText("Normal",1,0)
 	drawText("King's Raid",1,2)
@@ -238,16 +241,11 @@ document.addEventListener("mouseup",(e)=>{
 ctx.font = "bold 40px Courier New"
 
 function drawText(l,x,y){
-	ctx.textAlign = "left"
 	ctx.fillText(l,(x+camera.x+0.26)*tileSize,(y+camera.y+0.75)*tileSize)
 }
 
 function drawPiece(l,x,y,team,cd){
-	if(team == camera.team){
-	fill(255,255,255)} else {
-		fill(0,100,0)
-	}
-	ctx.fillText(l,(x+camera.x+0.5)*tileSize,(y+camera.y+0.75)*tileSize)
+
 	if(cd != 0){
 		if(team == camera.team){
 			fill(0,0,150,0.3)} else {
@@ -255,6 +253,12 @@ function drawPiece(l,x,y,team,cd){
 		}
 		mrect(x,y,1,cd)
 	}
+	if(team == camera.team){
+	fill(255,255,255)} else {
+		fill(0,100,0)
+	}
+	ctx.fillText(l,(x+camera.x+0.5)*tileSize,(y+camera.y+0.75)*tileSize)
+	
 }
 
 function render(){
@@ -287,6 +291,7 @@ function render(){
 		})
 	}
 
+	ctx.font = "bold 40px Courier New"
 	arr.forEach((e)=>{
 		let pos = ipos(e)
 		let tile = board.tiles[e]
@@ -336,21 +341,56 @@ function render(){
 	specialRender();
 }
 
-setInterval(()=>{if(document.hasFocus()){render()}},35)
+// setInterval(()=>{if(document.hasFocus()){render()}},35)
+setInterval(()=>{render()},35)
 
 
 
 function startGame(){
 specialRender = ()=>{}
 board.emptyNew()
+let gameInterval;
 
 
 if(camera.gamemode == "Knight's Raid"){
 			board.tiles[4+","+11].piece = new piece("knight",4,11,"p1")
-			board.tiles["4,11"].piece.maxCD = 0.2
+			let ap = board.tiles["4,11"].piece
+			ap.maxCD = 0.2
+			ap.onDeath=()=>{
+				camera.particles.push(new explosionR(ap.x+0.5,ap.y+0.5,
+					(x)=>{
+						let a = 250*Math.random()
+						return("rgba("+a+","+a+","+(250-a)+","+(2.5*x)+")")},
+					2,0.4,0.5))
+
+				for(let i = 0; i < 26; i++){
+					let dx = Math.random()-0.5
+					let dy = Math.random()-0.5
+					camera.particles.push(new bloodParticle(ap.x+0.5+0.6*dx,ap.y+0.5+0.6*dy,dx*24,24*dy,Math.random()*0.03,Math.random()*3+3,false))
+					camera.particles[camera.particles.length-1].friction = 0.97
+				}
+				clearInterval(gameInterval)
+
+
+			}
 } else if(camera.gamemode == "King's Raid"){
 			board.tiles[4+","+11].piece = new piece("king",4,11,"p1")
-			board.tiles["4,11"].piece.maxCD = 0.2
+			let ap = board.tiles["4,11"].piece
+			ap.maxCD = 0.2
+			ap.onDeath=()=>{
+				camera.particles.push(new explosionR(ap.x+0.5,ap.y+0.5,
+					(x)=>{
+						let a = 250*Math.random()
+						return("rgba("+a+","+a+","+(250-a)+","+(2.5*x)+")")},
+					2,1,1))
+				for(let i = 0; i < 26; i++){
+					let dx = Math.random()-0.5
+					let dy = Math.random()-0.5
+					camera.particles.push(new bloodParticle(ap.x+0.5+0.6*dx,ap.y+0.5+0.6*dy,dx*24,24*dy,Math.random()*0.03,Math.random()*3+3,false))
+					camera.particles[camera.particles.length-1].friction = 0.97
+				}
+				clearInterval(gameInterval)
+			}
 } else if(camera.gamemode == "Normal"){
 	for(let i = 0; i < 8; i++){
 		board.tiles[i+","+10].piece = new piece("pawn",i,10,"p1",{"direction":"y-"})
@@ -374,7 +414,7 @@ board.spawnRates = ["pawn",0.7,"king",0.85,"knight",0.95,"bishop",0.98,"rook"]
 	board.tiles[5+",0"].piece = new piece("pawn",5,0,"zombies",{"direction":"y+"})
 	board.tiles[6+",0"].piece = new piece("pawn",6,0,"zombies",{"direction":"y+"})
 
-let gameInterval = setInterval(()=>{
+gameInterval = setInterval(()=>{
 	let x = Math.floor(Math.random()*8)
 	let y = board.topTile;
 	while(board.tiles[x+","+y] == undefined || board.tiles[x+","+y].piece != undefined){

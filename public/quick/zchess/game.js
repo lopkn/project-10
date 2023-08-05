@@ -63,6 +63,7 @@ class piece {
 		this.x = x
 		this.y = y
 		this.team = team
+		this.kills = 0;
 		
 
 		if(id == "rook"){
@@ -411,7 +412,25 @@ class piece {
 		this.y = y
 
 		if(board.tiles[pos].piece != undefined){
+			if(board.tiles[pos].piece.onDeath != undefined){
+				board.tiles[pos].piece.onDeath()
+			}
 			kill(this.x,this.y)
+			this.kills += 1;
+			if(this.team!="zombies"){
+
+				let f;
+				if(this.kills < 11){
+					f = (x)=>{return("rgba(250,"+(250-this.kills*25)+","+(250-this.kills*25)+","+(2.5*x)+")")}
+				} else {
+
+					f = (x)=>{return("rgba("+(250-this.kills*3+Math.random()*this.kills*3)+",0,0,"+(2.5*x)+")")}
+				}
+
+				camera.particles.push(new expandingText(this.kills,this.x,this.y,
+				f,
+				7+this.kills/20,4))
+			}
 			console.log(board.tiles[pos].piece.team+" "+board.tiles[pos].piece.id+" has been killed!")
 		}
 
@@ -510,6 +529,37 @@ function board_to_screen(x,y){
 	return([(x+camera.x)*tileSize,(y+camera.y)*tileSize])
 }
 
+class expandingText{
+		constructor(text,x,y,colorf,speed,s2){
+		this.x = x
+		this.text = text
+		this.speed = speed?speed:1
+		this.s2 = (s2?s2:1)/5
+		this.y = y
+		this.colorf = colorf
+		this.size = 3
+		this.actLife = 600
+		this.lastTime = Date.now()		
+	}
+
+	update(t){
+		this.size += this.speed*(t-this.lastTime)/50
+		this.actLife -= this.s2*(t-this.lastTime)
+		this.lastTime = t
+	}
+	draw(){
+		if(this.actLife < 0){
+			return('del')
+		}
+		ctx.textAlign = "center"
+		ctx.fillStyle = this.colorf(this.actLife/600)
+		ctx.beginPath()
+		ctx.font = "bold "+(Math.floor(this.size))+"px Courier New"
+		let bts = board_to_screen(this.x+0.5,this.y+0.5)
+		ctx.fillText(this.text,bts[0],bts[1]+this.size/4)
+	}
+}//camera.particles.push(new expandingText("5",2,2,(x)=>{return("rgba(180,150,150,"+x+")")},5,5))
+
 class explosionR{
 	constructor(x,y,color,speed,s2,size){
 		this.x = x
@@ -517,6 +567,7 @@ class explosionR{
 		this.s2 = (s2?s2:1)/5
 		this.y = y
 		this.color = color
+		if(typeof(color) !== "string"){this.colorf = color; this.color = "#FF00FF"}
 		this.size = 3
 		this.lineWidth = size?size:1
 		this.actLife = 600
@@ -527,6 +578,9 @@ class explosionR{
 		this.size += this.speed*(t-this.lastTime)/50
 		this.actLife -= this.s2*(t-this.lastTime)
 		this.lastTime = t
+		if(this.colorf !== undefined){
+			this.color = this.colorf(this.actLife/600)
+		}
 	}
 	draw(){
 		if(this.actLife < 0){
@@ -565,6 +619,7 @@ class bloodParticle{
 		this.vx = vx/100
 		this.vy = vy/100
 		this.rv = rv/300
+		this.friction = 0.9
 		this.size = size
 		this.actualSize = size
 		this.duplicator = duplicator?duplicator:false
@@ -581,8 +636,8 @@ class bloodParticle{
 		this.lastTime = t
 		this.vx += (Math.random()-0.5)*this.rv*dt
 		this.vy += (Math.random()-0.5)*this.rv*dt
-		this.vx *= (this.life>700?0.9:this.life/700)
-		this.vy *= (this.life>700?0.9:this.life/700)
+		this.vx *= (this.life>700?this.friction:this.life/700)
+		this.vy *= (this.life>700?this.friction:this.life/700)
 		this.x += this.vx
 		this.y += this.vy
 	}
