@@ -670,7 +670,9 @@ function displayKills(kills,x,y,size,speed){
 }
 
 
-
+//pawn 2 moves
+//images
+//different color cooldown
 
 
 
