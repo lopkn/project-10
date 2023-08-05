@@ -357,11 +357,7 @@ if(camera.gamemode == "Knight's Raid"){
 			let ap = board.tiles["4,11"].piece
 			ap.maxCD = 0.2
 			ap.onDeath=()=>{
-				camera.particles.push(new explosionR(ap.x+0.5,ap.y+0.5,
-					(x)=>{
-						let a = 250*Math.random()
-						return("rgba("+a+","+a+","+(250-a)+","+(2.5*x)+")")},
-					2,0.4,0.5))
+				
 
 				for(let i = 0; i < 26; i++){
 					let dx = Math.random()-0.5
@@ -369,6 +365,12 @@ if(camera.gamemode == "Knight's Raid"){
 					camera.particles.push(new bloodParticle(ap.x+0.5+0.6*dx,ap.y+0.5+0.6*dy,dx*24,24*dy,Math.random()*0.03,Math.random()*3+3,false))
 					camera.particles[camera.particles.length-1].friction = 0.97
 				}
+				displayKills(ap.kills,ap.x,ap.y,1,2)
+				camera.particles.push(new explosionR(ap.x+0.5,ap.y+0.5,
+					(x)=>{
+						let a = 250*Math.random()
+						return("rgba("+a+","+a+","+(250-a)+","+(2.5*x)+")")},
+					2,0.7,1))
 				clearInterval(gameInterval)
 
 
@@ -378,17 +380,19 @@ if(camera.gamemode == "Knight's Raid"){
 			let ap = board.tiles["4,11"].piece
 			ap.maxCD = 0.2
 			ap.onDeath=()=>{
-				camera.particles.push(new explosionR(ap.x+0.5,ap.y+0.5,
-					(x)=>{
-						let a = 250*Math.random()
-						return("rgba("+a+","+a+","+(250-a)+","+(2.5*x)+")")},
-					2,1,1))
+				
 				for(let i = 0; i < 26; i++){
 					let dx = Math.random()-0.5
 					let dy = Math.random()-0.5
 					camera.particles.push(new bloodParticle(ap.x+0.5+0.6*dx,ap.y+0.5+0.6*dy,dx*24,24*dy,Math.random()*0.03,Math.random()*3+3,false))
 					camera.particles[camera.particles.length-1].friction = 0.97
 				}
+				displayKills(ap.kills,ap.x,ap.y,1,2)
+				camera.particles.push(new explosionR(ap.x+0.5,ap.y+0.5,
+					(x)=>{
+						let a = 250*Math.random()
+						return("rgba("+a+","+a+","+(250-a)+","+(2.5*x)+")")},
+					2,0.7,1))
 				clearInterval(gameInterval)
 			}
 } else if(camera.gamemode == "Normal"){

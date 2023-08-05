@@ -419,17 +419,7 @@ class piece {
 			this.kills += 1;
 			if(this.team!="zombies"){
 
-				let f;
-				if(this.kills < 11){
-					f = (x)=>{return("rgba(250,"+(250-this.kills*25)+","+(250-this.kills*25)+","+(2.5*x)+")")}
-				} else {
-
-					f = (x)=>{return("rgba("+(250-this.kills*3+Math.random()*this.kills*3)+",0,0,"+(2.5*x)+")")}
-				}
-
-				camera.particles.push(new expandingText(this.kills,this.x,this.y,
-				f,
-				7+this.kills/20,4))
+				displayKills(this.kills,this.x,this.y)
 			}
 			console.log(board.tiles[pos].piece.team+" "+board.tiles[pos].piece.id+" has been killed!")
 		}
@@ -657,6 +647,27 @@ class bloodParticle{
 	}
 }
 
+
+function displayKills(kills,x,y,size,speed){
+	speed = speed?speed:7
+	size = size?size:4
+	let f;
+	if(kills < 11){
+		f = (X)=>{return("rgba(250,"+(250-kills*25)+","+(250-kills*25)+","+(2.5*X)+")")}
+	} else if(kills%10 === 0){
+		f = (X)=>{return("rgba(0,0,"+(Math.random()*150)+","+(2.5*X)+")")}
+		if(size == 4){
+			size = 2.5;
+		}
+	} else {
+
+		f = (X)=>{return("rgba("+(250-kills*3+Math.random()*kills*3)+",0,0,"+(2.5*X)+")")}
+	}
+
+	camera.particles.push(new expandingText(kills,x,y,
+	f,
+	speed+kills/20,size))
+}
 
 
 
