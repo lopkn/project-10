@@ -1,0 +1,17 @@
+name: 'Send build request to Laser'
+on:
+  workflow_dispatch:
+  push:
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Repository Dispatch
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.PAT_LOPKN_GAME_10_DEPLOYMENT }}
+          repository: laseryuan/provision
+          event-type: build-request-from-lopkn
+          client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'

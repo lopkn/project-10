@@ -49,6 +49,7 @@ class piece {
 		this.tags = tags || {}
 		this.x = x
 		this.y = y
+		this.premoves = []
 		this.team = team
 		this.kills = 0;
 		this.alive = true
@@ -424,7 +425,7 @@ class piece {
 						for(let i = 0; i < 26; i++){
 						let dx = Math.random()-0.5
 						let dy = Math.random()-0.5
-						camera.particles.push(new bloodParticle(x+0.5+0.6*dx,y+0.5+0.6*dy,dx*24,24*dy,Math.random()*0.03,Math.random()*3+3,false))
+						camera.particles.push(new bloodParticle(x+0.5+0.6*dx,y+0.5+0.6*dy,dx*44,44*dy,Math.random()*0.03,Math.random()*3+3,false))
 						}
 						camera.particles.push(new explosionR(x+0.5+(Math.random()-0.5)*0.7,y+0.5+(Math.random()-0.5)*0.7,
 								"rgba("+(Math.random()*235+20)+","+(Math.random()*15)+","+(Math.random()*15)+","+(Math.random()*0.3+0.3)+")",4,6+Math.random()*2,0.2))
@@ -510,6 +511,11 @@ class piece {
 			},board.AIwait())
 		} else {
 			camera.particles.push(new explosionR(this.x+0.5,this.y+0.5,"rgba(255,255,0,0.5)",10,18,0.2))
+			let premoved = false
+			while(!premoved && this.premoves.length > 0){
+				premoved = attemptMove(this.x,this.y,this.premoves[0][0],this.premoves[0][1],this.team)
+				this.premoves.splice(0,1)
+			}
 		}
 	}
 

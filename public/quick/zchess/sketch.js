@@ -85,7 +85,8 @@ class camera{
 	}
 	static captureStreak = 0;
 }
-initSounds(["shot","escape","select","move","captureF","capture","captureS1","captureS2","captureS3","captureS4","captureS5","captureS6","captureS7","captureS8"])
+let initSoundsArr = ["shot","escape","select","move","captureF","capture","captureS1","captureS2","captureS3","captureS4","captureS5","captureS6","captureS7","captureS8"]
+initSounds(initSoundsArr)
 
 function fill(r,g,b,a){
 	a = a?a:1
@@ -169,6 +170,7 @@ let mouseDownPlace = [0,0]
 let mouseDeltaMovement = [0,0]
 let pieceSelected = "none"
 let pieceDowned = "none"
+let pieceClicked = "none"
 let mouseDown = false
 document.addEventListener("mousedown",(e)=>{
 	mouseX = (e.clientX); mouseY = (e.clientY-2);
@@ -178,10 +180,14 @@ document.addEventListener("mousedown",(e)=>{
 	mouseToBoardUpdate()
     mouseDown = true
     let tile = board.tiles[spos(mouseBoardX,mouseBoardY)]
-    if(tile != undefined && tile.piece != undefined && tile.piece.team == camera.team && tile.piece.cooldown == 0){
+    if(tile != undefined && tile.piece != undefined && tile.piece.team == camera.team){
+
+    	pieceClicked = tile.piece
+    	if(tile.piece.cooldown == 0){
     	pieceDowned = tile.piece
     	if(tile.piece.downed !== undefined){
     		tile.piece.downed()
+    	}
     	}
     }
 })
@@ -251,7 +257,8 @@ function menuRender(){
 	ctx.fillStyle = "#FFFFFF"
 	drawText("Buttons & Switches:",0,0)
 	drawText("Piece render mode ["+camera.pieceRender+"]",2,1)
-	drawText("sounds ["+(camera.soundOn?"on":"off")+"]",2,3)
+	drawText("Sounds ["+(camera.soundOn?"on":"off")+"]",2,3)
+	drawText("Play random sound",2,5)
 
 	if(camera.pieceRender == "image"){
 		fill(255,255,255)
@@ -263,7 +270,7 @@ function menuRender(){
 
 	((camera.soundOn)?(()=>{fill(0,255,0)}):(()=>{fill(255,0,0)}))();
 	mrect(0.2,3.2,0.6,0.6);//sound
-
+	mrect(0.2,5.2,0.6,0.6);//random sound
 
 	camera.x += Math.floor(camera.escapePos[0])
 	camera.y += Math.floor(camera.escapePos[1])
@@ -317,6 +324,8 @@ document.addEventListener("mouseup",(e)=>{
 				} else if(Y === 3){
 					camera.soundOn = !camera.soundOn
 					camera.playSound("select")
+				} else if(Y === 5){
+					camera.playSound(initSoundsArr[Math.floor(Math.random()*initSoundsArr.length)])
 				}
 			}
 
@@ -352,7 +361,6 @@ document.addEventListener("mouseup",(e)=>{
 			return;	
 		}
 	}
-	pieceSelected = "none"
 	let move = attemptMove(mouseDownPlace[0],mouseDownPlace[1],mouseBoardX,mouseBoardY,camera.team)
 	if(move !== false){
 		console.log(move)
@@ -371,7 +379,11 @@ document.addEventListener("mouseup",(e)=>{
 			// camera.playSound("./sounds/captureS"+(a-4)+".wav")
 			camera.playSoundF(a-1)
 		}
+	} else if(pieceClicked.cooldown != 0 && pieceClicked != "none"){
+		pieceClicked.premoves.push([mouseBoardX,mouseBoardY])
 	}
+	pieceSelected = "none"
+	pieceClicked = "none"
 })
 
 ctx.font = "bold 40px Courier New"
@@ -380,7 +392,7 @@ function drawText(l,x,y){
 	ctx.fillText(l,(x+camera.x+0.26)*tileSize,(y+camera.y+0.75)*tileSize)
 }
 
-function drawPiece(l,x,y,team,cd){
+function drawPiece(l,x,y,team,cd,pc){
 
 	if(cd != 0){
 		if(team == camera.team){
@@ -400,17 +412,25 @@ function drawPiece(l,x,y,team,cd){
 	if(camera.pieceRender === "image"&&pieceDict[l] != undefined){
 		let arr = pieceDict[l]  
 		ctx.beginPath()
-		// ctx.moveTo(arr[0][0]/8,arr[0][1]/8)
 		ctx.moveTo(arr[0][0]/8+(x+camera.x)*tileSize,arr[0][1]/8+(y+camera.y)*tileSize)
 		for(let i = 1; i < arr.length; i++){
-			// ctx.lineTo(arr[i][0]/8,arr[i][1]/8)
 			ctx.lineTo(arr[i][0]/8+(x+camera.x)*tileSize,arr[i][1]/8+(y+camera.y)*tileSize)
 		}
 		ctx.fill()
 		ctx.closePath()
 	} else {
 		ctx.fillText(l,(x+camera.x+0.5)*tileSize,(y+camera.y+0.75)*tileSize)
+	}
 
+	if(team == camera.team && pc.premoves.length > 0){
+		ctx.strokeStyle = "#FF0000"
+		ctx.lineWidth = 2;
+		ctx.beginPath()
+		let bts1 = board_to_screen(pc.x+0.5,pc.y+0.5)
+		let bts2 = board_to_screen(pc.premoves[0][0]+0.5,pc.premoves[0][1]+0.5)
+		ctx.moveTo(bts1[0],bts1[1])
+		ctx.lineTo(bts2[0],bts2[1])
+		ctx.stroke()
 	}
 	
 }
@@ -451,8 +471,9 @@ function render(){
 		let tile = board.tiles[e]
 		ctx.textAlign = "center"
 		if(tile.piece != undefined){
-			tile.piece.CDcheck()
-			drawPiece(tile.piece.renderLetter,pos.x,pos.y,tile.piece.team,tile.piece.cooldown/tile.piece.maxCD)
+			let tpc = tile.piece
+			tpc.CDcheck()
+			drawPiece(tpc.renderLetter,tpc.x,tpc.y,tpc.team,tpc.cooldown/tpc.maxCD,tpc)
 		}
 	})
 
