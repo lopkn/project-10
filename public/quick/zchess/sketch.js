@@ -83,7 +83,7 @@ class camera{
 	}
 	static captureStreak = 0;
 }
-initSounds(["select","move","captureF","capture","captureS1","captureS2","captureS3","captureS4","captureS5","captureS6","captureS7","captureS8"])
+initSounds(["escape","select","move","captureF","capture","captureS1","captureS2","captureS3","captureS4","captureS5","captureS6","captureS7","captureS8"])
 
 function fill(r,g,b,a){
 	a = a?a:1
@@ -128,6 +128,7 @@ document.addEventListener("keydown",(e)=>{
 	if(k == "Escape"){
 		camera.escaped = !camera.escaped
 		camera.escapePos = [camera.x,camera.y]
+		camera.playSound("escape")
 	}
 
 })
@@ -176,8 +177,7 @@ let gameStart = "mode"
 function specialRender(){
 	
 
-	ctx.fillStyle = "#488000"
-	mrect(0,0)
+	// mrect(0,0)
 	// ctx.fillStyle = "#500299"
 	// mrect(0,2)
 	// mrect(0,4)
@@ -208,6 +208,13 @@ function specialRender(){
 	ctx.lineTo(coord3[0],coord3[1]+4*tileSize)
 	ctx.fill()
 	ctx.closePath()
+	ctx.fillStyle = "#488000"
+	ctx.beginPath()
+	ctx.moveTo(coord1[0],coord1[1])
+	ctx.lineTo(coord2[0],coord2[1])
+	ctx.lineTo(coord3[0],coord3[1])
+	ctx.fill()
+	ctx.closePath()
 
 	ctx.fillStyle = "#F9F900"
 	drawText("K",0,2)
@@ -224,11 +231,11 @@ function menuRender(){
 	camera.y -= Math.floor(camera.escapePos[1])
 	ctx.font = "bold 40px Courier New"
 	ctx.textAlign = "left"
-	fill(0,0,0,0.6)
+	fill(0,0,0,0.8)
 	ctx.fillRect(0,0,Width,Height)
 
 	ctx.fillStyle = "#FFFFFF"
-	drawText("Switches:",0,0)
+	drawText("Buttons & Switches:",0,0)
 	drawText("Piece render mode ["+camera.pieceRender+"]",2,1)
 	drawText("sounds ["+(camera.soundOn?"on":"off")+"]",2,3)
 
@@ -251,6 +258,12 @@ function menuRender(){
 document.addEventListener("mouseup",(e)=>{
     mouseDown = false
 	mouseToBoardUpdate()
+
+	if(mouseX < 20 && mouseY < 20){
+		camera.escaped = !camera.escaped
+		camera.escapePos = [camera.x,camera.y]
+		camera.playSound("escape")
+	}
 
 	if(mouseDownPlace[0] == mouseBoardX && mouseDownPlace[1] == mouseBoardY){
 		let mbx = mouseBoardX;
@@ -454,6 +467,8 @@ function render(){
 	}
 	fill(255,0,0,0.3)
 	mrect(mouseBoardX,mouseBoardY)
+	fill(125,0,255,0.3)
+	ctx.fillRect(0,0,20,20)
 }
 
 // setInterval(()=>{if(document.hasFocus()){render()}},35)
@@ -581,7 +596,7 @@ function stopGame(){
 	clearInterval(gameInterval);
 	board.tiles = {}
 	camera.specialRenderOn = true
-	gameStart = "menu"
+	gameStart = "mode"
 }
 
 //touch handler
