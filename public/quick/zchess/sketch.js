@@ -27,10 +27,12 @@ function rect(x,y,w,h){
 function initSounds(arr){
 	arr.forEach((E)=>{
 		let e = "./sounds/"+E+".wav"
-		let audio = new Audio(e)
-		audio.preload = "auto";
-		audio.load()
-		camera.sounds[e] = audio
+		let audio = new Tone.Sampler({
+	urls: {
+		"C4":e,
+	},
+}).toDestination();
+		camera.sounds[E] = audio
 	})
 }
 
@@ -49,31 +51,42 @@ let pieceDict = {
 class camera{
 	static gamemode = "none"
 	static team = "p1";
+	static pieceRender = "text";
 	static pieceFrequency = 1300;
+	static escaped = false
+	static escapePos = [0,0]
 	static x = 1.2;
 	static y = 1.2;
 	static particles = [];
 	static sounds = {}
 	static soundArr = []
-
+	static soundOn = true;
 	// static playSound(url){
 	// 	let click = this.sounds[url].cloneNode()
 	// 	click.play()
 	// }
-	static playSound(url){
-		let audio = new Audio(url).play()
+	static playSound(file,note){
+		note = note?note:"C4"
+		this.sounds[file].triggerAttack(note)
 	}
 	static playSoundF(no){
 		sampler1.triggerAttack([soundMapper[no]])
 	}
+	static playSoundURL(url){
+		let audio = new Tone.Player(url).toDestination()
+		audio.onStop = ()=>{audio.dispose()}
+		audio.autostart = true;
+	}
 	static captureStreak = 0;
 }
-initSounds(["move","captureF","capture","captureS1","captureS2","captureS3","captureS4","captureS5","captureS6","captureS7","captureS8"])
+initSounds(["select","move","captureF","capture","captureS1","captureS2","captureS3","captureS4","captureS5","captureS6","captureS7","captureS8"])
 
 function fill(r,g,b,a){
 	a = a?a:1
 	ctx.fillStyle = "rgba(" + r+","+g+","+b+","+a+")"
 }
+
+
 
 let mouseX = 0
 let mouseY = 0
@@ -107,6 +120,12 @@ document.addEventListener("keydown",(e)=>{
 	if(k == "d"){
 	keyDowns[k] = setInterval(()=>{camera.x -= 0.7},60)
 	}
+
+	if(k == "Escape"){
+		camera.escaped = !camera.escaped
+		camera.escapePos = [camera.x,camera.y]
+	}
+
 })
 document.addEventListener("keyup",(e)=>{
 	let k = e.key
@@ -167,7 +186,9 @@ function specialRender(){
 	drawText("King's Raid",1,2)
 	drawText("Knight's Raid",1,4)
 
-	fill(155,0,255,Math.random())
+	let mra = Math.random()
+
+	fill(155,0,255,mra)
 	ctx.beginPath()
 	let coord1 = board_to_screen(0.1,0.85)
 	let coord2 = board_to_screen(0.9,0.85)
@@ -188,9 +209,32 @@ function specialRender(){
 	drawText("K",0,2)
 	drawText("N",0,4)
 
-	
 
 
+}
+
+function menuRender(){
+
+	camera.x -= Math.floor(camera.escapePos[0])
+	camera.y -= Math.floor(camera.escapePos[1])
+
+	fill(0,0,0,0.6)
+	ctx.fillRect(0,0,Width,Height)
+
+	ctx.fillStyle = "#FFFFFF"
+	drawText("Switches:",0,0)
+	drawText("Piece render mode ["+camera.pieceRender+"]",2,1)
+	drawText("sounds ["+(camera.soundOn?"on":"off")+"]",2,3)
+
+	if(camera.pieceRender == "image"){
+		fill(255,255,255)
+	} else {
+		fill(255,255,255)
+	}
+	mrect(0.2,1.2,0.6,0.6)
+	mrect(0.2,3.2,0.6,0.6)
+	camera.x += Math.floor(camera.escapePos[0])
+	camera.y += Math.floor(camera.escapePos[1])
 }
 
 document.addEventListener("mouseup",(e)=>{
@@ -198,6 +242,23 @@ document.addEventListener("mouseup",(e)=>{
 	mouseToBoardUpdate()
 
 	if(mouseDownPlace[0] == mouseBoardX && mouseDownPlace[1] == mouseBoardY){
+		let mbx = mouseBoardX;
+		let mby = mouseBoardY;
+		if(camera.escaped){
+			let X = mbx+Math.floor(camera.escapePos[0]);
+			let Y = mby+Math.floor(camera.escapePos[1]);
+			
+			if(X == 0 && Y == 1){
+				if(camera.pieceRender == "image"){
+					camera.pieceRender = "text"
+				} else {
+					camera.pieceRender = "image"
+				}
+				camera.playSound("select")
+			}
+
+			return;
+		}
 		if(gameStart != "started"){
 			if(gameStart == "mode"){
 				if(mouseBoardX == 0){
@@ -273,7 +334,7 @@ function drawPiece(l,x,y,team,cd){
 	} else {
 		fill(0,100,0)
 	}
-	if(pieceDict[l] != undefined){
+	if(camera.pieceRender === "image"&&pieceDict[l] != undefined){
 		let arr = pieceDict[l]  
 		ctx.beginPath()
 		// ctx.moveTo(arr[0][0]/8,arr[0][1]/8)
@@ -357,8 +418,9 @@ function render(){
 	//particles.push(new explosionR(300,300,"#FFFF00"))
 
 
-	fill(255,0,0,0.3)
-	mrect(mouseBoardX,mouseBoardY)
+
+
+	
 
 	if(mouseDown){
 		ctx.lineWidth = 5;
@@ -369,6 +431,11 @@ function render(){
 		ctx.stroke()
 	}
 	specialRender();
+	if(camera.escaped){
+		menuRender(0,0)
+	}
+	fill(255,0,0,0.3)
+	mrect(mouseBoardX,mouseBoardY)
 }
 
 // setInterval(()=>{if(document.hasFocus()){render()}},35)
@@ -565,7 +632,7 @@ function init()
 
 var sampler1 = new Tone.Sampler({
 	urls: {
-
+		// "C1100":"./sounds/select.wav",
 		"C2":"./sounds/captureF.wav",
 		"C4":"./sounds/move.wav",
 		"C#4":"./sounds/capture.wav",
@@ -580,6 +647,26 @@ var sampler1 = new Tone.Sampler({
 
 	},
 }).toDestination();
+// var sampler1 = new Tone.Sampler({
+// 	urls: {
+// 		"X20":"./sounds/select.wav",
+// 		"11":"./sounds/captureF.wav",
+// 		"12":"./sounds/move.wav",
+// 		"13":"./sounds/capture.wav",
+// 		"14":"./sounds/captureS1.wav",
+// 		"15":"./sounds/captureS2.wav",
+// 		"16":"./sounds/captureS3.wav",
+// 		"17":"./sounds/captureS4.wav",
+// 		"18":"./sounds/captureS5.wav",
+// 		"19":"./sounds/captureS6.wav",
+// 		"20":"./sounds/captureS7.wav",
+// 		"21":"./sounds/captureS8.wav"
+
+// 	},
+// }).toDestination();
+var sampler2 = new Tone.Players({
+	"1":"./sounds/select.wav"
+}).toDestination()
 let soundMapper = {
 	"0":"C2",
 	"1":"C4",
