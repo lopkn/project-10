@@ -55,6 +55,7 @@ class camera{
 	static pieceFrequency = 1300;
 	static escaped = false
 	static escapePos = [0,0]
+	static specialRenderOn = true;
 	static x = 1.2;
 	static y = 1.2;
 	static particles = [];
@@ -66,13 +67,16 @@ class camera{
 	// 	click.play()
 	// }
 	static playSound(file,note){
+		if(this.soundOn === false){return}
 		note = note?note:"C4"
 		this.sounds[file].triggerAttack(note)
 	}
 	static playSoundF(no){
+		if(this.soundOn === false){return}
 		sampler1.triggerAttack([soundMapper[no]])
 	}
 	static playSoundURL(url){
+		if(this.soundOn === false){return}
 		let audio = new Tone.Player(url).toDestination()
 		audio.onStop = ()=>{audio.dispose()}
 		audio.autostart = true;
@@ -215,9 +219,11 @@ function specialRender(){
 
 function menuRender(){
 
+	let rnd = Math.random()
 	camera.x -= Math.floor(camera.escapePos[0])
 	camera.y -= Math.floor(camera.escapePos[1])
-
+	ctx.font = "bold 40px Courier New"
+	ctx.textAlign = "left"
 	fill(0,0,0,0.6)
 	ctx.fillRect(0,0,Width,Height)
 
@@ -231,8 +237,13 @@ function menuRender(){
 	} else {
 		fill(255,255,255)
 	}
-	mrect(0.2,1.2,0.6,0.6)
-	mrect(0.2,3.2,0.6,0.6)
+	((camera.pieceRender=="image")?(()=>{fill(255,255,0)}):(()=>{fill(255,255,255)}))();
+	mrect(0.2,1.2,0.6,0.6);
+
+	((camera.soundOn)?(()=>{fill(0,255,0)}):(()=>{fill(255,0,0)}))();
+	mrect(0.2,3.2,0.6,0.6);//sound
+
+
 	camera.x += Math.floor(camera.escapePos[0])
 	camera.y += Math.floor(camera.escapePos[1])
 }
@@ -248,13 +259,18 @@ document.addEventListener("mouseup",(e)=>{
 			let X = mbx+Math.floor(camera.escapePos[0]);
 			let Y = mby+Math.floor(camera.escapePos[1]);
 			
-			if(X == 0 && Y == 1){
-				if(camera.pieceRender == "image"){
-					camera.pieceRender = "text"
-				} else {
-					camera.pieceRender = "image"
+			if(X === 0){
+				if(Y === 1){
+					if(camera.pieceRender == "image"){
+						camera.pieceRender = "text"
+					} else {
+						camera.pieceRender = "image"
+					}
+					camera.playSound("select")
+				} else if(Y === 3){
+					camera.soundOn = !camera.soundOn
+					camera.playSound("select")
 				}
-				camera.playSound("select")
 			}
 
 			return;
@@ -430,7 +446,9 @@ function render(){
 		ctx.lineTo(mouseX,mouseY)
 		ctx.stroke()
 	}
-	specialRender();
+	if(camera.specialRenderOn){
+		specialRender();
+	}
 	if(camera.escaped){
 		menuRender(0,0)
 	}
@@ -442,11 +460,11 @@ function render(){
 setInterval(()=>{render()},35)
 
 
+let gameInterval;
 
 function startGame(){
-specialRender = ()=>{}
+camera.specialRenderOn = false
 board.emptyNew()
-let gameInterval;
 
 
 if(camera.gamemode == "Knight's Raid"){
@@ -559,6 +577,12 @@ gameInterval = setInterval(()=>{
 
 }
 
+function stopGame(){
+	clearInterval(gameInterval);
+	board.tiles = {}
+	camera.specialRenderOn = true
+	gameStart = "menu"
+}
 
 //touch handler
 
@@ -708,9 +732,7 @@ let soundMapper = {
 	"37":"C7"
 }
 
-function playSoundF(no){
-	sampler1.triggerAttack([soundMapper[no]])
-}
+
 
 Tone.loaded().then(() => {
 	sampler1.triggerAttack(["C4"])
