@@ -41,7 +41,9 @@ let pieceDict = {
 	"Q":[[200,46],[177,57],[177,84],[192,94],[173,195],[136,102],[150,76],[123,52],[99,70],[118,109],[113,187],[74,130],[81,94],[52,74],[31,112],[54,132],[74,242],[104,281],[74,337],[150,357],[200,357],[200,357],[250,357],[326,337],[296,281],[326,242],[346,132],[369,112],[348,74],[319,94],[326,130],[287,187],[282,109],[301,70],[277,52],[250,76],[264,102],[227,195],[208,94],[223,84],[223,57],[200,46]],
 	"K":[[190,49],[189,64],[169,63],[169,81],[188,85],[190,104],[168,120],[160,150],[123,126],[65,147],[42,202],[65,243],[106,273],[105,336],[158,357],[200,361],[200,361],[242,357],[295,336],[294,273],[335,243],[358,202],[335,147],[277,126],[240,150],[232,120],[210,104],[212,85],[231,81],[231,63],[211,64],[210,49],[200,49]],
 	"R":[[200,75],[172,76],[171,96],[140,96],[129,77],[93,77],[91,131],[115,157],[118,269],[98,283],[96,313],[73,316],[71,358],[200,357],[200,357],[329,358],[327,316],[304,313],[302,283],[282,269],[285,157],[309,131],[307,77],[271,77],[260,96],[229,96],[228,76],[200,75]] ,
-	"B":[[200,47],[167,73],[184,100],[123,151],[118,207],[143,238],[123,272],[127,296],[157,307],[82,315],[49,332],[51,358],[92,350],[179,355],[200,346],[200,346],[221,355],[308,350],[349,358],[351,332],[318,315],[243,307],[273,296],[277,272],[257,238],[282,207],[277,151],[216,100],[233,73],[200,47]],
+	// "B":[[200,47],[167,73],[184,100],[123,151],[118,207],[143,238],[123,272],[127,296],[157,307],[82,315],[49,332],[51,358],[92,350],[179,355],[200,346],[200,346],[221,355],[308,350],[349,358],[351,332],[318,315],[243,307],[273,296],[277,272],[257,238],[282,207],[277,151],[216,100],[233,73],[200,47]],
+	"B":
+[[200,25],[113,193],[149,237],[122,285],[156,306],[82,313],[46,342],[62,359],[185,361],[200,345],[200,345],[215,361],[338,359],[354,342],[318,313],[244,306],[278,285],[251,237],[287,193],[200,25]] ,
 	"P":[[200,73],[163,87],[157,123],[172,137],[141,159],[136,203],[157,230],[116,257],[92,347],[200,351],[200,351],[308,347],[284,257],[243,230],[264,203],[259,159],[228,137],[243,123],[237,87],[200,73]],
 	"N":
 [[155,89],[122,63],[116,102],[69,174],[47,232],[63,271],[87,275],[96,256],[103,262],[102,285],[142,244],[153,247],[206,184],[186,256],[142,299],[127,356],[344,354],[326,177],[261,102],[203,84],[188,51],[167,87]]
@@ -83,7 +85,7 @@ class camera{
 	}
 	static captureStreak = 0;
 }
-initSounds(["escape","select","move","captureF","capture","captureS1","captureS2","captureS3","captureS4","captureS5","captureS6","captureS7","captureS8"])
+initSounds(["shot","escape","select","move","captureF","capture","captureS1","captureS2","captureS3","captureS4","captureS5","captureS6","captureS7","captureS8"])
 
 function fill(r,g,b,a){
 	a = a?a:1
@@ -161,6 +163,7 @@ function mouseToBoardUpdate(){
 let mouseDownPlace = [0,0]
 let mouseDeltaMovement = [0,0]
 let pieceSelected = "none"
+let pieceDowned = "none"
 let mouseDown = false
 document.addEventListener("mousedown",(e)=>{
 	mouseX = (e.clientX); mouseY = (e.clientY-2);
@@ -169,7 +172,13 @@ document.addEventListener("mousedown",(e)=>{
     mouseDeltaMovement = [mouseX,mouseY]
 	mouseToBoardUpdate()
     mouseDown = true
-
+    let tile = board.tiles[spos(mouseBoardX,mouseBoardY)]
+    if(tile != undefined && tile.piece != undefined && tile.piece.team == camera.team && tile.piece.cooldown == 0){
+    	pieceDowned = tile.piece
+    	if(tile.piece.downed !== undefined){
+    		tile.piece.downed()
+    	}
+    }
 })
 
 let gameStart = "mode"
@@ -259,7 +268,27 @@ document.addEventListener("mouseup",(e)=>{
     mouseDown = false
 	mouseToBoardUpdate()
 
+	if(pieceDowned !== "none"){
+		
+		let ph = pieceDowned.held
+		if(ph){
+			pieceDowned.unhold(mouseBoardX,mouseBoardY)
+		}
+
+		if(ph){
+			pieceDowned = "none"
+			return;
+		}    	
+    	pieceDowned = "none"
+	}
+
+
 	if(mouseX < 20 && mouseY < 20){
+		if(gameStart == "lost"){
+			stopGame()
+			camera.playSound("escape")
+			return;
+		}
 		camera.escaped = !camera.escaped
 		camera.escapePos = [camera.x,camera.y]
 		camera.playSound("escape")
@@ -353,7 +382,7 @@ function drawPiece(l,x,y,team,cd){
 			fill(0,0,150,0.3)} else {
 			fill(150,0,0,0.3)
 		}
-		mrect(x,y,1,cd)
+		mrect(x,y,1,cd>1?1:cd)
 	}
 	if(team == camera.team){
 		fill(255,255,255)
@@ -449,7 +478,7 @@ function render(){
 
 
 
-	
+	tn = Date.now()
 
 	if(mouseDown){
 		ctx.lineWidth = 5;
@@ -458,6 +487,15 @@ function render(){
 		ctx.moveTo(mouseDownPlace[2],mouseDownPlace[3])
 		ctx.lineTo(mouseX,mouseY)
 		ctx.stroke()
+		if(pieceDowned !== "none"){
+			if(board.tiles[spos(mouseBoardX,mouseBoardY)]?.piece == pieceDowned || (pieceDowned.held === true && pieceDowned.alive)){
+				if(pieceDowned.hold != undefined){
+				let progress = pieceDowned.hold(tn)
+				}
+			} else if(pieceDowned.held !== true || !piece.alive){
+				pieceDowned = "none"
+			}
+		}
 	}
 	if(camera.specialRenderOn){
 		specialRender();
@@ -495,6 +533,15 @@ if(camera.gamemode == "Knight's Raid"){
 					camera.particles.push(new bloodParticle(ap.x+0.5+0.6*dx,ap.y+0.5+0.6*dy,dx*24,24*dy,Math.random()*0.03,Math.random()*3+3,false))
 					camera.particles[camera.particles.length-1].friction = 0.97
 				}
+				for(let i = 0; i < ap.kills*2; i++){
+					setTimeout(()=>{
+					let dx = Math.random()-0.5
+					let dy = Math.random()-0.5
+					camera.particles.push(new bloodParticle(ap.x+0.5+0.6*dx,ap.y+0.5+0.6*dy,dx*24,24*dy,Math.random()*0.03,Math.random()*3+3,false))
+					camera.particles[camera.particles.length-1].friction = 0.97
+					camera.particles[camera.particles.length-1].color = "rgba("+(Math.random()*235+20)+","+(Math.random()*15)+","+(Math.random()*15)+","+(Math.random()*0.6+0.4)+")"
+					},i*40)
+				}
 				displayKills(ap.kills,ap.x,ap.y,1,2)
 				camera.particles.push(new explosionR(ap.x+0.5,ap.y+0.5,
 					(x)=>{
@@ -502,10 +549,12 @@ if(camera.gamemode == "Knight's Raid"){
 						return("rgba("+a+","+a+","+(250-a)+","+(2.5*x)+")")},
 					2,0.7,1))
 				clearInterval(gameInterval)
-
+				gameStart = "lost"
 
 			}
 } else if(camera.gamemode == "King's Raid"){
+			camera.pieceFrequency = 950
+
 			board.tiles[4+","+11].piece = new piece("king",4,11,"p1")
 			let ap = board.tiles["4,11"].piece
 			ap.maxCD = 0.2
@@ -526,7 +575,7 @@ camera.particles[camera.particles.length-1].color = "rgba("+(Math.random()*235+2
 					camera.particles.push(new bloodParticle(ap.x+0.5+0.6*dx,ap.y+0.5+0.6*dy,dx*24,24*dy,Math.random()*0.03,Math.random()*3+3,false))
 					camera.particles[camera.particles.length-1].friction = 0.97
 camera.particles[camera.particles.length-1].color = "rgba("+(Math.random()*235+20)+","+(Math.random()*15)+","+(Math.random()*15)+","+(Math.random()*0.6+0.4)+")"
-					},i*20)
+					},i*40)
 				}
 				displayKills(ap.kills,ap.x,ap.y,1,2)
 				camera.particles.push(new explosionR(ap.x+0.5,ap.y+0.5,
@@ -535,6 +584,7 @@ camera.particles[camera.particles.length-1].color = "rgba("+(Math.random()*235+2
 						return("rgba("+a+","+a+","+(250-a)+","+(2.5*x)+")")},
 					2,0.7,1))
 				clearInterval(gameInterval)
+				gameStart = "lost"
 			}
 } else if(camera.gamemode == "Normal"){
 	for(let i = 0; i < 8; i++){
@@ -548,7 +598,7 @@ camera.particles[camera.particles.length-1].color = "rgba("+(Math.random()*235+2
 		board.tiles[5+","+11].piece = new piece("bishop",5,11,"p1")
 		board.tiles[6+","+11].piece = new piece("knight",6,11,"p1")
 		board.tiles[7+","+11].piece = new piece("rook",7,11,"p1")
-		board.tiles[7+","+9].piece = new piece("cannon",7,9,"p1")
+		board.tiles[7+","+9].piece = new piece("wizard",7,9,"p1")
 	board.AIwait = ()=>{return(Math.random()*4000)}
 	board.AIblowkWait = ()=>{return(Math.random()*4000+3000)}
 	camera.pieceFrequency = 10000

@@ -23,19 +23,6 @@ class board {
 				this.tiles[i+","+j] = {};
 			}
 		}
-		for(let i = 0; i < 8; i++){
-			// this.tiles[i+","+10].piece = new piece("pawn",i,10,"p1",{"direction":"y-"})
-			// this.tiles[i+","+5].piece = new piece("knight",i,5,"p1",{"direction":"y-"})
-			// this.tiles[i+","+4].piece = new piece("knight",i,4,"p1",{"direction":"y-"})
-		}
-			// this.tiles[0+","+11].piece = new piece("rook",0,11,"p1",)
-			// this.tiles[1+","+11].piece = new piece("knight",1,11,"p1")
-			// this.tiles[2+","+11].piece = new piece("bishop",2,11,"p1",)
-			// this.tiles[3+","+11].piece = new piece("queen",3,11,"p1")
-			// this.tiles[4+","+11].piece = new piece("king",4,11,"p1")
-			// this.tiles[5+","+11].piece = new piece("bishop",5,11,"p1")
-			// this.tiles[6+","+11].piece = new piece("knight",6,11,"p1")
-			// this.tiles[7+","+11].piece = new piece("rook",7,11,"p1")
 	}
 }
 
@@ -64,6 +51,7 @@ class piece {
 		this.y = y
 		this.team = team
 		this.kills = 0;
+		this.alive = true
 		
 
 		if(id == "rook"){
@@ -388,6 +376,73 @@ class piece {
 					return({"arr":legals,"dict":legalDict})
 				}
 			}
+		} else if(id == "wizard"){
+			this.maxCD = 20
+			this.upLim = Infinity;
+			this.held = false;
+			if(this.team=="zombies"){this.maxCD = 20}
+			this.renderLetter = "W"
+			this.jumps = [[0,1],[0,-1],[-1,1],[1,-1],[1,0],[-1,0],[-1,-1],[1,1]]
+			this.legals = ()=>{
+				let legals = []
+				let legalDict = {}
+				this.jumps.forEach((s)=>{
+					let e = spos(s[0]+this.x,s[1]+this.y)
+					let gtt = getTileTeam(e,this.team)
+					if(gtt == "capture" || gtt == "empty"){legals.push(e);legalDict[e]=gtt;}
+				})
+				return({"arr":legals,"dict":legalDict})
+			}
+
+			this.downed = ()=>{
+				this.upLim = Date.now()+2000;
+			}
+			this.hold = (t)=>{
+				if(t > this.upLim){
+					if(this.held !== true){
+						camera.particles.push(new explosionR(mouseX/tileSize-camera.x,mouseY/tileSize-camera.y,"rgba(0,255,255,0.8)",10,18,0.2))
+						this.held = true
+					}
+				}
+				let progress =1-(this.upLim-t)/2000
+				ctx.lineWidth = tileSize/10
+				if(this.held){
+					let mr = Math.random()*255
+					ctx.strokeStyle = "rgb(0,"+mr+","+mr+")"
+				} else {
+					ctx.strokeStyle = "rgb(0,255,255)"
+				}
+				// console.log("yo?"+progress)
+				chargeArc(mouseX,mouseY,18,progress)
+
+				return(progress)
+			}
+			this.unhold = (x,y)=>{
+				if(this.held){
+					let tile = board.tiles[spos(x,y)]
+					if(killBoardPiece(x,y,this)){
+						for(let i = 0; i < 26; i++){
+						let dx = Math.random()-0.5
+						let dy = Math.random()-0.5
+						camera.particles.push(new bloodParticle(x+0.5+0.6*dx,y+0.5+0.6*dy,dx*24,24*dy,Math.random()*0.03,Math.random()*3+3,false))
+						}
+						camera.particles.push(new explosionR(x+0.5+(Math.random()-0.5)*0.7,y+0.5+(Math.random()-0.5)*0.7,
+								"rgba("+(Math.random()*235+20)+","+(Math.random()*15)+","+(Math.random()*15)+","+(Math.random()*0.3+0.3)+")",4,6+Math.random()*2,0.2))
+						for(let i = 0; i < 3;i++){
+							setTimeout(()=>{camera.particles.push(new explosionR(x+0.5+(Math.random()-0.5)*0.7,y+0.5+(Math.random()-0.5)*0.7,
+								"rgba("+(Math.random()*235+20)+","+(Math.random()*15)+","+(Math.random()*15)+","+(Math.random()*0.3+0.3)+")",4,6+Math.random()*2,0.2))},Math.random()*400)
+						}
+					}
+					camera.playSound("shot")
+					camera.particles.push(new lineParticle(this.x+0.5,this.y+0.5,x+0.5,y+0.5,10,
+						(x)=>{let mr = Math.random()*255
+							return("rgb(0,"+mr+","+mr+")")},0.6))
+				}
+				this.cooldown = this.maxCD + 5
+				this.coolUntil = Date.now() + 1000*this.cooldown
+				this.uplim = undefined
+				this.held = false
+			}
 		}
 
 
@@ -420,6 +475,7 @@ class piece {
 			if(board.tiles[pos].piece.onDeath != undefined){
 				board.tiles[pos].piece.onDeath()
 			}
+			board.tiles[pos].piece.alive = false
 			kill(this.x,this.y)
 			this.kills += 1;
 			if(this.team!="zombies"){
@@ -459,6 +515,29 @@ class piece {
 
 
 }
+
+function killBoardPiece(x,y,killerPiece){
+	let pos = spos(x,y)
+	if(board.tiles[pos] != undefined){
+	if(board.tiles[pos].piece != undefined){
+			if(board.tiles[pos].piece.onDeath != undefined){
+				board.tiles[pos].piece.onDeath()
+			}
+			board.tiles[pos].piece.alive = false
+
+			killerPiece.kills += 1;
+
+			if(killerPiece.team!="zombies"){
+
+				displayKills(killerPiece.kills,killerPiece.x,killerPiece.y)
+			}
+			console.log(board.tiles[pos].piece.team+" "+board.tiles[pos].piece.id+" has been killed!")
+			board.tiles[pos].piece = undefined
+			return(true)
+		}
+	}
+}
+
 function AImoveRandom(piece){
 	let legals = piece.legals()
 	let legal = legals.arr
@@ -487,7 +566,7 @@ function AImoveRandom(piece){
 		}
 	}
 	//capture piece
-
+	if(piece == undefined){return}
 	while(piece.cooldown == 0 && piece == board.tiles[spos(piece.x,piece.y)].piece){
 
 		let moveString = legal[Math.floor(Math.random()*legal.length)]
@@ -591,6 +670,12 @@ class explosionR{
 	}
 }
 
+function chargeArc(x,y,size,percentage){
+	ctx.beginPath()
+	ctx.arc(x,y,size,0,2*Math.PI*percentage)
+	ctx.stroke()
+}
+
 
 function kill(x,y){
 	for(let i = 0; i < 16; i++){
@@ -606,7 +691,36 @@ function kill(x,y){
 	}
 }
 
-
+class lineParticle{
+	constructor(x,y,tx,ty,size,colorf,s2){
+		this.x = x
+		this.y = y
+		this.tx = tx
+		this.ty = ty
+		this.size = size
+		this.colorf = colorf
+		this.actLife = 1000
+		this.s2 = (s2?s2:1)
+		this.lastTime = Date.now()
+	}
+	update(t){
+		this.actLife -= this.s2 * (t-this.lastTime)
+		this.lastTime = t
+	}
+	draw(){
+		if(this.actLife < 1){
+			return('del')
+		}
+		ctx.strokeStyle = this.colorf(this.actLife/1000)
+		let bts1 = board_to_screen(this.x,this.y)
+		let bts2 = board_to_screen(this.tx,this.ty)
+		ctx.lineWidth = this.size*(this.actLife/1000)
+		ctx.beginPath()
+		ctx.moveTo(bts1[0],bts1[1])
+		ctx.lineTo(bts2[0],bts2[1])
+		ctx.stroke()
+	}
+}
 class bloodParticle{
 	constructor(x,y,vx,vy,rv,size,duplicator){
 		this.x = x
