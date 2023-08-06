@@ -128,6 +128,11 @@ document.addEventListener("keydown",(e)=>{
 	}
 
 	if(k == "Escape"){
+		if(gameStart == "lost"){
+			stopGame()
+			camera.playSound("escape")
+			return;
+		}
 		camera.escaped = !camera.escaped
 		camera.escapePos = [camera.x,camera.y]
 		camera.playSound("escape")
@@ -603,7 +608,7 @@ camera.particles[camera.particles.length-1].color = "rgba("+(Math.random()*235+2
 	board.AIblowkWait = ()=>{return(Math.random()*4000+3000)}
 	camera.pieceFrequency = 10000
 }
-board.spawnRates = ["pawn",0.7,"king",0.85,"knight",0.95,"bishop",0.98,"rook"]
+board.spawnRates = ["pawn",0.7,"king",0.85,"knight",0.95,"bishop",0.98,"rook",1]
 
 	board.tiles[3+",0"].piece = new piece("pawn",3,0,"zombies",{"direction":"y+"})
 	board.tiles[5+",0"].piece = new piece("pawn",5,0,"zombies",{"direction":"y+"})

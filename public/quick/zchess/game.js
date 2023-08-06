@@ -405,7 +405,7 @@ class piece {
 					}
 				}
 				let progress =1-(this.upLim-t)/2000
-				ctx.lineWidth = tileSize/10
+				ctx.lineWidth = tileSize/8
 				if(this.held){
 					let mr = Math.random()*255
 					ctx.strokeStyle = "rgb(0,"+mr+","+mr+")"
@@ -413,7 +413,7 @@ class piece {
 					ctx.strokeStyle = "rgb(0,255,255)"
 				}
 				// console.log("yo?"+progress)
-				chargeArc(mouseX,mouseY,18,progress)
+				chargeArc(mouseX,mouseY,23,progress)
 
 				return(progress)
 			}
@@ -566,7 +566,7 @@ function AImoveRandom(piece){
 		}
 	}
 	//capture piece
-	if(piece == undefined){return}
+	if(board.tiles[spos(piece.x,piece.y)].piece == undefined){return}
 	while(piece.cooldown == 0 && piece == board.tiles[spos(piece.x,piece.y)].piece){
 
 		let moveString = legal[Math.floor(Math.random()*legal.length)]
@@ -672,7 +672,7 @@ class explosionR{
 
 function chargeArc(x,y,size,percentage){
 	ctx.beginPath()
-	ctx.arc(x,y,size,0,2*Math.PI*percentage)
+	ctx.arc(x,y,size,-0.5*Math.PI,2*Math.PI*percentage-0.5*Math.PI)
 	ctx.stroke()
 }
 
