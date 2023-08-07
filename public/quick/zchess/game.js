@@ -514,6 +514,7 @@ class piece {
 			let premoved = false
 			while(!premoved && this.premoves.length > 0){
 				premoved = attemptMove(this.x,this.y,this.premoves[0][0],this.premoves[0][1],this.team)
+				friendlyMoved(premoved)
 				this.premoves.splice(0,1)
 			}
 		}

@@ -358,12 +358,28 @@ document.addEventListener("mouseup",(e)=>{
 		if(t != undefined && t.piece != undefined && t.piece.team == camera.team){
 			t.piece.temporaryLegals = t.piece.legals().arr
 			pieceSelected = t.piece
+			pieceSelected.premoves = []
 			return;	
 		}
 	}
 	let move = attemptMove(mouseDownPlace[0],mouseDownPlace[1],mouseBoardX,mouseBoardY,camera.team)
 	if(move !== false){
-		console.log(move)
+		friendlyMoved(move)
+	} else if(pieceClicked.cooldown != 0 && pieceClicked != "none"){
+		pieceClicked.premoves.push([mouseBoardX,mouseBoardY])
+	}
+	pieceSelected = "none"
+	pieceClicked = "none"
+})
+
+ctx.font = "bold 40px Courier New"
+
+function drawText(l,x,y){
+	ctx.fillText(l,(x+camera.x+0.26)*tileSize,(y+camera.y+0.75)*tileSize)
+}
+function friendlyMoved(move){
+	if(move == false){return}
+	console.log(move)
 		if(move == "empty"){
 			camera.captureStreak = 0;
 			// camera.playSound("./sounds/move.wav")
@@ -379,17 +395,6 @@ document.addEventListener("mouseup",(e)=>{
 			// camera.playSound("./sounds/captureS"+(a-4)+".wav")
 			camera.playSoundF(a-1)
 		}
-	} else if(pieceClicked.cooldown != 0 && pieceClicked != "none"){
-		pieceClicked.premoves.push([mouseBoardX,mouseBoardY])
-	}
-	pieceSelected = "none"
-	pieceClicked = "none"
-})
-
-ctx.font = "bold 40px Courier New"
-
-function drawText(l,x,y){
-	ctx.fillText(l,(x+camera.x+0.26)*tileSize,(y+camera.y+0.75)*tileSize)
 }
 
 function drawPiece(l,x,y,team,cd,pc){
@@ -423,14 +428,19 @@ function drawPiece(l,x,y,team,cd,pc){
 	}
 
 	if(team == camera.team && pc.premoves.length > 0){
-		ctx.strokeStyle = "#FF0000"
+
 		ctx.lineWidth = 2;
-		ctx.beginPath()
-		let bts1 = board_to_screen(pc.x+0.5,pc.y+0.5)
-		let bts2 = board_to_screen(pc.premoves[0][0]+0.5,pc.premoves[0][1]+0.5)
-		ctx.moveTo(bts1[0],bts1[1])
-		ctx.lineTo(bts2[0],bts2[1])
-		ctx.stroke()
+		let lastpos = [pc.x+0.5,pc.y+0.5]
+		for(let i = 0; i < pc.premoves.length; i++){
+			ctx.strokeStyle = "rgb("+(255-i*40)+",0,0)"
+			ctx.beginPath()
+			let bts1 = board_to_screen(lastpos[0],lastpos[1])
+			let bts2 = board_to_screen(pc.premoves[i][0]+0.5,pc.premoves[i][1]+0.5)
+			lastpos = [pc.premoves[i][0]+0.5,pc.premoves[i][1]+0.5]
+			ctx.moveTo(bts1[0],bts1[1])
+			ctx.lineTo(bts2[0],bts2[1])
+			ctx.stroke()
+		}
 	}
 	
 }
@@ -626,7 +636,7 @@ camera.particles[camera.particles.length-1].color = "rgba("+(Math.random()*235+2
 		board.tiles[7+","+11].piece = new piece("rook",7,11,"p1")
 		board.tiles[7+","+9].piece = new piece("wizard",7,9,"p1")
 	board.AIwait = ()=>{return(Math.random()*4000)}
-	board.AIblowkWait = ()=>{return(Math.random()*4000+3000)}
+	board.AIblockWait = ()=>{return(Math.random()*4000+3000)}
 	camera.pieceFrequency = 10000
 }
 board.spawnRates = ["pawn",0.7,"king",0.85,"knight",0.95,"bishop",0.98,"rook",1]
