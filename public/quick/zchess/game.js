@@ -10,6 +10,7 @@ function ipos(str){
 class board {
 	// undefined: empty,{} empty movable, {"piece"}
 	static tiles = {}
+	static iterations = 0;
 	static topTile = 0;
 	static AIwait(){
 		return(10)
@@ -573,7 +574,7 @@ function AImoveRandom(piece){
 		}
 	}
 	//capture piece
-	if(board.tiles[spos(piece.x,piece.y)].piece == undefined){return}
+	if(board.tiles[spos(piece.x,piece.y)] == undefined || board.tiles[spos(piece.x,piece.y)].piece == undefined){return}
 	while(piece.cooldown == 0 && piece == board.tiles[spos(piece.x,piece.y)].piece){
 
 		let moveString = legal[Math.floor(Math.random()*legal.length)]

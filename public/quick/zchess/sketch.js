@@ -550,6 +550,7 @@ setInterval(()=>{render()},35)
 
 
 let gameInterval;
+let gameSpecialInterval = ()=>{}
 
 function startGame(){
 camera.specialRenderOn = false
@@ -557,6 +558,15 @@ board.emptyNew()
 
 
 if(camera.gamemode == "Knight's Raid"){
+
+			gameSpecialInterval = ()=>{if(board.iterations%18 == 0 && board.iterations > 30){
+				for(let i = 0; i < 4; i++){
+					board.spawnRates[2*i+1]-=(1-board.spawnRates[2*i+1])*(1-board.spawnRates[2*i+1])*0.2
+					if(board.spawnRates[2*i+1] < (i+1)*0.1){board.spawnRates[2*i+1] = (i+1)*0.1}
+				}
+				}
+			}
+
 			board.tiles[4+","+11].piece = new piece("knight",4,11,"p1")
 			let ap = board.tiles["4,11"].piece
 			ap.maxCD = 0.2
@@ -590,6 +600,15 @@ if(camera.gamemode == "Knight's Raid"){
 			}
 } else if(camera.gamemode == "King's Raid"){
 			camera.pieceFrequency = 950
+			gameSpecialInterval = ()=>{if(board.iterations%12 == 0 && board.iterations > 30){
+				for(let i = 0; i < 4; i++){
+					board.spawnRates[2*i+1]-=(1-board.spawnRates[2*i+1])*(1-board.spawnRates[2*i+1])*0.2
+					if(board.spawnRates[2*i+1] < (i+1)*0.1){board.spawnRates[2*i+1] = (i+1)*0.1}
+				}
+					console.log(board.spawnRates)
+				}
+			}
+
 
 			board.tiles[4+","+11].piece = new piece("king",4,11,"p1")
 			let ap = board.tiles["4,11"].piece
@@ -646,6 +665,7 @@ board.spawnRates = ["pawn",0.7,"king",0.85,"knight",0.95,"bishop",0.98,"rook",1]
 	board.tiles[6+",0"].piece = new piece("pawn",6,0,"zombies",{"direction":"y+"})
 
 gameInterval = setInterval(()=>{
+	board.iterations += 1
 	let x = Math.floor(Math.random()*8)
 	let y = board.topTile;
 	while(board.tiles[x+","+y] == undefined || board.tiles[x+","+y].piece != undefined){
@@ -659,10 +679,7 @@ gameInterval = setInterval(()=>{
 	for(let i = 0; i < board.spawnRates.length/2;i++){
 		if(rng < board.spawnRates[i*2+1]){name = board.spawnRates[i*2];break;}
 	}
-	// if(Math.random()>0.7){name = "king"}
-	// if(Math.random()>0.85){name = "knight"}
-	// if(Math.random()>0.95){name = "bishop"}
-	// if(Math.random()>0.98){name = "rook"}
+
 	board.tiles[x+","+y].piece = new piece(name,x,y,"zombies",{"direction":"y+"})
 
 	if(Math.random()>0.5){
@@ -673,7 +690,7 @@ gameInterval = setInterval(()=>{
 		let x = Math.floor(Math.random()*8)
 		if(board.tiles[x+","+y] == undefined){board.tiles[x+","+y] = {}; if(y < board.topTile){board.topTile=y}}
 	}
-
+	gameSpecialInterval()
 },camera.pieceFrequency)
 
 }
@@ -681,6 +698,7 @@ gameInterval = setInterval(()=>{
 function stopGame(){
 	clearInterval(gameInterval);
 	board.tiles = {}
+	board.iterations = 0;
 	camera.specialRenderOn = true
 	gameStart = "mode"
 }
