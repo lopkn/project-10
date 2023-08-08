@@ -503,8 +503,8 @@ function render(){
 		mrect(pos.x,pos.y)
 		
 	})
-	fill(0,200,200)
-	mrect(16,16)
+	// fill(0,200,200)
+	// mrect(16,16)
 	if(pieceSelected != "none"){
 		if(pieceSelected.cooldown == 0){
 		fill(40,155,40,0.2)}
@@ -598,7 +598,7 @@ board.emptyNew()
 
 
 if(camera.gamemode == "Knight's Raid"){
-		camera.pieceFrequency = 2935209357230
+		// camera.pieceFrequency = 2935209357230
 			gameSpecialInterval = ()=>{if(board.iterations%18 == 0 && board.iterations > 30){
 				for(let i = 0; i < 4; i++){
 					board.spawnRates[2*i+1]-=(1-board.spawnRates[2*i+1])*(1-board.spawnRates[2*i+1])*0.2
@@ -607,10 +607,10 @@ if(camera.gamemode == "Knight's Raid"){
 				}
 			}
 
-			// board.tiles[4+","+11].piece = new piece("knight",4,11,"p1")
-			// let ap = board.tiles["4,11"].piece
-			board.tiles[16+","+16].piece = new piece("knight",16,16,"p1")
-			let ap = board.tiles["16,16"].piece
+			board.tiles[4+","+11].piece = new piece("knight",4,11,"p1")
+			let ap = board.tiles["4,11"].piece
+			// board.tiles[16+","+16].piece = new piece("knight",16,16,"p1")
+			// let ap = board.tiles["16,16"].piece
 			ap.maxCD = 0.2
 			ap.onDeath=()=>{
 				
