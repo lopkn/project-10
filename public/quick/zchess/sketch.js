@@ -54,6 +54,7 @@ class camera{
 	static gamemode = "none"
 	static team = "p1";
 	static pieceRender = "text";
+	static increaseMargin = 1;
 	static menuButtonSize = 40;
 	static pieceFrequency = 1300;
 	static escaped = false
@@ -64,6 +65,7 @@ class camera{
 	static particles = [];
 	static sounds = {}
 	static soundArr = []
+	static tileRsize = 1
 	static soundOn = true;
 	// static playSound(url){
 	// 	let click = this.sounds[url].cloneNode()
@@ -204,7 +206,7 @@ function specialRender(){
 	// mrect(0,4)
 	fill(255,255,255)
 	ctx.textAlign = "left"
-	ctx.font = "bold 40px Courier New"
+	ctx.font = "bold "+Math.floor(0.8*tileSize)+"px Courier New"
 
 	drawText("Choose game mode:",0,-1)
 	drawText("Normal",1,0)
@@ -250,7 +252,7 @@ function menuRender(){
 	let rnd = Math.random()
 	camera.x -= Math.floor(camera.escapePos[0])
 	camera.y -= Math.floor(camera.escapePos[1])
-	ctx.font = "bold 40px Courier New"
+	ctx.font = "bold "+Math.floor(0.8*tileSize)+"px Courier New"
 	ctx.textAlign = "left"
 	fill(0,0,0,0.8)
 	ctx.fillRect(0,0,Width,Height)
@@ -260,6 +262,9 @@ function menuRender(){
 	drawText("Piece render mode ["+camera.pieceRender+"]",2,1)
 	drawText("Sounds ["+(camera.soundOn?"on":"off")+"]",2,3)
 	drawText("Play random sound",2,5)
+	drawText("Increase margin ["+camera.increaseMargin+"]",2,7)
+	drawText("Menu button size ["+camera.menuButtonSize+"]",2,9)
+	drawText("Tilesize ["+tileSize+"]",2,11)
 
 	if(camera.pieceRender == "image"){
 		fill(255,255,255)
@@ -272,6 +277,15 @@ function menuRender(){
 	((camera.soundOn)?(()=>{fill(0,255,0)}):(()=>{fill(255,0,0)}))();
 	mrect(0.2,3.2,0.6,0.6);//sound
 	mrect(0.2,5.2,0.6,0.6);//random sound
+
+	fill(255,0,0)
+	mrect(0.2,7.2,0.8,0.6)
+	mrect(0.2,9.2,0.8,0.6)
+	mrect(0.2,11.2,0.8,0.6)
+	fill(0,255,0)
+	mrect(1,7.2,0.8,0.6)
+	mrect(1,9.2,0.8,0.6)
+	mrect(1,11.2,0.8,0.6)
 
 	camera.x += Math.floor(camera.escapePos[0])
 	camera.y += Math.floor(camera.escapePos[1])
@@ -328,6 +342,22 @@ document.addEventListener("mouseup",(e)=>{
 					camera.playSound("select")
 				} else if(Y === 5){
 					camera.playSound(initSoundsArr[Math.floor(Math.random()*initSoundsArr.length)])
+				} else if(Y === 7){
+					camera.increaseMargin -= 1
+				} else if(Y === 9){
+					camera.menuButtonSize -= camera.increaseMargin
+				} else if(Y === 11){
+					tileSize -= camera.increaseMargin
+					camera.tileRsize = tileSize/50
+				}
+			} else if(X === 1){
+				if(Y === 7){
+					camera.increaseMargin += 1
+				} else if(Y === 9){
+					camera.menuButtonSize += camera.increaseMargin
+				} else if(Y === 11){
+					tileSize += camera.increaseMargin
+					camera.tileRsize = tileSize/50
 				}
 			}
 
@@ -375,7 +405,7 @@ document.addEventListener("mouseup",(e)=>{
 	console.log(pieceClicked)
 })
 
-ctx.font = "bold 40px Courier New"
+ctx.font = "bold "+Math.floor(0.8*tileSize)+"px Courier New"
 
 function drawText(l,x,y){
 	ctx.fillText(l,(x+camera.x+0.26)*tileSize,(y+camera.y+0.75)*tileSize)
@@ -478,7 +508,7 @@ function render(){
 		})
 	}
 
-	ctx.font = "bold 40px Courier New"
+	ctx.font = "bold "+Math.floor(0.8*tileSize)+"px Courier New"
 	arr.forEach((e)=>{
 		let pos = ipos(e)
 		let tile = board.tiles[e]

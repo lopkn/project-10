@@ -669,10 +669,10 @@ class explosionR{
 			return('del')
 		}
 		ctx.strokeStyle = this.color
-		ctx.lineWidth = (1 + this.actLife/10)*this.lineWidth
+		ctx.lineWidth = (1 + this.actLife/10)*this.lineWidth*camera.tileRsize
 		ctx.beginPath()
 		let bts = board_to_screen(this.x,this.y)
-		ctx.arc(bts[0],bts[1], this.size, 0, 2 * Math.PI);
+		ctx.arc(bts[0],bts[1], this.size*camera.tileRsize, 0, 2 * Math.PI);
 		ctx.stroke()
 		
 	}
@@ -722,7 +722,7 @@ class lineParticle{
 		ctx.strokeStyle = this.colorf(this.actLife/1000)
 		let bts1 = board_to_screen(this.x,this.y)
 		let bts2 = board_to_screen(this.tx,this.ty)
-		ctx.lineWidth = this.size*(this.actLife/1000)
+		ctx.lineWidth = this.size*(this.actLife/1000)*camera.tileRsize
 		ctx.beginPath()
 		ctx.moveTo(bts1[0],bts1[1])
 		ctx.lineTo(bts2[0],bts2[1])
@@ -767,7 +767,7 @@ class bloodParticle{
 		ctx.lineWidth = (1 + this.actLife/10)*this.lineWidth
 		ctx.beginPath()
 		let bts = board_to_screen(this.x,this.y)
-		ctx.arc(bts[0],bts[1], this.actualSize, 0, 2 * Math.PI);
+		ctx.arc(bts[0],bts[1], this.actualSize*camera.tileRsize, 0, 2 * Math.PI);
 		ctx.fill()
 		ctx.closePath()
 		// ctx.stroke()
