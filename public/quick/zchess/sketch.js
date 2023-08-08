@@ -231,7 +231,13 @@ function specialRender(){
 	ctx.lineTo(coord3[0],coord3[1]+4*tileSize)
 	ctx.fill()
 	ctx.closePath()
-	ctx.fillStyle = "#488000"
+	// ctx.fillStyle = "#488000"
+	let gradient = ctx.createLinearGradient(0, coord3[1], 0, coord2[1]);
+
+	// Add three color stops
+	gradient.addColorStop(1, "#488000");
+	gradient.addColorStop(0.1, "#20FFA0");
+	ctx.fillStyle = gradient
 	ctx.beginPath()
 	ctx.moveTo(coord1[0],coord1[1])
 	ctx.lineTo(coord2[0],coord2[1])
@@ -450,9 +456,9 @@ function drawPiece(l,x,y,team,cd,pc){
 	if(camera.pieceRender === "image"&&pieceDict[l] != undefined){
 		let arr = pieceDict[l]  
 		ctx.beginPath()
-		ctx.moveTo(arr[0][0]/8+(x+camera.x)*tileSize,arr[0][1]/8+(y+camera.y)*tileSize)
+		ctx.moveTo(arr[0][0]/(400/tileSize)+(x+camera.x)*tileSize,arr[0][1]/(400/tileSize)+(y+camera.y)*tileSize)
 		for(let i = 1; i < arr.length; i++){
-			ctx.lineTo(arr[i][0]/8+(x+camera.x)*tileSize,arr[i][1]/8+(y+camera.y)*tileSize)
+			ctx.lineTo(arr[i][0]/(400/tileSize)+(x+camera.x)*tileSize,arr[i][1]/(400/tileSize)+(y+camera.y)*tileSize)
 		}
 		ctx.fill()
 		ctx.closePath()
@@ -591,7 +597,7 @@ board.emptyNew()
 
 
 if(camera.gamemode == "Knight's Raid"){
-
+		// camera.pieceFrequency = 2935209357230
 			gameSpecialInterval = ()=>{if(board.iterations%18 == 0 && board.iterations > 30){
 				for(let i = 0; i < 4; i++){
 					board.spawnRates[2*i+1]-=(1-board.spawnRates[2*i+1])*(1-board.spawnRates[2*i+1])*0.2
