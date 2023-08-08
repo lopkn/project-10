@@ -54,6 +54,7 @@ class camera{
 	static gamemode = "none"
 	static team = "p1";
 	static pieceRender = "text";
+	static menuButtonSize = 40;
 	static pieceFrequency = 1300;
 	static escaped = false
 	static escapePos = [0,0]
@@ -295,7 +296,7 @@ document.addEventListener("mouseup",(e)=>{
 	}
 
 
-	if(mouseX < 20 && mouseY < 20){
+	if(mouseX < camera.menuButtonSize && mouseY < camera.menuButtonSize){
 		if(gameStart == "lost"){
 			stopGame()
 			camera.playSound("escape")
@@ -309,6 +310,7 @@ document.addEventListener("mouseup",(e)=>{
 	if(mouseDownPlace[0] == mouseBoardX && mouseDownPlace[1] == mouseBoardY){
 		let mbx = mouseBoardX;
 		let mby = mouseBoardY;
+		pieceClicked = "none"
 		if(camera.escaped){
 			let X = mbx+Math.floor(camera.escapePos[0]);
 			let Y = mby+Math.floor(camera.escapePos[1]);
@@ -370,6 +372,7 @@ document.addEventListener("mouseup",(e)=>{
 	}
 	pieceSelected = "none"
 	pieceClicked = "none"
+	console.log(pieceClicked)
 })
 
 ctx.font = "bold 40px Courier New"
@@ -542,7 +545,7 @@ function render(){
 	fill(255,0,0,0.3)
 	mrect(mouseBoardX,mouseBoardY)
 	fill(125,0,255,0.3)
-	ctx.fillRect(0,0,20,20)
+	ctx.fillRect(0,0,camera.menuButtonSize,camera.menuButtonSize)
 }
 
 // setInterval(()=>{if(document.hasFocus()){render()}},35)
