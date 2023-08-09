@@ -131,14 +131,7 @@ document.addEventListener("keydown",(e)=>{
 	}
 
 	if(k == "Escape"){
-		if(gameStart == "lost"){
-			stopGame()
-			camera.playSound("escape")
-			return;
-		}
-		camera.escaped = !camera.escaped
-		camera.escapePos = [camera.x,camera.y]
-		camera.playSound("escape")
+		escaped()
 	}
 
 })
@@ -167,6 +160,19 @@ function mouseToBoardUpdate(){
 		
 	}
 }
+
+
+document.addEventListener("wheel",(e)=>{
+	console.log('hi',e.deltaY)
+	let stb1 = screen_to_board(Width/2,Height/2)
+	tileSize -= e.deltaY/40
+	if(tileSize < 4){tileSize = 4}
+	camera.tileRsize = tileSize/50
+	let stb2 = screen_to_board(Width/2,Height/2)
+	camera.x += stb2[0] - stb1[0]
+	camera.y += stb2[1] - stb1[1]
+})
+
 
 let mouseDownPlace = [0,0]
 let mouseDeltaMovement = [0,0]
@@ -262,7 +268,15 @@ function menuRender(){
 	fill(0,0,0,0.8)
 	ctx.fillRect(0,0,Width,Height)
 
+	fill(rnd*255,0,0)
+	mrect(0,-1.8,1,0.6)
+	fill(rnd*255,rnd*255,0)
+	mrect(0,-3.8,1,0.6)
+
+
 	ctx.fillStyle = "#FFFFFF"
+	drawText("Quit",1,-2)
+	drawText("Send to origin",1,-4)
 	drawText("Buttons & Switches:",0,0)
 	drawText("Piece render mode ["+camera.pieceRender+"]",2,1)
 	drawText("Sounds ["+(camera.soundOn?"on":"off")+"]",2,3)
@@ -316,14 +330,8 @@ document.addEventListener("mouseup",(e)=>{
 
 
 	if(mouseX < camera.menuButtonSize && mouseY < camera.menuButtonSize){
-		if(gameStart == "lost"){
-			stopGame()
-			camera.playSound("escape")
-			return;
-		}
-		camera.escaped = !camera.escaped
-		camera.escapePos = [camera.x,camera.y]
-		camera.playSound("escape")
+		escaped()
+		return;
 	}
 
 	if(mouseDownPlace[0] == mouseBoardX && mouseDownPlace[1] == mouseBoardY){
@@ -353,7 +361,23 @@ document.addEventListener("mouseup",(e)=>{
 					camera.menuButtonSize -= camera.increaseMargin
 				} else if(Y === 11){
 					tileSize -= camera.increaseMargin
+					if(tileSize < 2){
+						tileSize = 2
+					}
 					camera.tileRsize = tileSize/50
+				} else if(Y === -2){
+					if(gameStart != "started"){
+						window.open('','_self').close()
+						clearInterval(renderInterval)
+						drawText("Please kill manually",-camera.x,-camera.y)
+						drawText("Static game started",-camera.x,-camera.y+1)
+					} else {
+						stopGame()
+						escaped()
+					}
+				} else if(Y === -4){
+					camera.x = 0;
+					camera.y = 0;
 				}
 			} else if(X === 1){
 				if(Y === 7){
@@ -362,6 +386,9 @@ document.addEventListener("mouseup",(e)=>{
 					camera.menuButtonSize += camera.increaseMargin
 				} else if(Y === 11){
 					tileSize += camera.increaseMargin
+					if(tileSize < 2){
+						tileSize = 2
+					}
 					camera.tileRsize = tileSize/50
 				}
 			}
@@ -527,7 +554,7 @@ function render(){
 		}
 	})
 
-	ctx.lineWidth = 2
+	ctx.lineWidth = Math.round(tileSize/50)+1
 	ctx.strokeStyle = "rgba(255,255,255,0.3)"
 	ctx.beginPath()
 	for(let i = (camera.x%1)*tileSize; i < Width; i+=tileSize){
@@ -586,7 +613,7 @@ function render(){
 }
 
 // setInterval(()=>{if(document.hasFocus()){render()}},35)
-setInterval(()=>{render()},35)
+let renderInterval = setInterval(()=>{render()},35)
 
 
 let gameInterval;
@@ -642,14 +669,14 @@ if(camera.gamemode == "Knight's Raid"){
 			}
 } else if(camera.gamemode == "King's Raid"){
 			
-			gameSpecialInterval = ()=>{if(board.iterations%12 == 0 && board.iterations > 30){
+			gameSpecialInterval = ()=>{if(board.iterations%12 == 0 && board.iterations > 120){
 				for(let i = 0; i < 4; i++){
 					board.spawnRates[2*i+1]-=(1-board.spawnRates[2*i+1])*(1-board.spawnRates[2*i+1])*0.2
 					if(board.spawnRates[2*i+1] < (i+1)*0.1){board.spawnRates[2*i+1] = (i+1)*0.1}
 				}
 					console.log(board.spawnRates)
-				} else if(board.iterations == 100){
-					camera.pieceFrequency = 950
+				} if(board.iterations % 20 == 0 && camera.pieceFrequency > 950){
+					camera.pieceFrequency -= 50
 					startGameInterval(camera.pieceFrequency)
 				}
 			}
@@ -739,7 +766,7 @@ board.spawnRates = ["pawn",0.7,"king",0.85,"knight",0.95,"bishop",0.98,"rook",1]
 	gameSpecialInterval()
 	}
 
-	startGameInterval(board.pieceFrequency)
+	startGameInterval(camera.pieceFrequency)
 }
 
 function startGameInterval(f){
@@ -916,7 +943,14 @@ document.querySelector('button')?.addEventListener('click', async () => {
 
 //noise n' stuff
 
-
+function escaped(){if(gameStart == "lost"){
+			stopGame()
+			camera.playSound("escape")
+			return;
+		}
+		camera.escaped = !camera.escaped
+		camera.escapePos = [camera.x,camera.y]
+		camera.playSound("escape")}
 
 
 

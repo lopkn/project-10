@@ -569,10 +569,15 @@ function AImoveRandom(piece){
 	if(capturables.length > 0){
 		let moveString = capturables[Math.floor(Math.random()*capturables.length)]
 		let ip = ipos(moveString)
+		let opx = piece.x
+		let opy = piece.y
 		let result = attemptMove(piece.x,piece.y,ip.x,ip.y,piece.team)
 		if(result == "capture"){
 			// camera.playSound("./sounds/captureF.wav")
 			camera.playSoundF("0")
+			camera.particles.push(new lineParticle(opx+0.5,opy+0.5,piece.x+0.5,piece.y+0.5,10,
+						(x)=>{let mr = Math.random()*255
+							return("rgb("+(mr<20?255-mr:0)+","+(mr/2)+",0)")},0.1))
 		}
 	}
 	//capture piece
@@ -611,6 +616,9 @@ function attemptMove(x,y,tx,ty,team){
 
 function board_to_screen(x,y){
 	return([(x+camera.x)*tileSize,(y+camera.y)*tileSize])
+}
+function screen_to_board(x,y){
+	return([x/tileSize-camera.x,y/tileSize-camera.y])
 }
 
 class expandingText{
