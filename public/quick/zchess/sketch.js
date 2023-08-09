@@ -535,11 +535,12 @@ function render(){
 		fill(60,60,60)} else {
 			fill(70,70,70)
 		}
+		if(tile.color != undefined){
+			ctx.fillStyle = tile.color()
+		}
 		mrect(pos.x,pos.y)
 		
 	})
-	// fill(0,200,200)
-	// mrect(16,16)
 	if(pieceSelected != "none"){
 		if(pieceSelected.cooldown == 0){
 		fill(40,155,40,0.2)}
@@ -638,6 +639,7 @@ if(camera.gamemode == "Roaming"){
 				board.tiles[i+","+j] = {};
 			}
 		}
+		board.tiles["16,16"].color = ()=>{return("rgb(0,200,200)")}
 		camera.pieceFrequency = 2935209357230
 		board.tiles[16+","+16].piece = new piece("knight",16,16,"p1")
 			let ap = board.tiles["16,16"].piece
@@ -826,6 +828,7 @@ function startGameInterval(f){
 function stopGame(){
 	specialRenderIn()
 
+	camera.pieceFrequency = 1300
 	clearInterval(gameInterval);
 	board.tiles = {}
 	board.iterations = 0;
