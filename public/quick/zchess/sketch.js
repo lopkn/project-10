@@ -641,13 +641,16 @@ if(camera.gamemode == "Knight's Raid"){
 
 			}
 } else if(camera.gamemode == "King's Raid"){
-			camera.pieceFrequency = 950
+			
 			gameSpecialInterval = ()=>{if(board.iterations%12 == 0 && board.iterations > 30){
 				for(let i = 0; i < 4; i++){
 					board.spawnRates[2*i+1]-=(1-board.spawnRates[2*i+1])*(1-board.spawnRates[2*i+1])*0.2
 					if(board.spawnRates[2*i+1] < (i+1)*0.1){board.spawnRates[2*i+1] = (i+1)*0.1}
 				}
 					console.log(board.spawnRates)
+				} else if(board.iterations == 100){
+					camera.pieceFrequency = 950
+					startGameInterval(camera.pieceFrequency)
 				}
 			}
 
@@ -706,7 +709,8 @@ board.spawnRates = ["pawn",0.7,"king",0.85,"knight",0.95,"bishop",0.98,"rook",1]
 	board.tiles[5+",0"].piece = new piece("pawn",5,0,"zombies",{"direction":"y+"})
 	board.tiles[6+",0"].piece = new piece("pawn",6,0,"zombies",{"direction":"y+"})
 
-gameInterval = setInterval(()=>{
+
+	board.gameFunction = ()=>{
 	board.iterations += 1
 	let x = Math.floor(Math.random()*8)
 	let y = board.topTile;
@@ -733,8 +737,15 @@ gameInterval = setInterval(()=>{
 		if(board.tiles[x+","+y] == undefined){board.tiles[x+","+y] = {}; if(y < board.topTile){board.topTile=y}}
 	}
 	gameSpecialInterval()
-},camera.pieceFrequency)
+	}
 
+	startGameInterval(board.pieceFrequency)
+}
+
+function startGameInterval(f){
+	clearInterval(gameInterval);
+	gameInterval = setInterval(()=>{board.gameFunction()
+	},f)
 }
 
 function stopGame(){
