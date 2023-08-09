@@ -201,10 +201,10 @@ document.addEventListener("mousedown",(e)=>{
 })
 
 let gameStart = "mode"
-
-function specialRender(){
+let specialRender;
+function specialRenderIn(){
 	
-
+	specialRender = ()=>{
 	// mrect(0,0)
 	// ctx.fillStyle = "#500299"
 	// mrect(0,2)
@@ -217,6 +217,7 @@ function specialRender(){
 	drawText("Normal",1,0)
 	drawText("King's Raid",1,2)
 	drawText("Knight's Raid",1,4)
+	drawText("Roaming",1,6)
 
 	let mra = Math.random()
 
@@ -253,10 +254,13 @@ function specialRender(){
 	ctx.fillStyle = "#F9F900"
 	drawText("K",0,2)
 	drawText("N",0,4)
-
+	drawText("&",0,6)
 
 
 }
+}
+
+specialRenderIn()
 
 function menuRender(){
 
@@ -410,6 +414,10 @@ document.addEventListener("mouseup",(e)=>{
 
 					} else if(mouseBoardY == 4){
 						camera.gamemode = "Knight's Raid"
+						gameStart = "started"
+						startGame()
+					} else if(mouseBoardY == 6){
+						camera.gamemode = "Roaming"
 						gameStart = "started"
 						startGame()
 					}
@@ -624,8 +632,48 @@ camera.specialRenderOn = false
 board.emptyNew()
 
 
-if(camera.gamemode == "Knight's Raid"){
-		// camera.pieceFrequency = 2935209357230
+if(camera.gamemode == "Roaming"){
+		for(let i = 0; i < 32; i++){
+			for(let j = 0; j < 32; j++){
+				board.tiles[i+","+j] = {};
+			}
+		}
+		camera.pieceFrequency = 2935209357230
+		board.tiles[16+","+16].piece = new piece("knight",16,16,"p1")
+			let ap = board.tiles["16,16"].piece
+			// board.tiles[16+","+16].piece = new piece("knight",16,16,"p1")
+			// let ap = board.tiles["16,16"].piece
+
+			ap.maxCD = 0.2
+			ap.onDeath=()=>{
+				
+
+				for(let i = 0; i < 26; i++){
+					let dx = Math.random()-0.5
+					let dy = Math.random()-0.5
+					camera.particles.push(new bloodParticle(ap.x+0.5+0.6*dx,ap.y+0.5+0.6*dy,dx*24,24*dy,Math.random()*0.03,Math.random()*3+3,false))
+					camera.particles[camera.particles.length-1].friction = 0.97
+				}
+				for(let i = 0; i < ap.kills*2; i++){
+					setTimeout(()=>{
+					let dx = Math.random()-0.5
+					let dy = Math.random()-0.5
+					camera.particles.push(new bloodParticle(ap.x+0.5+0.6*dx,ap.y+0.5+0.6*dy,dx*24,24*dy,Math.random()*0.03,Math.random()*3+3,false))
+					camera.particles[camera.particles.length-1].friction = 0.97
+					camera.particles[camera.particles.length-1].color = "rgba("+(Math.random()*235+20)+","+(Math.random()*15)+","+(Math.random()*15)+","+(Math.random()*0.6+0.4)+")"
+					},i*40)
+				}
+				displayKills(ap.kills,ap.x,ap.y,1,2)
+				camera.particles.push(new explosionR(ap.x+0.5,ap.y+0.5,
+					(x)=>{
+						let a = 250*Math.random()
+						return("rgba("+a+","+a+","+(250-a)+","+(2.5*x)+")")},
+					2,0.7,1))
+				clearInterval(gameInterval)
+				gameStart = "lost"
+
+			}
+}else if(camera.gamemode == "Knight's Raid"){
 			gameSpecialInterval = ()=>{if(board.iterations%18 == 0 && board.iterations > 30){
 				for(let i = 0; i < 4; i++){
 					board.spawnRates[2*i+1]-=(1-board.spawnRates[2*i+1])*(1-board.spawnRates[2*i+1])*0.2
@@ -776,6 +824,8 @@ function startGameInterval(f){
 }
 
 function stopGame(){
+	specialRenderIn()
+
 	clearInterval(gameInterval);
 	board.tiles = {}
 	board.iterations = 0;
