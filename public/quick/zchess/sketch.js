@@ -163,7 +163,6 @@ function mouseToBoardUpdate(){
 
 
 document.addEventListener("wheel",(e)=>{
-	console.log('hi',e.deltaY)
 	let stb1 = screen_to_board(Width/2,Height/2)
 	tileSize -= e.deltaY/40
 	if(tileSize < 4){tileSize = 4}
@@ -287,7 +286,7 @@ function menuRender(){
 	drawText("Play random sound",2,5)
 	drawText("Increase margin ["+camera.increaseMargin+"]",2,7)
 	drawText("Menu button size ["+camera.menuButtonSize+"]",2,9)
-	drawText("Tilesize ["+tileSize+"]",2,11)
+	drawText("Tilesize ["+tileSize.toPrecision(3)+"]",2,11)
 
 	if(camera.pieceRender == "image"){
 		fill(255,255,255)
@@ -382,6 +381,7 @@ document.addEventListener("mouseup",(e)=>{
 				} else if(Y === -4){
 					camera.x = 0;
 					camera.y = 0;
+					camera.playSound("select")
 				}
 			} else if(X === 1){
 				if(Y === 7){
@@ -827,7 +827,8 @@ function startGameInterval(f){
 
 function stopGame(){
 	specialRenderIn()
-
+	board.AIwait = ()=>{return(10)}
+	board.AIblockWait = ()=>{return(300)}
 	camera.pieceFrequency = 1300
 	clearInterval(gameInterval);
 	board.tiles = {}
@@ -883,10 +884,7 @@ function touchHandler(event)
        	console.log("t5")
        }
 
-    // if(type=="mouseup"){
-    // console.log("hi")} else {
-    // 	console.log(event.type)
-    // }
+
     document.body.dispatchEvent(simulatedEvent);
     
     event.preventDefault();
