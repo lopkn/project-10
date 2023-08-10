@@ -117,7 +117,7 @@ let initSoundsArr = ["shot","escape","select","move","captureF","capture","captu
 initSounds(initSoundsArr)
 
 function fill(r,g,b,a){
-	a = a?a:1
+	a = a==undefined?1:a
 	ctx.fillStyle = "rgba(" + r+","+g+","+b+","+a+")"
 }
 
@@ -827,7 +827,7 @@ camera.particles[camera.particles.length-1].color = "rgba("+(Math.random()*235+2
 			board.tiles[4+","+11].piece = new piece("king",4,11,"p1")
 			let ap = board.tiles["4,11"].piece
 			ap.maxCD = 0.2
-			board.pieceModifiers.push((e)=>{
+			board.arrFuncs.pieceModifiers.push((e)=>{
 				e.draw = (l,x,y,team,cd,pc)=>{
 
 					fill(0,100,0,cd)
@@ -838,6 +838,15 @@ camera.particles[camera.particles.length-1].color = "rgba("+(Math.random()*235+2
 						ctx.fillText(l,(x+camera.x+0.5)*tileSize,(y+camera.y+0.75)*tileSize)
 					}}
 			})
+			board.arrFuncs.pieceModifiers.push((e)=>{
+				e.arrFuncs.onMove.push((x,y,e,t)=>{
+					camera.particles.push(new lineParticle(x+0.5,y+0.5,e.x+0.5,e.y+0.5,10,
+						(x)=>{let mr = Math.random()*125+125
+							return("rgb(0,"+(mr/2)+",0)")},1))
+				})
+			})
+			board.AIwait = ()=>{return(Math.random()*5000+10)}
+			board.AIblockWait = ()=>{return(Math.random()*10000+10)}
 			ap.onDeath=()=>{
 				
 				for(let i = 0; i < 26; i++){
@@ -908,7 +917,7 @@ board.spawnRates = ["pawn",0.7,"king",0.85,"knight",0.95,"bishop",0.98,"rook",1]
 
 	board.tiles[x+","+y].piece = new piece(name,x,y,"zombies",{"direction":"y+"})
 
-	board.pieceModifiers.forEach((e)=>{
+	board.arrFuncs.pieceModifiers.forEach((e)=>{
 		e(board.tiles[x+","+y].piece)
 	})
 
@@ -934,7 +943,7 @@ function startGameInterval(f){
 
 function stopGame(){
 	specialRenderIn()
-	board.pieceModifiers = []
+	board.arrFuncs.pieceModifiers = []
 	board.AIwait = ()=>{return(10)}
 	board.AIblockWait = ()=>{return(300)}
 	camera.pieceFrequency = 1300

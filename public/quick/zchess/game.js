@@ -10,7 +10,9 @@ function ipos(str){
 class board {
 	// undefined: empty,{} empty movable, {"piece"}
 	static tiles = {}
-	static pieceModifiers = []
+	static arrFuncs = {
+		"pieceModifiers":[]
+	}
 	static iterations = 0;
 	static topTile = 0;
 	static AIwait(){
@@ -47,6 +49,9 @@ function movePiece(x,y,tx,ty,team){
 
 class piece {
 	constructor(id,x,y,team,tags){
+		this.arrFuncs = {
+		"onMove":[]
+		}
 		this.id = id
 		this.tags = tags || {}
 		this.x = x
@@ -470,7 +475,8 @@ class piece {
 		// if(movable === false){return(false)}
 
 		board.tiles[spos(this.x,this.y)].piece = undefined
-
+		let originalX = this.x
+		let originalY = this.y
 		this.x = x
 		this.y = y
 
@@ -491,6 +497,11 @@ class piece {
 		board.tiles[pos].piece = this;
 		this.cooldown = this.maxCD
 		this.coolUntil = Date.now() + 1000*this.maxCD
+
+		this.arrFuncs.onMove.forEach((e)=>{
+			e(originalX,originalY,this,legals.dict[pos])
+		})
+
 		return(legals.dict[pos])
 	}	
 
@@ -581,6 +592,7 @@ function AImoveRandom(piece){
 	}
 	//capture piece
 	if(board.tiles[spos(piece.x,piece.y)] == undefined || board.tiles[spos(piece.x,piece.y)].piece == undefined){return}
+	let result;
 	while(piece.cooldown == 0 && piece == board.tiles[spos(piece.x,piece.y)].piece){
 
 		let moveString = legal[Math.floor(Math.random()*legal.length)]
@@ -594,8 +606,9 @@ function AImoveRandom(piece){
 		//move front
 
 
-		attemptMove(piece.x,piece.y,ip.x,ip.y,piece.team)
+		result = attemptMove(piece.x,piece.y,ip.x,ip.y,piece.team)
 	}
+	return(result)
 }
 
 function attemptMove(x,y,tx,ty,team){
