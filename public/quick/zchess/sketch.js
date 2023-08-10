@@ -1,3 +1,29 @@
+
+
+let tv = {int:0,deg:0,rmom:[0,0,0,0],cr:0,cg:0,cb:0,gg:Math.random()*125+125}
+let buttonInterval = setInterval(()=>{
+	// tv.rmom[0] += Math.random() - 0.5
+	tv.int += 0.1
+	tv.rmom.forEach((e,i)=>{
+	tv.rmom[i] += (Math.random() - 0.5)
+		if(tv.rmom[i] < -5){tv.rmom[i] = -5}
+		if(tv.rmom[i] > 5){tv.rmom[i] = 5}
+	})
+	
+	tv.deg += tv.rmom[0]/5
+	tv.cr += tv.rmom[1]
+	tv.cg += tv.rmom[2]
+	tv.cb += tv.rmom[3]
+
+	tv.cr = Math.abs(250-(tv.cr+250)%500)
+	tv.cg = Math.abs(250-(tv.cg+250)%500)
+	tv.cb = Math.abs(250-(tv.cb+250)%500)
+
+
+	let btn = document.getElementById("wow")
+	btn.style.background = "linear-gradient("+(tv.deg/2)+"deg, rgba("+tv.cr+","+tv.cg+","+tv.cb+",1) "+(50-tv.int<0?0:50-tv.int)+"%, rgba(0,"+tv.gg+",44,1) 100%)"
+},20)
+
 let myCanvas = document.getElementById("myCanvas")
 
 let Height = window.innerHeight /*>window.innerHeight?window.innerHeight:window.innerWidth*/
@@ -179,6 +205,9 @@ let pieceSelected = "none"
 let pieceDowned = "none"
 let pieceClicked = "none"
 let mouseDown = false
+
+document.addEventListener("contextmenu",(e)=>{e.preventDefault()})
+
 document.addEventListener("mousedown",(e)=>{
 	mouseX = (e.clientX); mouseY = (e.clientY-2);
 	mouseToBoardUpdate()
@@ -476,6 +505,9 @@ function drawPiece(l,x,y,team,cd,pc){
 		if(team == camera.team){
 			fill(0,0,150,0.3)} else {
 			fill(150,0,0,0.3)
+			// if(cd < 0.2){
+			// 	fill(150,150,0,0.3)
+			// }
 		}
 		mrect(x,y,1,cd>1?1:cd)
 	}
