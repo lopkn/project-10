@@ -246,6 +246,7 @@ function specialRenderIn(){
 	drawText("King's Raid",1,2)
 	drawText("Knight's Raid",1,4)
 	drawText("Roaming",1,6)
+	drawText("Phantom",1,8)
 
 	let mra = Math.random()
 
@@ -449,6 +450,10 @@ document.addEventListener("mouseup",(e)=>{
 						camera.gamemode = "Roaming"
 						gameStart = "started"
 						startGame()
+					} else if(mouseBoardY == 8){
+						camera.gamemode = "Phantom"
+						gameStart = "started"
+						startGame()
 					}
 				}
 			}
@@ -519,15 +524,9 @@ function drawPiece(l,x,y,team,cd,pc){
 	} else {
 		fill(0,100,0)
 	}
-	if(camera.pieceRender === "image"&&pieceDict[l] != undefined){
+	if(camera.pieceRender === "image" && pieceDict[l] != undefined){
 		let arr = pieceDict[l]  
-		ctx.beginPath()
-		ctx.moveTo(arr[0][0]/(400/tileSize)+(x+camera.x)*tileSize,arr[0][1]/(400/tileSize)+(y+camera.y)*tileSize)
-		for(let i = 1; i < arr.length; i++){
-			ctx.lineTo(arr[i][0]/(400/tileSize)+(x+camera.x)*tileSize,arr[i][1]/(400/tileSize)+(y+camera.y)*tileSize)
-		}
-		ctx.fill()
-		ctx.closePath()
+		pieceImage(x,y,arr)
 	} else {
 		ctx.fillText(l,(x+camera.x+0.5)*tileSize,(y+camera.y+0.75)*tileSize)
 	}
@@ -548,6 +547,16 @@ function drawPiece(l,x,y,team,cd,pc){
 		}
 	}
 	
+}
+
+function pieceImage(x,y,arr){
+	ctx.beginPath()
+	ctx.moveTo(arr[0][0]/(400/tileSize)+(x+camera.x)*tileSize,arr[0][1]/(400/tileSize)+(y+camera.y)*tileSize)
+	for(let i = 1; i < arr.length; i++){
+		ctx.lineTo(arr[i][0]/(400/tileSize)+(x+camera.x)*tileSize,arr[i][1]/(400/tileSize)+(y+camera.y)*tileSize)
+	}
+	ctx.fill()
+	ctx.closePath()
 }
 
 function render(){
@@ -591,7 +600,11 @@ function render(){
 		if(tile.piece != undefined){
 			let tpc = tile.piece
 			tpc.CDcheck()
+			if(tpc.draw !== undefined){
+				tpc.draw(tpc.renderLetter,tpc.x,tpc.y,tpc.team,tpc.cooldown/tpc.maxCD,tpc)
+			} else {
 			drawPiece(tpc.renderLetter,tpc.x,tpc.y,tpc.team,tpc.cooldown/tpc.maxCD,tpc)
+			}
 		}
 	})
 
@@ -795,6 +808,64 @@ camera.particles[camera.particles.length-1].color = "rgba("+(Math.random()*235+2
 				clearInterval(gameInterval)
 				gameStart = "lost"
 			}
+} else if(camera.gamemode == "Phantom"){
+			
+			camera.pieceFrequency = 2500
+			gameSpecialInterval = ()=>{if(board.iterations%12 == 0 && board.iterations > 40){
+				for(let i = 0; i < 4; i++){
+					board.spawnRates[2*i+1]-=(1-board.spawnRates[2*i+1])*(1-board.spawnRates[2*i+1])*0.2
+					if(board.spawnRates[2*i+1] < (i+1)*0.1){board.spawnRates[2*i+1] = (i+1)*0.1}
+				}
+					console.log(board.spawnRates)
+				} if(board.iterations % 20 == 0 && camera.pieceFrequency > 950){
+					camera.pieceFrequency -= 25
+					startGameInterval(camera.pieceFrequency)
+				}
+			}
+
+
+			board.tiles[4+","+11].piece = new piece("king",4,11,"p1")
+			let ap = board.tiles["4,11"].piece
+			ap.maxCD = 0.2
+			board.pieceModifiers.push((e)=>{
+				e.draw = (l,x,y,team,cd,pc)=>{
+
+					fill(0,100,0,cd)
+					if(camera.pieceRender === "image"&&pieceDict[l] != undefined){
+						let arr = pieceDict[l]  
+						pieceImage(x,y,arr)
+					} else {
+						ctx.fillText(l,(x+camera.x+0.5)*tileSize,(y+camera.y+0.75)*tileSize)
+					}}
+			})
+			ap.onDeath=()=>{
+				
+				for(let i = 0; i < 26; i++){
+					let dx = Math.random()-0.5
+					let dy = Math.random()-0.5
+					camera.particles.push(new bloodParticle(ap.x+0.5+0.6*dx,ap.y+0.5+0.6*dy,dx*24,24*dy,Math.random()*0.03,Math.random()*3+3,false))
+					camera.particles[camera.particles.length-1].friction = 0.97
+camera.particles[camera.particles.length-1].color = "rgba("+(Math.random()*235+20)+","+(Math.random()*15)+","+(Math.random()*15)+","+(Math.random()*0.6+0.4)+")"
+
+				}
+				for(let i = 0; i < ap.kills*2; i++){
+					setTimeout(()=>{
+					let dx = Math.random()-0.5
+					let dy = Math.random()-0.5
+					camera.particles.push(new bloodParticle(ap.x+0.5+0.6*dx,ap.y+0.5+0.6*dy,dx*24,24*dy,Math.random()*0.03,Math.random()*3+3,false))
+					camera.particles[camera.particles.length-1].friction = 0.97
+camera.particles[camera.particles.length-1].color = "rgba("+(Math.random()*235+20)+","+(Math.random()*15)+","+(Math.random()*15)+","+(Math.random()*0.6+0.4)+")"
+					},i*40)
+				}
+				displayKills(ap.kills,ap.x,ap.y,1,2)
+				camera.particles.push(new explosionR(ap.x+0.5,ap.y+0.5,
+					(x)=>{
+						let a = 250*Math.random()
+						return("rgba("+a+","+a+","+(250-a)+","+(2.5*x)+")")},
+					2,0.7,1))
+				clearInterval(gameInterval)
+				gameStart = "lost"
+			}
 } else if(camera.gamemode == "Normal"){
 	for(let i = 0; i < 8; i++){
 		board.tiles[i+","+10].piece = new piece("pawn",i,10,"p1",{"direction":"y-"})
@@ -837,6 +908,10 @@ board.spawnRates = ["pawn",0.7,"king",0.85,"knight",0.95,"bishop",0.98,"rook",1]
 
 	board.tiles[x+","+y].piece = new piece(name,x,y,"zombies",{"direction":"y+"})
 
+	board.pieceModifiers.forEach((e)=>{
+		e(board.tiles[x+","+y].piece)
+	})
+
 	if(Math.random()>0.5){
 		let y = -1
 		while(Math.random()>0.4){
@@ -859,6 +934,7 @@ function startGameInterval(f){
 
 function stopGame(){
 	specialRenderIn()
+	board.pieceModifiers = []
 	board.AIwait = ()=>{return(10)}
 	board.AIblockWait = ()=>{return(300)}
 	camera.pieceFrequency = 1300

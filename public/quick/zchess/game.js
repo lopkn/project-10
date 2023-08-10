@@ -10,6 +10,7 @@ function ipos(str){
 class board {
 	// undefined: empty,{} empty movable, {"piece"}
 	static tiles = {}
+	static pieceModifiers = []
 	static iterations = 0;
 	static topTile = 0;
 	static AIwait(){
