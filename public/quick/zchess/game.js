@@ -521,7 +521,7 @@ class piece {
 			setTimeout(()=>{
 				AImoveRandom(this)
 			// },Math.random()*4000)
-			},board.AIwait())
+			},this.AIwait == undefined?board.AIwait():this.AIwait())
 		} else {
 			camera.particles.push(new explosionR(this.x+0.5,this.y+0.5,"rgba(255,255,0,0.5)",10,18,0.2))
 			let premoved = false
@@ -534,7 +534,13 @@ class piece {
 	}
 
 
+
 }
+
+function setPieceCooldown(piece,t){
+		piece.cooldown = t
+		piece.coolUntil = Date.now() + t*1000
+	}
 
 function killBoardPiece(x,y,killerPiece){
 	let pos = spos(x,y)
@@ -565,7 +571,7 @@ function AImoveRandom(piece){
 		setTimeout(()=>{
 				AImoveRandom(piece)
 			// },Math.random()*4000+3000)
-			},board.AIblockWait())
+			},piece.AIblockWait == undefined?board.AIblockWait():piece.AIblockWait())
 		return
 	}
 
@@ -658,9 +664,10 @@ class expandingText{
 		ctx.textAlign = "center"
 		ctx.fillStyle = this.colorf(this.actLife/600)
 		ctx.beginPath()
-		ctx.font = "bold "+(Math.floor(this.size))+"px Courier New"
+		ctx.font = "bold "+(this.size)+"px Courier New"
+		// ctx.font = "bold "+(Math.floor(this.size))+"px Courier New"
 		let bts = board_to_screen(this.x+0.5,this.y+0.5)
-		ctx.fillText(this.text,bts[0],bts[1]+this.size/4)
+		ctx.fillText(this.text,bts[0],bts[1])
 	}
 }//camera.particles.push(new expandingText("5",2,2,(x)=>{return("rgba(180,150,150,"+x+")")},5,5))
 
@@ -813,7 +820,7 @@ function displayKills(kills,x,y,size,speed){
 		f = (X)=>{return("rgba("+(250-kills*3+Math.random()*kills*3)+",0,0,"+(2.5*X)+")")}
 	}
 
-	camera.particles.push(new expandingText(kills,x,y,
+	camera.particles.splice(0,0,new expandingText(kills,x,y,
 	f,
 	speed+kills/20,size))
 }
@@ -824,5 +831,66 @@ function displayKills(kills,x,y,size,speed){
 //different color cooldown
 
 
+var gameEvents = {
+	"elite knight":()=>{
+		camera.particles.push(new expandingText("An Elite Knight Spawned",Width/2/tileSize-camera.x,Height/2/tileSize-camera.y,
+		(x)=>{return("rgba(255,255,0,"+x+")")},
+		0.5,0.9))
+		camera.particles[camera.particles.length-1].size = tileSize/2
+
+		board.tiles["4,0"].piece = new piece("knight",4,0,"zombies")
+		let pc = board.tiles["4,0"].piece
+		pc.maxCD = 3
+		pc.color = "rgb(50,150,0)"
+		pc.draw = (l,x,y)=>{
+			if(Math.random() > 0.95){
+				let dx = Math.random()-0.5
+				let dy = Math.random()-0.5
+				camera.particles.push(new bloodParticle(x+0.5+0.6*dx,y+0.5+0.6*dy,dx*14,14*dy,Math.random()*0.03,Math.random()*3+3,false))
+			}
+			return(true)
+		}
+		pc.AIwait = ()=>{return(10)}
+		pc.AIblockWait = ()=>{return(300)}
+	},
+	"elite rook":()=>{
+		board.tiles["4,0"].piece = new piece("rook",4,0,"zombies")
+		let pc = board.tiles["4,0"].piece
+		pc.maxCD = 4
+		pc.color = "rgb(50,150,0)"
+		pc.draw = (l,x,y)=>{
+			if(Math.random() > 0.95){
+				let dx = Math.random()-0.5
+				let dy = Math.random()-0.5
+				camera.particles.push(new bloodParticle(x+0.5+0.6*dx,y+0.5+0.6*dy,dx*14,14*dy,Math.random()*0.03,Math.random()*3+3,false))
+			}
+			return(true)
+		}
+		pc.AIwait = ()=>{return(10)}
+		pc.AIblockWait = ()=>{return(300)}
+	},"elite bishop":()=>{
+		board.tiles["4,0"].piece = new piece("rook",4,0,"zombies")
+		let pc = board.tiles["4,0"].piece
+		pc.maxCD = 4
+		pc.color = "rgb(50,150,0)"
+		pc.draw = (l,x,y)=>{
+			if(Math.random() > 0.95){
+				let dx = Math.random()-0.5
+				let dy = Math.random()-0.5
+				camera.particles.push(new bloodParticle(x+0.5+0.6*dx,y+0.5+0.6*dy,dx*14,14*dy,Math.random()*0.03,Math.random()*3+3,false))
+			}
+			return(true)
+		}
+		pc.AIwait = ()=>{return(10)}
+		pc.AIblockWait = ()=>{return(300)}
+	},
+}
+
+
+
+//bottom lose
+//pawn promotion
+//normal difficulty curve
+//special tiles
 
 

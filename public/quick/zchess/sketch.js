@@ -44,6 +44,7 @@ document.getElementById("help").innerHTML = `help menu unfinished`
 let CTX = {"main":myCanvas.getContext("2d")}
 let ctx = CTX.main
 ctx.textAlign = "center"
+		ctx.textBaseline="middle"
 
 function rect(x,y,w,h){
 	ctx.fillRect(x,y,w,h)
@@ -482,7 +483,7 @@ document.addEventListener("mouseup",(e)=>{
 ctx.font = "bold "+Math.floor(0.8*tileSize)+"px Courier New"
 
 function drawText(l,x,y){
-	ctx.fillText(l,(x+camera.x+0.26)*tileSize,(y+camera.y+0.75)*tileSize)
+	ctx.fillText(l,(x+camera.x+0.26)*tileSize,(y+camera.y+0.56)*tileSize)
 }
 function friendlyMoved(move){
 	if(move == false){return}
@@ -516,7 +517,9 @@ function drawPiece(l,x,y,team,cd,pc){
 		}
 		mrect(x,y,1,cd>1?1:cd)
 	}
-	if(team == camera.team){
+	if(pc.color !== undefined){
+		ctx.fillStyle = pc.color
+	}else if(team == camera.team){
 		fill(255,255,255)
 		if(cd != 0){
 			fill(250,180,180)
@@ -528,7 +531,7 @@ function drawPiece(l,x,y,team,cd,pc){
 		let arr = pieceDict[l]  
 		pieceImage(x,y,arr)
 	} else {
-		ctx.fillText(l,(x+camera.x+0.5)*tileSize,(y+camera.y+0.75)*tileSize)
+		ctx.fillText(l,(x+camera.x+0.5)*tileSize,(y+camera.y+0.56)*tileSize)
 	}
 
 	if(team == camera.team && pc.premoves.length > 0){
@@ -601,9 +604,12 @@ function render(){
 			let tpc = tile.piece
 			tpc.CDcheck()
 			if(tpc.draw !== undefined){
-				tpc.draw(tpc.renderLetter,tpc.x,tpc.y,tpc.team,tpc.cooldown/tpc.maxCD,tpc)
+				let d = tpc.draw(tpc.renderLetter,tpc.x,tpc.y,tpc.team,tpc.cooldown/tpc.maxCD,tpc)
+				if(d){
+					drawPiece(tpc.renderLetter,tpc.x,tpc.y,tpc.team,tpc.cooldown/tpc.maxCD,tpc)
+				}
 			} else {
-			drawPiece(tpc.renderLetter,tpc.x,tpc.y,tpc.team,tpc.cooldown/tpc.maxCD,tpc)
+				drawPiece(tpc.renderLetter,tpc.x,tpc.y,tpc.team,tpc.cooldown/tpc.maxCD,tpc)
 			}
 		}
 	})
@@ -835,7 +841,7 @@ camera.particles[camera.particles.length-1].color = "rgba("+(Math.random()*235+2
 						let arr = pieceDict[l]  
 						pieceImage(x,y,arr)
 					} else {
-						ctx.fillText(l,(x+camera.x+0.5)*tileSize,(y+camera.y+0.75)*tileSize)
+						ctx.fillText(l,(x+camera.x+0.5)*tileSize,(y+camera.y+0.56)*tileSize)
 					}}
 			})
 			board.arrFuncs.pieceModifiers.push((e)=>{
@@ -953,6 +959,27 @@ function stopGame(){
 	camera.specialRenderOn = true
 	gameStart = "mode"
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 //touch handler
 
