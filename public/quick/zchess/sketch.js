@@ -119,7 +119,9 @@ initSounds(initSoundsArr)
 
 function fill(r,g,b,a){
 	a = a==undefined?1:a
-	ctx.fillStyle = "rgba(" + r+","+g+","+b+","+a+")"
+	let c = "rgba(" + r+","+g+","+b+","+a+")"
+	ctx.fillStyle = c
+	return(c)
 }
 
 
@@ -727,11 +729,16 @@ if(camera.gamemode == "Roaming"){
 
 			}
 }else if(camera.gamemode == "Knight's Raid"){
+			camera.pieceFrequency = 1700
 			gameSpecialInterval = ()=>{if(board.iterations%18 == 0 && board.iterations > 30){
 				for(let i = 0; i < 4; i++){
 					board.spawnRates[2*i+1]-=(1-board.spawnRates[2*i+1])*(1-board.spawnRates[2*i+1])*0.2
 					if(board.spawnRates[2*i+1] < (i+1)*0.1){board.spawnRates[2*i+1] = (i+1)*0.1}
 				}
+				}
+				if(board.iterations % 20 == 0 && camera.pieceFrequency > 1300){
+					camera.pieceFrequency -= 50
+					startGameInterval(camera.pieceFrequency)
 				}
 			}
 
@@ -843,6 +850,8 @@ camera.particles[camera.particles.length-1].color = "rgba("+(Math.random()*235+2
 					} else {
 						ctx.fillText(l,(x+camera.x+0.5)*tileSize,(y+camera.y+0.56)*tileSize)
 					}}
+				setPieceCooldown(e,3)
+
 			})
 			board.arrFuncs.pieceModifiers.push((e)=>{
 				e.arrFuncs.onMove.push((x,y,e,t)=>{
@@ -882,6 +891,21 @@ camera.particles[camera.particles.length-1].color = "rgba("+(Math.random()*235+2
 				gameStart = "lost"
 			}
 } else if(camera.gamemode == "Normal"){
+
+	camera.pieceFrequency = 10000
+	gameSpecialInterval = ()=>{if(board.iterations%18 == 0 && board.iterations > 30){
+				for(let i = 0; i < 4; i++){
+					board.spawnRates[2*i+1]-=(1-board.spawnRates[2*i+1])*(1-board.spawnRates[2*i+1])*0.2
+					if(board.spawnRates[2*i+1] < (i+1)*0.1){board.spawnRates[2*i+1] = (i+1)*0.1}
+				}
+				}
+				if(board.iterations % 10 == 0 && camera.pieceFrequency > 8500){
+					camera.pieceFrequency -= 25
+					startGameInterval(camera.pieceFrequency)
+				}
+			}
+
+
 	for(let i = 0; i < 8; i++){
 		board.tiles[i+","+10].piece = new piece("pawn",i,10,"p1",{"direction":"y-"})
 	}
@@ -896,7 +920,6 @@ camera.particles[camera.particles.length-1].color = "rgba("+(Math.random()*235+2
 		board.tiles[7+","+9].piece = new piece("wizard",7,9,"p1")
 	board.AIwait = ()=>{return(Math.random()*4000)}
 	board.AIblockWait = ()=>{return(Math.random()*4000+3000)}
-	camera.pieceFrequency = 10000
 }
 board.spawnRates = ["pawn",0.7,"king",0.85,"knight",0.95,"bishop",0.98,"rook",1]
 

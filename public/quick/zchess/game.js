@@ -469,21 +469,18 @@ class piece {
 		let legals = this.legals()
 		let moves = legals.arr
 		if(legals.dict[pos] == undefined){return(false)}
-		// let movable = false
-		// for(let i = 0; i < moves.length; i++)
-		// 	{if(moves[i]==pos){movable=true;break;}}
-		// if(movable === false){return(false)}
 
 		board.tiles[spos(this.x,this.y)].piece = undefined
 		let originalX = this.x
 		let originalY = this.y
-		this.x = x
-		this.y = y
+			this.x = x
+			this.y = y
 
 		if(board.tiles[pos].piece != undefined){
 			if(board.tiles[pos].piece.onDeath != undefined){
 				board.tiles[pos].piece.onDeath()
 			}
+			
 			board.tiles[pos].piece.alive = false
 			kill(this.x,this.y)
 			this.kills += 1;
@@ -565,6 +562,9 @@ function killBoardPiece(x,y,killerPiece){
 }
 
 function AImoveRandom(piece){
+	if(piece.AImoveRandom !== undefined){
+		piece.AImoveRandom(piece)
+	}
 	let legals = piece.legals()
 	let legal = legals.arr
 	if(legal.length == 0){
@@ -869,7 +869,7 @@ var gameEvents = {
 		pc.AIwait = ()=>{return(10)}
 		pc.AIblockWait = ()=>{return(300)}
 	},"elite bishop":()=>{
-		board.tiles["4,0"].piece = new piece("rook",4,0,"zombies")
+		board.tiles["4,0"].piece = new piece("bishop",4,0,"zombies")
 		let pc = board.tiles["4,0"].piece
 		pc.maxCD = 4
 		pc.color = "rgb(50,150,0)"
@@ -883,7 +883,37 @@ var gameEvents = {
 		}
 		pc.AIwait = ()=>{return(10)}
 		pc.AIblockWait = ()=>{return(300)}
-	},
+	},"elite queen":()=>{
+		board.tiles["4,0"].piece = new piece("queen",4,0,"zombies")
+		let pc = board.tiles["4,0"].piece
+		pc.maxCD = 5
+		pc.color = "rgb(50,150,0)"
+		pc.draw = (l,x,y)=>{
+			if(Math.random() > 0.95){
+				let dx = Math.random()-0.5
+				let dy = Math.random()-0.5
+				camera.particles.push(new bloodParticle(x+0.5+0.6*dx,y+0.5+0.6*dy,dx*14,14*dy,Math.random()*0.03,Math.random()*3+3,false))
+			}
+			return(true)
+		}
+		pc.AIwait = ()=>{return(10)}
+		pc.AIblockWait = ()=>{return(300)}
+	},"board expansion":(e,l)=>{
+		e = e?e:20
+		for(let i = 0; i < e; i++){
+			setTimeout(()=>{
+				let y = l?l*-1:20
+				console.log(y)
+				while(Math.random()>0.4){
+					y -= 1
+				}
+				let x = Math.floor(Math.random()*8)
+				if(board.tiles[x+","+y] == undefined){board.tiles[x+","+y] = {}; if(y < board.topTile){board.topTile=y}} else {
+				}
+			},i*200)
+			
+		}
+	}
 }
 
 
