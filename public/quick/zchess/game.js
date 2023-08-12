@@ -362,6 +362,9 @@ class piece {
 					}
 					return({"arr":legals,"dict":legalDict})
 				}
+				this.arrFuncs.onMove.push(()=>{if(this.y == 11){
+					board.tiles[spos(this.x,this.y)].piece = new piece("queen",this.x,this.y,this.team)
+				}})
 			}
 			if(this.tags.direction == "y-"){
 				this.legals = ()=>{
@@ -383,6 +386,11 @@ class piece {
 					}
 					return({"arr":legals,"dict":legalDict})
 				}
+
+				this.arrFuncs.onMove.push(()=>{if(board.tiles[spos(this.x,this.y-1)] == undefined){
+					board.tiles[spos(this.x,this.y)].piece = new piece("queen",this.x,this.y,this.team)
+				}})
+
 			}
 		} else if(id == "wizard"){
 			this.maxCD = 20
