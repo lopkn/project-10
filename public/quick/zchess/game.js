@@ -913,6 +913,11 @@ var gameEvents = {
 			},i*200)
 			
 		}
+	}, "piece storm":(t,f)=>{
+		t = t?t*1000:2000
+		f = f?f:100
+		startGameInterval(f)
+		setTimeout(()=>{startGameInterval(camera.pieceFrequency)},t)
 	}
 }
 
