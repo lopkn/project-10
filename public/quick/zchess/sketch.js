@@ -250,6 +250,7 @@ function specialRenderIn(){
 	drawText("Knight's Raid",1,4)
 	drawText("Roaming",1,6)
 	drawText("Phantom",1,8)
+	drawText("Universal",1,10)
 
 	let mra = Math.random()
 
@@ -280,6 +281,13 @@ function specialRenderIn(){
 	ctx.moveTo(coord1[0],coord1[1])
 	ctx.lineTo(coord2[0],coord2[1])
 	ctx.lineTo(coord3[0],coord3[1])
+	ctx.fill()
+	ctx.closePath()
+	ctx.fillStyle = "#488000"
+	ctx.beginPath()
+	ctx.moveTo(coord1[0],coord1[1]+10*tileSize)
+	ctx.lineTo(coord2[0],coord2[1]+10*tileSize)
+	ctx.lineTo(coord3[0],coord3[1]+10*tileSize)
 	ctx.fill()
 	ctx.closePath()
 
@@ -455,6 +463,10 @@ document.addEventListener("mouseup",(e)=>{
 						startGame()
 					} else if(mouseBoardY == 8){
 						camera.gamemode = "Phantom"
+						gameStart = "started"
+						startGame()
+					} else if(mouseBoardY == 10){
+						camera.gamemode = "Universal"
 						gameStart = "started"
 						startGame()
 					}
@@ -831,6 +843,41 @@ if(camera.gamemode == "Roaming"){
 		board.tiles[6+","+11].piece = new piece("knight",6,11,"p1")
 		board.tiles[7+","+11].piece = new piece("rook",7,11,"p1")
 		board.tiles[7+","+9].piece = new piece("wizard",7,9,"p1")
+	board.AIwait = ()=>{return(Math.random()*4000)}
+	board.AIblockWait = ()=>{return(Math.random()*4000+3000)}
+}else if(camera.gamemode == "Universal"){
+
+	camera.pieceFrequency = 9000
+	gameSpecialInterval = ()=>{if(board.iterations%18 == 0 && board.iterations > 30){
+				for(let i = 0; i < 4; i++){
+					board.spawnRates[2*i+1]-=(1-board.spawnRates[2*i+1])*(1-board.spawnRates[2*i+1])*0.2
+					if(board.spawnRates[2*i+1] < (i+1)*0.1){board.spawnRates[2*i+1] = (i+1)*0.1}
+				}
+				}
+				if(board.iterations % 10 == 0 && camera.pieceFrequency > 7500){
+					camera.pieceFrequency -= 25
+					startGameInterval(camera.pieceFrequency)
+				}
+			}
+
+	board.arrFuncs.pieceModifiers.push((e)=>{
+				e.maxCD = 10;
+			})
+
+
+	for(let i = 0; i < 8; i++){
+		board.tiles[i+","+10].piece = new piece("pawn",i,10,"p1",{"direction":"y-"})
+	}
+	board.tiles[0+","+11].piece = new piece("rook",0,11,"p1",)
+		board.tiles[1+","+11].piece = new piece("knight",1,11,"p1")
+		board.tiles[2+","+11].piece = new piece("bishop",2,11,"p1",)
+		board.tiles[3+","+11].piece = new piece("queen",3,11,"p1")
+		board.tiles[4+","+11].piece = new piece("king",4,11,"p1")
+		board.tiles[5+","+11].piece = new piece("bishop",5,11,"p1")
+		board.tiles[6+","+11].piece = new piece("knight",6,11,"p1")
+		board.tiles[7+","+11].piece = new piece("rook",7,11,"p1")
+		board.tiles[0+","+9].piece = new piece("cannon",0,9,"p1")
+		board.tiles[7+","+9].piece = new piece("cannon",7,9,"p1")
 	board.AIwait = ()=>{return(Math.random()*4000)}
 	board.AIblockWait = ()=>{return(Math.random()*4000+3000)}
 }
