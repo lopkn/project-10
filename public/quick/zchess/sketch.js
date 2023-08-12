@@ -696,34 +696,12 @@ if(camera.gamemode == "Roaming"){
 		camera.pieceFrequency = 2935209357230
 		board.tiles[16+","+16].piece = new piece("knight",16,16,"p1")
 			let ap = board.tiles["16,16"].piece
-			// board.tiles[16+","+16].piece = new piece("knight",16,16,"p1")
-			// let ap = board.tiles["16,16"].piece
+
 
 			ap.maxCD = 0.2
 			ap.onDeath=()=>{
-				
-
-				for(let i = 0; i < 26; i++){
-					let dx = Math.random()-0.5
-					let dy = Math.random()-0.5
-					camera.particles.push(new bloodParticle(ap.x+0.5+0.6*dx,ap.y+0.5+0.6*dy,dx*24,24*dy,Math.random()*0.03,Math.random()*3+3,false))
-					camera.particles[camera.particles.length-1].friction = 0.97
-				}
-				for(let i = 0; i < ap.kills*2; i++){
-					setTimeout(()=>{
-					let dx = Math.random()-0.5
-					let dy = Math.random()-0.5
-					camera.particles.push(new bloodParticle(ap.x+0.5+0.6*dx,ap.y+0.5+0.6*dy,dx*24,24*dy,Math.random()*0.03,Math.random()*3+3,false))
-					camera.particles[camera.particles.length-1].friction = 0.97
-					camera.particles[camera.particles.length-1].color = "rgba("+(Math.random()*235+20)+","+(Math.random()*15)+","+(Math.random()*15)+","+(Math.random()*0.6+0.4)+")"
-					},i*40)
-				}
-				displayKills(ap.kills,ap.x,ap.y,1,2)
-				camera.particles.push(new explosionR(ap.x+0.5,ap.y+0.5,
-					(x)=>{
-						let a = 250*Math.random()
-						return("rgba("+a+","+a+","+(250-a)+","+(2.5*x)+")")},
-					2,0.7,1))
+			
+				mainPieceDeath(ap)
 				clearInterval(gameInterval)
 				gameStart = "lost"
 
@@ -744,33 +722,12 @@ if(camera.gamemode == "Roaming"){
 
 			board.tiles[4+","+11].piece = new piece("knight",4,11,"p1")
 			let ap = board.tiles["4,11"].piece
-			// board.tiles[16+","+16].piece = new piece("knight",16,16,"p1")
-			// let ap = board.tiles["16,16"].piece
+
 			ap.maxCD = 0.2
 			ap.onDeath=()=>{
 				
 
-				for(let i = 0; i < 26; i++){
-					let dx = Math.random()-0.5
-					let dy = Math.random()-0.5
-					camera.particles.push(new bloodParticle(ap.x+0.5+0.6*dx,ap.y+0.5+0.6*dy,dx*24,24*dy,Math.random()*0.03,Math.random()*3+3,false))
-					camera.particles[camera.particles.length-1].friction = 0.97
-				}
-				for(let i = 0; i < ap.kills*2; i++){
-					setTimeout(()=>{
-					let dx = Math.random()-0.5
-					let dy = Math.random()-0.5
-					camera.particles.push(new bloodParticle(ap.x+0.5+0.6*dx,ap.y+0.5+0.6*dy,dx*24,24*dy,Math.random()*0.03,Math.random()*3+3,false))
-					camera.particles[camera.particles.length-1].friction = 0.97
-					camera.particles[camera.particles.length-1].color = "rgba("+(Math.random()*235+20)+","+(Math.random()*15)+","+(Math.random()*15)+","+(Math.random()*0.6+0.4)+")"
-					},i*40)
-				}
-				displayKills(ap.kills,ap.x,ap.y,1,2)
-				camera.particles.push(new explosionR(ap.x+0.5,ap.y+0.5,
-					(x)=>{
-						let a = 250*Math.random()
-						return("rgba("+a+","+a+","+(250-a)+","+(2.5*x)+")")},
-					2,0.7,1))
+				mainPieceDeath(ap)
 				clearInterval(gameInterval)
 				gameStart = "lost"
 
@@ -795,35 +752,13 @@ if(camera.gamemode == "Roaming"){
 			ap.maxCD = 0.2
 			ap.onDeath=()=>{
 				
-				for(let i = 0; i < 26; i++){
-					let dx = Math.random()-0.5
-					let dy = Math.random()-0.5
-					camera.particles.push(new bloodParticle(ap.x+0.5+0.6*dx,ap.y+0.5+0.6*dy,dx*24,24*dy,Math.random()*0.03,Math.random()*3+3,false))
-					camera.particles[camera.particles.length-1].friction = 0.97
-camera.particles[camera.particles.length-1].color = "rgba("+(Math.random()*235+20)+","+(Math.random()*15)+","+(Math.random()*15)+","+(Math.random()*0.6+0.4)+")"
-
-				}
-				for(let i = 0; i < ap.kills*2; i++){
-					setTimeout(()=>{
-					let dx = Math.random()-0.5
-					let dy = Math.random()-0.5
-					camera.particles.push(new bloodParticle(ap.x+0.5+0.6*dx,ap.y+0.5+0.6*dy,dx*24,24*dy,Math.random()*0.03,Math.random()*3+3,false))
-					camera.particles[camera.particles.length-1].friction = 0.97
-camera.particles[camera.particles.length-1].color = "rgba("+(Math.random()*235+20)+","+(Math.random()*15)+","+(Math.random()*15)+","+(Math.random()*0.6+0.4)+")"
-					},i*40)
-				}
-				displayKills(ap.kills,ap.x,ap.y,1,2)
-				camera.particles.push(new explosionR(ap.x+0.5,ap.y+0.5,
-					(x)=>{
-						let a = 250*Math.random()
-						return("rgba("+a+","+a+","+(250-a)+","+(2.5*x)+")")},
-					2,0.7,1))
+				mainPieceDeath(ap)
 				clearInterval(gameInterval)
 				gameStart = "lost"
 			}
 } else if(camera.gamemode == "Phantom"){
 			
-			camera.pieceFrequency = 2500
+			camera.pieceFrequency = 2000
 			gameSpecialInterval = ()=>{if(board.iterations%12 == 0 && board.iterations > 40){
 				for(let i = 0; i < 4; i++){
 					board.spawnRates[2*i+1]-=(1-board.spawnRates[2*i+1])*(1-board.spawnRates[2*i+1])*0.2
@@ -864,29 +799,7 @@ camera.particles[camera.particles.length-1].color = "rgba("+(Math.random()*235+2
 			board.AIblockWait = ()=>{return(Math.random()*10000+10)}
 			ap.onDeath=()=>{
 				
-				for(let i = 0; i < 26; i++){
-					let dx = Math.random()-0.5
-					let dy = Math.random()-0.5
-					camera.particles.push(new bloodParticle(ap.x+0.5+0.6*dx,ap.y+0.5+0.6*dy,dx*24,24*dy,Math.random()*0.03,Math.random()*3+3,false))
-					camera.particles[camera.particles.length-1].friction = 0.97
-camera.particles[camera.particles.length-1].color = "rgba("+(Math.random()*235+20)+","+(Math.random()*15)+","+(Math.random()*15)+","+(Math.random()*0.6+0.4)+")"
-
-				}
-				for(let i = 0; i < ap.kills*2; i++){
-					setTimeout(()=>{
-					let dx = Math.random()-0.5
-					let dy = Math.random()-0.5
-					camera.particles.push(new bloodParticle(ap.x+0.5+0.6*dx,ap.y+0.5+0.6*dy,dx*24,24*dy,Math.random()*0.03,Math.random()*3+3,false))
-					camera.particles[camera.particles.length-1].friction = 0.97
-camera.particles[camera.particles.length-1].color = "rgba("+(Math.random()*235+20)+","+(Math.random()*15)+","+(Math.random()*15)+","+(Math.random()*0.6+0.4)+")"
-					},i*40)
-				}
-				displayKills(ap.kills,ap.x,ap.y,1,2)
-				camera.particles.push(new explosionR(ap.x+0.5,ap.y+0.5,
-					(x)=>{
-						let a = 250*Math.random()
-						return("rgba("+a+","+a+","+(250-a)+","+(2.5*x)+")")},
-					2,0.7,1))
+				mainPieceDeath(ap)
 				clearInterval(gameInterval)
 				gameStart = "lost"
 			}
@@ -962,6 +875,32 @@ board.spawnRates = ["pawn",0.7,"king",0.85,"knight",0.95,"bishop",0.98,"rook",1]
 	}
 
 	startGameInterval(camera.pieceFrequency)
+}
+
+function mainPieceDeath(ap){
+	for(let i = 0; i < 26; i++){
+					let dx = Math.random()-0.5
+					let dy = Math.random()-0.5
+					camera.particles.push(new bloodParticle(ap.x+0.5+0.6*dx,ap.y+0.5+0.6*dy,dx*24,24*dy,Math.random()*0.03,Math.random()*3+3,false))
+					camera.particles[camera.particles.length-1].friction = 0.97
+camera.particles[camera.particles.length-1].color = "rgba("+(Math.random()*235+20)+","+(Math.random()*15)+","+(Math.random()*15)+","+(Math.random()*0.6+0.4)+")"
+
+				}
+				for(let i = 0; i < ap.kills*2; i++){
+					setTimeout(()=>{
+					let dx = Math.random()-0.5
+					let dy = Math.random()-0.5
+					camera.particles.push(new bloodParticle(ap.x+0.5+0.6*dx,ap.y+0.5+0.6*dy,dx*24,24*dy,Math.random()*0.03,Math.random()*3+3,false))
+					camera.particles[camera.particles.length-1].friction = 0.97
+camera.particles[camera.particles.length-1].color = "rgba("+(Math.random()*235+20)+","+(Math.random()*15)+","+(Math.random()*15)+","+(Math.random()*0.6+0.4)+")"
+					},i*40)
+				}
+				displayKills(ap.kills,ap.x,ap.y,1,2)
+				camera.particles.push(new explosionR(ap.x+0.5,ap.y+0.5,
+					(x)=>{
+						let a = 250*Math.random()
+						return("rgba("+a+","+a+","+(250-a)+","+(2.5*x)+")")},
+					2,0.7,1))
 }
 
 function startGameInterval(f){
