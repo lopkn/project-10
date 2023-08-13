@@ -570,6 +570,7 @@ function killBoardPiece(x,y,killerPiece){
 }
 
 function AImoveRandom(piece){
+
 	if(piece.AImoveRandom !== undefined){
 		piece.AImoveRandom(piece)
 	}
@@ -926,7 +927,81 @@ var gameEvents = {
 		f = f?f:100
 		startGameInterval(f)
 		setTimeout(()=>{startGameInterval(camera.pieceFrequency)},t)
-	}
+	},"bomber pawn":()=>{
+		camera.particles.push(new expandingText("An bomber has Spawned",Width/2/tileSize-camera.x,Height/2/tileSize-camera.y,
+		(x)=>{return("rgba(255,255,0,"+x+")")},
+		0.5,0.9))
+		camera.particles[camera.particles.length-1].size = tileSize/2
+
+		board.tiles["4,0"].piece = new piece("pawn",4,0,"zombies",{"direction":"y+"})
+		let pc = board.tiles["4,0"].piece
+		// pc.maxCD = 3
+		pc.color = "rgb(50,150,0)"
+		pc.draw = (l,x,y)=>{
+			if(Math.random() > 0.9){
+				let dx = Math.random()-0.5
+				let dy = Math.random()-0.5
+				camera.particles.push(new bloodParticle(x+0.5+0.6*dx,y+0.5+0.6*dy,dx*7,7*dy,Math.random()*0.03,Math.random()*3+3,false))
+				let rr = Math.random()*235+20
+				camera.particles[camera.particles.length-1].color = "rgba("+(rr)+","+(Math.random()*rr)+","+(Math.random()*15)+","+(Math.random()*0.3+0.3)+")"
+			}
+			return(true)
+		}
+		pc.arrFuncs.onMove.push(()=>{
+			if(Math.random() > 0.9 || pc.y == 11){
+				pc.onDeath()
+			}
+		})
+		pc.onDeath = ()=>{
+			pc.onDeath = undefined
+			camera.playSound("bomb")
+			for(let i = 0; i < 16; i++){
+							let dx = Math.random()-0.5
+							let dy = Math.random()-0.5
+							camera.particles.push(new bloodParticle(pc.x+0.5+0.6*dx,pc.y+0.5+0.6*dy,dx*34,34*dy,Math.random()*0.2,Math.random()*3+3,false))
+							camera.particles[camera.particles.length-1].friction = 0.98
+						}
+
+			camera.particles.push(new explosionR(pc.x+0.5,pc.y+0.5,
+					(x)=>{
+						let rr = 250*Math.random()
+						return("rgb("+(rr)+","+(Math.random()*rr)+","+(Math.random()*15)+")")},
+					16,8,2))
+			camera.particles.push(new explosionR(pc.x+0.5,pc.y+0.5,
+					(x)=>{
+						let rr = 250*Math.random()
+						return("rgb("+(rr)+","+(Math.random()*rr)+","+(Math.random()*15)+")")},
+					6,2,1))
+
+			setTimeout(()=>{
+
+
+			for(let i = -1; i < 2; i++){
+				for(let j = -1 ;j < 2; j++){
+					if(board.tiles[spos(pc.x+i,pc.y+j)]?.piece != undefined){
+						let pct = board.tiles[spos(pc.x+i,pc.y+j)].piece
+						if(pct.onDeath != undefined && pct != pc){
+							pct.onDeath()
+						}
+						pct.alive = false
+						board.tiles[spos(pc.x+i,pc.y+j)].piece = undefined
+						for(let i = 0; i < 16; i++){
+							let dx = Math.random()-0.5
+							let dy = Math.random()-0.5
+							dx += (pct.x - pc.x)*0.3
+							dy += (pct.y - pc.y)*0.3
+							camera.particles.push(new bloodParticle(pct.x+0.5+0.6*dx,pct.y+0.5+0.6*dy,dx*24,24*dy,Math.random()*0.03,Math.random()*3+3,false))
+							camera.particles[camera.particles.length-1].friction = 0.94
+						}
+					}
+				}
+			}
+			},200)
+		}
+		pc.AIwait = ()=>{return(10)}
+		pc.AIblockWait = ()=>{return(300)}
+		return(pc)
+	},
 }
 
 

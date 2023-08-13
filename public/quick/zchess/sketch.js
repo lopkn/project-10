@@ -115,7 +115,7 @@ class camera{
 	}
 	static captureStreak = 0;
 }
-let initSoundsArr = ["shot","escape","select","move","captureF","capture","captureS1","captureS2","captureS3","captureS4","captureS5","captureS6","captureS7","captureS8"]
+let initSoundsArr = ["bomb","shot","escape","select","move","captureF","capture","captureS1","captureS2","captureS3","captureS4","captureS5","captureS6","captureS7","captureS8"]
 initSounds(initSoundsArr)
 
 function fill(r,g,b,a){
@@ -879,6 +879,12 @@ if(camera.gamemode == "Roaming"){
 		board.tiles[7+","+11].piece = new piece("rook",7,11,"p1")
 		board.tiles[0+","+9].piece = new piece("cannon",0,9,"p1")
 		board.tiles[7+","+9].piece = new piece("cannon",7,9,"p1")
+
+		let objk = Object.values(board.tiles)
+		objk.forEach((e)=>{
+			if(e != undefined && e.piece != undefined){e.piece.maxCD = 10}
+		})
+
 	board.AIwait = ()=>{return(Math.random()*4000)}
 	board.AIblockWait = ()=>{return(Math.random()*4000+3000)}
 }
