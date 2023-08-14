@@ -15,6 +15,7 @@ class board {
 	}
 	static iterations = 0;
 	static topTile = 0;
+	static bottomTile = 0;
 	static AIwait(){
 		return(10)
 	}
@@ -1047,5 +1048,7 @@ function spawnZombie(pc){
 //pawn promotion <-
 //normal difficulty curve <-
 //special tiles
+//event triggerer
+//help menu
 
 
