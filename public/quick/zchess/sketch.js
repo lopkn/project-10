@@ -707,7 +707,7 @@ if(camera.gamemode == "Roaming"){
 		}
 		board.tiles["16,16"].color = ()=>{return("rgb(0,200,200)")}
 		camera.pieceFrequency = 2935209357230
-		board.tiles[16+","+16].piece = new piece("knight",16,16,"p1")
+		board.tiles[16+","+16].piece = new piece("rook",16,16,"p1")
 			let ap = board.tiles["16,16"].piece
 
 

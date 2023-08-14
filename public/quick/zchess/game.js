@@ -74,6 +74,7 @@ class piece {
 				for(let i = 1;i<this.range+1;i++){
 					let pos = spos(this.x+i,this.y)
 					let gtt = getTileTeam(pos,this.team)
+					if(gtt === "empty"){legals.push(pos);legalDict[pos]=gtt;continue}
 					if(gtt == false || gtt == "block"){break};
 					if(gtt == "phase"){continue;}
 					if(gtt == "capture"){legals.push(pos);legalDict[pos]=gtt;break}
@@ -84,6 +85,7 @@ class piece {
 				for(let i = 1;i<this.range+1;i++){
 					let pos = spos(this.x,this.y+i)
 					let gtt = getTileTeam(pos,this.team)
+					if(gtt === "empty"){legals.push(pos);legalDict[pos]=gtt;continue}
 					if(gtt == false || gtt == "block"){break};
 					if(gtt == "phase"){continue;}
 					if(gtt == "capture"){legals.push(pos);legalDict[pos]=gtt;break}
@@ -94,6 +96,7 @@ class piece {
 				for(let i = 1;i<this.range+1;i++){
 					let pos = spos(this.x-i,this.y)
 					let gtt = getTileTeam(pos,this.team)
+					if(gtt === "empty"){legals.push(pos);legalDict[pos]=gtt;continue}
 					if(gtt == false || gtt == "block"){break};
 					if(gtt == "phase"){continue;}
 					if(gtt == "capture"){legals.push(pos);legalDict[pos]=gtt;break}
@@ -103,6 +106,7 @@ class piece {
 				for(let i = 1;i<this.range+1;i++){
 					let pos = spos(this.x,this.y-i)
 					let gtt = getTileTeam(pos,this.team)
+					if(gtt === "empty"){legals.push(pos);legalDict[pos]=gtt;continue}
 					if(gtt == false || gtt == "block"){break};
 					if(gtt == "phase"){continue;}
 					if(gtt == "capture"){legals.push(pos);legalDict[pos]=gtt;break}
