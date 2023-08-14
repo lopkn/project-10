@@ -907,6 +907,21 @@ var gameEvents = {
 		}
 		pc.AIwait = ()=>{return(10)}
 		pc.AIblockWait = ()=>{return(300)}
+	},"elite cannon":()=>{
+		let pc = spawnZombie(new piece("cannon",4,0,"zombies"))
+		if(pc === false){return}
+		pc.maxCD = 5
+		pc.color = "rgb(50,150,0)"
+		pc.draw = (l,x,y)=>{
+			if(Math.random() > 0.95){
+				let dx = Math.random()-0.5
+				let dy = Math.random()-0.5
+				camera.particles.push(new bloodParticle(x+0.5+0.6*dx,y+0.5+0.6*dy,dx*14,14*dy,Math.random()*0.03,Math.random()*3+3,false))
+			}
+			return(true)
+		}
+		pc.AIwait = ()=>{return(10)}
+		pc.AIblockWait = ()=>{return(300)}
 	},"board expansion":(e,l)=>{
 		e = e?e:20
 		for(let i = 0; i < e; i++){
@@ -928,13 +943,16 @@ var gameEvents = {
 		startGameInterval(f)
 		setTimeout(()=>{startGameInterval(camera.pieceFrequency)},t)
 	},"bomber pawn":()=>{
+		
+
+		let pc = spawnZombie(new piece("pawn",4,0,"zombies",{"direction":"y+"}))
+		if(pc === false){return}
+
 		camera.particles.push(new expandingText("An bomber has Spawned",Width/2/tileSize-camera.x,Height/2/tileSize-camera.y,
 		(x)=>{return("rgba(255,255,0,"+x+")")},
 		0.5,0.9))
 		camera.particles[camera.particles.length-1].size = tileSize/2
 
-		board.tiles["4,0"].piece = new piece("pawn",4,0,"zombies",{"direction":"y+"})
-		let pc = board.tiles["4,0"].piece
 		// pc.maxCD = 3
 		pc.color = "rgb(50,150,0)"
 		pc.draw = (l,x,y)=>{
@@ -1005,10 +1023,29 @@ var gameEvents = {
 }
 
 
+function spawnZombie(pc){
+	let X = Math.floor(Math.random()*8)
+	for(let i = 0; i < 8; i++){
+		let x = (X+i)%8
+		let y = board.topTile;
+		while(board.tiles[x+","+y] == undefined || board.tiles[x+","+y].piece != undefined){
+			y+=1
+			if(y > 1){break;}
+		}
+		if(y > 1){continue;}
+		board.tiles[x+","+y].piece = pc
+		pc.x = x
+		pc.y = y
+		return(pc)
+	}
+	return(false)
+}
+
+
 
 //bottom lose
-//pawn promotion
-//normal difficulty curve
+//pawn promotion <-
+//normal difficulty curve <-
 //special tiles
 
 

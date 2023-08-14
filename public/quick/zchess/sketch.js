@@ -901,7 +901,7 @@ board.spawnRates = ["pawn",0.7,"king",0.85,"knight",0.95,"bishop",0.98,"rook",1]
 	let y = board.topTile;
 	while(board.tiles[x+","+y] == undefined || board.tiles[x+","+y].piece != undefined){
 		y+=1
-		if(y > 2){return;}
+		if(y > 1){return;}
 		
 	}
 
