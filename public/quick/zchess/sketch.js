@@ -78,6 +78,7 @@ let pieceDict = {
 }
 
 class camera{
+	static cookies = false
 	static gamemode = "none"
 	static team = "p1";
 	static pieceRender = "image";
@@ -329,6 +330,7 @@ function menuRender(){
 	drawText("Increase margin ["+camera.increaseMargin+"]",2,7)
 	drawText("Menu button size ["+camera.menuButtonSize+"]",2,9)
 	drawText("Tilesize ["+tileSize.toPrecision(3)+"]",2,11)
+	drawText("Save settings (cookies) ["+(camera.cookies===false?'off':'saved last '+camera.cookies)+"]",2,13)
 
 	if(camera.pieceRender == "image"){
 		fill(255,255,255)
@@ -349,7 +351,12 @@ function menuRender(){
 	fill(0,255,0)
 	mrect(1,7.2,0.8,0.6)
 	mrect(1,9.2,0.8,0.6)
-	mrect(1,11.2,0.8,0.6)
+	mrect(1,11.2,0.8,0.6);
+
+	((camera.cookies)?(()=>{fill(0,255,0)}):(()=>{fill(255,0,0)}))(); //cookies
+	mrect(0.2,13.2,0.6,0.6);
+
+
 
 	camera.x += Math.floor(camera.escapePos[0])
 	camera.y += Math.floor(camera.escapePos[1])
@@ -400,6 +407,7 @@ document.addEventListener("mouseup",(e)=>{
 					camera.playSound("select")
 				} else if(Y === 5){
 					camera.playSound(initSoundsArr[Math.floor(Math.random()*initSoundsArr.length)])
+					// navigator.vibrate(200)
 				} else if(Y === 7){
 					camera.increaseMargin -= 1
 				} else if(Y === 9){
@@ -410,6 +418,18 @@ document.addEventListener("mouseup",(e)=>{
 						tileSize = 2
 					}
 					camera.tileRsize = tileSize/50
+				} else if(Y === 13){
+					camera.playSound("select")
+					if(camera.cookies){
+						camera.cookies = false
+						deleteCookies()
+					} else {
+						let d = new Date().toISOString()
+						saveCookies(d)
+						camera.cookies = d
+					}
+
+
 				} else if(Y === -2){
 					if(gameStart != "started"){
 						window.open('','_self').close()
@@ -1167,8 +1187,63 @@ function escaped(){if(gameStart == "lost"){
 		}
 		camera.escaped = !camera.escaped
 		camera.escapePos = [camera.x,camera.y]
-		camera.playSound("escape")}
+		camera.playSound("escape")
+	}
 
+
+
+//cookies n' smores
+
+function saveCookies(d){
+	if(camera.cookies == false){return}
+	let val = {
+		"sound":camera.soundOn,
+		"render":camera.pieceRender,
+		"size":tileSize,
+		"menuSize":camera.menuButtonSize,
+		"date":d
+	}
+
+	document.cookie = "main="+JSON.stringify(val)+";path=/;";
+}
+
+function getCookie(cname) {
+  let name = cname + "=";
+  let decodedCookie = decodeURIComponent(document.cookie);
+  let ca = decodedCookie.split(';');
+  for(let i = 0; i <ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) == ' ') {
+      c = c.substring(1);
+    }
+    if (c.indexOf(name) == 0) {
+      return c.substring(name.length, c.length);
+    }
+  }
+  return "";
+}
+
+function loadCookies(){
+	let val1 = getCookie("main")
+	if(val1 == ""){
+		return(false)
+	}
+	val = JSON.parse(val1)
+	camera.soundOn = val.sound
+	camera.pieceRender = val.render
+	tileSize = val.size
+
+	camera.tileRsize = tileSize/50
+
+	camera.menuButtonSize = val.menuSize
+	camera.cookies = val.date
+	return(val1)
+}
+loadCookies()
+
+function deleteCookies(){
+	document.cookie = "main=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
+}
 
 
 

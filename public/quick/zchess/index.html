@@ -15,7 +15,7 @@
 
   <div draggable="false" ondragstart="return false">
 <button id = "wow" top="0px" left = "0px" style = "color: purple;background-color: black;font-size: 50px;width:100%;height:100%;border-radius: 1px;position:absolute;z-index:2" onclick = "
-
+  // window.navigator.vibrate(200)
   const player = new Tone.Player('https://tonejs.github.io/audio/berklee/gong_1.mp3').toDestination();
 Tone.loaded().then(() => {
   player.start();
