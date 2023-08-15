@@ -95,6 +95,7 @@ class camera{
 	static soundArr = []
 	static tileRsize = 1
 	static soundOn = true;
+	// static volume = 0;
 
 	static highScores = {"Normal":[0,0],"King's Raid":[0,0],"Knight's Raid":[0,0],"Phantom":[0,0],"Universal":[0,0]}
 	static score = 0;
@@ -345,6 +346,14 @@ function menuRender(){
 	fill(rnd*255,rnd*255,0)
 	mrect(0,-3.8,1,0.6)
 
+	let volumeSlide = ""
+	for(let i = 0; i < (Tone.Master.volume.value+40)/5+1; i++){
+		volumeSlide += "-"
+	}
+	volumeSlide += "|"
+	while(volumeSlide.length < 11){
+		volumeSlide += "-"
+	}
 
 	ctx.fillStyle = "#FFFFFF"
 	drawText("Quit",1,-2)
@@ -356,7 +365,10 @@ function menuRender(){
 	drawText("Increase margin ["+camera.increaseMargin+"]",2,7)
 	drawText("Menu button size ["+camera.menuButtonSize+"]",2,9)
 	drawText("Tilesize ["+tileSize.toPrecision(3)+"]",2,11)
-	drawText("Save settings (cookies) ["+(camera.cookies===false?'off':'saved last '+camera.cookies)+"]",2,13)
+	drawText("Volume (requires sound) ["+Math.round(Tone.Master.volume.value)+"]",2,13)
+	drawText("["+volumeSlide+"]"+(Tone.Master.volume.value>10?" you are liable for any damage":""),2,13.8)
+	drawText("Save state/cookies ["+(camera.cookies===false?'off':'on')+"]",2,15)
+	drawText("saved last ["+(camera.cookies===false?'/':camera.cookies)+"]",2,15.8)
 
 	if(camera.pieceRender == "image"){
 		fill(255,255,255)
@@ -374,13 +386,15 @@ function menuRender(){
 	mrect(0.2,7.2,0.8,0.6)
 	mrect(0.2,9.2,0.8,0.6)
 	mrect(0.2,11.2,0.8,0.6)
+	mrect(0.2,13.2,0.8,0.6)
 	fill(0,255,0)
 	mrect(1,7.2,0.8,0.6)
 	mrect(1,9.2,0.8,0.6)
 	mrect(1,11.2,0.8,0.6);
+	mrect(1,13.2,0.8,0.6);
 
 	((camera.cookies)?(()=>{fill(0,255,0)}):(()=>{fill(255,0,0)}))(); //cookies
-	mrect(0.2,13.2,0.6,0.6);
+	mrect(0.2,15.2,0.6,0.6);
 
 
 
@@ -445,6 +459,8 @@ document.addEventListener("mouseup",(e)=>{
 					}
 					camera.tileRsize = tileSize/50
 				} else if(Y === 13){
+					Tone.Master.volume.value -= camera.increaseMargin
+				} else if(Y === 15){
 					camera.playSound("select")
 					if(camera.cookies){
 						camera.cookies = false
@@ -482,6 +498,8 @@ document.addEventListener("mouseup",(e)=>{
 						tileSize = 2
 					}
 					camera.tileRsize = tileSize/50
+				} else if(Y === 13){
+					Tone.Master.volume.value += camera.increaseMargin
 				}
 			}
 
@@ -1254,6 +1272,7 @@ function saveCookies(d){
 		"render":camera.pieceRender,
 		"size":tileSize,
 		"menuSize":camera.menuButtonSize,
+		"volume":Math.round(Tone.Master.volume.value),
 		"date":d
 	}
 	let objk = Object.keys(camera.highScores)
@@ -1294,9 +1313,10 @@ function loadCookies(){
 		tileSize = val.size
 
 		camera.tileRsize = tileSize/50
-
 		camera.menuButtonSize = val.menuSize
 		camera.cookies = val.date
+
+		Tone.Master.volume.value = val.volume?val.volume:0
 	}
 	let val2 = getCookie("scores")
 	if(val2 != ""){
