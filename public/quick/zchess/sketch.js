@@ -95,6 +95,10 @@ class camera{
 	static soundArr = []
 	static tileRsize = 1
 	static soundOn = true;
+
+	static highScores = {"Normal":[0,0],"King's Raid":[0,0],"Knight's Raid":[0,0],"Phantom":[0,0],"Universal":[0,0]}
+	static score = 0;
+
 	// static playSound(url){
 	// 	let click = this.sounds[url].cloneNode()
 	// 	click.play()
@@ -242,8 +246,28 @@ function specialRenderIn(){
 	// ctx.fillStyle = "#500299"
 	// mrect(0,2)
 	// mrect(0,4)
-	fill(255,255,255)
+
+
 	ctx.textAlign = "left"
+
+	ctx.font = "bold "+Math.floor(0.5*tileSize)+"px Courier New"
+	fill(180,180,255)
+	let hs = camera.highScores
+	let gmpos = Math.floor(mouseBoardY/2)
+	if(gmpos === 0){
+		drawText("session high: "+hs["Normal"][0]+(camera.cookies?" all time high: "+hs["Normal"][1]:""),1,0.8)
+	} else if(gmpos === 1){
+		drawText("session high: "+hs["King's Raid"][0]+(camera.cookies?" all time high: "+hs["King's Raid"][1]:""),1,2.8)
+	} else if(gmpos === 2){
+		drawText("session high: "+hs["Knight's Raid"][0]+(camera.cookies?" all time high: "+hs["Knight's Raid"][1]:""),1,4.8)
+	} else if(gmpos === 4){
+		drawText("session high: "+hs["Phantom"][0]+(camera.cookies?" all time high: "+hs["Phantom"][1]:""),1,8.8)
+	} else if(gmpos === 5){
+		drawText("session high: "+hs["Universal"][0]+(camera.cookies?" all time high: "+hs["Universal"][1]:""),1,10.8)
+	}
+
+
+	fill(255,255,255)
 	ctx.font = "bold "+Math.floor(0.8*tileSize)+"px Courier New"
 
 	drawText("Choose game mode:",0,-1)
@@ -253,9 +277,11 @@ function specialRenderIn(){
 	drawText("Roaming",1,6)
 	drawText("Phantom",1,8)
 	drawText("Universal",1,10)
+	
+
+
 
 	let mra = Math.random()
-
 	fill(155,0,255,mra)
 	ctx.beginPath()
 	let coord1 = board_to_screen(0.1,0.85)
@@ -425,8 +451,8 @@ document.addEventListener("mouseup",(e)=>{
 						deleteCookies()
 					} else {
 						let d = new Date().toISOString()
-						saveCookies(d)
 						camera.cookies = d
+						saveCookies(d)
 					}
 
 
@@ -733,7 +759,6 @@ if(camera.gamemode == "Roaming"){
 
 			ap.maxCD = 0.2
 			ap.onDeath=()=>{
-			
 				mainPieceDeath(ap)
 				clearInterval(gameInterval)
 				gameStart = "lost"
@@ -759,6 +784,7 @@ if(camera.gamemode == "Roaming"){
 			ap.maxCD = 0.2
 			ap.onDeath=()=>{
 				
+				camera.score = ap.kills
 
 				mainPieceDeath(ap)
 				clearInterval(gameInterval)
@@ -785,6 +811,7 @@ if(camera.gamemode == "Roaming"){
 			ap.maxCD = 0.2
 			ap.onDeath=()=>{
 				
+				camera.score = ap.kills
 				mainPieceDeath(ap)
 				clearInterval(gameInterval)
 				gameStart = "lost"
@@ -831,7 +858,7 @@ if(camera.gamemode == "Roaming"){
 			board.AIwait = ()=>{return(Math.random()*5000+10)}
 			board.AIblockWait = ()=>{return(Math.random()*10000+10)}
 			ap.onDeath=()=>{
-				
+				camera.score = ap.kills
 				mainPieceDeath(ap)
 				clearInterval(gameInterval)
 				gameStart = "lost"
@@ -839,7 +866,9 @@ if(camera.gamemode == "Roaming"){
 } else if(camera.gamemode == "Normal"){
 
 	camera.pieceFrequency = 10000
-	gameSpecialInterval = ()=>{if(board.iterations%18 == 0 && board.iterations > 30){
+	gameSpecialInterval = ()=>{
+		camera.score += 1
+		if(board.iterations%18 == 0 && board.iterations > 30){
 				for(let i = 0; i < 4; i++){
 					board.spawnRates[2*i+1]-=(1-board.spawnRates[2*i+1])*(1-board.spawnRates[2*i+1])*0.2
 					if(board.spawnRates[2*i+1] < (i+1)*0.1){board.spawnRates[2*i+1] = (i+1)*0.1}
@@ -869,7 +898,9 @@ if(camera.gamemode == "Roaming"){
 }else if(camera.gamemode == "Universal"){
 
 	camera.pieceFrequency = 9000
-	gameSpecialInterval = ()=>{if(board.iterations%18 == 0 && board.iterations > 30){
+	gameSpecialInterval = ()=>{
+		camera.score += 1
+		if(board.iterations%18 == 0 && board.iterations > 30){
 				for(let i = 0; i < 4; i++){
 					board.spawnRates[2*i+1]-=(1-board.spawnRates[2*i+1])*(1-board.spawnRates[2*i+1])*0.2
 					if(board.spawnRates[2*i+1] < (i+1)*0.1){board.spawnRates[2*i+1] = (i+1)*0.1}
@@ -999,6 +1030,24 @@ function stopGame(){
 	board.tiles = {}
 	board.iterations = 0;
 	camera.specialRenderOn = true
+	if(camera.highScores[camera.gamemode]!== undefined && camera.highScores[camera.gamemode][0] < camera.score){
+		camera.highScores[camera.gamemode][0] = camera.score
+		if(camera.highScores[camera.gamemode][1] < camera.score){
+			camera.highScores[camera.gamemode][1] = camera.score		
+		}		
+	}
+	camera.score = 0;
+
+	if(camera.cookies != false){
+		let objk = Object.keys(camera.highScores)
+		let val2 = {}
+
+		objk.forEach((e)=>{
+			val2[e]=camera.highScores[e][1]
+		})
+		document.cookie = "scores="+JSON.stringify(val2)+";path=/;";
+	}
+
 	gameStart = "mode"
 }
 
@@ -1180,6 +1229,8 @@ document.querySelector('button')?.addEventListener('click', async () => {
 
 //noise n' stuff
 
+
+
 function escaped(){if(gameStart == "lost"){
 			stopGame()
 			camera.playSound("escape")
@@ -1193,7 +1244,9 @@ function escaped(){if(gameStart == "lost"){
 
 
 //cookies n' smores
-
+// document.addEventListener('unload',()=>{
+	
+// })
 function saveCookies(d){
 	if(camera.cookies == false){return}
 	let val = {
@@ -1203,8 +1256,17 @@ function saveCookies(d){
 		"menuSize":camera.menuButtonSize,
 		"date":d
 	}
+	let objk = Object.keys(camera.highScores)
+	let val2 = {}
 
-	document.cookie = "main="+JSON.stringify(val)+";path=/;";
+	objk.forEach((e)=>{
+		val2[e]=camera.highScores[e][1]
+	})
+
+	document.cookie = "settings="+JSON.stringify(val)+";path=/;";
+	document.cookie = "scores="+JSON.stringify(val2)+";path=/;";
+	console.log("settings="+JSON.stringify(val)+";scores="+JSON.stringify(val2)+";path=/;")
+	console.log(document.cookie)
 }
 
 function getCookie(cname) {
@@ -1224,25 +1286,34 @@ function getCookie(cname) {
 }
 
 function loadCookies(){
-	let val1 = getCookie("main")
-	if(val1 == ""){
-		return(false)
+	let val1 = getCookie("settings")
+	if(val1 != ""){
+		let val = JSON.parse(val1)
+		camera.soundOn = val.sound
+		camera.pieceRender = val.render
+		tileSize = val.size
+
+		camera.tileRsize = tileSize/50
+
+		camera.menuButtonSize = val.menuSize
+		camera.cookies = val.date
 	}
-	val = JSON.parse(val1)
-	camera.soundOn = val.sound
-	camera.pieceRender = val.render
-	tileSize = val.size
-
-	camera.tileRsize = tileSize/50
-
-	camera.menuButtonSize = val.menuSize
-	camera.cookies = val.date
+	let val2 = getCookie("scores")
+	if(val2 != ""){
+		let val = JSON.parse(val2)
+		let objk = Object.keys(val)
+		objk.forEach((e)=>{
+			camera.highScores[e][1] = camera.highScores[e][1]<val[e]?val[e]:camera.highScores[e][1]
+		})
+	}
+	
 	return(val1)
 }
 loadCookies()
 
 function deleteCookies(){
-	document.cookie = "main=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
+	document.cookie = "settings=;scores=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
+	document.cookie = "settings=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
 }
 
 
