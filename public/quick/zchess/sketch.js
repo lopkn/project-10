@@ -179,7 +179,7 @@ document.addEventListener("keyup",(e)=>{
 onmousemove = (e)=>{mouseX = (e.clientX); mouseY = (e.clientY-2); mouseToBoardUpdate();
 	if(mouseDown){
 		let pos = spos(mouseDownPlace[0],mouseDownPlace[1])
-		if(board.tiles[pos] == undefined || board.tiles[pos].piece == undefined){
+		if(board.tiles[pos] == undefined || board.tiles[pos].piece == undefined || board.tiles[pos].piece.team != camera.team){
 			camera.x += (mouseX-mouseDeltaMovement[0])/tileSize
 			camera.y += (mouseY-mouseDeltaMovement[1])/tileSize
     		mouseDeltaMovement = [mouseX,mouseY]
