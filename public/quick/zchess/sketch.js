@@ -121,7 +121,7 @@ class camera{
 	}
 	static captureStreak = 0;
 }
-let initSoundsArr = ["bomb","shot","escape","select","move","captureF","capture","captureS1","captureS2","captureS3","captureS4","captureS5","captureS6","captureS7","captureS8"]
+let initSoundsArr = ["start4","start3","start2","start","bomb","shot","escape","select","move","captureF","capture","captureS1","captureS2","captureS3","captureS4","captureS5","captureS6","captureS7","captureS8"]
 initSounds(initSoundsArr)
 
 function fill(r,g,b,a){
@@ -761,6 +761,15 @@ let gameSpecialInterval = ()=>{}
 function startGame(){
 camera.specialRenderOn = false
 board.emptyNew()
+if(Math.random()>0.1){
+	camera.playSound("start4")
+} else if(Math.random()>0.5){
+		camera.playSound("start2")
+} else if(Math.random()>0.5){
+		camera.playSound("start")
+} else {
+		camera.playSound("start3")
+}
 
 
 if(camera.gamemode == "Roaming"){
@@ -811,6 +820,7 @@ if(camera.gamemode == "Roaming"){
 			}
 } else if(camera.gamemode == "King's Raid"){
 			
+			camera.pieceFrequency = 1300
 			gameSpecialInterval = ()=>{if(board.iterations%12 == 0 && board.iterations > 120){
 				for(let i = 0; i < 4; i++){
 					board.spawnRates[2*i+1]-=(1-board.spawnRates[2*i+1])*(1-board.spawnRates[2*i+1])*0.2
@@ -836,7 +846,7 @@ if(camera.gamemode == "Roaming"){
 			}
 } else if(camera.gamemode == "Phantom"){
 			
-			camera.pieceFrequency = 2000
+			camera.pieceFrequency = 1500
 			gameSpecialInterval = ()=>{if(board.iterations%12 == 0 && board.iterations > 40){
 				for(let i = 0; i < 4; i++){
 					board.spawnRates[2*i+1]-=(1-board.spawnRates[2*i+1])*(1-board.spawnRates[2*i+1])*0.2
@@ -856,7 +866,7 @@ if(camera.gamemode == "Roaming"){
 			board.arrFuncs.pieceModifiers.push((e)=>{
 				e.draw = (l,x,y,team,cd,pc)=>{
 
-					fill(0,100,0,cd)
+					fill(0,100,0,cd<0.2?0:(cd-0.2)*1.25)
 					if(camera.pieceRender === "image"&&pieceDict[l] != undefined){
 						let arr = pieceDict[l]  
 						pieceImage(x,y,arr)
@@ -873,8 +883,8 @@ if(camera.gamemode == "Roaming"){
 							return("rgb(0,"+(mr/2)+",0)")},1))
 				})
 			})
-			board.AIwait = ()=>{return(Math.random()*5000+10)}
-			board.AIblockWait = ()=>{return(Math.random()*10000+10)}
+			board.AIwait = ()=>{return(Math.random()*3000+10)}
+			board.AIblockWait = ()=>{return(Math.random()*5000+10)}
 			ap.onDeath=()=>{
 				camera.score = ap.kills
 				mainPieceDeath(ap)
