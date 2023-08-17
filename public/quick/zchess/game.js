@@ -931,12 +931,12 @@ var gameEvents = {
 		e = e?e:20
 		for(let i = 0; i < e; i++){
 			setTimeout(()=>{
-				let y = l?l*-1:20
-				console.log(y)
-				while(Math.random()>0.4){
+				let y = l?l*-1:-5
+				// console.log(y)
+				let x = Math.floor(Math.random()*8)
+				while(Math.random()>0.4||board.tiles[x+","+y] != undefined){
 					y -= 1
 				}
-				let x = Math.floor(Math.random()*8)
 				if(board.tiles[x+","+y] == undefined){board.tiles[x+","+y] = {}; if(y < board.topTile){board.topTile=y}} else {
 				}
 			},i*200)
@@ -1024,7 +1024,39 @@ var gameEvents = {
 		pc.AIwait = ()=>{return(10)}
 		pc.AIblockWait = ()=>{return(300)}
 		return(pc)
-	},
+	},"flight chamber":(ap)=>{
+
+		camera.particles.push(new expandingText("Flight chamber mode!",Width/2/tileSize-camera.x,Height/2/tileSize-camera.y,
+		(x)=>{return("rgba(255,255,0,"+x+")")},
+		0.2,0.2))
+		camera.particles[camera.particles.length-1].size = tileSize/2
+
+		gameEvents["board expansion"](30,1)
+			ap.bottom = 11
+			ap.arrFuncs.onMove.push((x,y)=>{
+				if(ap.y<y){
+					for(let i = 0; i < 8; i++){
+						for(let j = ap.bottom; j > ap.y; j--){
+							if(board.tiles[i+","+j]?.piece != undefined){
+								return;
+							}
+						}
+					}
+					let blocksdisplaced = 0;
+					for(let i = 0; i < 8; i++){
+						for(let j = ap.bottom+15; j > ap.y; j--){
+							if(board.tiles[i+","+j] != undefined){
+								board.tiles[i+","+j] = undefined
+								blocksdisplaced += 1
+							}
+						}
+					}
+					ap.bottom = ap.y
+					gameEvents["board expansion"](blocksdisplaced,-ap.y+5)
+
+				}
+			})
+	}
 }
 
 

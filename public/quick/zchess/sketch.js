@@ -654,9 +654,12 @@ function render(){
 		let tile = board.tiles[e]
 
 		if(tile == undefined){return}
-		if((pos.x+pos.y)%2 == 1){
-		fill(60,60,60)} else {
+			let pprr = (pos.x+pos.y)%2
+		if(pprr == 1){
+		fill(60,60,60)} else if(pprr == 0){
 			fill(70,70,70)
+		} else {
+			fill(80,80,70)
 		}
 		if(tile.color != undefined){
 			ctx.fillStyle = tile.color()
@@ -679,7 +682,7 @@ function render(){
 		let pos = ipos(e)
 		let tile = board.tiles[e]
 		ctx.textAlign = "center"
-		if(tile.piece != undefined){
+		if(tile?.piece != undefined){
 			let tpc = tile.piece
 			tpc.CDcheck()
 			if(tpc.draw !== undefined){
@@ -818,6 +821,11 @@ if(camera.gamemode == "Roaming"){
 				gameStart = "lost"
 
 			}
+
+			if(Math.random()<0.1){
+				gameEvents["flight chamber"](ap)
+			}
+			
 } else if(camera.gamemode == "King's Raid"){
 			
 			camera.pieceFrequency = 1300
