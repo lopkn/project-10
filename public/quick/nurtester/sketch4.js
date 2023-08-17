@@ -27,6 +27,7 @@ function roughCompare(arr1,arr2,skips){
 }
 let sample = []
 let answer = []
+let ansTotals = [0,0]
 
 function numToBinput(num,l){
 	 l = l?l:10
@@ -42,12 +43,15 @@ for(let i = 0; i < 10; i++){
 	sample[i] = []
 }
 
-for(let i = 0; i < 1020; i++){
+for(let i = 0; i < 60; i++){
 	let str = numToBinput(i)
 	for(let j = 0; j < str.length; j++){
 		sample[j][i] = parseInt(str[j])
 			}
-	answer.push((i%6==0)?1:0)
+	let ans = (i%3==0)?1:0
+	answer.push(ans)
+	if(ans){ansTotals[1]+=1}else{ansTotals[0]+=1}
+
 }
 
 
@@ -55,6 +59,7 @@ for(let i = 0; i < 1020; i++){
 let comps = []
 let deprecated = {}
 let creationNodes = {}
+// let usedNodes = {}
 
 function RCA(){
 	comps = []
@@ -66,12 +71,20 @@ RCA()
 
 let ansstr = ""
 function clearMatchesAll(){
+	if(ansTotals[0] == 0){ansstr += "true";return;}
+	if(ansTotals[1] == 0){ansstr += "false";return;}
 	let cp = [0,0,0,0]
 	for(let j = 0; j < sample.length; j++){
 		let tcp = comps[j]
 		if(Math.abs(tcp[0]) == 1 ){
 			if(tcp[2] > cp[2]){
 				cp = [tcp[0],tcp[1],tcp[2],j]
+				if(Math.abs(tcp[1]) == 1){
+					cp = [tcp[0],tcp[1],Infinity,j]
+					ansstr += getBase(j) + "]"
+					// break;
+					return;
+				}
 			}
 		} else if(Math.abs(tcp[1]) == 1){
 			if(tcp[3] > cp[2]){
@@ -83,57 +96,82 @@ function clearMatchesAll(){
 
 	if(Math.abs(cp[0]) == 1){
 				sample[i].forEach((e,j)=>{
-					if(e){deprecated[j] = i+""}
+					if(e){if(deprecated[j]===undefined){deprecated[j] = i+"";ansTotals[answer[j]]-=1}}
 				})
 			if(cp[0] == 1){
-				ansstr += "("+(creationNodes[i]?i+"("+creationNodes[i]+")":i)+" or "
+				ansstr += "("+getBase(i)+" or "
 			} else {
-				ansstr += "(not "+(creationNodes[i]?i+"("+creationNodes[i]+")":i)+" and "
+				ansstr += "(not "+getBase(i)+" and "
 			}
 		} else if(Math.abs(cp[1]) == 1){
 				sample[i].forEach((e,j)=>{
-					if(!e){deprecated[j] = i+""}
+					if(!e){if(deprecated[j]===undefined){deprecated[j] = i+"";ansTotals[answer[j]]-=1}}
 				})
 			if(cp[1] == 1){
-				ansstr += "(not "+(creationNodes[i]?i+"("+creationNodes[i]+")":i)+" or "
+				ansstr += "(not "+getBase(i)+" or "
 			} else {
-				ansstr += "("+(creationNodes[i]?i+"("+creationNodes[i]+")":i)+" and "
+				ansstr += "("+getBase(i)+" and "
 			}
 		}
 	if(answer.length == Object.keys(deprecated).length){ansstr+="else"}
 	return(ansstr)
 }
 let lastSampleLength = 0
+
+function getBase(i){
+	if(creationNodes[i] !== undefined){
+		switch(creationNodes[i][0]){
+		case 1:
+			return("("+getBase(creationNodes[i][1])+ " and not "+getBase(creationNodes[i][2])+")")
+			break;
+		case 2:
+			return("(not"+getBase(creationNodes[i][1])+ " and "+getBase(creationNodes[i][2])+")")
+			break;
+		case 3:
+			return("("+getBase(creationNodes[i][1])+ " xor "+getBase(creationNodes[i][2])+")")
+			break;
+		case 4:
+			return("("+getBase(creationNodes[i][1])+ " and "+getBase(creationNodes[i][2])+")")
+			break;
+		case 5:
+			return("("+getBase(creationNodes[i][1])+ " or "+getBase(creationNodes[i][2])+")")
+			break;
+		}
+	}
+	return(i)
+}
+
+
 function proliferate(){
 		let lsl = sample.length
 		for(let i = 0; i < lsl-lastSampleLength-1; i++){
 			for(let j = i+1; j < lsl-lastSampleLength; j++){
 				let tarr = []
-				creationNodes[sample.length] = i + " and not " + j
+				creationNodes[sample.length] = [1,i,j]
 				answer.forEach((e,p)=>{
 					tarr.push((sample[i][p]&&!sample[j][p])?1:0)
 				})
 				sample.push(tarr)
 				tarr = []
-				creationNodes[sample.length] = "not "+ i + " and " + j
+				creationNodes[sample.length] = [2,i,j]
 				answer.forEach((e,p)=>{
 					tarr.push((!sample[i][p]&&sample[j][p])?1:0)
 				})
 				sample.push(tarr)
 				tarr = []
-				creationNodes[sample.length] = i + " xor " + j
+				creationNodes[sample.length] = [3,i,j]
 				answer.forEach((e,p)=>{
 					tarr.push((sample[i][p]?!sample[j][p]:sample[j][p])?1:0)
 				})
 				sample.push(tarr)
 				tarr = []
-				creationNodes[sample.length] = i + " and " + j
+				creationNodes[sample.length] = [4,i,j]
 				answer.forEach((e,p)=>{
 					tarr.push((sample[i][p]&&sample[j][p])?1:0)
 				})
 				sample.push(tarr)
 				tarr = []
-				creationNodes[sample.length] = i + " or " + j
+				creationNodes[sample.length] = [5,i,j]
 				answer.forEach((e,p)=>{
 					tarr.push((sample[i][p]||sample[j][p])?1:0)
 				})
@@ -143,6 +181,8 @@ function proliferate(){
 		lastSampleLength = lsl
 }
 //A and not B, B and not A, xor, or, and
+
+
 
 
 
