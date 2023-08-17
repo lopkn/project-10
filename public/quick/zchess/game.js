@@ -13,6 +13,7 @@ class board {
 	static arrFuncs = {
 		"pieceModifiers":[]
 	}
+	static spawnRange = [0,8]
 	static iterations = 0;
 	static topTile = 0;
 	static bottomTile = 0;
@@ -943,10 +944,20 @@ var gameEvents = {
 			
 		}
 	}, "piece storm":(t,f)=>{
-		t = t?t*1000:2000
+		t = t?t:12
 		f = f?f:100
-		startGameInterval(f)
-		setTimeout(()=>{startGameInterval(camera.pieceFrequency)},t)
+		// startGameInterval(f)
+		// setTimeout(()=>{startGameInterval(camera.pieceFrequency)},t)
+		for(let i = 0; i < t; i++){
+			setTimeout(()=>{
+			let name = board.spawnRates[0]
+			let rng = Math.random()
+			for(let i = 0; i < board.spawnRates.length/2;i++){
+				if(rng < board.spawnRates[i*2+1]){name = board.spawnRates[i*2];break;}
+			}
+			spawnZombie(new piece(name,0,0,"zombies",{"direction":"y+"}))
+		},f*i)
+		}
 	},"bomber pawn":()=>{
 		
 
@@ -1025,13 +1036,14 @@ var gameEvents = {
 		pc.AIblockWait = ()=>{return(300)}
 		return(pc)
 	},"flight chamber":(ap)=>{
-
+		camera.pieceFrequency -= 200
 		camera.particles.push(new expandingText("Flight chamber mode!",Width/2/tileSize-camera.x,Height/2/tileSize-camera.y,
 		(x)=>{return("rgba(255,255,0,"+x+")")},
 		0.2,0.2))
 		camera.particles[camera.particles.length-1].size = tileSize/2
 
-		gameEvents["board expansion"](30,1)
+		// gameEvents["board expansion"](20,1)
+		
 			ap.bottom = 11
 			ap.arrFuncs.onMove.push((x,y)=>{
 				if(ap.y<y){
@@ -1052,10 +1064,13 @@ var gameEvents = {
 						}
 					}
 					ap.bottom = ap.y
-					gameEvents["board expansion"](blocksdisplaced,-ap.y+5)
+					gameEvents["board expansion"](blocksdisplaced,-ap.y+8)
 
 				}
 			})
+		// board.spawnRates = ["pawn",0.6,"king",0.77,"knight",0.94,"bishop",0.98,"rook",1]
+			board.spawnRates = ["pawn",0.65,"king",0.80,"knight",0.95,"bishop",0.98,"rook",1]
+		gameEvents["piece storm"](8)
 	}
 }
 
