@@ -958,6 +958,21 @@ var gameEvents = {
 			spawnZombie(new piece(name,0,0,"zombies",{"direction":"y+"}))
 		},f*i)
 		}
+	},"pawn swarm":(n,c)=>{
+	camera.particles.push(new expandingText("pawn swarm",Width/2/tileSize-camera.x,Height/2/tileSize-camera.y,
+		(x)=>{return("rgba(0,0,250,"+x+")")},
+		0.5,0.9))
+		n = n?n:5
+		c = c?c:5
+		for(let i = 0; i < n; i++){
+			setTimeout(()=>{
+				let pc = spawnZombie(new piece("pawn",4,0,"zombies",{"direction":"y+"}))
+				pc.maxCD = c
+				setPieceCooldown(pc,5)
+				pc.color = "rgb(0,130,0)"
+			},i*200)
+		}
+
 	},"bomber pawn":()=>{
 		
 
@@ -1035,6 +1050,18 @@ var gameEvents = {
 		pc.AIwait = ()=>{return(10)}
 		pc.AIblockWait = ()=>{return(300)}
 		return(pc)
+	},"reinforcements":(y)=>{
+		for(let i = 0; i < 8; i++){
+			board.tiles[i+","+(y-1)]= {"piece":new piece("pawn",i,y-1,"p1",{"direction":"y-"})}
+		}
+		board.tiles[0+","+y]= {"piece":new piece("rook",0,y,"p1",)}
+		board.tiles[1+","+y]= {"piece": new piece("knight",1,y,"p1")}
+		board.tiles[2+","+y]= {"piece": new piece("bishop",2,y,"p1",)}
+		board.tiles[3+","+y]= {"piece": new piece("queen",3,y,"p1")}
+		board.tiles[4+","+y]= {"piece": new piece("king",4,y,"p1")}
+		board.tiles[5+","+y]= {"piece": new piece("bishop",5,y,"p1")}
+		board.tiles[6+","+y]= {"piece": new piece("knight",6,y,"p1")}
+		board.tiles[7+","+y]= {"piece": new piece("rook",7,y,"p1")}
 	},"flight chamber":(ap)=>{
 		camera.pieceFrequency -= 200
 		camera.particles.push(new expandingText("Flight chamber mode!",Width/2/tileSize-camera.x,Height/2/tileSize-camera.y,

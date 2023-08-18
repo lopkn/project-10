@@ -899,6 +899,10 @@ if(camera.gamemode == "Roaming"){
 				clearInterval(gameInterval)
 				gameStart = "lost"
 			}
+			if(Math.random()<0.2){
+				gameEvents["board expansion"](30)
+				gameEvents["flight chamber"](ap)
+			}
 } else if(camera.gamemode == "Normal"){
 
 	camera.pieceFrequency = 10000

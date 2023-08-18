@@ -43,7 +43,7 @@ for(let i = 0; i < 10; i++){
 	sample[i] = []
 }
 
-for(let i = 0; i < 60; i++){
+for(let i = 0; i < 30; i++){
 	let str = numToBinput(i)
 	for(let j = 0; j < str.length; j++){
 		sample[j][i] = parseInt(str[j])
@@ -70,6 +70,7 @@ function RCA(){
 RCA()
 
 let ansstr = ""
+let ansfun = "((arr)=>{return("
 function clearMatchesAll(){
 	if(ansTotals[0] == 0){ansstr += "true";return;}
 	if(ansTotals[1] == 0){ansstr += "false";return;}
@@ -81,9 +82,15 @@ function clearMatchesAll(){
 				cp = [tcp[0],tcp[1],tcp[2],j]
 				if(Math.abs(tcp[1]) == 1){
 					cp = [tcp[0],tcp[1],Infinity,j]
+					if(tcp[0] == 1){
 					ansstr += getBase(j) + "]"
-					// break;
-					return;
+					ansfun += getBaseFun(j)
+					} else {
+						ansstr += "not "+getBase(j) + "]"
+						ansfun += "!"+getBaseFun(j)
+					}
+					console.log(ansfun)
+					return(ansstr)
 				}
 			}
 		} else if(Math.abs(tcp[1]) == 1){
@@ -100,8 +107,10 @@ function clearMatchesAll(){
 				})
 			if(cp[0] == 1){
 				ansstr += "("+getBase(i)+" or "
+				ansfun += "("+getBaseFun(i)+"||"
 			} else {
 				ansstr += "(not "+getBase(i)+" and "
+				ansfun += "(!"+getBaseFun(i)+"&&"
 			}
 		} else if(Math.abs(cp[1]) == 1){
 				sample[i].forEach((e,j)=>{
@@ -109,11 +118,14 @@ function clearMatchesAll(){
 				})
 			if(cp[1] == 1){
 				ansstr += "(not "+getBase(i)+" or "
+				ansfun += "(!"+getBaseFun(i)+"||"
 			} else {
 				ansstr += "("+getBase(i)+" and "
+				ansfun += "("+getBaseFun(i)+"&&"
 			}
 		}
 	if(answer.length == Object.keys(deprecated).length){ansstr+="else"}
+		console.log(ansfun)
 	return(ansstr)
 }
 let lastSampleLength = 0
@@ -140,7 +152,28 @@ function getBase(i){
 	}
 	return(i)
 }
-
+function getBaseFun(i){
+	if(creationNodes[i] !== undefined){
+		switch(creationNodes[i][0]){
+		case 1:
+			return("("+getBaseFun(creationNodes[i][1])+ "&&!"+getBaseFun(creationNodes[i][2])+")")
+			break;
+		case 2:
+			return("(!"+getBaseFun(creationNodes[i][1])+ "&&"+getBaseFun(creationNodes[i][2])+")")
+			break;
+		case 3:
+			return("("+getBaseFun(creationNodes[i][1])+ "?!"+getBaseFun(creationNodes[i][2])+":"+getBaseFun(creationNodes[i][2])+")")
+			break;
+		case 4:
+			return("("+getBaseFun(creationNodes[i][1])+ "&&"+getBaseFun(creationNodes[i][2])+")")
+			break;
+		case 5:
+			return("("+getBaseFun(creationNodes[i][1])+ "||"+getBaseFun(creationNodes[i][2])+")")
+			break;
+		}
+	}
+	return("arr["+(i)+"]")
+}
 
 function proliferate(){
 		let lsl = sample.length
