@@ -1009,11 +1009,11 @@ board.spawnRates = ["pawn",0.7,"king",0.85,"knight",0.95,"bishop",0.98,"rook",1]
 	})
 
 	if(Math.random()>0.5){
+		let x = Math.floor(Math.random()*8)
 		let y = board.bottomTile-1
-		while(Math.random()>0.4){
+		while(Math.random()>0.4||board.tiles[x+","+y] != undefined){
 			y-=1
 		}
-		let x = Math.floor(Math.random()*8)
 		if(board.tiles[x+","+y] == undefined){board.tiles[x+","+y] = {}; if(y < board.topTile){board.topTile=y}
 			let tilePut = 0;
 			for(let i = board.spawnRange[0]; i < board.spawnRange[1]; i++){

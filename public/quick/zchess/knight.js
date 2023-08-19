@@ -49,3 +49,5 @@ let kn = new ks(0,0)
 //knight is at 0 0
 //give the function any coordinates
 //find the fastest route
+
+

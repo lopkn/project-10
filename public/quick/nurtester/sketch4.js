@@ -192,12 +192,12 @@ function proliferate(){
 				})
 				sample.push(tarr)
 				tarr = []
-				creationNodes[sample.length] = [3,i,j]
-				answer.forEach((e,p)=>{
-					tarr.push((sample[i][p]?!sample[j][p]:sample[j][p])?1:0)
-				})
-				sample.push(tarr)
-				tarr = []
+				// creationNodes[sample.length] = [3,i,j]
+				// answer.forEach((e,p)=>{
+				// 	tarr.push((sample[i][p]?!sample[j][p]:sample[j][p])?1:0)
+				// })
+				// sample.push(tarr)
+				// tarr = []
 				creationNodes[sample.length] = [4,i,j]
 				answer.forEach((e,p)=>{
 					tarr.push((sample[i][p]&&sample[j][p])?1:0)
@@ -218,6 +218,33 @@ function proliferate(){
 
 
 
+function allDeprecated(){
+	return(Object.keys(deprecated.length))
+}
+function numBinArr(num,l){
+	l = l?l:10
+	let str = num.toString(2)
+	str = str.substring(str.length-l)
+	while(str.length < l){
+		str = "0"+str
+	}
+	let arr = []
+	for(let i = 0; i < str.length; i++){
+		arr.push(str[i])
+	}
+	return(arr)
+}
+function fin(str){
+	let b = 1
+	for(let i = 0; i < str.length; i++){
+		if(str[i] == "("){b+=1}
+		if(str[i] == ")"){b-=1}
+	}
+	for(let i = 0; i < b; i++){
+		str = str + ")"
+	}
+	return(str+"(numBinArr())")
+}
 
 
 
