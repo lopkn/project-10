@@ -5,16 +5,21 @@ function spos(x,y){
 class ks{
 	static moveArr = [[-2,-1],[-1,-2],[1,-2],[2,-1],[2,1],[1,2],[-1,2],[-2,1]]
 	static looked = {}
-	constructor(x,y){
-		this.x = x
-		this.y = y
+	// constructor(x,y){
+	static x = x
+	static y = y
 
-		this.look = [[this.x,this.y,""]]
-		this.nextLook = []
-		ks.looked[spos(this.x,this.y)] = ""
-	}
+	static look = [[this.x,this.y,""]]
+	static nextLook = []
+	static looked[spos(this.x,this.y)] = ""
 
-	search(x,y){
+	static search(xf,yf,x,y){
+	this.look = [[this.x,this.y,""]]
+	this.nextLook = []
+	this.looked = {}
+	this.looked[spos(this.x,this.y)] = ""
+		this.x = xf
+		this.y = yf
 		let D = 0
 		while(D < 50){
 			D++
@@ -43,7 +48,7 @@ class ks{
 
 }
 
-let kn = new ks(0,0)
+// let kn = new ks(0,0)
 
 
 //knight is at 0 0

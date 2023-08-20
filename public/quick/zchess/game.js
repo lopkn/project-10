@@ -498,7 +498,7 @@ class piece {
 			board.tiles[pos].piece.alive = false
 			kill(this.x,this.y)
 			this.kills += 1;
-			if(this.team!="zombies"){
+			if(this.team!="zombies"&&this.AI !== true){
 
 				displayKills(this.kills,this.x,this.y)
 			}
@@ -528,7 +528,7 @@ class piece {
 		return(this.cooldown)
 	}
 	cooldownFinish(){
-		if(this.team == "zombies"){
+		if(this.team == "zombies" || this.AI == true){
 			setTimeout(()=>{
 				AImoveRandom(this)
 			// },Math.random()*4000)
@@ -564,7 +564,7 @@ function killBoardPiece(x,y,killerPiece){
 
 			killerPiece.kills += 1;
 
-			if(killerPiece.team!="zombies"){
+			if(killerPiece.team!="zombies" && killerPiece.AI !== true){
 
 				displayKills(killerPiece.kills,killerPiece.x,killerPiece.y)
 			}
@@ -602,13 +602,20 @@ function AImoveRandom(piece){
 		let ip = ipos(moveString)
 		let opx = piece.x
 		let opy = piece.y
+		let ocp = board.tiles[moveString]?.piece
 		let result = attemptMove(piece.x,piece.y,ip.x,ip.y,piece.team)
 		if(result == "capture"){
+			if(ocp?.team == "p1" && ocp.AI !== true){
 			// camera.playSound("./sounds/captureF.wav")
 			camera.playSoundF("0")
 			camera.particles.push(new lineParticle(opx+0.5,opy+0.5,piece.x+0.5,piece.y+0.5,10,
 						(x)=>{let mr = Math.random()*255
 							return("rgb("+(mr<20?255-mr:0)+","+(mr/2)+",0)")},0.1))
+			} else {
+				camera.particles.push(new lineParticle(opx+0.5,opy+0.5,piece.x+0.5,piece.y+0.5,5,
+						(x)=>{
+							return("rgba(0,0,100,"+x+")")},0.2))
+			}
 		}
 	}
 	//capture piece
@@ -868,6 +875,59 @@ var gameEvents = {
 		pc.AIwait = ()=>{return(10)}
 		pc.AIblockWait = ()=>{return(300)}
 	},
+	"ranpant knight":(n)=>{
+		n = n?n:3
+		camera.particles.push(new expandingText("Knight Rampage",Width/2/tileSize-camera.x,Height/2/tileSize-camera.y,
+		(x)=>{return("rgba(255,255,0,"+x+")")},
+		0.5,0.9))
+		camera.particles[camera.particles.length-1].size = tileSize/2
+
+		for(let i = 0; i < n; i++){
+			setTimeout(()=>{
+				let pc = spawnZombie(new piece("knight",4,0,"Rampage"))
+			if(pc === false){return;}
+			pc.AI = true
+			pc.maxCD = 3
+			setPieceCooldown(pc,5)
+			pc.color = "rgb(0,50,0)"
+			pc.draw = (l,x,y)=>{
+				if(Math.random() > 0.95){
+					let dx = Math.random()-0.5
+					let dy = Math.random()-0.5
+					camera.particles.push(new bloodParticle(x+0.5+0.6*dx,y+0.5+0.6*dy,dx*14,14*dy,Math.random()*0.03,Math.random()*3+3,false))
+				}
+				return(true)
+			}
+			pc.AIwait = ()=>{return(10)}
+			pc.AIblockWait = ()=>{return(300)}
+		},i*200)
+			
+		}
+	},
+	"dark knight":()=>{
+		camera.particles.push(new expandingText("Dark Knight has spawned",Width/2/tileSize-camera.x,Height/2/tileSize-camera.y,
+		(x)=>{return("rgba(255,255,0,"+x+")")},
+		0.5,0.9))
+		camera.particles[camera.particles.length-1].size = tileSize/2
+
+				let pc = spawnZombie(new piece("knight",4,0,"Dark"))
+			if(pc === false){return;}
+			pc.AI = true
+			pc.maxCD = 0.6
+			setPieceCooldown(pc,5)
+			pc.color = "rgb(0,0,0)"
+			pc.draw = (l,x,y)=>{
+				if(Math.random() > 0.95){
+					let dx = Math.random()-0.5
+					let dy = Math.random()-0.5
+					camera.particles.push(new bloodParticle(x+0.5+0.6*dx,y+0.5+0.6*dy,dx*14,14*dy,Math.random()*0.03,Math.random()*3+3,false))
+				}
+				return(true)
+			}
+			pc.AIwait = ()=>{return(10)}
+			pc.AIblockWait = ()=>{return(300)}
+			
+	},
 	"elite rook":()=>{
 		board.tiles["4,0"].piece = new piece("rook",4,0,"zombies")
 		let pc = board.tiles["4,0"].piece
@@ -1010,7 +1070,6 @@ var gameEvents = {
 							camera.particles.push(new bloodParticle(pc.x+0.5+0.6*dx,pc.y+0.5+0.6*dy,dx*34,34*dy,Math.random()*0.2,Math.random()*3+3,false))
 							camera.particles[camera.particles.length-1].friction = 0.98
 						}
-
 			camera.particles.push(new explosionR(pc.x+0.5,pc.y+0.5,
 					(x)=>{
 						let rr = 250*Math.random()
