@@ -1,3 +1,65 @@
+
+class s5{
+	static samples = []
+	static sampleBin = []
+	static answers = []
+	static numPairs = {}
+
+	static findPairs(){
+		this.samples.forEach((e,i)=>{
+			if(this.numPairs[e] === undefined){
+				console.log("create mode: "+e+"->"+this.answers[i])
+				this.numPairs[e] = [1,this.answers[i]]
+			} else if(this.numPairs[e][1] == this.answers[i]){
+				this.numPairs[e][0] += 1
+			} else {
+				console.log("FATAL ERROR: CONFLICTING ANSWERS: "+e)
+			}
+		})
+		return("done")
+	}
+
+	static sampleConvert(){
+		this.samples.forEach((e,i)=>{
+			let nbp = numToBinput(e)
+			for(let j = 0; j < nbp.length; j++){
+				if(this.sampleBin[j] === undefined){this.sampleBin[j] = []}
+				this.sampleBin[j][i] = parseInt(nbp[j])
+			}
+		})
+		return(this)
+	}
+
+	static collapsable(){
+		let collapsables = []
+		this.sampleBin.forEach((arr,i)=>{
+			let numpow = Math.pow(2,this.sampleBin.length-i-1)
+			let tempDict = {}
+			for(let j = 0; j < arr.length; j++){
+				if(arr[j]){
+					let num = this.samples[j]-numpow
+					if(this.numPairs[num] !== undefined){
+						if(this.numPairs[num][1] != this.answers[j]){
+							return;
+						}
+					} else if(tempDict[num] !== undefined){
+						if(tempDict[num] != this.answers[j]){
+							return;
+						}
+					} else {
+						tempDict[num] = this.answers[j]
+					}
+				}
+			}
+			collapsables.push(i)
+		})
+		return(collapsables)
+	}
+}
+
+
+
+
 function roughCompare(arr1,arr2,skips){
 	let var1 = 0;
 	let var2 = 0;
@@ -50,6 +112,8 @@ for(let i = 0; i < 30; i++){
 			}
 	let ans = (i%3==0)?1:0
 	answer.push(ans)
+	s5.samples.push(i)
+	s5.answers.push(ans)
 	if(ans){ansTotals[1]+=1}else{ansTotals[0]+=1}
 
 }
@@ -245,8 +309,6 @@ function fin(str){
 	}
 	return(str+"(numBinArr())")
 }
-
-
 
 
 
