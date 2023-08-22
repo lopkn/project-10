@@ -807,6 +807,9 @@ if(camera.gamemode == "Roaming"){
 					startGameInterval(camera.pieceFrequency)
 				}
 			}
+			board.specialIntervals["bombers"] = ()=>{if(Math.random()>0.999){gameEvents["bomber pawn"]()}}
+			board.specialIntervals["elite cannon"] = ()=>{if(Math.random()>0.995){gameEvents["elite cannon"]()}}
+			board.specialIntervals["elite knight"] = ()=>{if(Math.random()>0.995){gameEvents["elite knight"]()}}
 
 			board.tiles[4+","+11].piece = new piece("knight",4,11,"p1")
 			let ap = board.tiles["4,11"].piece
@@ -848,6 +851,9 @@ if(camera.gamemode == "Roaming"){
 				}
 			}
 
+			board.specialIntervals["bombers"] = ()=>{if(Math.random()>0.999){gameEvents["bomber pawn"]()}}
+			board.specialIntervals["elite cannon"] = ()=>{if(Math.random()>0.995){gameEvents["elite pawn"]()}}
+			board.specialIntervals["elite knight"] = ()=>{if(Math.random()>0.995){gameEvents["elite knight"]()}}
 
 			board.tiles[4+","+11].piece = new piece("king",4,11,"p1")
 			let ap = board.tiles["4,11"].piece
@@ -868,7 +874,6 @@ if(camera.gamemode == "Roaming"){
 				gameStart = "lost"
 			}
 } else if(camera.gamemode == "Phantom"){
-			
 			camera.pieceFrequency = 1500
 			gameSpecialInterval = ()=>{if(board.iterations%12 == 0 && board.iterations > 40){
 				for(let i = 0; i < 4; i++){
@@ -1025,7 +1030,7 @@ board.spawnRates = ["pawn",0.7,"king",0.85,"knight",0.95,"bishop",0.98,"rook",1]
 
 	if(Math.random()>0.5){
 		let x = Math.floor(Math.random()*8)
-		let y = board.topTile-1
+		let y = board.tileExtensionBoarder-1
 		while(Math.random()>0.4||board.tiles[x+","+y] != undefined){
 			y-=1
 		}
@@ -1034,10 +1039,11 @@ board.spawnRates = ["pawn",0.7,"king",0.85,"knight",0.95,"bishop",0.98,"rook",1]
 			for(let i = board.spawnRange[0]; i < board.spawnRange[1]; i++){
 				if(board.tiles[i+","+y] != undefined){tilePut += 1}
 			}
-		if(tilePut > 6){board.topTile += 1}
+		if(tilePut > 6){board.tileExtensionBoarder += 1}
 		}
 	}
 	gameSpecialInterval()
+	Object.values(board.specialIntervals).forEach((e)=>{e()})
 	}
 
 	startGameInterval(camera.pieceFrequency)
@@ -1082,6 +1088,8 @@ function stopGame(){
 	board.AIwait = ()=>{return(10)}
 	board.AIblockWait = ()=>{return(300)}
 	camera.pieceFrequency = 1300
+	board.specialIntervals = {}
+	board.tileExtensionBoarder = 0
 	clearInterval(gameInterval);
 	board.tiles = {}
 	board.iterations = 0;

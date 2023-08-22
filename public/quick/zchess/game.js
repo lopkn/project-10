@@ -16,7 +16,9 @@ class board {
 	static spawnRange = [0,8]
 	static iterations = 0;
 	static topTile = 0;
+	static tileExtensionBoarder = 0
 	static bottomTile = 11;
+	static specialIntervals = {}
 	static AIwait(){
 		return(10)
 	}
@@ -497,7 +499,8 @@ class piece {
 			
 			board.tiles[pos].piece.alive = false
 			kill(this.x,this.y)
-			this.kills += 1;
+			if(board.tiles[pos].piece.noPints === undefined){
+			this.kills += 1;}
 			if(this.team!="zombies"&&this.AI !== true){
 
 				displayKills(this.kills,this.x,this.y)
@@ -579,6 +582,7 @@ function AImoveRandom(piece){
 
 	if(piece.AImoveRandom !== undefined){
 		piece.AImoveRandom(piece)
+		return;
 	}
 	let legals = piece.legals()
 	let legal = legals.arr
@@ -1010,6 +1014,10 @@ var gameEvents = {
 	},"elite cannon":()=>{
 		let pc = spawnZombie(new piece("cannon",4,0,"zombies"))
 		if(pc === false){return}
+			camera.particles.push(new expandingText("An Elite Cannon Spawned",Width/2/tileSize-camera.x,Height/2/tileSize-camera.y,
+		(x)=>{return("rgba(255,255,0,"+x+")")},
+		0.5,0.9))
+		camera.particles[camera.particles.length-1].size = tileSize/2
 		pc.maxCD = 5
 		pc.color = "rgb(50,150,0)"
 		pc.draw = (l,x,y)=>{
@@ -1091,11 +1099,14 @@ var gameEvents = {
 			return(true)
 		}
 		pc.arrFuncs.onMove.push(()=>{
-			if(Math.random() > 0.9 || pc.y == 11){
+			if(Math.random() > 0.9 || pc.y == board.bottomTile){
 				pc.onDeath()
 			}
 		})
-		pc.onDeath = ()=>{
+		pc.onDeath = (det)=>{
+			if(det !== "detonate" && board.tiles[spos(pc.x,pc.y+1)] === undefined){
+				return
+			}
 			pc.onDeath = undefined
 			camera.playSound("bomb")
 			for(let i = 0; i < 16; i++){
@@ -1143,6 +1154,48 @@ var gameEvents = {
 		pc.AIwait = ()=>{return(10)}
 		pc.AIblockWait = ()=>{return(300)}
 		return(pc)
+	},"ghost pawns":(amt)=>{
+
+		camera.particles.push(new expandingText("Ghost pawns",Width/2/tileSize-camera.x,Height/2/tileSize-camera.y,
+		(x)=>{return("rgba(255,255,0,"+x+")")},
+		0.5,0.9))
+		camera.particles[camera.particles.length-1].size = tileSize/2
+
+		amt = amt?amt:5
+		for(let c = 0; c < amt; c++){
+		let pc = spawnZombie(new piece("pawn",4,0,"zombies",{"direction":"y+"}))
+		if(pc === false){return;}
+				pc.color = "rgba(0,100,0,0.5)"
+				pc.noPints = true
+				pc.maxCD -= 2
+		pc.AImoveRandom = (piece)=>{
+	let legals = piece.legals()
+	let legal = legals.arr
+	if(legal.length == 0){
+		setTimeout(()=>{
+				pc.AImoveRandom(piece)
+			},piece.AIblockWait == undefined?board.AIblockWait():piece.AIblockWait())
+		return
+	}
+
+	//capture piece
+
+	if(board.tiles[spos(piece.x,piece.y)] == undefined || board.tiles[spos(piece.x,piece.y)].piece == undefined){return}
+	let result;
+	while(piece.cooldown == 0 && piece == board.tiles[spos(piece.x,piece.y)].piece && legal.length > 0){
+
+		let moveIndex = Math.floor(Math.random()*legal.length)
+
+		let moveString = legal[moveIndex]
+		let ip = ipos(moveString)
+		if(legals.dict[moveString] == "capture"){legal.splice(moveIndex,1);continue}
+
+
+		result = attemptMove(piece.x,piece.y,ip.x,ip.y,piece.team)
+	}
+	return(result)
+	}
+	}
 	},"reinforcements":(y)=>{
 		for(let i = 0; i < 8; i++){
 			board.tiles[i+","+(y-1)]= {"piece":new piece("pawn",i,y-1,"p1",{"direction":"y-"})}
