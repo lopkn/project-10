@@ -16,7 +16,7 @@ class board {
 	static spawnRange = [0,8]
 	static iterations = 0;
 	static topTile = 0;
-	static bottomTile = 0;
+	static bottomTile = 11;
 	static AIwait(){
 		return(10)
 	}
@@ -875,7 +875,7 @@ var gameEvents = {
 		pc.AIwait = ()=>{return(10)}
 		pc.AIblockWait = ()=>{return(300)}
 	},
-	"ranpant knight":(n)=>{
+	"rampant knights":(n)=>{
 		n = n?n:3
 		camera.particles.push(new expandingText("Knight Rampage",Width/2/tileSize-camera.x,Height/2/tileSize-camera.y,
 		(x)=>{return("rgba(255,255,0,"+x+")")},
@@ -916,6 +916,40 @@ var gameEvents = {
 			pc.maxCD = 0.6
 			setPieceCooldown(pc,5)
 			pc.color = "rgb(0,0,0)"
+			pc.draw = (l,x,y)=>{
+				if(Math.random() > 0.95){
+					let dx = Math.random()-0.5
+					let dy = Math.random()-0.5
+					camera.particles.push(new bloodParticle(x+0.5+0.6*dx,y+0.5+0.6*dy,dx*14,14*dy,Math.random()*0.03,Math.random()*3+3,false))
+				}
+				return(true)
+			}
+			pc.AIwait = ()=>{return(10)}
+			pc.AIblockWait = ()=>{return(300)}
+			
+	},
+	"white knight":()=>{
+		camera.particles.push(new expandingText("white knight",Width/2/tileSize-camera.x,Height/2/tileSize-camera.y,
+		(x)=>{return("rgba(255,255,0,"+x+")")},
+		0.5,0.9))
+		camera.particles[camera.particles.length-1].size = tileSize/2
+
+			let pc = spawnFriendly(new piece("knight",4,11,"p1",{"direction":"y-"}))
+			if(pc === false){return;}
+			pc.AI = true
+			pc.maxCD = 0.4
+			setPieceCooldown(pc,0.4)
+			pc.color = "rgb(200,200,255)"
+			pc.arrFuncs.onMove.push((px,py)=>{
+
+				if(Math.random()>0.8 && pc.kills > 0){
+					board.tiles[spos(pc.x,pc.y)].piece = undefined
+				} else {
+					camera.particles.push(new lineParticle(px+0.5,py+0.5,pc.x+0.5,pc.y+0.5,3,
+						(x)=>{
+							return("rgba(200,200,200,"+x+")")},0.2))
+				}
+			})
 			pc.draw = (l,x,y)=>{
 				if(Math.random() > 0.95){
 					let dx = Math.random()-0.5
@@ -1171,6 +1205,24 @@ function spawnZombie(pc){
 			if(y > 1){break;}
 		}
 		if(y > 1){continue;}
+		board.tiles[x+","+y].piece = pc
+		pc.x = x
+		pc.y = y
+		return(pc)
+	}
+	return(false)
+}
+
+function spawnFriendly(pc){
+	let X = Math.floor(Math.random()*8)
+	for(let i = 0; i < 8; i++){
+		let x = (X+i)%8
+		let y = board.bottomTile;
+		while(board.tiles[x+","+y] == undefined || board.tiles[x+","+y].piece != undefined){
+			y-=1
+			if(y < board.bottomTile-3){break;}
+		}
+		if(y < board.bottomTile-3){continue;}
 		board.tiles[x+","+y].piece = pc
 		pc.x = x
 		pc.y = y

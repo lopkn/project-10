@@ -810,7 +810,14 @@ if(camera.gamemode == "Roaming"){
 
 			board.tiles[4+","+11].piece = new piece("knight",4,11,"p1")
 			let ap = board.tiles["4,11"].piece
+			ap.arrFuncs.onMove.push((px,py)=>{
 
+
+					camera.particles.push(new lineParticle(px+0.5,py+0.5,ap.x+0.5,ap.y+0.5,2,
+						(x)=>{
+							return("rgba(200,200,0,"+(x/2)+")")},0.4))
+
+			})
 			ap.maxCD = 0.2
 			ap.onDeath=()=>{
 				
@@ -844,6 +851,14 @@ if(camera.gamemode == "Roaming"){
 
 			board.tiles[4+","+11].piece = new piece("king",4,11,"p1")
 			let ap = board.tiles["4,11"].piece
+			ap.arrFuncs.onMove.push((px,py)=>{
+
+
+					camera.particles.push(new lineParticle(px+0.5,py+0.5,ap.x+0.5,ap.y+0.5,2,
+						(x)=>{
+							return("rgba(200,200,0,"+(x/2)+")")},0.4))
+
+			})
 			ap.maxCD = 0.2
 			ap.onDeath=()=>{
 				
@@ -1010,7 +1025,7 @@ board.spawnRates = ["pawn",0.7,"king",0.85,"knight",0.95,"bishop",0.98,"rook",1]
 
 	if(Math.random()>0.5){
 		let x = Math.floor(Math.random()*8)
-		let y = board.bottomTile-1
+		let y = board.topTile-1
 		while(Math.random()>0.4||board.tiles[x+","+y] != undefined){
 			y-=1
 		}
@@ -1019,7 +1034,7 @@ board.spawnRates = ["pawn",0.7,"king",0.85,"knight",0.95,"bishop",0.98,"rook",1]
 			for(let i = board.spawnRange[0]; i < board.spawnRange[1]; i++){
 				if(board.tiles[i+","+y] != undefined){tilePut += 1}
 			}
-		if(tilePut > 6){board.bottomTile += 1}
+		if(tilePut > 6){board.topTile += 1}
 		}
 	}
 	gameSpecialInterval()
@@ -1078,6 +1093,8 @@ function stopGame(){
 		}		
 	}
 	camera.score = 0;
+	board.bottomTile = 11
+	board.topTile = 0
 
 	if(camera.cookies != false){
 		let objk = Object.keys(camera.highScores)
@@ -1197,23 +1214,7 @@ var sampler1 = new Tone.Sampler({
 
 	},
 }).toDestination();
-// var sampler1 = new Tone.Sampler({
-// 	urls: {
-// 		"X20":"./sounds/select.wav",
-// 		"11":"./sounds/captureF.wav",
-// 		"12":"./sounds/move.wav",
-// 		"13":"./sounds/capture.wav",
-// 		"14":"./sounds/captureS1.wav",
-// 		"15":"./sounds/captureS2.wav",
-// 		"16":"./sounds/captureS3.wav",
-// 		"17":"./sounds/captureS4.wav",
-// 		"18":"./sounds/captureS5.wav",
-// 		"19":"./sounds/captureS6.wav",
-// 		"20":"./sounds/captureS7.wav",
-// 		"21":"./sounds/captureS8.wav"
 
-// 	},
-// }).toDestination();
 var sampler2 = new Tone.Players({
 	"1":"./sounds/select.wav"
 }).toDestination()
