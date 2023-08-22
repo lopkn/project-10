@@ -932,12 +932,14 @@ var gameEvents = {
 			pc.AIblockWait = ()=>{return(300)}
 			
 	},
-	"white knight":()=>{
-		camera.particles.push(new expandingText("white knight",Width/2/tileSize-camera.x,Height/2/tileSize-camera.y,
-		(x)=>{return("rgba(255,255,0,"+x+")")},
+	"white knights":(amt)=>{
+		camera.particles.push(new expandingText("Allied knight rushers",Width/2/tileSize-camera.x,Height/2/tileSize-camera.y,
+		(x)=>{return("rgba(100,100,255,"+x+")")},
 		0.5,0.9))
 		camera.particles[camera.particles.length-1].size = tileSize/2
+		 amt = amt?amt:3
 
+		for(let i = 0; i < amt; i++){
 			let pc = spawnFriendly(new piece("knight",4,11,"p1",{"direction":"y-"}))
 			if(pc === false){return;}
 			pc.AI = true
@@ -946,12 +948,12 @@ var gameEvents = {
 			pc.color = "rgb(200,200,255)"
 			pc.arrFuncs.onMove.push((px,py)=>{
 
-				if(Math.random()>0.8 && pc.kills > 0){
+				if(Math.random()>0.95 && pc.kills > 0){
 					board.tiles[spos(pc.x,pc.y)].piece = undefined
 				} else {
 					camera.particles.push(new lineParticle(px+0.5,py+0.5,pc.x+0.5,pc.y+0.5,3,
 						(x)=>{
-							return("rgba(200,200,200,"+x+")")},0.2))
+							return("rgba(200,200,200,"+x+")")},0.5))
 				}
 			})
 			pc.draw = (l,x,y)=>{
@@ -964,7 +966,7 @@ var gameEvents = {
 			}
 			pc.AIwait = ()=>{return(10)}
 			pc.AIblockWait = ()=>{return(300)}
-			
+			}
 	},
 	"elite rook":()=>{
 		board.tiles["4,0"].piece = new piece("rook",4,0,"zombies")
