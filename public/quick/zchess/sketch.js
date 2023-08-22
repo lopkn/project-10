@@ -5,8 +5,15 @@ let cacheName = [
         './sketch.js',
         './tone.js',
         'game.js'
-      ]
-let tv = {int:0,deg:0,rmom:[0,0,0,0],cr:0,cg:0,cb:0,gg:Math.random()*125+125}
+      ];
+let cacheQuota = 0;
+;(async () => {
+   cacheQuota = await navigator.storage.estimate().then(async (e)=>{return(e.quota)})
+  console.log(cacheQuota)
+})()
+
+
+let tv = {int:0,deg:0,rmom:[0,0,0,0],cr:0,cg:0,cb:0,gg:Math.random()*125+125};
 let buttonInterval = setInterval(()=>{
 	// tv.rmom[0] += Math.random() - 0.5
 	tv.int += 0.1
@@ -100,7 +107,7 @@ class camera{
 	static sounds = {}
 	static soundArr = []
 	static tileRsize = 1
-	static soundOn = false;
+	static soundOn = true;
 	// static volume = 0;
 
 	static highScores = {"Normal":[0,0],"King's Raid":[0,0],"Knight's Raid":[0,0],"Phantom":[0,0],"Universal":[0,0]}
@@ -137,7 +144,9 @@ function fill(r,g,b,a){
 	return(c)
 }
 
-
+if(navigator.onLine == false){
+	camera.soundOn = false
+}
 
 let mouseX = 0
 let mouseY = 0
@@ -376,6 +385,7 @@ function menuRender(){
 	drawText("Save state/cookies ["+(camera.cookies===false?'off':'on')+"]",2,15)
 	drawText("saved last ["+(camera.cookies===false?'/':camera.cookies)+"]",2,15.8);
 	drawText("DELETE CACHE (if you are not updating)",2,17)
+	drawText("cache quota ["+cacheQuota+"]",2,17.8);
 
 	if(camera.pieceRender == "image"){
 		fill(255,255,255)
