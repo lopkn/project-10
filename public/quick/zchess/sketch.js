@@ -808,10 +808,10 @@ if(camera.gamemode == "Roaming"){
 					startGameInterval(camera.pieceFrequency)
 				}
 			}
-			board.specialIntervals["bombers"] = ()=>{if(Math.random()>0.999*relativeEventFrequency){gameEvents["bomber pawn"]()}}
-			board.specialIntervals["elite cannon"] = ()=>{if(Math.random()>0.995*relativeEventFrequency){gameEvents["elite cannon"]()}}
-			board.specialIntervals["elite knight"] = ()=>{if(Math.random()>0.995*relativeEventFrequency){gameEvents["elite knight"]()}}
-			board.specialIntervals["allied knight"] = ()=>{if(Math.random()>0.995*relativeEventFrequency){gameEvents["white knights"]()}}
+			board.specialIntervals["bombers"] = ()=>{if(Math.random()<0.0001*relativeEventFrequency){gameEvents["bomber pawn"]()}}
+			board.specialIntervals["elite cannon"] = ()=>{if(Math.random()<0.005*relativeEventFrequency){gameEvents["elite cannon"]()}}
+			board.specialIntervals["elite knight"] = ()=>{if(Math.random()<0.005*relativeEventFrequency){gameEvents["elite knight"]()}}
+			board.specialIntervals["allied knight"] = ()=>{if(Math.random()<0.005*relativeEventFrequency){gameEvents["white knights"]()}}
 
 			board.tiles[4+","+11].piece = new piece("knight",4,11,"p1")
 			let ap = board.tiles["4,11"].piece
@@ -853,10 +853,10 @@ if(camera.gamemode == "Roaming"){
 				}
 			}
 
-			board.specialIntervals["bombers"] = ()=>{if(Math.random()>0.999*relativeEventFrequency){gameEvents["bomber pawn"]()}}
-			board.specialIntervals["elite cannon"] = ()=>{if(Math.random()>0.995*relativeEventFrequency){gameEvents["elite pawn"]()}}
-			board.specialIntervals["allied knight"] = ()=>{if(Math.random()>0.995*relativeEventFrequency){gameEvents["white knights"]()}}
-			board.specialIntervals["elite knight"] = ()=>{if(Math.random()>0.995*relativeEventFrequency){gameEvents["elite knight"]()}}
+			board.specialIntervals["bombers"] = ()=>{if(Math.random()<0.0001*relativeEventFrequency){gameEvents["bomber pawn"]()}}
+			board.specialIntervals["elite cannon"] = ()=>{if(Math.random()<0.005*relativeEventFrequency){gameEvents["elite cannon"]()}}
+			board.specialIntervals["elite knight"] = ()=>{if(Math.random()<0.005*relativeEventFrequency){gameEvents["elite knight"]()}}
+			board.specialIntervals["allied knight"] = ()=>{if(Math.random()<0.005*relativeEventFrequency){gameEvents["white knights"]()}}
 
 			board.tiles[4+","+11].piece = new piece("king",4,11,"p1")
 			let ap = board.tiles["4,11"].piece
