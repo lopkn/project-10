@@ -1,5 +1,11 @@
 
-
+let cacheName = [
+        // '/',
+        './index.html',
+        './sketch.js',
+        './tone.js',
+        'game.js'
+      ]
 let tv = {int:0,deg:0,rmom:[0,0,0,0],cr:0,cg:0,cb:0,gg:Math.random()*125+125}
 let buttonInterval = setInterval(()=>{
 	// tv.rmom[0] += Math.random() - 0.5
@@ -53,7 +59,7 @@ function rect(x,y,w,h){
 
 function initSounds(arr){
 	arr.forEach((E)=>{
-		let e = "./sounds/"+E+".wav"
+		let e = "./soundsM/"+E+".mp3"
 		let audio = new Tone.Sampler({
 	urls: {
 		"C4":e,
@@ -94,13 +100,13 @@ class camera{
 	static sounds = {}
 	static soundArr = []
 	static tileRsize = 1
-	static soundOn = true;
+	static soundOn = false;
 	// static volume = 0;
 
 	static highScores = {"Normal":[0,0],"King's Raid":[0,0],"Knight's Raid":[0,0],"Phantom":[0,0],"Universal":[0,0]}
 	static score = 0;
 
-	// static playSound(url){
+	// static playSound(url){ dogassass
 	// 	let click = this.sounds[url].cloneNode()
 	// 	click.play()
 	// }
@@ -113,7 +119,7 @@ class camera{
 		if(this.soundOn === false){return}
 		sampler1.triggerAttack([soundMapper[no]])
 	}
-	static playSoundURL(url){
+	static playSoundURL(url){//dog
 		if(this.soundOn === false){return}
 		let audio = new Tone.Player(url).toDestination()
 		audio.onStop = ()=>{audio.dispose()}
@@ -368,7 +374,8 @@ function menuRender(){
 	drawText("Volume (requires sound) ["+Math.round(Tone.Master.volume.value)+"]",2,13)
 	drawText("["+volumeSlide+"]"+(Tone.Master.volume.value>10?" you are liable for any damage":""),2,13.8)
 	drawText("Save state/cookies ["+(camera.cookies===false?'off':'on')+"]",2,15)
-	drawText("saved last ["+(camera.cookies===false?'/':camera.cookies)+"]",2,15.8)
+	drawText("saved last ["+(camera.cookies===false?'/':camera.cookies)+"]",2,15.8);
+	drawText("DELETE CACHE (if you are not updating)",2,17)
 
 	if(camera.pieceRender == "image"){
 		fill(255,255,255)
@@ -392,6 +399,7 @@ function menuRender(){
 	mrect(1,9.2,0.8,0.6)
 	mrect(1,11.2,0.8,0.6);
 	mrect(1,13.2,0.8,0.6);
+	mrect(0.2,17.2,0.6,0.6);
 
 	((camera.cookies)?(()=>{fill(0,255,0)}):(()=>{fill(255,0,0)}))(); //cookies
 	mrect(0.2,15.2,0.6,0.6);
@@ -472,7 +480,20 @@ document.addEventListener("mouseup",(e)=>{
 					}
 
 
-				} else if(Y === -2){
+				} else if(Y === 17){
+					deleteCache()
+					if ('serviceWorker' in navigator) {
+						  navigator.serviceWorker.getRegistrations().then(function(registrations) {
+						    for (let registration of registrations) {
+						      registration.unregister();
+						    }
+						  }).catch(function(error) {
+						    console.error('Error unregistering service worker:', error);
+						  });
+						}
+					camera.playSound("select")
+
+				}  else if(Y === -2){
 					if(gameStart != "started"){
 						window.open('','_self').close()
 						clearInterval(renderInterval)
@@ -808,10 +829,10 @@ if(camera.gamemode == "Roaming"){
 					startGameInterval(camera.pieceFrequency)
 				}
 			}
-			board.specialIntervals["bombers"] = ()=>{if(Math.random()<0.0001*relativeEventFrequency){gameEvents["bomber pawn"]()}}
-			board.specialIntervals["elite cannon"] = ()=>{if(Math.random()<0.005*relativeEventFrequency){gameEvents["elite cannon"]()}}
-			board.specialIntervals["elite knight"] = ()=>{if(Math.random()<0.005*relativeEventFrequency){gameEvents["elite knight"]()}}
-			board.specialIntervals["allied knight"] = ()=>{if(Math.random()<0.005*relativeEventFrequency){gameEvents["white knights"]()}}
+			board.specialIntervals["bombers"] = ()=>{if(board.iterations > 30 &&Math.random()<0.0001*relativeEventFrequency){gameEvents["bomber pawn"]()}}
+			board.specialIntervals["elite cannon"] = ()=>{if(board.iterations > 30 &&Math.random()<0.005*relativeEventFrequency){gameEvents["elite cannon"]()}}
+			board.specialIntervals["elite knight"] = ()=>{if(board.iterations > 30 &&Math.random()<0.005*relativeEventFrequency){gameEvents["elite knight"]()}}
+			board.specialIntervals["allied knight"] = ()=>{if(board.iterations > 30 && Math.random()<0.005*relativeEventFrequency){gameEvents["white knights"]()}}
 
 			board.tiles[4+","+11].piece = new piece("knight",4,11,"p1")
 			let ap = board.tiles["4,11"].piece
@@ -853,10 +874,10 @@ if(camera.gamemode == "Roaming"){
 				}
 			}
 
-			board.specialIntervals["bombers"] = ()=>{if(Math.random()<0.0001*relativeEventFrequency){gameEvents["bomber pawn"]()}}
-			board.specialIntervals["elite cannon"] = ()=>{if(Math.random()<0.005*relativeEventFrequency){gameEvents["elite cannon"]()}}
-			board.specialIntervals["elite knight"] = ()=>{if(Math.random()<0.005*relativeEventFrequency){gameEvents["elite knight"]()}}
-			board.specialIntervals["allied knight"] = ()=>{if(Math.random()<0.005*relativeEventFrequency){gameEvents["white knights"]()}}
+			board.specialIntervals["bombers"] = ()=>{if(board.iterations > 30 &&Math.random()<0.0001*relativeEventFrequency){gameEvents["bomber pawn"]()}}
+			board.specialIntervals["elite cannon"] = ()=>{if(board.iterations > 30 &&Math.random()<0.005*relativeEventFrequency){gameEvents["elite cannon"]()}}
+			board.specialIntervals["elite knight"] = ()=>{if(board.iterations > 30 &&Math.random()<0.005*relativeEventFrequency){gameEvents["elite knight"]()}}
+			board.specialIntervals["allied knight"] = ()=>{if(board.iterations > 30 &&Math.random()<0.005*relativeEventFrequency){gameEvents["white knights"]()}}
 
 			board.tiles[4+","+11].piece = new piece("king",4,11,"p1")
 			let ap = board.tiles["4,11"].piece
@@ -1146,7 +1167,7 @@ function stopGame(){
 function touchHandler(event)
 {
 
-	console.log(event.type)
+	// console.log(event.type)
     var touches = event.changedTouches,
         first = touches[0],
         type = "";
@@ -1279,6 +1300,29 @@ document.querySelector('button')?.addEventListener('click', async () => {
 	await Tone.start()
 	console.log('audio is ready')
 })
+
+
+//cache and shit
+async function deleteCache() {
+  try {
+    // Get all cache keys
+    const cacheKeys = await caches.keys();
+
+    // Filter and delete cache entries with the name "my-cache"
+    const deletePromises = cacheKeys.map(async (cacheKey) => {
+      if (cacheKey === 'my-cache') {
+        await caches.delete(cacheKey);
+      }
+    });
+
+    // Wait for all cache entries to be deleted
+    await Promise.all(deletePromises);
+
+    console.log('Cache deleted successfully.');
+  } catch (error) {
+    console.error('Error deleting cache:', error);
+  }
+}
 
 //noise n' stuff
 
