@@ -7,6 +7,7 @@ let cacheName = [
         'game.js'
       ];
 let cacheQuota = 0;
+let soundLoaded = false
 ;(async () => {
    cacheQuota = await navigator.storage.estimate().then(async (e)=>{return(e.quota)})
   console.log(cacheQuota)
@@ -84,10 +85,24 @@ let pieceDict = {
 	// "B":[[200,47],[167,73],[184,100],[123,151],[118,207],[143,238],[123,272],[127,296],[157,307],[82,315],[49,332],[51,358],[92,350],[179,355],[200,346],[200,346],[221,355],[308,350],[349,358],[351,332],[318,315],[243,307],[273,296],[277,272],[257,238],[282,207],[277,151],[216,100],[233,73],[200,47]],
 	"B":
 [[200,25],[113,193],[149,237],[122,285],[156,306],[82,313],[46,342],[62,359],[185,361],[200,345],[200,345],[215,361],[338,359],[354,342],[318,313],[244,306],[278,285],[251,237],[287,193],[200,25]] ,
-	"P":[[200,73],[163,87],[157,123],[172,137],[141,159],[136,203],[157,230],[116,257],[92,347],[200,351],[200,351],[308,347],[284,257],[243,230],[264,203],[259,159],[228,137],[243,123],[237,87],[200,73]],
+	// "P":[[200,73],[163,87],[157,123],[172,137],[141,159],[136,203],[157,230],[116,257],[92,347],[200,351],[200,351],[308,347],[284,257],[243,230],[264,203],[259,159],[228,137],[243,123],[237,87],[200,73]],
+	"P":[[200,49],[251,198],[468,330],[294,38],[527,94],[320,307],[516,295],[435,30],[215,102],[245,325],[496,370],[543,141],[501,49],[375,233],[318,261],[325,334],[407,367],[530,283],[288,47],[222,323],[220,390],[571,15],[556,355],[400,47],[400,47],[244,355],[229,15],[580,390],[578,323],[512,47],[270,283],[393,367],[475,334],[482,261],[425,233],[299,49],[257,141],[304,370],[555,325],[585,102],[365,30],[284,295],[480,307],[273,94],[506,38],[332,330],[549,198],[400,49],[95,88],[53,224],[51,311],[134,323],[161,270],[108,150],[60,97],[54,65],[163,63],[192,168],[91,286],[112,319],[202,311],[276,244],[229,106],[111,58],[61,145],[79,254],[60,323],[317,59],[20,56],[276,311],[82,365],[265,69],[39,94],[220,305],[37,233],[279,146],[265,353],[200,48],[200,48],[135,353],[121,146],[363,233],[180,305],[361,94],[135,69],[318,365],[124,311],[380,56],[83,59],[340,323],[321,254],[339,145],[289,58],[171,106],[124,244],[198,311],[288,319],[309,286],[208,168],[237,63],[346,65],[340,97],[292,150],[239,270],[266,323],[349,311],[347,224],[305,88],[0,49],[-149,198],[68,330],[-106,38],[127,94],[-80,307],[116,295],[35,30],[-185,102],[-155,325],[96,370],[143,141],[101,49],[-25,233],[-82,261],[-75,334],[7,367],[130,283],[-112,47],[-178,323],[-180,390],[171,15],[156,355],[0,47],[0,47],[-156,355],[-171,15],[180,390],[178,323],[112,47],[-130,283],[-7,367],[75,334],[82,261],[25,233],[-101,49],[-143,141],[-96,370],[155,325],[185,102],[-35,30],[-116,295],[80,307],[-127,94],[106,38],[-68,330],[149,198],[200,49]],
 	"N":[[155,89],[122,63],[116,102],[69,174],[47,232],[63,271],[87,275],[96,256],[103,262],[102,285],[142,244],[153,247],[206,184],[186,256],[142,299],[127,356],[344,354],[326,177],[261,102],[203,84],[188,51],[167,87]],
 	"W":[[336,27],[135,124],[78,292],[19,332],[384,320],[311,279],[243,156],[335,29]],
 	"C":[[385,80],[332,106],[334,117],[311,128],[304,118],[180,179],[141,115],[132,122],[148,157],[98,180],[97,219],[60,237],[74,269],[83,266],[84,275],[46,275],[33,299],[3,301],[3,308],[38,309],[57,286],[88,288],[105,307],[132,321],[165,317],[192,293],[200,262],[192,234],[179,219],[184,216],[202,243],[213,237],[198,211],[319,150],[317,142],[339,129],[345,135],[400,110],[390,81]] 
+}
+
+class DBG{
+	static debugging = false;
+	static tickTime = 0;
+
+	static render(){
+		ctx.font = "bold 15px Courier New"
+		ctx.textAlign = "right"
+		ctx.fillStyle = "white"
+
+		ctx.fillText(Math.floor(this.tickTime)+"/"+Math.floor(camera.fps*this.tickTime/10)+"%",Width,15)
+	}
 }
 
 class camera{
@@ -108,6 +123,7 @@ class camera{
 	static soundArr = []
 	static tileRsize = 1
 	static soundOn = true;
+	static fps = 28
 	// static volume = 0;
 
 	static highScores = {"Normal":[0,0],"King's Raid":[0,0],"Knight's Raid":[0,0],"Phantom":[0,0],"Universal":[0,0]}
@@ -118,16 +134,16 @@ class camera{
 	// 	click.play()
 	// }
 	static playSound(file,note){
-		if(this.soundOn === false){return}
+		if(this.soundOn === false || soundLoaded === false){return}
 		note = note?note:"C4"
 		this.sounds[file].triggerAttack(note)
 	}
 	static playSoundF(no){
-		if(this.soundOn === false){return}
+		if(this.soundOn === false|| soundLoaded === false){return}
 		sampler1.triggerAttack([soundMapper[no]])
 	}
 	static playSoundURL(url){//dog
-		if(this.soundOn === false){return}
+		if(this.soundOn === false|| soundLoaded === false){return}
 		let audio = new Tone.Player(url).toDestination()
 		audio.onStop = ()=>{audio.dispose()}
 		audio.autostart = true;
@@ -673,7 +689,7 @@ function pieceImage(x,y,arr){
 }
 
 function render(){
-
+	let renderStartTime = Date.now()
 	fill(0,0,0)
 	rect(0,0,Width,Height)
 
@@ -776,17 +792,32 @@ function render(){
 	if(camera.specialRenderOn){
 		specialRender();
 	}
+	if(DBG.debugging){
+		DBG.render()
+	}
 	if(camera.escaped){
 		menuRender(0,0)
 	}
 	fill(255,0,0,0.3)
 	mrect(mouseBoardX,mouseBoardY)
 	fill(125,0,255,0.3)
+
+	// for(let i = 0; i < 20000000; i++){
+	// 	Math.random()
+	// } wow this game is terrifically optimized
+
 	ctx.fillRect(0,0,camera.menuButtonSize,camera.menuButtonSize)
+	DBG.tickTime = DBG.tickTime + 0.05*(Date.now()-renderStartTime- DBG.tickTime)
 }
 
 // setInterval(()=>{if(document.hasFocus()){render()}},35)
-let renderInterval = setInterval(()=>{render()},35)
+let renderInterval = setInterval(()=>{render()},Math.floor(1000/camera.fps))
+function setFps(x){
+	camera.fps = x
+	clearInterval(renderInterval)
+	renderInterval = setInterval(()=>{render()},Math.floor(1000/camera.fps))
+}
+
 
 
 let gameInterval;
@@ -1294,7 +1325,9 @@ var sampler1 = new Tone.Sampler({
 		"G#4":"./sounds/captureS8.wav"
 
 	},
+	onload : ()=>{soundLoaded = true;console.log("soundLoaded")}
 }).toDestination();
+
 
 var sampler2 = new Tone.Players({
 	"1":"./sounds/select.wav"
