@@ -402,6 +402,7 @@ function menuRender(){
 	drawText("saved last ["+(camera.cookies===false?'/':camera.cookies)+"]",2,15.8);
 	drawText("DELETE CACHE (if you are not updating)",2,17)
 	drawText("cache quota ["+cacheQuota+"]",2,17.8);
+	drawText("Debugging info ["+(DBG.debugging?"on":"off")+"]",2,19)
 
 	if(camera.pieceRender == "image"){
 		fill(255,255,255)
@@ -414,6 +415,9 @@ function menuRender(){
 	((camera.soundOn)?(()=>{fill(0,255,0)}):(()=>{fill(255,0,0)}))();
 	mrect(0.2,3.2,0.6,0.6);//sound
 	mrect(0.2,5.2,0.6,0.6);//random sound
+
+	((DBG.debugging)?(()=>{fill(0,255,0)}):(()=>{fill(255,0,0)}))();
+	mrect(0.2,19.2,0.6,0.6);
 
 	fill(255,0,0)
 	mrect(0.2,7.2,0.8,0.6)
@@ -519,6 +523,9 @@ document.addEventListener("mouseup",(e)=>{
 						}
 					camera.playSound("select")
 
+				} else if(Y === 19){
+					DBG.debugging = !DBG.debugging
+					camera.playSound("select")
 				}  else if(Y === -2){
 					if(gameStart != "started"){
 						window.open('','_self').close()
@@ -696,6 +703,9 @@ function render(){
 	
 
 	let arr = Object.keys(board.tiles)
+
+
+
 	arr.forEach((e)=>{
 		let pos = ipos(e)
 		let tile = board.tiles[e]
@@ -779,6 +789,8 @@ function render(){
 		ctx.moveTo(mouseDownPlace[2],mouseDownPlace[3])
 		ctx.lineTo(mouseX,mouseY)
 		ctx.stroke()
+		drawArrow(mouseDownPlace[2],mouseDownPlace[3],mouseX,mouseY,Math.random(),0.2,0.1)
+
 		if(pieceDowned !== "none"){
 			if(board.tiles[spos(mouseBoardX,mouseBoardY)]?.piece == pieceDowned || (pieceDowned.held === true && pieceDowned.alive)){
 				if(pieceDowned.hold != undefined){
@@ -1329,9 +1341,7 @@ var sampler1 = new Tone.Sampler({
 }).toDestination();
 
 
-var sampler2 = new Tone.Players({
-	"1":"./sounds/select.wav"
-}).toDestination()
+
 let soundMapper = {
 	"0":"C2",
 	"1":"C4",

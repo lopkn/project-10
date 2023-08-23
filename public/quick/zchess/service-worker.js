@@ -66,11 +66,11 @@ self.addEventListener('install', function(event) {
 //     })
 //   );
 // });
+  console.log("ver:"+version)
 
 
 
 self.addEventListener('fetch', event => {
-  console.log("ver:"+version)
   // console.log(event.request)
   let re = Math.random()
   event.respondWith(

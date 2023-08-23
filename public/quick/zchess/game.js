@@ -34,6 +34,13 @@ class board {
 	}
 }
 
+function pointTile(){
+	return(board.tiles[spos(mouseBoardX,mouseBoardY)])
+}
+function pointPiece(){
+	return(board.tiles[spos(mouseBoardX,mouseBoardY)]?.piece)
+}
+
 function getTileTeam(pos,team){
 	let tile = board.tiles[pos]
 	if(tile == undefined){return(false)}
@@ -54,7 +61,8 @@ function movePiece(x,y,tx,ty,team){
 class piece {
 	constructor(id,x,y,team,tags){
 		this.arrFuncs = {
-		"onMove":[]
+		"onMove":[],
+		"onDeath":{},
 		}
 		this.id = id
 		this.tags = tags || {}
@@ -496,6 +504,9 @@ class piece {
 			if(board.tiles[pos].piece.onDeath != undefined){
 				board.tiles[pos].piece.onDeath()
 			}
+			Object.values(board.tiles[pos].piece.arrFuncs.onDeath).forEach((f)=>{
+				f(this)
+			})
 			
 			board.tiles[pos].piece.alive = false
 			kill(this.x,this.y)
@@ -784,6 +795,21 @@ class lineParticle{
 		ctx.stroke()
 	}
 }
+
+function drawArrow(x1,y1,x2,y2,p,d,s){
+	d = d?d:0.05
+	s = s?s:d
+	let drawPoint = [x1+p*(x2-x1),y1+p*(y2-y1),x1+(p-d)*(x2-x1),y1+(p-d)*(y2-y1)]
+	let arrowPoint = [drawPoint[2]+s*(y1-y2),drawPoint[3]+s*(x2-x1),drawPoint[2]-s*(y1-y2),drawPoint[3]-s*(x2-x1)]
+	ctx.beginPath()
+	ctx.moveTo(arrowPoint[0],arrowPoint[1])
+	ctx.lineTo(drawPoint[0],drawPoint[1])
+	ctx.lineTo(arrowPoint[2],arrowPoint[3])
+	ctx.stroke()
+	return(arrowPoint)
+}
+
+
 class bloodParticle{
 	constructor(x,y,vx,vy,rv,size,duplicator){
 		this.x = x
@@ -1248,6 +1274,8 @@ var gameEvents = {
 		gameEvents["piece storm"](8)
 	}
 }
+
+
 
 
 function spawnZombie(pc){
