@@ -1174,6 +1174,22 @@ function stopGame(){
 
 //touch handler
 
+function mobileScale(x,md){
+	let stb1 = screen_to_board(md[0],md[1])
+	tileSize -= x/5
+	if(tileSize < 4){tileSize = 4}
+	camera.tileRsize = tileSize/50
+	let stb2 = screen_to_board(md[0],md[1])
+	camera.x += stb2[0] - stb1[0]
+	camera.y += stb2[1] - stb1[1]
+
+
+}
+
+let pinchDist = -1
+let pinchMdx = -1
+let pinchMdy = -1
+
 function touchHandler(event)
 {
 
@@ -1196,7 +1212,28 @@ function touchHandler(event)
     //                screenX, screenY, clientX, clientY, ctrlKey, 
     //                altKey, shiftKey, metaKey, button, relatedTarget);
 
+    // if(event.type == 'touchmove' &&event.touches.length == 2){
+    // 	console.log(Math.hypot(
+    // 		event.touches[0].pageX - event.touches[1].pageX,
+    // 		event.touches[0].pageY - event.touches[1].pageY))
+    // }
 
+    if(event.type == 'touchmove' && event.touches.length == 2){
+    	let newDist = Math.hypot(
+    		event.touches[0].pageX - event.touches[1].pageX,
+    		event.touches[0].pageY - event.touches[1].pageY);
+    	let md = [(event.touches[0].clientX+event.touches[1].clientX)/2,(event.touches[0].clientY+event.touches[1].clientY)/2]
+
+    	if(pinchDist != -1){
+    		mobileScale(pinchDist - newDist,md)
+    		camera.x -= (md[0]-pinchMdx)/tileSize
+    		camera.y -= (md[1]-pinchMdy)/tileSize
+    	}
+    	pinchDist = newDist
+    	pinchMdx = md[0]
+    	pinchMdy = md[1]
+    	return;
+    }
 
 
     if(type !== "mouseup"){
@@ -1208,6 +1245,7 @@ function touchHandler(event)
 
     if(event.type == "touchend"){
        	console.log("t4")
+       	pinchDist = -1
        }
 
     simulatedEvent.initMouseEvent(type, true, true, window, 1, 
