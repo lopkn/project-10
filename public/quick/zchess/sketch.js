@@ -1189,6 +1189,7 @@ function mobileScale(x,md){
 let pinchDist = -1
 let pinchMdx = -1
 let pinchMdy = -1
+let mobileInverse = -1
 
 function touchHandler(event)
 {
@@ -1226,8 +1227,8 @@ function touchHandler(event)
 
     	if(pinchDist != -1){
     		mobileScale(pinchDist - newDist,md)
-    		camera.x -= (md[0]-pinchMdx)/tileSize
-    		camera.y -= (md[1]-pinchMdy)/tileSize
+    		camera.x -= (md[0]-pinchMdx)/tileSize*mobileInverse
+    		camera.y -= (md[1]-pinchMdy)/tileSize*mobileInverse
     	}
     	pinchDist = newDist
     	pinchMdx = md[0]
