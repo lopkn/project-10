@@ -1116,7 +1116,7 @@ board.spawnRates = ["pawn",0.7,"king",0.85,"knight",0.95,"bishop",0.98,"rook",1]
 			for(let i = board.spawnRange[0]; i < board.spawnRange[1]; i++){
 				if(board.tiles[i+","+y] != undefined){tilePut += 1}
 			}
-		if(tilePut > 6){board.tileExtensionBoarder += 1}
+		if(tilePut > 6){board.tileExtensionBoarder -= 1}
 		}
 	}
 	gameSpecialInterval()

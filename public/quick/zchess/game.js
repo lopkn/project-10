@@ -885,13 +885,13 @@ function displayKills(kills,x,y,size,speed){
 
 var gameEvents = {
 	"elite knight":()=>{
+		let pc = spawnZombie(new piece("knight",4,0,"zombies"))
+		if(pc === false){return}
 		camera.particles.push(new expandingText("An Elite Knight Spawned",Width/2/tileSize-camera.x,Height/2/tileSize-camera.y,
 		(x)=>{return("rgba(255,255,0,"+x+")")},
 		0.5,0.9))
 		camera.particles[camera.particles.length-1].size = tileSize/2
 
-		board.tiles["4,0"].piece = new piece("knight",4,0,"zombies")
-		let pc = board.tiles["4,0"].piece
 		pc.maxCD = 3
 		pc.color = "rgb(50,150,0)"
 		pc.draw = (l,x,y)=>{
@@ -1210,7 +1210,13 @@ var gameEvents = {
 
 	if(board.tiles[spos(piece.x,piece.y)] == undefined || board.tiles[spos(piece.x,piece.y)].piece == undefined){return}
 	let result;
-	while(piece.cooldown == 0 && piece == board.tiles[spos(piece.x,piece.y)].piece && legal.length > 0){
+	while(piece.cooldown == 0 && piece == board.tiles[spos(piece.x,piece.y)].piece){
+		if(legal.length == 0){
+			setTimeout(()=>{
+				pc.AImoveRandom(piece)
+			},piece.AIblockWait == undefined?board.AIblockWait():piece.AIblockWait())
+		return
+		}
 
 		let moveIndex = Math.floor(Math.random()*legal.length)
 
