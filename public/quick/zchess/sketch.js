@@ -870,19 +870,19 @@ if(camera.gamemode == "Roaming"){
 
 			}
 }else if(camera.gamemode == "Knight's Raid"){
-			camera.pieceFrequency = 1700
+			camera.pieceFrequency = 1100
 			gameSpecialInterval = ()=>{if(board.iterations%18 == 0 && board.iterations > 30){
 				for(let i = 0; i < 4; i++){
 					board.spawnRates[2*i+1]-=(1-board.spawnRates[2*i+1])*(1-board.spawnRates[2*i+1])*0.2
 					if(board.spawnRates[2*i+1] < (i+1)*0.1){board.spawnRates[2*i+1] = (i+1)*0.1}
 				}
 				}
-				if(board.iterations % 20 == 0 && camera.pieceFrequency > 1300){
+				if(board.iterations % 20 == 0 && camera.pieceFrequency > 100){
 					camera.pieceFrequency -= 50
 					startGameInterval(camera.pieceFrequency)
 				}
 			}
-			board.specialIntervals["bombers"] = ()=>{if(board.iterations > 30 &&Math.random()<0.0001*relativeEventFrequency){gameEvents["bomber pawn"]()}}
+			board.specialIntervals["bombers"] = ()=>{if(board.iterations > 30 &&Math.random()<0.001*relativeEventFrequency){gameEvents["bomber pawn"]()}}
 			board.specialIntervals["elite cannon"] = ()=>{if(board.iterations > 30 &&Math.random()<0.005*relativeEventFrequency){gameEvents["elite cannon"]()}}
 			board.specialIntervals["elite knight"] = ()=>{if(board.iterations > 30 &&Math.random()<0.005*relativeEventFrequency){gameEvents["elite knight"]()}}
 			board.specialIntervals["allied knight"] = ()=>{if(board.iterations > 30 && Math.random()<0.005*relativeEventFrequency){gameEvents["white knights"]()}}
@@ -914,14 +914,14 @@ if(camera.gamemode == "Roaming"){
 			
 } else if(camera.gamemode == "King's Raid"){
 			
-			camera.pieceFrequency = 1300
+			camera.pieceFrequency = 1200
 			gameSpecialInterval = ()=>{if(board.iterations%12 == 0 && board.iterations > 120){
 				for(let i = 0; i < 4; i++){
 					board.spawnRates[2*i+1]-=(1-board.spawnRates[2*i+1])*(1-board.spawnRates[2*i+1])*0.2
 					if(board.spawnRates[2*i+1] < (i+1)*0.1){board.spawnRates[2*i+1] = (i+1)*0.1}
 				}
 					console.log(board.spawnRates)
-				} if(board.iterations % 20 == 0 && camera.pieceFrequency > 950){
+				} if(board.iterations % 20 == 0 && camera.pieceFrequency > 850){
 					camera.pieceFrequency -= 50
 					startGameInterval(camera.pieceFrequency)
 				}

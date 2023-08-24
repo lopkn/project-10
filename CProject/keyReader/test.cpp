@@ -168,8 +168,8 @@ int lastKey = 400;
 int keyRepeats = 0;
 
 
-int keyboardEventX = 2;
-int mouseEventX = 5;
+int keyboardEventX = 1;
+int mouseEventX = 2;
 
 bool extraSlow = false;
 
