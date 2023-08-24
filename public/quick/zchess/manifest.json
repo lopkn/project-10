@@ -5,7 +5,7 @@
 	"start_url":"./index.html",
 	"background_color":"#6000A0",
 	"theme_color":"#6000A0",
-	"orientation":"natural",
+	"orientation":"portrait",
 	"icons":[
 		{
 			"src":"../../images/pismc7.png",
