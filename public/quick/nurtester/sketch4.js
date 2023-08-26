@@ -4,6 +4,9 @@ class s5{
 	static sampleBin = []
 	static answers = []
 	static numPairs = {}
+	static binLength = 10
+
+	static assumeCollapsed = {}
 
 	static findPairs(){
 		this.samples.forEach((e,i)=>{
@@ -20,8 +23,10 @@ class s5{
 	}
 
 	static sampleConvert(){
+		let maxInt = Math.pow(2,this.binLength-1)
 		this.samples.forEach((e,i)=>{
-			let nbp = numToBinput(e)
+			if(e > maxInt){console.log("FATAL ERROR: OVERSIZED NUMBER: "+e+" AT "+i)}
+			let nbp = numToBinput(e,this.binLength)
 			for(let j = 0; j < nbp.length; j++){
 				if(this.sampleBin[j] === undefined){this.sampleBin[j] = []}
 				this.sampleBin[j][i] = parseInt(nbp[j])
@@ -31,6 +36,7 @@ class s5{
 	}
 
 	static collapsable(){
+		this.assumeCollapsed = {}
 		let collapsables = []
 		this.sampleBin.forEach((arr,i)=>{
 			let numpow = Math.pow(2,this.sampleBin.length-i-1)
@@ -52,6 +58,7 @@ class s5{
 				}
 			}
 			collapsables.push(i)
+			this.assumeCollapsed[i] = true
 		})
 		return(collapsables)
 	}

@@ -162,6 +162,11 @@ const fs = require("fs");
 
 class s6{
   static blocks = {}
+
+  static interpreter(str){
+    let splitLine = str.split('\n')
+    
+  }
 }
 
 
