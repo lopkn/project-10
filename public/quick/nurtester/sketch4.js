@@ -35,25 +35,25 @@ class s5{
 		return(this)
 	}
 
-	static collapsable(){
+	static collapsable(dissing){
 		this.assumeCollapsed = {}
 		let collapsables = []
 		this.sampleBin.forEach((arr,i)=>{
-			let numpow = Math.pow(2,this.sampleBin.length-i-1)
+			let numpow = Math.pow(2,this.sampleBin.length-i-1) // the Index represented
 			let tempDict = {}
 			for(let j = 0; j < arr.length; j++){
-				if(arr[j]){
-					let num = this.samples[j]-numpow
+				if(arr[j]){ // if index is 1
+					let num = this.samples[j]-numpow // whats the number without this index?
 					if(this.numPairs[num] !== undefined){
-						if(this.numPairs[num][1] != this.answers[j]){
+						if(this.numPairs[num][1] != this.answers[j]){ // if this new number is not this answer
 							return;
 						}
 					} else if(tempDict[num] !== undefined){
-						if(tempDict[num] != this.answers[j]){
+						if(tempDict[num] != this.answers[j]){ // if a created number is not this answer
 							return;
 						}
 					} else {
-						tempDict[num] = this.answers[j]
+						tempDict[num] = this.answers[j] // create the answer number key
 					}
 				}
 			}
@@ -61,6 +61,49 @@ class s5{
 			this.assumeCollapsed[i] = true
 		})
 		return(collapsables)
+	}
+}
+
+class s6{
+
+
+	static removeFrontZeros(str){
+		str = str.replace("x",'')
+			while(str[0] === "0"){
+				str = i.substring(1)
+			}
+			return(str)
+	}
+	constructor(){
+		this.sampleAnswer = {}
+	}
+	addPair(s,a){
+		let samp;
+		if(typeof(s) === "string"){
+			samp = s6.removeFrontZeros(s)
+		} else {
+			samp =s6.removeFrontZeros(s.toString(2))
+		}
+		if(this.sampleAnswer[samp] === undefined){
+			this.sampleAnswer[samp] = {"count":1,"answer":a} //collapse count will be in the collapse dict
+		} else if(this.sampleAnswer[samp].answer == a){
+			this.sampleAnswer[samp].count += 1
+		}
+	}
+
+	static sampleCollapse(str,arr){
+		arr.forEach((e)=>{
+			if(str.length > e){
+				str[e] = "x"
+			}
+		})
+		return(this.removeFrontZeros(str))
+	}
+
+	static collapse(cls){
+		let maxLeng = 0;
+		let objk = Object.keys(cls.sampleAnswer)
+		objk.forEach((e)=>{if(e.length > maxLeng){maxLeng = e.length}})
 	}
 }
 
