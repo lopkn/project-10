@@ -995,8 +995,8 @@ var gameEvents = {
 			}
 	},
 	"elite rook":()=>{
-		board.tiles["4,0"].piece = new piece("rook",4,0,"zombies")
-		let pc = board.tiles["4,0"].piece
+		let pc = spawnZombie(new piece("rook",4,0,"zombies"))
+		if(pc === false){return}
 		pc.maxCD = 4
 		pc.color = "rgb(50,150,0)"
 		pc.draw = (l,x,y)=>{
@@ -1010,8 +1010,9 @@ var gameEvents = {
 		pc.AIwait = ()=>{return(10)}
 		pc.AIblockWait = ()=>{return(300)}
 	},"elite bishop":()=>{
-		board.tiles["4,0"].piece = new piece("bishop",4,0,"zombies")
-		let pc = board.tiles["4,0"].piece
+		let pc = spawnZombie(new piece("bishop",4,0,"zombies"))
+		if(pc === false){return}
+
 		pc.maxCD = 4
 		pc.color = "rgb(50,150,0)"
 		pc.draw = (l,x,y)=>{
@@ -1025,8 +1026,8 @@ var gameEvents = {
 		pc.AIwait = ()=>{return(10)}
 		pc.AIblockWait = ()=>{return(300)}
 	},"elite queen":()=>{
-		board.tiles["4,0"].piece = new piece("queen",4,0,"zombies")
-		let pc = board.tiles["4,0"].piece
+		let pc = spawnZombie(new piece("queen",4,0,"zombies"))
+		if(pc === false){return}
 		pc.maxCD = 5
 		pc.color = "rgb(50,150,0)"
 		pc.draw = (l,x,y)=>{
