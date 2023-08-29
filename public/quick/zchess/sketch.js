@@ -1076,7 +1076,8 @@ if(camera.gamemode == "Roaming"){
 	board.AIwait = ()=>{return(Math.random()*4000)}
 	board.AIblockWait = ()=>{return(Math.random()*4000+3000)}
 }
-board.spawnRates = ["pawn",0.7,"king",0.85,"knight",0.95,"bishop",0.98,"rook",1]
+board.spawnRates = ["pawn",0.65,"king",0.80,"knight",0.95,"bishop",0.98,"rook",0.998,"cannon":0.9995,"queen":1]
+
 
 	board.tiles[3+",0"].piece = new piece("pawn",3,0,"zombies",{"direction":"y+"})
 	board.tiles[5+",0"].piece = new piece("pawn",5,0,"zombies",{"direction":"y+"})

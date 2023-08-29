@@ -1276,8 +1276,7 @@ var gameEvents = {
 
 				}
 			})
-		// board.spawnRates = ["pawn",0.6,"king",0.77,"knight",0.94,"bishop",0.98,"rook",1]
-			board.spawnRates = ["pawn",0.65,"king",0.80,"knight",0.95,"bishop",0.98,"rook",1]
+			board.spawnRates = ["pawn",0.65,"king",0.80,"knight",0.95,"bishop",0.98,"rook",0.998,"cannon":0.9995,"queen":1]
 		gameEvents["piece storm"](8)
 	}
 }
