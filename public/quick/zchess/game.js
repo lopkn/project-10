@@ -1114,7 +1114,7 @@ var gameEvents = {
 		(x)=>{return("rgba(255,255,0,"+x+")")},
 		0.5,0.9))
 		camera.particles[camera.particles.length-1].size = tileSize/2
-
+		pc.bombRadius = 1;
 		// pc.maxCD = 3
 		pc.color = "rgb(50,150,0)"
 		pc.draw = (l,x,y)=>{
@@ -1158,8 +1158,8 @@ var gameEvents = {
 			setTimeout(()=>{
 
 
-			for(let i = -1; i < 2; i++){
-				for(let j = -1 ;j < 2; j++){
+			for(let i = -pc.bombRadius; i < pc.bombRadius+1; i++){
+				for(let j = -pc.bombRadius ;j < pc.bombRadius+1; j++){
 					if(board.tiles[spos(pc.x+i,pc.y+j)]?.piece != undefined){
 						let pct = board.tiles[spos(pc.x+i,pc.y+j)].piece
 						if(pct.onDeath != undefined && pct != pc){
