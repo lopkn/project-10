@@ -695,6 +695,13 @@ function pieceImage(x,y,arr){
 	ctx.closePath()
 }
 
+function normalShopRender(){
+	fill(20,0,0)
+	for(let i = -camera.x-2;i<Width/tileSize+5;i++){
+		mrect(i, 13)
+	}
+}
+
 function render(){
 	let renderStartTime = Date.now()
 	fill(0,0,0)
@@ -704,6 +711,7 @@ function render(){
 
 	let arr = Object.keys(board.tiles)
 
+	normalShopRender()
 
 
 	arr.forEach((e)=>{
@@ -1076,7 +1084,7 @@ if(camera.gamemode == "Roaming"){
 	board.AIwait = ()=>{return(Math.random()*4000)}
 	board.AIblockWait = ()=>{return(Math.random()*4000+3000)}
 }
-board.spawnRates = ["pawn",0.65,"king",0.80,"knight",0.95,"bishop",0.98,"rook",0.998,"cannon":0.9995,"queen":1]
+board.spawnRates = ["pawn",0.65,"king",0.80,"knight",0.95,"bishop",0.98,"rook",0.998,"cannon",0.9995,"queen",1]
 
 
 	board.tiles[3+",0"].piece = new piece("pawn",3,0,"zombies",{"direction":"y+"})
