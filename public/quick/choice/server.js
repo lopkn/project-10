@@ -162,10 +162,54 @@ const fs = require("fs");
 
 class s6{
   static blocks = {}
+  static executions = []
+  static memory1 = {}
+
+  static prt(str){
+    console.log(str)
+  }
 
   static interpreter(str){
     let splitLine = str.split('\n')
-    
+    let variables = {}
+    for(let i = 0 ; i < splitLine.length; i++){
+      let line = splitLine[i]
+      let splitSpace = line.split(' ')
+      if(splitSpace[0] === "req"){
+        let req = this.requirer(line.substring(4))
+        if(req === undefined){return;}
+        if(variables[req.varName] !== undefined){this.prt("warning: override variable: "+req.varName)}
+        variables[req.varName] = req.variable
+      } else if(splitSpace[0] === "go"){
+        if(this.blocks[splitSpace[1]] !== undefined){
+          this.executions.push(splitSpace[1])
+          return;
+        }
+      } else if(splitSpace[0] === "prt"){this.prt(line.substring(4))
+      } else if(){}
+    }
+  }
+
+  static run(x){
+    for(let i = 0; i < x; i++){
+      this.executeBlock(this.executions[0])
+      this.executions.splice(0,1)
+    }
+  }
+  static executeBlock(block){
+    return(this.interpreter(this.blocks[block]))
+  }
+
+  static requirer(str){
+    let split = str.split(' ')
+    if(split.length === 1){
+      return({"variable":memory1[split[0]],"varName":split[0]})
+    }
+    if(split.length === 3){
+      if(split[1] === "as"){
+        return({"variable":memory1[split[0]],"varName":split[2]})
+      }
+    }
   }
 }
 

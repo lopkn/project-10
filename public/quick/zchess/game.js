@@ -1344,3 +1344,33 @@ function spawnFriendly(pc){
 //help menu
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
