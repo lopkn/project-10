@@ -359,7 +359,21 @@ class piece {
 				})
 				return({"arr":legals,"dict":legalDict})
 			}
-		} else if(id == "king"){
+		} else if(id == "Guardian"){
+			this.maxCD = 10
+			this.renderLetter = "J"
+			this.jumps = [[2,-2],[-2,2],[2,2],[2,-2]]
+			this.legals = ()=>{
+				let legals = []
+				let legalDict = {}
+				this.jumps.forEach((s)=>{
+					let e = spos(s[0]+this.x,s[1]+this.y)
+					let gtt = getTileTeam(e,this.team)
+					if(gtt == "capture" || gtt == "empty"){legals.push(e);legalDict[e]=gtt;}
+				})
+				return({"arr":legals,"dict":legalDict})
+			}
+		}  else if(id == "king"){
 			this.maxCD = 20
 			if(this.team=="zombies"){this.maxCD = 20}
 			this.renderLetter = "K"
