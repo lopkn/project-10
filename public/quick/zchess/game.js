@@ -361,7 +361,7 @@ class piece {
 			}
 		} else if(id == "Guardian"){
 			this.maxCD = 10
-			this.renderLetter = "J"
+			this.renderLetter = "G"
 			this.jumps = [[2,-2],[-2,2],[2,2],[2,-2]]
 			this.legals = ()=>{
 				let legals = []

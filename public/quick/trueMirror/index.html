@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Lopkn's True Mirror online</title>
+    <style>
+      #videoElement {
+        transform: scaleX(-1);
+      }
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px;
+        background-color: lightblue;
+      }
+      
+      .header-element {
+        margin-right: 10px;
+      }
+      
+      .additional-element {
+        margin-left: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1 class="header-element">WHY TF CANT I FIND THIS WITH GOOGLE</h1>
+    <div class = "additional-element"><input type="range" id="slider" min="0" max="100" value="50" ></input></div>
+    <video id="videoElement" autoplay></video>
+    <script>
+      navigator.mediaDevices
+        .getUserMedia({ video: true })
+        .then(function (stream) {
+          var videoElement = document.getElementById("videoElement");
+          videoElement.style.transform = "scale(1,1)"
+          videoElement.srcObject = stream;
+        })
+        .catch(function (error) {
+          console.log("Error accessing the camera: ", error);
+        });
+
+        document.getElementById('slider').addEventListener('input',(e)=>{
+          let x = document.getElementById('slider').value/50
+          videoElement.style.transform = "scale("+x+","+x+")"
+        })
+    </script>
+  </body>
+</html>
