@@ -27,13 +27,18 @@
     <h1 class="header-element">WHY TF CANT I FIND THIS WITH GOOGLE</h1>
     <div class = "additional-element"><input type="range" id="slider" min="0" max="100" value="50" ></input></div>
     <video id="videoElement" autoplay></video>
+    <canvas id = "myCanvas"></canvas>
     <script>
+
+      var refer = []
+
       navigator.mediaDevices
         .getUserMedia({ video: true })
         .then(function (stream) {
           var videoElement = document.getElementById("videoElement");
           videoElement.style.transform = "scale(1,1)"
           videoElement.srcObject = stream;
+          redef()
         })
         .catch(function (error) {
           console.log("Error accessing the camera: ", error);
@@ -42,7 +47,310 @@
         document.getElementById('slider').addEventListener('input',(e)=>{
           let x = document.getElementById('slider').value/50
           videoElement.style.transform = "scale("+x+","+x+")"
+          redef()
         })
+        let myCanvas = document.getElementById('myCanvas')
+        let ctx = myCanvas.getContext("2d")
+        myCanvas.style.position = "absolute"
+        var videoRect = videoElement.getBoundingClientRect()
+        let Width = 640;
+        let Height = 480;
+        function redef(){
+        myCanvas.style.top = videoRect.top + "px";
+        myCanvas.style.left = videoRect.left + "px";
+        myCanvas.width = videoElement.offsetWidth
+        myCanvas.height = videoElement.offsetHeight
+         Width = myCanvas.width
+         Height = myCanvas.height
+
+         for(let i = 0; i < Width*Height; i++){
+            refer[i] = {"x":i%Width,"y":Math.floor(i/Width)}
+         }
+
+      }
+      setTimeout(()=>{redef();console.log("redefed")},3000)
+        function drawFunc(){}
+
+        function getData(){
+          let imageData = ctx.getImageData(0, 0, myCanvas.width, myCanvas.height).data;
+          let newArr = []
+
+          for(let i = 1; i < imageData.length; i+=4){
+            newArr.push(imageData[i]*2-imageData[i-1]-imageData[i+1])
+
+
+          }
+          return({"data":newArr,"imageData":imageData})
+        }
+
+        function processData(d,res){
+          let arr = [[-Infinity,0,0]]
+          res = res?res:300
+          let ares = 0
+          d.data.forEach((e,i)=>{
+            let x = refer[i].x
+            let y = refer[i].y
+            if(x%2 == 1 || y%2 == 1){return}
+              if(e > aresLim){ares++}
+            if(e < aresLim || arr.length > res-1 && e < arr[res-1][0]){return;}
+            for(let j = 0; j < res; j++){
+              if(arr[j] === undefined||e > arr[j][0]){
+                arr.splice(j,0,[e,x,y])
+                break;
+              }
+            }
+          })
+          arr.splice((res-1),Infinity)
+          d["sorted"] = arr
+          d.ares = ares
+          return(d)
+        }
+        let aresLim = 100
+        let masterRes = 300
+        function copyToCanvas(){
+          ctx.drawImage(videoElement, 0, 0, myCanvas.width, myCanvas.height)
+          let d = getData()
+           d = processData(d,masterRes)
+          // d.data.forEach((e,i)=>{
+          //   let x = refer[i].x
+          //   let y = refer[i].y
+          //   if(x%2 == 1 || y%2 == 1){return}
+          //   ctx.fillStyle = "rgb("+e+","+e+","+e+")"
+          //   ctx.fillRect(Width-x,y,2,2)
+          // })
+           ctx.fillStyle = "black"
+           ctx.fillRect(0,0,Width,Height)
+           let regressionArr = [[],[]]
+           d.sorted.forEach((a)=>{
+            let e = a[0]>255?255:a[0]
+            ctx.fillStyle = "rgb(0,"+e+",0)"
+            ctx.fillRect(Width-a[1],a[2],2,2)
+            regressionArr[0].push({"x":Width-a[1],"y":a[2]})
+            regressionArr[1].push(e)
+           })
+           // let reg = calculateLinearRegression2(regressionArr[0],regressionArr[1])
+           // let reg = calculateLinearRegression(regressionArr[0])
+           let reg = calculateGeometricRegressionSlope(regressionArr[0],regressionArr[1])
+           console.log(reg)
+           drawLineWithMidpoint(reg.m,{"x":reg.x,"y":reg.y},200)
+          //  if(d.sorted[d.sorted.length-1][0] > aresLim){masterRes += Math.floor((d.sorted[d.sorted.length-1][0]-aresLim))
+          // }
+           if(d.ares > 300){masterRes = d.ares}else if(masterRes>300){masterRes-=Math.floor((masterRes-300)*0.05)}
+            if(masterRes < 300){masterRes = 300}
+        }
+
+        function drawLoop(){
+          ctx.clearRect(0,0,Width,Height)
+          drawFunc()
+        }
+        let mainInterval = setInterval(()=>{
+          let dn = Date.now()
+          drawLoop();copyToCanvas()
+          console.log("taken: "+(Date.now()-dn))
+        },80)
+
+function calculateGeometricRegressionSlope(points, weights) {
+  let sumX = 0;
+  let sumY = 0;
+  let sumXY = 0;
+  let sumX2 = 0;
+  let sumWeights = 0;
+
+  for (let i = 0; i < points.length; i++) {
+    const point = points[i];
+    const weight = weights[i];
+    const x = point.x;
+    const y = point.y;
+    sumX += Math.log(x) * weight;
+    sumY += Math.log(y) * weight;
+    sumXY += Math.log(x) * Math.log(y) * weight;
+    sumX2 += Math.log(x) ** 2 * weight;
+    sumWeights += weight;
+  }
+
+  const slope = (sumWeights * sumXY - sumX * sumY) / (sumWeights * sumX2 - sumX ** 2);
+  return slope;
+}
+
+function calculateLine(points, weights) {
+  // Calculate the sum of weights
+  const sumWeight = weights.reduce((sum, weight) => sum + weight, 0);
+
+  // Check if the sum of weights is close to zero
+  const EPSILON = 1e-10;
+  if (Math.abs(sumWeight) < EPSILON) {
+    throw new Error('Sum of weights is close to zero. Unable to calculate the line.');
+  }
+
+  // Calculate the weighted means
+  let sumX = 0;
+  let sumY = 0;
+
+  for (let i = 0; i < points.length; i++) {
+    const { x, y } = points[i];
+    const weight = weights[i];
+
+    sumX += weight * x;
+    sumY += weight * y;
+  }
+
+  const meanX = sumX / sumWeight;
+  const meanY = sumY / sumWeight;
+
+  // Calculate the variances
+  let varX = 0;
+  let covXY = 0;
+
+  for (let i = 0; i < points.length; i++) {
+    const { x, y } = points[i];
+    const weight = weights[i];
+
+    const diffX = x - meanX;
+    const diffY = y - meanY;
+
+    varX += weight * diffX * diffX;
+    covXY += weight * diffX * diffY;
+  }
+
+  // Calculate the slope and intercept
+  const slope = covXY / varX;
+  const intercept = meanY - slope * meanX;
+
+  // Calculate a coordinate on the line
+  const x = points[0].x; // You can choose any x-coordinate from your points
+  const y = slope * x + intercept;
+
+  return { slope, x, y };
+}
+
+function calculateLine(points, weights) {
+  let sumWX = 0
+  let sumWY = 0
+  let sumW = 0
+  points.forEach((e,i)=>{
+    if(weights[i] == -Infinity){return}
+    sumWX += e.x*weights[i]
+    sumWY += e.y*weights[i]
+    sumW += weights[i]
+  })
+  let meanWX = sumWX / sumW
+  let meanWY = sumWY / sumW
+
+  let sumCov = 0
+  let sumVar = 0
+  points.forEach((e,i)=>{
+    if(weights[i] == -Infinity){return}
+    sumCov += weights[i] * (e.x - meanWX) * (e.y - meanWY)
+    sumVar += weights[i] * (e.x - meanWX) * (e.x - meanWX)
+  })
+  let slope = sumCov / sumVar
+
+  return { m: slope, x: meanWX, y: meanWY , sx:sumWX,sy:sumWY, pts:points,wts:weights ,sc :sumCov, sv:sumVar}
+}
+
+function calculateLinearRegression2(points, weights) {
+  const n = points.length;
+  let sumX = 0;
+  let sumY = 0;
+  let sumXY = 0;
+  let sumX2 = 0;
+  let sumW = 0;
+  let sumWX = 0;
+  let sumWY = 0;
+  let sumWXY = 0;
+  let sumWX2 = 0;
+
+  // Calculate the sums of X, Y, XY, X^2, and the weighted sums
+  for (let i = 0; i < n; i++) {
+    const { x, y } = points[i];
+    const weight = weights[i];
+    sumX += x;
+    sumY += y;
+    sumXY += x * y;
+    sumX2 += x * x;
+    sumW += weight;
+    sumWX += weight * x;
+    sumWY += weight * y;
+    sumWXY += weight * x * y;
+    sumWX2 += weight * x * x;
+  }
+
+  // Calculate the means of X, Y, and the weighted means
+  const meanX = sumX / n;
+  const meanY = sumY / n;
+  const meanWX = sumWX / sumW;
+  const meanWY = sumWY / sumW;
+
+  // Calculate the slope (b) using the weighted covariance and variance
+  const covXY = (sumXY - n * meanX * meanY);
+  const varX = (sumX2 - n * meanX * meanX);
+  const b = covXY / varX;
+
+  // Calculate the intercept (a) using the weighted means and slope
+  const a = meanWY - b * meanWX;
+
+  return { m: b, x: meanWX, y: meanWY, w: sumW };
+}
+
+function calculateLinearRegression(points) {
+  const n = points.length;
+  let sumX = 0;
+  let sumY = 0;
+  let sumXY = 0;
+  let sumX2 = 0;
+
+  // Calculate the sums of X, Y, XY, and X^2
+  for (let i = 0; i < n; i++) {
+    const { x, y } = points[i];
+    sumX += x;
+    sumY += y;
+    sumXY += x * y;
+    sumX2 += x * x;
+  }
+
+  // Calculate the means of X and Y
+  const meanX = sumX / n;
+  const meanY = sumY / n;
+
+  // Calculate the slope (b)
+  const b = (sumXY - n * meanX * meanY) / (sumX2 - n * meanX * meanX);
+
+  // Calculate the intercept (a)
+  const a = meanY - b * meanX;
+
+  return ({"m":b,"x":meanX,"y":meanY});
+}
+function drawLineWithMidpoint( slope, midpoint, len) {
+  ctx.strokeStyle = "red"
+  ctx.lineWidth = 5
+  if (isNaN(slope)) {
+    // Draw a vertical line
+    const startX = midpoint.x;
+    const startY = midpoint.y - (len / 2);
+    const endX = midpoint.x;
+    const endY = midpoint.y + (len / 2);
+
+    ctx.beginPath();
+    ctx.moveTo(startX, startY);
+    ctx.lineTo(endX, endY);
+    ctx.stroke();
+  } else {
+    // Calculate the coordinates of the starting and ending points
+    const halfLen = len / 2;
+    const deltaX = halfLen / Math.sqrt(1 + slope * slope);
+    const deltaY = slope * deltaX;
+
+    const startX = midpoint.x - deltaX;
+    const startY = midpoint.y - deltaY;
+    const endX = midpoint.x + deltaX;
+    const endY = midpoint.y + deltaY;
+
+    ctx.beginPath();
+    ctx.moveTo(startX, startY);
+    ctx.lineTo(endX, endY);
+    ctx.stroke();
+  }
+}
     </script>
   </body>
 </html>
