@@ -156,6 +156,9 @@ function calculateGeometricRegressionSlope(points, weights) {
   let sumX2 = 0;
   let sumWeights = 0;
 
+  let sumX3 = 0;
+  let sumY3 = 0;
+
   for (let i = 0; i < points.length; i++) {
     const point = points[i];
     const weight = weights[i];
@@ -163,13 +166,15 @@ function calculateGeometricRegressionSlope(points, weights) {
     const y = point.y;
     sumX += Math.log(x) * weight;
     sumY += Math.log(y) * weight;
+    sumX3 +=  x * weight
+    sumY3 +=  y * weight
     sumXY += Math.log(x) * Math.log(y) * weight;
     sumX2 += Math.log(x) ** 2 * weight;
     sumWeights += weight;
   }
 
   const slope = (sumWeights * sumXY - sumX * sumY) / (sumWeights * sumX2 - sumX ** 2);
-  return slope;
+  return {"m":slope,"x":sumX3/sumWeights,"y":sumY3/sumWeights};
 }
 
 function calculateLine(points, weights) {
