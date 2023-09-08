@@ -297,6 +297,12 @@ function calculateLinearRegression2(points, weights) {
   return { m: b, x: meanWX, y: meanWY, w: sumW };
 }
 
+function distance(x1,y1,x2,y2) {
+  let a = x2-x1
+  let b = y2-y1
+  return(Math.sqrt(a*a+b*b))
+}
+
 function calculateLinearRegression(points) {
   const n = points.length;
   let sumX = 0;
