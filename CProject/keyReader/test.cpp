@@ -40,8 +40,8 @@
 std::string s1;
 cairo_t* cr;
 
-int Width = 1920;
-int Height = 1200;
+int Width = 1920*2;
+int Height = 1080*2;
 
 struct myDrawConst{
 	std::string id = "NONE";
@@ -168,8 +168,8 @@ int lastKey = 400;
 int keyRepeats = 0;
 
 
-int keyboardEventX = 1;
-int mouseEventX = 2;
+int keyboardEventX = 2;
+int mouseEventX = 1;
 
 bool extraSlow = false;
 
@@ -963,7 +963,7 @@ void repeating(){
 	return;
 }
 void recoilReader(int xarr[100][3],int size, int device){
-	
+	int scale = 1;
     struct pollfd fds[1];
     fds[0].fd = device;
     fds[0].events = POLLIN;
@@ -998,9 +998,9 @@ void recoilReader(int xarr[100][3],int size, int device){
 
 			int * pos = myGetMousePos();
 			if(mast.aimprint){
-				std::cout << "aiming: "<<xarr[i][1]<<" = "<<xarr[i][2]<<"\n";
+				std::cout << "aiming: "<<xarr[i][1]<<" = "<<xarr[i][2]<< "scale: " << scale <<"\n";
 			}
-			myMouseMove(pos[0]+xarr[i][1], pos[1]+xarr[i][2]);
+			myMouseMove(pos[0]+xarr[i][1]*scale, pos[1]+xarr[i][2]*scale);
 	}
 }
 void myMouseThread(){
@@ -1104,25 +1104,26 @@ void myScreenThread(){
                                   Width, Height);
     cr = cairo_create(surf);
 
-
-  //   for(int i = 0; i < 150; i++){
-  //   	myScreen.drawArr1[i].id = "test";
-		// myScreen.drawArr1[i].render = true;
-		// myScreen.drawArr1[i].ints[0] = rand()%1800; 
-		// myScreen.drawArr1[i].ints[1] = rand()%1000; 
-		// // std::cout << myScreen.drawArr1[0].ints[1] << "\n";
-		// myScreen.drawArr1[i].ints[2] = rand()%40+10; 
-		// myScreen.drawArr1[i].ints[3] = 40; 
-		// myScreen.drawArr1[i].ints[4] = 0; 
-		// myScreen.drawArr1[i].ints[5] = 0; 
-		// myScreen.drawArr1[i].floats[0] = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);;
-		// myScreen.drawArr1[i].floats[1] = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);;
-		// myScreen.drawArr1[i].floats[2] = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);;
-		// // myScreen.drawArr1[i].floats[0] = 1;
-		// // myScreen.drawArr1[i].floats[1] = 1;
-		// // myScreen.drawArr1[i].floats[2] = 1;
-		// myScreen.drawArr1[i].floats[3] = 0.5;
-		// }
+    // //actual colrender
+    // for(int i = 0; i < 150; i++){
+    // 	myScreen.drawArr1[i].id = "test";
+	// 	myScreen.drawArr1[i].render = true;
+	// 	myScreen.drawArr1[i].ints[0] = rand()%1800; 
+	// 	myScreen.drawArr1[i].ints[1] = rand()%1000; 
+	// 	// std::cout << myScreen.drawArr1[0].ints[1] << "\n";
+	// 	myScreen.drawArr1[i].ints[2] = rand()%40+10; 
+	// 	myScreen.drawArr1[i].ints[3] = 40; 
+	// 	myScreen.drawArr1[i].ints[4] = 0; 
+	// 	myScreen.drawArr1[i].ints[5] = 0; 
+	// 	myScreen.drawArr1[i].floats[0] = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);;
+	// 	myScreen.drawArr1[i].floats[1] = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);;
+	// 	myScreen.drawArr1[i].floats[2] = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);;
+	// 	// myScreen.drawArr1[i].floats[0] = 1;
+	// 	// myScreen.drawArr1[i].floats[1] = 1;
+	// 	// myScreen.drawArr1[i].floats[2] = 1;
+	// 	myScreen.drawArr1[i].floats[3] = 0.5;
+	// 	}
+    // //actual colrender
 
     while(1){
 
@@ -1134,44 +1135,44 @@ void myScreenThread(){
   // //Colorrender
   //   	for(int i = 0; i < 150; i++){
   //   	myScreen.drawArr1[i].id = "test";
-		// myScreen.drawArr1[i].render = true;
-		// myScreen.drawArr1[i].ints[0] += int(myScreen.drawArr1[i].floats[4]); 
-		// myScreen.drawArr1[i].ints[1] += int(myScreen.drawArr1[i].floats[5]); 
+// 		myScreen.drawArr1[i].render = true;
+// 		myScreen.drawArr1[i].ints[0] += int(myScreen.drawArr1[i].floats[4]); 
+// 		myScreen.drawArr1[i].ints[1] += int(myScreen.drawArr1[i].floats[5]); 
 
-		// myScreen.drawArr1[i].floats[4] += static_cast <float> (rand()) / static_cast <float> (RAND_MAX); 
-		// myScreen.drawArr1[i].floats[5] += static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-		// myScreen.drawArr1[i].floats[4] -= 0.5;
-		// myScreen.drawArr1[i].floats[5] -= 0.5;
+// 		myScreen.drawArr1[i].floats[4] += static_cast <float> (rand()) / static_cast <float> (RAND_MAX); 
+// 		myScreen.drawArr1[i].floats[5] += static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+// 		myScreen.drawArr1[i].floats[4] -= 0.5;
+// 		myScreen.drawArr1[i].floats[5] -= 0.5;
 
-		// if(myScreen.drawArr1[i].floats[4] > 5){
-		// 	myScreen.drawArr1[i].floats[4] = 5;
-		// }if(myScreen.drawArr1[i].floats[4] < -5){
-		// 	myScreen.drawArr1[i].floats[4] = -5;
-		// }
+// 		if(myScreen.drawArr1[i].floats[4] > 5){
+// 			myScreen.drawArr1[i].floats[4] = 5;
+// 		}if(myScreen.drawArr1[i].floats[4] < -5){
+// 			myScreen.drawArr1[i].floats[4] = -5;
+// 		}
 
-		// if(myScreen.drawArr1[i].floats[5] > 50){
-		// 	myScreen.drawArr1[i].floats[5] = 50;
-		// }if(myScreen.drawArr1[i].floats[5] < 7){
-		// 	myScreen.drawArr1[i].floats[5] = 7;
-		// }
+// 		if(myScreen.drawArr1[i].floats[5] > 50){
+// 			myScreen.drawArr1[i].floats[5] = 50;
+// 		}if(myScreen.drawArr1[i].floats[5] < 7){
+// 			myScreen.drawArr1[i].floats[5] = 7;
+// 		}
 
 
-		// if(myScreen.drawArr1[i].ints[0]>Width){
-		// 	myScreen.drawArr1[i].ints[0]=0;
-		// }
-		// if(myScreen.drawArr1[i].ints[0]<0){
-		// 	myScreen.drawArr1[i].ints[0]=Width;
-		// }
-		// if(myScreen.drawArr1[i].ints[1]>Height){
-		// 	myScreen.drawArr1[i].ints[1]=0;
-		// }
-		// // std::cout << myScreen.drawArr1[0].ints[1] << "\n";
-		// // myScreen.drawArr1[i].ints[2] = rand()%20+10; 
-		// // myScreen.drawArr1[i].ints[3] = 20; 
-		// // myScreen.drawArr1[i].floats[0] = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);;
-		// // myScreen.drawArr1[i].floats[1] = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);;
-		// // myScreen.drawArr1[i].floats[2] = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);;
-		// }
+// 		if(myScreen.drawArr1[i].ints[0]>Width){
+// 			myScreen.drawArr1[i].ints[0]=0;
+// 		}
+// 		if(myScreen.drawArr1[i].ints[0]<0){
+// 			myScreen.drawArr1[i].ints[0]=Width;
+// 		}
+// 		if(myScreen.drawArr1[i].ints[1]>Height){
+// 			myScreen.drawArr1[i].ints[1]=0;
+// 		}
+// 		// std::cout << myScreen.drawArr1[0].ints[1] << "\n";
+// 		// myScreen.drawArr1[i].ints[2] = rand()%20+10; 
+// 		// myScreen.drawArr1[i].ints[3] = 20; 
+// 		// myScreen.drawArr1[i].floats[0] = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);;
+// 		// myScreen.drawArr1[i].floats[1] = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);;
+// 		// myScreen.drawArr1[i].floats[2] = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);;
+// 		}
 
   //   	for(int i = 0; i < 150; i ++){
   //   		myDrawConst shape = myScreen.drawArr1[i];
