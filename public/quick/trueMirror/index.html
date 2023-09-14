@@ -129,10 +129,15 @@
             regressionArr[1].push(e)
            })
            // let reg = calculateLinearRegression2(regressionArr[0],regressionArr[1])
-           // let reg = calculateLinearRegression(regressionArr[0])
-           let reg = calculateGeometricRegressionSlope(regressionArr[0],regressionArr[1])
-           console.log(reg)
+           let reg = calculateLinearRegression(regressionArr[0])
+           // let reg = calculateGeometricRegressionSlope(regressionArr[0],regressionArr[1])
+           // let reg2 = calculateGeometricRegressionSlope(regressionArr[0],regressionArr[1])
+           // console.log(reg.m2)
            drawLineWithMidpoint(reg.m,{"x":reg.x,"y":reg.y},200)
+           drawLineWithMidpoint(reg.m2,{"x":reg.x,"y":reg.y},200)
+           console.log(omfg(regressionArr[0],regressionArr[1],0,reg.x,reg.y))
+           if(omfg(regressionArr[0],regressionArr[1],0,reg.x,reg.y) < 1){debugger}
+
           //  if(d.sorted[d.sorted.length-1][0] > aresLim){masterRes += Math.floor((d.sorted[d.sorted.length-1][0]-aresLim))
           // }
            if(d.ares > 300){masterRes = d.ares}else if(masterRes>300){masterRes-=Math.floor((masterRes-300)*0.05)}
@@ -148,6 +153,20 @@
           drawLoop();copyToCanvas()
           console.log("taken: "+(Date.now()-dn))
         },80)
+
+
+function mid(m1,m2,w1,w2){
+    if(m1 == Infinity || m1 == -Infinity){
+        if(m2 == Infinity || m2 == -Infinity){
+            return(Infinity)
+        }
+
+    }
+    if(m2 == Infinity || m2 == -Infinity){
+        
+    }
+    return((m1*Math.sqrt(1/(1+m1*m1))+m2*Math.sqrt(1/(1+m2*m2)))/(Math.sqrt(1/(1+m1*m1))+Math.sqrt(1/(1+m2*m2))))
+}
 
 function calculateGeometricRegressionSlope(points, weights) {
   let sumX = 0;
@@ -243,14 +262,30 @@ function calculateLine(points, weights) {
 
   let sumCov = 0
   let sumVar = 0
+  let sumVar2 = 0
   points.forEach((e,i)=>{
     if(weights[i] == -Infinity){return}
     sumCov += weights[i] * (e.x - meanWX) * (e.y - meanWY)
+    sumVar2 += weights[i] * (e.y -meanWY ) * (e.y - meanWY)
     sumVar += weights[i] * (e.x - meanWX) * (e.x - meanWX)
   })
   let slope = sumCov / sumVar
+  let slope2 = sumCov / sumVar2
 
-  return { m: slope, x: meanWX, y: meanWY , sx:sumWX,sy:sumWY, pts:points,wts:weights ,sc :sumCov, sv:sumVar}
+  return { m2: slope2, m: slope, x: meanWX, y: meanWY , sx:sumWX,sy:sumWY, pts:points,wts:weights ,sc :sumCov, sv:sumVar}
+}
+
+function omfg(points,weights,angle,x,y){
+  let sumX = 0;
+  let sumY = 0;
+  points.forEach((e,i)=>{
+    if(weights[i] < 0){return;}
+    if((e.x-x) > 300 || (e.x-x) < -300){return;}
+    if((e.y-y) > 300 || (e.y-y) < -300){return;}
+    sumX += (e.x-x) * Math.cos(angle) - (e.y-y) * Math.sin(angle)
+    sumY += (e.x-x) * Math.sin(angle) + (e.y-y) * Math.cos(angle)
+  })
+  return(sumY)
 }
 
 function calculateLinearRegression2(points, weights) {
@@ -309,7 +344,7 @@ function calculateLinearRegression(points) {
   let sumY = 0;
   let sumXY = 0;
   let sumX2 = 0;
-
+  let sumY2 = 0;
   // Calculate the sums of X, Y, XY, and X^2
   for (let i = 0; i < n; i++) {
     const { x, y } = points[i];
@@ -317,6 +352,7 @@ function calculateLinearRegression(points) {
     sumY += y;
     sumXY += x * y;
     sumX2 += x * x;
+    sumY2 += y * y
   }
 
   // Calculate the means of X and Y
@@ -325,11 +361,10 @@ function calculateLinearRegression(points) {
 
   // Calculate the slope (b)
   const b = (sumXY - n * meanX * meanY) / (sumX2 - n * meanX * meanX);
+  const c = (sumXY - n * meanX * meanY) / (sumY2 - n * meanY * meanY);
 
-  // Calculate the intercept (a)
-  const a = meanY - b * meanX;
 
-  return ({"m":b,"x":meanX,"y":meanY});
+  return ({"m2":-1/c,"m":b,"x":meanX,"y":meanY});
 }
 function drawLineWithMidpoint( slope, midpoint, len) {
   ctx.strokeStyle = "red"
