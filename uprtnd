@@ -624,25 +624,53 @@ I think the prospects of telling us to write the land acknowledgements & include
 
 signed contracts in english (forced in starvation?)
 
+15/9
+"make sure that when you do the land acknowledgement you say X"
+
+whats the point of listening to the blackbird song sang in a language we dont know
+
 +-----------------------+-------------------------+
 1. Why do I need to do a land acknowledgement?
 - because the indiginous people want us to [2]
-2. What exactly do you want to hear in a land acknowledgement? (give me a script of what you want me to say)
-- It's not about the content. [3]
-- (you give me a script) []
-3. Then why do you want me to do a land acknowledgement?
+
+2. Can you give me a script for it?
+- no. [3]
+- yes. [9]
+
+3. Then why do you want me to do a land acknowledgement, other than reading a script?
 - I want you to respect the land [4]
-4. our opinions on what is respect is subjective. How do you want me to respect the land?
+
+4. Our opinions on what is respect is subjective. How do you want me to respect the land?
 - have a spiritual connection [5]
-- understand the fact that you stole it [6]
+- understand the fact that you stole it & actually know the contents of the script is true [6]
+
 5. I am not spiritual. You have 3 choices:
-- disrespect my beliefs and force me to say things i dont believe in
-- respectfully disagree & debate on my beliefs
-- accept that fact that i won't do land acknowledgements the way you want.
+- disrespect my beliefs and force me to say things i dont believe in []
+- respectfully disagree & debate on my beliefs []
+- accept that fact that i won't do land acknowledgements the way you want. []
+- It doesn't need to be spiritual [9]
+
 6. Ok. i understand the fact that people stole it from you, and im sorry for that [7][8]
+
 7. So i can just say "I understand we stole this land from you"?
+
 8. What is the point of me knowing about your spirituality when all i need to know is "stole ur land, sorry"?
 
+9. There are boundaries of what I am willing to read. (e.g. i won't read what i dont believe in. e.g. "i murdered him")
+- You agree. Read only if you believe in the content
+- You disagree. You should read it because it's true
+
+
+20. Do you agree with the fact that BCFP is mandatory?
+- yes []
+- no []
+
+
+51. Is it true that for person X to respect person Y, person X should do whatever person Y says?
+- yes. []
+- no. not "whatever". there are boundaries []
+- no. depends on what type of respect []
+- no. depends on why you need to respect person []
 
 +-----------------------+-------------------------+
 
@@ -692,7 +720,6 @@ Repeat the steps for other masses. Remember to take measurement of water volume 
 
 The first reading may be optionally discarded because the string soaks up some water.
 
-
 to calculate density (kg/m^3)
 Buoyant force = the difference in apparent weight of the mass before and after fully submerging 
 Buoyant force = weight of water displaced 
@@ -700,15 +727,24 @@ Weight of water displaced = volume of water displaced * density of water * g
 
 therefore, W = ρVg where W is the weight of displaced water, ρ is the density of water and V is the volume of water displaced.
 
-
 because F = mg, m = F/g, density = F/m^3*g
 plotting F against V would give a slope, and density = slope/g
 
+
+Table:
+
+
+
+Graph:
+
+
+
+
 sources of error: 
 1. the resolution of the spring scale and the resolution of the measuring cillinders
-2. water may not be completely poured into the cillinders/stuck/adhered on the side (unavoidable when transfering from container to measuring cilinder)
+2. water may not be completely poured into the cillinders/stuck/adhered on the side (unavoidable when using method2)
 3. the volume measured may vary a little because of the volume of the rope and the water soaked up from the rope
-
+4. cohesion of water might add error to volume measurements
 
 
 
