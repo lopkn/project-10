@@ -70,6 +70,7 @@ class piece {
 		this.y = y
 		this.premoves = []
 		this.team = team
+		this.hp = 100
 		this.kills = 0;
 		this.alive = true
 		
@@ -669,10 +670,8 @@ function damagePiece(damagee,damager,options){
 	let dhp = damager.hp?damager.hp:100
 	let damage = options.damage?options.damage:(atk*dhp)
 	let ehp = damagee.hp?damagee.hp:100
-	console.log(damager)
 
 	if(damage >= ehp){killPiece(damagee,damager);return(damager)}
-	console.log("what",damage,ehp)
 	if(options.resolve === false){
 		damagee.hp -= damage
 		return(undefined);
@@ -680,7 +679,9 @@ function damagePiece(damagee,damager,options){
 
 	let catk = damager.criticalAttack==undefined?2:damager.criticalAttack
 	if(dhp*atk+dhp*catk > ehp){killPiece(damager,damagee);damager.hp-=Math.round((ehp-dhp*atk)/catk);return(damager)}
+	console.log("dope")
 	if(dhp*atk+dhp*catk == ehp){killPiece(damager,damagee);killPiece(damagee,damager);return(undefined)}
+	console.log("yeah")
 	damagee.hp-=dhp*atk+dhp*catk;killPiece(damagee,damager);return(damagee);
 }
 
