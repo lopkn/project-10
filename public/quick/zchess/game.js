@@ -359,7 +359,7 @@ class piece {
 				})
 				return({"arr":legals,"dict":legalDict})
 			}
-		} else if(id == "Guardian"){
+		} else if(id == "guardian"){
 			this.maxCD = 10
 			this.renderLetter = "G"
 			this.jumps = [[2,-2],[-2,2],[2,2],[2,-2]]
@@ -386,6 +386,14 @@ class piece {
 					let gtt = getTileTeam(e,this.team)
 					if(gtt == "capture" || gtt == "empty"){legals.push(e);legalDict[e]=gtt;}
 				})
+				return({"arr":legals,"dict":legalDict})
+			}
+		}  else if(id == "dummy"){
+			this.maxCD = 20
+			this.renderLetter = "D"
+			this.legals = ()=>{
+				let legals = []
+				let legalDict = {}
 				return({"arr":legals,"dict":legalDict})
 			}
 		} else if(id == "mercinary"){
@@ -515,7 +523,7 @@ class piece {
 			this.unhold = (x,y)=>{
 				if(this.held){
 					let tile = board.tiles[spos(x,y)]
-					if(killBoardPiece(x,y,this)){
+					if(tile.piece !== undefined && damagePiece(tile.piece,this) !== undefined){
 						for(let i = 0; i < 26; i++){
 						let dx = Math.random()-0.5
 						let dy = Math.random()-0.5
@@ -564,25 +572,29 @@ class piece {
 			this.y = y
 
 		if(board.tiles[pos].piece != undefined){
-			if(board.tiles[pos].piece.onDeath != undefined){
-				board.tiles[pos].piece.onDeath()
-			}
-			Object.values(board.tiles[pos].piece.arrFuncs.onDeath).forEach((f)=>{
-				f(this)
-			})
+			// if(board.tiles[pos].piece.onDeath != undefined){
+			// 	board.tiles[pos].piece.onDeath()
+			// }
+			// Object.values(board.tiles[pos].piece.arrFuncs.onDeath).forEach((f)=>{
+			// 	f(this)
+			// })
 			
-			board.tiles[pos].piece.alive = false
-			kill(this.x,this.y)
-			if(board.tiles[pos].piece.noPints === undefined){
-			this.kills += 1;}
-			if(this.team!="zombies"&&this.AI !== true){
+			// board.tiles[pos].piece.alive = false
+			// kill(this.x,this.y)
+			// if(board.tiles[pos].piece.noPoints === undefined){
+			// this.kills += 1;}
+			// if(this.team!="zombies"&&this.AI !== true){
 
-				displayKills(this.kills,this.x,this.y)
-			}
-			console.log(board.tiles[pos].piece.team+" "+board.tiles[pos].piece.id+" has been killed!")
+			// 	displayKills(this.kills,this.x,this.y)
+			// }
+			// console.log(board.tiles[pos].piece.team+" "+board.tiles[pos].piece.id+" has been killed!")
+
+			////legacy murder code
+			board.tiles[pos].piece=damagePiece(board.tiles[pos].piece,this)
+		} else {
+			board.tiles[pos].piece = this;
 		}
 
-		board.tiles[pos].piece = this;
 		this.cooldown = this.maxCD
 		this.coolUntil = Date.now() + 1000*this.maxCD
 
@@ -624,6 +636,54 @@ class piece {
 
 
 }
+
+function killPiece(piece,killer){
+	if(piece.onDeath != undefined){
+			piece.onDeath()
+		}//legacy
+
+		Object.values(piece.arrFuncs.onDeath).forEach((f)=>{
+			f(killer)
+		})
+		
+		piece.alive = false
+		kill(piece.x,piece.y)
+		console.log(piece.x,piece.y)
+		if(piece.noPoints === undefined){
+			killer.kills += 1
+	    }
+	    board.tiles[spos(piece.x,piece.y)].piece = undefined
+		if(killer && killer.team!="zombies"&& killer.AI !== true){
+			displayKills(killer.kills,killer.x,killer.y)
+		}
+		console.log(piece.team+" "+piece.id+" has been killed!")
+		return(killer)
+}
+
+function damagePiece(damagee,damager,options){
+	// console.log(damager)
+	// console.log(killPiece(damagee,damager));
+	// return(damager)
+	options = options?options:{}
+	let atk = damager.attack==undefined?2:damager.attack
+	let dhp = damager.hp?damager.hp:100
+	let damage = options.damage?options.damage:(atk*dhp)
+	let ehp = damagee.hp?damagee.hp:100
+	console.log(damager)
+
+	if(damage >= ehp){killPiece(damagee,damager);return(damager)}
+	console.log("what",damage,ehp)
+	if(options.resolve === false){
+		damagee.hp -= damage
+		return(undefined);
+	}
+
+	let catk = damager.criticalAttack==undefined?2:damager.criticalAttack
+	if(dhp*atk+dhp*catk > ehp){killPiece(damager,damagee);damager.hp-=Math.round((ehp-dhp*atk)/catk);return(damager)}
+	if(dhp*atk+dhp*catk == ehp){killPiece(damager,damagee);killPiece(damagee,damager);return(undefined)}
+	damagee.hp-=dhp*atk+dhp*catk;killPiece(damagee,damager);return(damagee);
+}
+
 
 function setPieceCooldown(piece,t){
 		piece.cooldown = t
@@ -1258,7 +1318,7 @@ var gameEvents = {
 		let pc = spawnZombie(new piece("pawn",4,0,"zombies",{"direction":"y+"}))
 		if(pc === false){return;}
 				pc.color = "rgba(0,100,0,0.5)"
-				pc.noPints = true
+				pc.noPoints = true
 				pc.maxCD -= 2
 		pc.AImoveRandom = (piece)=>{
 	let legals = piece.legals()
