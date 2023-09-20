@@ -679,9 +679,7 @@ function damagePiece(damagee,damager,options){
 
 	let catk = damager.criticalAttack==undefined?2:damager.criticalAttack
 	if(dhp*atk+dhp*catk > ehp){killPiece(damager,damagee);damager.hp-=Math.round((ehp-dhp*atk)/catk);return(damager)}
-	console.log("dope")
 	if(dhp*atk+dhp*catk == ehp){killPiece(damager,damagee);killPiece(damagee,damager);return(undefined)}
-	console.log("yeah")
 	damagee.hp-=dhp*atk+dhp*catk;killPiece(damagee,damager);return(damagee);
 }
 
