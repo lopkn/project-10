@@ -130,6 +130,7 @@ void myPix(cairo_t *cr, int x, int y, int z, float r, float g, float b, float a 
 }
 
 void scanr();
+void AK(std::string str);
 void recoilReader(int xarr[100][3], int size);
 
 struct AST{
@@ -137,6 +138,8 @@ struct AST{
 	bool aimprint = true;
 	bool stopsound = false;
 	bool keyCord = false;
+
+	bool autoK = true;
 
 
 	int downMode = 1;
@@ -555,6 +558,7 @@ void executeCommandString(std::string str){
 		std::cout << "> [setweapon] sets the weapon combinations (press 5 to set)\n";
 		std::cout << "> [time/tnow/time.now] gives times in epoch ms\n";
 		std::cout << "> [keycord] records all key events\n";
+		std::cout << "> [autok] toggle autokeys and fills things (default false)\n";
 		std::cout << "> [scan] print out an askii of xscan (red)\n";
 		std::cout << "> [scanx] <int> <r/g/b> <int> <char> render out a pixmap of xscan\n";
 		std::cout << "> [list] list all eventx inputs\n";
@@ -620,6 +624,11 @@ void executeCommandString(std::string str){
 		mast.keyCord = !mast.keyCord;
 		std::cout << ">keycording toggled: "<< mast.keyCord <<"\n";
 		return;
+	} else if (str == "autok"){
+		mast.autoK = !mast.autoK;
+		std::cout << ">autoK toggled: "<< mast.autoK <<"\n";
+		system("xdotool key BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace");
+		AK("test");
 	}
 
 
@@ -1358,6 +1367,12 @@ int main()
         return 0;
 }
 
+void AK(std::string str){
+	if(!mast.autoK){return;}
+
+	std::string str2 = "xdotool type '"+str+"'";
+	system(str2.c_str());
+}
 
 
 //matrix correlation
