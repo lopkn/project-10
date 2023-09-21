@@ -762,13 +762,14 @@ function render(){
 	}
 
 	ctx.font = "bold "+Math.floor(0.8*tileSize)+"px Courier New"
+	let tn = Date.now()
 	arr.forEach((e)=>{
 		let pos = ipos(e)
 		let tile = board.tiles[e]
 		ctx.textAlign = "center"
 		if(tile?.piece != undefined){
 			let tpc = tile.piece
-			tpc.CDcheck()
+			tpc.CDcheck(tn)
 			if(tpc.draw !== undefined){
 				let d = tpc.draw(tpc.renderLetter,tpc.x,tpc.y,tpc.team,tpc.cooldown/tpc.maxCD,tpc)
 				if(d){

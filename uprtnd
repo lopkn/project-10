@@ -631,6 +631,10 @@ signed contracts in english (forced in starvation?)
 
 whats the point of listening to the blackbird song sang in a language we dont know
 
+20/9
+practically work
+http://www.native-languages.org/tlingit-legends.htm
+
 +-----------------------+-------------------------+
 1. Why do I need to do a land acknowledgement?
 - because the indiginous people want us to [2]
@@ -753,6 +757,37 @@ sources of error:
 
 
 
+
+
+Buoyant work
+
+
+
+1. 1-0.25 = 0.75, 0.75mg/0.25 = 3mg of force up. D.
+2. When radius increases by a factor of 2, area increases by a factor of 4. Since velocity is proportional to area, the speed is 4 times less. so answer D.
+3. Pressure is lowest when the fluid is moving fastest (bernoullis). Fluid moves fastes at a section with smallest area, because the same flow rate is achieved by A*V when A is small, v is big.
+4. D, the first statement we can conclude the volume of both A and B is the same, because they have the same density and mass. With the second statement we conclude that B and C has the same volume, so all of their displaced water is the same volume and buoyant force up is the same.
+5. Remains constat. this is because the volume of the water displaced stays constant (assuming density of water stays same which the question says it does.)
+6. the Iron. Because the iron is displacing more water (100% of 50cm^3) compared to wood (<100% of 50cm^3)
+7. is less, because the weight of the saltwater displaced is equal when there is less volume due to it being denser. This means the weight of liquid displaced is the thing that matters and the volume is less for denser liquids to achieve the same effect.
+8. point B. When the diameter is larger, the area is larger and the flow rate must stay constant. so in a bigger area the velocity of liquid must be lower, and bernoullis equations tells us that slower fluids have less pressure. (given that they have the same height)
+9. 4m/s because when the radius is reduced by a factor of 2, the area is reduced by a factor of 4 and the speed is increased by the same factor of 4.
+10. C. they are all equal because the copper block displaced the same amount of water in the scenarios (and the question says water is incompressible which means the density is constant.)
+11. D. the bouyant force is equal because the question states that it is floating, and since they have the same mass and the blocks arent flying anywhere, the bouyant force must be equal to mg which is the same since the mass is the same.
+12. rho * V * g = 8, V = 8/1000*9.81
+13. D. all other answers are less than 60. there is no way a block can float with less volume submerged in a medium of lower density
+14. A. 4v because the area decreases by a factor of 4 so the velocity of liquid makes up so the flowrate stays constant by A1V1 = A2V2.
+15. B. velocity in a smaller area is faster because there is a constant flow rate. Pressure in the faster area is smaller because bernoullis equations states P + 0.5rho*v^2 = constant
+16. 0.4g-3 newtons because bouyant force = actual weight - apparent weight
+17. D. the pressure is calculated by rho * g * h. the force is the same because the height of all the beakers are the same.
+18. A. the pressure at the intersection area lowers beacuse the velocity of air travelling is faster. bernoullis equations states that the pressure will lower when the medium (air) is at a higher velocity. since there is less pressure, the water will get pushed up by surrounding atmospheric pressure.
+19. C. theyre both the same because they displace the same 1 cubic centimeter of water volume of water.
+20. Aluminum. A kilogram of aluminum has much more volume than a kilogram of iron because its density is lower, so the weight of water displaced is higher and aluminum feels a larger bouyant force.
+21. 4/3 * PI * 0.4^3 * 1.4 * 10^3
+22. A. The speed is decreased by a factor of 7 squared (49)
+23. P + 0.5 rho * v^2 = X + 0.5 rho * 4v^2 + rho * g * y
+24. C. bouyant force when fully submerged is rho * g * v where rho is the density of the liquid
+25. B and C are true. they can be reasonably compared because they are in the same fluid system. Other answers are wrong because it is taking two points from different medium/systems.
 
 
 

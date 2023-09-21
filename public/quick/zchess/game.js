@@ -19,6 +19,9 @@ class board {
 	static tileExtensionBoarder = 0
 	static bottomTile = 11;
 	static specialIntervals = {}
+
+	// static eventStack = 
+
 	static AIwait(){
 		return(10)
 	}
@@ -606,9 +609,8 @@ class piece {
 		return(legals.dict[pos])
 	}	
 
-	CDcheck(){
+	CDcheck(tn){
 		if(this.cooldown == 0){return(0)}
-		let tn = Date.now()
 		this.cooldown = (this.coolUntil - tn)/1000
 		if(this.cooldown <= 0){
 			this.cooldown = 0
