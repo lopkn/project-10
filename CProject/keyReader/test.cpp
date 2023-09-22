@@ -140,7 +140,7 @@ struct AST{
 	bool keyCord = false;
 
 	bool autoK = true;
-
+	std::string autokStore = "";
 
 	int downMode = 1;
 	int weaponSetter = 3;
@@ -1369,7 +1369,6 @@ int main()
 
 void AK(std::string str){
 	if(!mast.autoK){return;}
-
 	std::string str2 = "xdotool type '"+str+"'";
 	system(str2.c_str());
 }
