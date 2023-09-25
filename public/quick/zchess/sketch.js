@@ -135,6 +135,7 @@ class camera{
 	static escaped = false
 	static escapePos = [0,0]
 	static specialRenderOn = true;
+	static money = 0;
 	static x = 1.2;
 	static y = 1.2;
 	static particles = [];
@@ -795,7 +796,7 @@ function render(){
 	ctx.stroke()
 
 
-	let tn = Date.now()
+	// let tn = Date.now()
 	for(let i = camera.particles.length-1; i > -1; i--){
 		let p = camera.particles[i]
 		p.update(tn)
@@ -1199,6 +1200,7 @@ function stopGame(){
 	clearInterval(gameInterval);
 	board.tiles = {}
 	board.iterations = 0;
+	camera.money = 0;
 	camera.specialRenderOn = true
 	if(camera.highScores[camera.gamemode]!== undefined && camera.highScores[camera.gamemode][0] < camera.score){
 		camera.highScores[camera.gamemode][0] = camera.score
