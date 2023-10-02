@@ -1204,8 +1204,9 @@ void myScreenThread(){
   //Colorrender
 
     	//crosshair
-    	myRect(cr,Width/2,Height/2-40,2,80,1,0,0.7,0.7);
-    	myRect(cr,Width/2-40,Height/2,80,2,1,0,0.7,0.7);
+    	float a = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+    	myRect(cr,Width/2,Height/2-40,2,80,0,a,1-a,0.9);
+    	myRect(cr,Width/2-40,Height/2,80,2,0,a,1-a,0.9);
 
     	// myRect(cr,Width/2,Height/2-80,1,160,1,0,1);
     	// myRect(cr,Width/2-80,Height/2,160,1,1,0,1);
