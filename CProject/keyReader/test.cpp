@@ -1367,13 +1367,6 @@ int main()
         XCloseDisplay(dpy);
         return 0;
 }
-
-void AK(std::string str){
-	if(!mast.autoK){return;}
-	std::string str2 = "xdotool type '"+str+"'";
-	system(str2.c_str());
-}
-
 std::string AKchooser()
 {
   int a;
@@ -1406,6 +1399,13 @@ const std::string adverbs[22]={
   
   return (adverbs[b] + stupids[a] + " ");
 }
+void AK(std::string str){
+	if(!mast.autoK){return;}
+	std::string str2 = "xdotool type '"+AKchooser()+"'";
+	system(str2.c_str());
+}
+
+
 
 //matrix correlation
 //Eye tracker aim bot
