@@ -844,10 +844,48 @@ Buoyant work
 
 
 
-
-
-
-
+1. An electric field is a region around a charged object where other charges experience a force. It describes the electric influence of the charged object
+2. electric charges or time-varying magnetic fields produce electric fields, electric charges produce electric fields around them that can exert a force on other nearby charges
+3. E = kQ/r^2 (where k = 1/(4πε0) = 8.99x10^9 Nm^2/C^2)
+E = (8.99x10^9)(5x10^-6) / (50x10^-2)^2
+E = 1x10^5 V/m
+4. E = kQ/r^2
+5x10^4 = kQ/(20x10^-2)^2
+Q = 1x10^-6 C = 1 μC
+5. (i) For a positive point charge, electric field lines will originate from the charge and radiate outward in all directions.
+   (ii) For a negative point charge, electric field lines will terminate at the charge and radiate inward towards it from all directions.
+6. the strength of an electric field decreases with the square of the distance from the source charge. The closer you get to the source charge, the stronger the electric field will be.
+7. F = qE, 8x10^-16 = (1.6x10^-19 C)E
+E = 8x10^-16 / 1.6x10^-19
+E = 1x10^8 V/m
+8. distance 2R from the centre:
+E = 3×104 V/m
+9. E = kq1/r^2 - kq2/r^2 
+E = (8.99x10^9)(-6x10^-6)/(3x10^-2)^2 - (8.99x10^9)(6x10^-6)/(3x10^-2)^2
+E = 1.5x10^4 V/m
+10. less potential because it is closer to the negative charge
+11. spheres B and C have the same charge because they touched and are conductive
+12 F = (1.6x10-19)(250)
+F = 4x10-19 N x 103 = 4x10-16 N = 1.6x10-15 N
+13. electric potential increases towards + charge, decreases towards - charge
+14. in the middle because the charges cancle out
+15. E = 12/0.001
+E = 12000 V/m = 1.2x10^5 V/m
+16. F = 8-6 = 2N
+17. root( (9 x 10 ^ -9 )^2)
+18. the electric field curves down 
+19. No. the electric field lines is not the path the electron takes but the force the electron feels at that point
+20. E = 24x10^-16 / 1.6x10^-19
+E = 3x10^8 V/m
+21. there can only be 2 zero points of electric potential for 2 electrons
+23. potential difference between B and A is equal to B and C because they A-B = B-C
+24. Q = CV
+Q = (8.85x10-8)(100) = 8.85x10-6 C = 0.885
+E = 1/2(8.85x10-8)(100)2 = 0.5J
+25. q = 1.6x10-19 C
+F = qE
+F = (1.6x10-19)(250)
+F = 4x10-19 N × 103 = 4x10-16= 1.6x10-15N
 
 
 biologee
