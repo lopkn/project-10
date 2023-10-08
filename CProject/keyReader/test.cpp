@@ -719,7 +719,20 @@ void updateCommand(int x){
 }
 
 
+void pressShiftKey()
+{
+    KeyCode shiftKeyCode = XKeysymToKeycode(dpy, XK_Shift_L);
+    XTestFakeKeyEvent(dpy, shiftKeyCode, True, CurrentTime);
+    XFlush(dpy);
+}
 
+// Simulate releasing the Shift key
+void releaseShiftKey()
+{
+    KeyCode shiftKeyCode = XKeysymToKeycode(dpy, XK_Shift_L);
+    XTestFakeKeyEvent(dpy, shiftKeyCode, False, CurrentTime);
+    XFlush(dpy);
+}
 
 int keysounds = 0;
 //0: none, 1: apx
@@ -901,6 +914,11 @@ void myDo(int x,std::string s1){
 			}
 		} else if (x == 46){
 			scanr();
+		} else if(x == 41){
+			// system("xdotool key space");
+			// usleep(16);
+			// system("xdotool keydown shift &");
+			pressShiftKey();
 		}
 	} else if(keysounds == 0){
 		if(x == 45){
@@ -910,6 +928,16 @@ void myDo(int x,std::string s1){
 		
 		} else if(x == 46){
 			myXset();
+		}
+	}
+}
+
+void myDoU(int x){
+	if(keysounds == 1){
+		if(x == 41){
+			std::cout << "upped\n";
+			// system("xdotool keyup shift &");
+			releaseShiftKey();
 		}
 	}
 }
@@ -1355,10 +1383,18 @@ int main()
                 if(mast.keyCord){
                 	std::cout << "Keycord: " << ev.type << " - " << ev.code << " - " << ev.value << " \n";
                 }
-                if(ev.type == 1 && ev.value == 1){
-
+                if(ev.type == 1){
+                	if(ev.value == 1){
                         myDo(ev.code,s1);
                         std::cout << "Key: " << ev.code << " State: " << ev.value << std::endl;
+                    } else if(ev.value == 0){
+                    	myDoU(ev.code);
+                    	std::cout << "KeyU: " << ev.code << " State: " << ev.value << std::endl;
+                    }
+
+                    // {
+                    	// std::cout << "Other: code:"<< ev.code << " State: " << ev.value << std::endl;
+                    // }
                 }
 
 
