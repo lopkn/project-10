@@ -202,7 +202,6 @@ void myPlay(std::string wavFile, std::string s1){
 		return;
 	}
 	std::string s2 = "dummy=$(sudo -u '#" + s1 +"' XDG_RUNTIME_DIR=/run/user/"+s1+" aplay "+wavFile+" 2>/dev/null) &";
-
 	int i3 = std::system(s2.c_str());
 }
 
@@ -918,7 +917,14 @@ void myDo(int x,std::string s1){
 			// system("xdotool key space");
 			// usleep(16);
 			// system("xdotool keydown shift &");
-			pressShiftKey();
+			// pressShiftKey();
+			system("xdotool click 5 &");
+		} else if(x == 57){
+			if(!mast.stopsound){
+				// std::string s2 = "dummy=$(sleep 2 && sudo -u '#" + s1 +"' XDG_RUNTIME_DIR=/run/user/"+s1+" aplay jumpDing.wav 2>/dev/null) &";
+				int i3 = std::system(s2.c_str());
+			}
+
 		}
 	} else if(keysounds == 0){
 		if(x == 45){
@@ -937,7 +943,8 @@ void myDoU(int x){
 		if(x == 41){
 			std::cout << "upped\n";
 			// system("xdotool keyup shift &");
-			releaseShiftKey();
+			// releaseShiftKey();
+			system("xdotool click 5 &");
 		}
 	}
 }
