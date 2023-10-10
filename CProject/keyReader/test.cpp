@@ -139,6 +139,8 @@ struct AST{
 	bool stopsound = false;
 	bool keyCord = false;
 
+	bool Rjump = true;
+
 	bool autoK = true;
 	std::string autokStore = "";
 
@@ -560,6 +562,7 @@ void executeCommandString(std::string str){
 		std::cout << "> [autok] toggle autokeys and fills things (default false)\n";
 		std::cout << "> [scan] print out an askii of xscan (red)\n";
 		std::cout << "> [scanx] <int> <r/g/b> <int> <char> render out a pixmap of xscan\n";
+		std::cout << "> [rjump] toogles r for spam jump\n";
 		std::cout << "> [list] list all eventx inputs\n";
 		std::cout << "> === help ===\n\n";
 	}
@@ -628,7 +631,11 @@ void executeCommandString(std::string str){
 		std::cout << ">autoK toggled: "<< mast.autoK <<"\n";
 		system("xdotool key BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace");
 		AK("test");
+	} else if (str == "rjump"){
+		mast.Rjump = !mast.Rjump;
+		std::cout << ">Rjump toggled: "<< mast.Rjump <<"\n";
 	}
+
 
 
 
@@ -876,7 +883,7 @@ void myDo(int x,std::string s1){
 
 
 	if(keysounds == 1){
-		if(x == 19){
+		if(x == 19 ){
 			myPlay("Reload.wav",s1);
 
 		}else if(x == 16 ){
@@ -895,14 +902,14 @@ void myDo(int x,std::string s1){
 			myMouseMove(1000,700);
 			myPlay("map.wav",s1);
 		} else if(x == 36){
-			scx("1","b","0.5","3");
-			myPlay("map.wav",s1);
-		} else if(x == 37){
-			scx("1","g","0.5","3");
-			myPlay("map.wav",s1);
-		} else if(x == 38){
-			scx("1","r","0.5","3");
-			myPlay("map.wav",s1);
+		// 	scx("1","b","0.5","3");
+		// 	myPlay("map.wav",s1);
+		// } else if(x == 37){
+		// 	scx("1","g","0.5","3");
+		// 	myPlay("map.wav",s1);
+		// } else if(x == 38){
+		// 	scx("1","r","0.5","3");
+		// 	myPlay("map.wav",s1);
 		} else if(x == 45){
 			
 			mast.firedown = !mast.firedown;
@@ -913,16 +920,16 @@ void myDo(int x,std::string s1){
 			}
 		} else if (x == 46){
 			scanr();
-		} else if(x == 41){
+		} else if(x == 20 && mast.Rjump){
 			// system("xdotool key space");
 			// usleep(16);
 			// system("xdotool keydown shift &");
 			// pressShiftKey();
-			system("xdotool click 5 &");
+			system("xdotool click 5 && sleep 0.05 && xdotool click 5 &");
 		} else if(x == 57){
 			if(!mast.stopsound){
 				// std::string s2 = "dummy=$(sleep 2 && sudo -u '#" + s1 +"' XDG_RUNTIME_DIR=/run/user/"+s1+" aplay jumpDing.wav 2>/dev/null) &";
-				int i3 = std::system(s2.c_str());
+				// int i3 = std::system(s2.c_str());
 			}
 
 		}
@@ -940,7 +947,7 @@ void myDo(int x,std::string s1){
 
 void myDoU(int x){
 	if(keysounds == 1){
-		if(x == 41){
+		if(x == 20 && mast.Rjump){
 			std::cout << "upped\n";
 			// system("xdotool keyup shift &");
 			// releaseShiftKey();
