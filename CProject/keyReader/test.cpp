@@ -11,6 +11,7 @@
 #include <linux/input.h>
 // #include <sys/types.h>
 #include <unistd.h>
+#include <cmath>
 #include <signal.h>
 #include <stdlib.h>
 // #include <list>
@@ -142,11 +143,14 @@ struct AST{
 	bool Rjump = true;
 
 	bool autoK = true;
+
+	double RSscale = 1;
+
 	std::string autokStore = "";
 
 	int downMode = 1;
 	int weaponSetter = 3;
-	int weaponSet[3] = {1,2,3};
+	int weaponSet[3] = {8,7,11};
 	int prowlerAST[100][3] = {{50,0,7},{50,0,7},{50,0,7},{50,0,7}};
 	int nemesisAST[100][3] = {{50,0,5},{50,0,5},{50,0,6}};
 	// int carAST[100][3] = {{64,1,8},{64,1,7},{64,1,7},{64,1,7},{64,2,7},{64,2,7},{64,2,7},{64,2,7},{64,1,1},{64,0,1},{64,0,1},{64,-2,1},{64,-2,3},{64,-2,3},{64,0,3},{64,0,1},{64,0,1},{64,0,1},{64,0,1},{64,0,1}};
@@ -563,6 +567,7 @@ void executeCommandString(std::string str){
 		std::cout << "> [scan] print out an askii of xscan (red)\n";
 		std::cout << "> [scanx] <int> <r/g/b> <int> <char> render out a pixmap of xscan\n";
 		std::cout << "> [rjump] toogles r for spam jump\n";
+		std::cout << "> [scale] <double> scales reader by number";
 		std::cout << "> [list] list all eventx inputs\n";
 		std::cout << "> === help ===\n\n";
 	}
@@ -634,6 +639,9 @@ void executeCommandString(std::string str){
 	} else if (str == "rjump"){
 		mast.Rjump = !mast.Rjump;
 		std::cout << ">Rjump toggled: "<< mast.Rjump <<"\n";
+	} else if (spl[0] == "scale"){
+		double scale = stod(spl[1]);
+		mast.RSscale = scale;
 	}
 
 
@@ -720,6 +728,8 @@ void updateCommand(int x){
 		endCommand();
 	} else if(x == 53){
 		std::cout << "\n>=command=<\n>"+commandString+"<\n";
+	} else if(keyRepeats == 2){
+		endCommand();
 	}
 
 }
@@ -910,7 +920,7 @@ void myDo(int x,std::string s1){
 		// } else if(x == 38){
 		// 	scx("1","r","0.5","3");
 		// 	myPlay("map.wav",s1);
-		} else if(x == 45){
+		} else if(x == 45 && keyRepeats%3 == 0){
 			
 			mast.firedown = !mast.firedown;
 			if(mast.firedown){
@@ -1017,7 +1027,7 @@ void repeating(){
 	return;
 }
 void recoilReader(int xarr[100][3],int size, int device){
-	int scale = 1;
+	double scale = mast.RSscale;
     struct pollfd fds[1];
     fds[0].fd = device;
     fds[0].events = POLLIN;
@@ -1054,7 +1064,7 @@ void recoilReader(int xarr[100][3],int size, int device){
 			if(mast.aimprint){
 				std::cout << "aiming: "<<xarr[i][1]<<" = "<<xarr[i][2]<< "scale: " << scale <<"\n";
 			}
-			myMouseMove(pos[0]+xarr[i][1]*scale, pos[1]+xarr[i][2]*scale);
+			myMouseMove(static_cast<int>(std::round(pos[0]+xarr[i][1]*scale)), static_cast<int>(std::round(pos[1]+xarr[i][2]*scale)));
 	}
 }
 void myMouseThread(){
