@@ -1465,6 +1465,10 @@ void AK(std::string str){
 	system(str2.c_str());
 }
 
+void speak(std::string str){
+	std::string str2 = "espeak -k20 '" + str + "' -a100 -s225"
+	system(str2.c_str());
+}
 
 
 //matrix correlation
