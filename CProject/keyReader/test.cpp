@@ -177,8 +177,8 @@ int lastKey = 400;
 int keyRepeats = 0;
 
 
-int keyboardEventX = 2;
-int mouseEventX = 1;
+int keyboardEventX = 4;
+int mouseEventX = 3;
 
 bool extraSlow = false;
 
@@ -1466,7 +1466,7 @@ void AK(std::string str){
 }
 
 void speak(std::string str){
-	std::string str2 = "espeak -k20 '" + str + "' -a100 -s225"
+	std::string str2 = "espeak -k20 '" + str + "' -a100 -s225";
 	system(str2.c_str());
 }
 
