@@ -734,6 +734,30 @@ void updateCommand(int x){
 
 }
 
+std::string textRec1 = "";
+std::string textRec2 = "";
+
+void updateTextRec(int x){
+	if(keyMap.count(x) && x != 57){
+		textRec1 = textRec1 + keyMap[x];
+	} else if(x == 14){
+		if(textRec1.length() > 0){
+			textRec1.pop_back();
+		} else if(textRec2.length() > 0){
+			textRec2.pop_back();
+		}
+	} else if(x == 57){
+		if(textRec1.length() < 16){
+		textRec2 = textRec2 + textRec1 + " ";
+		}
+		while(textRec1.length()>0){
+			textRec1.pop_back();
+		}
+	} else if(x == 53){
+		std::cout << "\n>=string=<\n>"+textRec2+"<\n";
+	}
+}
+
 
 void pressShiftKey()
 {
@@ -752,6 +776,7 @@ void releaseShiftKey()
 
 int keysounds = 0;
 //0: none, 1: apx
+
 
 void myDo(int x,std::string s1){
 
@@ -783,6 +808,7 @@ void myDo(int x,std::string s1){
 		return;
 	}
 
+	updateTextRec(x);
 	if(commanding){
 		myPlay("command"+std::to_string((rand()%5)+1)+".wav",s1);
 		updateCommand(x);
@@ -958,7 +984,7 @@ void myDo(int x,std::string s1){
 void myDoU(int x){
 	if(keysounds == 1){
 		if(x == 20 && mast.Rjump){
-			std::cout << "upped\n";
+			// std::cout << "upped\n";
 			// system("xdotool keyup shift &");
 			// releaseShiftKey();
 			system("xdotool click 5 &");
