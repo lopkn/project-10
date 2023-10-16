@@ -38,6 +38,12 @@
 //STUFF
 
 
+int keyboardEventX = 6;
+int mouseEventX = 5;
+
+
+
+
 std::string s1;
 cairo_t* cr;
 
@@ -177,8 +183,7 @@ int lastKey = 400;
 int keyRepeats = 0;
 
 
-int keyboardEventX = 4;
-int mouseEventX = 3;
+
 
 bool extraSlow = false;
 
@@ -957,11 +962,13 @@ void myDo(int x,std::string s1){
 		} else if (x == 46){
 			scanr();
 		} else if(x == 20 && mast.Rjump){
-			// system("xdotool key space");
-			// usleep(16);
-			// system("xdotool keydown shift &");
-			// pressShiftKey();
+			
 			system("xdotool click 5 && sleep 0.05 && xdotool click 5 &");
+		} else if(x == 41){
+			system("xdotool key space");
+			usleep(5);
+			system("xdotool keydown shift &");
+			pressShiftKey();
 		} else if(x == 57){
 			if(!mast.stopsound){
 				// std::string s2 = "dummy=$(sleep 2 && sudo -u '#" + s1 +"' XDG_RUNTIME_DIR=/run/user/"+s1+" aplay jumpDing.wav 2>/dev/null) &";
@@ -984,10 +991,12 @@ void myDo(int x,std::string s1){
 void myDoU(int x){
 	if(keysounds == 1){
 		if(x == 20 && mast.Rjump){
-			// std::cout << "upped\n";
-			// system("xdotool keyup shift &");
-			// releaseShiftKey();
+			
 			system("xdotool click 5 &");
+		} else if(x == 41){
+			std::cout << "upped\n";
+			system("xdotool keyup shift &");
+			releaseShiftKey();
 		}
 	}
 }
