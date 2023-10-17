@@ -751,6 +751,8 @@ void updateTextRec(int x){
 		} else if(textRec2.length() > 0){
 			textRec2.pop_back();
 		}
+	} else if(x == 42){
+		textRec1 = textRec1 + "[s]"
 	} else if(x == 57){
 		if(textRec1.length() < 16){
 		textRec2 = textRec2 + textRec1 + " ";
@@ -790,6 +792,7 @@ void myDo(int x,std::string s1){
 		std::cout << "returning to mouse speed 0\n";
 		system("xinput --set-prop \"PixArt Microsoft USB Optical Mouse\" \"libinput Accel Speed\" 0");
 		system("xinput --set-prop \"PixArt Microsoft USB Optical Mouse\" \"Coordinate Transformation Matrix\" 1 0 0 0 1 0 0 0 1");
+		std::cout << "\n>=string=<\n>"+textRec2+"<\n\n";
 		std::cout << "\nKrd closed at " << timeNow() << "\n";
 		myPlay("allClose.wav",s1);
 		exit(0);
