@@ -752,7 +752,9 @@ void updateTextRec(int x){
 			textRec2.pop_back();
 		}
 	} else if(x == 42){
-		textRec1 = textRec1 + "[s]"
+		textRec1 = textRec1 + "[s]";
+	} else if(x == 28){
+		textRec1 = textRec1 + "[e]";
 	} else if(x == 57){
 		if(textRec1.length() < 16){
 		textRec2 = textRec2 + textRec1 + " ";
