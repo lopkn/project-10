@@ -12,13 +12,13 @@ body{
 	display: flex;
   flex-direction: column;
   align-items: flex-start;
-  
+  max-width: 40%;
 }
 
 .container1 > * {
 	margin:1%;
 	type:text;
-	max-width: 40%;
+/*	max-width: 40%;*/
 	overflow-x: visible;
 	padding-inline: 1%;
 	/*display: inline-block;
@@ -26,6 +26,17 @@ body{
   	width:fit-content;
   	overflow: hidden;
   	display: inline-block;*/
+}
+
+.actionBx{
+	color: rgb(157,253,131);
+	background-color: rgb(60,60,90);
+	transition: color 400ms;
+	font-size: 200%;
+	user-select:none;
+}
+.actionBx:hover {
+	color:yellow;
 }
 
 .statementBx{
@@ -37,6 +48,21 @@ body{
 }
 .statementBx:hover {
 	color:yellow;
+}
+
+
+.topBar{
+	position:sticky;
+	color: rgb(0,224,208);
+	background-color: rgb(50,50,80);
+	transition: color 400ms;
+	font-size: 300%;
+	margin: 2%;
+	user-select:none;
+}
+
+.topBar .path{
+	font-size: 50%;
 }
 
 .overlay{
