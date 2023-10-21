@@ -22,6 +22,21 @@ document.addEventListener("keydown",(e)=>{
 })
 
 
+const socket = io.connect('/')
+let GAMESESSION = "G10.6"
+socket.emit("JOINGAME",GAMESESSION)
+var ID = 0
+socket.on("acknowledge G10.6",(e)=>{ID = e; console.log("joined as "+ID)})
+socket.on("string",(e)=>{console.log(e)})
+socket.on("mem",(e)=>{storage.main[e[0]]=e[1]})
+
+
+
+
+
+/// setup stuff
+
+
 function classQuery(c){
 	return(document.getElementsByClassName(c))
 }
@@ -36,9 +51,6 @@ function getHighlightedText() {
   return text;
 }
 
-ctx.fillRect(0,0,Width,Height)
-
-setTimeout(()=>{ctx.clearRect(0,0,Width,Height)},200)
 
 
 var drag = {"sx":0,"sy":0,"x":0,"y":0,"on":false}
@@ -72,7 +84,9 @@ function setDefaultStatementBx(el){
 			el.blur()
 		})
 		el.addEventListener('click',(e)=>{
-			el.contentEditable = true;
+			// el.contentEditable = true;
+
+			optionClicked(parseInt(el.id.substring(7)))
 		})
 		el.addEventListener('blur',(e)=>{
 			el.contentEditable = false;
@@ -111,11 +125,18 @@ function setDefaultStatementBx(el){
 
 
 class storage{
-	static main = {"0":{
-		"title":"Welcome to lopknA65's domain",
-		"description":"Feel free to explore",
-		"options":[{"optTitle":"hi","tags":[0]},{"optTitle":"hello","tags":[0]}]
-	}}
+	static main = {
+		"0":{
+			"title":"Welcome to lopknA65's domain",
+			"description":"Feel free to explore",
+			"options":[{"optTitle":"hi","tags":[0]},{"optTitle":"info","tags":[1]}]
+		},
+		"1":{
+			"title":"Information here",
+			"description":"Not looking for an argument?",
+			"options":[{"optTitle":"science","tags":[-1]}]
+		},
+	}
 }
 
 
@@ -124,10 +145,7 @@ class Arg {
 	static currentTag = 0
 	static currentTitle = ""
 
-	static loadTag(tag){
-
-		
-		this.path.push(tag)
+	static reloadPath(){
 		let pathStr = " <  "
 		this.path.forEach((e,i)=>{
 			if(i%2==0){
@@ -137,7 +155,21 @@ class Arg {
 			}
 		})
 		document.getElementById("path").innerHTML = pathStr
+	}
+
+	static loadTag(tag){
+
+		if(storage.main[tag] === undefined){
+			socket.emit("mem",tag);
+			return
+		}
+
+		this.currentTag = tag
+		this.path.push(tag)
+		this.reloadPath()
+
 		
+
 		let content = storage.main[tag]
 
 		document.getElementById("title").innerHTML = content.title
@@ -152,20 +184,56 @@ class Arg {
 		}
 
 
-		content.options.forEach((option,i)=>{
-			let el = document.createElement("div")
-			el.innerHTML = option.optTitle
-			el.classList.add("statementBx")
-			setDefaultStatementBx(el)
-			document.getElementById("container1").insertBefore(el,document.getElementById("container1").firstChild)
-		})
-
-		
+		// content.options.forEach((option,i)=>{
+		for(let i = content.options.length -1; i>-1;i--){
+			addOption(content.options[i],i,"container1")
+		}
 
 	}
 }
 
 Arg.loadTag(0)
+
+function addOption(option,optionNo,container){
+	let el = document.createElement("div")
+	el.innerHTML = option.optTitle
+	el.id = "option-"+optionNo
+	el.classList.add("optionBx")
+	setDefaultStatementBx(el)
+	document.getElementById(container).insertBefore(el,document.getElementById(container).firstChild)
+}
+
+
+function optionClicked(number){
+	let block = storage.main[Arg.currentTag]
+	console.log("option clicked:"+number)
+	Arg.path.push(number);Arg.reloadPath()
+
+	Arg.loadTag(block.options[number].tags[0])
+	console.log("loading tag:"+block.options[number].tags[0])
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 /// Tag ID, tag title, tag description, tag options (link)

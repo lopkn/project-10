@@ -31,7 +31,7 @@ body{
 .actionBx{
 	color: rgb(157,253,131);
 	background-color: rgb(60,60,90);
-	transition: color 400ms;
+	transition: 400ms;
 	font-size: 200%;
 	user-select:none;
 }
@@ -42,11 +42,22 @@ body{
 .statementBx{
 	color: rgb(155,0,255);
 	background-color: rgb(50,50,80);
-	transition: color 400ms;
+	transition: 400ms;
 	font-size: 200%;
 
 }
 .statementBx:hover {
+	color:yellow;
+}
+
+.optionBx{
+	color: rgb(155,0,255);
+	background-color: rgb(70,70,90);
+	transition: 400ms;
+	font-size: 200%;
+
+}
+.optionBx:hover {
 	color:yellow;
 }
 
@@ -55,7 +66,7 @@ body{
 	position:sticky;
 	color: rgb(0,224,208);
 	background-color: rgb(50,50,80);
-	transition: color 400ms;
+	transition: 400ms;
 	font-size: 300%;
 	margin: 2%;
 	user-select:none;

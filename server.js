@@ -1606,7 +1606,6 @@ function joinGame(game,socket){
 		socket.on("joinRm",(e)=>{ten.joinRm(e,socket)})
 		socket.on("click",(e)=>{ten.processClick(e)})
 		socket.on("restart",(e)=>{ten.restartRoom(e)})
-
 		socket.onAny((e,n)=>{ten.logger.push([Date.now(),e,n])})
 	} else if(game == "G10.5"){
 		socket.join("G10.5")
@@ -1618,6 +1617,10 @@ function joinGame(game,socket){
 		socket.on('disconnect',()=>{flightSim.disconnect(socket)})
 
 		// socket.onAny((e,n)=>{flightSim.logger.push([Date.now(),e,n])})
+	} else if(game == "G10.6"){
+		socket.join("G10.6")
+		io.to(socket.id).emit("acknowledge G10.6",socket.id)
+		socket.onAny((e,n)=>{ArgAug.handle(Date.now(),e,n,socket)})
 	}
 }
 
@@ -5322,7 +5325,34 @@ class flightSim{
 
 
 
+//////////////////////////////////////////////////// ARGAUG
 
+
+class ArgAug{
+	static logger = []
+
+	static storage = {
+		"main":{},
+		"opt":{}
+	}
+
+	static handle(time,request,content,socket){
+		this.logger.push([time,request,content])
+
+		// io.to(socket.id).emit("string","acknowledged request:"+request)
+
+		if(request === "mem"){
+			if(this.storage.main[content] !== undefined){
+				io.to(socket.id).emit("mem",[content,this.storage.main[content]])
+			} else {
+				io.to(socket.id).emit("string","couldnt load tag "+content)
+			}
+		}
+
+	}
+}
+
+//////////////////////////////////////////////////// ARGAUG END
 
 
 
