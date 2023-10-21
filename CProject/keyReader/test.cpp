@@ -1297,8 +1297,16 @@ void myScreenThread(){
 
     	//crosshair
     	float a = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-    	myRect(cr,Width/2,Height/2-40,2,80,0,a,1-a,0.9);
-    	myRect(cr,Width/2-40,Height/2,80,2,0,a,1-a,0.9);
+
+    	float R = static_cast <float> (rand()%2);
+    	float G = static_cast <float> (rand()%2);
+    	float B = static_cast <float> (rand()%2);
+
+    	myRect(cr,Width/2,Height/2-40,2,80,R,G,B,0.9);
+    	myRect(cr,Width/2-40,Height/2,80,2,R,G,B,0.9);
+
+    	// myRect(cr,Width/2,Height/2-40,2,80,0,a,1-a,0.9);
+    	// myRect(cr,Width/2-40,Height/2,80,2,0,a,1-a,0.9);
 
     	// myRect(cr,Width/2,Height/2-80,1,160,1,0,1);
     	// myRect(cr,Width/2-80,Height/2,160,1,1,0,1);
