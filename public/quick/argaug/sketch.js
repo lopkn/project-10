@@ -111,7 +111,41 @@ function setDefaultStatementBx(el){
 		el.style.userSelect = "none"
 		el.draggable = true
 }
+function setDefaultTextBx(el){
+	el.addEventListener('contextmenu',(e)=>{
+			e.preventDefault();
+			console.log("Elm rc: "+el+" at X: "+e.clientX+" Y: "+e.clientY)
+			// el.contentEditable = false;
+			// el.style.userSelect = "none"
+			// el.draggable = true
+			el.blur()
+		})
+		el.addEventListener('click',(e)=>{
+			el.contentEditable = true;
+		})
+		el.addEventListener('blur',(e)=>{
+			el.contentEditable = false;
+			el.style.userSelect = "none"
+			el.draggable = true
+		})
+		el.addEventListener('dragstart',(e)=>{
+			console.log("Elm drg: "+el+" at X: "+e.clientX+" Y: "+e.clientY)
+			e.dataTransfer.setDragImage(new Image(), 0, 0);
+			drag = {"sx":e.clientX,"sy":e.clientY,"x":e.clientX,"y":e.clientY,"on":true}
+		})
+		el.addEventListener('drag',(e)=>{
+			drag.x = e.clientX
+			drag.y = e.clientY
+		})
+		el.addEventListener('dragend',(e)=>{
+			console.log("Elm drgend: "+el+" at X: "+e.clientX+" Y: "+e.clientY)
+			drag.on = false;
+		})
 
+		el.contentEditable = false;
+		el.style.userSelect = "none"
+		el.draggable = true
+}
 { 
 
 	let elms = classQuery("statementBx")

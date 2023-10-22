@@ -1620,6 +1620,11 @@ function joinGame(game,socket){
 	} else if(game == "G10.6"){
 		socket.join("G10.6")
 		io.to(socket.id).emit("acknowledge G10.6",socket.id)
+		let clientIp = socket.request.connection.remoteAddress
+		if(clientIp == "::ffff:192.168.1.1" || clientIp == "::1" || clientIp == "::ffff:223.18.29.177"){
+				ArgAug.keyholders[socket.id] = true
+			io.to(socket.id).emit("string","you are a keyholder")
+		}
 		socket.onAny((e,n)=>{ArgAug.handle(Date.now(),e,n,socket)})
 	}
 }
@@ -5335,6 +5340,8 @@ class ArgAug{
 		"main":{},
 		"opt":{}
 	}
+
+	static keyholders = {}
 
 	static handle(time,request,content,socket){
 		this.logger.push([time,request,content])
