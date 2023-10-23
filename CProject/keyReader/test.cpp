@@ -152,6 +152,8 @@ struct AST{
 
 	double RSscale = 1;
 
+	int autotimer = 0;
+
 	std::string autokStore = "";
 
 	int downMode = 1;
@@ -844,7 +846,9 @@ void myDo(int x,std::string s1){
 		} else if(x == 80){
 			inputMode = 2;
 			myPlay("AUDrecoil.wav",s1);
-		} else {
+		} else if(x == 81){
+			inputMode = 3;
+		}else {
 			inputMode = 0;
 			return;
 		}
@@ -914,6 +918,29 @@ void myDo(int x,std::string s1){
 				mast.downMode = mast.weaponCount;
 			}
 			myPlay(mast.ASTsounds[mast.downMode-1],s1);
+		}
+	} else if(inputMode == 3){
+		string wavFile = "ding2.wav"
+		// if(x == 79){
+		// 	std::string s2 = "dummy=$( sleep "+ 5 +"&& sudo -u '#" + s1 +"' XDG_RUNTIME_DIR=/run/user/"+s1+" aplay "+wavFile+" 2>/dev/null) &";
+		// 	int i3 = std::system(s2.c_str());
+		// } else if(x == 80){
+		// 	std::string s2 = "dummy=$( sleep "+ 10 +"&& sudo -u '#" + s1 +"' XDG_RUNTIME_DIR=/run/user/"+s1+" aplay "+wavFile+" 2>/dev/null) &";
+		// 	int i3 = std::system(s2.c_str());
+		// } else if(x == 81){
+		// 	std::string s2 = "dummy=$( sleep "+ 30 +"&& sudo -u '#" + s1 +"' XDG_RUNTIME_DIR=/run/user/"+s1+" aplay "+wavFile+" 2>/dev/null) &";
+		// 	int i3 = std::system(s2.c_str());
+		// }
+		if(x == 79){
+			mast.autotimer += 1;
+		}else if(x == 80){
+			mast.autotimer += 5
+		}else if(x == 81){
+			mast.autotimer += 10;
+		} else if(x == 78){
+			std::string s2 = "dummy=$( sleep "+ mast.autotimer +" && sudo -u '#" + s1 +"' XDG_RUNTIME_DIR=/run/user/"+s1+" aplay "+wavFile+" 2>/dev/null) &";
+			int i3 = std::system(s2.c_str());
+			mast.autotimer = 0;
 		}
 	}
 
