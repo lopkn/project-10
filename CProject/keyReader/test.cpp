@@ -919,8 +919,9 @@ void myDo(int x,std::string s1){
 			}
 			myPlay(mast.ASTsounds[mast.downMode-1],s1);
 		}
-	} else if(inputMode == 3){
-		string wavFile = "ding2.wav"
+	}
+	 else if(inputMode == 3){
+		std::string wavFile = "microDing.wav";
 		// if(x == 79){
 		// 	std::string s2 = "dummy=$( sleep "+ 5 +"&& sudo -u '#" + s1 +"' XDG_RUNTIME_DIR=/run/user/"+s1+" aplay "+wavFile+" 2>/dev/null) &";
 		// 	int i3 = std::system(s2.c_str());
@@ -934,11 +935,11 @@ void myDo(int x,std::string s1){
 		if(x == 79){
 			mast.autotimer += 1;
 		}else if(x == 80){
-			mast.autotimer += 5
+			mast.autotimer += 5;
 		}else if(x == 81){
 			mast.autotimer += 10;
-		} else if(x == 78){
-			std::string s2 = "dummy=$( sleep "+ mast.autotimer +" && sudo -u '#" + s1 +"' XDG_RUNTIME_DIR=/run/user/"+s1+" aplay "+wavFile+" 2>/dev/null) &";
+		} else if(x == 82){
+			std::string s2 = "dummy=$( sleep "+ std::to_string(mast.autotimer) +" && sudo -u '#" + s1 +"' XDG_RUNTIME_DIR=/run/user/"+s1+" aplay "+wavFile+" 2>/dev/null) &";
 			int i3 = std::system(s2.c_str());
 			mast.autotimer = 0;
 		}
