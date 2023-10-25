@@ -150,7 +150,7 @@ struct AST{
 
 	bool autoK = true;
 
-	double RSscale = 1;
+	double RSscale = 2;
 
 	int autotimer = 0;
 
@@ -758,7 +758,7 @@ void updateTextRec(int x){
 	} else if(x == 28){
 		textRec1 = textRec1 + "[e]";
 	} else if(x == 57){
-		if(textRec1.length() < 16){
+		if(textRec1.length() != 16){
 		textRec2 = textRec2 + textRec1 + " ";
 		}
 		while(textRec1.length()>0){
