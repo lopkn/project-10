@@ -5338,10 +5338,15 @@ class ArgAug{
 
 	static storage = {
 		"main":{},
-		"opt":{}
+		"opt":{},
+		"Smain":{},
+		"Sopt":{}
 	}
 
 	static keyholders = {}
+
+	static counter = 2;
+
 
 	static handle(time,request,content,socket){
 		this.logger.push([time,request,content])
@@ -5354,8 +5359,13 @@ class ArgAug{
 			} else {
 				io.to(socket.id).emit("string","couldnt load tag "+content)
 			}
+		} else if(request === "req"){
+			this.storage.Smain = content
 		}
 
+	}
+	static getNewID(){
+		return(this.counter++)
 	}
 }
 
