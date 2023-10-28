@@ -28,7 +28,7 @@ socket.emit("JOINGAME",GAMESESSION)
 var ID = 0
 socket.on("acknowledge G10.6",(e)=>{ID = e; console.log("joined as "+ID)})
 socket.on("string",(e)=>{console.log(e)})
-socket.on("mem",(e)=>{storage.main[e[0]]=e[1]})
+socket.on("mem",(e)=>{storage.main[e[0]]=e[1];Arg.loadTag(e[0]);console.log(e[1])})
 
 
 
@@ -160,16 +160,16 @@ function setDefaultTextBx(el){
 
 class storage{
 	static main = {
-		"0":{
-			"title":"Welcome to lopknA65's domain",
-			"description":"Feel free to explore",
-			"options":[{"optTitle":"hi","tags":[0]},{"optTitle":"info","tags":[1]}]
-		},
-		"1":{
-			"title":"Information here",
-			"description":"Not looking for an argument?",
-			"options":[{"optTitle":"science","tags":[-1]}]
-		},
+		// "0":{
+		// 	"title":"Welcome to lopknA65's domain",
+		// 	"description":"Feel free to explore",
+		// 	"options":[{"optTitle":"hi","tags":[0]},{"optTitle":"info","tags":[1]}]
+		// },
+		// "1":{
+		// 	"title":"Information here",
+		// 	"description":"Not looking for an argument?",
+		// 	"options":[{"optTitle":"science","tags":[-1]}]
+		// },
 	}
 }
 
@@ -258,8 +258,16 @@ function sendReq(req,type){
 
 
 
+function reqV2(req){
 
-
+	let dict = {
+		"path":Arg.currentTag,
+		"option":document.getElementById("cbx option").innerHTML,
+		"title":document.getElementById("cbx title").innerHTML,
+		"description":document.getElementById("cbx description").innerHTML,
+	}
+	sendReq(dict,"v2")
+}
 
 
 
@@ -284,3 +292,33 @@ let example = {
 /// [41]{5} -> [58]{3} -> [29]<17>
 
 ///guideline: ychain, understand -> sound -> valid
+
+///arginput guideline:
+/// general topic [base]=option
+///
+/// wrong option
+/// Correct title
+/// correct description
+/// 
+/// 
+/// 
+
+
+// Each title has multiple options
+// Each option has one tag
+// One tag links to a block
+// 
+
+
+//so there needs to be a specific starting path
+//then add an option to the path
+/// recognizing same options/ choice for same option
+// then title, description
+
+
+
+
+
+
+
+

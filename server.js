@@ -5365,12 +5365,48 @@ class ArgAug{
 				io.to(socket.id).emit("string","couldnt load tag "+content)
 			}
 		} else if(request === "req"){
-			this.storage.Smain = content.cont
+			if(content.type == "v2"){
+				let c = content.cont
+				if(this.storage.Smain[c.path] == undefined){
+					this.storage.Smain[c.path] = []
+				}
+
+				this.storage.Smain[c.path].push(c)
+
+				if(this.keyholders[socket.id] == true){
+					this.mergeSmainV2(c.path,this.storage.Smain[c.path].length-1)
+				}
+
+			} else {
+				this.storage.Smain["rnd-"+Date.now()] = content.cont
+			}
 		} else if(request === "save"){
 			this.save()
 		}
 
 	}
+
+	static mergeSmainV2(path,i){
+		let c = this.storage.Smain[path][i]
+
+		let t = this.getNewID()
+
+		let d = {
+			"optTitle":c.option,
+			"tags":[t],
+		}
+
+		this.storage.main[t] = {
+			"title":c.title,
+			"description":c.description,
+			"options":[]
+		}
+
+		this.storage.main[path].options.push(d)
+
+		this.storage.Smain[path].splice(i,1)
+	}
+
 	static getNewID(){
 		return(this.storage.counter++)
 	}

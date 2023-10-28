@@ -1,6 +1,51 @@
 {
-    "main": {},
+    "main": {
+        "0": {
+            "title": "Welcome to lopknA65's domain",
+            "description": "Feel free to explore",
+            "options": [
+                {
+                    "optTitle": "hi",
+                    "tags": [
+                        0
+                    ]
+                },
+                {
+                    "optTitle": "info",
+                    "tags": [
+                        1
+                    ]
+                },
+                {
+                    "optTitle": "option",
+                    "tags": [
+                        2
+                    ]
+                }
+            ]
+        },
+        "1": {
+            "title": "Information here",
+            "description": "Not looking for an argument?",
+            "options": [
+                {
+                    "optTitle": "science",
+                    "tags": [
+                        -1
+                    ]
+                }
+            ]
+        },
+        "2": {
+            "title": "title",
+            "description": "description",
+            "options": []
+        }
+    },
     "opt": {},
-    "Smain": {},
-    "Sopt": {}
+    "Smain": {
+        "0": []
+    },
+    "Sopt": {},
+    "counter": 3
 }
