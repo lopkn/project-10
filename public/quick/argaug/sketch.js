@@ -251,7 +251,9 @@ function optionClicked(number){
 
 
 
-
+function sendReq(req,type){
+	socket.emit("req",{"type":type,"cont":req})
+}
 
 
 

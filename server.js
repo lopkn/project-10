@@ -5336,16 +5336,21 @@ class flightSim{
 class ArgAug{
 	static logger = []
 
-	static storage = {
-		"main":{},
-		"opt":{},
-		"Smain":{},
-		"Sopt":{}
-	}
+	// static storage = {
+	// 	"main":{},
+	// 	"opt":{},
+	// 	"Smain":{},
+	// 	"Sopt":{}
+	// }
+
+	static storage = require("./argstorage")
 
 	static keyholders = {}
 
-	static counter = 2;
+
+	static save(){
+		fs.writeFileSync('./argstorage.json',JSON.stringify(this.storage,null,4), function writeJSON(err){if(err)return console.log(err)})
+	}
 
 
 	static handle(time,request,content,socket){
@@ -5360,12 +5365,14 @@ class ArgAug{
 				io.to(socket.id).emit("string","couldnt load tag "+content)
 			}
 		} else if(request === "req"){
-			this.storage.Smain = content
+			this.storage.Smain = content.cont
+		} else if(request === "save"){
+			this.save()
 		}
 
 	}
 	static getNewID(){
-		return(this.counter++)
+		return(this.storage.counter++)
 	}
 }
 
