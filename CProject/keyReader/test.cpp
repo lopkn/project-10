@@ -38,8 +38,8 @@
 //STUFF
 
 
-int keyboardEventX = 6;
-int mouseEventX = 5;
+int keyboardEventX = 1;
+int mouseEventX = 4;
 
 
 
