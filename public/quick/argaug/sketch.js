@@ -326,3 +326,17 @@ let example = {
 
 
 
+function decr(str){
+	let split = str.split("-")
+	for(let i = 0; i < split.length;i++){
+		let s = split[i]
+		if(s[0] == ">"){
+			if(s[1] == ">"){
+				
+			}
+		}
+	}
+}
+
+
+
