@@ -328,12 +328,22 @@ let example = {
 
 function decr(str){
 	let split = str.split("-")
+	let outArr = []
+
 	for(let i = 0; i < split.length;i++){
 		let s = split[i]
 		if(s[0] == ">"){
 			if(s[1] == ">"){
-				
+				outArr.push({"type":"description","cont":s.substring(2)})
+			} else {	
+				outArr.push({"type":"title","cont":s.substring(1)})
 			}
+		} else if(s[0] == "!"){
+				outArr.push({"type":"link","cont":s.substring(1)})
+		} else if(s[0] == "/"){
+				outArr.push({"type":"highlight","cont":s.substring(1)})
+		} else {
+				outArr.push({"type":"option","cont":s})
 		}
 	}
 }
