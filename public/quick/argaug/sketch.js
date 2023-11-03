@@ -346,7 +346,12 @@ function decr(str){
 				outArr.push({"type":"option","cont":s})
 		}
 	}
+	return(outArr)
 }
+
+//tdl
+// uni drvlic glass this pres 
+
 
 
 
