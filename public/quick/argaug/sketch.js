@@ -55,7 +55,7 @@ function getHighlightedText() {
 
 var drag = {"sx":0,"sy":0,"x":0,"y":0,"on":false}
 
-setInterval(()=>{mainInterval()},30)
+let main=setInterval(()=>{mainInterval()},30)
 
 function mainInterval(){
 	ctx.clearRect(0,0,Width,Height)
@@ -269,7 +269,16 @@ function reqV2(req){
 	sendReq(dict,"v2")
 }
 
+function reqV2_1(req){
 
+	let dict = {
+		"path":Arg.currentTag,
+		"option":req.option,
+		"title":req.title,
+		"description":req.description,
+	}
+	sendReq(dict,"v2")
+}
 
 
 
@@ -325,6 +334,32 @@ let example = {
 // -/ highlight
 
 
+function decrV2(str){
+	let split = str.split("-")
+	let DCT = {}
+
+	for(let i = 0; i < split.length;i++){
+		let s = split[i]
+
+		if(s[s.length-1] == "\n"){s = s.slice(0,-1)}
+
+		if(s[0] == ">"){
+			if(s[1] == ">"){
+				DCT.description=s.substring(2)
+			} else {	
+				DCT.title=s.substring(1)
+			}
+		} else if(s[0] == "!"){
+				DCT.link=s.substring(1)
+		} else if(s[0] == "/"){
+				DCT.highlight = s.substring(1)
+		} else {
+				DCT.option=s
+				}
+	}
+	Object.keys(DCT).forEach((e,i)=>{if(DCT[e][0]==" "){DCT[e]=DCT[e].substring(1)}})
+	return(DCT)
+}
 
 function decr(str){
 	let split = str.split("-")
