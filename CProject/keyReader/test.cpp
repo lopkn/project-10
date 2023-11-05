@@ -138,6 +138,8 @@ void myPix(cairo_t *cr, int x, int y, int z, float r, float g, float b, float a 
 
 void scanr();
 void AK(std::string str);
+std::string AKchooser();
+
 void recoilReader(int xarr[100][3], int size);
 
 struct AST{
@@ -761,6 +763,14 @@ void updateTextRec(int x){
 		if(textRec1.length() != 16){
 		textRec2 = textRec2 + textRec1 + " ";
 		}
+
+		if(textRec1.compare("stupid") == 0){std::cout<<"STUPID????\n";}
+
+		if(textRec1.compare("stupid") == 0 && mast.autoK){
+			system("xdotool key BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace");
+			AK(AKchooser());
+		}
+
 		while(textRec1.length()>0){
 			textRec1.pop_back();
 		}
@@ -1533,11 +1543,11 @@ const std::string adverbs[22]={
   int b = rand()%22;
   std::cout << adverbs[b] + stupids[a] + " " << std::endl;
   
-  return (adverbs[b] + stupids[a] + " ");
+  return (adverbs[b] + stupids[a]);
 }
 void AK(std::string str){
 	if(!mast.autoK){return;}
-	std::string str2 = "xdotool type '"+AKchooser()+"'";
+	std::string str2 = "xdotool type  --delay 0 '"+AKchooser()+"'";
 	system(str2.c_str());
 }
 
