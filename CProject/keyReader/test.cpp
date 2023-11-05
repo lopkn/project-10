@@ -643,7 +643,7 @@ void executeCommandString(std::string str){
 	} else if (str == "autok"){
 		mast.autoK = !mast.autoK;
 		std::cout << ">autoK toggled: "<< mast.autoK <<"\n";
-		system("xdotool key BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace");
+		system("xdotool --repeat 7 --delay 0 BackSpace");
 		AK("test");
 	} else if (str == "rjump"){
 		mast.Rjump = !mast.Rjump;
