@@ -137,7 +137,7 @@ void myPix(cairo_t *cr, int x, int y, int z, float r, float g, float b, float a 
 }
 
 void scanr();
-void AK(std::string str);
+void AK(std::string str, int back = 0);
 std::string AKchooser();
 
 void recoilReader(int xarr[100][3], int size);
@@ -767,8 +767,7 @@ void updateTextRec(int x){
 		if(textRec1.compare("stupid") == 0){std::cout<<"STUPID????\n";}
 
 		if(textRec1.compare("stupid") == 0 && mast.autoK){
-			system("xdotool key BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace BackSpace");
-			AK(AKchooser());
+			AK(AKchooser(),7);
 		}
 
 		while(textRec1.length()>0){
@@ -1545,10 +1544,17 @@ const std::string adverbs[22]={
   
   return (adverbs[b] + stupids[a]);
 }
-void AK(std::string str){
+void AK(std::string str, int back){
 	if(!mast.autoK){return;}
-	std::string str2 = "xdotool type  --delay 0 '"+AKchooser()+"'";
+	std::string strA = AKchooser();
+	std::string str2;
+	if(back > 0){
+		str2 = "xdotool keyup space && xdotool key --repeat "+std::to_string(back)+" --delay 0 BackSpace && xdotool type --delay 0 '"+strA+"'";
+	} else {
+		str2 = "xdotool keyup space && xdotool type  --delay 0 '"+strA+"'";
+	}
 	system(str2.c_str());
+	std::cout << "typing: "+str2+"\n";
 }
 
 void speak(std::string str){
