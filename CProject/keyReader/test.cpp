@@ -1517,7 +1517,10 @@ std::string AKchooser()
   int a;
   srand (time(NULL));
 
-  const std::string stupids[31] = {
+  const int ff = 34;
+  const int gg = 22;
+
+  const std::string stupids[ff] = {
   "idiotic ",
   "moronic ","bloody unintelligent ","brain dead ",//4
   "vapid ","pig headed ","cretinous ","naive ","senseless ",//9
@@ -1525,10 +1528,10 @@ std::string AKchooser()
   "degenerate ","aberrant ","delerious ","apeish ","puerile ","lame and dopey ", "uneducated ",//16
   "asinine ","unintellectual ","fallacious ","daft ","slow ", "obtuse ",//22
   "feeble ", "uneducated ","invalid ","inconsequential ","frivolous ","protohominid ","negligable ",//29
-  "rancid ","primal brained "//31
+  "rancid ","primal brained ","reprobate ", "misinformed ","chowderheaded "
 };
 
-const std::string adverbs[22]={
+const std::string adverbs[gg]={
   "trivially ","horrendously ","heinously ","erroneously ","notably ","exceptionally ",
   "abnormally ","abhorrently ","atrociously ","direly ","hideously ","dreadfully ","awfully ","harrowingly ",
   "unbelievably ","improbably ","implausibly ","disturbingly ","excrutiatingly ", "catastrophically ","absurdly ",
@@ -1538,8 +1541,8 @@ const std::string adverbs[22]={
 };
 
 
-  a = rand() % 31;
-  int b = rand()%22;
+  a = rand() % ff;
+  int b = rand()%gg;
   std::cout << adverbs[b] + stupids[a] + " " << std::endl;
   
   return (adverbs[b] + stupids[a]);
