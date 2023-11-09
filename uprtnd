@@ -908,6 +908,25 @@ F = qE
 F = (1.6x10-19)(250)
 F = 4x10-19 N × 103 = 4x10-16= 1.6x10-15N
 
+1. V = IR = 5*(5+2) = 35
+2. resistance in parallel = 1/(1/r1+1/r2) = 0.5
+3. resistance in parallel = 1/(1/r1+1/r2) = 2/3
+4. Current in parallel = total current * (Rtotal-R)/Rtotal = 0.66.. = 2/3
+5. Q = CV, C = Q/V = 5uF
+6. e.m.f. = I(R+r) = TPD-Ir = 12V
+7. increasing in distance decreases the elecric field
+8. Increase in area increases capacitance (stores more charge)
+9. It = I0 * e^(-t/RC) describes the current at time t in relation to starting charge and the resistance in the rest of the circuit
+10. A non-ohmic V/I graph would be a curve and V is not necisserily I*R
+11. A capacitor that is fully charged has a resistance of +Infinity and a capacitor that is not charged has a resistance of 0
+12. An ideal Ameter has 0 resistance and an ideal Voltmeter has +Infinite resistance
+13. Energy stored in a connected capacitor increases if we increase the area of the capacitor or reduce the distance of the capacitor.
+14. A capacitor discharges with a half life scale over time and never fully discharges
+15. P = I^2R = 20W it is the same brightness
+
+
+
+
 
 biologee
 For microtubules: talk about diameter, pulling chromosomes apart equally
