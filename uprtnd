@@ -930,7 +930,9 @@ F = 4x10-19 N × 103 = 4x10-16= 1.6x10-15N
 20. At higher temperatures, the resistance of resistors & wires increase because the shaking of atoms block electron flow
 21. At really low temperatures, materials become superconductors and electrons travel through with almost 0 resistance
 22. no. Although there is more current flowing through resistor 1, the overall current in the circuit decreases so resistor 3 has less current
-23. 
+23. V = IR = IxRx. Ix = I * R/Rx = V/Rx
+24. the voltage across the parallel circuit decreases because the resistance decreased
+25. The voltage Decreases because All other voltages across things increase, and the voltage across a battery stays the same.
 
 
 

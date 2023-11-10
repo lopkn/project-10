@@ -258,7 +258,7 @@ function sendReq(req,type){
 
 
 
-function reqV2(req){
+function reqV2(){
 
 	let dict = {
 		"path":Arg.currentTag,
@@ -268,6 +268,12 @@ function reqV2(req){
 	}
 	sendReq(dict,"v2")
 }
+
+document.getElementById("cbx button").addEventListener("click",()=>{
+	reqV2();
+	console.log("hello?")
+})
+
 
 function reqV2_1(req){
 
