@@ -271,7 +271,7 @@ function reqV2(){
 
 document.getElementById("cbx button").addEventListener("click",()=>{
 	reqV2();
-	console.log("hello?")
+	ArgAug.loadTag(ArgAug.currentTag);
 })
 
 
