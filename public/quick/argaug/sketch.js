@@ -191,9 +191,9 @@ class Arg {
 		document.getElementById("path").innerHTML = pathStr
 	}
 
-	static loadTag(tag){
+	static loadTag(tag,forced){
 
-		if(storage.main[tag] === undefined){
+		if(storage.main[tag] === undefined||forced){
 			socket.emit("mem",tag);
 			return
 		}
@@ -258,7 +258,7 @@ function sendReq(req,type){
 
 
 
-function reqV2(){
+function reqV2(req){
 
 	let dict = {
 		"path":Arg.currentTag,
@@ -267,13 +267,8 @@ function reqV2(){
 		"description":document.getElementById("cbx description").innerHTML,
 	}
 	sendReq(dict,"v2")
+	ArgAug.loadTag(currentTag,true)
 }
-
-document.getElementById("cbx button").addEventListener("click",()=>{
-	reqV2();
-	ArgAug.loadTag(ArgAug.currentTag);
-})
-
 
 function reqV2_1(req){
 
