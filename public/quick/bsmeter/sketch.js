@@ -113,11 +113,14 @@ function data(){
     infactor = Math.random()*3.7-1.6
 
     if(Math.random()<0.2){
-      mode = randarr(["calm","mid","danger"])
+      mode = randarr(["default","calm","mid","danger"])
       console.log(mode)
     }
 
-    if(mode == "calm"){
+    if(mode == "default"){
+      infactor = smoothf(infactor,infactor/2-1.6,0.6)
+      smoothness *= 0.2
+    }else if(mode == "calm"){
       infactor = smoothf(infactor,infactor/2-1.6,0.4)
       smoothness *= 0.6
       if(infactor < -1){
@@ -135,7 +138,7 @@ function data(){
       smoothness = smoothf(smoothness,0.01,0.1*Math.random())
     }
   }
-  if(infactor > -1 && Math.random()<0.01){
+  if(infactor > -1.3 && Math.random()<0.02){
     infactor -= 0.1
   }
 
