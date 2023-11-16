@@ -114,10 +114,15 @@ function data(){
 
     if(Math.random()<0.2){
       mode = randarr(["calm","mid","danger"])
+      console.log(mode)
     }
 
     if(mode == "calm"){
-      infactor = smoothf(infactor,infactor/2-1,0.2)
+      infactor = smoothf(infactor,infactor/2-1.6,0.4)
+      smoothness *= 0.6
+      if(infactor < -1){
+        pd += 1000
+      }
     } else if(mode == "mid"){
       infactor = smoothf(infactor,infactor/2,0.2)
     }
@@ -129,6 +134,9 @@ function data(){
     } else if(infactor < -1){
       smoothness = smoothf(smoothness,0.01,0.1*Math.random())
     }
+  }
+  if(infactor > -1 && Math.random()<0.01){
+    infactor -= 0.1
   }
 
   newAng = Math.sqrt(Math.random()*Math.PI*Math.PI) + infactor
