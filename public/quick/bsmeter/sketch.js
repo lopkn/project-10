@@ -107,6 +107,8 @@ function randarr(arr){
   return(arr[Math.floor(Math.random()*arr.length)])
 }
 let mode = "calm"
+let sfactor = 20;
+let rfactor = 1;
 function data(){
 
   if(Date.now() > pd){
@@ -121,14 +123,29 @@ function data(){
     if(mode == "default"){
       infactor = smoothf(infactor,infactor/2-1.6,0.6)
       smoothness *= 0.2
+      sfactor = 20
+      rfactor = 1
     }else if(mode == "calm"){
       infactor = smoothf(infactor,infactor/2-1.6,0.4)
       smoothness *= 0.6
       if(infactor < -1){
         pd += 1000
       }
+      sfactor = 40
+      rfactor = 0.7
     } else if(mode == "mid"){
       infactor = smoothf(infactor,infactor/2,0.2)
+      sfactor = 40
+      rfactor = 0.5
+    } else {
+      sfactor = 60
+      rfactor = 0.2
+    }
+
+    if(true){
+      let rr = Math.random()
+      sfactor = rr*60
+      rfactor = 1-rr
     }
 
 
@@ -146,11 +163,11 @@ function data(){
   newAng = Math.sqrt(Math.random()*Math.PI*Math.PI) + infactor
   if(newAng < 0|| newAng >Math.PI){newAng/=1.2}
 
-    let algo = Math.abs(AOUT[0][0][0]*40)
+    let algo = Math.abs(AOUT[0][0][0]*sfactor)
 
     lastAout = smoothf(lastAout,algo,lastAout>algo?0.02:0.1)
 
-    newAng =  newAng * (lastAout + 0.5)
+    newAng =  newAng * (lastAout + rfactor)
     if(newAng > 3.6){newAng = 3 + Math.random()}
 }
 
