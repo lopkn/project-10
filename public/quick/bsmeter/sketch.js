@@ -78,6 +78,7 @@ function draw(){
   let bx = 20
   ctx.fillStyle = "#FFAAAA"
   ctx.fillRect(Width/2-bx,Height*h-bx,bx*2,bx*2)
+  // ctx.fillText(lastAout,200,200)
 
 }
 
@@ -113,7 +114,7 @@ function data(){
     infactor = Math.random()*3.7-1.6
 
     if(Math.random()<0.2){
-      mode = randarr(["default","calm","mid","danger"])
+      mode = randarr(["default","calm","mid","danger","danger"])
       console.log(mode)
     }
 
@@ -144,4 +145,38 @@ function data(){
 
   newAng = Math.sqrt(Math.random()*Math.PI*Math.PI) + infactor
   if(newAng < 0|| newAng >Math.PI){newAng/=1.2}
+
+    let algo = Math.abs(AOUT[0][0][0]*40)
+
+    lastAout = smoothf(lastAout,algo,lastAout>algo?0.02:0.1)
+
+    newAng =  newAng * (lastAout + 0.5)
+    if(newAng > 3.6){newAng = 3 + Math.random()}
+}
+
+
+
+
+let workProcessor;
+let audioContext;
+let lastAout = 0
+let AOUT = [[[0]]];
+if(true){
+navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+  audioContext = new AudioContext();
+  let mic = audioContext.createMediaStreamSource(stream);
+  audioContext.audioWorklet
+    .addModule("./test.js")
+    .then(() => {
+      workProcessor = new AudioWorkletNode(audioContext, "worklet-processor",{
+  numberOfInputs: 1
+});
+      mic.connect(workProcessor).connect(audioContext.destination);
+      console.log("Audio context successfully initialized.");
+        workProcessor.port.onmessage = (e)=>{AOUT = e.data}
+    })
+    .catch((error) => {
+      console.error("Error adding audio worklet module:", error);
+    });
+});
 }
