@@ -85,7 +85,7 @@ function draw(){
 
 
 
-let main = setInterval(()=>{data();smooth();draw()},20)
+let main = setInterval(()=>{data();smooth();draw();board.draw()},20)
 
 
 
@@ -155,6 +155,13 @@ function data(){
     } else if(infactor < -1){
       smoothness = smoothf(smoothness,0.01,0.1*Math.random())
     }
+
+    if(smoothness > 0.1){
+      board.dict["High fluctuation"].on = true
+    } else {
+      board.dict["High fluctuation"].on = false
+    }
+
   }
   if(infactor > -1.3 && Math.random()<0.02){
     infactor -= 0.1
@@ -197,3 +204,49 @@ navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
     });
 });
 }
+
+
+
+
+
+class board{
+  // static arr = [
+  //   {"name":"Danger BS intensity","on":false},
+  //   {"name":"BS flux warning","on":false},
+  //   {"name":"High fluctuation","on":false}
+  // ]
+  static dict = {
+    "Danger BS intensity":{"on":false},
+    "BS flux warning":{"on":false},
+    "High fluctuation":{"on":false},
+  }
+  static hx = 3
+  static h = 30;
+  static hd = 40;
+  static w = 250;
+  static wd = 300;
+
+  static draw(){
+
+    let arr = Object.keys(this.dict)
+
+    arr.forEach((name,i)=>{
+      let e = this.dict[name]
+    let blink = Math.floor(Date.now()/200)%2==0
+    
+    ctx.fillStyle = "#202020"
+    if(e.on && blink){  
+      ctx.fillStyle = e.onBColor?e.onBColor:"#FF0000"
+    }
+    ctx.fillRect(this.wd+this.w*(Math.floor(i/4))-10,this.hd*(i%this.hx)+50,this.w,-this.h)
+
+  ctx.font = "bold 20px Courier New"
+    ctx.fillStyle = "#808080"
+    if(e.on && blink){  
+      ctx.fillStyle = e.onColor?e.onColor:"#FFFFFF"
+    }
+    ctx.fillText(name,this.wd+this.w*(Math.floor(i/4)),this.hd*(i%this.hx)+40)
+  })
+  }
+}
+
