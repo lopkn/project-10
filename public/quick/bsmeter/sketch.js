@@ -18,6 +18,7 @@ let mouseY = 0
 onmousemove = (e)=>{mouseX = (e.clientX); mouseY = (e.clientY)}
 let newAng = 0
 let ang = 0
+let ang2 = 0;
 
 let resolution = 20;
 
@@ -75,10 +76,25 @@ function draw(){
   ctx.lineWidth = 15
   ctx.strokeStyle="#FFFFFF"
   ctx.stroke()
+
+  ctx.beginPath()
+  ctx.moveTo(Width/2,Height*h)
+  x*=size
+  y*=size
+  ctx.lineCap = "round"
+  x = Math.sin(ang2-Math.PI/2)*size/2
+  y = Math.cos(ang2-Math.PI/2)*size/2
+  ctx.lineTo(x+Width/2,Height*h-y)
+  ctx.lineWidth = 10
+  ctx.strokeStyle="#7000C0"
+  ctx.stroke()
+
   let bx = 20
   ctx.fillStyle = "#FFAAAA"
   ctx.fillRect(Width/2-bx,Height*h-bx,bx*2,bx*2)
   // ctx.fillText(lastAout,200,200)
+
+  ctx.fillText(rfactor.toFixed(3),200,200)
 
 }
 
@@ -116,7 +132,7 @@ function data(){
     infactor = Math.random()*3.7-1.6
 
     if(Math.random()<0.2){
-      mode = randarr(["default","calm","mid","danger","danger"])
+      mode = randarr(["default","calm","mid","danger"])
       console.log(mode)
     }
 
@@ -138,6 +154,12 @@ function data(){
       sfactor = 40
       rfactor = 0.5
     } else {
+      smoothness *= 1+Math.random();
+      if(smoothness > 0.35){
+        smoothness = 0.35
+      } else if(smoothness > 0.13){
+        smoothness /= 0.13
+      }
       sfactor = 60
       rfactor = 0.2
     }
@@ -170,12 +192,18 @@ function data(){
   newAng = Math.sqrt(Math.random()*Math.PI*Math.PI) + infactor
   if(newAng < 0|| newAng >Math.PI){newAng/=1.2}
 
-    let algo = Math.abs(AOUT[0][0][0]*sfactor)
 
-    lastAout = smoothf(lastAout,algo,lastAout>algo?0.02:0.1)
+    let abl = Math.abs(AOUT[0][0][0])
+    abl = abl>1?1+Math.log10(abl):abl
+
+    let algo = (Math.abs(abl)*sfactor)
+
+    lastAout = smoothf(lastAout,algo,lastAout>algo?0.02:0.05)
 
     newAng =  newAng * (lastAout + rfactor)
     if(newAng > 3.6){newAng = 3 + Math.random()}
+
+    ang2 = lastAout
 }
 
 
@@ -232,7 +260,7 @@ class board{
 
     arr.forEach((name,i)=>{
       let e = this.dict[name]
-    let blink = Math.floor(Date.now()/200)%2==0
+    let blink = Math.floor(Date.now()/500)%2==0
     
     ctx.fillStyle = "#202020"
     if(e.on && blink){  
