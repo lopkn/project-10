@@ -201,7 +201,9 @@ function data(){
     lastAout = smoothf(lastAout,algo,lastAout>algo?0.02:0.05)
 
     newAng =  newAng * (lastAout + rfactor)
-    if(newAng > 3.6){newAng = 3 + Math.random()}
+    if(newAng > 3.6){newAng = 3 + Math.random();board.dict["Danger BS intensity"].on = true}else{
+      board.dict["Danger BS intensity"].on = false
+    }
 
     ang2 = lastAout
 }
