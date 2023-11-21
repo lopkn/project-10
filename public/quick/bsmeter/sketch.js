@@ -3,6 +3,9 @@
 let Width = (window.innerWidth>window.innerHeight?window.innerWidth:window.innerHeight)-20
 let Height = (window.innerWidth<window.innerHeight?window.innerWidth:window.innerHeight)-20
 
+let Width = window.innerWidth-20
+let Height = window.innerHeight-20
+
 let myCanvas = document.getElementById("myCanvas")
 
   myCanvas.width = Math.floor(Width)
