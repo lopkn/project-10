@@ -1,7 +1,7 @@
 // let D = (window.innerWidth>window.innerHeight?window.innerHeight:window.innerWidth)-50
 
-let Width = (window.innerWidth>window.innerHeight?window.innerWidth:window.innerHeight)-20
-let Height = (window.innerWidth<window.innerHeight?window.innerWidth:window.innerHeight)-20
+// let Width = (window.innerWidth>window.innerHeight?window.innerWidth:window.innerHeight)-20
+// let Height = (window.innerWidth<window.innerHeight?window.innerWidth:window.innerHeight)-20
 
 let Width = window.innerWidth-20
 let Height = window.innerHeight-20
@@ -24,6 +24,11 @@ let ang = 0
 let ang2 = 0;
 
 let resolution = 20;
+
+function grand(mean=0, stdev=1) {
+    return(Math.sqrt( -2.0 * Math.log(1 - Math.random()) ) * Math.cos( 2.0 * Math.PI * Math.random() )*stdev+mean);
+}
+
 
 function draw(){
 
@@ -119,7 +124,7 @@ function smoothf(o,n,f){
 }
 
 let infactor = 0
-
+let flux = 0
 let pd = Date.now()
 
 function randarr(arr){
@@ -169,7 +174,7 @@ function data(){
 
     if(true){
       let rr = Math.random()
-      sfactor = rr*60
+      sfactor = rr*60*grand(0,1)
       rfactor = 1-rr
     }
 
@@ -202,13 +207,20 @@ function data(){
     let algo = (Math.abs(abl)*sfactor)
 
     lastAout = smoothf(lastAout,algo,lastAout>algo?0.02:0.05)
+    if(lastAout>3){lastAout = 3}
 
     newAng =  newAng * (lastAout + rfactor)
     if(newAng > 3.6){newAng = 3 + Math.random();board.dict["Danger BS intensity"].on = true}else{
       board.dict["Danger BS intensity"].on = false
     }
+    if(newAng<=-0.3){newAng = -0.3}
+      flux = smoothf(flux,Math.abs(newAng-ang),0.01)
+    if(flux > 2){board.dict["BS flux warning"].on = true}else{
+      board.dict["BS flux warning"].on = false
+    }
 
-    ang2 = lastAout
+
+    ang2 = Math.abs(lastAout)
 }
 
 
