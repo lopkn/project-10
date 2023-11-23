@@ -133,9 +133,16 @@ function randarr(arr){
 let mode = "calm"
 let sfactor = 20;
 let rfactor = 1;
+let warping = false;
 function data(){
 
   if(Date.now() > pd){
+    if(warping){
+      board.dict["Warp"].on = true
+    }else{
+      board.dict["Warp"].on = false
+    }
+    warping = true
     pd += Math.random()*10000+1000
     infactor = Math.random()*3.7-1.6
 
@@ -192,7 +199,7 @@ function data(){
       board.dict["High fluctuation"].on = false
     }
 
-  }
+  } else {warping = false}
   if(infactor > -1.3 && Math.random()<0.02){
     infactor -= 0.1
   }
@@ -264,6 +271,7 @@ class board{
     "Danger BS intensity":{"on":false},
     "BS flux warning":{"on":false},
     "High fluctuation":{"on":false},
+    "Warp":{"on":false,"onBColor":"#0040FF"}
   }
   static hx = 3
   static h = 30;
@@ -283,14 +291,14 @@ class board{
     if(e.on && blink){  
       ctx.fillStyle = e.onBColor?e.onBColor:"#FF0000"
     }
-    ctx.fillRect(this.wd+this.w*(Math.floor(i/4))-10,this.hd*(i%this.hx)+50,this.w,-this.h)
+    ctx.fillRect(this.wd+(this.w+5)*(Math.floor(i/this.hx))-10,this.hd*(i%this.hx)+50,this.w,-this.h)
 
   ctx.font = "bold 20px Courier New"
     ctx.fillStyle = "#808080"
     if(e.on && blink){  
       ctx.fillStyle = e.onColor?e.onColor:"#FFFFFF"
     }
-    ctx.fillText(name,this.wd+this.w*(Math.floor(i/4)),this.hd*(i%this.hx)+40)
+    ctx.fillText(name,this.wd+(this.w+5)*(Math.floor(i/this.hx)),this.hd*(i%this.hx)+40)
   })
   }
 }
