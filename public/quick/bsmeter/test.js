@@ -4,7 +4,7 @@ class WorkletProcessor extends AudioWorkletProcessor {
   process(inputs, outputs, parameters) {
     // Do something with the data, e.g. convert it to WAV
     out ++
-    if(out%20==0){
+    if(out%40==0){
       // console.log(inputs[0][0][0])
       // console.log(inputs[0][0][0])
       this.port.postMessage(inputs)

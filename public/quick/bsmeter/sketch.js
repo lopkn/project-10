@@ -22,6 +22,7 @@ onmousemove = (e)=>{mouseX = (e.clientX); mouseY = (e.clientY)}
 let newAng = 0
 let ang = 0
 let ang2 = 0;
+let ang3 = 0
 
 let resolution = 20;
 
@@ -73,7 +74,7 @@ function draw(){
   ctx.fillText("BULLSHIT",Width/1.4,Height*h*1.04)
   ctx.fillText("Nothing detected",Width/8.4,Height*h*1.04)
 
-   let x = Math.sin(ang-Math.PI/2)
+  let x = Math.sin(ang-Math.PI/2)
   let y = Math.cos(ang-Math.PI/2)
   ctx.beginPath()
   ctx.moveTo(Width/2,Height*h)
@@ -83,6 +84,19 @@ function draw(){
   ctx.lineTo(x+Width/2,Height*h-y)
   ctx.lineWidth = 15
   ctx.strokeStyle="#FFFFFF"
+  ctx.stroke()
+
+
+  ctx.beginPath()
+  ctx.moveTo(Width/2,Height*h)
+  x*=size
+  y*=size
+  ctx.lineCap = "round"
+  x = Math.sin(ang3-Math.PI/2)*size/2
+  y = Math.cos(ang3-Math.PI/2)*size/2
+  ctx.lineTo(x+Width/2,Height*h-y)
+  ctx.lineWidth = 10
+  ctx.strokeStyle="#70C000"
   ctx.stroke()
 
   ctx.beginPath()
@@ -97,10 +111,11 @@ function draw(){
   ctx.strokeStyle="#7000C0"
   ctx.stroke()
 
+  
+
   let bx = 20
   ctx.fillStyle = "#FFAAAA"
   ctx.fillRect(Width/2-bx,Height*h-bx,bx*2,bx*2)
-  // ctx.fillText(lastAout,200,200)
 
   ctx.fillText(rfactor.toFixed(3),200,200)
 
