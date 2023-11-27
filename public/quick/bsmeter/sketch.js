@@ -149,6 +149,7 @@ let mode = "calm"
 let sfactor = 20;
 let rfactor = 1;
 let warping = false;
+let outSource = 0;
 function data(){
 
   if(Date.now() > pd){
@@ -223,7 +224,7 @@ function data(){
   if(newAng < 0|| newAng >Math.PI){newAng/=1.2}
 
 
-    let abl = Math.abs(AOUT[0][0][0])
+    let abl = Math.abs(AOUT[0][0][outSource])
     abl = abl>1?1+Math.log10(abl):abl
 
     let algo = (Math.abs(abl)*sfactor)
@@ -245,7 +246,7 @@ function data(){
     ang2 = Math.abs(lastAout)
 }
 
-
+// add a slider for outSource
 
 
 let workProcessor;
