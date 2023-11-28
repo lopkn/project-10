@@ -20,6 +20,7 @@ btn.onclick = ()=>{
 		starttime = Date.now()
 		started = true
 		btn.style.backgroundColor = "green"
+		btn.innerHTML = "---> stop? <---"
 	} else {
 		btn.style.backgroundColor = "red"
 		bstop()
@@ -63,6 +64,7 @@ let Actime = 10
 
 
 function bstop(){
+btn.innerHTML = "---> start <---"
 	let d = Date.now()
 	let diff = d-starttime
 	let diffratio = diff/1000/Actime
