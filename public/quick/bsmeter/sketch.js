@@ -159,7 +159,7 @@ function data(){
       board.dict["Warp"].on = false
     }
     warping = true
-    pd += Math.random()*10000+1000
+    pd += Math.random()*10000+1000+grand(0,1000)
     infactor = Math.random()*3.7-1.6
 
     if(Math.random()<0.2){
