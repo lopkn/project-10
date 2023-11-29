@@ -13,6 +13,7 @@ if(years < 50){
 let btn = document.createElement("button")
 btn.innerHTML = "---> start <---"
 btn.style.fontSize = "40px"
+btn.id = "startstop"
 btn.style.top = "50%"
 btn.style.left = "50%"
 btn.onclick = ()=>{
@@ -23,6 +24,7 @@ btn.onclick = ()=>{
 		btn.innerHTML = "---> stop? <---"
 	} else {
 		btn.style.backgroundColor = "red"
+		btn.innerHTML = "---> start <---"
 		bstop()
 		started = false
 	}
@@ -64,7 +66,6 @@ let Actime = 10
 
 
 function bstop(){
-btn.innerHTML = "---> start <---"
 	let d = Date.now()
 	let diff = d-starttime
 	let diffratio = diff/1000/Actime
@@ -80,7 +81,7 @@ btn.innerHTML = "---> start <---"
 
 	let di = document.createElement("div")
 	di.id = "result"
-	di.innerHTML = "your time ratio is: "+(diffratio.toFixed(2))+"<br>you clicked too "+(diffratio>1?"late":"soon")+" muahaha<br>you will die about "+((years-years*(diffratio>1?2-diffratio:diffratio)).toFixed(3))+" years earlier.<br>"+(diffratio>2?"you literally died like now you idiot":"")
+	di.innerHTML = "your time ratio is: "+(diffratio.toFixed(3))+"<br>you clicked too "+(diffratio>1?"late":"soon")+" muahaha<br>you will die about "+((years-years*(diffratio>1?2-diffratio:diffratio)).toFixed(3))+" years earlier.<br>"+(diffratio>2?"you literally died like now you idiot":"")
 	di.style.color = "white"
 	di.style.fontSize = "30px"
 	console.log(diffratio)

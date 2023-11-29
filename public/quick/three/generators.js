@@ -1700,6 +1700,215 @@ class GEN16{
   }}
 }
 
+
+class GEN17{
+//scaled random?
+  constructor(boarder){
+    this.boarder = boarder?boarder:1000
+    this.name = "GEN17"
+    this.gbk = []
+    this.counter = 0
+    this.displacement = 0
+
+    this.vx = 0
+    this.vy = 0
+    this.nextRand = 1
+    // this.px = px?px:this.targX
+    // this.py = py?py:this.targY
+
+    this.yAxis = new THREE.Vector3(0,1,0)
+    this.xAxis = new THREE.Vector3(1,0,0)
+  }
+
+  update(){
+    if(camera.position.z+c.vel*50 > this.boarder - 800){
+
+      let vel = c.vel>1?c.vel:1
+      let breaker = 0;
+      while(camera.position.z+c.vel*50 > this.boarder - 800){
+      breaker++
+        if(breaker>20){
+          console.log("break 17")
+          break;
+        }
+        let B = 1
+      if(this.counter > 0){
+        this.boarder += 12+8*vel
+        this.counter -= 1
+
+        if(camera.position.y-gw.GPC(camera.position.z)<90){
+          this.counter = 0
+        }
+
+
+      } else {
+        this.boarder += Math.random()*100*vel+100*vel
+        this.counter += Math.floor(Math.random()*100+33)
+        this.displacement = (Math.random()*150-75)*vel
+        this.nextRand = 1+Math.random()*3
+        return;
+      }
+      
+
+
+      let h = 3+Math.random()*40*vel
+
+      let tx = Math.random()*600*vel-300*vel+camera.position.x+this.displacement
+
+      let w = h * (0.07+Math.random()*0.04*this.nextRand)
+
+
+
+      let l = w + Math.random()*w-w/2
+
+
+
+      let ty = camera.position.y + Math.random()*380*vel-190*vel - 251
+      let layers = Math.floor(Math.random()*4+3)
+      for(let i = 0; i < layers; i++){
+
+        let w2 = w* (layers-i)
+        let l2 = l* (layers-i)
+        let h2 = h
+
+      let mesh3 = new THREE.Mesh(
+      new THREE.BoxGeometry(w2, h2, l2),
+      new THREE.MeshStandardMaterial({ color:  Math.floor(Math.random()*65535), roughness:0.2}))
+      mesh3.position.x += tx
+      mesh3.position.z += 12 + this.boarder
+      mesh3.position.y = gw.GPC(mesh3.position.z)+h/1.9 + i*h
+
+        let tv = 0
+        let rx = Math.random()*tv-tv/2
+        let ry = Math.random()*tv-tv/2
+        let rz = Math.random()*tv-tv/2
+        // mesh3.rotateX(rx)
+        // mesh3.rotateY(ry)
+        // mesh3.rotateZ(rz)
+        // let rotx = Math.random()*2-1
+      // mesh3.rotateOnWorldAxis(this.xAxis,-rotx)
+      // mesh3.rotateOnWorldAxis(this.yAxis,roty)
+
+        mesh3.position.y -= tv+h2/9
+        mesh3.name = this.name
+        mesh3.trashDisp = h2/2
+        let d = dist3(h2,w2,l2,0,0,0)/2
+
+        gw.colliders[mesh3.id] = [{"x":mesh3.position.x,"y":mesh3.position.y,"z":mesh3.position.z,"rx":rx,"ry":ry,"rz":rz},mesh3.position.z-d,mesh3.position.x+d,mesh3.position.x-d,{"id":mesh3.id,"X":mesh3.position.x+w2/2,"x":mesh3.position.x-w2/2,"Y":mesh3.position.y+h2/2,"y":mesh3.position.y-h2/2,"Z":mesh3.position.z+l2/2,"z":mesh3.position.z-l2/2,}]
+
+        scene.add(mesh3)
+      }
+
+      // }
+    }
+    }
+  }
+
+}
+class GEN18{
+//scaled attempted?
+  constructor(boarder){
+    this.boarder = boarder?boarder:1000
+    this.name = "GEN17"
+    this.gbk = []
+    this.counter = 0
+    this.displacement = 0
+
+    this.vx = 0
+    this.vy = 0
+
+    // this.px = px?px:this.targX
+    // this.py = py?py:this.targY
+
+    this.yAxis = new THREE.Vector3(0,1,0)
+    this.xAxis = new THREE.Vector3(1,0,0)
+  }
+
+  update(){
+    if(camera.position.z+c.vel*50 > this.boarder - 800){
+
+      let vel = c.vel>1?c.vel:1
+      let breaker = 0;
+      while(camera.position.z+c.vel*50 > this.boarder - 800){
+      breaker++
+        if(breaker>20){
+          console.log("break 17")
+          break;
+        }
+        let B = 1
+      if(this.counter > 0){
+        this.boarder += 12+8*vel
+        this.counter -= 1
+
+        if(camera.position.y-gw.GPC(camera.position.z)<90){
+          this.counter = 0
+        }
+
+
+      } else {
+        this.boarder += Math.random()*1000*vel+100*vel
+        this.counter += Math.floor(Math.random()*100+33)
+        this.displacement = (Math.random()*150-75)*vel
+        return;
+      }
+      
+
+
+      let h = 10+Math.random()*200*vel
+
+      let tx = Math.random()*600*vel-300*vel+camera.position.x+this.displacement
+
+      let w = h * (0.07+Math.random()*0.002)
+
+
+
+      let l = w + Math.random()*w-w/2
+
+
+
+      let ty = camera.position.y + Math.random()*380*vel-190*vel - 251
+      let layers = Math.floor(Math.random()*4+3)
+      for(let i = 0; i < layers; i++){
+
+        let w2 = w* layers-i
+        let l2 = l *layers-i
+        let h2 = h*0.5+Math.random()*0.5
+
+      let mesh3 = new THREE.Mesh(
+      new THREE.BoxGeometry(w2, h2, l2),
+      new THREE.MeshStandardMaterial({ color:  Math.floor(Math.random()*65535), roughness:0.2}))
+      mesh3.position.x += tx
+      mesh3.position.z += 12 + this.boarder
+      mesh3.position.y = gw.GPC(mesh3.position.z)+h/1.9 + i*h
+
+        let tv = 0
+        let rx = Math.random()*tv-tv/2
+        let ry = Math.random()*tv-tv/2
+        let rz = Math.random()*tv-tv/2
+        // mesh3.rotateX(rx)
+        // mesh3.rotateY(ry)
+        // mesh3.rotateZ(rz)
+        // let rotx = Math.random()*2-1
+      // mesh3.rotateOnWorldAxis(this.xAxis,-rotx)
+      // mesh3.rotateOnWorldAxis(this.yAxis,roty)
+
+        mesh3.position.y -= tv+h/9
+        mesh3.name = this.name
+        mesh3.trashDisp = h/2
+        let d = dist3(h,w,l,0,0,0)/2
+
+        gw.colliders[mesh3.id] = [{"x":mesh3.position.x,"y":mesh3.position.y,"z":mesh3.position.z,"rx":rx,"ry":ry,"rz":rz},mesh3.position.z-d,mesh3.position.x+d,mesh3.position.x-d,{"id":mesh3.id,"X":mesh3.position.x+w2/2,"x":mesh3.position.x-w2/2,"Y":mesh3.position.y+h2/2,"y":mesh3.position.y-h2/2,"Z":mesh3.position.z+l2/2,"z":mesh3.position.z-l2/2,}]
+
+        scene.add(mesh3)
+      }
+
+      // }
+    }
+    }
+  }
+
+}
+
 class GENV2_1{
   static gen(x,y,z,r){
     let mesh3 = new THREE.Mesh(
