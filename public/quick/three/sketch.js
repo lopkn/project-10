@@ -86,7 +86,7 @@ class gw{
     if(amount>1){amount = 1}
     if(amount<-1){amount = -1} 
 
-    c.spinX += (0.0005*c.vel*3*c.throttle/(c.gliding?c.vel*4/(c.vel>1?1:c.vel*0.8+0.2):1))*(c.mechanics.wing2.damage+c.mechanics.wing1.damage)/2*amount;
+    c.spinX += (0.0005*c.vel*3*c.throttle/(c.gliding?c.vel*4*(c.chaosMode?0.5:1)/(c.vel>1?1:c.vel*0.8+0.2):1))*(c.mechanics.wing2.damage+c.mechanics.wing1.damage)/2*amount;
     c.vel/=(c.gliding?(1-c.throttle*0.0001):(1+c.throttle*0.0001))
   }
 
@@ -191,12 +191,12 @@ class gw{
 
   }
 
-  // static pdate3s = [new TRIG1(),new GEN9(),new GEN1(),new GEN2(),new GEN2(10000),new GEN2(60000),new GEN2(40000),new GEN2(80000),new GEN2(120000),new GEN3(40000), new GEN4(), new GEN5(), new GEN7(), new GEN8()]
+  static pdate3s = [new TRIG1(),new GEN17(),new GEN9(),new GEN1(),new GEN2(),new GEN2(10000),new GEN2(60000),new GEN2(40000),new GEN2(80000),new GEN2(120000),new GEN3(40000), new GEN4(), new GEN5(), new GEN7(), new GEN8()]
   // static pdate3s = [new GEN14(),new GEN15(),new GEN15(0,300,-200),new GEN15(0,-300,-200),new GEN15(0,300,300),new GEN15(0,-300,300), new GEN5(), new GEN9()]
   
   // static pdate3s = [new GEN14(),new GEN15(),new GEN15(0,300,-200),new GEN15(0,-300,-200),new GEN15(0,300,300),new GEN15(0,-300,300), new GEN5(), new GEN9(),new TRIG1(),new GEN9(),new GEN1(),new GEN2(),new GEN2(10000),new GEN2(60000),new GEN2(40000),new GEN2(80000),new GEN2(120000),new GEN3(40000), new GEN4(), new GEN5(), new GEN7(), new GEN8()]
 
-  static pdate3s = [new GEN17()]
+  // static pdate3s = [new GEN17()]
 
   static pdate3(){
     this.pdate3s.forEach((e)=>{e.update()})

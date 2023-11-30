@@ -1702,7 +1702,7 @@ class GEN16{
 
 
 class GEN17{
-//scaled random?
+//scaled random pyramid?
   constructor(boarder){
     this.boarder = boarder?boarder:1000
     this.name = "GEN17"
@@ -1764,7 +1764,7 @@ class GEN17{
 
 
       let ty = camera.position.y + Math.random()*380*vel-190*vel - 251
-      let layers = Math.floor(Math.random()*4+3)
+      let layers = Math.floor(Math.random()*4+3+c.vel/600)
       for(let i = 0; i < layers; i++){
 
         let w2 = w* (layers-i)
