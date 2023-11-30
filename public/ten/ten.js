@@ -16,9 +16,14 @@ socket.emit("JOINGAME",GAMESESSION)
 var ID = 0
 // var TEAM = window.prompt("what room would you join?","0")+":"+window.prompt("room type?","t")+"-"+window.prompt("what team would you join?","0")+"-"+window.prompt("what color?","p")
 
-socket.on("acknowledge G10.4",(e)=>{ID = e; console.log("joined as e")
+socket.on("acknowledge G10.4",(e)=>{ID = e; console.log("joined as"+e)
   let rm = window.prompt("which room?","0")
-  socket.emit("joinRm",[ID,rm])
+  if(rm == null){
+    console.log("STUPID")
+
+  } else {
+    socket.emit("joinRm",[ID,rm])
+  }
 })
 
 socket.on("startRm",(e)=>{game.startRm(e)})
