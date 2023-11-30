@@ -46,6 +46,9 @@ socket.on("acknowledge G10.5",(e)=>{
   gw.message = "you are connected."
 })
 
+function grand(mean=0, stdev=1) {
+    return(Math.sqrt( -2.0 * Math.log(1 - Math.random()) ) * Math.cos( 2.0 * Math.PI * Math.random() )*stdev+mean);
+}
 
 class gw{
 
@@ -191,10 +194,10 @@ class gw{
 
   }
 
-  static pdate3s = [new TRIG1(),new GEN17(),new GEN9(),new GEN1(),new GEN2(),new GEN2(10000),new GEN2(60000),new GEN2(40000),new GEN2(80000),new GEN2(120000),new GEN3(40000), new GEN4(), new GEN5(), new GEN7(), new GEN8()]
+  // static pdate3s = [new TRIG1(),new GEN17(),new GEN9(),new GEN1(),new GEN2(),new GEN2(10000),new GEN2(60000),new GEN2(40000),new GEN2(80000),new GEN2(120000),new GEN3(40000), new GEN4(), new GEN5(), new GEN7(), new GEN8()]
   // static pdate3s = [new GEN14(),new GEN15(),new GEN15(0,300,-200),new GEN15(0,-300,-200),new GEN15(0,300,300),new GEN15(0,-300,300), new GEN5(), new GEN9()]
   
-  // static pdate3s = [new GEN14(),new GEN15(),new GEN15(0,300,-200),new GEN15(0,-300,-200),new GEN15(0,300,300),new GEN15(0,-300,300), new GEN5(), new GEN9(),new TRIG1(),new GEN9(),new GEN1(),new GEN2(),new GEN2(10000),new GEN2(60000),new GEN2(40000),new GEN2(80000),new GEN2(120000),new GEN3(40000), new GEN4(), new GEN5(), new GEN7(), new GEN8()]
+  static pdate3s = [new GEN14(),new GEN18(),new GEN16(),new GEN17(),new GEN15(),new GEN15(0,300,-200),new GEN15(0,-300,-200),new GEN15(0,300,300),new GEN15(0,-300,300), new GEN5(), new GEN9(),new TRIG1(),new GEN9(),new GEN1(),new GEN2(),new GEN2(10000),new GEN2(60000),new GEN2(40000),new GEN2(80000),new GEN2(120000),new GEN3(40000), new GEN4(), new GEN5(), new GEN7(), new GEN8()]
 
   // static pdate3s = [new GEN17()]
 
@@ -213,8 +216,9 @@ class gw{
   static CLENSE(z){
     let clarr = []
     let cldct = {}
+    let d = Date.now()
     scene.children.forEach((e)=>{
-      if(e.position.z + z +  (e.trashDisp?e.trashDisp:0)< camera.position.z && e.unClense !== true){
+      if(e.position.z + z +  (e.trashDisp?e.trashDisp:0)< camera.position.z && e.unClense !== true ){
         clarr.push(e.id)
         cldct[e.id] = true
       }
@@ -236,7 +240,11 @@ class gw{
     })
 
   }
-
+  static mist(scene){
+    scene.background.b = c.vel*2/c.chaosLimit
+    scene.background.r = c.vel/c.chaosLimit
+    scene.background.g = c.vel/c.chaosLimit
+  }
 
 
 
@@ -445,7 +453,7 @@ class c{
     l.position.z = z
     l.name = "line"
     scene.add(l)
-
+    return(l)
    }
 
    static update(UPDATENO){
@@ -529,7 +537,13 @@ class c{
     let tdy = lpos.y-camera.position.y
 
     if(tdy > 0){
-    this.vel += Math.sqrt(tdy)/1500
+      if(c.gliding){
+
+      this.vel += Math.sqrt(tdy)/1500
+      } else {
+
+      this.vel += Math.sqrt(tdy)/700
+      }
     
 
     } else{
@@ -553,9 +567,11 @@ class c{
     }
 
 
-    scene.background.b = this.vel*2/this.chaosLimit
-    scene.background.r = this.vel/this.chaosLimit
-    scene.background.g = this.vel/this.chaosLimit
+    // scene.background.b = this.vel*2/this.chaosLimit
+    // scene.background.r = this.vel/this.chaosLimit
+    // scene.background.g = this.vel/this.chaosLimit
+
+    gw.mist(scene)
 
     scene.fog.color = scene.background
 
@@ -732,6 +748,7 @@ const createWorld = () => {
     new THREE.BoxGeometry(2, 2, 2),
     new THREE.MeshStandardMaterial({ color: 0xff9999 })
   );
+  mesh.position.y += 15
 
   plane = new THREE.Mesh(new THREE.PlaneBufferGeometry(2500, 1500),new THREE.MeshStandardMaterial({ color: 0x12401e }))
   plane.rotateX(-1.2)
@@ -846,6 +863,7 @@ const line = new THREE.LineSegments( edges, new THREE.LineBasicMaterial( { color
 scene.add( line );
 
   mesh2.position.x += 7
+
 
   scene.add(mesh2)
   
@@ -1230,7 +1248,7 @@ const init = () => {
   camera.position.set(0, 21, -5);
 
   scene = new THREE.Scene();
-  scene.fog = new THREE.Fog("rgb(0,0,0)",300,500)
+  scene.fog = new THREE.Fog("rgb(0,0,0)",350,500)
   scene.background = new THREE.Color("rgb(51,51,51)");
 
   light = new THREE.PointLight(0xffffcc, 2.5, 1000, 1.5)
@@ -1293,6 +1311,11 @@ let animate = () => {
   if(throttleCounter%5===0){
     let tv = c.vel>3?3:c.vel
     scene.fog.far = 500 + c.vel*83
+    if(c.vel > c.chaosLimit*2){
+      scene.fog.near = 500
+    } else {
+      scene.fog.near = 300
+    }
   }
 
   if(music1.paused && c.music){
@@ -1595,5 +1618,6 @@ function update2D(counter){
 //2d plane UI -
 //help
 //plane trashed fix
+//two towers < marcus
 //lane generator
 //cross lane generator

@@ -193,7 +193,7 @@ class missile{
   }
 
   explode(){
-    // c.my3Vel.y += 0.5
+    // c.my3Vel.y += 0.5    GEN_sphere.gen(this.x,this.y,this.z,1)
     c.vel *= 0.9
     this.del()
   }
@@ -251,7 +251,7 @@ class missile2{
 
     let vm = 1
 
-    if(d < 15){
+    if(d < 65 + c.vel*20){
       this.explode()
     }
 
@@ -276,11 +276,11 @@ class missile2{
 
   update(){
     this.counter ++
-    if(this.counter%5 === 0 && this.body.position.z > camera.position.z-4){
+    if(this.counter%10 === 0 && this.body.position.z > camera.position.z-4){
       this.lookA()
       // if(this.counter%10 === 0){
         let mat = new THREE.LineBasicMaterial({ color:  "rgb(0,"+(this.counter)+",0)", linewidth: 4, opacity:(this.counter/150), transparent:true})
-        c.makeLine(this.lastpos[0],this.lastpos[1],this.lastpos[2],this.body.position.x,this.body.position.y,this.body.position.z,mat)
+        let line = c.makeLine(this.lastpos[0],this.lastpos[1],this.lastpos[2],this.body.position.x,this.body.position.y,this.body.position.z,mat)
         this.lastpos = [this.body.position.x,this.body.position.y,this.body.position.z]
       // }
     }
@@ -289,7 +289,7 @@ class missile2{
 
   explode(){
     // c.my3Vel.y += 0.5
-    c.vel *= 0.9
+    GEN_sphere.gen(this.body.position.x,this.body.position.y,this.body.position.z,15+Math.abs(grand(5,2)))
     this.del()
   }
 
@@ -1874,13 +1874,16 @@ class GEN18{
         let l2 = l *layers-i
         let h2 = h*0.5+Math.random()*0.5
 
+      let mat = new THREE.MeshStandardMaterial({ color:  Math.floor(16711677-Math.random()*65535), roughness:1})
       let mesh3 = new THREE.Mesh(
       new THREE.BoxGeometry(w2, h2, l2),
-      new THREE.MeshStandardMaterial({ color:  Math.floor(Math.random()*65535), roughness:0.2}))
+      mat)
       mesh3.position.x += tx
       mesh3.position.z += 12 + this.boarder
       mesh3.position.y = gw.GPC(mesh3.position.z)+h/1.9 + i*h
-
+      let ranem = Math.random()
+      mat.emissive.r = ranem
+      mat.emissive.g = ranem*Math.random()
         let tv = 0
         let rx = Math.random()*tv-tv/2
         let ry = Math.random()*tv-tv/2
@@ -1907,6 +1910,28 @@ class GEN18{
     }
   }
 
+}
+
+class GEN_sphere{
+  static gen(x,y,z,r,color = 0x707010){
+    let mat = new THREE.MeshStandardMaterial({ color: color, roughness: 0.1})
+    mat.emissive.r = 2
+    mat.emissive.g = 2
+    let mesh3 = new THREE.Mesh(
+      new THREE.SphereGeometry(r,12,8),
+      mat)
+      gw.colliders[mesh3.id] = ["special",GEN_sphere.cC,[x,y,z,r,mesh3.id]]
+      posSet(mesh3,x,y,z)
+      mesh3.name = "GS"
+    scene.add(mesh3)
+  }
+  static cC(s){
+    let d = dist3(camera.position.x,camera.position.y,camera.position.z,s[0],s[1],s[2])
+    if(d < s[3]){
+      return(s[4])
+    }
+    return(false)
+  }
 }
 
 class GENV2_1{
