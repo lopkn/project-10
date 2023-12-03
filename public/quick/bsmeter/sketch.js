@@ -289,11 +289,20 @@ class board{
     "High fluctuation":{"on":false},
     "Warp":{"on":false,"onBColor":"#0040FF"}
   }
+
+  static console = ""
+
   static hx = 3
   static h = 30;
   static hd = 40;
   static w = 250;
   static wd = 300;
+
+  static updateConsole(){
+    if(this.console.length > 2000){
+      this.console = this.console.substring(1)
+    }
+  }
 
   static draw(){
 
@@ -316,6 +325,14 @@ class board{
     }
     ctx.fillText(name,this.wd+(this.w+5)*(Math.floor(i/this.hx)),this.hd*(i%this.hx)+40)
   })
+  }
+
+  static on(name){
+    this.dict[name].on = true
+    this.console += "\n ["+name+"] was activated at: "+Date.now()
+  }
+  static off(name){
+    this.dict[name].on = false
   }
 }
 
