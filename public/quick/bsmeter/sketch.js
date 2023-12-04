@@ -329,10 +329,13 @@ class board{
 
   static on(name){
     this.dict[name].on = true
+    if(name.split(" ")[name.split(" ").length-1] != "warning"){name += " warning"}
     this.console += "\n ["+name+"] was activated at: "+Date.now()
   }
   static off(name){
     this.dict[name].on = false
+    if(name.split(" ")[name.split(" ").length-1] != "warning"){name += " warning"}
+    this.console += "\n ["+name+"] was turned off at: "+Date.now()
   }
 }
 
