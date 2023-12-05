@@ -148,6 +148,8 @@ struct AST{
 	bool stopsound = false;
 	bool keyCord = false;
 
+	bool crosshair = true;
+
 	bool Rjump = true;
 
 	bool autoK = true;
@@ -578,6 +580,7 @@ void executeCommandString(std::string str){
 		std::cout << "> [rjump] toogles r for spam jump\n";
 		std::cout << "> [scale] <double> scales reader by number";
 		std::cout << "> [list] list all eventx inputs\n";
+		std::cout << "> [crosshair] toggle crosshair\n";
 		std::cout << "> === help ===\n\n";
 	}
 	else if(str == "heatmap"){
@@ -648,6 +651,9 @@ void executeCommandString(std::string str){
 	} else if (str == "rjump"){
 		mast.Rjump = !mast.Rjump;
 		std::cout << ">Rjump toggled: "<< mast.Rjump <<"\n";
+	}  else if (str == "crosshair"){
+		mast.crosshair = !mast.crosshair;
+		std::cout << ">crosshair toggled: "<< mast.crosshair <<"\n";
 	} else if (spl[0] == "scale"){
 		double scale = stod(spl[1]);
 		mast.RSscale = scale;
@@ -1339,9 +1345,10 @@ void myScreenThread(){
     	float G = static_cast <float> (rand()%2);
     	float B = static_cast <float> (rand()%2);
 
+    	if(mast.crosshair){
     	myRect(cr,Width/2,Height/2-40,2,80,R,G,B,0.9);
     	myRect(cr,Width/2-40,Height/2,80,2,R,G,B,0.9);
-
+    	}
     	// myRect(cr,Width/2,Height/2-40,2,80,0,a,1-a,0.9);
     	// myRect(cr,Width/2-40,Height/2,80,2,0,a,1-a,0.9);
 
