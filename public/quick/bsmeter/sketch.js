@@ -284,10 +284,10 @@ class board{
   //   {"name":"High fluctuation","on":false}
   // ]
   static dict = {
-    "Danger BS intensity":{"on":false},
-    "BS flux warning":{"on":false},
-    "High fluctuation":{"on":false},
-    "Warp":{"on":false,"onBColor":"#0040FF"}
+    "Danger BS intensity":{"on":false,"time":0},
+    "BS flux warning":{"on":false,"time":0},
+    "High fluctuation":{"on":false,"time":0},
+    "Warp":{"on":false,"onBColor":"#0040FF","time":0}
   }
 
   static console = ""
@@ -329,13 +329,16 @@ class board{
 
   static on(name){
     this.dict[name].on = true
+    this.dict[name].time = Date.now()
     if(name.split(" ")[name.split(" ").length-1] != "warning"){name += " warning"}
-    this.console += "\n ["+name+"] was activated at: "+Date.now()
+    this.console += "\n ["+name+"] was activated at: "+this.dict[name].time
   }
   static off(name){
     this.dict[name].on = false
     if(name.split(" ")[name.split(" ").length-1] != "warning"){name += " warning"}
-    this.console += "\n ["+name+"] was turned off at: "+Date.now()
+      if(Date.now() - this.dict[name].time>1000){
+        this.console += "\n ["+name+"] was turned off at: "+Date.now()
+      }
   }
 }
 
