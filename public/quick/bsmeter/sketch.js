@@ -329,14 +329,16 @@ class board{
 
   static on(name){
     this.dict[name].on = true
+    let rn = name
     this.dict[name].time = Date.now()
     if(name.split(" ")[name.split(" ").length-1] != "warning"){name += " warning"}
-    this.console += "\n ["+name+"] was activated at: "+this.dict[name].time
+    this.console += "\n ["+name+"] was activated at: "+this.dict[rn].time
   }
   static off(name){
+    let rn = name
     this.dict[name].on = false
     if(name.split(" ")[name.split(" ").length-1] != "warning"){name += " warning"}
-      if(Date.now() - this.dict[name].time>1000){
+      if(Date.now() - this.dict[rn].time>1000){
         this.console += "\n ["+name+"] was turned off at: "+Date.now()
       }
   }
