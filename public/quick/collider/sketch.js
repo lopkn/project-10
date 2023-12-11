@@ -6,7 +6,7 @@ let balls = []
 let scl=5
 
 let down = false
-
+let cb = [0,0]
 function draw() {
   background(0);
  
@@ -23,16 +23,20 @@ function draw() {
   let COL = collideDT(balls,DDT*0.01)
   while(COL.result == "collide"&&breaker < 10000 && DDT > 0){
     breaker++
+    cb = [COL.info.b1,COL.info.b2]
     advance(COL.info.ans)
     momentumTransfer2D(COL.info.b1,COL.info.b2)
     DDT -= COL.info.ans
     COL = collideDT(balls,DDT*0.01)
+    if(COL.result == "collide" && cb[0]==COL.info?.b1 && cb[1] ==COL.info?.b2){
+      console.log("cb repeat")
+    }
     if(breaker == 99){
       console.log(dist(COL.info.b1.vx,COL.info.b1.vy,0,0))
     }
   } 
   if(breaker > 10){
-  console.log(breaker)
+  console.log("breaker reached: "+breaker)
   }
   advance(DDT)
   balls.forEach((e,i)=>{
