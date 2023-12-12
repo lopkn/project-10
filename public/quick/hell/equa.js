@@ -1,3 +1,17 @@
+function condense(str){
+	return(str.replace(" ",""))
+}
+
+//make every number C, unknown X
+
+//rules: 
+// ax+bx=x(a+b=>C)
+// a(x+b)=ax+(ab=>C)
+// generally, expand then simplify for x
+
+//regex for everything []
+//
+
 
 
 
