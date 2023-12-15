@@ -27,7 +27,7 @@ function draw() {
   let repeated = false
   
   let colRecord = ""
-  
+  colResolv(balls)
   while(COL.result == "collide"&&breaker < 1000 && DDT > 0 && COL.info.ans <= DDT){
     COL.info.ans *= 100
     breaker++
@@ -36,7 +36,8 @@ function draw() {
     if(distance(COL.info.b1.x,COL.info.b1.y,COL.info.b2.x,COL.info.b2.y) >= COL.info.b1.r+COL.info.b2.r-200){
       momentumTransfer2D(COL.info.b1,COL.info.b2)
       // console.log("transfer")
-      colRecord += "|"+COL.info.b1.id+"-"+COL.info.b2.id
+      colRecord += "|"+COL.info.b1.id+"-"+COL.info.b2.id+"-"
+        // +dball(balls[2],balls[3])
     }
       DDT -= COL.info.ans
     COL = collideDT(balls,DDT*0.01)
@@ -73,23 +74,37 @@ function advance(dt){
   })
 }
 
-
+function colResolv(objs){
+	// for(let i = 0; i < objs.length; i++){
+	// 	for(let j = i+1; j < objs.length; j++){
+	// let ddb = dball(objs[i],objs[j])
+	// let db = ddb-objs[i].r-objs[j].r
+	// 		if(db < 0){
+	// let deltaVector = [(objs[j].x-objs[i].x)/ddb*-db/1.9,(objs[j].y-objs[i].y)/ddb*-db/1.9]
+	// objs[j].x += deltaVector[0]
+	// objs[j].y += deltaVector[1]
+	// objs[i].x -= deltaVector[0]
+	// objs[i].y -= deltaVector[1]
+	// }
+	// 	}
+	// }
+}
 
 function collideDT(objs, DT){
-  let collideTime = Infinity;
-  let collideInfo = "none";
-  for(let i = 0; i < objs.length; i++){
-    for(let j = i; j < objs.length; j++){
-      //quick check of collision
-      //find collision time
+	let collideTime = Infinity;
+	let collideInfo = "none";
+	for(let i = 0; i < objs.length; i++){
+		for(let j = i+1; j < objs.length; j++){
+			//quick check of collision
+			//find collision time
             let col = collBall2D(objs[i],objs[j])
             if(col.ans < 1 && col.ans < collideTime){
               //if collide time is smaller, make it the new collision info & time
               collideTime = col.ans
               collideInfo = col
             }
-    }
-  }
+		}
+	}
   if(collideTime > DT){//might check for equality error here later
     return({"result":"advance","time":DT})
   } else {
@@ -100,16 +115,16 @@ function collideDT(objs, DT){
 class ball{
   static id = 0;
   static getID(){return(this.id++)};
-  constructor(x,y,r=1,vx=0,vy=0,mouseControl=false,mass = 1){
+	constructor(x,y,r=1,vx=0,vy=0,mouseControl=false,mass = 1){
       this.id = ball.getID()
-    this.x = x
-    this.y = y
-    this.r = r
-    this.vy = vy
-    this.vx = vx
+		this.x = x
+		this.y = y
+		this.r = r
+		this.vy = vy
+		this.vx = vx
         this.m = mass
       this.mouseControl = mouseControl
-  }
+	}
   
     update1(dt=1){
       this.x += this.vx*dt
@@ -125,27 +140,32 @@ class ball{
 // let bl1 = new ball(10,1000000,100,6,-350000)  
 // let bl2 = new ball(10,110,50,27,35)
 
-balls.push(new ball(50,50,5,1)) 
-balls.push(new ball(60.01,50,5,1,0)) 
+balls.push(new ball(50,50,5,1,0,true)) 
+// balls.push(new ball(60.01,50,5,1,0)) 
 balls.push(new ball(80,50,5,-15,0)) 
-balls.push(new ball(91,50,5,-16,0)) 
+// balls.push(new ball(91,50,5,-16,0)) 
 
 function collBall2D(b1,b2){
 
-  let b = (b2.vx-b1.vx)
-  let c = b2.x
-  let d = b1.x
-  let e = (b2.vy-b1.vy)
-  let f = b2.y
-  let g = b1.y
+	let b = (b2.vx-b1.vx)
+	let c = b2.x
+	let d = b1.x
+	let e = (b2.vy-b1.vy)
+	let f = b2.y
+	let g = b1.y
 
-  let answers = [NaN,NaN]
-  // let answers = [b,c,d,e,f,g]
+	let answers = [NaN,NaN]
+	// let answers = [b,c,d,e,f,g]
 
-  // t1 = (-2*b*c+2*b*d-2*e*f+2*e*g+-2*Math.sqrt(-b*b*f*f+2*e*b*c*f+2*b*b*f*g-e*e*c*c-e*e*d*d+2*e*e*c*d-b*b*g*g-2*e*b*c*g+2*e*b*d*g)) / 2(b*b+e*e)
+	// t1 = (-2*b*c+2*b*d-2*e*f+2*e*g+-2*Math.sqrt(-b*b*f*f+2*e*b*c*f+2*b*b*f*g-e*e*c*c-e*e*d*d+2*e*e*c*d-b*b*g*g-2*e*b*c*g+2*e*b*d*g)) / 2(b*b+e*e)
 
-  try{answers[0] = (-2*b*c+2*b*d-2*e*f+2*e*g+Math.sqrt(Math.pow(2*b*c-2*b*d+2*e*f-2*e*g,2)-4*(b*b+e*e)*(c*c-2*c*d+d*d-2*f*g+f*f+g*g-Math.pow(b1.r+b2.r,2)))) / (2*(b*b+e*e))}catch{}
-  try{answers[1] = (-2*b*c+2*b*d-2*e*f+2*e*g-Math.sqrt(Math.pow(2*b*c-2*b*d+2*e*f-2*e*g,2)-4*(b*b+e*e)*(c*c-2*c*d+d*d-2*f*g+f*f+g*g-Math.pow(b1.r+b2.r,2)))) / (2*(b*b+e*e))}catch{}
+	try{answers[0] = (-2*b*c+2*b*d-2*e*f+2*e*g+Math.sqrt(Math.pow(2*b*c-2*b*d+2*e*f-2*e*g,2)-4*(b*b+e*e)*(c*c-2*c*d+d*d-2*f*g+f*f+g*g-Math.pow(b1.r+b2.r,2)))) / (2*(b*b+e*e))}catch{}
+	try{answers[1] = (-2*b*c+2*b*d-2*e*f+2*e*g-Math.sqrt(Math.pow(2*b*c-2*b*d+2*e*f-2*e*g,2)-4*(b*b+e*e)*(c*c-2*c*d+d*d-2*f*g+f*f+g*g-Math.pow(b1.r+b2.r,2)))) / (2*(b*b+e*e))}catch{}
+  
+  
+  
+  
+  
 
     // let ans = answers[0]>answers[1]?answers[1]:answers[0]
     if(isNaN(answers[0])){
@@ -167,10 +187,11 @@ function collBall2D(b1,b2){
     }
   if(ans == 0){console.log("zeroed")}
   if(ans < 0){ans = Infinity}
-  
+  let t = ans
+let answerDelta1 = 2*(b1.x+b1.vx*t-b2.x-b2.vx*t)*(b1.vx-b2.vx)+2*(b1.y+b1.vy*t-b2.y-b2.vy*t)*(b1.vy-b2.vy)
 
-  
-  return({"ans":ans,"answers":answers,"b1":b1,"b2":b2})
+  if(answerDelta1 >= 0 || isNaN(answerDelta1)){ans = Infinity}  
+	return({"ans":ans,"answers":answers,"b1":b1,"b2":b2,"delta":answerDelta1})
 
 }
 
@@ -219,8 +240,8 @@ function normalize(x,y){
 
 
 function distance(x1,y1,x2,y2) {
-  let a = x2-x1
-  let b = y2-y1
+	let a = x2-x1
+	let b = y2-y1
   return(Math.sqrt(a*a+b*b))
 }
 
@@ -230,5 +251,5 @@ function distance(x1,y1,x2,y2) {
 
 
 
-  
+	
 
