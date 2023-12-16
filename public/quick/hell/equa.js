@@ -9,7 +9,7 @@ function condense(str){
 // a(x+b)=ax+(ab=>C)
 // generally, expand then simplify for x
 
-//regex for everything []
+//replace all constant with [Cnum]
 //
 
 
