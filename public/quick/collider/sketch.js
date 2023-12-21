@@ -224,8 +224,6 @@ function momentumTransfer2D4(b1,b2){
   b1.vx += normVB12[0] * MT2 / b1.m * elast
   b1.vy += normVB12[1] * MT2 / b1.m * elast
 }
-
-
 function momentumTransfer2D(b1,b2){
   let vb12x = b2.x-b1.x
   let vb12y = b2.y-b1.y //differential vector
@@ -239,9 +237,53 @@ function momentumTransfer2D(b1,b2){
   let MT1 = (dotHx1-Vaverage*1) * b1.m
   let MT2 = (dotHx2-Vaverage*1) * b2.m
   
-  let ELA = 0.1
+  let ELA = 9
   
-  let VF2 = -Math.sqrt(((b1.m * dotHx1 + b2.m * dotHx2)/ELA - b1.m * dotHx1) / b2.m + dotHx2 * dotHx2 - dotHx2)
+  // let VF2 = -Math.sqrt(((b1.m * dotHx1 + b2.m * dotHx2)/ELA - b1.m * dotHx1) / b2.m + dotHx2 * dotHx2 - dotHx2)
+  let a = b1.m
+  let b = dotHx1
+  let c = b2.m
+  let d = dotHx2
+  let z = ELA
+  let VF2 = (c*d*z+a*b*z-a*d+a*b)/(z*(c+a))
+    let VF1 = (b1.m * dotHx1 + b2.m * dotHx2 - b2.m * VF2) / b1.m
+  console.log(b,d,VF1,VF2)
+    // VF1 = 0
+
+  
+  b1.vx -= normVB12[0] * dotHx1
+  b1.vy -= normVB12[1] * dotHx1
+  b1.vx += normVB12[0] * VF1
+  b1.vy += normVB12[1] * VF1
+  b2.vx -= normVB12[0] * dotHx2
+  b2.vy -= normVB12[1] * dotHx2
+  b2.vx += normVB12[0] * VF2
+  b2.vy += normVB12[1] * VF2
+
+}
+
+function momentumTransfer2D5(b1,b2){
+  let vb12x = b2.x-b1.x
+  let vb12y = b2.y-b1.y //differential vector
+  
+  let normVB12 = normalize(vb12x,vb12y)
+  
+  let dotHx1 = dot(normVB12[0],normVB12[1],b1.vx,b1.vy)
+  let dotHx2 = dot(normVB12[0],normVB12[1],b2.vx,b2.vy)
+  
+  let Vaverage = ( dotHx1 + dotHx2 )/ 2
+  let MT1 = (dotHx1-Vaverage*1) * b1.m
+  let MT2 = (dotHx2-Vaverage*1) * b2.m
+  
+  let ELA = 1
+  
+  // let VF2 = -Math.sqrt(((b1.m * dotHx1 + b2.m * dotHx2)/ELA - b1.m * dotHx1) / b2.m + dotHx2 * dotHx2 - dotHx2)
+  let a = b1.m
+  let b = dotHx1
+  let c = b2.m
+  let d = dotHx2
+  let z = ELA
+  let VF2 = (a*b*b*z*(a+c)-Math.sqrt(b*z*(-a*a*a*b*b*z-a*b*b*c*c*z-2*a*a*b*b*c*z+a*a*b*b*b+a*b*b+a*b*c*d*d+c*d*d)))/(b*z*(a*b+1))
   let VF1 = (b1.m * dotHx1 + b2.m * dotHx2 - b2.m * VF2) / b1.m
   
   b1.vx -= normVB12[0] * dotHx1
