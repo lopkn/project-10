@@ -25,6 +25,14 @@ function draw() {
   let repeated = false
   
   let colRecord = ""
+  balls.forEach((e,i)=>{
+    if(e.mouseControl && mouseIsPressed){
+    
+      e.vx -= (e.x-mouseX/scl)*0.5
+      e.vy -= (e.y-mouseY/scl)*0.5
+    }
+  })
+  
   // colResolv(balls)
   while(COL.result == "collide"&&breaker < 1000 && DDT > 0 && COL.info.ans <= DDT){
     COL.info.ans *= 100
@@ -43,7 +51,7 @@ function draw() {
       repeated = true
     } else {repeated = false}
     if(breaker == 99){
-      console.log(dist(COL.info.b1.vx,COL.info.b1.vy,0,0))
+      // console.log(dist(COL.info.b1.vx,COL.info.b1.vy,0,0))
     }
   } 
   if(breaker > 10){
@@ -127,10 +135,7 @@ class ball{
       this.x += this.vx*dt
       this.y += this.vy*dt
       // if(this.mouseControl && keyIsDown(32)){
-      if(this.mouseControl && mouseIsPressed){
-      this.vx -= (this.x-mouseX/scl)*0.5
-      this.vy -= (this.y-mouseY/scl)*0.5
-      }
+      
     }
 }
 
@@ -237,7 +242,7 @@ function momentumTransfer2D(b1,b2){
   let MT1 = (dotHx1-Vaverage*1) * b1.m
   let MT2 = (dotHx2-Vaverage*1) * b2.m
   
-  let ELA = 9
+  let ELA = 5
   
   // let VF2 = -Math.sqrt(((b1.m * dotHx1 + b2.m * dotHx2)/ELA - b1.m * dotHx1) / b2.m + dotHx2 * dotHx2 - dotHx2)
   let a = b1.m
@@ -247,18 +252,20 @@ function momentumTransfer2D(b1,b2){
   let z = ELA
   let VF2 = (c*d*z+a*b*z-a*d+a*b)/(z*(c+a))
     let VF1 = (b1.m * dotHx1 + b2.m * dotHx2 - b2.m * VF2) / b1.m
-  console.log(b,d,VF1,VF2)
     // VF1 = 0
 
   
   b1.vx -= normVB12[0] * dotHx1
   b1.vy -= normVB12[1] * dotHx1
-  b1.vx += normVB12[0] * VF1
-  b1.vy += normVB12[1] * VF1
   b2.vx -= normVB12[0] * dotHx2
   b2.vy -= normVB12[1] * dotHx2
+  // setTimeout(()=>{
+    b1.vx += normVB12[0] * VF1
+  b1.vy += normVB12[1] * VF1
   b2.vx += normVB12[0] * VF2
   b2.vy += normVB12[1] * VF2
+  // },0)
+  
 
 }
 
