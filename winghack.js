@@ -25,9 +25,43 @@ let last = {}
 let closest = -1;
 let aimedAt = -1;
 
-let adjust = 20
+let allObjects = []
 
+
+let bot = {"on":false,"loyal":false,"mode":"engage","compadrae":["lopAssistant"],"aiming":"closest"}
+
+let whiteList = {}
+let blackList = {}
+
+let Counter = 0
+
+setTimeout(()=>{
+  let name = document.getElementById('nick').value
+  Object.keys(window.B).forEach((a)=>{
+    if(window.B[a].name == name){
+      pla = a
+    }
+  })
+},5000)
+
+let adjust = 20
+let drop = 20
 let main = setInterval(()=>{
+  if(bot.on && Counter%50==0){
+    window.A.sendDirection = ()=>{}
+    window.A.sendInput = ()=>{}
+    bot.compadrae.forEach((e)=>{WL(e,true)})
+    window.onfocus()
+    if(bot.loyal){
+      bot.loyalDist = distance(window.B[pla].x,window.B[pla].y,window.B[bot.loyalID].x,window.B[bot.loyalID].y)
+      if(bot.loyalDist>1500&&window.B[bot.loyalID].inGame){
+        bot.mode = "followLoyal"
+      } else if(bot.loyalDist<500){
+        bot.mode = "engage"
+      }
+    }
+  }
+  Counter ++
     ctx.clearRect(0,0,canvas.width,canvas.height)
 
     let lx = 0
@@ -46,13 +80,22 @@ objk.forEach((a,i)=>{
        if(e.inGame == false){return}
 
   // if(i == 0){console.log(e.x,e.y)}
-    ctx.fillStyle = "red"
+    ctx.fillStyle = "orange"
     if(highlights[a]){ctx.fillStyle="green"}
+      if(blackList[a]){ctx.fillStyle="red"}
+      if(whiteList[a]){ctx.fillStyle="yellow"}
     if(a == pla){ctx.fillStyle = "yellow"}
+      let invuln = e.isInvulnerable()
+      
     let t = tran(e.x,e.y)
     if(pla !== -1){
+      if(window.B[pla].inGame == false){
+        setTimeout(()=>{
+        clickPlay(document.getElementById('nick').value)
+        },2000)
+      }
       let tdist = distance(e.x,e.y,window.B[pla].x,window.B[pla].y)
-      if(a!=pla&&tdist < distclosest){
+      if(a!=pla&&tdist < distclosest&&!whiteList[a]&&!invuln){
         distclosest = tdist
         closest = a
       }
@@ -65,7 +108,33 @@ objk.forEach((a,i)=>{
     }
     
     ctx.fillRect(t[0]-7.5*zoom-lx,t[1]-7.5*zoom-ly,15*zoom,15*zoom)
+    if(invuln){
+      ctx.fillStyle = "rgba(0,0,255,0.5)"
+      ctx.fillRect(t[0]-10*zoom-lx,t[1]-10*zoom-ly,20*zoom,20*zoom)
+    }
+
 })
+
+  if(Counter%5 == 0){
+     allObjects = Object.values(window.W)
+     allObjects.forEach((e)=>{
+      if(e.date == undefined){e.date = Date.now()}
+     })
+  }
+  let dn = Date.now()
+  ctx.fillStyle = "#FF00FF"
+  allObjects.forEach((a)=>{
+    if(a.type == 64){return}
+      ctx.font = "bold 10px Courier New"
+    if(a.type == 32 || a.type == 8){
+      ctx.font = "bold 17px Courier New"
+    }
+
+    let t = tran(a.x,a.y+(dn-a.date)/drop)
+    ctx.fillText(a.type,t[0]-7.5*zoom-lx,t[1]-7.5*zoom-ly)
+  })
+
+
   if(aimedAt !== -1){
     let t = tran(window.B[aimedAt].x,window.B[aimedAt].y)
     ctx.fillStyle = "rgba(0,0,0)"
@@ -207,10 +276,12 @@ function getAng(p){
 
 
 let minDist = 2000
-let shootThreshold = 0.1
+let shootThreshold = 0.2
 let lead = 40
+let friendlyThreshold = 0.4
 function autoF(c){
   aimedAt = -1
+  if(window.B[pla].y > 770){return}
   let tp = [window.B[c].x-window.B[pla].x,window.B[c].y-window.B[pla].y]
   let aEnemy = ang(tp[0],-tp[1])
   let aMe = ang(mouseX-canvas.width/2,-(mouseY-canvas.height/2))
@@ -220,26 +291,56 @@ function autoF(c){
   }
 
   let closestAng = Infinity
+  let closestFriendly = Infinity
   Object.keys(window.B).forEach((a)=>{
     let e = window.B[a]
-    if(!e.inGame){return}
+    if(!e.inGame || e.isInvulnerable()){return}
+    
     if(a ==pla || distP(pla,a) > minDist){return}
     let aEnemy2 = ang(window.B[a].x-window.B[pla].x,-window.B[a].y+window.B[pla].y)
+  if(whiteList[a]){
+      let tang2 = Math.abs(aGame-aEnemy2)
+      if(tang2 < closestFriendly && distP(pla,a) > 1500){closestFriendly = tang2}
+        return
+    }
     let tang = Math.abs(aMe-aEnemy2)
     if(tang < closestAng){closestAng = tang;aimedAt = a}
   })
 
   // console.log(tp[0])
-  if(downs["x"] == true){
-    c = mouseDown?(aimedAt == -1?c:aimedAt):c
+  if(downs["x"] == true || bot.on){
+    c = bot.on?(bot.aiming=="closest"?c:bot.aiming):(mouseDown?(aimedAt == -1?c:aimedAt):c)
     let leadingAngle = ang(window.B[c].x+last[c].vx*lead-window.B[pla].x,-(window.B[c].y+last[c].vy*lead-window.B[pla].y))
       window.U.angle = Math.PI-leadingAngle
-      console.log(window.U.angle)
+      
+
+
+
+      if(bot.on){
+
+        if(closestFriendly < friendlyThreshold){
+          window.U.angle += 1
+        }
+
+        if(bot.mode == "engage"){
+          bot.aiming = "closest"
+          window.U.hover = Math.random()>0.5?1:0
+        }
+        if(bot.mode == "followLoyal"){
+          window.U.hover = Math.random()>0.2?1:0
+          bot.aiming = bot.loyalID
+        }
+      }
+
       window.SI()
       window.SD()
     }
-  if( ((Math.abs(aGame-aEnemy) < shootThreshold && distP(pla,closest) < minDist)|| closestAng < shootThreshold )&&downs["x"]){
-    window.A?.sendShooting(1)
+  if( ((Math.abs(aGame-aEnemy) < shootThreshold && distP(pla,closest) < minDist)|| closestAng < shootThreshold )&&(bot.on||downs["x"])){
+    if(closestFriendly > friendlyThreshold){
+      window.A?.sendShooting(1)
+    } else {
+      console.log("stopped")
+    }
   } else if(Math.abs(aGame-aEnemy) >0.3 && !mouseDown){
     window.A?.sendShooting(0)
   }
@@ -252,3 +353,63 @@ function distP(a,b){
 
 window.SD = window.A.sendDirection
 window.SI = window.A.sendInput
+
+function WL(str,c){
+  let objk = Object.keys(window.B)
+  objk.forEach((a,i)=>{
+    let e = window.B[a]
+    if(e.name == str){
+      if(whiteList[a]&&!c){
+        whiteList[a] = false
+      } else {
+        whiteList[a] = true
+      }
+    }
+  })
+}
+function BL(str){
+  let objk = Object.keys(window.B)
+  objk.forEach((a,i)=>{
+    let e = window.B[a]
+    if(e.name == str){
+      if(blackList[a]){
+        blackList[a] = false
+      } else {
+        blackList[a] = true
+      }
+    }
+  })
+}
+
+
+
+
+
+//window.A=A;window.B=B;window.U = U;window.W=W
+
+function boton(str){
+  bot.on  = true
+  tranmode = 3
+  window.A.sendDirection = ()=>{}
+  window.A.sendInput = ()=>{}
+  window.onfocus()
+  lock = true
+  autoFire = true
+  if(str){
+    loyal(str)
+  }
+}
+
+function loyal(str,str2){
+  let objk = Object.keys(window.B)
+  objk.forEach((a,i)=>{
+    let e = window.B[a]
+    if(e.name == str){
+      bot.loyalName = str
+      bot.loyalID = a
+      bot.loyal = true
+    }
+  })
+  bot.compadrae.push(str)
+  document.getElementById('nick').value = str2?str2:"lopAssistant"
+}
