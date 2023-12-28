@@ -27,6 +27,7 @@ let aimedAt = -1;
 
 let allObjects = []
 let toggleDraw = true
+let nameDraw = false
 ctx.textAlign = "center"
 
 
@@ -34,6 +35,17 @@ let bot = {"on":false,"loyal":false,"mode":"engage","compadrae":["lopAssistant"]
 
 let whiteList = {}
 let blackList = {}
+
+
+let weaponColor = {
+  "2":"#FFFF00",
+  "4":"#FF0000",
+  "8":"#000000",
+  "16":"#FFFF00",
+  "128":"#FF00FF",
+  "256":"#FFFFFF"
+}
+
 
 let Counter = 0
 
@@ -131,7 +143,7 @@ objk.forEach((a,i)=>{
             if(a == pla){ctx.fillStyle = "yellow"}
               
             
-            
+                    
 
            
             
@@ -140,6 +152,13 @@ objk.forEach((a,i)=>{
               ctx.fillStyle = "rgba(0,0,255,0.5)"
               ctx.fillRect((t[0]-10)*zoom-lx,(t[1]-10)*zoom-ly,20*zoom,20*zoom)
             }
+
+            if(nameDraw || downs["w"]){
+              ctx.font = "bold 17px Courier New"
+              ctx.fillStyle = weaponColor[e.weapon]
+              ctx.fillText(e.name,t[0]*zoom-lx,(t[1]-15)*zoom-ly,50)
+            }
+
         }
     if(pla !== -1){
       let tdist = distance(e.x,e.y,window.B[pla].x,window.B[pla].y)
@@ -472,6 +491,9 @@ function botoff(){
   window.A.sendDirection = window.SD
   window.A.sendInput = window.SI
   window.onfocus()
+  mouseDown = 0
+  bot.aimAddx = 0
+  bot.aimAddy = 0
 }
 
 function loyal(str,str2){
