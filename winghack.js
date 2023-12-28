@@ -26,9 +26,11 @@ let closest = -1;
 let aimedAt = -1;
 
 let allObjects = []
+let toggleDraw = true
+ctx.textAlign = "center"
 
 
-let bot = {"on":false,"loyal":false,"mode":"engage","compadrae":["lopAssistant"],"aiming":"closest"}
+let bot = {"on":false,"loyal":false,"mode":"engage","compadrae":["lopAssistant"],"aiming":"closest","aimAddx":0,"aimAddy":0,"followBoundary":1200}
 
 let whiteList = {}
 let blackList = {}
@@ -47,23 +49,52 @@ setTimeout(()=>{
 let adjust = 20
 let drop = 20
 let main = setInterval(()=>{
-  if(bot.on && Counter%50==0){
+
+
+  if(Counter%500){
+    if(window.B[pla] == undefined){
+      pla = -1
+      let name = document.getElementById('nick').value
+      Object.keys(window.B).forEach((a)=>{
+        if(window.B[a].name == name){
+          pla = a
+        }
+      })
+    }
+  }
+
+  if(bot.on && Counter%5==0){
     window.A.sendDirection = ()=>{}
     window.A.sendInput = ()=>{}
     bot.compadrae.forEach((e)=>{WL(e,true)})
     window.onfocus()
     if(bot.loyal){
-      bot.loyalDist = distance(window.B[pla].x,window.B[pla].y,window.B[bot.loyalID].x,window.B[bot.loyalID].y)
-      if(bot.loyalDist>1500&&window.B[bot.loyalID].inGame){
+      let loyalty = window.B[bot.loyalID]
+      if(loyalty == undefined){bot.loyal = false}
+      bot.loyalDist = distance(window.B[pla].x,window.B[pla].y,loyalty.x,loyalty.y)
+      let orgmode = bot.mode
+      if(bot.loyalDist>bot.followBoundary&&loyalty.inGame){
         bot.mode = "followLoyal"
       } else if(bot.loyalDist<500){
-        bot.mode = "engage"
+        if(loyalty.hover == 1){
+          bot.mode = "turret"
+        } else {
+          bot.mode = "engage"
+        }
+      }
+
+      if(bot.mode != orgmode){
+        console.log("mode: "+bot.mode)
+      }
+
+    } else {
+      if(bot.loyalID&&Counter%150==0){
+        loyal(bot.loyalName)
       }
     }
   }
   Counter ++
     ctx.clearRect(0,0,canvas.width,canvas.height)
-
     let lx = 0
     let ly = 0
     if(lock){
@@ -75,25 +106,42 @@ let main = setInterval(()=>{
     let objk = Object.keys(window.B)
     closest = -1
     let distclosest = Infinity
-objk.forEach((a,i)=>{
-  let e = window.B[a]
-       if(e.inGame == false){return}
-
-  // if(i == 0){console.log(e.x,e.y)}
-    ctx.fillStyle = "orange"
-    if(highlights[a]){ctx.fillStyle="green"}
-      if(blackList[a]){ctx.fillStyle="red"}
-      if(whiteList[a]){ctx.fillStyle="yellow"}
-    if(a == pla){ctx.fillStyle = "yellow"}
-      let invuln = e.isInvulnerable()
-      
-    let t = tran(e.x,e.y)
-    if(pla !== -1){
-      if(window.B[pla].inGame == false){
+    if(window.B[pla] == undefined||window.B[pla].inGame == false){
         setTimeout(()=>{
         clickPlay(document.getElementById('nick').value)
         },2000)
       }
+objk.forEach((a,i)=>{
+  let e = window.B[a]
+       if(e.inGame == false){return}
+
+    let t = tran(e.x,e.y)
+      let invuln = e.isInvulnerable()
+
+    if(last[a] == undefined){
+      last[a] = {"lx":t[0],"ly":t[1],"vy":0,"vx":0}
+    } else {
+      last[a] = {"vx":t[0]-last[a].lx,"vy":t[1]-last[a].ly,"lx":t[0],"ly":t[1]}
+    }
+        if(toggleDraw){
+            ctx.fillStyle = "orange"
+            if(highlights[a]){ctx.fillStyle="green"}
+              if(blackList[a]){ctx.fillStyle="red"}
+              if(whiteList[a]){ctx.fillStyle="yellow"}
+            if(a == pla){ctx.fillStyle = "yellow"}
+              
+            
+            
+
+           
+            
+            ctx.fillRect((t[0]-7.5)*zoom-lx,(t[1]-7.5)*zoom-ly,15*zoom,15*zoom)
+            if(invuln){
+              ctx.fillStyle = "rgba(0,0,255,0.5)"
+              ctx.fillRect((t[0]-10)*zoom-lx,(t[1]-10)*zoom-ly,20*zoom,20*zoom)
+            }
+        }
+    if(pla !== -1){
       let tdist = distance(e.x,e.y,window.B[pla].x,window.B[pla].y)
       if(a!=pla&&tdist < distclosest&&!whiteList[a]&&!invuln){
         distclosest = tdist
@@ -101,46 +149,42 @@ objk.forEach((a,i)=>{
       }
     }
 
-    if(last[a] == undefined){
-      last[a] = {"lx":t[0],"ly":t[1],"vy":0,"vx":0}
-    } else {
-      last[a] = {"vx":t[0]-last[a].lx,"vy":t[1]-last[a].ly,"lx":t[0],"ly":t[1]}
-    }
-    
-    ctx.fillRect(t[0]-7.5*zoom-lx,t[1]-7.5*zoom-ly,15*zoom,15*zoom)
-    if(invuln){
-      ctx.fillStyle = "rgba(0,0,255,0.5)"
-      ctx.fillRect(t[0]-10*zoom-lx,t[1]-10*zoom-ly,20*zoom,20*zoom)
-    }
-
 })
 
-  if(Counter%5 == 0){
-     allObjects = Object.values(window.W)
-     allObjects.forEach((e)=>{
-      if(e.date == undefined){e.date = Date.now()}
-     })
-  }
-  let dn = Date.now()
-  ctx.fillStyle = "#FF00FF"
-  allObjects.forEach((a)=>{
-    if(a.type == 64){return}
-      ctx.font = "bold 10px Courier New"
-    if(a.type == 32 || a.type == 8){
-      ctx.font = "bold 17px Courier New"
-    }
+  if(toggleDraw){
 
-    let t = tran(a.x,a.y+(dn-a.date)/drop)
-    ctx.fillText(a.type,t[0]-7.5*zoom-lx,t[1]-7.5*zoom-ly)
-  })
+    if(Counter%10 == 0){
+       allObjects = Object.values(window.W)
+       allObjects.forEach((e)=>{
+        if(e.date == undefined){e.date = Date.now()}
+       })
+    }
+    let dn = Date.now()
+    ctx.fillStyle = "#FF00FF"
+    allObjects.forEach((a)=>{
+      if(a.type == 64){return}
+        ctx.font = "bold 10px Courier New"
+      if(a.type == 32 || a.type == 8){
+        ctx.font = "bold 17px Courier New"
+      } else if(a.type == 16){
+        ctx.font = "bold 27px Courier New"
+      }
+
+      let t = tran(a.x,a.y+(dn-a.date)/drop)
+      ctx.fillText(a.type,t[0]*zoom-lx,t[1]*zoom-ly)
+    })
+  }
 
 
   if(aimedAt !== -1){
     let t = tran(window.B[aimedAt].x,window.B[aimedAt].y)
     ctx.fillStyle = "rgba(0,0,0)"
     ctx.fillRect(t[0]-5-lx,t[1]-5-ly,10,10)
+    if(Counter%200 && window.B[aimedAt] == undefined){
+      aimedAt = -1
+    }
   }
-  if(closest !== -1){
+  if(closest !== -1 && toggleDraw){
     let t = tran(window.B[closest].x,window.B[closest].y)
     ctx.fillStyle = "rgba(255,0,255,0.5)"
     ctx.fillRect(t[0]-10-lx,t[1]-10-ly,20,20)
@@ -160,13 +204,13 @@ objk.forEach((a,i)=>{
       ctx.stroke()
 
       let tranPo = [3*(t[0]-lx-(canvas.width/2)),3*(t[1]-ly-(canvas.height/2))]
-      if(autoFire){
-        autoF(closest)
-      }
+      
 
-    }
-    
+    } 
   }
+  if(autoFire){
+      autoF(closest)
+    }
 },30)
 // function a1(){debugger;}
 // function a2(e){window.M=e}
@@ -251,6 +295,11 @@ document.addEventListener("keydown",(e)=>{
     window.A.sendDirection = ()=>{}
     window.A.sendInput = ()=>{}
   }
+  if(key == "b"){
+    if(bot.on){
+      botoff()
+    } else {boton("lopkn")}
+  }
   downs[e.key] = true
 })
 document.addEventListener("keyup",(e)=>{
@@ -292,6 +341,9 @@ function autoF(c){
 
   let closestAng = Infinity
   let closestFriendly = Infinity
+  let closestFriendlyPos = Infinity
+  let closestFriendlyID = -1
+
   Object.keys(window.B).forEach((a)=>{
     let e = window.B[a]
     if(!e.inGame || e.isInvulnerable()){return}
@@ -300,7 +352,9 @@ function autoF(c){
     let aEnemy2 = ang(window.B[a].x-window.B[pla].x,-window.B[a].y+window.B[pla].y)
   if(whiteList[a]){
       let tang2 = Math.abs(aGame-aEnemy2)
-      if(tang2 < closestFriendly && distP(pla,a) > 1500){closestFriendly = tang2}
+      let dst = distP(pla,a)
+      if(dst < closestFriendlyPos){closestFriendlyPos = dst;closestFriendlyID = a}
+      if(tang2 < closestFriendly && dst < 1400){closestFriendly = tang2}
         return
     }
     let tang = Math.abs(aMe-aEnemy2)
@@ -310,26 +364,38 @@ function autoF(c){
   // console.log(tp[0])
   if(downs["x"] == true || bot.on){
     c = bot.on?(bot.aiming=="closest"?c:bot.aiming):(mouseDown?(aimedAt == -1?c:aimedAt):c)
-    let leadingAngle = ang(window.B[c].x+last[c].vx*lead-window.B[pla].x,-(window.B[c].y+last[c].vy*lead-window.B[pla].y))
+      if(window.B[c] == undefined){bot.aiming = "closest"}
+    let leadingAngle = ang(window.B[c].x+last[c].vx*lead-window.B[pla].x+bot.aimAddx,-(window.B[c].y+last[c].vy*lead-window.B[pla].y+bot.aimAddy))
       window.U.angle = Math.PI-leadingAngle
       
 
 
 
       if(bot.on){
+        bot.aimAddx = 0
+        bot.aimAddy = 0
 
-        if(closestFriendly < friendlyThreshold){
-          window.U.angle += 1
+
+        if(closestFriendlyPos < 300 && mode != "turret"){
+          // window.U.angle += 1
+          bot.aimAddx += window.B[pla].x - window.B[closestFriendlyID].x
+          bot.aimAddy += window.B[pla].y - window.B[closestFriendlyID].y
         }
 
         if(bot.mode == "engage"){
           bot.aiming = "closest"
           window.U.hover = Math.random()>0.5?1:0
-        }
-        if(bot.mode == "followLoyal"){
-          window.U.hover = Math.random()>0.2?1:0
+        } else if(bot.mode == "followLoyal"){
+          window.U.hover = Math.random()>0.85?1:0
           bot.aiming = bot.loyalID
+        } else if(bot.mode == "turret"){
+          bot.aiming = "closest"
+          window.U.hover = 1
         }
+      }
+
+      if(downs["d"]){
+        window.U.angle = Math.PI-aMe
       }
 
       window.SI()
@@ -340,6 +406,7 @@ function autoF(c){
       window.A?.sendShooting(1)
     } else {
       console.log("stopped")
+      window.A?.sendShooting(0)
     }
   } else if(Math.abs(aGame-aEnemy) >0.3 && !mouseDown){
     window.A?.sendShooting(0)
@@ -400,6 +467,13 @@ function boton(str){
   }
 }
 
+function botoff(){
+  bot.on = false
+  window.A.sendDirection = window.SD
+  window.A.sendInput = window.SI
+  window.onfocus()
+}
+
 function loyal(str,str2){
   let objk = Object.keys(window.B)
   objk.forEach((a,i)=>{
@@ -413,3 +487,6 @@ function loyal(str,str2){
   bot.compadrae.push(str)
   document.getElementById('nick').value = str2?str2:"lopAssistant"
 }
+
+
+function name(str){document.getElementById('nick').value=str}
