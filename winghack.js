@@ -1,75 +1,76 @@
-let canvas = document.createElement("canvas")
-document.body.appendChild(canvas)
-canvas.style.position = "absolute"
-canvas.style.zIndex = 5000
-canvas.style.width = Math.floor(window.innerWidth)+"px"
-canvas.style.height = Math.floor(window.innerHeight)+"px"
-canvas.width = window.innerWidth; canvas.height = window.innerHeight
-var mouseDown = 0;
+window.canvas2 = document.createElement("canvas")
+document.body.appendChild(canvas2)
+canvas2.style.position = "absolute"
+canvas2.style.zIndex = 5000
+canvas2.style.width = Math.floor(window.innerWidth)+"px"
+canvas2.style.height = Math.floor(window.innerHeight)+"px"
+canvas2.width = window.innerWidth; canvas2.height = window.innerHeight
+window.mouseDown = 0;
+window.Width = canvas2.width
+window.Height = canvas2.height
 document.body.onmousedown = function() { 
   ++mouseDown;
 }
 document.body.onmouseup = function() {
   --mouseDown;
 }
-let priorityTargetMode = false
-let ctx = canvas.getContext("2d")
-canvas.style.pointerEvents = "none"
-let highlights = {}
-// window.B = {}
-let lock = false
-let autoFire = false
-let pla = -1
-let zoom = 1
-let last = {}
-let closest = -1;
-let aimedAt = -1;
+window.priorityTargetMode = false
+window.ctx = canvas2.getContext("2d")
+canvas2.style.pointerEvents = "none"
+window.highlights = {}
 
-let allObjects = []
-let toggleDraw = true
-let nameDraw = false
+window.lock = false
+window.autoFire = false
+window.pla = -1
+window.zoom = 1
+window.last = {}
+window.closest = -1;
+window.aimedAt = -1;
+
+window.allObjects = []
+window.toggleDraw = true
+window.nameDraw = false
 ctx.textAlign = "center"
-
-
-let bot = {"on":false,"loyal":false,"mode":"engage","compadrae":["lopAssistant"],"aiming":"closest","aimAddx":0,"aimAddy":0,"followBoundary":1200}
-
-let whiteList = {}
-let blackList = {}
-
-
-let weaponColor = {
-  "2":"#FFFF00",
+window.bot = {"on":false,"loyal":false,"mode":"engage","compadrae":["lopAssistant"],"aiming":"closest","aimAddx":0,"aimAddy":0,"followBoundary":1200}
+window.whiteList = {}
+window.blackList = {}
+window.weaponColor = {
+  "1":"#707070",
+  "2":"#FF7F00",
   "4":"#FF0000",
   "8":"#000000",
   "16":"#FFFF00",
   "128":"#FF00FF",
   "256":"#FFFFFF"
 }
-
-
-let Counter = 0
-
-setTimeout(()=>{
-  let name = document.getElementById('nick').value
-  Object.keys(window.B).forEach((a)=>{
-    if(window.B[a].name == name){
-      pla = a
-    }
-  })
-},5000)
-
-let adjust = 20
-let drop = 20
-let main = setInterval(()=>{
+window.Counter = 0
+window.adjust = 20
+window.drop = 20
+window.aname = ""
+window.minDist = 2000
+window.shootThreshold = 0.2
+window.tranmode = 1
+window.lead = 40
+window.friendlyThreshold = 0.4
+window.mouseX = 0
+window.mouseY = 0
+window.onmousemove = (e)=>{mouseX = (e.clientX); mouseY = (e.clientY)}
+window.downs = {}
+window.main = setInterval(()=>{
 
 
   if(Counter%500){
     if(window.B[pla] == undefined){
       pla = -1
       let name = document.getElementById('nick').value
+      if(name.length < 40){
+        aname = name
+        document.getElementById('nick').value = name ="IDENTIFICATIONIDENTIFICATIONIDENTIFICATIONIDENTIFICATIONIDENTIFICATIONIDENTIFICATION"
+      }
       Object.keys(window.B).forEach((a)=>{
-        if(window.B[a].name == name){
+        if(window.B[a].name == name && name.length > 39){
           pla = a
+          document.getElementById('nick').value = aname
         }
       })
     }
@@ -88,7 +89,7 @@ let main = setInterval(()=>{
       if(bot.loyalDist>bot.followBoundary&&loyalty.inGame){
         bot.mode = "followLoyal"
       } else if(bot.loyalDist<500){
-        if(loyalty.hover == 1){
+        if(loyalty.hover != 0){
           bot.mode = "turret"
         } else {
           bot.mode = "engage"
@@ -99,30 +100,36 @@ let main = setInterval(()=>{
         console.log("mode: "+bot.mode)
       }
 
-    } else {
-      if(bot.loyalID&&Counter%150==0){
+      if(B[bot.loyalID]==undefined){
         loyal(bot.loyalName)
       }
+
+
+    } else {
+      
     }
   }
   Counter ++
-    ctx.clearRect(0,0,canvas.width,canvas.height)
+
+  if(window.B[pla] == undefined||window.B[pla].inGame == false){
+        setTimeout(()=>{
+        clickPlay(document.getElementById('nick').value)
+        },2000)
+      }
+
+    ctx.clearRect(0,0,canvas2.width,canvas2.height)
     let lx = 0
     let ly = 0
     if(lock){
-      t = tran(window.B[pla].x,window.B[pla].y)
-      lx = t[0]-canvas.width/2
-      ly = t[1]-canvas.height/2
+      let t = tran(window.B[pla].x,window.B[pla].y)
+      lx = t[0]-canvas2.width/2
+      ly = t[1]-canvas2.height/2
     }
 
     let objk = Object.keys(window.B)
     closest = -1
     let distclosest = Infinity
-    if(window.B[pla] == undefined||window.B[pla].inGame == false){
-        setTimeout(()=>{
-        clickPlay(document.getElementById('nick').value)
-        },2000)
-      }
+    
 objk.forEach((a,i)=>{
   let e = window.B[a]
        if(e.inGame == false){return}
@@ -211,8 +218,8 @@ objk.forEach((a,i)=>{
       ctx.beginPath()
       ctx.lineWidth = 1
       ctx.strokeStyle = "#000000"
-      ctx.moveTo(canvas.width/2,canvas.height/2)
-      ctx.lineTo(canvas.width/2+3*(t[0]-lx-(canvas.width/2)),canvas.height/2+3*(t[1]-ly-(canvas.height/2)))
+      ctx.moveTo(Width/2,Height/2)
+      ctx.lineTo(Width/2+3*(t[0]-lx-(Width/2)),Height/2+3*(t[1]-ly-(Height/2)))
       ctx.stroke()
 
       ctx.beginPath()
@@ -222,7 +229,7 @@ objk.forEach((a,i)=>{
       ctx.lineTo(last[closest].vx*adjust  + t[0]-lx,last[closest].vy*adjust  +t[1]-ly)
       ctx.stroke()
 
-      let tranPo = [3*(t[0]-lx-(canvas.width/2)),3*(t[1]-ly-(canvas.height/2))]
+      let tranPo = [3*(t[0]-lx-(Width/2)),3*(t[1]-ly-(Height/2))]
       
 
     } 
@@ -235,26 +242,25 @@ objk.forEach((a,i)=>{
 // function a2(e){window.M=e}
 // function a3(){debugger;window.M.followTopPlayer()}
 // function a4(e){window.B=e}
-function a1(){window.B =B;window.FF=true}
-let tranmode = 1
+// function a1(){window.B =B;window.FF=true}
+
+
 function tran(x,y){
   if(tranmode == 1){
-    return([(x+5000)*canvas.width/10000*zoom,(y+1000)/2*zoom])
+    return([(x+5000)*Width/10000*zoom,(y+1000)/2*zoom])
   } else if (tranmode == 2){
     return([(x+5000)/2*zoom,(y+1000)/2*zoom])
   } else if(tranmode == 3){
-    return([(x+5000)*canvas.width/10000*zoom,(y+1000)*canvas.width/10000*zoom])
+    return([(x+5000)*Width/10000*zoom,(y+1000)*Width/10000*zoom])
   }
 }
+
 function distance(x1,y1,x2,y2) {
     let a = x2-x1
     let b = y2-y1
   return(Math.sqrt(a*a+b*b))
 }
-let mouseX = 0
-let mouseY = 0
-onmousemove = (e)=>{mouseX = (e.clientX); mouseY = (e.clientY)}
-let downs = {}
+
 document.addEventListener("keydown",(e)=>{
   let key = e.key
   if(key == "q"){
@@ -268,8 +274,8 @@ document.addEventListener("keydown",(e)=>{
        let ly = 0
        if(lock){
           let tt = tran(window.B[pla].x,window.B[pla].y)
-          lx = tt[0]-canvas.width/2
-          ly = tt[1]-canvas.height/2
+          lx = tt[0]-Width/2
+          ly = tt[1]-Height/2
         }
         if(distance(t[0]-lx,t[1]-ly,mouseX,mouseY)<70){
         highlights[a] = true        
@@ -319,6 +325,11 @@ document.addEventListener("keydown",(e)=>{
       botoff()
     } else {boton("lopkn")}
   }
+  if(key == "t"){
+    if(bot.mode != "turret"){
+      bot.mode = "turret"
+    } else {bot.mode = "engage"}
+  }
   downs[e.key] = true
 })
 document.addEventListener("keyup",(e)=>{
@@ -330,7 +341,7 @@ document.addEventListener("keyup",(e)=>{
 })
 
 function resize(){
-canvas.width = window.innerWidth; canvas.height = window.innerHeight
+Width = window.innerWidth; Height = window.innerHeight
 }
 function ang(x,y){
     let a = Math.atan2(x,y)
@@ -343,16 +354,13 @@ function getAng(p){
 }
 
 
-let minDist = 2000
-let shootThreshold = 0.2
-let lead = 40
-let friendlyThreshold = 0.4
+
 function autoF(c){
   aimedAt = -1
   if(window.B[pla].y > 770){return}
   let tp = [window.B[c].x-window.B[pla].x,window.B[c].y-window.B[pla].y]
   let aEnemy = ang(tp[0],-tp[1])
-  let aMe = ang(mouseX-canvas.width/2,-(mouseY-canvas.height/2))
+  let aMe = ang(mouseX-Width/2,-(mouseY-Height/2))
   let aGame = window.B[pla].angle%(2*Math.PI)
   if(aGame < 0){
     aGame = 2*Math.PI+aGame
@@ -395,7 +403,7 @@ function autoF(c){
         bot.aimAddy = 0
 
 
-        if(closestFriendlyPos < 300 && mode != "turret"){
+        if(closestFriendlyPos < 300 && bot.mode != "turret"){
           // window.U.angle += 1
           bot.aimAddx += window.B[pla].x - window.B[closestFriendlyID].x
           bot.aimAddy += window.B[pla].y - window.B[closestFriendlyID].y
@@ -512,3 +520,19 @@ function loyal(str,str2){
 
 
 function name(str){document.getElementById('nick').value=str}
+
+
+
+window.tran = tran
+window.distance = distance
+window.autoF = autoF
+window.resize = resize
+window.ang = ang
+window.getAng = getAng
+window.distP = distP
+window.WL = WL
+window.BL =BL
+window.boton = boton
+window.botoff = botoff
+window.loyal = loyal
+window.name = name
