@@ -7,14 +7,14 @@ canvas2.style.zIndex = 5000
 canvas2.style.width = Math.floor(window.innerWidth)+"px"
 canvas2.style.height = Math.floor(window.innerHeight)+"px"
 canvas2.width = window.innerWidth; canvas2.height = window.innerHeight
-window.mouseDown = 0;
+window.mouseDown = false;
 window.Width = canvas2.width
 window.Height = canvas2.height
 document.body.onmousedown = function() { 
-  ++mouseDown;
+  mouseDown = true;
 }
 document.body.onmouseup = function() {
-  --mouseDown;
+  mouseDown = false;
 }
 window.priorityTargetMode = false
 window.ctx = canvas2.getContext("2d")
@@ -60,6 +60,8 @@ window.onmousemove = (e)=>{mouseX = (e.clientX); mouseY = (e.clientY)}
 window.downs = {}
 window.engageSpeed = 0.5
 
+window.focusedOn = -1
+window.focusSave = -1
 
 window.main = setInterval(()=>{
 
@@ -157,6 +159,10 @@ objk.forEach((a,i)=>{
               if(e.score > 2000){
                 let col = Math.random()*255
                 ctx.fillStyle = "rgba("+col+","+col+","+col+")"
+              }
+              if(a==focusedOn||a==focusSave){
+                let col = Math.random()*255
+                ctx.fillStyle = "rgba(0,"+col+",0)"
               }
               
             
@@ -303,6 +309,32 @@ document.addEventListener("keydown",(e)=>{
         if(td < d){d = td; pla = a}
     })
   }
+  if(key == "a"){
+    let d = Infinity
+    Object.keys(window.B).forEach((a)=>{
+       let e = window.B[a]
+       if(e.inGame == false || a == pla){return}
+       let t = tran(e.x,e.y)
+     let lx = 0
+       let ly = 0
+       if(lock){
+          let tt = tran(window.B[pla].x,window.B[pla].y)
+          lx = tt[0]-Width/2
+          ly = tt[1]-Height/2
+        }
+       let td = distance(t[0]-lx,t[1]-ly,mouseX,mouseY)
+        if(td < d){d = td; focusedOn = a}
+    })
+    if(d == Infinity){focusedOn = -1}
+  }
+if(key == "s"){
+  if(focusedOn == -1){
+    focusedOn = focusSave
+  } else {
+    focusSave = focusedOn
+    focusedOn = -1
+  }
+}
   if(key == "e"){
     zoom += 0.1
   }
@@ -402,7 +434,7 @@ function autoF(c){
 
   // console.log(tp[0])
   if(downs["x"] == true || bot.on){
-    c = bot.on?(bot.aiming=="closest"?c:bot.aiming):(mouseDown?(aimedAt == -1?c:aimedAt):c)
+    c = focusedOn==-1?(bot.on?(bot.aiming=="closest"?c:bot.aiming):(mouseDown?(aimedAt == -1?c:aimedAt):c)):focusedOn
       if(window.B[c] == undefined){bot.aiming = "closest"}
     let leadingAngle = ang(window.B[c].x+last[c].vx*lead-window.B[pla].x+bot.aimAddx,-(window.B[c].y+last[c].vy*lead-window.B[pla].y+bot.aimAddy))
       window.U.angle = Math.PI-leadingAngle
@@ -550,7 +582,7 @@ function findNearestObject(id){
   let dist = Infinity
   let object = {}
   allObjects.forEach((e)=>{
-    if(e.type != id || e.grabbing != false){return}
+    if((e.type != id && id != undefined) || e.grabbing != false){return}
     let dst = distance(e.x,e.y,B[pla].x,B[pla].y)
     if(dst < dist){
       dist = dst
