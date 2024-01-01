@@ -1,4 +1,4 @@
-window.A=A;window.B=B;window.U = U;window.W=W;
+window.A=A;window.B=B;window.U = U;window.W=W;window.N=N;
 (function(){
     window.canvas2 = document.createElement("canvas")
 document.body.appendChild(canvas2)
@@ -21,6 +21,7 @@ window.ctx = canvas2.getContext("2d")
 canvas2.style.pointerEvents = "none"
 window.highlights = {}
 
+window.dodgeFactor = 40
 window.lock = false
 window.autoFire = false
 window.pla = -1
@@ -160,7 +161,12 @@ objk.forEach((a,i)=>{
                 let col = Math.random()*255
                 ctx.fillStyle = "rgba("+col+","+col+","+col+")"
               }
-              if(a==focusedOn||a==focusSave){
+              if(a==focusSave){
+                let col = Math.random()*255
+                ctx.fillStyle = "rgba("+col+","+(col/2)+",0)"
+              }
+              
+              if(a==focusedOn){
                 let col = Math.random()*255
                 ctx.fillStyle = "rgba(0,"+col+",0)"
               }
@@ -436,15 +442,18 @@ function autoF(c){
   if(downs["x"] == true || bot.on){
     c = focusedOn==-1?(bot.on?(bot.aiming=="closest"?c:bot.aiming):(mouseDown?(aimedAt == -1?c:aimedAt):c)):focusedOn
       if(window.B[c] == undefined){bot.aiming = "closest"}
+
+        dodgeAll(dodgeFactor)
+
     let leadingAngle = ang(window.B[c].x+last[c].vx*lead-window.B[pla].x+bot.aimAddx,-(window.B[c].y+last[c].vy*lead-window.B[pla].y+bot.aimAddy))
       window.U.angle = Math.PI-leadingAngle
       
 
 
-
-      if(bot.on){
         bot.aimAddx = 0
         bot.aimAddy = 0
+      if(bot.on){
+        
 
 
         if(closestFriendlyPos < 300 && bot.mode != "turret"){
@@ -476,6 +485,8 @@ function autoF(c){
 
       if(downs["d"]){
         window.U.angle = Math.PI-aMe
+        window.A.sendDirection = window.SD
+        window.A.sendInput = window.SI
       }
 
       window.SI()
@@ -589,7 +600,7 @@ function findNearestObject(id){
       object = e
     }
   })
-  console.log(object)
+
   return([object,dist])
 }
 
@@ -598,6 +609,38 @@ function goClosestTemp(id){
   bot.mode = "target";bot.targetX = obj.x; bot.targetY = obj.y;
 }
 
+function dodgeFromPos(x,y,s=1,md=Infinity){
+  //s for strength
+  let player = B[pla]
+  let dst = distance(player.x,player.y,x,y)
+  if(dst > md){return([0,0])}
+  return([(player.x - x)/dst*s,(player.y - y)/dst*s])
+}
+
+
+function dot(x,y,x2,y2){
+  return(x*x2+y2*y)
+}
+function normalize(x,y){
+  let d = Math.sqrt(x*x+y*y)
+  return([x/d,y/d])
+}
+
+function dodgeAll(s=40){
+  //type 1 = bomb, type 0 = rocket
+  let p = B[pla]
+  Object.values(N).forEach((e)=>{
+    let norm = normalize(e.x-e.prevX,e.y-e.prevY)
+    let dt = dot(norm[0],norm[1],p.x-e.x,p.y-e.y)
+    if(dt < 0){return}
+    let dodge = dodgeFromPos(e.x,e.y,s,500)
+    bot.aimAddx += dodge[0]
+    bot.aimAddy += dodge[1]
+  })
+}
+
+
+window.dodgeFromPos = dodgeFromPos
 window.goClosestTemp = goClosestTemp
 window.findNearestObject = findNearestObject
 window.tran = tran
