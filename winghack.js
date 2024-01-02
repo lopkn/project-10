@@ -21,7 +21,7 @@ window.ctx = canvas2.getContext("2d")
 canvas2.style.pointerEvents = "none"
 window.highlights = {}
 
-window.dodgeFactor = 40
+window.dodgeFactor = 40000
 window.lock = false
 window.autoFire = false
 window.pla = -1
@@ -34,7 +34,13 @@ window.allObjects = []
 window.toggleDraw = true
 window.nameDraw = false
 ctx.textAlign = "center"
-window.bot = {"destinationRadius":20,"on":false,"loyal":false,"mode":"engage","compadrae":["lopAssist"],"aiming":"closest","aimAddx":0,"aimAddy":0,"followBoundary":1200}
+window.bot = {"destinationRadius":20,"on":false,"loyal":false,"mode":"engage","compadrae":["lopAssist"],
+"aiming":"closest","aimAddx":0,"aimAddy":0,"followBoundary":1200,
+"dodgeX":0,"dodgeY":0
+}
+
+window.resortPlayer = {"isInvulnerable":()=>{return(false)},"highlightValue":0,"lastUpdate":1704172062897,"id":1,"x":0,"y":0,"prevX":1,"prevY":1,"origX":-37.09577560424805,"origY":52.94370174407959,"dstX":-2.211310863494873,"dstY":52.387943267822266,"energy":255,"inGame":true,"updateBool":true,"colorHue":0,"speed":11.629630488697506,"momentum":0,"maxMomentum":8,"angle":7.838051719665527,"origAngle":7.838051795959473,"dstAngle":7.8380513191223145,"controlAngle":360,"rotSpeed":4,"directionX":0,"directionY":-1,"targetX":0,"targetY":0,"targetMomentum":8,"name":"cornhol.io","first_set":false,"rank":3,"score":165,"frameSwitchTime":40,"timeToNextFrame":40,"flameState":true,"flipLastImage":-1,"planeImages":[{"x":0,"y":0,"width":35,"height":12},{"x":0,"y":0,"width":35,"height":11},{"x":0,"y":0,"width":35,"height":13},{"x":0,"y":0,"width":35,"height":16},{"x":0,"y":0,"width":35,"height":18},{"x":0,"y":0,"width":35,"height":19},{"x":0,"y":0,"width":35,"height":20},{"x":0,"y":0,"width":35,"height":22}],"planeImagesReflex":[{"x":0,"y":0,"width":35,"height":12,"canvas":{}},{"x":0,"y":0,"width":35,"height":11,"canvas":{}},{"x":0,"y":0,"width":35,"height":13,"canvas":{}},{"x":0,"y":0,"width":35,"height":16,"canvas":{}},{"x":0,"y":0,"width":35,"height":18,"canvas":{}},{"x":0,"y":0,"width":35,"height":19,"canvas":{}},{"x":0,"y":0,"width":35,"height":20,"canvas":{}},{"x":0,"y":0,"width":35,"height":22,"canvas":{}}],"colorID":5,"decalID":1,"hover":0,"hadHover":true,"isBot":0,"isShooting":2048,"weapon":4,"ammo":8,"laserTimer":0,"laserFrame":0,"decalFrames":[{"x":0,"y":0,"width":31,"height":8,"canvas":{}},{"x":0,"y":0,"width":32,"height":9,"canvas":{}},{"x":0,"y":0,"width":31,"height":8,"canvas":{}},{"x":0,"y":0,"width":32,"height":13,"canvas":{}},{"x":0,"y":0,"width":30,"height":15,"canvas":{}},{"x":0,"y":0,"width":25,"height":18,"canvas":{}},{"x":0,"y":0,"width":32,"height":19,"canvas":{}},{"x":0,"y":0,"width":33,"height":19,"canvas":{}}],"showName":true,"lastImage":{"x":0,"y":0,"width":35,"height":12},"lastImageReflex":{"x":0,"y":0,"width":35,"height":12,"canvas":{}}}
+
 window.whiteList = {}
 window.blackList = {}
 window.weaponColor = {
@@ -46,10 +52,11 @@ window.weaponColor = {
   "128":"#FF00FF",
   "256":"#FFFFFF"
 }
+window.autoDodge = true
 window.Counter = 0
 window.adjust = 20
 window.drop = 20
-window.aname = ""
+window.aname = "lopknA65"
 window.minDist = 2000
 window.shootThreshold = 0.2
 window.tranmode = 1
@@ -139,6 +146,10 @@ window.main = setInterval(()=>{
     closest = -1
     let distclosest = Infinity
     
+    if(objk.length == 1){
+      B[1] = window.resortPlayer
+    }
+
 objk.forEach((a,i)=>{
   let e = window.B[a]
        if(e.inGame == false){return}
@@ -182,7 +193,7 @@ objk.forEach((a,i)=>{
               ctx.fillRect((t[0]-10)*zoom-lx,(t[1]-10)*zoom-ly,20*zoom,20*zoom)
             }
 
-            if(nameDraw || downs["w"]){
+            if(nameDraw){
               ctx.font = "bold 17px Courier New"
               ctx.fillStyle = weaponColor[e.weapon]
               ctx.fillText(e.name,t[0]*zoom-lx,(t[1]-15)*zoom-ly,50)
@@ -379,6 +390,10 @@ if(key == "s"){
       bot.mode = "turret"
     } else {bot.mode = "engage"}
   }
+  if(key == "w"){
+    nameDraw = !nameDraw
+  }
+
   downs[e.key] = true
 })
 document.addEventListener("keyup",(e)=>{
@@ -408,6 +423,9 @@ function getAng(p){
 function autoF(c){
   aimedAt = -1
   if(window.B[pla].y > 770){window.U.hover=0;return}
+
+
+
   let tp = [window.B[c].x-window.B[pla].x,window.B[c].y-window.B[pla].y]
   let aEnemy = ang(tp[0],-tp[1])
   let aMe = ang(mouseX-Width/2,-(mouseY-Height/2))
@@ -443,7 +461,13 @@ function autoF(c){
     c = focusedOn==-1?(bot.on?(bot.aiming=="closest"?c:bot.aiming):(mouseDown?(aimedAt == -1?c:aimedAt):c)):focusedOn
       if(window.B[c] == undefined){bot.aiming = "closest"}
 
+        bot.dodgeX = 0; bot.dodgeY = 0
+      if(autoDodge){
         dodgeAll(dodgeFactor)
+        bot.aimAddx += bot.dodgeX
+        bot.aimAddy += bot.dodgeY
+      }
+        
 
     let leadingAngle = ang(window.B[c].x+last[c].vx*lead-window.B[pla].x+bot.aimAddx,-(window.B[c].y+last[c].vy*lead-window.B[pla].y+bot.aimAddy))
       window.U.angle = Math.PI-leadingAngle
@@ -473,7 +497,7 @@ function autoF(c){
           window.U.hover = 1
         } else if(bot.mode == "target"){
           window.U.angle = Math.PI-ang(bot.targetX-window.B[pla].x,-(bot.targetY-window.B[pla].y))
-          let dst = distance(B[pla].x,B[pla].y,bot.targetX,bot.targetY)
+          let dst = distance(B[pla].x,B[pla].y,bot.targetX+bot.dodgeX,bot.targetY+bot.dodgeY)
           window.U.hover=(dst<90?(Math.random()>0.5?1:0):0)
           if(dst < (bot.destinationRadius?bot.destinationRadius:50)){
             console.log(distance(B[pla].x,B[pla].y,bot.targetX,bot.targetY))
@@ -483,16 +507,23 @@ function autoF(c){
         }
       }
 
+      if(autoDodge && distance(bot.dodgeX,bot.dodgeY,0,0)>1000){
+        U.hover = 0
+      }
+
       if(downs["d"]){
         window.U.angle = Math.PI-aMe
         window.A.sendDirection = window.SD
         window.A.sendInput = window.SI
       }
+      if(downs["g"]){
+        window.U.angle += (Math.random()-0.5)*3
+      }
 
       window.SI()
       window.SD()
     }
-  if( ((Math.abs(aGame-aEnemy) < shootThreshold && distP(pla,closest) < minDist)|| closestAng < shootThreshold )&&(bot.on||downs["x"])){
+  if( ((Math.abs(aGame-aEnemy) < shootThreshold && distP(pla,closest) < minDist)/*|| closestAng < shootThreshold */)&&(bot.on||downs["x"])){
     if(closestFriendly > friendlyThreshold){
       window.A?.sendShooting(1)
     } else {
@@ -617,6 +648,25 @@ function dodgeFromPos(x,y,s=1,md=Infinity){
   return([(player.x - x)/dst*s,(player.y - y)/dst*s])
 }
 
+function dodgeFromThing(e,s=1,md=Infinity){
+  let x = e.x
+  let y = e.y
+  //s for strength
+  let p = B[pla]
+  let norm = normalize(e.x-e.prevX,e.y-e.prevY)
+  let norm2 = normalize(p.x-e.x,p.y-e.y)
+  let dt = dot(norm[0],norm[1],norm2[0],norm2[1])
+  if(dt < 0){return([0,0])}
+  let dst = distance(p.x,p.y,x,y)
+  if(dst > md){return([0,0])}
+
+  let parComp = normalize((norm2[0]-dt*norm[0]),(norm2[1]-dt*norm[1]))
+  
+  let ret = [parComp[0]*s/dst,parComp[1]*s/dst]
+
+  return(ret)
+}
+
 
 function dot(x,y,x2,y2){
   return(x*x2+y2*y)
@@ -630,16 +680,32 @@ function dodgeAll(s=40){
   //type 1 = bomb, type 0 = rocket
   let p = B[pla]
   Object.values(N).forEach((e)=>{
-    let norm = normalize(e.x-e.prevX,e.y-e.prevY)
-    let dt = dot(norm[0],norm[1],p.x-e.x,p.y-e.y)
-    if(dt < 0){return}
-    let dodge = dodgeFromPos(e.x,e.y,s,500)
-    bot.aimAddx += dodge[0]
-    bot.aimAddy += dodge[1]
+    // let norm = normalize(e.x-e.prevX,e.y-e.prevY)
+    // let norm2 = normalize(p.x-e.x,p.y-e.y)
+    // let dt = dot(norm[0],norm[1],norm2[0],norm2[1])
+    // if(dt < 0){return;}
+    // let dodge = dodgeFromPos(e.x,e.y,s*dt,500)
+    let dodge = dodgeFromThing(e,s,1500)
+    bot.dodgeX += dodge[0]
+    bot.dodgeY += dodge[1]
   })
+  ctx.strokeStyle = "#FF00FF"
+  ctx.beginPath()
+  ctx.moveTo(Width/2,Height/2)
+  ctx.lineTo(Width/2+bot.dodgeX,Height/2+bot.dodgeY)
+  ctx.stroke()
+}
+
+function collect(){
+  bot.onReach = ()=>{goClosestTemp(64)};goClosestTemp(64);bot.destinationRadius = 70;boton();
+  window.collectInterval = setInterval(()=>{
+    if(Math.random>0.9){bot.mode = "engage"}else{bot.mode = "target"}
+  },20000)
+  n("LopPtFarmer")
 }
 
 
+window.collect = collect
 window.dodgeFromPos = dodgeFromPos
 window.goClosestTemp = goClosestTemp
 window.findNearestObject = findNearestObject
