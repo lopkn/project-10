@@ -29,6 +29,7 @@ window.zoom = 1
 window.last = {}
 window.closest = -1;
 window.aimedAt = -1;
+window.projectiles = []
 
 window.allObjects = []
 window.toggleDraw = true
@@ -52,7 +53,25 @@ window.weaponColor = {
   "128":"#FF00FF",
   "256":"#FFFFFF"
 }
-window.autoDodge = true
+window.weaponPreset = {
+  "8":()=>{
+    lead = 20;
+    shootThreshold = 0.1;
+  },
+  "16":()=>{
+    lead = 40;
+    shootThreshold = 0.2
+  },
+  "4":()=>{
+    lead = 80;
+    shootThreshold = 0.3
+  },
+  "128":()=>{
+    lead = 50;
+    shootThreshold = 0.2;
+  }
+}
+window.autoDodge = false
 window.Counter = 0
 window.adjust = 20
 window.drop = 20
@@ -91,6 +110,8 @@ window.main = setInterval(()=>{
     }
   }
 
+  projectiles = Object.values(N)
+  
   if(bot.on && Counter%5==0){
     window.A.sendDirection = ()=>{}
     window.A.sendInput = ()=>{}
@@ -149,6 +170,11 @@ window.main = setInterval(()=>{
     if(objk.length == 1){
       B[1] = window.resortPlayer
     }
+    ctx.fillStyle = "#A00000"
+    projectiles.forEach((e)=>{
+    let t = tran(e.x,e.y)
+        ctx.fillRect((t[0]-4)*zoom-lx,(t[1]-4)*zoom-ly,8*zoom,8*zoom)
+    })
 
 objk.forEach((a,i)=>{
   let e = window.B[a]
@@ -418,12 +444,16 @@ function getAng(p){
   return(ang(window.B[p].x-window.B[pla].x,-window.B[p].y+window.B[pla].y))
 }
 
+function autoLead(){
+  let w = B[pla].weapon
 
+}
 
 function autoF(c){
   aimedAt = -1
   if(window.B[pla].y > 770){window.U.hover=0;return}
 
+    c = focusedOn==-1?(bot.on?(bot.aiming=="closest"?c:bot.aiming):(mouseDown?(aimedAt == -1?c:aimedAt):c)):focusedOn
 
 
   let tp = [window.B[c].x-window.B[pla].x,window.B[c].y-window.B[pla].y]
@@ -458,7 +488,6 @@ function autoF(c){
 
   // console.log(tp[0])
   if(downs["x"] == true || bot.on){
-    c = focusedOn==-1?(bot.on?(bot.aiming=="closest"?c:bot.aiming):(mouseDown?(aimedAt == -1?c:aimedAt):c)):focusedOn
       if(window.B[c] == undefined){bot.aiming = "closest"}
 
         bot.dodgeX = 0; bot.dodgeY = 0
@@ -679,7 +708,7 @@ function normalize(x,y){
 function dodgeAll(s=40){
   //type 1 = bomb, type 0 = rocket
   let p = B[pla]
-  Object.values(N).forEach((e)=>{
+  projectiles.forEach((e)=>{
     // let norm = normalize(e.x-e.prevX,e.y-e.prevY)
     // let norm2 = normalize(p.x-e.x,p.y-e.y)
     // let dt = dot(norm[0],norm[1],norm2[0],norm2[1])
