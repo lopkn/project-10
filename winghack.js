@@ -73,7 +73,7 @@ window.weaponPreset = {
 }
 window.autoDodge = false
 window.Counter = 0
-window.adjust = 20
+window.adjust = 6
 window.drop = 20
 window.aname = "lopknA65"
 window.minDist = 2000
@@ -183,11 +183,12 @@ objk.forEach((a,i)=>{
     let t = tran(e.x,e.y)
       let invuln = e.isInvulnerable()
 
-    if(last[a] == undefined){
-      last[a] = {"lx":t[0],"ly":t[1],"vy":0,"vx":0}
-    } else {
-      last[a] = {"vx":t[0]-last[a].lx,"vy":t[1]-last[a].ly,"lx":t[0],"ly":t[1]}
-    }
+    // if(last[a] == undefined){
+    //   last[a] = {"lx":t[0],"ly":t[1],"vy":0,"vx":0}
+    // } else {
+    //   last[a] = {"vx":t[0]-last[a].lx,"vy":t[1]-last[a].ly,"lx":t[0],"ly":t[1]}
+    // }
+      last[a] = {"vx":e.x-e.prevX,"vy":e.y-e.prevY}
         if(toggleDraw){
             ctx.fillStyle = "orange"
             if(highlights[a]){ctx.fillStyle="green"}
@@ -453,11 +454,6 @@ function autoF(c){
   aimedAt = -1
   if(window.B[pla].y > 770){window.U.hover=0;return}
 
-    c = focusedOn==-1?(bot.on?(bot.aiming=="closest"?c:bot.aiming):(mouseDown?(aimedAt == -1?c:aimedAt):c)):focusedOn
-
-
-  let tp = [window.B[c].x-window.B[pla].x,window.B[c].y-window.B[pla].y]
-  let aEnemy = ang(tp[0],-tp[1])
   let aMe = ang(mouseX-Width/2,-(mouseY-Height/2))
   let aGame = window.B[pla].angle%(2*Math.PI)
   if(aGame < 0){
@@ -486,6 +482,12 @@ function autoF(c){
     if(tang < closestAng){closestAng = tang;aimedAt = a}
   })
 
+  c = focusedOn==-1?(bot.on?(bot.aiming=="closest"?c:bot.aiming):(mouseDown?(aimedAt == -1?c:aimedAt):c)):focusedOn
+
+
+  let tp = [window.B[c].x-window.B[pla].x,window.B[c].y-window.B[pla].y]
+  let aEnemy = ang(tp[0],-tp[1])
+
   // console.log(tp[0])
   if(downs["x"] == true || bot.on){
       if(window.B[c] == undefined){bot.aiming = "closest"}
@@ -497,7 +499,6 @@ function autoF(c){
         bot.aimAddy += bot.dodgeY
       }
         
-
     let leadingAngle = ang(window.B[c].x+last[c].vx*lead-window.B[pla].x+bot.aimAddx,-(window.B[c].y+last[c].vy*lead-window.B[pla].y+bot.aimAddy))
       window.U.angle = Math.PI-leadingAngle
       
