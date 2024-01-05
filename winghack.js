@@ -54,6 +54,18 @@ window.weaponColor = {
   "256":"#FFFFFF"
 }
 window.weaponPreset = {
+  "1":()=>{
+    lead = 40;
+    shootThreshold = 0.3
+  },
+  "2":()=>{
+    lead = 40;
+    shootThreshold = 0.5
+  },
+  "4":()=>{
+    lead = 80;
+    shootThreshold = 0.3
+  },
   "8":()=>{
     lead = 20;
     shootThreshold = 0.1;
@@ -62,13 +74,13 @@ window.weaponPreset = {
     lead = 40;
     shootThreshold = 0.2
   },
-  "4":()=>{
-    lead = 80;
-    shootThreshold = 0.3
-  },
   "128":()=>{
     lead = 50;
     shootThreshold = 0.2;
+  },
+  "256":()=>{
+    lead = 40;
+    shootThreshold = 30
   }
 }
 window.autoDodge = false
