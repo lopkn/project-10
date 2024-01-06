@@ -287,6 +287,11 @@ objk.forEach((a,i)=>{
     let t = tran(window.B[closest].x,window.B[closest].y)
     ctx.fillStyle = "rgba(255,0,255,0.5)"
     ctx.fillRect(t[0]-10-lx,t[1]-10-ly,20,20)
+    ctx.fillStyle = "rgb(0,0,0)"
+        ctx.font = "bold 15px Courier New"
+        ctx.textAlign = "left"
+    ctx.fillText("DST:" + distP(pla,closest).toFixed(0),Width/2+20,Height/2+7)
+        ctx.textAlign = "center"
     if(lock){
       ctx.beginPath()
       ctx.lineWidth = 1
@@ -391,10 +396,10 @@ if(key == "s"){
     focusedOn = -1
   }
 }
-  if(key == "e"){
+  if(key == "-"){
     zoom += 0.1
   }
-  if(key == "r"){
+  if(key == "="){
     zoom -= 0.1
   }
   if(key == "["){
@@ -432,6 +437,9 @@ if(key == "s"){
   if(key == "w"){
     nameDraw = !nameDraw
   }
+  if(key == "e"){
+    weaponAuto()
+  }
 
   downs[e.key] = true
 })
@@ -457,9 +465,11 @@ function getAng(p){
   return(ang(window.B[p].x-window.B[pla].x,-window.B[p].y+window.B[pla].y))
 }
 
-function autoLead(){
-  let w = B[pla].weapon
-
+function weaponAuto(){
+  weaponPreset[B[pla].weapon]()
+  console.log("lead: "+lead)
+  console.log("tresh: "+shootThreshold)
+  console.log("minDist: "+minDist)
 }
 
 function autoF(c){
@@ -479,7 +489,7 @@ function autoF(c){
 
   Object.keys(window.B).forEach((a)=>{
     let e = window.B[a]
-    if(!e.inGame || e.isInvulnerable()){return}
+    if(!e.inGame){return}
     
     if(a ==pla || distP(pla,a) > minDist){return}
     let aEnemy2 = ang(window.B[a].x-window.B[pla].x,-window.B[a].y+window.B[pla].y)
@@ -510,8 +520,8 @@ function autoF(c){
         bot.aimAddx += bot.dodgeX
         bot.aimAddy += bot.dodgeY
       }
-        
-    let leadingAngle = ang(window.B[c].x+last[c].vx*lead-window.B[pla].x+bot.aimAddx,-(window.B[c].y+last[c].vy*lead-window.B[pla].y+bot.aimAddy))
+        let Tlead = lead * 13/40
+    let leadingAngle = ang(window.B[c].x+last[c].vx*Tlead-window.B[pla].x+bot.aimAddx,-(window.B[c].y+last[c].vy*Tlead-window.B[pla].y+bot.aimAddy))
       window.U.angle = Math.PI-leadingAngle
       
 
