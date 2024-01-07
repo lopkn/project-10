@@ -44,6 +44,7 @@ window.resortPlayer = {"isInvulnerable":()=>{return(false)},"highlightValue":0,"
 
 window.whiteList = {}
 window.blackList = {}
+window.normVector = []
 window.weaponColor = {
   "1":"#707070",
   "2":"#FF7F00",
@@ -92,6 +93,7 @@ window.minDist = 2000
 window.shootThreshold = 0.2
 window.tranmode = 1
 window.lead = 40
+window.preLead = 40
 window.friendlyThreshold = 0.4
 window.mouseX = 0
 window.mouseY = 0
@@ -102,8 +104,10 @@ window.engageSpeed = 0.5
 window.focusedOn = -1
 window.focusSave = -1
 
-window.main = setInterval(()=>{
+window.tempCounter = 0
+window.tempCounter2 = 0 
 
+window.main = setInterval(()=>{
 
   if(Counter%500){
     if(window.B[pla] == undefined){
@@ -151,8 +155,6 @@ window.main = setInterval(()=>{
       if(B[bot.loyalID]==undefined){
         loyal(bot.loyalName)
       }
-
-
     } else {
       
     }
@@ -195,12 +197,16 @@ objk.forEach((a,i)=>{
     let t = tran(e.x,e.y)
       let invuln = e.isInvulnerable()
 
-    // if(last[a] == undefined){
-    //   last[a] = {"lx":t[0],"ly":t[1],"vy":0,"vx":0}
-    // } else {
-    //   last[a] = {"vx":t[0]-last[a].lx,"vy":t[1]-last[a].ly,"lx":t[0],"ly":t[1]}
-    // }
-      last[a] = {"vx":e.x-e.prevX,"vy":e.y-e.prevY}
+    if(last[a] == undefined){
+      last[a] = {"lx":t[0],"ly":t[1],"lvy":0,"lvx":0,"vx":e.x-e.prevX,"vy":e.y-e.prevY}
+    } else {
+      last[a] = {"lvx":t[0]-last[a].lx,"lvy":t[1]-last[a].ly,"lx":t[0],"ly":t[1],"vx":e.x-e.prevX,"vy":e.y-e.prevY}
+    }
+      // last[a] = {}
+    // let ddl = distance(last[a].lvx,last[a].lvy,0,0)
+    // let ddn = distance(last[a].vx,last[a].vy,0,0)
+    // if(a == pla && ddn != 0){console.log(ddl/ddn);tempCounter++;tempCounter2+=ddl/ddn}
+
         if(toggleDraw){
             ctx.fillStyle = "orange"
             if(highlights[a]){ctx.fillStyle="green"}
@@ -221,11 +227,7 @@ objk.forEach((a,i)=>{
                 ctx.fillStyle = "rgba(0,"+col+",0)"
               }
               
-            
-                    
-
-           
-            
+                        
             ctx.fillRect((t[0]-7.5)*zoom-lx,(t[1]-7.5)*zoom-ly,15*zoom,15*zoom)
             if(invuln){
               ctx.fillStyle = "rgba(0,0,255,0.5)"
@@ -305,6 +307,13 @@ objk.forEach((a,i)=>{
       ctx.strokeStyle = "#00FF00"
       ctx.moveTo(t[0]-lx,t[1]-ly)
       ctx.lineTo(last[closest].vx*adjust  + t[0]-lx,last[closest].vy*adjust  +t[1]-ly)
+      ctx.stroke()
+
+      ctx.strokeStyle = "#0000FF"
+      ctx.beginPath() 
+      ctx.moveTo(Width/2,Height/2)
+      normVector = [Math.sin(B[pla].angle),-Math.cos(B[pla].angle)]
+      ctx.lineTo(Width/2+normVector[0]*50,Height/2+normVector[1]*50)
       ctx.stroke()
 
       let tranPo = [3*(t[0]-lx-(Width/2)),3*(t[1]-ly-(Height/2))]
@@ -506,6 +515,15 @@ function autoF(c){
 
   c = focusedOn==-1?(bot.on?(bot.aiming=="closest"?c:bot.aiming):(mouseDown?(aimedAt == -1?c:aimedAt):c)):focusedOn
 
+  let n1 = normalize(B[c].x-B[pla].x,B[c].y-B[pla].y)
+  missRatio = dot(n1[0],n1[1],normVector[0],normVector[1])
+  missDirection = cross(n1[0],n1[1],normVector[0],normVector[1])
+  if(missDirection > 0){
+    ctx.fillStyle = "rgba(0,0,200,0.4)"
+  } else {   
+    ctx.fillStyle = "rgba(200,0,0,0.4)"
+  }
+  ctx.fillRect(Width/2,400,missRatio*Width/2,30)
 
   let tp = [window.B[c].x-window.B[pla].x,window.B[c].y-window.B[pla].y]
   let aEnemy = ang(tp[0],-tp[1])
@@ -520,7 +538,7 @@ function autoF(c){
         bot.aimAddx += bot.dodgeX
         bot.aimAddy += bot.dodgeY
       }
-        let Tlead = lead * 13/40
+        let Tlead = lead * 14/40
     let leadingAngle = ang(window.B[c].x+last[c].vx*Tlead-window.B[pla].x+bot.aimAddx,-(window.B[c].y+last[c].vy*Tlead-window.B[pla].y+bot.aimAddy))
       window.U.angle = Math.PI-leadingAngle
       
@@ -722,6 +740,9 @@ function dodgeFromThing(e,s=1,md=Infinity){
 
 function dot(x,y,x2,y2){
   return(x*x2+y2*y)
+}
+function cross(x,y,x2,y2){
+  return(x*y2-y*x2)
 }
 function normalize(x,y){
   let d = Math.sqrt(x*x+y*y)
