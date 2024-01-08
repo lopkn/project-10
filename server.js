@@ -1468,9 +1468,11 @@ app.use(cors()) //jan7-2024
 
 app.use(express.static('public'));
 app.use(bodyParser.urlencoded({ extended: true }));
-app.post('/post-test', (req, res) => {
+app.use(express.json())
+app.post('/responder', (req, res) => {
     console.log('Got body:', req.body);
-    res.sendStatus(200);
+    responder.process1(req.body,res)
+    // res.sendStatus(200);
 })
 console.log("server is opened")
 // console.log(perSeed.noise2D(0.2,0,0))
@@ -5420,4 +5422,16 @@ class ArgAug{
 //////////////////////////////////////////////////// ARGAUG END
 
 
+///// responder ////
 
+class responder{
+	static info1 = {}
+	static process1(d,r){
+		if(d.action == "up"){
+			this.info1 = d
+		}
+		r.send(this.info1)
+	}
+}
+
+///// responder END////
