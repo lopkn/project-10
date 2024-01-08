@@ -37,10 +37,10 @@ window.nameDraw = false
 ctx.textAlign = "center"
 window.bot = {"destinationRadius":20,"on":false,"loyal":false,"mode":"engage","compadrae":["lopAssist"],
 "aiming":"closest","aimAddx":0,"aimAddy":0,"followBoundary":1200,
-"dodgeX":0,"dodgeY":0
+"dodgeX":0,"dodgeY":0,"permAimY":-10
 }
 
-window.resortPlayer = {"isInvulnerable":()=>{return(false)},"highlightValue":0,"lastUpdate":1704172062897,"id":1,"x":0,"y":0,"prevX":1,"prevY":1,"origX":-37.09577560424805,"origY":52.94370174407959,"dstX":-2.211310863494873,"dstY":52.387943267822266,"energy":255,"inGame":true,"updateBool":true,"colorHue":0,"speed":11.629630488697506,"momentum":0,"maxMomentum":8,"angle":7.838051719665527,"origAngle":7.838051795959473,"dstAngle":7.8380513191223145,"controlAngle":360,"rotSpeed":4,"directionX":0,"directionY":-1,"targetX":0,"targetY":0,"targetMomentum":8,"name":"cornhol.io","first_set":false,"rank":3,"score":165,"frameSwitchTime":40,"timeToNextFrame":40,"flameState":true,"flipLastImage":-1,"planeImages":[{"x":0,"y":0,"width":35,"height":12},{"x":0,"y":0,"width":35,"height":11},{"x":0,"y":0,"width":35,"height":13},{"x":0,"y":0,"width":35,"height":16},{"x":0,"y":0,"width":35,"height":18},{"x":0,"y":0,"width":35,"height":19},{"x":0,"y":0,"width":35,"height":20},{"x":0,"y":0,"width":35,"height":22}],"planeImagesReflex":[{"x":0,"y":0,"width":35,"height":12,"canvas":{}},{"x":0,"y":0,"width":35,"height":11,"canvas":{}},{"x":0,"y":0,"width":35,"height":13,"canvas":{}},{"x":0,"y":0,"width":35,"height":16,"canvas":{}},{"x":0,"y":0,"width":35,"height":18,"canvas":{}},{"x":0,"y":0,"width":35,"height":19,"canvas":{}},{"x":0,"y":0,"width":35,"height":20,"canvas":{}},{"x":0,"y":0,"width":35,"height":22,"canvas":{}}],"colorID":5,"decalID":1,"hover":0,"hadHover":true,"isBot":0,"isShooting":2048,"weapon":4,"ammo":8,"laserTimer":0,"laserFrame":0,"decalFrames":[{"x":0,"y":0,"width":31,"height":8,"canvas":{}},{"x":0,"y":0,"width":32,"height":9,"canvas":{}},{"x":0,"y":0,"width":31,"height":8,"canvas":{}},{"x":0,"y":0,"width":32,"height":13,"canvas":{}},{"x":0,"y":0,"width":30,"height":15,"canvas":{}},{"x":0,"y":0,"width":25,"height":18,"canvas":{}},{"x":0,"y":0,"width":32,"height":19,"canvas":{}},{"x":0,"y":0,"width":33,"height":19,"canvas":{}}],"showName":true,"lastImage":{"x":0,"y":0,"width":35,"height":12},"lastImageReflex":{"x":0,"y":0,"width":35,"height":12,"canvas":{}}}
+window.resortPlayer = {"update":(a)=>{},"isInvulnerable":()=>{return(false)},"highlightValue":0,"lastUpdate":1704172062897,"id":1,"x":0,"y":0,"prevX":1,"prevY":1,"origX":-37.09577560424805,"origY":52.94370174407959,"dstX":-2.211310863494873,"dstY":52.387943267822266,"energy":255,"inGame":true,"updateBool":true,"colorHue":0,"speed":11.629630488697506,"momentum":0,"maxMomentum":8,"angle":7.838051719665527,"origAngle":7.838051795959473,"dstAngle":7.8380513191223145,"controlAngle":360,"rotSpeed":4,"directionX":0,"directionY":-1,"targetX":0,"targetY":0,"targetMomentum":8,"name":"cornhol.io","first_set":false,"rank":3,"score":165,"frameSwitchTime":40,"timeToNextFrame":40,"flameState":true,"flipLastImage":-1,"planeImages":[{"x":0,"y":0,"width":35,"height":12},{"x":0,"y":0,"width":35,"height":11},{"x":0,"y":0,"width":35,"height":13},{"x":0,"y":0,"width":35,"height":16},{"x":0,"y":0,"width":35,"height":18},{"x":0,"y":0,"width":35,"height":19},{"x":0,"y":0,"width":35,"height":20},{"x":0,"y":0,"width":35,"height":22}],"planeImagesReflex":[{"x":0,"y":0,"width":35,"height":12,"canvas":{}},{"x":0,"y":0,"width":35,"height":11,"canvas":{}},{"x":0,"y":0,"width":35,"height":13,"canvas":{}},{"x":0,"y":0,"width":35,"height":16,"canvas":{}},{"x":0,"y":0,"width":35,"height":18,"canvas":{}},{"x":0,"y":0,"width":35,"height":19,"canvas":{}},{"x":0,"y":0,"width":35,"height":20,"canvas":{}},{"x":0,"y":0,"width":35,"height":22,"canvas":{}}],"colorID":5,"decalID":1,"hover":0,"hadHover":true,"isBot":0,"isShooting":2048,"weapon":4,"ammo":8,"laserTimer":0,"laserFrame":0,"decalFrames":[{"x":0,"y":0,"width":31,"height":8,"canvas":{}},{"x":0,"y":0,"width":32,"height":9,"canvas":{}},{"x":0,"y":0,"width":31,"height":8,"canvas":{}},{"x":0,"y":0,"width":32,"height":13,"canvas":{}},{"x":0,"y":0,"width":30,"height":15,"canvas":{}},{"x":0,"y":0,"width":25,"height":18,"canvas":{}},{"x":0,"y":0,"width":32,"height":19,"canvas":{}},{"x":0,"y":0,"width":33,"height":19,"canvas":{}}],"showName":true,"lastImage":{"x":0,"y":0,"width":35,"height":12},"lastImageReflex":{"x":0,"y":0,"width":35,"height":12,"canvas":{}}}
 
 window.whiteList = {}
 window.blackList = {}
@@ -92,7 +92,7 @@ window.aname = "lopknA65"
 window.minDist = 2000
 window.shootThreshold = 0.2
 window.tranmode = 1
-window.lead = 40
+window.lead = 25
 window.preLead = 40
 window.friendlyThreshold = 0.4
 window.mouseX = 0
@@ -397,6 +397,36 @@ document.addEventListener("keydown",(e)=>{
     })
     if(d == Infinity){focusedOn = -1}
   }
+if(key == "\\"){
+    let d = Infinity
+    let tar = -1
+    Object.keys(window.B).forEach((a)=>{
+       let e = window.B[a]
+       if(e.inGame == false || a == pla){return}
+       let t = tran(e.x,e.y)
+     let lx = 0
+       let ly = 0
+       if(lock){
+          let tt = tran(window.B[pla].x,window.B[pla].y)
+          lx = tt[0]-Width/2
+          ly = tt[1]-Height/2
+        }
+       let td = distance(t[0]-lx,t[1]-ly,mouseX,mouseY)
+        if(td < d){d = td; tar = a}
+    })
+      if(tar != -1){
+          if(whiteList[tar]){
+            whiteList[tar] = false
+          } else {
+            whiteList[tar] = true
+          }
+      }
+  }
+
+  if(key == "/"){
+    WL("lopAssist")
+  }
+
 if(key == "s"){
   if(focusedOn == -1){
     focusedOn = focusSave
@@ -436,7 +466,10 @@ if(key == "s"){
   if(key == "b"){
     if(bot.on){
       botoff()
-    } else {boton("lopkn")}
+    } else {
+      boton("lopknA65")
+      WL("lopAssist")
+    }
   }
   if(key == "t"){
     if(bot.mode != "turret"){
@@ -490,6 +523,7 @@ function autoF(c){
   if(aGame < 0){
     aGame = 2*Math.PI+aGame
   }
+  let agameBomb = (B[pla].weapon == 256?Math.PI:aGame)
 
   let closestAng = Infinity
   let closestFriendly = Infinity
@@ -503,7 +537,7 @@ function autoF(c){
     if(a ==pla || distP(pla,a) > minDist){return}
     let aEnemy2 = ang(window.B[a].x-window.B[pla].x,-window.B[a].y+window.B[pla].y)
   if(whiteList[a]){
-      let tang2 = Math.abs(aGame-aEnemy2)
+      let tang2 = Math.abs(agameBomb-aEnemy2)
       let dst = distP(pla,a)
       if(dst < closestFriendlyPos){closestFriendlyPos = dst;closestFriendlyID = a}
       if(tang2 < closestFriendly && dst < 1400){closestFriendly = tang2}
@@ -523,7 +557,11 @@ function autoF(c){
   } else {   
     ctx.fillStyle = "rgba(200,0,0,0.4)"
   }
-  ctx.fillRect(Width/2,400,missRatio*Width/2,30)
+  ctx.fillRect(Width/2,400,missRatio*Width/2,20)
+  // if(Counter%10 ==0 && missRatio>0.5){
+    let mr = 1-missRatio
+    ctx.fillText( (mr*distP(pla,c)).toFixed(3),Width/2,430)
+  // }
 
   let tp = [window.B[c].x-window.B[pla].x,window.B[c].y-window.B[pla].y]
   let aEnemy = ang(tp[0],-tp[1])
@@ -539,9 +577,10 @@ function autoF(c){
         bot.aimAddy += bot.dodgeY
       }
         let Tlead = lead * 14/40
-    let leadingAngle = ang(window.B[c].x+last[c].vx*Tlead-window.B[pla].x+bot.aimAddx,-(window.B[c].y+last[c].vy*Tlead-window.B[pla].y+bot.aimAddy))
+    let leadingAngle = ang(window.B[c].x+last[c].vx*Tlead-window.B[pla].x+bot.aimAddx,-(window.B[c].y+last[c].vy*Tlead-window.B[pla].y+bot.aimAddy-bot.permAimY))
       window.U.angle = Math.PI-leadingAngle
       
+    ctx.fillText( (U.angle).toFixed(3),Width/2,450)
 
 
         bot.aimAddx = 0
@@ -594,7 +633,7 @@ function autoF(c){
       window.SD()
     }
   if( ((Math.abs(aGame-aEnemy) < shootThreshold && distP(pla,closest) < minDist)/*|| closestAng < shootThreshold */)&&(bot.on||downs["x"])){
-    if(closestFriendly > friendlyThreshold){
+    if(closestFriendly > friendlyThreshold ){
       window.A?.sendShooting(1)
     } else {
       console.log("stopped")

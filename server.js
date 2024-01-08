@@ -1460,7 +1460,12 @@ function fastdistance(x1,y1,x2,y2) {
 var express = require('express');
 var bodyParser = require('body-parser');
 var app = express();
+var cors = require('cors')//jan7-2024
+
 var server = app.listen(3000);
+
+app.use(cors()) //jan7-2024
+
 app.use(express.static('public'));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.post('/post-test', (req, res) => {
