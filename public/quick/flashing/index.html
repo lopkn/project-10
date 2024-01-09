@@ -48,10 +48,16 @@ function fill(x){
 function rect(x,y,w,h){
   ctx.fillRect(x,y,w,h)
 }
-
+let counter = 0
 function draw() {
+  counter++
   rectWidth=Math.random()*2000+2
   // rectWidth=10
+  if(counter%3==0){
+    ctx.fillStyle = "black"
+    rect(0,0,window.innerWidth,window.innerHeight)
+    return
+  }
   for(let i = 0; i < window.innerWidth/rectWidth+1; i++){
     for(let j = 0; j < window.innerHeight/rectWidth+1; j++){
       fill("rgb("+(Math.random()>0.5?255:0)+","+(Math.random()>0.5?255:0)+","+(Math.random()>0.5?255:0)+")")
