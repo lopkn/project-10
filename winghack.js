@@ -31,6 +31,9 @@ window.closest = -1;
 window.aimedAt = -1;
 window.projectiles = []
 
+window.autoDowns = true
+window.downFrequency = 200
+
 window.allObjects = []
 window.toggleDraw = true
 window.nameDraw = false
@@ -109,22 +112,33 @@ window.tempCounter2 = 0
 
 window.main = setInterval(()=>{
 
-  if(Counter%500){
-    if(window.B[pla] == undefined){
-      pla = -1
-      let name = document.getElementById('nick').value
-      if(name.length < 40){
-        aname = name
-        document.getElementById('nick').value = name ="IDENTIFICATIONIDENTIFICATIONIDENTIFICATIONIDENTIFICATIONIDENTIFICATIONIDENTIFICATION"
-      }
-      Object.keys(window.B).forEach((a)=>{
-        if(window.B[a].name == name && name.length > 39){
-          pla = a
-          document.getElementById('nick').value = aname
+  
+
+  
+
+      if(Counter%5==0){
+      if(window.B[pla] == undefined){
+        pla = -1
+        let name = document.getElementById('nick').value
+        if(name.length < 40){
+          aname = name
+          document.getElementById('nick').value = name ="IDENTIFICATIONIDENTIFICATIONIDENTIFICATIONIDENTIFICATIONIDENTIFICATIONIDENTIFICATION"
         }
-      })
+        Object.keys(window.B).forEach((a)=>{
+          if(window.B[a].name == name && name.length > 39){
+            pla = a
+            document.getElementById('nick').value = aname
+          }
+        })
+      }
+
+      if(Counter%downFrequency==0){
+        if(window.autoDowns){
+          DOWN()
+        }
+      }
     }
-  }
+  
 
   projectiles = Object.values(N)
   
@@ -415,16 +429,37 @@ if(key == "\\"){
         if(td < d){d = td; tar = a}
     })
       if(tar != -1){
-          if(whiteList[tar]){
+          if(whiteList[tar] || blackList[tar]){
             whiteList[tar] = false
           } else {
             whiteList[tar] = true
           }
       }
   }
-
   if(key == "/"){
-    WL("lopAssist")
+    let d = Infinity
+    let tar = -1
+    Object.keys(window.B).forEach((a)=>{
+       let e = window.B[a]
+       if(e.inGame == false || a == pla){return}
+       let t = tran(e.x,e.y)
+     let lx = 0
+       let ly = 0
+       if(lock){
+          let tt = tran(window.B[pla].x,window.B[pla].y)
+          lx = tt[0]-Width/2
+          ly = tt[1]-Height/2
+        }
+       let td = distance(t[0]-lx,t[1]-ly,mouseX,mouseY)
+        if(td < d){d = td; tar = a}
+    })
+      if(tar != -1){
+          if(blackList[tar]){
+            blackList[tar] = false
+          } else {
+            blackList[tar] = true
+          }
+      }
   }
 
 if(key == "s"){
@@ -471,6 +506,26 @@ if(key == "s"){
       WL("lopAssist")
     }
   }
+
+  if(key == "m"){
+    if(bot.on){
+      botoff()
+    } else {
+      boton("lopknA65")
+      WL("lopAssist")
+    }
+    toggleDraw = false
+    nameDraw = false
+    U.keydown({keyCode:51})
+    U.keydown({keyCode:52})
+    U.keydown({keyCode:53})
+    U.keydown({keyCode:54})
+    U.keydown({keyCode:55})
+    U.keydown({keyCode:56})
+    U.keydown({keyCode:57})
+    U.keydown({keyCode:48})
+  }
+
   if(key == "t"){
     if(bot.mode != "turret"){
       bot.mode = "turret"
@@ -657,7 +712,7 @@ function WL(str,c){
   objk.forEach((a,i)=>{
     let e = window.B[a]
     if(e.name == str){
-      if(whiteList[a]&&!c){
+      if((whiteList[a]&&!c)||blackList[a]){
         whiteList[a] = false
       } else {
         whiteList[a] = true
@@ -817,6 +872,77 @@ function collect(){
 }
 
 
+function autoUp(){
+  UP({
+    "blackList":blackList,
+    "whiteList":whiteList,
+    "frequency":downFrequency
+  })
+}
+
+function UP(data){
+  const url = 'https://game-10.lopkn.unsown.top/responder';
+  data.action = "up"
+
+fetch(url, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify(data),
+})
+  .then(response => {
+    // Parse the response as JSON
+    return response.json();
+  })
+  .then(responseData => {
+    // Handle the response data
+    console.log('Received response:', responseData);
+  })
+  .catch(error => {
+    // Handle any errors that occurred during the request
+    console.error('Request failed:', error);
+  });
+}
+
+function DOWN(){
+  const url = 'https://game-10.lopkn.unsown.top/responder';
+  let data = {}
+  data.action = "down"
+
+fetch(url, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify(data),
+})
+  .then(response => {
+    // Parse the response as JSON
+    return response.json();
+  })
+  .then(responseData => {
+    // Handle the response data
+    console.log('Received response:', responseData);
+    actOnDownedData(responseData)
+  })
+  .catch(error => {
+    // Handle any errors that occurred during the request
+    console.error('Request failed:', error);
+  });
+}
+
+
+function actOnDownedData(d){
+  blackList = d.blackList
+  whiteList = d.whiteList
+  downFrequency = d.frequency
+}
+
+
+window.autoUp = autoUp
+window.UP = UP
+window.DOWN = DOWN
 window.collect = collect
 window.dodgeFromPos = dodgeFromPos
 window.goClosestTemp = goClosestTemp
