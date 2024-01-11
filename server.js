@@ -5426,10 +5426,14 @@ class ArgAug{
 
 class responder{
 	static info1 = {}
+	static pusher = []
 	static process1(d,r){
 		if(d.action == "up"){
 			this.info1 = d
+		} else if(d.action == "push"){
+			this.pusher.push(d)
 		}
+		this.info1.pusher = this.pusher
 		r.send(this.info1)
 	}
 }
