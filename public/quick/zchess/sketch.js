@@ -911,7 +911,7 @@ if(camera.gamemode == "Roaming"){
 					startGameInterval(camera.pieceFrequency)
 				}
 			}
-			board.specialIntervals["bombers"] = ()=>{if(board.iterations > 30 &&Math.random()<0.001*relativeEventFrequency){gameEvents["bomber pawn"]()}}
+			board.specialIntervals["bombers"] = ()=>{if(board.iterations > 30 &&Math.random()<0.005*relativeEventFrequency){gameEvents["bomber pawn"]()}}
 			board.specialIntervals["elite cannon"] = ()=>{if(board.iterations > 30 &&Math.random()<0.005*relativeEventFrequency){gameEvents["elite cannon"]()}}
 			board.specialIntervals["elite knight"] = ()=>{if(board.iterations > 30 &&Math.random()<0.005*relativeEventFrequency){gameEvents["elite knight"]()}}
 			board.specialIntervals["allied knight"] = ()=>{if(board.iterations > 30 && Math.random()<0.005*relativeEventFrequency){gameEvents["white knights"]()}}
@@ -939,6 +939,8 @@ if(camera.gamemode == "Roaming"){
 
 			if(Math.random()<0.05){
 				gameEvents["flight chamber"](ap)
+			} else if(Math.random()<0.2){
+				gameEvents["piece storm"]()
 			}
 			
 } else if(camera.gamemode == "King's Raid"){
