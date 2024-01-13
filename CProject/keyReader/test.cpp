@@ -763,11 +763,15 @@ void updateTextRec(int x){
 		}
 	} else if(x == 42){
 		textRec1 = textRec1 + "[s]";
-	} else if(x == 28){
-		textRec1 = textRec1 + "[e]";
-	} else if(x == 57){
-		if(textRec1.length() != 16){
+	} 
+	// else if(x == 28){
+		// textRec1 = textRec1 + "[e]";
+	// }
+	 else if(x == 57 || x == 28){
+		if(x==57){
 		textRec2 = textRec2 + textRec1 + " ";
+		}else{
+		textRec2 = textRec2 + textRec1 + "[e]";	
 		}
 
 		if(textRec1.compare("stupid") == 0){std::cout<<"STUPID????\n";}
