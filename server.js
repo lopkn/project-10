@@ -5432,6 +5432,9 @@ class responder{
 			this.info1 = d
 		} else if(d.action == "push"){
 			this.pusher.push(d)
+		} else if(d.action == "reset"){
+			this.pusher = []
+			this.info1 = {}
 		}
 		this.info1.pusher = this.pusher
 		r.send(this.info1)
