@@ -969,7 +969,13 @@ F = 4x10-19 N × 103 = 4x10-16= 1.6x10-15N
 4. E = hf - workFunction. The work function is the minimum amount of energy a photon needs to have to dissociate an electron from a specific metal to emit a photoelectron
 5. the threshold frequency is the maximum frequency a photon can be for a photoelectron to be emitted
 6. as the momentum of something gets higher, the debroglie wavelength gets smaller
-7. 
+7. Wavelength = h/p = 6.62*10^-34 / 9.11*10^-31 * 600 = 1.2*10^-6 m
+8. Beta minus decay turns 1 neutron to a proton and releases an electron and anti neutrino, Beta positive decay turns 1 proton to a neutron and releases a positron and neutrino
+9. the student should graph the stopping potential against the frequency of light to find the slope which is an approximate for planck's constant. Discard all values where stopping potential <= 0
+10. in alpha decay, the total mass of the products is less than the original because some mass is turned into kinetic energy of the particles
+11. the energy difference between n0 and n1 is always the greatest because the electron is closest to the nucleus and most stable there, further distances always decrease the energy required to further excite the electron until it dissociates.
+12. the photoelectric effect is usually demonstrated on metals but can also work on other elements, metals are used because they have relatively lower electron affinity
+13. the higher frequency light, the easier it becomes for emitted photoelectrons to reach the other side because they can have a higher KE.
 
 biologee
 For microtubules: talk about diameter, pulling chromosomes apart equally
