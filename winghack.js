@@ -47,7 +47,7 @@ window.resortPlayer = {"update":(a)=>{},"isInvulnerable":()=>{return(false)},"hi
 
 window.whiteList = {}
 window.blackList = {}
-window.normVector = []
+window.normVector = [0,-1]
 window.weaponColor = {
   "1":"#707070",
   "2":"#FF7F00",
@@ -258,6 +258,9 @@ objk.forEach((a,i)=>{
         }
     if(pla !== -1){
       let tdist = distance(e.x,e.y,window.B[pla].x,window.B[pla].y)
+      let dt = dot(normVector[0],normVector[1],(e.x-window.B[pla].x)/tdist,(e.y-window.B[pla].y)/tdist)
+      // console.log(dt)
+      tdist = tdist - dt*200
       if(a!=pla&&tdist < distclosest&&!whiteList[a]&&!invuln){
         distclosest = tdist
         closest = a
@@ -711,7 +714,9 @@ function autoF(c){
     }
 
     if(downs["z"]){
-
+      if(closestAng < shootThreshold){
+        window.A?.sendShooting(1)
+      }
     } else if( ((Math.abs(aGame-aEnemy) < shootThreshold && distP(pla,closest) < minDist)/*|| closestAng < shootThreshold */)&&(bot.on||downs["x"])){
     if(closestFriendly > friendlyThreshold ){
       window.A?.sendShooting(1)
