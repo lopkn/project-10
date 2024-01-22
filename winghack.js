@@ -212,9 +212,9 @@ objk.forEach((a,i)=>{
       let invuln = e.isInvulnerable()
 
     if(last[a] == undefined){
-      last[a] = {"lx":t[0],"ly":t[1],"lvy":0,"lvx":0,"vx":e.x-e.prevX,"vy":e.y-e.prevY}
+      last[a] = {"lx":t[0],"ly":t[1],"lvy":0,"lvx":0,"vx":e.x-e.prevX,"vy":e.y-e.prevY,"ax":0,"ay":0,}
     } else {
-      last[a] = {"lvx":t[0]-last[a].lx,"lvy":t[1]-last[a].ly,"lx":t[0],"ly":t[1],"vx":e.x-e.prevX,"vy":e.y-e.prevY}
+      last[a] = {"lvx":t[0]-last[a].lx,"lvy":t[1]-last[a].ly,"lx":t[0],"ly":t[1],"ax":e.x-e.prevX-last[a].vx,"ay":e.y-e.prevY-last[a].vy,"vx":e.x-e.prevX,"vy":e.y-e.prevY}
     }
       // last[a] = {}
     // let ddl = distance(last[a].lvx,last[a].lvy,0,0)
@@ -323,7 +323,8 @@ objk.forEach((a,i)=>{
       ctx.lineWidth = 2
       ctx.strokeStyle = "#00FF00"
       ctx.moveTo(t[0]-lx,t[1]-ly)
-      ctx.lineTo(last[closest].vx*adjust  + t[0]-lx,last[closest].vy*adjust  +t[1]-ly)
+      ctx.lineTo(last[closest].vx*adjust  + t[0]-lx,last[closest].vy*adjust +t[1]-ly)
+      ctx.lineTo(last[closest].vx*adjust+last[closest].ax*adjust  + t[0]-lx,last[closest].vy*adjust+last[closest].ay*adjust +t[1]-ly)
       ctx.stroke()
 
       ctx.strokeStyle = "#0000FF"
@@ -638,6 +639,9 @@ function autoF(c){
     ctx.fillStyle = "rgba(200,0,0,0.4)"
   }
   ctx.fillRect(Width/2,400,missRatio*Width/2,20)
+  if(missRatio>0.95){
+    ctx.fillRect(Width/2,400,(missRatio-0.95)*10*Width,20)
+  }
   // if(Counter%10 ==0 && missRatio>0.5){
     let mr = 1-missRatio
     ctx.fillText( (mr*distP(pla,c)).toFixed(3),Width/2,430)
@@ -657,7 +661,10 @@ function autoF(c){
         bot.aimAddy += bot.dodgeY
       }
         let Tlead = lead * 14/40
-    let leadingAngle = ang(window.B[c].x+last[c].vx*Tlead-window.B[pla].x+bot.aimAddx,-(window.B[c].y+last[c].vy*Tlead-window.B[pla].y+bot.aimAddy-bot.permAimY))
+    let leadingAngle = ang(
+      window.B[c].x+last[c].vx*Tlead+last[c].ax*Tlead-window.B[pla].x+bot.aimAddx,
+      -(window.B[c].y+last[c].vy*Tlead+last[c].ay*Tlead-window.B[pla].y+bot.aimAddy-bot.permAimY)
+      )
       window.U.angle = Math.PI-leadingAngle
       
     ctx.fillText( (U.angle).toFixed(3),Width/2,450)
@@ -724,7 +731,7 @@ function autoF(c){
       console.log("stopped")
       window.A?.sendShooting(0)
     }
-  } else if(Math.abs(aGame-aEnemy) >0.3 && !mouseDown){
+  } else if(Math.abs(aGame-aEnemy) >shootThreshold*2 && !mouseDown){
     window.A?.sendShooting(0)
   }
 }
