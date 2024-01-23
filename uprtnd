@@ -963,7 +963,7 @@ F = 4x10-19 N × 103 = 4x10-16= 1.6x10-15N
 25. The magnetic field decreases because the current decreases.
 
 
-1. equation of half life = N * 0.5^(x/t), where N is original amount, x is time passed, t is half life
+1. equation of half life n = N * 0.5^(x/t), where N is original amount, x is time passed, t is half life
 2. each state change of electron being less excited will release a photon of the same energy
 3. when electrons collide with free electrons to get excited, it can absorb a portion of energy and bounce off
 4. E = hf - workFunction. The work function is the minimum amount of energy a photon needs to have to dissociate an electron from a specific metal to emit a photoelectron
@@ -976,6 +976,18 @@ F = 4x10-19 N × 103 = 4x10-16= 1.6x10-15N
 11. the energy difference between n0 and n1 is always the greatest because the electron is closest to the nucleus and most stable there, further distances always decrease the energy required to further excite the electron until it dissociates.
 12. the photoelectric effect is usually demonstrated on metals but can also work on other elements, metals are used because they have relatively lower electron affinity
 13. the higher frequency light, the easier it becomes for emitted photoelectrons to reach the other side because they can have a higher KE.
+14. there are 6 differnet wavelengths of light a n2 electron can emmit to get to ground state, at most, 1 electron can emmit 3 different wavelengths
+15. the wave spectrum of human light is around 400-700nm
+16. the half life is the time for a unstable isotope of an element to have a 50% chance of decaying
+17. Carbon dating uses half life of carbon-14 to calculate the time the equation is 
+18. the photoelectric effect demonstrates the PARTICLE nature of light. Waves can superpose to create higher amplitudes, but there are no photoelectrons emitted if the energy is below the work function, independent of intensity.
+19. If the mass and velocity are both increased by 3 times, the debroglie wavelength will decrease by a factor of 9.
+20. Alpha radiation is Helium nuclei, Beta radiation is either electrons or positrons, Gamma radiation is high frequency photons
+21. The penetration power of radiation ranks from High->Low: Gamma, Beta, Alpha. this is because each one has bigger volume and less energy
+22. The importance of the double slit experiment is that it shows matter can have wave properties, electrons showing a diffraction pattern shows the wave nature of electrons.
+23. It is harder to show the wave nature of matter using protons/neutrons because their mass is thousands of times bigger than the electron, and therefore have 2000 times factors less
+24. In the compton effect, the photon and the electron splits off at an angle that conserves the momentum of the system. A photon is absorbed then released at a different angle.
+25. Mass-Energy of any system without external influence will always stay constant.
 
 biologee
 For microtubules: talk about diameter, pulling chromosomes apart equally
