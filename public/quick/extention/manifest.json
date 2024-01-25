@@ -7,7 +7,7 @@
   // },
   "permissions": ["scripting"],
   "host_permissions": [
-    "https://*.youtube.com/*"
+    "*://*/*"
   ],
   "action": {
     "default_popup": "popup.html",
@@ -19,7 +19,7 @@
   },
   "content_scripts":[
     {
-      "matches":["https://*.youtube.com/*"],
+      "matches":["*://*/*"],
       "js": ["contentscript.js"]
     }
   ]
