@@ -30,8 +30,9 @@ window.last = {}
 window.closest = -1;
 window.aimedAt = -1;
 window.projectiles = []
+window.dodgeThreshold = 200
 
-window.autoDowns = true
+window.autoDowns = false
 window.downFrequency = 200
 
 window.allObjects = []
@@ -87,7 +88,7 @@ window.weaponPreset = {
     shootThreshold = 30
   }
 }
-window.autoDodge = false
+window.autoDodge = true
 window.Counter = 0
 window.adjust = 6
 window.drop = 20
@@ -650,13 +651,13 @@ function autoF(c){
   let tp = [window.B[c].x-window.B[pla].x,window.B[c].y-window.B[pla].y]
   let aEnemy = ang(tp[0],-tp[1])
 
+        bot.dodgeX = 0; bot.dodgeY = 0
+        dodgeAll(dodgeFactor)
   // console.log(tp[0])
   if(downs["x"] == true || bot.on){
       if(window.B[c] == undefined){bot.aiming = "closest"}
 
-        bot.dodgeX = 0; bot.dodgeY = 0
-      if(autoDodge){
-        dodgeAll(dodgeFactor)
+      if(autoDodge && distance(bot.dodgeX,bot.dodgeY,0,0)>dodgeThreshold){
         bot.aimAddx += bot.dodgeX
         bot.aimAddy += bot.dodgeY
       }
@@ -703,7 +704,7 @@ function autoF(c){
         }
       }
 
-      if(autoDodge && distance(bot.dodgeX,bot.dodgeY,0,0)>1000){
+      if(autoDodge && distance(bot.dodgeX,bot.dodgeY,0,0)>dodgeThreshold){
         U.hover = 0
       }
 
@@ -900,6 +901,9 @@ function dodgeAll(s=40){
     bot.dodgeY += dodge[1]
   })
   ctx.strokeStyle = "#FF00FF"
+  if(distance(bot.dodgeX,bot.dodgeY,0,0)>dodgeThreshold){
+    ctx.strokeStyle = "#005F00"
+  }
   ctx.beginPath()
   ctx.moveTo(Width/2,Height/2)
   ctx.lineTo(Width/2+bot.dodgeX,Height/2+bot.dodgeY)
@@ -982,6 +986,12 @@ function actOnDownedData(d){
   downFrequency = d.frequency
 }
 
+document.addEventListener("wheel",(e)=>{
+  let d = e.deltaY //positive = down
+  lead -= d/150
+  console.log(lead.toFixed(0))
+})
+
 
 window.autoUp = autoUp
 window.UP = UP
@@ -1005,3 +1015,4 @@ window.loyal = loyal
 window.name = name
 window.reidentify = ()=>{pla=-1}
 })()
+
