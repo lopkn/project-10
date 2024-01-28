@@ -21,6 +21,8 @@ window.ctx = canvas2.getContext("2d")
 canvas2.style.pointerEvents = "none"
 window.highlights = {}
 
+window.miss = "UDF"
+
 window.dodgeFactor = 40000
 window.lock = false
 window.autoFire = false
@@ -34,6 +36,8 @@ window.dodgeThreshold = 200
 
 window.autoDowns = false
 window.downFrequency = 200
+window.throttleShift = true
+window.throttleShiftPercentage = 0
 
 window.allObjects = []
 window.toggleDraw = true
@@ -311,6 +315,8 @@ objk.forEach((a,i)=>{
         ctx.font = "bold 15px Courier New"
         ctx.textAlign = "left"
     ctx.fillText("DST:" + distP(pla,closest).toFixed(0),Width/2+20,Height/2+7)
+    ctx.fillText("THR:" + (throttleShiftPercentage*100).toFixed(0),Width/2+20,Height/2-7)
+    ctx.fillText(miss,Width/2+20,Height/2+21)
         ctx.textAlign = "center"
     if(lock){
       ctx.beginPath()
@@ -634,10 +640,14 @@ function autoF(c){
   let n1 = normalize(B[c].x-B[pla].x,B[c].y-B[pla].y)
   missRatio = dot(n1[0],n1[1],normVector[0],normVector[1])
   missDirection = cross(n1[0],n1[1],normVector[0],normVector[1])
+  missComp = cross(n1[0],n1[1],last[c].vx,last[c].vy)
   if(missDirection > 0){
     ctx.fillStyle = "rgba(0,0,200,0.4)"
+    if(missComp > 0){miss = "OVR"}else{miss = "UDR"}
+    // console.log(missComp)
   } else {   
     ctx.fillStyle = "rgba(200,0,0,0.4)"
+    if(missComp < 0){miss = "OVR"}else{miss = "UDR"}
   }
   ctx.fillRect(Width/2,400,missRatio*Width/2,20)
   if(missRatio>0.95){
@@ -655,6 +665,16 @@ function autoF(c){
         dodgeAll(dodgeFactor)
   // console.log(tp[0])
   if(downs["x"] == true || bot.on){
+
+      if(throttleShift){
+
+        let throttleD = distance(mouseX,mouseY,Width/2,Height/2)
+
+          throttleShiftPercentage= (throttleD-80)/200
+
+        U.hover=Math.random()>throttleShiftPercentage?1:0
+      }
+
       if(window.B[c] == undefined){bot.aiming = "closest"}
 
       if(autoDodge && distance(bot.dodgeX,bot.dodgeY,0,0)>dodgeThreshold){
@@ -719,6 +739,7 @@ function autoF(c){
 
       window.SI()
       window.SD()
+      A.sendThrottle()
     }
 
     if(downs["z"]){
