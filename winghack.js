@@ -1013,6 +1013,26 @@ document.addEventListener("wheel",(e)=>{
   console.log(lead.toFixed(0))
 })
 
+function boostPathRecursive(amt,A,arr=[[B[pla].x,B[pla].y]]){
+  amt -= 1
+
+  let pos = arr[arr.length-1]
+  let md = Infinity
+  let a;
+  allObjects.forEach((e)=>{
+    if(e.type != 64){return}
+    let d = -dot(pos[0]-e.x,pos[1]-e.y,normVector[0],normVector[1])
+    if(d < md){md = d; a = e}
+  })
+
+  arr.push([e.x,e.y])
+
+
+  if(amt == 0){
+    return(arr)
+  } else {return(boostPathRecursive(amt,A,arr))}
+}
+
 
 window.autoUp = autoUp
 window.UP = UP
