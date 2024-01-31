@@ -1634,6 +1634,16 @@ function joinGame(game,socket){
 		}
 		socket.onAny((e,n)=>{ArgAug.handle(Date.now(),e,n,socket)})
 	}
+	else if(game == "G10.7"){
+		socket.join("G10.7")
+		io.to(socket.id).emit("acknowledge G10.7",socket.id)
+		let clientIp = socket.request.connection.remoteAddress
+		if(clientIp == "::ffff:192.168.1.1" || clientIp == "::1" || clientIp == "::ffff:223.18.29.177"){
+				ArgAccel.keyholders[socket.id] = true
+			io.to(socket.id).emit("string","you are a keyholder")
+		}
+		socket.onAny((e,n)=>{ArgAccel.handle(Date.now(),e,n,socket)})
+	}
 }
 
 	
@@ -5420,6 +5430,25 @@ class ArgAug{
 }
 
 //////////////////////////////////////////////////// ARGAUG END
+//////////////////////////////////////////////////// ArgAccel
+
+class ArgAccel{
+	static keyholders = {}
+	static handle(date,name,content,socket){
+		console.log("argaccel",date,name,content,socket)
+
+		if(name == "msg"){
+			this.message(date,content,socket)
+		}
+
+
+	}
+	static message(date,content,socket){
+		io.to("G10.7").emit("msg",{"msg":content,"id":socket.id})
+	}
+}
+
+//////////////////////////////////////////////////// ArgAccel END
 
 
 ///// responder ////
