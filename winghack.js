@@ -113,6 +113,7 @@ window.focusedOn = -1
 window.focusSave = -1
 
 window.tempCounter = 0
+window.botHandycap = 700
 window.tempCounter2 = 0 
 
 window.main = setInterval(()=>{
@@ -598,9 +599,10 @@ function autoF(c){
 
   Object.keys(window.B).forEach((a)=>{
     let e = window.B[a]
+    let DST = distP(pla,a)
     if(!e.inGame){return}
     
-    if(a ==pla || distP(pla,a) > minDist){return}
+    if(a ==pla ||  DST > minDist){return}
     let aEnemy2 = ang(window.B[a].x-window.B[pla].x,-window.B[a].y+window.B[pla].y)
   if(whiteList[a]){
       let tang2 = Math.abs(agameBomb-aEnemy2)
@@ -742,14 +744,19 @@ function autoF(c){
       A.sendThrottle()
     }
 
+    if(distP(c,pla) > botHandycap){
+      window.A?.sendShooting(0)
+      return;
+    }
+
     if(downs["z"]){
-      if(closestAng < shootThreshold){
+      if(closestAng < shootThreshold && (B[pla].weapn != 8 || B[c].dashing() == false)){
         window.A?.sendShooting(1)
       }
     } else if( ((Math.abs(aGame-aEnemy) < shootThreshold && distP(pla,closest) < minDist)/*|| closestAng < shootThreshold */)&&(bot.on||downs["x"])){
     if(closestFriendly > friendlyThreshold ){
       window.A?.sendShooting(1)
-    } else {
+    } else if(Math.abs(aGame-aEnemy) > 2*shootThreshold){
       console.log("stopped")
       window.A?.sendShooting(0)
     }
