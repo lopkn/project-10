@@ -53,6 +53,9 @@ window.resortPlayer = {"update":(a)=>{},"isInvulnerable":()=>{return(false)},"hi
 window.whiteList = {}
 window.blackList = {}
 window.normVector = [0,-1]
+
+window.boostPath = []
+
 window.weaponColor = {
   "1":"#707070",
   "2":"#FF7F00",
@@ -113,7 +116,7 @@ window.focusedOn = -1
 window.focusSave = -1
 
 window.tempCounter = 0
-window.botHandycap = 700
+window.botHandycap = Infinity
 window.tempCounter2 = 0 
 
 window.main = setInterval(()=>{
@@ -260,6 +263,15 @@ objk.forEach((a,i)=>{
               ctx.fillText(e.name,t[0]*zoom-lx,(t[1]-15)*zoom-ly,50)
               ctx.fillRect((t[0]-128/8)*zoom-lx,(t[1]+15)*zoom-ly,e.energy/8,5)
             }
+
+            ctx.strokeStyle="#FFFF00"
+            ctx.beginPath()
+            ctx.moveTo(Width/2,Height/2)
+            for(let i = 1; i < boostPath.length;i++){
+              let tra = tran(boostPath[i][0],boostPath[i][1])
+              ctx.lineTo(tra[0]*zoom-lx,tra[1]*zoom-ly)
+            }
+            ctx.stroke()
 
         }
     if(pla !== -1){
@@ -548,6 +560,9 @@ if(key == "s"){
   }
   if(key == "e"){
     weaponAuto()
+  }
+  if(key == "t"){
+    boostPath = boostPathRecursive(5)
   }
 
   downs[e.key] = true
@@ -1020,27 +1035,29 @@ document.addEventListener("wheel",(e)=>{
   console.log(lead.toFixed(0))
 })
 
-function boostPathRecursive(amt,A,arr=[[B[pla].x,B[pla].y]]){
+function boostPathRecursive(amt,A,arr=[[B[pla].x,B[pla].y]],found={}){
   amt -= 1
 
   let pos = arr[arr.length-1]
   let md = Infinity
   let a;
   allObjects.forEach((e)=>{
-    if(e.type != 64){return}
-    let d = -dot(pos[0]-e.x,pos[1]-e.y,normVector[0],normVector[1])
+    if(e.type != 64 || found[e.id]){return}
+    let d = -dot(e.x-pos[0],e.y-pos[1],normVector[0],normVector[1])
     if(d < md){md = d; a = e}
   })
 
-  arr.push([e.x,e.y])
+  arr.push([a.x,a.y])
+  found[a.id] = true
 
 
   if(amt == 0){
     return(arr)
-  } else {return(boostPathRecursive(amt,A,arr))}
+  } else {return(boostPathRecursive(amt,A,arr,found))}
 }
 
 
+window.boostPathRecursive = boostPathRecursive
 window.autoUp = autoUp
 window.UP = UP
 window.DOWN = DOWN
