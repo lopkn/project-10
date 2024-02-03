@@ -1637,6 +1637,7 @@ function joinGame(game,socket){
 	else if(game == "G10.7"){
 		socket.join("G10.7")
 		io.to(socket.id).emit("acknowledge G10.7",socket.id)
+		ArgAccel.sMessageWelcome(socket)
 		let clientIp = socket.request.connection.remoteAddress
 		if(clientIp == "::ffff:192.168.1.1" || clientIp == "::1" || clientIp == "::ffff:223.18.29.177"){
 				ArgAccel.keyholders[socket.id] = true
@@ -5435,7 +5436,7 @@ class ArgAug{
 class ArgAccel{
 	static keyholders = {}
 	static handle(date,name,content,socket){
-		console.log("argaccel",date,name,content,socket)
+		// console.log("argaccel",date,name,content,socket)
 
 		if(name == "msg"){
 			this.message(date,content,socket)
@@ -5446,6 +5447,12 @@ class ArgAccel{
 	static message(date,content,socket){
 		io.to("G10.7").emit("msg",{"msg":content,"id":socket.id})
 	}
+	static sMessageWelcome(socket){
+		io.to(socket.id).emit("smsg","Welcome to Lopkn's Argument Accelerator! ArgAccel is one of the top leading technologies in the world. Please feel free to bug fetch while you are here.")
+	}
+	static sMessage(content,socket){
+		io.to("G10.7").emit("smsg",content)
+		}
 }
 
 //////////////////////////////////////////////////// ArgAccel END

@@ -18,7 +18,10 @@ let mouseX = 0
 let mouseY = 0
 onmousemove = (e)=>{mouseX = (e.clientX); mouseY = (e.clientY)}
 document.addEventListener("keydown",(e)=>{
-
+	if(e.key == "Tab"){
+		GHT(true)
+		e.preventDefault()
+	}
 })
 
 
@@ -30,6 +33,9 @@ socket.on("acknowledge G10.7",(e)=>{ID = e; console.log("joined as "+ID)})
 socket.on("msg",(e)=>{console.log("recieved message: "+e)
 	messageBubble(e.msg,e.id == ID?"right":"left")
 })
+socket.on("smsg",(e)=>{
+	messageBubble(e,"cent")
+})
 
 
 
@@ -37,6 +43,8 @@ socket.on("msg",(e)=>{console.log("recieved message: "+e)
 
 
 /// setup stuff
+
+var MIP = document.getElementById("mainInput")
 
 var wrapperFunctions = {}
 
@@ -50,11 +58,64 @@ function gay(){console.log("gay")}
 
 
 
+
 function sendReq(req,type){
 	socket.emit("req",{"type":type,"cont":req})
 }
 
 
+function garble(leng){
+	let str =""
+	while(leng>0){
+		leng--
+		str+="abcdefghijklmnopqrstuvwxyz "[Math.floor(Math.random()*27)]
+	}
+	return(str)
+}
+
+
+function clearLeftContainer(){
+	let element = classQuery("leftContainer")[0]
+		while (element.firstChild) {
+	    element.removeChild(element.firstChild);
+	}
+
+	for(let i = 0; i < 25; i++){
+		let d = document.createElement("div")
+		let h2 = document.createElement("h2")
+		let p = document.createElement("p")
+		h2.innerHTML = garble(Math.random()*16)
+		p.innerHTML = garble(Math.random()*900+20)
+		d.appendChild(h2)
+		d.appendChild(p)
+		d.style.backgroundColor = "HSL("+Math.floor(Math.random()*255)+",100%,80%)"
+		d.onclick=()=>{insert(d.querySelector("p").innerHTML)}
+		element.appendChild(d)
+
+	}
+
+	let ad = document.createElement("div")
+	ad.innerHTML="&#43;"
+	ad.classList.add("addItem")
+	element.appendChild(ad)
+	ad.onclick=()=>{
+		toggleInputPanel()
+	}
+
+}
+clearLeftContainer()
+
+
+function toggleInputPanel(on=true){
+		let ipanel = document.getElementById("inputPanel")
+	if(on){
+		ipanel.style.visibility="visible"
+		ipanel.style.opacity="1"
+	} else {
+		ipanel.style.visibility="hidden"
+		ipanel.style.opacity="0"
+	}
+}
 
 
 // function reqV2(req){
@@ -91,6 +152,18 @@ inp.addEventListener("keydown",(e)=>{
 		inp.value = ""
 		e.preventDefault()
 	}
+	if(e.key == "Tab"){
+		e.preventDefault()
+	}
+})
+
+document.getElementById("chat").addEventListener("keydown",(e)=>{
+	console.log('dog')
+	if(e.key == "Tab"){
+		GHT()
+		console.log("gay?")
+		e.preventDefault()
+	}
 })
 
 
@@ -109,16 +182,18 @@ function messageBubble(msg,lr="left"){
 	m.classList.add("textBubble")
 	if(lr == "right"){
 		m.classList.add("right")
-	} else {
+	} if(lr == "cent"){
+		m.classList.add("cent")
+	}else {
 		m.classList.add("left")
 	}
 	jer.classList.add("jer")
 	let chat = document.getElementsByClassName("chat")[0]
 
 	let scrolledTop = (chat.scrollTop+chat.offsetHeight+10>chat.scrollHeight);
+	jer.appendChild(m)
 
 	chat.appendChild(jer)
-	jer.appendChild(m)
 	wrapperCompleteAll()
 	if(scrolledTop){
 		chat.scrollTop = chat.scrollHeight;
@@ -153,6 +228,57 @@ function wrapperCompleteAll(){
 function spanClicked(evt){
 	console.log("span id clicked: ",evt.target.id)
 }
+
+
+function insString(str,index,nstr){
+	return(str.substring(0, index) + nstr + str.substring(index))
+}
+
+
+function getHighlightedText() {
+    let highlightedText = "";
+    let highlightedElement = null;
+    if (window.getSelection) {
+        const selection = window.getSelection();
+        if (selection.rangeCount > 0) {
+            const range = selection.getRangeAt(0);
+            highlightedText = selection.toString();
+            highlightedElement = range.commonAncestorContainer.parentNode;
+        }
+    } else if (document.selection && document.selection.type != "Control") {
+        const range = document.selection.createRange();
+        highlightedText = range.text;
+        highlightedElement = range.parentElement();
+    }
+    return {
+        text: highlightedText,
+        element: highlightedElement
+    };
+}
+
+
+function GHT(refocus=false){
+	let ght = getHighlightedText()
+	if(ght.element.classList.contains("textBubble")||ght.element.classList.contains("jer")){
+		insert(ght.text)
+
+		if(refocus){
+			MIP.focus()
+		}
+
+	}
+}
+
+function insert(text){
+	MIP.value=insString(MIP.value,MIP.selectionStart,text)
+}
+
+
+// we point out flaws because
+// -More people are heard -> 49% cant do anything -> anarchism?
+// 51% Utilitarian
+
+
 
 
 
