@@ -105,6 +105,23 @@ function clearLeftContainer(){
 }
 clearLeftContainer()
 
+document.getElementById("addCard").addEventListener("click",(e)=>{
+	let element = classQuery("leftContainer")[0]
+	toggleInputPanel(false)
+	let d = document.createElement("div")
+	let h2 = document.createElement("h2")
+	let p = document.createElement("p")
+	h2.innerHTML = document.getElementById("panelTitle").value
+	p.innerHTML = document.getElementById("panelInside").value
+	d.appendChild(h2)
+	d.appendChild(p)
+	d.style.backgroundColor = "HSL("+Math.floor(Math.random()*255)+",100%,80%)"
+	d.onclick=()=>{insert(d.querySelector("p").innerHTML)}
+	element.insertBefore(d,element.firstChild)
+	document.getElementById("panelTitle").value = ""
+	document.getElementById("panelInside").value = ""
+})
+
 
 function toggleInputPanel(on=true){
 		let ipanel = document.getElementById("inputPanel")

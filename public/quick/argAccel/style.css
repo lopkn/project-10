@@ -19,6 +19,8 @@ button.func{
 .inputPanel{
 	min-width:70%;
 	min-height:70%;
+	max-width:70%;
+	max-height:70%;
 	background-color: #808080;
 	top:15%;
 	left:15%;
@@ -28,6 +30,11 @@ button.func{
 	border:1px solid #000;
 	visibility: hidden;
 	transition: opacity 1s;
+}
+
+.inputPanel > textarea {
+	max-width: 60vw;
+	max-height: 60vh;
 }
 
 .mainContainer {
