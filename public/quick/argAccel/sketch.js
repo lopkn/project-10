@@ -75,7 +75,7 @@ function garble(leng){
 
 
 function clearLeftContainer(){
-	let element = classQuery("leftContainer")[0]
+	let element = classQuery("leftSaved")[0]
 		while (element.firstChild) {
 	    element.removeChild(element.firstChild);
 	}
@@ -94,9 +94,12 @@ function clearLeftContainer(){
 
 	}
 
+
+  element = classQuery("leftContainer")[0]
 	let ad = document.createElement("div")
 	ad.innerHTML="&#43;"
 	ad.classList.add("addItem")
+	// ad.classList.add("leftCard")
 	element.appendChild(ad)
 	ad.onclick=()=>{
 		toggleInputPanel()
@@ -106,7 +109,7 @@ function clearLeftContainer(){
 clearLeftContainer()
 
 document.getElementById("addCard").addEventListener("click",(e)=>{
-	let element = classQuery("leftContainer")[0]
+	let element = classQuery("leftCard")[0]
 	toggleInputPanel(false)
 	let d = document.createElement("div")
 	let h2 = document.createElement("h2")
@@ -159,6 +162,31 @@ function toggleInputPanel(on=true){
 // }
 
 
+function suggestionCard(val){
+		if(val.length < 10 || val.split(" ").length < 3){
+			return
+		}
+	let d = document.createElement("div")
+		let h2 = document.createElement("h2")
+		let p = document.createElement("p")
+		h2.innerHTML = "suggested Card"
+		p.innerHTML = val
+		d.appendChild(h2)
+		d.appendChild(p)
+		d.style.backgroundColor = "HSL("+Math.floor(Math.random()*255)+",100%,80%)"
+		d.onclick=()=>{h2.innerHTML="saved card";saveSuggestion(d)}
+		let suggestElement = classQuery("leftSuggest")[0]
+		suggestElement.insertBefore(d,suggestElement.firstChild)
+		classQuery("leftSuggest")[0].children[2]?.remove()
+
+}
+function saveSuggestion(d){
+	d.remove()
+	let saved = classQuery("leftSaved")[0]
+	saved.insertBefore(d,saved.firstChild)
+}
+
+
 let inp = document.getElementById("mainInput")
 inp.addEventListener("keydown",(e)=>{
 	if(e.key == "Enter" || e.keyCode == 13){
@@ -166,6 +194,9 @@ inp.addEventListener("keydown",(e)=>{
 		if(e.shiftKey){return}
 
 		socket.emit("msg",inp.value)
+
+		suggestionCard(inp.value)
+
 		inp.value = ""
 		e.preventDefault()
 	}

@@ -50,11 +50,12 @@ button.func{
 	overflow: auto;
 }
 
-.leftContainer > div {
+.leftCard > div {
 	margin:2%;
 	overflow-x: auto;
 	box-sizing: border-box;
 	max-height:25vh;
+  white-space: pre-wrap;
 	word-wrap: break-word;
 
 }
@@ -145,11 +146,15 @@ button.func{
 
 .textBubble.left{
 	float:left;
+	max-width:90%;
 	text-align: left;
+	word-wrap: break-word;
 }
 .textBubble.right{
+	max-width:90%;
 	float:right;
 	text-align: right;
+	word-wrap: break-word;
 }
 .textBubble.cent{
 	width:90%;
@@ -157,6 +162,7 @@ button.func{
 	display: block;
 	text-align: center;
 	color:yellow;
+	word-wrap: break-word;
 }
 
 .clickSpan{
