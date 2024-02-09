@@ -25,7 +25,7 @@ var paused
 
 document.addEventListener("keydown",(e)=>{
 	let k = e.key
-	if((k=="p" || k == "l")&& e.ctrlKey){
+	if((k=="p" || k == "l")&& e.altKey){
 		if(ON){
 			canvas2.style.zIndex = -5000
 			ctx.clearRect(0,0,Width,Height)
