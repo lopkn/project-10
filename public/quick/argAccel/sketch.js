@@ -81,16 +81,17 @@ function clearLeftContainer(){
 	}
 
 	for(let i = 0; i < 25; i++){
-		let d = document.createElement("div")
-		let h2 = document.createElement("h2")
-		let p = document.createElement("p")
-		h2.innerHTML = garble(Math.random()*16)
-		p.innerHTML = garble(Math.random()*900+20)
-		d.appendChild(h2)
-		d.appendChild(p)
-		d.style.backgroundColor = "HSL("+Math.floor(Math.random()*255)+",100%,80%)"
-		d.onclick=()=>{insert(d.querySelector("p").innerHTML)}
-		element.appendChild(d)
+		// let d = document.createElement("div")
+		// let h2 = document.createElement("h2")
+		// let p = document.createElement("p")
+		// h2.innerHTML = garble(Math.random()*16)
+		// p.innerHTML = garble(Math.random()*900+20)
+		// d.appendChild(h2)
+		// d.appendChild(p)
+		// d.style.backgroundColor = "HSL("+Math.floor(Math.random()*255)+",100%,80%)"
+		// d.onclick=()=>{insert(d.querySelector("p").innerHTML)}
+		// element.appendChild(d)
+		addSavedCard(garble(Math.random()*16),garble(Math.random()*900+20))
 
 	}
 
@@ -108,19 +109,57 @@ function clearLeftContainer(){
 }
 clearLeftContainer()
 
-document.getElementById("addCard").addEventListener("click",(e)=>{
+
+function addSavedCard(title,value){
+	
 	let element = classQuery("leftCard")[0]
-	toggleInputPanel(false)
+	
+	console.log(title)
 	let d = document.createElement("div")
 	let h2 = document.createElement("h2")
 	let p = document.createElement("p")
-	h2.innerHTML = document.getElementById("panelTitle").value
-	p.innerHTML = document.getElementById("panelInside").value
-	d.appendChild(h2)
-	d.appendChild(p)
-	d.style.backgroundColor = "HSL("+Math.floor(Math.random()*255)+",100%,80%)"
-	d.onclick=()=>{insert(d.querySelector("p").innerHTML)}
-	element.insertBefore(d,element.firstChild)
+	let crosser = document.createElement("div")
+	crosser.style.top = "0px"
+	crosser.style.right = "0px"
+	crosser.innerHTML = "X"
+	d.style.position = "relative"
+	crosser.style.position = "absolute"
+	crosser.onclick = (e)=>{e.stopPropagation();d.remove();}
+	crosser.classList.add("clickableIcon")
+
+	h2.innerHTML = title
+	p.innerHTML = value
+
+		d.appendChild(h2)
+		d.appendChild(p)
+		d.appendChild(crosser)
+		d.style.backgroundColor = "HSL("+Math.floor(Math.random()*255)+",100%,80%)"
+		d.onclick=()=>{insert(d.querySelector("p").innerHTML)}
+		element.insertBefore(d,element.firstChild)
+}
+
+
+document.getElementById("addCard").addEventListener("click",(e)=>{
+	// let element = classQuery("leftCard")[0]
+	toggleInputPanel(false)
+	addSavedCard(document.getElementById("panelTitle").value,document.getElementById("panelInside").value)
+	// let d = document.createElement("div")
+	// let h2 = document.createElement("h2")
+	// let p = document.createElement("p")
+	// let crosser = document.createElement("div")
+	// crosser.style.top = "0px"
+	// crosser.style.right = "0px"
+	// crosser.innerHTML = "X"
+	// crosser.onclick = ()=>{d.remove()}
+
+	// h2.innerHTML = document.getElementById("panelTitle").value
+	// p.innerHTML = document.getElementById("panelInside").value
+	// d.appendChild(h2)
+	// d.appendChild(crosser)
+	// d.appendChild(p)
+	// d.style.backgroundColor = "HSL("+Math.floor(Math.random()*255)+",100%,80%)"
+	// d.onclick=()=>{insert(d.querySelector("p").innerHTML)}
+	// element.insertBefore(d,element.firstChild)
 	document.getElementById("panelTitle").value = ""
 	document.getElementById("panelInside").value = ""
 })
@@ -174,7 +213,11 @@ function suggestionCard(val){
 		d.appendChild(h2)
 		d.appendChild(p)
 		d.style.backgroundColor = "HSL("+Math.floor(Math.random()*255)+",100%,80%)"
-		d.onclick=()=>{h2.innerHTML="saved card";saveSuggestion(d)}
+		d.onclick=()=>{
+			d.remove()
+			addSavedCard("saved card",val)
+			// h2.innerHTML="saved card";saveSuggestion(d);console.log("saved");d.onclick=()=>{insert(d.querySelector("p").innerHTML)}
+		}
 		let suggestElement = classQuery("leftSuggest")[0]
 		suggestElement.insertBefore(d,suggestElement.firstChild)
 		classQuery("leftSuggest")[0].children[2]?.remove()

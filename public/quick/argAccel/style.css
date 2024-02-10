@@ -37,6 +37,10 @@ button.func{
 	max-height: 60vh;
 }
 
+.clickableIcon{
+	cursor: pointer;
+}
+
 .mainContainer {
   display: flex;
 }
@@ -48,6 +52,7 @@ button.func{
 	height:100vh;
 	max-width: 25%;
 	overflow: auto;
+	position:relative;
 }
 
 .leftCard > div {
