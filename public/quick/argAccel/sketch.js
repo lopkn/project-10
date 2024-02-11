@@ -118,21 +118,32 @@ function addSavedCard(title,value){
 	let d = document.createElement("div")
 	let h2 = document.createElement("h2")
 	let p = document.createElement("p")
+	let cit = document.createElement("div")
 	let crosser = document.createElement("div")
-	crosser.style.top = "0px"
-	crosser.style.right = "0px"
+	cit.style.top = "0px"
+	cit.style.right = "0px"
 	crosser.innerHTML = "X"
 	d.style.position = "relative"
-	crosser.style.position = "absolute"
-	crosser.onclick = (e)=>{e.stopPropagation();d.remove();}
-	crosser.classList.add("clickableIcon")
+	cit.style.position = "absolute"
+	crosser.onclick = (e)=>{
+		if(e.altKey){
+			d.remove()
+			e.preventDefault()
+		}else{
+			savedCardOptions(e,d)
+		}
+		// d.remove();
+	}
+	cit.onclick = (e)=>{e.stopPropagation()}
+	cit.classList.add("clickableIconsTab")
+	cit.appendChild(crosser)
 
 	h2.innerHTML = title
 	p.innerHTML = value
 
 		d.appendChild(h2)
 		d.appendChild(p)
-		d.appendChild(crosser)
+		d.appendChild(cit)
 		d.style.backgroundColor = "HSL("+Math.floor(Math.random()*255)+",100%,80%)"
 		d.onclick=()=>{insert(d.querySelector("p").innerHTML)}
 		element.insertBefore(d,element.firstChild)
@@ -140,33 +151,30 @@ function addSavedCard(title,value){
 
 
 document.getElementById("addCard").addEventListener("click",(e)=>{
-	// let element = classQuery("leftCard")[0]
 	toggleInputPanel(false)
-	addSavedCard(document.getElementById("panelTitle").value,document.getElementById("panelInside").value)
-	// let d = document.createElement("div")
-	// let h2 = document.createElement("h2")
-	// let p = document.createElement("p")
-	// let crosser = document.createElement("div")
-	// crosser.style.top = "0px"
-	// crosser.style.right = "0px"
-	// crosser.innerHTML = "X"
-	// crosser.onclick = ()=>{d.remove()}
+	console.log(document.getElementById("addCard").targeting)
+	if(document.getElementById("addCard").targeting == undefined){
+		addSavedCard(document.getElementById("panelTitle").value,document.getElementById("panelInside").value)
+	} else {
 
-	// h2.innerHTML = document.getElementById("panelTitle").value
-	// p.innerHTML = document.getElementById("panelInside").value
-	// d.appendChild(h2)
-	// d.appendChild(crosser)
-	// d.appendChild(p)
-	// d.style.backgroundColor = "HSL("+Math.floor(Math.random()*255)+",100%,80%)"
-	// d.onclick=()=>{insert(d.querySelector("p").innerHTML)}
-	// element.insertBefore(d,element.firstChild)
+		let d = document.getElementById("addCard").targeting
+		d.querySelector("h2").innerHTML = document.getElementById("panelTitle").value
+		d.querySelector("p").innerHTML = document.getElementById("panelInside").value
+	}
 	document.getElementById("panelTitle").value = ""
 	document.getElementById("panelInside").value = ""
+	document.getElementById("addCard").targeting = undefined
 })
 
+let ipanel = document.getElementById("inputPanel")
+function toggleInputPanel(on=true,editing){
 
-function toggleInputPanel(on=true){
-		let ipanel = document.getElementById("inputPanel")
+ 	if(editing){
+ 		document.getElementById("addCard").innerHTML="EDIT"
+	} else {
+		document.getElementById("addCard").innerHTML="ADD"
+	}
+
 	if(on){
 		ipanel.style.visibility="visible"
 		ipanel.style.opacity="1"
@@ -365,9 +373,63 @@ function insert(text){
 }
 
 
-// we point out flaws because
-// -More people are heard -> 49% cant do anything -> anarchism?
-// 51% Utilitarian
+
+function handlePaste(e) {
+  var clipboardData, pastedData;
+
+  // Stop data actually being pasted into div
+  e.stopPropagation();
+  e.preventDefault();
+
+  // Get pasted data via clipboard API
+  clipboardData = e.clipboardData || window.clipboardData;
+  pastedData = clipboardData.getData('Text');
+
+  // Do whatever with pasteddata
+  alert(pastedData);
+}
+
+// document.querySelector('textarea').addEventListener('paste', handlePaste);
+
+let opanel = document.getElementById("optionPanel")
+function savedCardOptions(e,d){
+	let on = (opanel === document.activeElement)
+	if(!on){
+		opanel.style.visibility="visible"
+		opanel.style.opacity="1"
+		opanel.style.top = Math.floor(e.clientY)+"px"
+		opanel.style.left = Math.floor(e.clientX)+"px"
+		opanel.MyReference = d
+		opanel.focus()
+	}
+}
+opanel.addEventListener("focusout",(e)=>{
+	opanel.style.visibility="hidden"
+	opanel.style.opacity="0"
+	console.log("hi?")
+})
+document.getElementById("opRemove").addEventListener("click",(e)=>{
+	let d = opanel.MyReference
+	d.remove()
+	opanel.blur()
+})
+document.getElementById("opEdit").addEventListener("click",(e)=>{
+	let d = opanel.MyReference
+	opanel.blur()
+
+	toggleInputPanel(true,d)
+	document.getElementById("panelTitle").value = d.querySelector("h2").innerHTML
+	document.getElementById("panelInside").value = d.querySelector("p").innerHTML
+	document.getElementById('addCard').targeting = d
+
+})
+
+
+class textHandler{
+	static tb = document.querySelector("textarea")
+
+	static mainArr = []
+}
 
 
 

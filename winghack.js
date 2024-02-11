@@ -388,7 +388,7 @@ function distance(x1,y1,x2,y2) {
 
 document.addEventListener("keydown",(e)=>{
   let key = e.key
-  if(key == "q"){
+  if(key == "h"){
         highlights = {}
      console.log("ho?")
      Object.keys(window.B).forEach((a)=>{
@@ -561,7 +561,7 @@ if(key == "s"){
   if(key == "e"){
     weaponAuto()
   }
-  if(key == "t"){
+  if(key == "q"){
     boostPath = boostPathRecursive(5)
   }
 
@@ -1043,7 +1043,7 @@ function boostPathRecursive(amt,A,arr=[[B[pla].x,B[pla].y]],found={}){
   let a;
   allObjects.forEach((e)=>{
     if(e.type != 64 || found[e.id]){return}
-    let d = -dot(e.x-pos[0],e.y-pos[1],normVector[0],normVector[1])
+    let d = -dot(e.x-pos[0],e.y-pos[1],normVector[0],normVector[1])/distance(e.x,e.y,pos[0],pos[1])/distance(e.x,e.y,pos[0],pos[1])
     if(d < md){md = d; a = e}
   })
 
