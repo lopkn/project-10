@@ -147,6 +147,7 @@ function addSavedCard(title,value){
 		d.style.backgroundColor = "HSL("+Math.floor(Math.random()*255)+",100%,80%)"
 		d.onclick=()=>{insert(d.querySelector("p").innerHTML)}
 		element.insertBefore(d,element.firstChild)
+	return(d)
 }
 
 
@@ -223,7 +224,8 @@ function suggestionCard(val){
 		d.style.backgroundColor = "HSL("+Math.floor(Math.random()*255)+",100%,80%)"
 		d.onclick=()=>{
 			d.remove()
-			addSavedCard("saved card",val)
+			let c = addSavedCard("saved card",val)
+			c.style.backgroundColor = d.style.backgroundColor
 			// h2.innerHTML="saved card";saveSuggestion(d);console.log("saved");d.onclick=()=>{insert(d.querySelector("p").innerHTML)}
 		}
 		let suggestElement = classQuery("leftSuggest")[0]
