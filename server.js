@@ -5439,8 +5439,25 @@ class ArgAccel{
 		// console.log("argaccel",date,name,content,socket)
 
 		if(name == "msg"){
+			if(content[0] == "/"){
+				this.command(date,content,socket)
+				return
+			}
 			this.message(date,content,socket)
 		}
+
+
+	}
+	static command(date,content,socket){
+		let su = false
+		if(this.keyholders[socket.id]){su = true}
+		let split = content.substring(1).split(" ")
+
+			if(su){
+				if(split[0] == "smsg"){
+					this.sMessage(content.substring(5))
+				}
+			}
 
 
 	}
