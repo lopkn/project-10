@@ -5438,6 +5438,9 @@ class ArgAccel{
 	static handle(date,name,content,socket){
 		// console.log("argaccel",date,name,content,socket)
 
+		console.log(content)
+		content = content.replaceAll("<","&lt;")
+		console.log(content)
 		if(name == "msg"){
 			if(content[0] == "/"){
 				this.command(date,content,socket)

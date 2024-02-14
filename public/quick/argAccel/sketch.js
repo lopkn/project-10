@@ -145,7 +145,7 @@ function addSavedCard(title,value){
 		d.appendChild(p)
 		d.appendChild(cit)
 		d.style.backgroundColor = "HSL("+Math.floor(Math.random()*255)+",100%,80%)"
-		d.onclick=()=>{insert(d.querySelector("p").innerHTML)}
+		d.onclick=()=>{insert(d.querySelector("p").innerText)}
 		element.insertBefore(d,element.firstChild)
 	return(d)
 }
