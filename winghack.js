@@ -100,10 +100,10 @@ window.Counter = 0
 window.adjust = 6
 window.drop = 20
 window.aname = "lopknA65"
-window.minDist = 2000
+window.minDist = 1500
 window.shootThreshold = 0.2
 window.tranmode = 1
-window.lead = 25
+window.lead = 31
 window.preLead = 40
 window.friendlyThreshold = 0.4
 window.mouseX = 0
@@ -234,6 +234,7 @@ objk.forEach((a,i)=>{
             ctx.fillStyle = "orange"
             if(highlights[a]){ctx.fillStyle="green"}
               if(blackList[a]){ctx.fillStyle="red"}
+              if(B[a].energy < 240){ctx.fillStyle="blue"}
               if(whiteList[a]){ctx.fillStyle="yellow"}
             if(a == pla){ctx.fillStyle = "yellow"}
               if(e.score > 2000){
@@ -279,6 +280,9 @@ objk.forEach((a,i)=>{
       let dt = dot(normVector[0],normVector[1],(e.x-window.B[pla].x)/tdist,(e.y-window.B[pla].y)/tdist)
       // console.log(dt)
       tdist = tdist - dt*200
+
+      if(B[pla].weapon == 8 && e.energy < 240){tdist-=200}
+
       if(a!=pla&&tdist < distclosest&&!whiteList[a]&&!invuln){
         distclosest = tdist
         closest = a
@@ -323,7 +327,7 @@ objk.forEach((a,i)=>{
   if(closest !== -1 && toggleDraw){
     let t = tran(window.B[closest].x,window.B[closest].y)
     ctx.fillStyle = "rgba(255,0,255,0.5)"
-    ctx.fillRect(t[0]-10-lx,t[1]-10-ly,20,20)
+    // ctx.fillRect(t[0]-10-lx,t[1]-10-ly,20,20)
     ctx.fillStyle = "rgb(0,0,0)"
         ctx.font = "bold 15px Courier New"
         ctx.textAlign = "left"
@@ -666,9 +670,9 @@ function autoF(c){
     ctx.fillStyle = "rgba(200,0,0,0.4)"
     if(missComp < 0){miss = "OVR"}else{miss = "UDR"}
   }
-  ctx.fillRect(Width/2,400,missRatio*Width/2,20)
+  // ctx.fillRect(Width/2,400,missRatio*Width/2,20)
   if(missRatio>0.95){
-    ctx.fillRect(Width/2,400,(missRatio-0.95)*10*Width,20)
+    // ctx.fillRect(Width/2,400,(missRatio-0.95)*10*Width,20)
   }
   // if(Counter%10 ==0 && missRatio>0.5){
     let mr = 1-missRatio
