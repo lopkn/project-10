@@ -138,12 +138,17 @@ button.func{
 /*	margin:20%;*/
 	height:10%;
 	min-width:100%;
+	max-width: 100%;
 	margin-top:auto;
 	box-sizing: border-box;
 	max-height: 20vh;
 	resize:vertical;
 	min-height:3%;
 	overflow-y:auto;
+	background-color: white;
+/*	display: block;*/
+	word-wrap: break-word;
+	padding:2px;
 }
 
 

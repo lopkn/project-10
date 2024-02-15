@@ -94,6 +94,7 @@ function clearLeftContainer(){
 		addSavedCard(garble(Math.random()*16),garble(Math.random()*900+20))
 
 	}
+	addSavedCard("testing!","<div style=\"color:red\"> testing! </div>")
 
 
   element = classQuery("leftContainer")[0]
@@ -145,7 +146,7 @@ function addSavedCard(title,value){
 		d.appendChild(p)
 		d.appendChild(cit)
 		d.style.backgroundColor = "HSL("+Math.floor(Math.random()*255)+",100%,80%)"
-		d.onclick=()=>{insert(d.querySelector("p").innerText)}
+		d.onclick=()=>{insert(d.querySelector("p").innerHTML)}
 		element.insertBefore(d,element.firstChild)
 	return(d)
 }
@@ -240,17 +241,16 @@ function saveSuggestion(d){
 }
 
 
-let inp = document.getElementById("mainInput")
-inp.addEventListener("keydown",(e)=>{
+MIP.addEventListener("keydown",(e)=>{
 	if(e.key == "Enter" || e.keyCode == 13){
 		
 		if(e.shiftKey){return}
 
-		socket.emit("msg",inp.value)
+		socket.emit("msg",MIP.innerText)
 
-		suggestionCard(inp.value)
+		suggestionCard(MIP.innerHTML)
 
-		inp.value = ""
+		MIP.innerText = ""
 		e.preventDefault()
 	}
 	if(e.key == "Tab"){
@@ -371,7 +371,7 @@ function GHT(refocus=false){
 }
 
 function insert(text){
-	MIP.value=insString(MIP.value,MIP.selectionStart,text)
+	MIP.innerHTML=insString(MIP.innerHTML,MIP.selectionStart,text)
 }
 
 
@@ -427,11 +427,83 @@ document.getElementById("opEdit").addEventListener("click",(e)=>{
 })
 
 
+function getSelectionPosition() {
+  const selection = window.getSelection(); // Get the Selection object
+
+  if (selection.rangeCount === 0) {
+    return null; // No selection exists
+  }
+
+  const range = selection.getRangeAt(0); // Get the first Range object
+
+  // Create a new Range object to use as a reference
+  const referenceRange = document.createRange();
+  referenceRange.selectNodeContents(document.getElementById('mainInput'));
+
+  // Use the compareBoundaryPoints() method to determine the position of the selection within the content editable div
+  const position = range.compareBoundaryPoints(Range.START_TO_START, referenceRange);
+
+  // return position;
+  // return window.getSelection().anchorOffset
+  return getSelectionRangeRelativeToElement(MIP).startOffset
+}
+
+MIP.addEventListener('blur', function() {
+  const selectionPosition = getSelectionPosition();
+  MIP.selectionStart = selectionPosition
+  console.log('Selection position:', selectionPosition);
+});
+
+
+
+function getSelectionRangeRelativeToElement(element) {
+  const selection = window.getSelection();
+  
+  if (selection.rangeCount === 0) {
+    return null; // No selection
+  }
+  
+  const range = selection.getRangeAt(0);
+  
+  const startContainer = range.startContainer;
+  const endContainer = range.endContainer;
+  
+  // Calculate the start and end offsets relative to the element
+  const startOffset = getOffsetRelativeToElement(element, startContainer, range.startOffset);
+  const endOffset = getOffsetRelativeToElement(element, endContainer, range.endOffset);
+  
+  return { startOffset, endOffset };
+}
+
+function getOffsetRelativeToElement(element, container, offset) {
+  let currentElement = container;
+  let relativeOffset = offset;
+  
+  while (currentElement !== element && currentElement.parentNode) {
+    const childNodes = Array.from(currentElement.parentNode.childNodes);
+    const index = childNodes.indexOf(currentElement);
+    
+    for (let i = 0; i < index; i++) {
+      if (childNodes[i].nodeType === Node.TEXT_NODE) {
+        relativeOffset += childNodes[i].textContent.length;
+      }
+    }
+    
+    currentElement = currentElement.parentNode;
+  }
+  
+  return relativeOffset;
+}
+
+
+
+
 class textHandler{
 	static tb = document.querySelector("textarea")
 
 	static mainArr = []
 }
+
 
 
 
