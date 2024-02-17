@@ -21,6 +21,7 @@ window.ctx = canvas2.getContext("2d")
 canvas2.style.pointerEvents = "none"
 window.highlights = {}
 
+window.boostRadarLast = Date.now()
 window.miss = "UDF"
 
 window.dodgeFactor = 40000
@@ -32,7 +33,9 @@ window.last = {}
 window.closest = -1;
 window.aimedAt = -1;
 window.projectiles = []
-window.dodgeThreshold = 200
+window.dodgeThreshold = 150
+
+window.boostRadar = []
 
 window.autoDowns = false
 window.downFrequency = 200
@@ -266,13 +269,21 @@ objk.forEach((a,i)=>{
             }
 
             ctx.strokeStyle="#FFFF00"
-            ctx.beginPath()
-            ctx.moveTo(Width/2,Height/2)
-            for(let i = 1; i < boostPath.length;i++){
-              let tra = tran(boostPath[i][0],boostPath[i][1])
-              ctx.lineTo(tra[0]*zoom-lx,tra[1]*zoom-ly)
+            ctx.fillStyle="#FFFF00"
+            // ctx.beginPath()
+            // ctx.moveTo(Width/2,Height/2)
+            // for(let i = 1; i < boostPath.length;i++){
+            //   let tra = tran(boostPath[i][0],boostPath[i][1])
+            //   ctx.lineTo(tra[0]*zoom-lx,tra[1]*zoom-ly)
+            // }
+            // ctx.stroke()
+            if(Date.now() < boostRadarLast+3000){
+            ctx.fillStyle="rgba(255,255,0,"+(boostRadarLast+3000-Date.now())/3000+")"
+              boostRadar.forEach((e)=>{
+                let tra = tran(e.x,e.y)
+                ctx.fillRect(tra[0]*zoom-lx-2,tra[1]*zoom-ly-2,4,4)
+              })
             }
-            ctx.stroke()
 
         }
     if(pla !== -1){
@@ -566,7 +577,9 @@ if(key == "s"){
     weaponAuto()
   }
   if(key == "q"){
-    boostPath = boostPathRecursive(5)
+    // boostPath = boostPathRecursive(5)
+    boostRadar = boostRadarSweep(0.7)
+    boostRadarLast = Date.now()
   }
 
   downs[e.key] = true
@@ -627,7 +640,7 @@ function autoF(c){
       let tang2 = Math.abs(agameBomb-aEnemy2)
       let dst = distP(pla,a)
       if(dst < closestFriendlyPos){closestFriendlyPos = dst;closestFriendlyID = a}
-      if(tang2 < closestFriendly && dst < 1400){closestFriendly = tang2}
+      if(tang2 < closestFriendly && dst < 1600){closestFriendly = tang2}
         return
     }
     let tang = Math.abs(aMe-aEnemy2)
@@ -780,6 +793,9 @@ function autoF(c){
       window.A?.sendShooting(0)
     }
   } else if(Math.abs(aGame-aEnemy) >shootThreshold*2 && !mouseDown){
+    window.A?.sendShooting(0)
+  }
+  if(closestFriendly < friendlyThreshold){
     window.A?.sendShooting(0)
   }
 }
@@ -944,6 +960,7 @@ function dodgeAll(s=40){
     // if(dt < 0){return;}
     // let dodge = dodgeFromPos(e.x,e.y,s*dt,500)
     let dodge = dodgeFromThing(e,s,1500)
+    if(distance(dodge[0],dodge[1],0,0)<dodgeThreshold){return}
     bot.dodgeX += dodge[0]
     bot.dodgeY += dodge[1]
   })
@@ -1058,6 +1075,16 @@ function boostPathRecursive(amt,A,arr=[[B[pla].x,B[pla].y]],found={}){
   if(amt == 0){
     return(arr)
   } else {return(boostPathRecursive(amt,A,arr,found))}
+}
+
+function boostRadarSweep(ang){
+  let outarr = []
+  allObjects.forEach((e)=>{
+    if(e.type != 64){return}
+    let d = dot(e.x-B[pla].x,e.y-B[pla].y,normVector[0],normVector[1])/distance(e.x,e.y,B[pla].x,B[pla].y)/distance(e.x,e.y,B[pla].x,B[pla].y)*2300
+    if(d > ang){outarr.push(e)} else {console.log(d)}
+  })
+  return(outarr)
 }
 
 
