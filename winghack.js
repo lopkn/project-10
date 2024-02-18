@@ -70,23 +70,31 @@ window.weaponColor = {
 }
 window.weaponPreset = {
   "1":()=>{
-    lead = 40;
+    lead = 32;
+    Dlead = 3;
+    Alead = 31
     shootThreshold = 0.3
   },
   "2":()=>{
-    lead = 40;
+    lead = 32;
+    Dlead = 3;
+    Alead = 31
     shootThreshold = 0.5
   },
   "4":()=>{
     lead = 80;
+    Alead = 40;
+    Dlead = 40;
     shootThreshold = 0.3
   },
   "8":()=>{
-    lead = 20;
+    lead = 31;
+    Alead = 40;
+    Dlead = 0
     shootThreshold = 0.1;
   },
   "16":()=>{
-    lead = 40;
+    lead = 31;
     shootThreshold = 0.2
   },
   "128":()=>{
@@ -107,6 +115,8 @@ window.minDist = 1500
 window.shootThreshold = 0.2
 window.tranmode = 1
 window.lead = 31
+window.Alead = 40
+window.Dlead = 0
 window.preLead = 40
 window.friendlyThreshold = 0.4
 window.mouseX = 0
@@ -716,9 +726,11 @@ function autoF(c){
         bot.aimAddy += bot.dodgeY
       }
         let Tlead = lead * 14/40
+        Tlead += distP(c,pla) * Dlead
+        let TTlead = Alead * 14/40
     let leadingAngle = ang(
-      window.B[c].x+last[c].vx*Tlead+last[c].ax*Tlead-window.B[pla].x+bot.aimAddx,
-      -(window.B[c].y+last[c].vy*Tlead+last[c].ay*Tlead-window.B[pla].y+bot.aimAddy-bot.permAimY)
+      window.B[c].x+last[c].vx*Tlead+last[c].ax*TTlead-window.B[pla].x+bot.aimAddx,
+      -(window.B[c].y+last[c].vy*Tlead+last[c].ay*TTlead-window.B[pla].y+bot.aimAddy-bot.permAimY)
       )
       window.U.angle = Math.PI-leadingAngle
       
