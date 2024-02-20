@@ -726,7 +726,7 @@ function autoF(c){
         bot.aimAddy += bot.dodgeY
       }
         let Tlead = lead * 14/40
-        Tlead += distP(c,pla) * Dlead
+        Tlead += distP(c,pla) * Dlead / 200
         let TTlead = Alead * 14/40
     let leadingAngle = ang(
       window.B[c].x+last[c].vx*Tlead+last[c].ax*TTlead-window.B[pla].x+bot.aimAddx,
