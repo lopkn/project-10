@@ -94,7 +94,7 @@ function clearLeftContainer(){
 		addSavedCard(garble(Math.random()*16),garble(Math.random()*900+20))
 
 	}
-	addSavedCard("testing!","<div style=\"color:red\"> testing! </div>")
+	addSavedCard("testing!","<span style=\"color:red\" contentEditable=\"false\"> testing! </span>")
 
 
   element = classQuery("leftContainer")[0]
@@ -361,7 +361,7 @@ function getHighlightedText() {
 function GHT(refocus=false){
 	let ght = getHighlightedText()
 	if(ght.element.classList.contains("textBubble")||ght.element.classList.contains("jer")){
-		insert(ght.text)
+		insert("<span style='color:cyan' contentEditable='false'>"+ght.text+"</span>")
 
 		if(refocus){
 			MIP.focus()
@@ -449,7 +449,7 @@ function getSelectionPosition() {
 }
 
 MIP.addEventListener('blur', function() {
-  const selectionPosition = getSelectionPosition();
+  const selectionPosition = SSoffset();
   MIP.selectionStart = selectionPosition
   console.log('Selection position:', selectionPosition);
 });
@@ -495,6 +495,13 @@ function getOffsetRelativeToElement(element, container, offset) {
   return relativeOffset;
 }
 
+function SSoffset(){
+	let target = document.createTextNode("\u0001");
+	document.getSelection().getRangeAt(0).insertNode(target);
+	let position = MIP.innerHTML.indexOf("\u0001");
+	target.parentNode.removeChild(target);
+	return(position)
+}
 
 
 
