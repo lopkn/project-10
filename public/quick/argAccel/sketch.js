@@ -503,6 +503,59 @@ function SSoffset(){
 	return(position)
 }
 
+function test2(){
+	let target = document.createTextNode("\u0001");
+	let x = document.getSelection().getRangeAt(0)
+	x.insertNode(target)
+}
+
+function test1(){
+	let target = document.createTextNode("\u0001");
+	let newRange = document.createRange();
+	let selection = document.getSelection()
+  newRange.setStart(selection.focusNode, selection.startOffset);
+  newRange.insertNode(target)
+	let position = MIP.innerHTML.indexOf("\u0001");
+	target.parentNode.removeChild(target)
+	return(position)
+}
+
+///
+const createRange = (node, targetPosition) => {
+    let range = document.createRange();
+    range.selectNode(node);
+    range.setStart(node, 0);
+
+    let pos = 0;
+    const stack = [node];
+    while (stack.length > 0) {
+        const current = stack.pop();
+
+        if (current.nodeType === Node.TEXT_NODE) {
+            const len = current.textContent.length;
+            if (pos + len >= targetPosition) {
+                range.setEnd(current, targetPosition - pos);
+                return range;
+            }
+            pos += len;
+        } else if (current.childNodes && current.childNodes.length > 0) {
+            for (let i = current.childNodes.length - 1; i >= 0; i--) {
+                stack.push(current.childNodes[i]);
+            }
+        }
+    }
+
+    // The target position is greater than the
+    // length of the contenteditable element.
+    range.setEnd(node, node.childNodes.length);
+    return range;
+};
+const setPosition = (targetPosition) => {
+    const range = createRange(contentEle, targetPosition);
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+};
 
 
 class textHandler{
@@ -510,6 +563,10 @@ class textHandler{
 
 	static mainArr = []
 }
+
+
+
+
 
 
 
