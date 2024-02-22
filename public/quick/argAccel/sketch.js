@@ -383,6 +383,7 @@ function insert(text){
 	// MIP.innerHTML=insString(MIP.innerHTML,MIP.selectionStart,text)
 	if(typeof(text) !== "object"){
 		s = document.createElement("span")
+		s.style.userSelect = "none"
 		s.classList.add("temporary")
 		s.innerHTML = text
 		text = s
