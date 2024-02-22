@@ -146,7 +146,7 @@ function addSavedCard(title,value){
 		d.appendChild(p)
 		d.appendChild(cit)
 		d.style.backgroundColor = "HSL("+Math.floor(Math.random()*255)+",100%,80%)"
-		d.onclick=()=>{insert(d.querySelector("p").innerHTML)}
+		d.onclick=()=>{GST(d.querySelector("p").innerHTML,true)}
 		element.insertBefore(d,element.firstChild)
 	return(d)
 }
@@ -361,17 +361,47 @@ function getHighlightedText() {
 function GHT(refocus=false){
 	let ght = getHighlightedText()
 	if(ght.element.classList.contains("textBubble")||ght.element.classList.contains("jer")){
-		insert("<span style='color:cyan' contentEditable='false'>"+ght.text+"</span>")
+		let ir = insert("<span style='color:cyan' contentEditable='false'>"+ght.text+"</span>")
 
 		if(refocus){
 			MIP.focus()
+			moveCaretAfterNode(ir)
 		}
 
 	}
 }
 
+function GST(text,refocus=false){
+	let ir = insert(text)
+	if(refocus){
+		MIP.focus()
+		moveCaretAfterNode(ir)
+	}
+}
+
 function insert(text){
-	MIP.innerHTML=insString(MIP.innerHTML,MIP.selectionStart,text)
+	// MIP.innerHTML=insString(MIP.innerHTML,MIP.selectionStart,text)
+	if(typeof(text) !== "object"){
+		s = document.createElement("span")
+		s.classList.add("temporary")
+		s.innerHTML = text
+		text = s
+	}
+	selectionPosition.insertNode(text)
+	
+	let b = document.getElementsByClassName("temporary");
+	let x = 0
+	let lc;
+	while(b.length && x < 500) {
+			x++
+	    let parent = b[0].parentNode;
+	    while(b[0].firstChild ) {
+	        lc = b[0].firstChild
+	        parent.insertBefore(b[0].firstChild,b[0]);
+	    }
+	     parent.removeChild(b[0]);
+	}
+	return(lc)
 }
 
 
@@ -448,10 +478,13 @@ function getSelectionPosition() {
   return getSelectionRangeRelativeToElement(MIP).startOffset
 }
 
+MIP.focus()
+let selectionPosition=SSoffset2();
+
 MIP.addEventListener('blur', function() {
-  const selectionPosition = SSoffset();
-  MIP.selectionStart = selectionPosition
-  console.log('Selection position:', selectionPosition);
+  selectionPosition = SSoffset2();
+  // MIP.selectionStart = selectionPosition
+  // console.log('Selection position:', selectionPosition);
 });
 
 
@@ -501,6 +534,10 @@ function SSoffset(){
 	let position = MIP.innerHTML.indexOf("\u0001");
 	target.parentNode.removeChild(target);
 	return(position)
+}
+
+function SSoffset2(){
+	return(document.getSelection().getRangeAt(0))
 }
 
 function test2(){
@@ -556,6 +593,21 @@ const setPosition = (targetPosition) => {
     selection.removeAllRanges();
     selection.addRange(range);
 };
+
+function moveCaretAfterNode(node) {
+  var range = document.createRange();
+  var selection = window.getSelection();
+
+  // Set the range to the end of the node
+  range.setStartAfter(node);
+  range.collapse(true);
+
+  // Clear any existing selections
+  selection.removeAllRanges();
+
+  // Add the range to the selection
+  selection.addRange(range);
+}
 
 
 class textHandler{
