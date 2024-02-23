@@ -29,8 +29,19 @@ const concol = {"Black" : "\x1b[30m" ,"Red" : "\x1b[31m" ,"Green" : "\x1b[32m" ,
 "White" : "\x1b[37m" ,"BBlack" : "\x1b[40m" ,"BRed" : "\x1b[41m" ,"BGreen" : "\x1b[42m" ,"BYellow" : "\x1b[43m" ,
 "BBlue" : "\x1b[44m" ,"BMagenta" : "\x1b[45m" ,"BCyan" : "\x1b[46m" ,"BWhite" : "\x1b[47m"}
 
+const outputLog = fs.createWriteStream('./outputLog.log');
+	const errorsLog = fs.createWriteStream('./errorsLog.log');
+
+
+	const consoler = new console.Console(outputLog, errorsLog);
 
 process.on('uncaughtException',(err)=>{
+	
+	let newerr = new Error(err.message)
+	newerr.stack = err.stack
+
+	consoler.log(err)
+	consoler.error(newerr)
 	fs.writeFileSync('./errorlog.json',JSON.stringify(enDict,null,4), function writeJSON(err){if(err)return console.log(err)})
 	console.log(concol.Red + "%s" + "\x1b[1m" ,"ERROR")
 	throw err
@@ -5438,9 +5449,11 @@ class ArgAccel{
 	static handle(date,name,content,socket){
 		// console.log("argaccel",date,name,content,socket)
 
-		console.log(content)
+		let ihtml = content[0]
+		content = content[1]
+
 		content = content.replaceAll("<","&lt;")
-		console.log(content)
+
 		if(name == "msg"){
 			if(content[0] == "/"){
 				this.command(date,content,socket)

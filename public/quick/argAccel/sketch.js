@@ -246,7 +246,7 @@ MIP.addEventListener("keydown",(e)=>{
 		
 		if(e.shiftKey){return}
 
-		socket.emit("msg",MIP.innerText)
+		socket.emit("msg",[MIP.innerHTML,MIP.innerText])
 
 		suggestionCard(MIP.innerHTML)
 

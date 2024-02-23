@@ -1,0 +1,7 @@
+TypeError: Cannot read properties of null (reading '0')
+    at Function.handle ([eval]:5452:22)
+    at Socket.<anonymous> ([eval]:1657:33)
+    at Socket.onevent (/Users/leo/projects/project-10/node_modules/socket.io/dist/socket.js:466:26)
+    at Socket._onpacket (/Users/leo/projects/project-10/node_modules/socket.io/dist/socket.js:434:22)
+    at /Users/leo/projects/project-10/node_modules/socket.io/dist/client.js:214:24
+    at processTicksAndRejections (node:internal/process/task_queues:78:11)
