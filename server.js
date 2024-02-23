@@ -29,20 +29,21 @@ const concol = {"Black" : "\x1b[30m" ,"Red" : "\x1b[31m" ,"Green" : "\x1b[32m" ,
 "White" : "\x1b[37m" ,"BBlack" : "\x1b[40m" ,"BRed" : "\x1b[41m" ,"BGreen" : "\x1b[42m" ,"BYellow" : "\x1b[43m" ,
 "BBlue" : "\x1b[44m" ,"BMagenta" : "\x1b[45m" ,"BCyan" : "\x1b[46m" ,"BWhite" : "\x1b[47m"}
 
-const outputLog = fs.createWriteStream('./outputLog.log');
+
+	const outputLog = fs.createWriteStream('./outputLog.log');
 	const errorsLog = fs.createWriteStream('./errorsLog.log');
-
-
 	const consoler = new console.Console(outputLog, errorsLog);
 
 process.on('uncaughtException',(err)=>{
 	
+
 	let newerr = new Error(err.message)
 	newerr.stack = err.stack
 
 	consoler.log(err)
 	consoler.error(newerr)
-	fs.writeFileSync('./errorlog.json',JSON.stringify(enDict,null,4), function writeJSON(err){if(err)return console.log(err)})
+	consoler.log(err.stack)
+	fs.writeFileSync('./errorlog.json',JSON.stringify({error:err.toString()+"\n"+err.stack}), function writeJSON(err){if(err)return console.log(err)})
 	console.log(concol.Red + "%s" + "\x1b[1m" ,"ERROR")
 	throw err
 })
@@ -1655,6 +1656,8 @@ function joinGame(game,socket){
 			io.to(socket.id).emit("string","you are a keyholder")
 		}
 		socket.onAny((e,n)=>{ArgAccel.handle(Date.now(),e,n,socket)})
+	} else if(game == "debug"){
+		io.to(socket.id).emit("debugReturn",{"sid":socket.id,"str":fs.readFileSync("./errorlog.json","utf8")})
 	}
 }
 
@@ -5497,6 +5500,10 @@ class responder{
 	static info1 = {}
 	static pusher = []
 	static process1(d,r){
+		if(d.action == "debug"){
+			let str = fs.readFileSync("./errorlog.json")
+			r.send({"response":str})
+		}
 		if(d.action == "up"){
 			this.info1 = d
 		} else if(d.action == "push"){

@@ -610,6 +610,31 @@ function moveCaretAfterNode(node) {
   selection.addRange(range);
 }
 
+function UP(data,action="up"){
+  const url = 'https://game-10.lopkn.unsown.top/responder';
+  data.action = action
+
+fetch(url, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify(data),
+})
+  .then(response => {
+    // Parse the response as JSON
+    return response.json();
+  })
+  .then(responseData => {
+    // Handle the response data
+    console.log('Received response:', responseData);
+  })
+  .catch(error => {
+    // Handle any errors that occurred during the request
+    console.error('Request failed:', error);
+  });
+}
+
 
 class textHandler{
 	static tb = document.querySelector("textarea")
