@@ -43,7 +43,7 @@ process.on('uncaughtException',(err)=>{
 	consoler.log(err)
 	consoler.error(newerr)
 	consoler.log(err.stack)
-	fs.writeFileSync('./errorlog.json',JSON.stringify({error:err.toString()+"\n"+err.stack}), function writeJSON(err){if(err)return console.log(err)})
+	fs.writeFileSync('./errorlog.json',JSON.stringify({error:err.toString()+"\n"+err.stack+"\n"+Date.now()}), function writeJSON(err){if(err)return console.log(err)})
 	console.log(concol.Red + "%s" + "\x1b[1m" ,"ERROR")
 	throw err
 })
