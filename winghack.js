@@ -125,6 +125,8 @@ window.onmousemove = (e)=>{mouseX = (e.clientX); mouseY = (e.clientY)}
 window.downs = {}
 window.engageSpeed = 0.5
 
+window.extraFunc = ()=>{};
+
 window.focusedOn = -1
 window.focusSave = -1
 
@@ -384,6 +386,7 @@ objk.forEach((a,i)=>{
 
     } 
   }
+  window.extraFunc()
   if(autoFire){
       autoF(closest)
     }
@@ -847,6 +850,18 @@ function BL(str){
   })
 }
 
+function getByName(str){
+ let objk = Object.keys(window.B)
+ let n;
+  objk.forEach((a,i)=>{
+    let e = window.B[a]
+    if(e.name == str){
+      n = e
+    }
+  })
+  return(n)
+}
+
 
 
 
@@ -1099,7 +1114,7 @@ function boostRadarSweep(ang){
   return(outarr)
 }
 
-
+window.getByName = getByName
 window.boostPathRecursive = boostPathRecursive
 window.autoUp = autoUp
 window.UP = UP
