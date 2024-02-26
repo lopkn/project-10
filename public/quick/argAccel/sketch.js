@@ -283,7 +283,7 @@ function messageBubble(msg,lr="left"){
 	m.classList.add("textBubble")
 	if(lr == "right"){
 		m.classList.add("right")
-	} if(lr == "cent"){
+	}else if(lr == "cent"){
 		m.classList.add("cent")
 	}else {
 		m.classList.add("left")
