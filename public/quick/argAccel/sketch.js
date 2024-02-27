@@ -290,9 +290,10 @@ function messageBubble(msg,lr="left",msgid=-1){
 		m.classList.add("left")
 	}
 
-	m.setAttribute("msgid",msgid)
-	jer.setAttribute("msgid",msgid)
-
+	// m.setAttribute("msgid",msgid)
+	// jer.setAttribute("msgid",msgid)
+	m.id = "msgM"+msgid
+	jer.id = "msgJ"+msgid
 	jer.classList.add("jer")
 	let chat = document.getElementsByClassName("chat")[0]
 
@@ -365,15 +366,33 @@ function getHighlightedText() {
 
 function GHT(refocus=false,ref={}){
 	let ght = getHighlightedText()
-	let reference = JSON.stringify(ref)
-	if(ght.element.classList.contains("textBubble")||ght.element.classList.contains("jer")){
-		let ir = insert("<span style='color:cyan' contentEditable='false' doughnut='-"+reference+"-'>"+ght.text+"</span>")
+	// if(ght.element.classList.contains("textBubble")||ght.element.classList.contains("jer")){
+	// 	ref.msgid = ght.element.getAttribute("id").substring(4)
+	// 	let reference = JSON.stringify(ref)
+	// 	console.log(reference)
+	// 	let str = "<span style='color:cyan' contentEditable='false' doughnut='-"+reference+"-'>"+ght.text+"</span>"
+	// 	console.log(str)
+	// 	let ir = insert(str)
+
+	// 	if(refocus){
+	// 		MIP.focus()
+	// 		moveCaretAfterNode(ir)
+	// 	}
+	// 	return;
+	// } 
+	let phc = parentHasClass(ght.element,"jer") 
+	if(phc !== false){
+		ref.msgid = phc.getAttribute("id").substring(4)
+		let reference = JSON.stringify(ref)
+		console.log(reference)
+		let str = "<span style='color:cyan' contentEditable='false' doughnut='-"+reference+"-'>"+ght.text+"</span>"
+		console.log(str)
+		let ir = insert(str)
 
 		if(refocus){
 			MIP.focus()
 			moveCaretAfterNode(ir)
 		}
-
 	}
 }
 
@@ -411,6 +430,15 @@ function insert(text){
 	return(lc)
 }
 
+
+function parentHasClass(el,clas){
+	if(el.classList.contains(clas)){return(el)}
+	while(el.parentElement){
+		el = el.parentElement
+		if(el.classList.contains(clas)){return(el)}
+	}
+	return(false)
+}
 
 
 function handlePaste(e) {
@@ -639,6 +667,31 @@ fetch(url, {
     // Handle any errors that occurred during the request
     console.error('Request failed:', error);
   });
+}
+
+
+function refArrow(el1,el2){
+	let bounding1 = el1.getBoundingClientRect()
+	let bounding2 = el2.getBoundingClientRect()
+	let arr =[bounding1.x+bounding1.width/2,bounding1.y+bounding1.height/2,
+		bounding2.x+bounding2.width/2,bounding2.y+bounding2.height/2]
+	
+	ctx.lineWidth = 3
+	ctx.strokeStyle = "#FF7000"
+	ctx.beginPath()
+	ctx.moveTo(arr[0],arr[1])
+	ctx.lineTo(arr[2],arr[3])
+	ctx.stroke()
+
+	return(arr)
+}
+
+
+function refover(el,open=true){
+	refArrow(el,document.getElementById("msgM"+el.getAttribute('ref')))
+	if(!open){
+		ctx.clearRect(0,0,5000,5000)
+	}
 }
 
 

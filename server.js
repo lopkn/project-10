@@ -5460,7 +5460,7 @@ class ArgAccel{
 
 		let ihtml = content[0]
 		content = content[1]
-
+		ihtml = ihtml.replaceAll("&quot;","\"")
 		content = content.replaceAll("<","&lt;")
 		let processed = this.ihtmlProcess(ihtml,content)
 		if(name == "msg"){
@@ -5468,14 +5468,16 @@ class ArgAccel{
 				this.command(date,content,socket)
 				return
 			}
-			this.message(date,content,socket,processed)
+
+
+
+			this.message(date,processed.stext,socket,processed)
 		}
 
 
 	}
 
 	static ihtmlProcess(str,cont){
-		console.log("ihtmlProcessing: "+str)
 		let id = "normal"
 		let out = ['']
 		for(let i = 0; i < str.length; i++){
@@ -5516,6 +5518,7 @@ class ArgAccel{
 
 		}
 
+		let stext = ''
 		out.forEach((e,i)=>{
 			if(i%2==1){
 				let attr = e.attr
@@ -5534,20 +5537,30 @@ class ArgAccel{
 				}
 				e.extractedAttr = outstr
 				this.matchExtract(e)
+				if(e.verified == true){
+					stext += "<span class='verified' ref='"+e.reference+"' onmouseover='refover(this)' onmouseout='refover(this,false)'>" + e.text + "</span>"
+				} else {
+				  stext += e.text
+				}
+			}else{
+			 stext +=e
 			}
 		})
-		console.log({"text":cont,"processed":out})
+		// console.log({"text":cont,"processed":out})
 
-		return({"text":cont,"processed":out})
+
+
+		return({"text":cont,"processed":out,"stext":stext})
 	}
 
 	static matchExtract(e){
 		let jstr = e.extractedAttr
 		try{
 		let j = JSON.parse(jstr)
-			let matches = this.msghist[j.msgid].includes(e.text)
+			let matches = this.msghist[j.msgid].text.includes(e.text)
 			if(matches){
 				e.verified = true
+				e.reference = j.msgid
 			}
 		}catch(err){return(e)}
 		
