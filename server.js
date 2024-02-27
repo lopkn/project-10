@@ -5447,8 +5447,14 @@ class ArgAug{
 //////////////////////////////////////////////////// ARGAUG END
 //////////////////////////////////////////////////// ArgAccel
 
+
 class ArgAccel{
 	static keyholders = {}
+
+	static msgid = 0
+	static msghist = {}
+
+
 	static handle(date,name,content,socket){
 		// console.log("argaccel",date,name,content,socket)
 
@@ -5456,17 +5462,98 @@ class ArgAccel{
 		content = content[1]
 
 		content = content.replaceAll("<","&lt;")
-
+		let processed = this.ihtmlProcess(ihtml,content)
 		if(name == "msg"){
 			if(content[0] == "/"){
 				this.command(date,content,socket)
 				return
 			}
-			this.message(date,content,socket)
+			this.message(date,content,socket,processed)
 		}
 
 
 	}
+
+	static ihtmlProcess(str,cont){
+		console.log("ihtmlProcessing: "+str)
+		let id = "normal"
+		let out = ['']
+		for(let i = 0; i < str.length; i++){
+			let char = str[i]
+
+			if(id == "normal"){
+
+				if(char == "<"){
+				if(str.substring(i+1,i+5) == "span"){
+					i+=4
+					id = "spanAttr"
+					out.push({"text":'',"attr":''})
+					continue
+				}
+			}
+
+				out[out.length-1] += char
+			} else if(id == "spanAttr"){
+				if(char == ">"){
+					id = "inSpan"
+					continue
+				}
+				out[out.length-1].attr += char
+
+
+			} else if(id == "inSpan"){
+
+				if(char == "<"){
+				if(str.substring(i+1,i+7) == "/span>"){
+					i+=6
+					id = "normal"
+					out.push('')
+					continue
+				}
+			}
+				out[out.length-1].text += char
+			}
+
+		}
+
+		out.forEach((e,i)=>{
+			if(i%2==1){
+				let attr = e.attr
+				let outstr = ""
+				let pushing = false
+				for(let i = 0; i < attr.length; i++){
+					if(attr[i] == "-"){
+						if(pushing == false){							
+							pushing = true
+							continue
+						} else {break}
+					}
+					if(pushing){
+						outstr += attr[i]
+					}
+				}
+				e.extractedAttr = outstr
+				this.matchExtract(e)
+			}
+		})
+		console.log({"text":cont,"processed":out})
+
+		return({"text":cont,"processed":out})
+	}
+
+	static matchExtract(e){
+		let jstr = e.extractedAttr
+		try{
+		let j = JSON.parse(jstr)
+			let matches = this.msghist[j.msgid].includes(e.text)
+			if(matches){
+				e.verified = true
+			}
+		}catch(err){return(e)}
+		
+		return(e)
+	}
+
 	static command(date,content,socket){
 		let su = false
 		if(this.keyholders[socket.id]){su = true}
@@ -5480,8 +5567,10 @@ class ArgAccel{
 
 
 	}
-	static message(date,content,socket){
-		io.to("G10.7").emit("msg",{"msg":content,"id":socket.id})
+	static message(date,content,socket, contentBlock){
+		let mid = this.msgid++
+		this.msghist[mid] = contentBlock
+		io.to("G10.7").emit("msg",{"msg":content,"id":socket.id,"msgid":mid})
 	}
 	static sMessageWelcome(socket){
 		io.to(socket.id).emit("smsg","Welcome to Lopkn's Argument Accelerator! ArgAccel is one of the top leading technologies in the world. Please feel free to bug fetch while you are here.")

@@ -31,7 +31,7 @@ socket.emit("JOINGAME",GAMESESSION)
 var ID = 0
 socket.on("acknowledge G10.7",(e)=>{ID = e; console.log("joined as "+ID)})
 socket.on("msg",(e)=>{console.log("recieved message: "+e)
-	messageBubble(e.msg,e.id == ID?"right":"left")
+	messageBubble(e.msg,e.id == ID?"right":"left",e.msgid)
 })
 socket.on("smsg",(e)=>{
 	messageBubble(e,"cent")
@@ -95,6 +95,7 @@ function clearLeftContainer(){
 
 	}
 	addSavedCard("testing!","<span style=\"color:red\" contentEditable=\"false\"> testing! </span>")
+	addSavedCard("test2","&lt;div style=\"color:red\"&gt; test &lt;/div&gt;")
 
 
   element = classQuery("leftContainer")[0]
@@ -268,7 +269,7 @@ document.getElementById("chat").addEventListener("keydown",(e)=>{
 })
 
 
-function messageBubble(msg,lr="left"){
+function messageBubble(msg,lr="left",msgid=-1){
 	let m = document.createElement("div")
 	let jer = document.createElement("div")
 
@@ -288,6 +289,10 @@ function messageBubble(msg,lr="left"){
 	}else {
 		m.classList.add("left")
 	}
+
+	m.setAttribute("msgid",msgid)
+	jer.setAttribute("msgid",msgid)
+
 	jer.classList.add("jer")
 	let chat = document.getElementsByClassName("chat")[0]
 
@@ -358,10 +363,11 @@ function getHighlightedText() {
 }
 
 
-function GHT(refocus=false){
+function GHT(refocus=false,ref={}){
 	let ght = getHighlightedText()
+	let reference = JSON.stringify(ref)
 	if(ght.element.classList.contains("textBubble")||ght.element.classList.contains("jer")){
-		let ir = insert("<span style='color:cyan' contentEditable='false'>"+ght.text+"</span>")
+		let ir = insert("<span style='color:cyan' contentEditable='false' doughnut='-"+reference+"-'>"+ght.text+"</span>")
 
 		if(refocus){
 			MIP.focus()
