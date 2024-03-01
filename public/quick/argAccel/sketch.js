@@ -80,7 +80,7 @@ function clearLeftContainer(){
 	    element.removeChild(element.firstChild);
 	}
 
-	for(let i = 0; i < 25; i++){
+	for(let i = 0; i < 15; i++){
 		// let d = document.createElement("div")
 		// let h2 = document.createElement("h2")
 		// let p = document.createElement("p")
@@ -224,6 +224,8 @@ function suggestionCard(val){
 		d.appendChild(h2)
 		d.appendChild(p)
 		d.style.backgroundColor = "HSL("+Math.floor(Math.random()*255)+",100%,80%)"
+		// d.style.maxHeight = "25vh"
+		// d.style.overflowX = "auto"
 		d.onclick=()=>{
 			d.remove()
 			let c = addSavedCard("saved card",val)
@@ -231,6 +233,7 @@ function suggestionCard(val){
 			// h2.innerHTML="saved card";saveSuggestion(d);console.log("saved");d.onclick=()=>{insert(d.querySelector("p").innerHTML)}
 		}
 		let suggestElement = classQuery("leftSuggest")[0]
+		console.log(suggestElement)
 		suggestElement.insertBefore(d,suggestElement.firstChild)
 		classQuery("leftSuggest")[0].children[2]?.remove()
 
@@ -680,7 +683,12 @@ function refArrow(el1,el2){
 	ctx.strokeStyle = "#FF7000"
 	ctx.beginPath()
 	ctx.moveTo(arr[0],arr[1])
-	ctx.lineTo(arr[2],arr[3])
+	// ctx.lineTo(arr[2],arr[3])
+	arr[4] = (arr[0]+arr[2])/2
+	arr[5] = (arr[1]+arr[3])/2
+	let s = 80
+	let s2 = s/2
+	ctx.bezierCurveTo(arr[4]+Math.random()*s-s2,arr[5]+Math.random()*s-s2,arr[4]+Math.random()*s-s2,arr[5]+Math.random()*s-s2,arr[2],arr[3])
 	ctx.stroke()
 
 	return(arr)

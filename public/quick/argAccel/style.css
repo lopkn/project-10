@@ -75,6 +75,7 @@ button.func{
 }
 
 
+
 .leftContainer {
 	background-color: #404040;
 	min-height:100%;
@@ -84,14 +85,22 @@ button.func{
 	position:relative;
 }
 
+.leftSuggest > div {
+	overflow-x: auto;
+	margin-bottom: 3vh;
+	max-height:25vh;
+  	white-space: pre-wrap;
+	box-sizing: border-box;
+	word-wrap: break-word;
+}
+
 .leftCard > div {
 	margin:2%;
 	overflow-x: auto;
 	box-sizing: border-box;
 	max-height:25vh;
-  white-space: pre-wrap;
+  	white-space: pre-wrap;
 	word-wrap: break-word;
-
 }
 
 .addItem {
@@ -149,6 +158,7 @@ button.func{
 	background-color: white;
 /*	display: block;*/
 	word-wrap: break-word;
+	white-space: pre;
 	padding:2px;
 }
 

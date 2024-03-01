@@ -172,6 +172,9 @@ let myStat = INFUNCS.myStat
 let re8L = require("./re8.js")
 let serTen = require("./serTen.js")
 let ArgA = require("./ArgA.js")
+let compact = require("./compact.js")
+let flightSim = compact.flightSim
+let responder = compact.responder
 let ten = serTen.ten
 let re8 = re8L.re8
 let ArgAccel = ArgA.ArgAccel
@@ -668,9 +671,6 @@ class mob{
 		ACTIONPROCESS(myAction)
 	}
 	relay2(){
-
-
-
 	}
 	combatRelay(){}
 	invrelay(){}
@@ -1007,13 +1007,7 @@ class player{
 			"summoning" : 10
 
 		}
-
-
-
-		
 	}
-
-
 
 	switchItems(of,i1slot,i2slot){
 		if(of == "chest" && this.chestLink[0]!="none"){
@@ -1851,9 +1845,6 @@ function temptest4(){
 	TAF2.checkpoints1.b = 0
 	return(final)
 }
-
-
-
 
 
 
@@ -3508,13 +3499,7 @@ function addToItem(str,amount){
 
 
 
-
-
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-
 
 
 
@@ -3613,24 +3598,6 @@ function CoordToMap(x,y,d){
 
 	return([generatedChunks[dimension][cx+","+cy],p])
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -5331,63 +5298,5 @@ class shooter2C{
 
 
 
-class flightSim{
-
-	static plarr = []
-
-	static join(id){
-		this.plarr.push(id)
-	}
-
-	static systemMsg(msg){
-		io.to("G10.5").emit("msg",msg)
-	}
-
-	static getVal(pln,val){
-		if(pln == 0){return("starts with 1")}
-		if(val === "info"){val = "document.getElementById('info').innerHTML"}
-		io.to(this.plarr[this.plarr.length-pln]).emit("ev",val)
-	}
-	static forceFunc(pln,val){
-		if(pln == 0){return("starts with 1")}
-		io.to(this.plarr[this.plarr.length-pln]).emit("ev","function b"+val+";b()")
-	}
-
-	static disconnect(socket){
-		let id = socket.id
-		this.plarr.forEach((e,i)=>{
-			if(e == id){
-				this.plarr.splice(i,1)
-			}
-		})
-	}
-}
 
 
-
-
-
-///// responder ////
-
-class responder{
-	static info1 = {}
-	static pusher = []
-	static process1(d,r){
-		if(d.action == "debug"){
-			let str = fs.readFileSync("./errorlog.json")
-			r.send({"response":str})
-		}
-		if(d.action == "up"){
-			this.info1 = d
-		} else if(d.action == "push"){
-			this.pusher.push(d)
-		} else if(d.action == "reset"){
-			this.pusher = []
-			this.info1 = {}
-		}
-		this.info1.pusher = this.pusher
-		r.send(this.info1)
-	}
-}
-
-///// responder END////
