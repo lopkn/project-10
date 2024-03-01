@@ -219,6 +219,8 @@ button.func{
 	background-color: #00000F;
 	white-space: pre-wrap;
 	color:#FF7F00;
+	margin-left: 2px;
+	margin-right: 2px;
 }
 
 .sb2::-webkit-scrollbar {
