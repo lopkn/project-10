@@ -221,12 +221,18 @@ class ArgAccel{
 		let su = false
 		if(this.keyholders[socket.id]){su = true}
 		let split = content.substring(1).split(" ")
+		let s1 = split[0]
 
 			if(su){
-				let s1 = split[0]
 				if(split[0] == "smsg"){
 					this.sMessage(content.substring(5),room)
-				} else if(s1 == "thisroom"){
+				} else if(s1 == "crash"){
+					throw(new Error)
+				}
+			} else{
+
+
+			    if(s1 == "thisroom"){
 					this.dsMessage("your current room is: "+room,socket)
 				} else if(s1 == "joinroom"){
 					if(this.rooms[split[1]]){
