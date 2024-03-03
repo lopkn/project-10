@@ -1496,6 +1496,8 @@ INFUNCS.io = io
 
 re8L.io = io
 ten.io = io
+compact.io = io
+ArgA.io = io
 
 // socket = io("https://home.unsown.top")
 
