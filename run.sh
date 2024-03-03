@@ -1,5 +1,13 @@
 node -e "$(cat server.js)" -i;
+sleep 10;
 node -e "$(cat server.js)" -i;
+sleep 10;
+node -e "$(cat server.js)" -i;
+sleep 10;
+node server.js;
+sleep 10;
+node server.js;
+sleep 10;
 node server.js;
 sleep 10;
 node server.js;
