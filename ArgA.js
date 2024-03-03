@@ -88,33 +88,47 @@ class ArgAccel{
 	static keyholders = {}
 
 	static msgid = 0
-	static msghist = {}
+	// static msghist = {}
 
+	static rooms = {"Lobby":{"msghist":{}}}
+
+	static addRoom(name){
+		this.rooms[name] = {
+			"msghist":{}
+		}
+	}
 
 	static handle(date,name,content,socket){
-		// console.log("argaccel",date,name,content,socket)
 
-		let ihtml = content[0]
-		content = content[1]
-		if(content.length == 0){console.log("dog");return}
+		let ihtml = content.ihtml
+		let txt = content.txt
+		let room = content.room
+
+		if(this.rooms[room] == undefined){
+			room = "Lobby"
+		}
+
+
+
+		if(txt.length == 0){return}
 		ihtml = ihtml.replaceAll("&quot;","\"")
-		content = content.replaceAll("<","&lt;")
-		let processed = this.ihtmlProcess(ihtml,content)
+		txt = txt.replaceAll("<","&lt;")
+		let processed = this.ihtmlProcess(ihtml,txt,room)
 		if(name == "msg"){
-			if(content[0] == "/"){
-				this.command(date,content,socket)
+			if(txt[0] == "/"){
+				this.command(date,txt,socket,room)
 				return
 			}
 
 
 
-			this.message(date,processed.stext,socket,processed)
+			this.message(date,processed.stext,socket,processed,room)
 		}
 
 
 	}
 
-	static ihtmlProcess(str,cont){
+	static ihtmlProcess(str,cont,room){
 		let id = "normal"
 		let out = ['']
 		for(let i = 0; i < str.length; i++){
@@ -173,7 +187,7 @@ class ArgAccel{
 					}
 				}
 				e.extractedAttr = outstr
-				this.matchExtract(e)
+				this.matchExtract(e,room)
 				if(e.verified == true){
 					stext += "<span class='verified' ref='"+e.reference+"' onmouseover='refover(this)' onmouseout='refover(this,false)'>" + e.text + "</span>"
 				} else {
@@ -183,18 +197,17 @@ class ArgAccel{
 			 stext +=e
 			}
 		})
-		// console.log({"text":cont,"processed":out})
 
 
 
 		return({"text":cont,"processed":out,"stext":stext})
 	}
 
-	static matchExtract(e){
+	static matchExtract(e,room){
 		let jstr = e.extractedAttr
 		try{
 		let j = JSON.parse(jstr)
-			let matches = this.msghist[j.msgid].text.includes(e.text)
+			let matches = this.rooms[room].msghist[j.msgid].text.includes(e.text)
 			if(matches){
 				e.verified = true
 				e.reference = j.msgid
@@ -204,30 +217,48 @@ class ArgAccel{
 		return(e)
 	}
 
-	static command(date,content,socket){
+	static command(date,content,socket,room){
 		let su = false
 		if(this.keyholders[socket.id]){su = true}
 		let split = content.substring(1).split(" ")
 
 			if(su){
+				let s1 = split[0]
 				if(split[0] == "smsg"){
-					this.sMessage(content.substring(5))
+					this.sMessage(content.substring(5),room)
+				} else if(s1 == "thisroom"){
+					this.dsMessage("your current room is: "+room,socket)
+				} else if(s1 == "joinroom"){
+					if(this.rooms[split[1]]){
+
+					} else {
+						this.addRoom(split[1])			
+					}
+					io.to(socket.id).emit("joinroom",split[1])
+					let sid = socket.id
+					socket.leaveAll()
+					socket.join("G10.7")
+					socket.join("ArgAccel-"+split[1])
+					socket.join(sid)
 				}
 			}
 
 
 	}
-	static message(date,content,socket, contentBlock){
+	static message(date,content,socket, contentBlock, room){
 		let mid = this.msgid++
-		this.msghist[mid] = contentBlock
+		this.rooms[room].msghist[mid] = contentBlock
 		io.to("G10.7").emit("msg",{"msg":content,"id":socket.id,"msgid":mid})
 	}
 	static sMessageWelcome(socket){
 		io.to(socket.id).emit("smsg","Welcome to Lopkn's Argument Accelerator! ArgAccel is one of the top leading technologies in the world. Please feel free to bug fetch while you are here.")
 	}
-	static sMessage(content,socket){
-		io.to("G10.7").emit("smsg",content)
+	static sMessage(content,room){
+		io.to("ArgAccel-"+room).emit("smsg",content)
 		}
+	static dsMessage(content,socket){
+		io.to(socket.id).emit("smsg",content)
+	}
 }
 
 //////////////////////////////////////////////////// ArgAccel END

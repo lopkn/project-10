@@ -13,6 +13,9 @@ let myCanvas = document.getElementById("myCanvas")
   myCanvas.style.top = "0px"
   myCanvas.style.left = "0px"
 
+
+let ROOM = "ArgAccel-Lobby"
+
 let ctx = document.getElementById("myCanvas").getContext("2d")
 let mouseX = 0
 let mouseY = 0
@@ -35,6 +38,10 @@ socket.on("msg",(e)=>{console.log("recieved message: "+e)
 })
 socket.on("smsg",(e)=>{
 	messageBubble(e,"cent")
+})
+socket.on("joinroom",(e)=>{
+	messageBubble("you have entered a new room","cent")
+	ROOM = e
 })
 
 
@@ -250,7 +257,7 @@ MIP.addEventListener("keydown",(e)=>{
 		
 		if(e.shiftKey){return}
 
-		socket.emit("msg",[MIP.innerHTML,MIP.innerText])
+		socket.emit("msg",{"ihtml":MIP.innerHTML,"txt":MIP.innerText,"room":ROOM})
 
 		suggestionCard(MIP.innerHTML)
 
