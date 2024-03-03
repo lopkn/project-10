@@ -96,6 +96,7 @@ class ArgAccel{
 
 		let ihtml = content[0]
 		content = content[1]
+		if(content.length == 0){console.log("dog");return}
 		ihtml = ihtml.replaceAll("&quot;","\"")
 		content = content.replaceAll("<","&lt;")
 		let processed = this.ihtmlProcess(ihtml,content)

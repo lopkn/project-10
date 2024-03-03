@@ -686,7 +686,7 @@ function refArrow(el1,el2){
 	// ctx.lineTo(arr[2],arr[3])
 	arr[4] = (arr[0]+arr[2])/2
 	arr[5] = (arr[1]+arr[3])/2
-	let s = 80
+	let s = 180
 	let s2 = s/2
 	ctx.bezierCurveTo(arr[4]+Math.random()*s-s2,arr[5]+Math.random()*s-s2,arr[4]+Math.random()*s-s2,arr[5]+Math.random()*s-s2,arr[2],arr[3])
 	ctx.stroke()
