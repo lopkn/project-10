@@ -1,8 +1,8 @@
-node -e "$(cat server.js)" -i;
+node -e "$(cat server.js)" -i &> errorlog2.txt;
 sleep 10;
-node -e "$(cat server.js)" -i;
+node -e "$(cat server.js)" -i &> errorlog2.txt;
 sleep 10;
-node -e "$(cat server.js)" -i;
+node -e "$(cat server.js)" -i &> errorlog2.txt;
 sleep 10;
 node server.js;
 sleep 10;

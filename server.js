@@ -1659,7 +1659,7 @@ function joinGame(game,socket){
 		}
 		socket.onAny((e,n)=>{ArgAccel.handle(Date.now(),e,n,socket)})
 	} else if(game == "debug"){
-		io.to(socket.id).emit("debugReturn",{"sid":socket.id,"str":fs.readFileSync("./errorlog.json","utf8")})
+		io.to(socket.id).emit("debugReturn",{"sid":socket.id,"str":fs.readFileSync("./errorlog.json","utf8"),"str2":fs.readFileSync("./errorlog2.txt","utf8")})
 	}
 }
 
