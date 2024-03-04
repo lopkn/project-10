@@ -94,7 +94,7 @@ class ArgAccel{
 
 	static addRoom(name){
 		this.rooms[name] = {
-			"msghist":{}
+			"msghist":{},
 		}
 	}
 
@@ -222,14 +222,13 @@ class ArgAccel{
 		if(this.keyholders[socket.id]){su = true}
 		let split = content.substring(1).split(" ")
 		let s1 = split[0]
-
 			if(su){
-				if(split[0] == "smsg"){
+				if(s1 == "smsg"){
 					this.sMessage(content.substring(5),room)
 				} else if(s1 == "crash"){
 					throw(new Error)
 				}
-			} else{
+			}
 
 
 			    if(s1 == "thisroom"){
@@ -246,8 +245,23 @@ class ArgAccel{
 					socket.join("G10.7")
 					socket.join("ArgAccel-"+split[1])
 					socket.join(sid)
+				} else if(s1 == "topic"){
+					if(split[1]){
+						if(this.rooms[room].topic == undefined){
+							this.rooms[room].topic = content.substring(7)
+							this.sMessage("The room's topic has been set to: "+this.rooms[room].topic,room)
+						} else {
+							this.dsMessage("The room's topic is already set to: "+this.rooms[room].topic,socket)
+						}
+					} else {
+						if(this.rooms[room].topic == undefined){
+						this.dsMessage("Current room topic is unset",socket)
+						}else{
+						this.dsMessage("Current topic is: "+this.rooms[room].topic,socket)
+						}
+					}
 				}
-			}
+			
 
 
 	}

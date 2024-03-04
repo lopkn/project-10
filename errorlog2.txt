@@ -1,0 +1,6 @@
+Welcome to Node.js v16.15.0.
+Type ".help" for more information.
+> Process pid 25415
+server is opened: 1709528022696
+new short validation code: 346
+... 

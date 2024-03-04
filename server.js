@@ -36,7 +36,7 @@ const concol = {"Black" : "\x1b[30m" ,"Red" : "\x1b[31m" ,"Green" : "\x1b[32m" ,
 
 process.on('uncaughtException',(err)=>{
 	
-
+	console.log("crash at: "+Date.now())
 	let newerr = new Error(err.message)
 	newerr.stack = err.stack
 
@@ -1486,7 +1486,7 @@ app.post('/responder', (req, res) => {
     responder.process1(req.body,res)
     // res.sendStatus(200);
 })
-console.log("server is opened")
+console.log("server is opened: "+Date.now())
 // console.log(perSeed.noise2D(0.2,0,0))
 // console.log("seeds: " + JSON.stringify(perSeeds))
 
@@ -1651,6 +1651,7 @@ function joinGame(game,socket){
 	}
 	else if(game == "G10.7"){
 		socket.join("G10.7")
+		socket.join("ArgAccel-Lobby")
 		io.to(socket.id).emit("acknowledge G10.7",socket.id)
 		ArgAccel.sMessageWelcome(socket)
 		let clientIp = socket.request.connection.remoteAddress
