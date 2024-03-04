@@ -1,0 +1,19 @@
+Welcome to Node.js v16.15.0.
+Type ".help" for more information.
+> Process pid 26415
+server is opened: 1709529915171
+new short validation code: 359
+crash at: 1709529987812
+[31mERROR[1m
+[eval]:48
+	throw err
+	^
+
+Error
+    at Function.command (/Users/leo/projects/project-10/ArgA.js:229:12)
+    at Function.handle (/Users/leo/projects/project-10/ArgA.js:119:10)
+    at Socket.<anonymous> ([eval]:1662:33)
+    at Socket.onevent (/Users/leo/projects/project-10/node_modules/socket.io/dist/socket.js:466:26)
+    at Socket._onpacket (/Users/leo/projects/project-10/node_modules/socket.io/dist/socket.js:434:22)
+    at /Users/leo/projects/project-10/node_modules/socket.io/dist/client.js:214:24
+    at processTicksAndRejections (node:internal/process/task_queues:78:11)

@@ -230,7 +230,6 @@ class ArgAccel{
 				}
 			}
 
-
 			    if(s1 == "thisroom"){
 					this.dsMessage("your current room is: "+room,socket)
 				} else if(s1 == "joinroom"){
