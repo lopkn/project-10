@@ -1496,12 +1496,9 @@ var io = socket(server);
 var ranStrucLists = {"GoldOre":["gold ore vein1",1,"gold ore vein2",1,"gold ore vein3",1,"gold ore vein4",1]}
 
 INFUNCS.io = io
-
 re8L.io = io
 ten.io = io
-ArgAccel.io = io
-ArgAug.io = io
-ArgA.io = io
+ArgAccel.setio(io)
 
 // socket = io("https://home.unsown.top")
 

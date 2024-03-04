@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////// ARGAUG
 
-
+let io;
 class ArgAug{
 	static logger = []
 
@@ -96,6 +96,10 @@ class ArgAccel{
 		this.rooms[name] = {
 			"msghist":{},
 		}
+	}
+
+	static setio(i){
+		io = i
 	}
 
 	static handle(date,name,content,socket){
