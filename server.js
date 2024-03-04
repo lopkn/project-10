@@ -1501,6 +1501,7 @@ re8L.io = io
 ten.io = io
 ArgAccel.io = io
 ArgAug.io = io
+ArgA.io = io
 
 // socket = io("https://home.unsown.top")
 

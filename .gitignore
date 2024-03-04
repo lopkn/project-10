@@ -2,3 +2,4 @@ node_modules
 process.env
 disc/token.json
 errorlog.json
+errorlog2.txt
