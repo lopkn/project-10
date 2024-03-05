@@ -261,6 +261,9 @@ MIP.addEventListener("keydown",(e)=>{
 		
 		if(e.shiftKey){return}
 
+		collapseSelect()
+
+
 		socket.emit("msg",{"ihtml":MIP.innerHTML,"txt":MIP.innerText,"room":ROOM})
 
 		suggestionCard(MIP.innerHTML)
@@ -394,12 +397,15 @@ function GHT(refocus=false,ref={}){
 	// 	}
 	// 	return;
 	// } 
+
+
 	let phc = parentHasClass(ght.element,"jer") 
 	if(phc !== false){
 		ref.msgid = phc.getAttribute("id").substring(4)
 		let reference = JSON.stringify(ref)
 		console.log(reference)
-		let str = "<span style='color:cyan' contentEditable='false' doughnut='-"+reference+"-'>"+ght.text+"</span>"
+		let gtxt = ght.text.replaceAll("<","&lt;").replaceAll(">","&gt;")
+		let str = "<span style='color:cyan' contentEditable='false' doughnut='-"+reference+"-'>"+gtxt+"</span>"
 		console.log(str)
 		let ir = insert(str)
 
@@ -443,6 +449,25 @@ function insert(text){
 	}
 	return(lc)
 }
+
+
+function collapseSelect(){
+	let b = MIP.getElementsByClassName("collapseSelector");
+	let x = 0
+	let lc;
+	while(b.length && x < 500) {
+			x++
+	    let parent = b[0].parentNode;
+
+	    let SPAN = document.createElement("span")
+	    SPAN.classList.add("collapsedSelector")
+	    SPAN.innerHTML = b[0].value
+	     parent.insertBefore(SPAN,b[0]);
+	     parent.removeChild(b[0]);
+	}
+	return(lc)
+}
+
 
 
 function parentHasClass(el,clas){
@@ -715,6 +740,7 @@ function refover(el,open=true){
 
 function generateOptionSelect(options){
 	let sel = document.createElement("select")
+	sel.classList.add("collapseSelector")
 	options.forEach((e)=>{
 		let opt = document.createElement("option")
 		opt.value = e

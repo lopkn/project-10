@@ -158,7 +158,7 @@ button.func{
 	background-color: white;
 /*	display: block;*/
 	word-wrap: break-word;
-	white-space: pre;
+	white-space: pre-wrap;
 	padding:2px;
 }
 
@@ -232,6 +232,11 @@ button.func{
 	margin-left: 2px;
 	margin-right: 2px;
 }
+
+.collapsedSelector{
+	color:red;
+}
+
 
 .sb2::-webkit-scrollbar {
     width: 12px;

@@ -117,6 +117,10 @@ class ArgAccel{
 		if(txt.length == 0){return}
 		ihtml = ihtml.replaceAll("&quot;","\"")
 		txt = txt.replaceAll("<","&lt;")
+		txt = txt.replaceAll(">","&gt;")
+		ihtml = ihtml.replaceAll("<","&lt;")
+		ihtml = ihtml.replaceAll(">","&gt;")
+
 		console.log(txt)
 		let processed = this.ihtmlProcess(ihtml,txt,room)
 		if(name == "msg"){
@@ -125,9 +129,10 @@ class ArgAccel{
 				return
 			}
 
-
-
-			this.message(date,processed.stext,socket,processed,room)
+			let mid = this.message(date,processed.stext,socket,processed,room)
+			if(processed.desync){
+				this.sMessage("Message ID: "+mid+" is desynced/corrupt",room)
+			}
 		}
 
 
@@ -141,31 +146,32 @@ class ArgAccel{
 
 			if(id == "normal"){
 
-				if(char == "<"){
-				if(str.substring(i+1,i+5) == "span"){
-					i+=4
+				if(char == "&"){
+				if(str.substring(i+1,i+8) == "lt;span"){
+					i+=7
 					id = "spanAttr"
 					out.push({"text":'',"attr":''})
 					continue
-				} else {
-
 				}
 			}
 
 				out[out.length-1] += char
 			} else if(id == "spanAttr"){
-				if(char == ">"){
-					id = "inSpan"
-					continue
+				if(char == "&"){
+					if(str.substring(i+1,i+4) == "gt;"){
+						id = "inSpan"
+						i+=3
+						continue	
+					}
 				}
 				out[out.length-1].attr += char
 
 
 			} else if(id == "inSpan"){
 
-				if(char == "<"){
-				if(str.substring(i+1,i+7) == "/span>"){
-					i+=6
+				if(char == "&"){
+				if(str.substring(i+1,i+13) == "lt;/span&gt;"){
+					i+=12
 					id = "normal"
 					out.push('')
 					continue
@@ -207,7 +213,7 @@ class ArgAccel{
 
 
 
-		return({"text":cont,"processed":out,"stext":stext})
+		return({"text":cont,"processed":out,"stext":stext,"desync":cont!=stext})
 	}
 
 	static matchExtract(e,room){
@@ -245,7 +251,7 @@ class ArgAccel{
 					} else {
 						this.addRoom(split[1])			
 					}
-					sMessage(socket.id + " moved to room "+split[1])
+					this.sMessage(socket.id + " moved to room "+split[1],room)
 					io.to(socket.id).emit("joinroom",split[1])
 					let sid = socket.id
 					socket.leaveAll()
@@ -276,6 +282,7 @@ class ArgAccel{
 		let mid = this.msgid++
 		this.rooms[room].msghist[mid] = contentBlock
 		io.to("G10.7").emit("msg",{"msg":content,"id":socket.id,"msgid":mid})
+		return(mid)
 	}
 	static sMessageWelcome(socket){
 		io.to(socket.id).emit("smsg","Welcome to Lopkn's Argument Accelerator! ArgAccel is one of the top leading technologies in the world. Please feel free to bug fetch while you are here.")
