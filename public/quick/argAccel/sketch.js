@@ -55,6 +55,8 @@ var MIP = document.getElementById("mainInput")
 
 var wrapperFunctions = {}
 
+const empt = "<span class='emptySpan' contentEditable='false' onclick='chatAttributes.deleting(this)'>         </span>"
+
 
 function classQuery(c){
 	return(document.getElementsByClassName(c))
@@ -62,7 +64,7 @@ function classQuery(c){
 function gay(){console.log("gay")}
 
 
-
+let chatAttributes = {"deleting":(e)=>{console.log(e);if(e.parentElement==MIP){e.remove()}}}
 
 
 
@@ -101,6 +103,8 @@ function clearLeftContainer(){
 		addSavedCard(garble(Math.random()*16),garble(Math.random()*900+20))
 
 	}
+	addSavedCard("common",`not every ${empt} is ${empt}. An example would be ${empt}`)
+	addSavedCard("common",`your statement is ${generateOptionSelect(["unsound","invalid","irrelevant"])} because ${empt}`)
 	addSavedCard("testing!","<span style=\"color:red\" contentEditable=\"false\"> testing! </span>")
 	addSavedCard("test2","&lt;div style=\"color:red\"&gt; test &lt;/div&gt;")
 
@@ -707,6 +711,17 @@ function refover(el,open=true){
 	if(!open){
 		ctx.clearRect(0,0,5000,5000)
 	}
+}
+
+function generateOptionSelect(options){
+	let sel = document.createElement("select")
+	options.forEach((e)=>{
+		let opt = document.createElement("option")
+		opt.value = e
+		opt.innerHTML = e
+		sel.appendChild(opt)
+	})
+	return(sel.outerHTML)
 }
 
 

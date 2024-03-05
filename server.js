@@ -1499,6 +1499,7 @@ INFUNCS.io = io
 re8L.io = io
 ten.io = io
 ArgAccel.setio(io)
+re8.setio(io)
 
 // socket = io("https://home.unsown.top")
 
@@ -1650,6 +1651,7 @@ function joinGame(game,socket){
 		socket.join("G10.7")
 		socket.join("ArgAccel-Lobby")
 		io.to(socket.id).emit("acknowledge G10.7",socket.id)
+		ArgAccel.sMessage(socket.id+" connected.","Lobby")
 		ArgAccel.sMessageWelcome(socket)
 		let clientIp = socket.request.connection.remoteAddress
 		if(clientIp == "::ffff:192.168.1.1" || clientIp == "::1" || clientIp == "::ffff:223.18.29.177"){

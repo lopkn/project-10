@@ -117,6 +117,7 @@ class ArgAccel{
 		if(txt.length == 0){return}
 		ihtml = ihtml.replaceAll("&quot;","\"")
 		txt = txt.replaceAll("<","&lt;")
+		console.log(txt)
 		let processed = this.ihtmlProcess(ihtml,txt,room)
 		if(name == "msg"){
 			if(txt[0] == "/"){
@@ -146,6 +147,8 @@ class ArgAccel{
 					id = "spanAttr"
 					out.push({"text":'',"attr":''})
 					continue
+				} else {
+
 				}
 			}
 
@@ -242,6 +245,7 @@ class ArgAccel{
 					} else {
 						this.addRoom(split[1])			
 					}
+					sMessage(socket.id + " moved to room "+split[1])
 					io.to(socket.id).emit("joinroom",split[1])
 					let sid = socket.id
 					socket.leaveAll()

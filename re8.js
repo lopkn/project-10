@@ -1,9 +1,11 @@
-
+let io;
 class re8{
 	static players = {}
 	static rooms = {}
 	static referencer = {"color":{"r":"#A00000","b":"#0000A0","y":"#A0A000","o":"#A04000","p":"#6000C0","c":"#0060C0"}}
-
+	static setio(i){
+		io = i
+	}
 
 	static logger = []
 
