@@ -33,7 +33,7 @@ button.func{
 	transition: opacity 1s;
 }
 #panelInside{
-	width:40%;
+	width:60vw;
 	height:40vh;
 }
 .optionPanel{
@@ -61,10 +61,13 @@ button.func{
 	transition: color 0.2s;
 }
 
-.inputPanel > textarea {
+.inputPanel > div {
 	max-width: 60vw;
 	max-height: 60vh;
+	background-color: white;
+	margin: 1%;
 }
+
 
 .clickableIconsTab{
 	cursor: pointer;

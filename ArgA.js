@@ -90,11 +90,12 @@ class ArgAccel{
 	static msgid = 0
 	// static msghist = {}
 
-	static rooms = {"Lobby":{"msghist":{}}}
+	static rooms = {"Lobby":{"msghist":{},"msghistArr":[]}}
 
 	static addRoom(name){
 		this.rooms[name] = {
 			"msghist":{},
+			"msghistArr":[]
 		}
 	}
 
@@ -183,6 +184,7 @@ class ArgAccel{
 		}
 
 		let stext = ''
+		let ftext = ''
 		out.forEach((e,i)=>{
 			if(i%2==1){
 				let attr = e.attr
@@ -206,14 +208,14 @@ class ArgAccel{
 				} else {
 				  stext += e.text
 				}
+				ftext +=e.text
 			}else{
 			 stext +=e
+			 ftext +=e
 			}
 		})
 
-
-
-		return({"text":cont,"processed":out,"stext":stext,"desync":cont!=stext})
+		return({"text":cont,"processed":out,"stext":stext,"desync":cont!=ftext})
 	}
 
 	static matchExtract(e,room){
@@ -234,6 +236,7 @@ class ArgAccel{
 		let su = false
 		if(this.keyholders[socket.id]){su = true}
 		let split = content.substring(1).split(" ")
+		let aroom = this.rooms[room]
 		let s1 = split[0]
 			if(su){
 				if(s1 == "smsg"){
@@ -260,18 +263,53 @@ class ArgAccel{
 					socket.join(sid)
 				} else if(s1 == "topic"){
 					if(split[1]){
-						if(this.rooms[room].topic == undefined){
-							this.rooms[room].topic = content.substring(7)
-							this.sMessage("The room's topic has been set to: "+this.rooms[room].topic,room)
+						if(aroom.topic == undefined){
+							aroom.topic = content.substring(7)
+							this.sMessage("The room's topic has been set to: "+aroom.topic,room)
 						} else {
-							this.dsMessage("The room's topic is already set to: "+this.rooms[room].topic,socket)
+							this.dsMessage("The room's topic is already set to: "+aroom.topic,socket)
 						}
 					} else {
 						if(this.rooms[room].topic == undefined){
 						this.dsMessage("Current room topic is unset",socket)
 						}else{
-						this.dsMessage("Current topic is: "+this.rooms[room].topic,socket)
+						this.dsMessage("Current topic is: "+aroom.topic,socket)
 						}
+					}
+				} else if(s1 == "flag" || s1 == "flags"){
+					let msg = aroom.msghist[split[1]]?aroom.msghist[split[1]]:aroom.msghist[aroom.msghistArr[aroom.msghistArr.length-1]]
+					let flagstr = ''
+					if(split[2]){
+						this.sMessage(socket.id+" flagged ["+msg.msgid+"] as "+split[2],room)
+						msg.flags[split[2]] = socket.id
+					} else {
+
+						Object.keys(msg.flags).forEach((e)=>{
+							flagstr += ", " + e
+						})
+
+						this.dsMessage("Flags for ["+msg.msgid+"] => "+flagstr.substring(2),socket)
+					}
+				} else if(s1 == "cite"){
+					let msg = aroom.msghist[split[1]]?aroom.msghist[split[1]]:aroom.msghist[aroom.msghistArr[aroom.msghistArr.length-1]]
+					let citestr = ''
+					if(split[2]){
+						this.sMessage(socket.id+" cited ["+msg.msgid+"] with "+split[2],room)
+						msg.citations[split[2]] = socket.id
+					} else {
+
+						Object.keys(msg.citations).forEach((e)=>{
+							citestr += ", " + e
+						})
+
+						this.dsMessage("citations for ["+msg.msgid+"] => "+citestr.substring(2),socket)
+					}
+				} else if(s1 == "load" || s1=="loadlast"){
+					let hist = Number.isInteger(parseInt(split[1]))?parseInt(split[1]):5
+					for(let i = aroom.msghistArr.length-hist; i < aroom.msghistArr.length;i++){
+						let msg = aroom.msghist[aroom.msghistArr[i]]
+						if(msg == undefined){continue}
+						io.to(socket.id).emit("msg",{"msg":msg.stext,"id":msg.senderId,"msgid":msg.msgid})
 					}
 				}
 			
@@ -280,8 +318,14 @@ class ArgAccel{
 	}
 	static message(date,content,socket, contentBlock, room){
 		let mid = this.msgid++
+		contentBlock.flags = {}
+		contentBlock.citations = {}
+		contentBlock.msgid = mid
+		contentBlock.senderId = socket.id
 		this.rooms[room].msghist[mid] = contentBlock
-		io.to("G10.7").emit("msg",{"msg":content,"id":socket.id,"msgid":mid})
+		this.rooms[room].msghistArr.push(mid)
+
+		io.to("ArgAccel-"+room).emit("msg",{"msg":content,"id":socket.id,"msgid":mid})
 		return(mid)
 	}
 	static sMessageWelcome(socket){

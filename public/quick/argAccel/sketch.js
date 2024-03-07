@@ -55,7 +55,7 @@ var MIP = document.getElementById("mainInput")
 
 var wrapperFunctions = {}
 
-const empt = "<span class='emptySpan' contentEditable='false' onclick='chatAttributes.deleting(this)'>         </span>"
+const empt = "<span class='emptySpan' contentEditable='false'>         </span>"
 
 
 function classQuery(c){
@@ -103,10 +103,11 @@ function clearLeftContainer(){
 		addSavedCard(garble(Math.random()*16),garble(Math.random()*900+20))
 
 	}
-	addSavedCard("common",`not every ${empt} is ${empt}. An example would be ${empt}`)
-	addSavedCard("common",`your statement is ${generateOptionSelect(["unsound","invalid","irrelevant"])} because ${empt}`)
 	addSavedCard("testing!","<span style=\"color:red\" contentEditable=\"false\"> testing! </span>")
 	addSavedCard("test2","&lt;div style=\"color:red\"&gt; test &lt;/div&gt;")
+
+	addSavedCard("common",`not every ${empt} is ${empt}. An example would be ${empt}`)
+	addSavedCard("common",`your statement is ${generateOptionSelect(["unsound","invalid","irrelevant"])} because ${empt}`)
 
 
   element = classQuery("leftContainer")[0]
@@ -168,15 +169,15 @@ document.getElementById("addCard").addEventListener("click",(e)=>{
 	toggleInputPanel(false)
 	console.log(document.getElementById("addCard").targeting)
 	if(document.getElementById("addCard").targeting == undefined){
-		addSavedCard(document.getElementById("panelTitle").value,document.getElementById("panelInside").value)
+		addSavedCard(document.getElementById("panelTitle").innerHTML,document.getElementById("panelInside").innerHTML)
 	} else {
 
 		let d = document.getElementById("addCard").targeting
-		d.querySelector("h2").innerHTML = document.getElementById("panelTitle").value
-		d.querySelector("p").innerHTML = document.getElementById("panelInside").value
+		d.querySelector("h2").innerHTML = document.getElementById("panelTitle").innerHTML
+		d.querySelector("p").innerHTML = document.getElementById("panelInside").innerHTML
 	}
-	document.getElementById("panelTitle").value = ""
-	document.getElementById("panelInside").value = ""
+	document.getElementById("panelTitle").innerHTML = ""
+	document.getElementById("panelInside").innerHTML = ""
 	document.getElementById("addCard").targeting = undefined
 })
 
@@ -433,7 +434,10 @@ function insert(text){
 		s.innerHTML = text
 		text = s
 	}
+
+
 	selectionPosition.insertNode(text)
+	initiateTextFuncs(text)
 	
 	let b = document.getElementsByClassName("temporary");
 	let x = 0
@@ -450,6 +454,16 @@ function insert(text){
 	return(lc)
 }
 
+function initiateTextFuncs(elm){
+	console.log(elm.outerHTML)
+	let b = elm.getElementsByClassName("emptySpan")
+	for(let i = 0; i < b.length; i++){
+		let e = b[i]
+		if(!e.onclick){
+			e.onclick = ()=>{chatAttributes.deleting(e)}
+		}
+	}
+}
 
 function collapseSelect(){
 	let b = MIP.getElementsByClassName("collapseSelector");
@@ -524,8 +538,8 @@ document.getElementById("opEdit").addEventListener("click",(e)=>{
 	opanel.blur()
 
 	toggleInputPanel(true,d)
-	document.getElementById("panelTitle").value = d.querySelector("h2").innerHTML
-	document.getElementById("panelInside").value = d.querySelector("p").innerHTML
+	document.getElementById("panelTitle").innerHTML = d.querySelector("h2").innerHTML
+	document.getElementById("panelInside").innerHTML = d.querySelector("p").innerHTML
 	document.getElementById('addCard').targeting = d
 
 })
