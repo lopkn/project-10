@@ -123,7 +123,7 @@ class ArgAccel{
 		ihtml = ihtml.replaceAll(">","&gt;")
 
 		console.log(txt)
-		let processed = this.ihtmlProcess(ihtml,txt,room)
+		let processed = this.ihtmlProcess(ihtml,txt,room,socket)
 		if(name == "msg"){
 			if(txt[0] == "/"){
 				this.command(date,txt,socket,room)
@@ -139,7 +139,7 @@ class ArgAccel{
 
 	}
 
-	static ihtmlProcess(str,cont,room){
+	static ihtmlProcess(str,cont,room,socket){
 		let id = "normal"
 		let out = ['']
 		for(let i = 0; i < str.length; i++){
@@ -204,7 +204,7 @@ class ArgAccel{
 				e.extractedAttr = outstr
 				this.matchExtract(e,room)
 				if(e.verified == true){
-					stext += "<span class='verified' ref='"+e.reference+"' onmouseover='refover(this)' onmouseout='refover(this,false)'>" + e.text + "</span>"
+					stext += "<span class='verified' refid='"+this.rooms[room].msghist[e.reference].senderId+"' ref='"+e.reference+"' onmouseover='refover(this)' onmouseout='refover(this,false)'>" + e.text + "</span>"
 				} else {
 				  stext += e.text
 				}
@@ -214,6 +214,10 @@ class ArgAccel{
 			 ftext +=e
 			}
 		})
+
+		if(cont!=ftext){
+			console.log("["+cont+"]","["+ftext+"]")
+		}
 
 		return({"text":cont,"processed":out,"stext":stext,"desync":cont!=ftext})
 	}

@@ -35,6 +35,7 @@ button.func{
 #panelInside{
 	width:60vw;
 	height:40vh;
+	word-wrap: break-word;
 }
 .optionPanel{
 	min-width:15%;
@@ -236,7 +237,11 @@ button.func{
 	margin-right: 2px;
 }
 
-.collapsedSelector{
+.selfReference{
+	color:limegreen;
+}
+
+.collapsed{
 	color:red;
 }
 

@@ -34,7 +34,7 @@ socket.emit("JOINGAME",GAMESESSION)
 var ID = 0
 socket.on("acknowledge G10.7",(e)=>{ID = e; console.log("joined as "+ID)})
 socket.on("msg",(e)=>{console.log("recieved message: "+e)
-	messageBubble(e.msg,e.id == ID?"right":"left",e.msgid)
+	messageBubble(e.msg,e.id == ID?"right":"left",e.msgid,e.id)
 })
 socket.on("smsg",(e)=>{
 	messageBubble(e,"cent")
@@ -92,13 +92,13 @@ function clearLeftContainer(){
 	for(let i = 0; i < 15; i++){
 		// let d = document.createElement("div")
 		// let h2 = document.createElement("h2")
-		// let p = document.createElement("p")
+		// let p = document.createElement("div")
 		// h2.innerHTML = garble(Math.random()*16)
 		// p.innerHTML = garble(Math.random()*900+20)
 		// d.appendChild(h2)
 		// d.appendChild(p)
 		// d.style.backgroundColor = "HSL("+Math.floor(Math.random()*255)+",100%,80%)"
-		// d.onclick=()=>{insert(d.querySelector("p").innerHTML)}
+		// d.onclick=()=>{insert(d.querySelector("div").innerHTML)}
 		// element.appendChild(d)
 		addSavedCard(garble(Math.random()*16),garble(Math.random()*900+20))
 
@@ -131,7 +131,7 @@ function addSavedCard(title,value){
 	console.log(title)
 	let d = document.createElement("div")
 	let h2 = document.createElement("h2")
-	let p = document.createElement("p")
+	let p = document.createElement("div")
 	let cit = document.createElement("div")
 	let crosser = document.createElement("div")
 	cit.style.top = "0px"
@@ -159,7 +159,8 @@ function addSavedCard(title,value){
 		d.appendChild(p)
 		d.appendChild(cit)
 		d.style.backgroundColor = "HSL("+Math.floor(Math.random()*255)+",100%,80%)"
-		d.onclick=()=>{GST(d.querySelector("p").innerHTML,true)}
+		//clickablesaved//saveclick
+		d.onclick=()=>{GST(d.querySelector("div").innerHTML.replaceAll("&nbsp;"," "),true)}
 		element.insertBefore(d,element.firstChild)
 	return(d)
 }
@@ -174,7 +175,7 @@ document.getElementById("addCard").addEventListener("click",(e)=>{
 
 		let d = document.getElementById("addCard").targeting
 		d.querySelector("h2").innerHTML = document.getElementById("panelTitle").innerHTML
-		d.querySelector("p").innerHTML = document.getElementById("panelInside").innerHTML
+		d.querySelector("div").innerHTML = document.getElementById("panelInside").innerHTML
 	}
 	document.getElementById("panelTitle").innerHTML = ""
 	document.getElementById("panelInside").innerHTML = ""
@@ -230,7 +231,7 @@ function suggestionCard(val){
 		}
 	let d = document.createElement("div")
 		let h2 = document.createElement("h2")
-		let p = document.createElement("p")
+		let p = document.createElement("div")
 		h2.innerHTML = "suggested Card"
 		p.innerHTML = val
 		d.appendChild(h2)
@@ -242,7 +243,7 @@ function suggestionCard(val){
 			d.remove()
 			let c = addSavedCard("saved card",val)
 			c.style.backgroundColor = d.style.backgroundColor
-			// h2.innerHTML="saved card";saveSuggestion(d);console.log("saved");d.onclick=()=>{insert(d.querySelector("p").innerHTML)}
+			// h2.innerHTML="saved card";saveSuggestion(d);console.log("saved");d.onclick=()=>{insert(d.querySelector("div").innerHTML)}
 		}
 		let suggestElement = classQuery("leftSuggest")[0]
 		console.log(suggestElement)
@@ -262,10 +263,13 @@ MIP.addEventListener("keydown",(e)=>{
 		
 		if(e.shiftKey){return}
 
-		collapseSelect()
+		collapseAll()
 
-
-		socket.emit("msg",{"ihtml":MIP.innerHTML,"txt":MIP.innerText,"room":ROOM})
+		let sstr = MIP.innerHTML.replaceAll("&nbsp;"," ")
+		let sstr2 = MIP.innerText.replaceAll(" "," ")
+		console.log(sstr)
+		console.log(sstr[0] == sstr[1])
+		socket.emit("msg",{"ihtml":sstr,"txt":sstr2,"room":ROOM})
 
 		suggestionCard(MIP.innerHTML)
 
@@ -287,7 +291,7 @@ document.getElementById("chat").addEventListener("keydown",(e)=>{
 })
 
 
-function messageBubble(msg,lr="left",msgid=-1){
+function messageBubble(msg,lr="left",msgid=-1,eid=-1){
 	let m = document.createElement("div")
 	let jer = document.createElement("div")
 
@@ -317,6 +321,15 @@ function messageBubble(msg,lr="left",msgid=-1){
 
 	let scrolledTop = (chat.scrollTop+chat.offsetHeight+10>chat.scrollHeight);
 	jer.appendChild(m)
+
+	let classArr = m.getElementsByClassName("verified")
+	for(let i = 0; i < classArr.length; i++){
+		let e = classArr[i]
+		if(e.getAttribute("refid") == eid){
+			e.classList.add("selfReference")
+		}
+	}
+
 
 	chat.appendChild(jer)
 	wrapperCompleteAll()
@@ -465,6 +478,28 @@ function initiateTextFuncs(elm){
 	}
 }
 
+function collapseAll(){
+	collapseSelect()
+	collapseEmpty()
+}
+
+function collapseEmpty(){
+	let b = MIP.getElementsByClassName("emptySpan");
+	let x = 0
+		let lc;
+		while(b.length && x < 500) {
+				x++
+		    let parent = b[0].parentNode;
+
+		    let SPAN = document.createElement("span")
+		    SPAN.classList.add("collapsed")
+		    SPAN.innerHTML = ((e)=>{return(e[Math.floor(Math.random()*e.length)])})(["doughnut","gay","a torus","topological","stupid"])
+		     parent.insertBefore(SPAN,b[0]);
+		     parent.removeChild(b[0]);
+		}
+		return(lc)
+}
+
 function collapseSelect(){
 	let b = MIP.getElementsByClassName("collapseSelector");
 	let x = 0
@@ -474,7 +509,7 @@ function collapseSelect(){
 	    let parent = b[0].parentNode;
 
 	    let SPAN = document.createElement("span")
-	    SPAN.classList.add("collapsedSelector")
+	    SPAN.classList.add("collapsed")
 	    SPAN.innerHTML = b[0].value
 	     parent.insertBefore(SPAN,b[0]);
 	     parent.removeChild(b[0]);
@@ -539,7 +574,7 @@ document.getElementById("opEdit").addEventListener("click",(e)=>{
 
 	toggleInputPanel(true,d)
 	document.getElementById("panelTitle").innerHTML = d.querySelector("h2").innerHTML
-	document.getElementById("panelInside").innerHTML = d.querySelector("p").innerHTML
+	document.getElementById("panelInside").innerHTML = d.querySelector("div").innerHTML
 	document.getElementById('addCard').targeting = d
 
 })
