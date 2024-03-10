@@ -285,7 +285,7 @@ class ArgAccel{
 					let flagstr = ''
 					if(split[2]){
 						this.sMessage(socket.id+" flagged ["+msg.msgid+"] as "+split[2],room)
-						msg.flags[split[2]] = socket.id
+						msg.flags[split[2]] = {"flagid":socket.id,"resolved":false}
 					} else {
 
 						Object.keys(msg.flags).forEach((e)=>{
