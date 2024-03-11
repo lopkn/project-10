@@ -284,7 +284,7 @@ class ArgAccel{
 					let msg = aroom.msghist[split[1]]?aroom.msghist[split[1]]:aroom.msghist[aroom.msghistArr[aroom.msghistArr.length-1]]
 					let flagstr = ''
 					if(split[2]){
-						this.sMessage(socket.id+" flagged ["+msg.msgid+"] as "+split[2],room)
+						this.sMessage(socket.id+"<span style='color:pink'> flagged ["+msg.msgid+"] as "+split[2]+"</span>",room)
 						msg.flags[split[2]] = {"flagid":socket.id,"resolved":false}
 					} else {
 
