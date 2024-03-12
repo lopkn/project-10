@@ -282,7 +282,6 @@ MIP.addEventListener("keydown",(e)=>{
 })
 
 document.getElementById("chat").addEventListener("keydown",(e)=>{
-	console.log('dog')
 	if(e.key == "Tab"){
 		GHT()
 		console.log("gay?")
@@ -312,6 +311,8 @@ function messageBubble(msg,lr="left",msgid=-1,eid=-1){
 		m.classList.add("left")
 	}
 
+	m.addEventListener("contextmenu",messageBubbleClick)
+
 	// m.setAttribute("msgid",msgid)
 	// jer.setAttribute("msgid",msgid)
 	m.id = "msgM"+msgid
@@ -339,6 +340,11 @@ function messageBubble(msg,lr="left",msgid=-1,eid=-1){
 	
 }
 
+
+function messageBubbleClick(e){
+	console.log(e,e.target)
+	e.preventDefault()
+}
 
 
 

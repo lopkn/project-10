@@ -28,11 +28,11 @@ const std::string adverbs[22]={
   "incomprehensibly "
 };
 
-  for(int i = 0; i < 20; i++){
+  // for(int i = 0; i < 20; i++){
   a = rand() % 31;
   int b = rand()%22;
-  std::cout << adverbs[b] + stupids[a] + " " << std::endl;
-  }
+  std::cout << adverbs[b] + stupids[a] + " ";
+  // }
   return 0;
 }
 

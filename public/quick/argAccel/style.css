@@ -228,6 +228,7 @@ button.func{
 	user-select: all;
 	background-color: #E0E0FF;
 	white-space: pre;
+	cursor: pointer;
 }
 .verified{
 	background-color: #00000F;

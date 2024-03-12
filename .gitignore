@@ -3,3 +3,5 @@ process.env
 disc/token.json
 errorlog.json
 public/debug/errorlog3.txt
+errorsLog.log
+outputLog.log
