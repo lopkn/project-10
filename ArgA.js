@@ -265,6 +265,15 @@ class ArgAccel{
 					socket.join("G10.7")
 					socket.join("ArgAccel-"+split[1])
 					socket.join(sid)
+				} else if(s1 == "lobby"){
+					split[1] = "Lobby"
+					this.sMessage(socket.id + " moved to room "+split[1],room)
+					io.to(socket.id).emit("joinroom",split[1])
+					let sid = socket.id
+					socket.leaveAll()
+					socket.join("G10.7")
+					socket.join("ArgAccel-"+split[1])
+					socket.join(sid)
 				} else if(s1 == "topic"){
 					if(split[1]){
 						if(aroom.topic == undefined){
@@ -344,5 +353,22 @@ class ArgAccel{
 }
 
 //////////////////////////////////////////////////// ArgAccel END
-
+//tdl
+//
+//
+// join same room prevention
+// citation block
+// citation API
+// flag block
+// flag API
+// rightside bar
+//
+//
+//
+//
+//
+//
+//
+//
+///
 module.exports = {ArgAug,ArgAccel}

@@ -146,7 +146,6 @@ function addSavedCard(title,value){
 		}else{
 			savedCardOptions(e,d)
 		}
-		// d.remove();
 	}
 	cit.onclick = (e)=>{e.stopPropagation()}
 	cit.classList.add("clickableIconsTab")
@@ -267,9 +266,13 @@ MIP.addEventListener("keydown",(e)=>{
 
 		let sstr = MIP.innerHTML.replaceAll("&nbsp;"," ")
 		let sstr2 = MIP.innerText.replaceAll(" "," ")
-		console.log(sstr)
-		console.log(sstr[0] == sstr[1])
-		socket.emit("msg",{"ihtml":sstr,"txt":sstr2,"room":ROOM})
+
+		if(sstr2[0] == "/" && sstr2[1] == "/"){
+			clientCommand(sstr2.substring(2))
+		} else {
+			socket.emit("msg",{"ihtml":sstr,"txt":sstr2,"room":ROOM})
+		}
+
 
 		suggestionCard(MIP.innerHTML)
 
@@ -341,10 +344,38 @@ function messageBubble(msg,lr="left",msgid=-1,eid=-1){
 }
 
 
+
+let mpanel = document.getElementById("messagePanel")
 function messageBubbleClick(e){
 	console.log(e,e.target)
+	let d = e.target
+
 	e.preventDefault()
+
+
+	let on = (mpanel === document.activeElement)
+	if(!on){
+		mpanel.style.visibility="visible"
+		mpanel.style.opacity="1"
+		mpanel.style.top = Math.floor(e.clientY)+"px"
+		mpanel.style.left = Math.floor(e.clientX)+"px"
+		mpanel.MyReference = d
+		mpanel.focus()
+	}
+
 }
+mpanel.addEventListener("focusout",(e)=>{
+	mpanel.style.visibility="hidden"
+	mpanel.style.opacity="0"
+})
+document.getElementById("mpFlag").addEventListener("click",(e)=>{
+	let d = mpanel.MyReference
+	mpanel.blur()
+})
+document.getElementById("mpCite").addEventListener("click",(e)=>{
+	let d = mpanel.MyReference
+	mpanel.blur()
+})
 
 
 
@@ -567,7 +598,6 @@ function savedCardOptions(e,d){
 opanel.addEventListener("focusout",(e)=>{
 	opanel.style.visibility="hidden"
 	opanel.style.opacity="0"
-	console.log("hi?")
 })
 document.getElementById("opRemove").addEventListener("click",(e)=>{
 	let d = opanel.MyReference
@@ -803,6 +833,11 @@ function generateOptionSelect(options){
 		sel.appendChild(opt)
 	})
 	return(sel.outerHTML)
+}
+
+
+function clientCommand(str){
+	
 }
 
 
