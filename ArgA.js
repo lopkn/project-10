@@ -342,12 +342,15 @@ class ArgAccel{
 		let mid = this.msgid++
 		contentBlock.flags = {}
 		contentBlock.citations = {}
+		contentBlock.type = "msg"
 		contentBlock.msgid = mid
 		contentBlock.senderId = socket.id
 		this.rooms[room].msghist[mid] = contentBlock
 		this.rooms[room].msghistArr.push(mid)
 
-		io.to("ArgAccel-"+room).emit("msg",{"msg":content,"id":socket.id,"msgid":mid})
+		let attributes = {}
+
+		io.to("ArgAccel-"+room).emit("msg",{"msg":content,"id":socket.id,"msgid":mid,"attr":attributes})
 		return(mid)
 	}
 	static sMessageWelcome(socket){

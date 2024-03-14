@@ -17,6 +17,30 @@ button.func{
 }
 
 
+.genericInputBackground{
+	width: 40vw;
+	height: 40vh;
+	top:30%;
+	left:30%;
+	background-color: #808080;
+	position: fixed;
+	border:1px solid #000;
+	transition: opacity 1s;
+}
+.genericInput{
+	width:90%;
+	height:90%;
+	top:5%;
+	margin:auto;
+	background-color: white;
+	word-wrap: break-word;
+  	white-space: pre-wrap;
+	box-sizing: border-box;
+	position:relative;
+	padding:2px;
+}
+
+
 .inputPanel{
 	min-width:70%;
 	min-height:70%;
@@ -192,6 +216,8 @@ button.func{
 	white-space: pre-wrap;
 	padding:2px;
 }
+
+
 
 
 .chat{

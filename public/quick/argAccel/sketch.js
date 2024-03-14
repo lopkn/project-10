@@ -388,9 +388,12 @@ document.getElementById("mpCite").addEventListener("click",(e)=>{
 
 	let str = "/cite "+d.id.substring(4)+" "
 	str += window.prompt("cite with:","www.theonion.com")+" "
-	str += window.prompt("additional comments:","good website")
-	console.log(str)
-	sendPlain(str)
+
+	let op = new genericContBox((e)=>{
+		str += e.d.innerText
+		console.log(str)
+		sendPlain(str)
+	})
 
 	mpanel.blur()
 })
@@ -859,10 +862,45 @@ function clientCommand(str){
 }
 
 
-class textHandler{
-	static tb = document.querySelector("textarea")
 
-	static mainArr = []
+
+
+
+
+
+class genericContBox{
+	constructor(endFunction=(e)=>{console.log(e.d.innerHTML)}){
+		this.db = document.createElement("div")
+		this.db.classList.add("genericInputBackground")
+		document.body.appendChild(this.db)
+
+		this.d = document.createElement("div")
+		this.d.contentEditable = 'true'
+		this.d.classList.add("genericInput")
+		this.db.appendChild(this.d)
+
+		this.d.addEventListener('keydown',(e)=>{
+			if(e.key == "Enter" || e.keyCode == 13){
+				
+				if(e.shiftKey){return}
+
+				this.endFunction(this)
+				this.db.remove()
+				e.preventDefault()
+			} else if(e.key=="Escape"){
+				this.d.innerHTML = ''
+				this.endFunction(this)
+				this.db.remove()
+				e.preventDefault()
+			}
+		})
+
+
+
+		this.endFunction=endFunction
+		this.d.focus()
+		return(this)
+	}
 }
 
 
