@@ -224,6 +224,8 @@ function toggleInputPanel(on=true,editing){
 // }
 
 
+
+
 function suggestionCard(val){
 		if(val.length < 10 || val.split(" ").length < 3){
 			return
@@ -283,6 +285,10 @@ MIP.addEventListener("keydown",(e)=>{
 		e.preventDefault()
 	}
 })
+
+function sendPlain(str){
+		socket.emit("msg",{"ihtml":str,"txt":str,"room":ROOM})
+}
 
 document.getElementById("chat").addEventListener("keydown",(e)=>{
 	if(e.key == "Tab"){
@@ -370,6 +376,11 @@ mpanel.addEventListener("focusout",(e)=>{
 })
 document.getElementById("mpFlag").addEventListener("click",(e)=>{
 	let d = mpanel.MyReference
+	let str = "/flag "+d.id.substring(4)+" "
+	str += window.prompt("flag as:","stupid").split(" ")[0] + " "
+	str += window.prompt("reason?")
+	console.log(str)
+	sendPlain(str)
 	mpanel.blur()
 })
 document.getElementById("mpCite").addEventListener("click",(e)=>{
@@ -837,7 +848,7 @@ function generateOptionSelect(options){
 
 
 function clientCommand(str){
-	
+
 }
 
 

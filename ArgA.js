@@ -290,11 +290,18 @@ class ArgAccel{
 						}
 					}
 				} else if(s1 == "flag" || s1 == "flags"){
+
+					if(split[1] !== ""){
+						if(aroom.msghist[split[1]] == undefined){return}
+					}
+
 					let msg = aroom.msghist[split[1]]?aroom.msghist[split[1]]:aroom.msghist[aroom.msghistArr[aroom.msghistArr.length-1]]
 					let flagstr = ''
 					if(split[2]){
-						this.sMessage(socket.id+"<span style='color:pink'> flagged ["+msg.msgid+"] as "+split[2]+"</span>",room)
-						msg.flags[split[2]] = {"flagid":socket.id,"resolved":false}
+						let reason = content.substring(8+split[2].length+split[1].length)
+						let reasonString = (reason == ''?'':" because "+reason)
+						this.sMessage(socket.id+"<span style='color:pink'> flagged ["+msg.msgid+"] as "+split[2]+reasonString+"</span>",room)
+						msg.flags[split[2]] = {"flagid":socket.id,"resolved":false,"reason":reason}
 					} else {
 
 						Object.keys(msg.flags).forEach((e)=>{
@@ -362,6 +369,16 @@ class ArgAccel{
 // flag block
 // flag API
 // rightside bar
+//
+//
+//
+//
+//argdemo
+//
+// s
+//
+//
+//
 //
 //
 //
