@@ -385,6 +385,13 @@ document.getElementById("mpFlag").addEventListener("click",(e)=>{
 })
 document.getElementById("mpCite").addEventListener("click",(e)=>{
 	let d = mpanel.MyReference
+
+	let str = "/cite "+d.id.substring(4)+" "
+	str += window.prompt("cite with:","www.theonion.com")+" "
+	str += window.prompt("additional comments:","good website")
+	console.log(str)
+	sendPlain(str)
+
 	mpanel.blur()
 })
 

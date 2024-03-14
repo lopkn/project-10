@@ -204,7 +204,7 @@ class ArgAccel{
 				e.extractedAttr = outstr
 				this.matchExtract(e,room)
 				if(e.verified == true){
-					stext += "<span class='verified' refid='"+this.rooms[room].msghist[e.reference].senderId+"' ref='"+e.reference+"' onmouseover='refover(this)' onmouseout='refover(this,false)'>" + e.text + "</span>"
+					stext += "<span class='verified referencer' refid='"+this.rooms[room].msghist[e.reference].senderId+"' ref='"+e.reference+"' onmouseover='refover(this)' onmouseout='refover(this,false)'>" + e.text + "</span>"
 				} else {
 				  stext += e.text
 				}
@@ -313,9 +313,11 @@ class ArgAccel{
 				} else if(s1 == "cite"){
 					let msg = aroom.msghist[split[1]]?aroom.msghist[split[1]]:aroom.msghist[aroom.msghistArr[aroom.msghistArr.length-1]]
 					let citestr = ''
+					let citation = "<span style='color:SlateBlue'><a target='_blank' rel='noopener noreferrer' href='//"+split[2]+"'>"+split[2]+"</a></span>"+content.substring(7+split[1].length+split[2].length)
+
 					if(split[2]){
-						this.sMessage(socket.id+" cited ["+msg.msgid+"] with "+split[2],room)
-						msg.citations[split[2]] = socket.id
+						this.sMessage(socket.id+" cited ["+msg.msgid+"] with "+citation,room)
+						msg.citations[Date.now()] = socket.id
 					} else {
 
 						Object.keys(msg.citations).forEach((e)=>{
