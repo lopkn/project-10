@@ -293,7 +293,6 @@ function sendPlain(str){
 document.getElementById("chat").addEventListener("keydown",(e)=>{
 	if(e.key == "Tab"){
 		GHT()
-		console.log("gay?")
 		e.preventDefault()
 	}
 })
@@ -895,10 +894,20 @@ class genericContBox{
 			}
 		})
 
+		this.d.focus()
+		this.db.tabIndex = -1
+		this.db.addEventListener('focusout',(e)=>{
+			if(this.db.contains(document.activeElement) || document.activeElement == this.db
+				|| this.db.contains(e.target) || this.db == e.target
+				){return}
+			this.d.innerHTML = ''
+			this.endFunction(this)
+			this.db.remove()
+		})
+
 
 
 		this.endFunction=endFunction
-		this.d.focus()
 		return(this)
 	}
 }

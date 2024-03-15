@@ -360,7 +360,7 @@ class ArgAccel{
 		io.to("ArgAccel-"+room).emit("smsg",content)
 		}
 	static dsMessage(content,socket){
-		io.to(socket.id).emit("smsg",content)
+		io.to(socket.id).emit("smsg","> "+content)
 	}
 }
 
