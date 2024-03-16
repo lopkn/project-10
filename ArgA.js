@@ -130,7 +130,7 @@ class ArgAccel{
 				return
 			}
 
-			let mid = this.message(date,processed.stext,socket,processed,room)
+			let mid = this.message(date,socket,processed,room)
 			if(processed.desync){
 				this.sMessage("Message ID: "+mid+" is desynced/corrupt",room)
 			}
@@ -226,11 +226,17 @@ class ArgAccel{
 		let jstr = e.extractedAttr
 		try{
 		let j = JSON.parse(jstr)
-			let matches = this.rooms[room].msghist[j.msgid].text.includes(e.text)
-			if(matches){
-				e.verified = true
-				e.reference = j.msgid
+			let msg = this.rooms[room].msghist[j.msgid]
+
+			if(msg.canReference){
+				let matches = msg.text.includes(e.text)
+				if(matches){
+					e.verified = true
+					e.reference = j.msgid
+				}
 			}
+
+			
 		}catch(err){return(e)}
 		
 		return(e)
@@ -291,11 +297,11 @@ class ArgAccel{
 					}
 				} else if(s1 == "flag" || s1 == "flags"){
 
-					if(split[1] !== ""){
+					if(split[1] !== "" && split[1] !== undefined){
 						if(aroom.msghist[split[1]] == undefined){return}
 					}
 
-					let msg = aroom.msghist[split[1]]?aroom.msghist[split[1]]:aroom.msghist[aroom.msghistArr[aroom.msghistArr.length-1]]
+					let msg = this.isMessage(split[1],aroom)?aroom.msghist[split[1]]:this.latestMessage(aroom)
 					let flagstr = ''
 					if(split[2]){
 						let reason = content.substring(8+split[2].length+split[1].length)
@@ -311,12 +317,15 @@ class ArgAccel{
 						this.dsMessage("Flags for ["+msg.msgid+"] => "+flagstr.substring(2),socket)
 					}
 				} else if(s1 == "cite"){
-					let msg = aroom.msghist[split[1]]?aroom.msghist[split[1]]:aroom.msghist[aroom.msghistArr[aroom.msghistArr.length-1]]
+					let msg = this.isMessage(split[1],aroom)?aroom.msghist[split[1]]:this.latestMessage(aroom)
 					let citestr = ''
-					let citation = "<span style='color:SlateBlue'><a target='_blank' rel='noopener noreferrer' href='//"+split[2]+"'>"+split[2]+"</a></span>"+content.substring(7+split[1].length+split[2].length)
 
 					if(split[2]){
-						this.sMessage(socket.id+" cited ["+msg.msgid+"] with "+citation,room)
+						let citation = "<span style='color:SlateBlue'><a target='_blank' rel='noopener noreferrer' href='//"+split[2]+"'>"+split[2]+"</a></span>"+content.substring(7+split[1].length+split[2].length)
+						// this.sMessage(socket.id+" cited ["+msg.msgid+"] with "+citation,room)
+						this.blockMessage(Date.now(),socket,{
+							"stext":socket.id+" cited ["+msg.msgid+"] with "+citation
+						},room)
 						msg.citations[Date.now()] = socket.id
 					} else {
 
@@ -331,28 +340,57 @@ class ArgAccel{
 					for(let i = aroom.msghistArr.length-hist; i < aroom.msghistArr.length;i++){
 						let msg = aroom.msghist[aroom.msghistArr[i]]
 						if(msg == undefined){continue}
-						io.to(socket.id).emit("msg",{"msg":msg.stext,"id":msg.senderId,"msgid":msg.msgid})
+						io.to(socket.id).emit("msg",{"msg":msg.stext,"id":msg.senderId,"msgid":msg.msgid,"attr":msg.attributes})
 					}
 				}
 			
 
 
 	}
-	static message(date,content,socket, contentBlock, room){
+
+	static isMessage(id,room){
+		return(room.msghist[id]?.type =="msg")
+	}
+
+	static latestMessage(room){
+		for(let i = room.msghistArr.length-1;i>-1;i--){
+			if(room.msghist[room.msghistArr[i]].type == "msg"){
+				return(room.msghist[room.msghistArr[i]])
+			}
+		}
+	}
+
+	static message(date,socket, contentBlock, room){
 		let mid = this.msgid++
 		contentBlock.flags = {}
 		contentBlock.citations = {}
 		contentBlock.type = "msg"
 		contentBlock.msgid = mid
+		contentBlock.canReference = true
 		contentBlock.senderId = socket.id
 		this.rooms[room].msghist[mid] = contentBlock
 		this.rooms[room].msghistArr.push(mid)
 
-		let attributes = {}
+		contentBlock.attributes = {}
 
-		io.to("ArgAccel-"+room).emit("msg",{"msg":content,"id":socket.id,"msgid":mid,"attr":attributes})
+		io.to("ArgAccel-"+room).emit("msg",{"msg":contentBlock.stext,"id":socket.id,"msgid":mid,"attr":contentBlock.attributes})
 		return(mid)
 	}
+
+	static blockMessage(date,socket,contentBlock,room){
+		let mid = this.msgid++
+		contentBlock.type = "block"
+		contentBlock.msgid = mid
+		contentBlock.senderId = socket.id
+		this.rooms[room].msghist[mid] = contentBlock
+		this.rooms[room].msghistArr.push(mid)
+
+		contentBlock.attributes = {}
+
+		io.to("ArgAccel-"+room).emit("msg",{"msg":contentBlock.stext,"id":socket.id,"msgid":mid,"attr":contentBlock.attributes})
+		return(mid)
+	}
+
 	static sMessageWelcome(socket){
 		io.to(socket.id).emit("smsg","Welcome to Lopkn's Argument Accelerator! ArgAccel is one of the top leading technologies in the world. Please feel free to bug fetch while you are here.")
 	}

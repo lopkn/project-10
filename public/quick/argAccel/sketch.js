@@ -36,6 +36,12 @@ socket.on("acknowledge G10.7",(e)=>{ID = e; console.log("joined as "+ID)})
 socket.on("msg",(e)=>{console.log("recieved message: "+e)
 	messageBubble(e.msg,e.id == ID?"right":"left",e.msgid,e.id)
 })
+
+socket.on("bmsg",(e)=>{console.log("recieved bmessage: "+e)
+	let mb = messageBubble(e.msg,e.id == ID?"right":"left",e.msgid,e.id)
+	mb.classList.add("blockMessage")
+})
+
 socket.on("smsg",(e)=>{
 	messageBubble(e,"cent")
 })
@@ -345,7 +351,7 @@ function messageBubble(msg,lr="left",msgid=-1,eid=-1){
 	if(scrolledTop){
 		chat.scrollTop = chat.scrollHeight;
 	}
-	
+	return(jer)
 }
 
 
