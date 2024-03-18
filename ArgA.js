@@ -385,7 +385,7 @@ class ArgAccel{
 		this.rooms[room].msghist[mid] = contentBlock
 		this.rooms[room].msghistArr.push(mid)
 
-		contentBlock.attributes = {}
+		contentBlock.attributes = {"type":"block"}
 
 		io.to("ArgAccel-"+room).emit("msg",{"msg":contentBlock.stext,"id":socket.id,"msgid":mid,"attr":contentBlock.attributes})
 		return(mid)

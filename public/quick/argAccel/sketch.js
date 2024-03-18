@@ -34,13 +34,16 @@ socket.emit("JOINGAME",GAMESESSION)
 var ID = 0
 socket.on("acknowledge G10.7",(e)=>{ID = e; console.log("joined as "+ID)})
 socket.on("msg",(e)=>{console.log("recieved message: "+e)
-	messageBubble(e.msg,e.id == ID?"right":"left",e.msgid,e.id)
+	let mb = messageBubble(e.msg,e.id == ID?"right":"left",e.msgid,e)
+	if(e.attr.type == "block"){
+		mb.classList.add("blockMessage")
+	}
 })
 
-socket.on("bmsg",(e)=>{console.log("recieved bmessage: "+e)
-	let mb = messageBubble(e.msg,e.id == ID?"right":"left",e.msgid,e.id)
-	mb.classList.add("blockMessage")
-})
+// socket.on("bmsg",(e)=>{console.log("recieved bmessage: "+e)
+// 	let mb = messageBubble(e.msg,e.id == ID?"right":"left",e.msgid,e.id)
+// 	mb.classList.add("blockMessage")
+// })
 
 socket.on("smsg",(e)=>{
 	messageBubble(e,"cent")
@@ -304,7 +307,8 @@ document.getElementById("chat").addEventListener("keydown",(e)=>{
 })
 
 
-function messageBubble(msg,lr="left",msgid=-1,eid=-1){
+function messageBubble(msg,lr="left",msgid=-1,e){
+	let eid = (e?.id!==undefined)?e.id:-1
 	let m = document.createElement("div")
 	let jer = document.createElement("div")
 
