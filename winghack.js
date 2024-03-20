@@ -87,7 +87,7 @@ window.weaponPreset = {
   "1":()=>{
     lead = 32;
     Dlead = 1;
-    Alead = 31
+    Alead = 100
     shootThreshold = 0.3
   },
   "2":()=>{
@@ -104,13 +104,13 @@ window.weaponPreset = {
   },
   "8":()=>{
     lead = 31;
-    Alead = 30;
-    Dlead = 0
+    Alead = 130;
+    Dlead = 0;
     shootThreshold = 0.1;
   },
   "16":()=>{
     lead = 31;
-    Dlead = 0;
+    Dlead = 160;
     Alead = 0;
     shootThreshold = 0.2
   },
@@ -257,7 +257,13 @@ objk.forEach((a,i)=>{
     if(last[a] == undefined){
       last[a] = {"lx":t[0],"ly":t[1],"lvy":0,"lvx":0,"vx":e.x-e.prevX,"vy":e.y-e.prevY,"ax":0,"ay":0,}
     } else {
+      let sav = [last[a].ax,last[a].ay]
       last[a] = {"lvx":t[0]-last[a].lx,"lvy":t[1]-last[a].ly,"lx":t[0],"ly":t[1],"ax":e.x-e.prevX-last[a].vx,"ay":e.y-e.prevY-last[a].vy,"vx":e.x-e.prevX,"vy":e.y-e.prevY}
+      if(last[a].ax == 0 && last[a].ay==0){
+        last[a].ax = sav[0]
+        last[a].ay = sav[1]
+        console.log("hol*")
+      }
     }
       // last[a] = {}
     // let ddl = distance(last[a].lvx,last[a].lvy,0,0)
@@ -390,6 +396,10 @@ objk.forEach((a,i)=>{
       ctx.strokeStyle = "#00FF00"
       ctx.moveTo(t[0]-lx,t[1]-ly)
       ctx.lineTo(last[closest].vx*adjust  + t[0]-lx,last[closest].vy*adjust +t[1]-ly)
+      ctx.stroke()
+      ctx.beginPath()
+      ctx.strokeStyle = "#FF0000"
+      ctx.moveTo(last[closest].vx*adjust  + t[0]-lx,last[closest].vy*adjust +t[1]-ly)
       ctx.lineTo(last[closest].vx*adjust+last[closest].ax*adjust  + t[0]-lx,last[closest].vy*adjust+last[closest].ay*adjust +t[1]-ly)
       ctx.stroke()
 
