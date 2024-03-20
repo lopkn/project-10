@@ -110,8 +110,8 @@ window.weaponPreset = {
   },
   "16":()=>{
     lead = 31;
-    Dlead = 160;
-    Alead = 0;
+    Dlead = 0;
+    Alead = 160;
     shootThreshold = 0.2
   },
   "128":()=>{
@@ -262,7 +262,6 @@ objk.forEach((a,i)=>{
       if(last[a].ax == 0 && last[a].ay==0){
         last[a].ax = sav[0]
         last[a].ay = sav[1]
-        console.log("hol*")
       }
     }
       // last[a] = {}
