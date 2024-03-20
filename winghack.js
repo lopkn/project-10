@@ -10,11 +10,24 @@ canvas2.width = window.innerWidth; canvas2.height = window.innerHeight
 window.mouseDown = false;
 window.Width = canvas2.width
 window.Height = canvas2.height
-document.body.onmousedown = function() { 
-  mouseDown = true;
+document.body.onmousedown = function(e) {
+  if(e.which == 1){
+    mouseDown = true;
+  }  else if(e.which == 3){
+    if(downs["x"] == false){
+    window.A.sendDirection = ()=>{}
+    window.A.sendInput = ()=>{}
+    }
+  }
 }
 document.body.onmouseup = function() {
-  mouseDown = false;
+  if(e.which == 1){
+    mouseDown = false;
+  } else if(e.which == 3){
+    window.A.sendDirection = window.SD
+    window.A.sendInput = window.SI
+    downs["x"] = false
+  }
 }
 window.priorityTargetMode = false
 window.ctx = canvas2.getContext("2d")
