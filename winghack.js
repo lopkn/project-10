@@ -17,6 +17,7 @@ document.body.onmousedown = function(e) {
     if(downs["x"] == false){
     window.A.sendDirection = ()=>{}
     window.A.sendInput = ()=>{}
+    downs['x'] = true
     }
   }
 }
@@ -85,34 +86,38 @@ window.weaponColor = {
 window.weaponPreset = {
   "1":()=>{
     lead = 32;
-    Dlead = 3;
+    Dlead = 1;
     Alead = 31
     shootThreshold = 0.3
   },
   "2":()=>{
     lead = 32;
-    Dlead = 3;
+    Dlead = 1;
     Alead = 31
     shootThreshold = 0.5
   },
   "4":()=>{
     lead = 80;
-    Alead = 40;
-    Dlead = 40;
+    Alead = 5;
+    Dlead = 5;
     shootThreshold = 0.3
   },
   "8":()=>{
     lead = 31;
-    Alead = 40;
+    Alead = 30;
     Dlead = 0
     shootThreshold = 0.1;
   },
   "16":()=>{
     lead = 31;
+    Dlead = 0;
+    Alead = 0;
     shootThreshold = 0.2
   },
   "128":()=>{
     lead = 50;
+    Alead = 30;
+    Dlead = 2
     shootThreshold = 0.2;
   },
   "256":()=>{
