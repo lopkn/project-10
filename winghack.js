@@ -73,6 +73,7 @@ window.blackList = {}
 window.normVector = [0,-1]
 
 window.boostPath = []
+window.autoThresh = true
 
 window.weaponColor = {
   "1":"#707070",
@@ -89,54 +90,60 @@ window.weaponPreset = {
     Dlead = 1;
     Alead = 100
     shootThreshold = 0.3
+    window.minDist = 700
   },
   "2":()=>{
     lead = 32;
     Dlead = 1;
     Alead = 31
     shootThreshold = 0.5
+    window.minDist = 700
   },
   "4":()=>{
-    lead = 80;
+    lead = 90;
     Alead = 5;
-    Dlead = 5;
+    Dlead = 3;
     shootThreshold = 0.3
+    window.minDist = 1200
   },
   "8":()=>{
     lead = 31;
     Alead = 130;
     Dlead = 0;
     shootThreshold = 0.1;
+    window.minDist = 1200
   },
   "16":()=>{
     lead = 31;
     Dlead = 0;
     Alead = 160;
     shootThreshold = 0.2
+    window.minDist = 1200
   },
   "128":()=>{
     lead = 50;
     Alead = 30;
     Dlead = 2
     shootThreshold = 0.2;
+    window.minDist = 500
   },
   "256":()=>{
     lead = 40;
     shootThreshold = 30
+    window.minDist = 99999
   }
 }
-window.autoDodge = true
+window.autoDodge = false
 window.Counter = 0
 window.adjust = 6
 window.drop = 20
 window.aname = "lopknA65"
-window.minDist = 1500
+window.minDist = 1200
 window.shootThreshold = 0.2
 window.tranmode = 1
 window.lead = 31
 window.Alead = 40
 window.Dlead = 0
-window.preLead = 40
 window.friendlyThreshold = 0.4
 window.mouseX = 0
 window.mouseY = 0
@@ -180,6 +187,11 @@ window.main = setInterval(()=>{
           DOWN()
         }
       }
+
+      if(autoThresh){
+        weaponPreset[B[pla].weapon]()
+      }
+
     }
   
 
@@ -759,11 +771,16 @@ function autoF(c){
         let Tlead = lead * 14/40
         Tlead += distP(c,pla) * Dlead / 200
         let TTlead = Alead * 14/40
-    let leadingAngle = ang(
-      window.B[c].x+last[c].vx*Tlead+last[c].ax*TTlead-window.B[pla].x+bot.aimAddx,
+        let SHOTPOS = [window.B[c].x+last[c].vx*Tlead+last[c].ax*TTlead-window.B[pla].x+bot.aimAddx,
       -(window.B[c].y+last[c].vy*Tlead+last[c].ay*TTlead-window.B[pla].y+bot.aimAddy-bot.permAimY)
-      )
+        ]
+    let leadingAngle = ang(SHOTPOS[0],SHOTPOS[1])
       window.U.angle = Math.PI-leadingAngle
+
+      ctx.beginPath();
+      ctx.arc(Width/2+SHOTPOS[0],Height/2-SHOTPOS[1], 15, 0, 2 * Math.PI);
+      ctx.stroke();
+
       
     ctx.fillText( (U.angle).toFixed(3),Width/2,450)
 
