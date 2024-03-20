@@ -20,7 +20,7 @@ document.body.onmousedown = function(e) {
     }
   }
 }
-document.body.onmouseup = function() {
+document.body.onmouseup = function(e) {
   if(e.which == 1){
     mouseDown = false;
   } else if(e.which == 3){
@@ -28,6 +28,7 @@ document.body.onmouseup = function() {
     window.A.sendInput = window.SI
     downs["x"] = false
   }
+  e.preventDefault()
 }
 window.priorityTargetMode = false
 window.ctx = canvas2.getContext("2d")
