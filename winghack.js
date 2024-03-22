@@ -95,7 +95,7 @@ window.weaponPreset = {
   "1":()=>{
     lead = 32;
     Dlead = 1;
-    Alead = 100
+    Alead = 200
     shootThreshold = 0.3
     window.minDist = 700
   },
@@ -109,7 +109,7 @@ window.weaponPreset = {
   "4":()=>{
     lead = 90;
     Alead = 5;
-    Dlead = 3.5;
+    Dlead = 3.3;
     shootThreshold = 0.2
     window.minDist = 1200
   },
@@ -278,7 +278,7 @@ objk.forEach((a,i)=>{
     } else {
       let sav = [last[a].ax,last[a].ay]
       last[a] = {"lvx":t[0]-last[a].lx,"lvy":t[1]-last[a].ly,"lx":t[0],"ly":t[1],"ax":e.x-e.prevX-last[a].vx,"ay":e.y-e.prevY-last[a].vy,"vx":e.x-e.prevX,"vy":e.y-e.prevY}
-      if(last[a].ax == 0 && last[a].ay==0){
+      if(distance(0,0,last[a].ax,last[a].ay < 0.0001)){
         last[a].ax = sav[0]
         last[a].ay = sav[1]
       }
