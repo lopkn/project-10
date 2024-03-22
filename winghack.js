@@ -278,7 +278,7 @@ objk.forEach((a,i)=>{
     } else {
       let sav = [last[a].ax,last[a].ay]
       last[a] = {"lvx":t[0]-last[a].lx,"lvy":t[1]-last[a].ly,"lx":t[0],"ly":t[1],"ax":e.x-e.prevX-last[a].vx,"ay":e.y-e.prevY-last[a].vy,"vx":e.x-e.prevX,"vy":e.y-e.prevY}
-      if(distance(0,0,last[a].ax,last[a].ay < 0.0001)){
+      if(distance(0,0,last[a].ax,last[a].ay) < 0.0001){
         last[a].ax = sav[0]
         last[a].ay = sav[1]
       }
