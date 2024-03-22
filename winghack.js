@@ -13,6 +13,13 @@ window.Height = canvas2.height
 document.body.onmousedown = function(e) {
   if(e.which == 1){
     mouseDown = true;
+  } else if(e.which == 2){
+          if(focusedOn == -1){
+        focusedOn = focusSave
+      } else {
+        focusSave = focusedOn
+        focusedOn = -1
+      }
   }  else if(e.which == 3){
     if(downs["x"] == false){
     window.A.sendDirection = ()=>{}
@@ -168,7 +175,7 @@ window.main = setInterval(()=>{
 
       if(Counter%5==0){
       if(window.B[pla] == undefined){
-        pla = -1
+        pla = -1 
         let name = document.getElementById('nick').value
         if(name.length < 40){
           aname = name
@@ -751,6 +758,21 @@ function autoF(c){
         bot.dodgeX = 0; bot.dodgeY = 0
         dodgeAll(dodgeFactor)
   // console.log(tp[0])
+        
+        let Tlead = lead * 14/40
+        Tlead += distP(c,pla) * Dlead / 200
+        let TTlead = Alead * 14/40
+        let SHOTPOS = [window.B[c].x+last[c].vx*Tlead+last[c].ax*TTlead-window.B[pla].x+bot.aimAddx,
+      -(window.B[c].y+last[c].vy*Tlead+last[c].ay*TTlead-window.B[pla].y+bot.aimAddy-bot.permAimY)
+        ]
+        ctx.strokeStyle = "#F7B446"
+        ctx.beginPath();
+      ctx.arc(Width/2+SHOTPOS[0],Height/2-SHOTPOS[1], 15, 0, 2 * Math.PI);
+      ctx.stroke();
+      let normSHOTPOS = normalize(SHOTPOS[0],SHOTPOS[1])
+      ctx.beginPath();
+      ctx.arc(Width/2+normSHOTPOS[0]*50,Height/2-normSHOTPOS[1]*50, 5, 0, 2 * Math.PI);
+      ctx.stroke();
   if(downs["x"] == true || bot.on){
 
       if(throttleShift){
@@ -768,18 +790,12 @@ function autoF(c){
         bot.aimAddx += bot.dodgeX
         bot.aimAddy += bot.dodgeY
       }
-        let Tlead = lead * 14/40
-        Tlead += distP(c,pla) * Dlead / 200
-        let TTlead = Alead * 14/40
-        let SHOTPOS = [window.B[c].x+last[c].vx*Tlead+last[c].ax*TTlead-window.B[pla].x+bot.aimAddx,
-      -(window.B[c].y+last[c].vy*Tlead+last[c].ay*TTlead-window.B[pla].y+bot.aimAddy-bot.permAimY)
-        ]
+        
+        
     let leadingAngle = ang(SHOTPOS[0],SHOTPOS[1])
       window.U.angle = Math.PI-leadingAngle
 
-      ctx.beginPath();
-      ctx.arc(Width/2+SHOTPOS[0],Height/2-SHOTPOS[1], 15, 0, 2 * Math.PI);
-      ctx.stroke();
+      
 
       
     ctx.fillText( (U.angle).toFixed(3),Width/2,450)
