@@ -102,8 +102,8 @@ window.weaponPreset = {
   "4":()=>{
     lead = 90;
     Alead = 5;
-    Dlead = 3;
-    shootThreshold = 0.3
+    Dlead = 3.5;
+    shootThreshold = 0.2
     window.minDist = 1200
   },
   "8":()=>{
@@ -261,7 +261,7 @@ window.main = setInterval(()=>{
 
 objk.forEach((a,i)=>{
   let e = window.B[a]
-       if(e.inGame == false){return}
+       if(e.inGame == false){if(a==focusedOn){focusedOn=-1};return}
 
     let t = tran(e.x,e.y)
       let invuln = e.isInvulnerable()
