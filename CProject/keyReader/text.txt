@@ -3,29 +3,29 @@ Device 'PixArt Microsoft USB Optical Mouse':
 	Coordinate Transformation Matrix (157):	1.000000, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000, 0.000000, 0.000000, 1.000000
 	libinput Natural Scrolling Enabled (290):	0
 	libinput Natural Scrolling Enabled Default (291):	0
-	libinput Scroll Methods Available (292):	0, 0, 1
-	libinput Scroll Method Enabled (293):	0, 0, 0
-	libinput Scroll Method Enabled Default (294):	0, 0, 0
-	libinput Button Scrolling Button (295):	2
-	libinput Button Scrolling Button Default (296):	2
-	libinput Button Scrolling Button Lock Enabled (297):	0
-	libinput Button Scrolling Button Lock Enabled Default (298):	0
-	libinput Middle Emulation Enabled (299):	0
-	libinput Middle Emulation Enabled Default (300):	0
-	libinput Accel Speed (301):	0.000000
-	libinput Accel Speed Default (302):	0.000000
-	libinput Accel Profiles Available (303):	1, 1
-	libinput Accel Profile Enabled (304):	1, 0
-	libinput Accel Profile Enabled Default (305):	1, 0
-	libinput Left Handed Enabled (306):	0
-	libinput Left Handed Enabled Default (307):	0
+	libinput Scroll Methods Available (295):	0, 0, 1
+	libinput Scroll Method Enabled (296):	0, 0, 0
+	libinput Scroll Method Enabled Default (297):	0, 0, 0
+	libinput Button Scrolling Button (298):	2
+	libinput Button Scrolling Button Default (299):	2
+	libinput Button Scrolling Button Lock Enabled (300):	0
+	libinput Button Scrolling Button Lock Enabled Default (301):	0
+	libinput Middle Emulation Enabled (302):	0
+	libinput Middle Emulation Enabled Default (303):	0
+	libinput Accel Speed (304):	0.000000
+	libinput Accel Speed Default (305):	0.000000
+	libinput Accel Profiles Available (306):	1, 1
+	libinput Accel Profile Enabled (307):	1, 0
+	libinput Accel Profile Enabled Default (308):	1, 0
+	libinput Left Handed Enabled (309):	0
+	libinput Left Handed Enabled Default (310):	0
 	libinput Send Events Modes Available (275):	1, 0
 	libinput Send Events Mode Enabled (276):	0, 0
 	libinput Send Events Mode Enabled Default (277):	0, 0
 	Device Node (278):	"/dev/input/event4"
 	Device Product ID (279):	1118, 203
-	libinput Drag Lock Buttons (308):	<no items>
-	libinput Horizontal Scroll Enabled (309):	1
-	libinput Scrolling Pixel Distance (310):	15
-	libinput Scrolling Pixel Distance Default (311):	15
-	libinput High Resolution Wheel Scroll Enabled (312):	1
+	libinput Drag Lock Buttons (292):	<no items>
+	libinput Horizontal Scroll Enabled (293):	1
+	libinput Scrolling Pixel Distance (311):	15
+	libinput Scrolling Pixel Distance Default (312):	15
+	libinput High Resolution Wheel Scroll Enabled (294):	1

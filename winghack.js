@@ -1,4 +1,7 @@
-window.A=A;window.B=B;window.U = U;window.W=W;window.N=N;
+window.A=A;window.B=B;window.U = U;window.W=W;window.N=N;window.M=M;
+window.ddd = 1;
+fa = ()=>{return(ddd)};
+
 (function(){
     window.canvas2 = document.createElement("canvas")
 document.body.appendChild(canvas2)
@@ -95,7 +98,7 @@ window.weaponPreset = {
   "1":()=>{
     lead = 32;
     Dlead = 1;
-    Alead = 200
+    Alead = 120
     shootThreshold = 0.3
     window.minDist = 700
   },
@@ -167,7 +170,22 @@ window.tempCounter = 0
 window.botHandycap = Infinity
 window.tempCounter2 = 0 
 
-window.main = setInterval(()=>{
+
+/// coupling
+oldRb = Rb
+myAn = ()=>{}
+newRb = ()=>{oldRb();window.main()}
+Rb = 1
+Rb = newRb
+
+
+////
+
+
+
+window.main = 
+
+  ()=>{
 
   
 
@@ -195,7 +213,7 @@ window.main = setInterval(()=>{
         }
       }
 
-      if(autoThresh){
+      if(autoThresh && B[pla]?.weapon){
         weaponPreset[B[pla].weapon]()
       }
 
@@ -268,19 +286,25 @@ window.main = setInterval(()=>{
 
 objk.forEach((a,i)=>{
   let e = window.B[a]
-       if(e.inGame == false){if(a==focusedOn){focusedOn=-1};return}
+       if(e.inGame == false){if(a==focusedOn&&!bot.on){focusedOn=-1};return}
 
     let t = tran(e.x,e.y)
       let invuln = e.isInvulnerable()
 
     if(last[a] == undefined){
-      last[a] = {"lx":t[0],"ly":t[1],"lvy":0,"lvx":0,"vx":e.x-e.prevX,"vy":e.y-e.prevY,"ax":0,"ay":0,}
-    } else {
-      let sav = [last[a].ax,last[a].ay]
-      last[a] = {"lvx":t[0]-last[a].lx,"lvy":t[1]-last[a].ly,"lx":t[0],"ly":t[1],"ax":e.x-e.prevX-last[a].vx,"ay":e.y-e.prevY-last[a].vy,"vx":e.x-e.prevX,"vy":e.y-e.prevY}
-      if(distance(0,0,last[a].ax,last[a].ay) < 0.000000000001){
-        last[a].ax = sav[0]
-        last[a].ay = sav[1]
+      last[a] = {"lx":t[0],"ly":t[1],"lvy":0,"lvx":0,"vx":e.x-e.prevX,"vy":e.y-e.prevY,"ax":0,"ay":0}
+    }
+     // else {
+     //  let sav = [last[a].ax,last[a].ay]
+     //  last[a] = {"lvx":t[0]-last[a].lx,"lvy":t[1]-last[a].ly,"lx":t[0],"ly":t[1],"ax":e.x-e.prevX-last[a].vx,"ay":e.y-e.prevY-last[a].vy,"vx":e.x-e.prevX,"vy":e.y-e.prevY}
+     //  if(distance(0,0,last[a].ax,last[a].ay) < 0.000000000001){
+     //    last[a].ax = sav[0]
+     //    last[a].ay = sav[1]
+     //  }
+    else {
+      let t2 = tran(e.dstX,e.dstY)
+      if(t2[0] != last[a].lx || t2[1] != last[a].ly){
+        last[a] = {"lx":t2[0],"ly":t2[1],"lvx":t2[0]-last[a].lx,"lvy":t2[1]-last[a].ly,"vx":t2[0]-last[a].lx,"vy":t2[1]-last[a].ly,"ax":t2[0]-last[a].lx-last[a].vx,"ay":t2[1]-last[a].ly-last[a].vy}
       }
     }
       // last[a] = {}
@@ -437,7 +461,7 @@ objk.forEach((a,i)=>{
   if(autoFire){
       autoF(closest)
     }
-},30)
+}
 // function a1(){debugger;}
 // function a2(e){window.M=e}
 // function a3(){debugger;window.M.followTopPlayer()}
@@ -506,7 +530,7 @@ document.addEventListener("keydown",(e)=>{
           ly = tt[1]-Height/2
         }
        let td = distance(t[0]-lx,t[1]-ly,mouseX,mouseY)
-        if(td < d){d = td; focusedOn = a}
+        if(td < d){d = td; focusedOn = a;focusSave=a}
     })
     if(d == Infinity){focusedOn = -1}
   }
@@ -1175,7 +1199,20 @@ function boostRadarSweep(ang){
   return(outarr)
 }
 
+
+function wrapper(org,w){
+  let old = org
+  let newa = (a,b,c,d)=>{old(a,b,c,d);w(a,b,c,d)}
+  org = 1;
+  org = newa;
+  return(org)
+}
+
+
+
+
 window.getByName = getByName
+window.wrapper = wrapper
 window.boostPathRecursive = boostPathRecursive
 window.autoUp = autoUp
 window.UP = UP
@@ -1199,4 +1236,3 @@ window.loyal = loyal
 window.name = name
 window.reidentify = ()=>{pla=-1}
 })()
-
