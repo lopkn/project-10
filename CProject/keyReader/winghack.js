@@ -115,7 +115,7 @@ window.weaponPreset = {
   "4":()=>{
     lead = 4.5;
     Alead = 0.5;
-    Dlead = 0.165;
+    Dlead = 0.265;
     shootThreshold = 0.2
     window.minDist = 1200
   },
