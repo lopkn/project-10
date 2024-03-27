@@ -358,7 +358,8 @@ objk.forEach((a,i)=>{
             if(nameDraw){
               ctx.font = "bold 17px Courier New"
               ctx.fillStyle = weaponColor[e.weapon]
-              ctx.fillText(e.name,t[0]*zoom-lx,(t[1]-15)*zoom-ly,50)
+              let nm = e.isBot?"@bot":e.name
+              ctx.fillText(nm,t[0]*zoom-lx,(t[1]-15)*zoom-ly,50)
               ctx.fillRect((t[0]-128/8)*zoom-lx,(t[1]+15)*zoom-ly,e.energy/8,5)
             }
 
@@ -810,7 +811,7 @@ function autoF(c){
         let deltaV = distance(0,0,last[c].vx,last[c].vy)
         // let facing = Pangserialise(B[c].dstAngle)
         deltaV = [deltaV*Math.sin(B[c].dstAngle),-deltaV*Math.cos(B[c].dstAngle)]
-        if(c.energy<20){
+        if(B[c].energy<20){
           deltaV = [last[c].vx,last[c].vy]
         }
         let SHOTPOS = [window.B[c].x+deltaV[0]*lead+last[c].ax*Alead-window.B[pla].x+bot.aimAddx,

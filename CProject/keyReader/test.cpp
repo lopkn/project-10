@@ -1256,7 +1256,7 @@ void myScreenThread(){
     cr = cairo_create(surf);
 
     //actual colrender
-    bool confetti = false;
+    bool confetti = true;
     if(confetti){
     for(int i = 0; i < 150; i++){
     	myScreen.drawArr1[i].id = "test";
