@@ -810,7 +810,9 @@ function autoF(c){
         let deltaV = distance(0,0,last[c].vx,last[c].vy)
         // let facing = Pangserialise(B[c].dstAngle)
         deltaV = [deltaV*Math.sin(B[c].dstAngle),-deltaV*Math.cos(B[c].dstAngle)]
-
+        if(c.energy<20){
+          deltaV = [last[c].vx,last[c].vy]
+        }
         let SHOTPOS = [window.B[c].x+deltaV[0]*lead+last[c].ax*Alead-window.B[pla].x+bot.aimAddx,
           -(window.B[c].y+deltaV[1]*lead+last[c].ay*Alead-window.B[pla].y+bot.aimAddy-bot.permAimY)
         ]
