@@ -1254,13 +1254,22 @@ window.anglePair2 = []
 function FRAME(){
   COUNTER2++
   // window.U.angle = Math.floor(COUNTER2%16/4)-1
-  anglePair2.push(window.U.angle)
-  anglePair1.push(B[pla].dstAngle)
+  // anglePair2.push(window.U.angle)
+  // anglePair1.push(B[pla].dstAngle)
   // if(anglePair1.length>10){
   //   anglePair1.splice(0,1)
   //   anglePair2.splice(0,1)
   // }
   // window.SI()
+
+  Object.values(B).forEach((e)=>{
+    if(e==B[pla]){return}
+    let n1 = normalize(B[pla].dstX-e.dstX,B[pla].dstY-e.dstY)
+    let n2 = normalize(Math.sin(e.dstAngle),Math.cos(e.dstAngle))
+    e.dangerVal = dot(n1[0],n1[1],n2[0],n2[1])
+  })
+
+
 }
 
 function Pangserialise(ang){
