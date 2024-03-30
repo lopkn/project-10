@@ -1,7 +1,7 @@
 fa = ()=>{return(1)}
 let pla = -1
 Object.keys(B).forEach((e)=>{
-  if(B[e].name=="Jet<-Lop"){
+  if(B[e].name=="lopknA65"){
     pla = e
   }
 })

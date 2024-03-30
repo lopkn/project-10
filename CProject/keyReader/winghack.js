@@ -49,6 +49,10 @@ window.highlights = {}
 window.boostRadarLast = Date.now()
 window.miss = "UDF"
 
+window.masterLead=1.2
+
+window.targetBots = false
+
 window.FRAMEDEBUG = true
 
 window.dodgeFactor = 40000
@@ -116,7 +120,7 @@ window.weaponPreset = {
     lead = 4.5;
     Alead = 0.5;
     Dlead = 0.265;
-    shootThreshold = 0.2
+    shootThreshold = 0.4
     window.minDist = 1200
   },
   "8":()=>{
@@ -124,7 +128,7 @@ window.weaponPreset = {
     Alead = 0.5;
     Dlead = 0;
     shootThreshold = 0.1;
-    window.minDist = 1200
+    window.minDist = 1300
   },
   "16":()=>{
     lead = 1.5;
@@ -389,7 +393,7 @@ objk.forEach((a,i)=>{
 
       if(B[pla].weapon == 8 && e.energy < 240){tdist-=200}
 
-      if(a!=pla&&tdist < distclosest&&!whiteList[a]&&!invuln){
+      if(a!=pla&&tdist < distclosest&&!whiteList[a]&&!invuln&&(!targetBots||B[a].isBot)){
         distclosest = tdist
         closest = a
       }
@@ -812,7 +816,7 @@ function autoF(c){
         // let facing = Pangserialise(B[c].dstAngle)
         deltaV = [deltaV*Math.sin(B[c].dstAngle),-deltaV*Math.cos(B[c].dstAngle)]
         if(B[c].energy<20){
-          deltaV = [last[c].vx,last[c].vy]
+          deltaV = [last[c].vx*masterLead,last[c].vy*masterLead]
         }
         let SHOTPOS = [window.B[c].x+deltaV[0]*lead+last[c].ax*Alead-window.B[pla].x+bot.aimAddx,
           -(window.B[c].y+deltaV[1]*lead+last[c].ay*Alead-window.B[pla].y+bot.aimAddy-bot.permAimY)
@@ -1282,7 +1286,13 @@ function UangToPSerialised(ang){
   return(2*Math.PI-(Math.abs(ang)+Math.PI)%(2*Math.PI))
 }
 
-
+window.lobbyBot = ()=>{
+  let a = {}
+  Object.values(B).forEach((e)=>{
+    a[e.name] = e.isBot?1:0
+  })
+  return(JSON.stringify(a))
+}
 
 window.UangToPSerialised = UangToPSerialised
 window.Pangserialise = Pangserialise
