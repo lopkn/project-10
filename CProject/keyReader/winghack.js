@@ -536,6 +536,9 @@ document.addEventListener("keydown",(e)=>{
         if(td < d){d = td; pla = a}
     })
   }
+  if(key == "o"){
+    toggleDraw = !toggleDraw
+  }
   if(key == "a"){
     let d = Infinity
     Object.keys(window.B).forEach((a)=>{
