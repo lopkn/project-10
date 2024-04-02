@@ -52,8 +52,11 @@ window.miss = "UDF"
 window.masterLead=1.2
 
 window.targetBots = false
+window.continueFocus = false
 
 window.FRAMEDEBUG = true
+
+
 
 window.dodgeFactor = 40000
 window.lock = false
@@ -222,6 +225,11 @@ window.main =
 
       if(autoThresh && B[pla]?.weapon){
         weaponPreset[B[pla].weapon]()
+      }
+      if(continueFocus){
+        if(B[focusSave].inGame){
+          focusedOn=focusSave
+        }
       }
 
     }
