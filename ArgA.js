@@ -90,12 +90,13 @@ class ArgAccel{
 	static msgid = 0
 	// static msghist = {}
 
-	static rooms = {"Lobby":{"msghist":{},"msghistArr":[]}}
+	static rooms = {"Lobby":{"msghist":{},"msghistArr":[],"settings":{}}}
 
 	static addRoom(name){
 		this.rooms[name] = {
 			"msghist":{},
-			"msghistArr":[]
+			"msghistArr":[],
+			"settings":{}
 		}
 	}
 
@@ -185,6 +186,7 @@ class ArgAccel{
 
 		let stext = ''
 		let ftext = ''
+		let verifieds = {}
 		out.forEach((e,i)=>{
 			if(i%2==1){
 				let attr = e.attr
@@ -205,6 +207,7 @@ class ArgAccel{
 				this.matchExtract(e,room)
 				if(e.verified == true){
 					stext += "<span class='verified referencer' refid='"+this.rooms[room].msghist[e.reference].senderId+"' ref='"+e.reference+"' onmouseover='refover(this)' onmouseout='refover(this,false)'>" + e.text + "</span>"
+					verifieds[e.reference] = e.text
 				} else {
 				  stext += e.text
 				}
@@ -219,7 +222,7 @@ class ArgAccel{
 			console.log("["+cont+"]","["+ftext+"]")
 		}
 
-		return({"text":cont,"processed":out,"stext":stext,"desync":cont!=ftext})
+		return({"text":cont,"processed":out,"stext":stext,"desync":cont!=ftext,"verifieds":verifieds})
 	}
 
 	static matchExtract(e,room){
@@ -253,6 +256,11 @@ class ArgAccel{
 					this.sMessage(content.substring(5),room)
 				} else if(s1 == "crash"){
 					throw(new Error)
+				} else if(s1 == "settings"){
+					if(split[1] == "replyonly"){
+						aroom.settings.replyonly = aroom.settings.replyonly?false:true
+						this.sMessage("room settings replyonly = "+aroom.settings.replyonly,room)
+					}
 				}
 			}
 
@@ -361,6 +369,12 @@ class ArgAccel{
 	}
 
 	static message(date,socket, contentBlock, room){
+		if(this.rooms[room].settings.replyonly){
+			if(Object.keys(contentBlock.verifieds).length<1){
+				this.dsMessage("room is reply only.",socket)
+				return;
+			}
+		}
 		let mid = this.msgid++
 		contentBlock.flags = {}
 		contentBlock.citations = {}
