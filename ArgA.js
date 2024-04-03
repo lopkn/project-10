@@ -104,6 +104,42 @@ class ArgAccel{
 		io = i
 	}
 
+
+	static accounts = {}
+
+	static loginWithName(socket,name,psswd){
+		if(this.accounts[name] !== undefined){
+			let hashPsswd = crypto.createHash("sha256").update(psswd?psswd:"").digest("hex")
+			if(this.accounts[name].temporaryAccount||hashPsswd == this.accounts[name].psswd ){
+				socket.loggedin = name
+				if(this.accounts[name].currentSocketID){
+					this.dsMessage("you have logged in elsewhere, your session has ended",{id:this.accounts[name].currentSocketID})
+				}
+				this.accounts[name].currentSocketID = socket.id
+				this.dsMessage("logged in as "+name,socket)
+			} else {
+				this.dsMessage("wrong password for "+name,socket)
+			}
+		} else {
+			if(psswd != "" && psswd != undefined){
+				let hashPsswd = crypto.createHash("sha256").update(psswd).digest("hex")
+				let acc = {"name":name,"psswd":hashPsswd,"currentSocketID":socket.id,"temporaryAccount":false}
+				this.accounts[name] = acc
+				socket.loggedin = name
+				this.dsMessage("logged in as "+name,socket)
+			} else {
+				let acc = {"name":name,"currentSocketID":socket.id,"temporaryAccount":true}
+				this.accounts[name]=acc
+				socket.loggedin = name
+				this.dsMessage("logged in as "+name,socket)
+			}
+		}
+	}
+
+	static nameof(socket){
+		return(this.accounts[socket.loggedin].name)
+	}
+
 	static handle(date,name,content,socket){
 
 		let ihtml = content.ihtml
@@ -126,6 +162,18 @@ class ArgAccel{
 		console.log(txt)
 		let processed = this.ihtmlProcess(ihtml,txt,room,socket)
 		if(name == "msg"){
+
+			if(!socket.loggedin){
+				if(txt.split(" ")[0] == "/login"){
+					this.loginWithName(socket,txt.split(" ")[1],txt.split(" ")[2])
+				} else {
+					this.dsMessage("you are not logged in, do /login [name] <password>",socket)
+					this.dsMessage("you will create a temporary account if no password is provided",socket)
+				}
+				return
+			}
+
+
 			if(txt[0] == "/"){
 				this.command(date,txt,socket,room)
 				return
@@ -272,7 +320,7 @@ class ArgAccel{
 					} else {
 						this.addRoom(split[1])			
 					}
-					this.sMessage(socket.id + " moved to room "+split[1],room)
+					this.sMessage(this.nameof(socket) + " moved to room "+split[1],room)
 					io.to(socket.id).emit("joinroom",split[1])
 					let sid = socket.id
 					socket.leaveAll()
@@ -281,7 +329,7 @@ class ArgAccel{
 					socket.join(sid)
 				} else if(s1 == "lobby"){
 					split[1] = "Lobby"
-					this.sMessage(socket.id + " moved to room "+split[1],room)
+					this.sMessage(this.nameof(socket) + " moved to room "+split[1],room)
 					io.to(socket.id).emit("joinroom",split[1])
 					let sid = socket.id
 					socket.leaveAll()
@@ -314,7 +362,12 @@ class ArgAccel{
 					if(split[2]){
 						let reason = content.substring(8+split[2].length+split[1].length)
 						let reasonString = (reason == ''?'':" because "+reason)
-						this.sMessage(socket.id+"<span style='color:pink'> flagged ["+msg.msgid+"] as "+split[2]+reasonString+"</span>",room)
+						this.sMessage(this.nameof(socket)+"<span style='color:pink'> flagged ["+msg.msgid+"] as "+split[2]+reasonString+"</span>",room)
+						let flag = split[2]+reasonString
+						this.blockMessage(Date.now(),socket,{
+							"stext":this.nameof(socket)+" flagged ["+msg.msgid+"] as "+flag
+						},room)
+
 						msg.flags[split[2]] = {"flagid":socket.id,"resolved":false,"reason":reason}
 					} else {
 
@@ -332,7 +385,7 @@ class ArgAccel{
 						let citation = "<span style='color:SlateBlue'><a target='_blank' rel='noopener noreferrer' href='//"+split[2]+"'>"+split[2]+"</a></span>"+content.substring(7+split[1].length+split[2].length)
 						// this.sMessage(socket.id+" cited ["+msg.msgid+"] with "+citation,room)
 						this.blockMessage(Date.now(),socket,{
-							"stext":socket.id+" cited ["+msg.msgid+"] with "+citation
+							"stext":this.nameof(socket)+" cited ["+msg.msgid+"] with "+citation
 						},room)
 						msg.citations[Date.now()] = socket.id
 					} else {
