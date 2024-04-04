@@ -3,153 +3,35 @@
 join with link https://game-10.lopkn.unsown.top/ (almost always online)
 join the discord server with link https://discord.gg/RtP4GnM8
 
-DONE (after creation of tdl)
-- Logins and accounts
-- Lighting & effect tables
-- player password change
-- dependancy of config from server
-- refactor MasterTileDeparser
-- slab tiles
-- rotatable structures
-- block rendering images
-- mobs and entities
-- death screen
-- custom fps and improved timer
-- animation beams
-- tile scanner
-- combat sprite
-- structure array compression
-- custom favicon
-- dropped items
-- chests and inventory
-- random item generation for chests
-- inventory management GUI
-- explosives!!
-- particles and staffs
-- minion entities
-- commands update
-- player disconnect timer
-- rendering Dimensions
-- player combat
-- player health & moves
-- health bar
-- custom items & mobs and block sprites
-- custom particle renderer
-- follower move commanding
-- auto zoom and rescale
-- client memory purge
-- function for block breaking
-- hunger system
-- block outlines
-- textures overhaul
-- custom explosion sizes
-- client side help command
-- actual structure generation
-- breakable slabs
-- ctx input for particles and rendering
-- add gitignore file
-- structure generation distances
-- player inventory drop
-- a bit of mobile support
-- dragging
-- server generated lightning beams
-- automatic rescaling
-- cookies
+This is the central repository where I make random stuff
+Many fun projects are here, ran by one central server.js file
 
-TO DO LIST
+visit the join link with suffixes for fun stuff:
+- https://game-10.lopkn.unsown.top/quick/three 3d flight simulator
 
-- custom cursor
+- https://game-10.lopkn.unsown.top/quick/particles 2d particle system universe (PWA)
 
-- leaves update for trees and mutiblocks
+- https://game-10.lopkn.unsown.top/quick/zchess 2d real time singleplayer chess (PWA)
 
-- map updater entities
+- https://game-10.lopkn.unsown.top/quick/epcounter stare at random objects on your screen to pass time
 
-- drag moving and drag permissions update
+- https://game-10.lopkn.unsown.top/quick/argAccel argument based online text channel
 
-- fix overlapping entity combat
+- https://game-10.lopkn.unsown.top/quick/flashing exploit your friends epilepsy to a whole new level
 
-- random block placements for structure generation	
+- https://game-10.lopkn.unsown.top/quick/truemirror an ad-less simple site for a true mirror
 
-- shades layer
+- https://game-10.lopkn.unsown.top/quick/timer test how wrong your internal clock is (10s)
 
-- energy update
+- https://game-10.lopkn.unsown.top/quick/bsmeter Bullsh\*t meter that uses your mic somehow
 
-- data amount bar
 
-- join/loading screen
 
-- command syntax autofill
+other stuff that are served on the server but are still in this repo include:
 
-- blood and ash tiles
+- **./CProject/keyReader/**  Is an X11 cpp script that has built in Anti-recoil for apex legends, transparent overlays, and kecords everything you type even when the window is not focused on. Also has many other functions
 
-- particles and fire
-
-- particles class merge
-
-- dungeons
-
-- door block
-
-- dark rooms
-
-- multiblock entities
-
-- combat animations
-
-- tile animations
-
-- damage types
-
-- block breaking types
-
-- combat victory
-
-- item name and descriptions
-
-- backpacks
-
-- terrain randomness
-
-- entity menu
-
-- number display for bars
-
-- try out WFC
-
-- biomes
-
-- rivers
-
-- enviornmental damage
-
-- enviornmental turn management
-
-- request animation frame
-
-- transparent blocks
-
-- natural entity spawning
-
-- NPCs and quests
-
-- ore and crafting
-
-- ping compensation
-
-- timer voting system
-
-- stationary and non stationary click options (temporarily scrapped)
-
-- help menu update (low priority)
-
-- chunk saves (low priority)
-
-- test functions (low priority)
-
-- sound effects
- 
-- Music
-
+- **./skript/** includers cpp script to help you win internet arguments. Every time you type "stupid" it will replace it with a stronger word combination that means practically the same thing
 
 
 

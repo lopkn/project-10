@@ -385,6 +385,7 @@ mpanel.addEventListener("focusout",(e)=>{
 })
 document.getElementById("mpFlag").addEventListener("click",(e)=>{
 	let d = mpanel.MyReference
+	if(d.parentElement.classList.contains("blockMessage")||d.classList.contains("blockMessage")){return}
 	let str = "/flag "+d.id.substring(4)+" "
 	str += window.prompt("flag as:","stupid").split(" ")[0] + " "
 	str += window.prompt("reason?")
@@ -394,6 +395,7 @@ document.getElementById("mpFlag").addEventListener("click",(e)=>{
 })
 document.getElementById("mpCite").addEventListener("click",(e)=>{
 	let d = mpanel.MyReference
+	if(d.parentElement.classList.contains("blockMessage")||d.classList.contains("blockMessage")){return}
 
 	let str = "/cite "+d.id.substring(4)+" "
 	str += window.prompt("cite with:","www.theonion.com")+" "

@@ -359,6 +359,7 @@ class ArgAccel{
 
 					let msg = this.isMessage(split[1],aroom)?aroom.msghist[split[1]]:this.latestMessage(aroom)
 					let flagstr = ''
+					if(!msg.canReference){return}
 					if(split[2]){
 						let reason = content.substring(8+split[2].length+split[1].length)
 						let reasonString = (reason == ''?'':" because "+reason)
@@ -381,6 +382,7 @@ class ArgAccel{
 					let msg = this.isMessage(split[1],aroom)?aroom.msghist[split[1]]:this.latestMessage(aroom)
 					let citestr = ''
 
+					if(!msg.canReference){return}
 					if(split[2]){
 						let citation = "<span style='color:SlateBlue'><a target='_blank' rel='noopener noreferrer' href='//"+split[2]+"'>"+split[2]+"</a></span>"+content.substring(7+split[1].length+split[2].length)
 						// this.sMessage(socket.id+" cited ["+msg.msgid+"] with "+citation,room)
@@ -403,6 +405,8 @@ class ArgAccel{
 						if(msg == undefined){continue}
 						io.to(socket.id).emit("msg",{"msg":msg.stext,"id":msg.senderId,"msgid":msg.msgid,"attr":msg.attributes})
 					}
+				} else if(s1 == "help"){
+					this.dsMessage("/load \n /cite \n /flag \n /topic \n /lobby \n /joinroom \n /lobby",socket)
 				}
 			
 
@@ -435,6 +439,7 @@ class ArgAccel{
 		contentBlock.msgid = mid
 		contentBlock.canReference = true
 		contentBlock.senderId = socket.id
+		contentBlock.senderName = this.nameof(socket)
 		this.rooms[room].msghist[mid] = contentBlock
 		this.rooms[room].msghistArr.push(mid)
 
@@ -449,6 +454,7 @@ class ArgAccel{
 		contentBlock.type = "block"
 		contentBlock.msgid = mid
 		contentBlock.senderId = socket.id
+		contentBlock.senderName = this.nameof(socket)
 		this.rooms[room].msghist[mid] = contentBlock
 		this.rooms[room].msghistArr.push(mid)
 
