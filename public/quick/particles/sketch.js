@@ -1,3 +1,45 @@
+
+
+
+
+
+
+
+
+
+ function initGPU() {
+	try {
+		return new window.GPU.GPU();
+	} catch (e) {
+		return new GPU();
+	}
+}
+
+
+
+
+  const gpu = initGPU();
+  // const multiplyMatrix = gpu.createKernel(function(a, b) {
+  //   let sum = 0;
+  //   for (let i = 0; i < 512; i++) {
+  //     sum += a[this.thread.y][i] * b[i][this.thread.x];
+  //   }
+  //   return sum;
+  // }).setOutput([512, 512])
+
+  // var out = (async ()=>{await multiplyMatrix(matrices[0], matrices[1]) })()
+
+
+
+
+
+
+
+
+
+
+
+///// gpu
 let myCanvas = document.getElementById("myCanvas")
 
 let Height = window.innerWidth >window.innerHeight?window.innerHeight:window.innerWidth
@@ -752,31 +794,6 @@ class G{
 		}
 	}
 
-	// static updateParticle3(p){
-	// 	let t = p.t
-	// 	if(GI.typeDict[t].toOther !== undefined){
-	// 		GI.particlesArr.forEach((e)=>{
-	// 			if(e!==p.id){
-
-	// 			let op = GI.particles[e]
-	// 			GI.typeDict[t].toOther(p,op)
-	// 			}
-
-	// 		})
-	// 	}
-
-	// 	if(GI.typeDict[t].eachFrame!=undefined){
-	// 		GI.typeDict[t].eachFrame(GI.frame,p)
-	// 	}
-
-	// }
-
-
-	// static particleChainUpdate(i,p,c){
-	// 	if(p.info.chainRes !== undefined){
-	// 		let a = p.info.chainRes(i,p,c)
-	// 	}
-	// }
 
 
 	static updateParticles(){
