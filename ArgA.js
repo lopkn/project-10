@@ -50,6 +50,8 @@ class ArgAug{
 			}
 		} else if(request === "save"){
 			this.save()
+		} else if(request === "disconnect"){
+			this.disconnect(socket,content)
 		}
 
 	}
@@ -90,13 +92,14 @@ class ArgAccel{
 	static msgid = 0
 	// static msghist = {}
 
-	static rooms = {"Lobby":{"msghist":{},"msghistArr":[],"settings":{}}}
+	static rooms = {"Lobby":{"msghist":{},"msghistArr":[],"settings":{"max":50},"connectedSockets":{}}}
 
 	static addRoom(name){
 		this.rooms[name] = {
 			"msghist":{},
 			"msghistArr":[],
-			"settings":{}
+			"settings":{"max":50},
+			"connectedSockets":{}
 		}
 	}
 
@@ -140,6 +143,13 @@ class ArgAccel{
 		return(this.accounts[socket.loggedin].name)
 	}
 
+	static disconnect(socket,rsn){
+		if(!socket.closed){
+			socket.disconnect(true)
+			socket.closed = true
+		}
+	}
+
 	static handle(date,name,content,socket){
 
 		let ihtml = content.ihtml
@@ -150,7 +160,7 @@ class ArgAccel{
 			room = "Lobby"
 		}
 
-
+aroom.settings.max
 
 		if(txt.length == 0){return}
 		ihtml = ihtml.replaceAll("&quot;","\"")
@@ -308,6 +318,11 @@ class ArgAccel{
 					if(split[1] == "replyonly"){
 						aroom.settings.replyonly = aroom.settings.replyonly?false:true
 						this.sMessage("room settings replyonly = "+aroom.settings.replyonly,room)
+					} else if(split[1] == "max"){
+						aroom.settings.max = Number(split[2])
+						if(isNaN(aroom.settings.max)){aroom.settings.max = 50}
+						this.sMessage("room settings max = "+aroom.settings.max,room)
+
 					}
 				}
 			}
@@ -316,7 +331,11 @@ class ArgAccel{
 					this.dsMessage("your current room is: "+room,socket)
 				} else if(s1 == "joinroom"){
 					if(this.rooms[split[1]]){
-
+						let objk = Object.keys(this.rooms[split[1]].connectedSockets)
+						if(this.rooms[split[1]].max <= objk.length){
+							this.dsMessage("room is full")
+							return;
+						}
 					} else {
 						this.addRoom(split[1])			
 					}
