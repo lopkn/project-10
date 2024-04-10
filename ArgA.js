@@ -160,7 +160,6 @@ class ArgAccel{
 			room = "Lobby"
 		}
 
-aroom.settings.max
 
 		if(txt.length == 0){return}
 		ihtml = ihtml.replaceAll("&quot;","\"")
@@ -330,27 +329,31 @@ aroom.settings.max
 			    if(s1 == "thisroom"){
 					this.dsMessage("your current room is: "+room,socket)
 				} else if(s1 == "joinroom"){
-					if(this.rooms[split[1]]){
-						let objk = Object.keys(this.rooms[split[1]].connectedSockets)
-						if(this.rooms[split[1]].max <= objk.length){
-							this.dsMessage("room is full")
-							return;
-						}
-					} else {
-						this.addRoom(split[1])			
-					}
-					this.sMessage(this.nameof(socket) + " moved to room "+split[1],room)
-					io.to(socket.id).emit("joinroom",split[1])
-					let sid = socket.id
-					socket.leaveAll()
-					socket.join("G10.7")
-					socket.join("ArgAccel-"+split[1])
-					socket.join(sid)
+					this.joinroom(split,room,socket)
+					// if(this.rooms[split[1]]){
+					// 	let objk = Object.keys(this.rooms[split[1]].connectedSockets)
+					// 	if(this.rooms[split[1]].max <= objk.length){
+					// 		this.dsMessage("room is full")
+					// 		return;
+					// 	}
+					// } else {
+					// 	this.addRoom(split[1])			
+					// }
+					// this.sMessage(this.nameof(socket) + " moved to room "+split[1],room)
+					// io.to(socket.id).emit("joinroom",split[1])
+					// let sid = socket.id
+					// delete this.rooms[split[1]].connectedSockets[sid]
+					// socket.leaveAll()
+					// socket.join("G10.7")
+					// socket.join("ArgAccel-"+split[1])
+					// socket.join(sid)
+					// this.rooms[split[1]].connectedSockets[sid] = true
 				} else if(s1 == "lobby"){
 					split[1] = "Lobby"
 					this.sMessage(this.nameof(socket) + " moved to room "+split[1],room)
 					io.to(socket.id).emit("joinroom",split[1])
 					let sid = socket.id
+					delete this.rooms[split[1]].connectedSockets[sid]
 					socket.leaveAll()
 					socket.join("G10.7")
 					socket.join("ArgAccel-"+split[1])
@@ -442,6 +445,27 @@ aroom.settings.max
 				return(room.msghist[room.msghistArr[i]])
 			}
 		}
+	}
+
+	static joinroom(split,room,socket){
+		if(this.rooms[split[1]]){
+			let objk = Object.keys(this.rooms[split[1]].connectedSockets)
+			if(this.rooms[split[1]].max <= objk.length){
+				this.dsMessage("room is full")
+				return;
+			}
+		} else {
+			this.addRoom(split[1])			
+		}
+		this.sMessage(this.nameof(socket) + " moved to room "+split[1],room)
+		io.to(socket.id).emit("joinroom",split[1])
+		let sid = socket.id
+		delete this.rooms[split[1]].connectedSockets[sid]
+		socket.leaveAll()
+		socket.join("G10.7")
+		socket.join("ArgAccel-"+split[1])
+		socket.join(sid)
+		this.rooms[split[1]].connectedSockets[sid] = true
 	}
 
 	static message(date,socket, contentBlock, room){
