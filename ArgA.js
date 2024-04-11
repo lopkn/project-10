@@ -349,15 +349,16 @@ class ArgAccel{
 					// socket.join(sid)
 					// this.rooms[split[1]].connectedSockets[sid] = true
 				} else if(s1 == "lobby"){
-					split[1] = "Lobby"
-					this.sMessage(this.nameof(socket) + " moved to room "+split[1],room)
-					io.to(socket.id).emit("joinroom",split[1])
-					let sid = socket.id
-					delete this.rooms[split[1]].connectedSockets[sid]
-					socket.leaveAll()
-					socket.join("G10.7")
-					socket.join("ArgAccel-"+split[1])
-					socket.join(sid)
+					// split[1] = "Lobby"
+					// this.sMessage(this.nameof(socket) + " moved to room "+split[1],room)
+					// io.to(socket.id).emit("joinroom",split[1])
+					// let sid = socket.id
+					// delete this.rooms[split[1]].connectedSockets[sid]
+					// socket.leaveAll()
+					// socket.join("G10.7")
+					// socket.join("ArgAccel-"+split[1])
+					// socket.join(sid)
+					this.joinroom(["join","Lobby"],room,socket)
 				} else if(s1 == "topic"){
 					if(split[1]){
 						if(aroom.topic == undefined){
@@ -460,7 +461,7 @@ class ArgAccel{
 		this.sMessage(this.nameof(socket) + " moved to room "+split[1],room)
 		io.to(socket.id).emit("joinroom",split[1])
 		let sid = socket.id
-		delete this.rooms[split[1]].connectedSockets[sid]
+		delete this.rooms[room].connectedSockets[sid]
 		socket.leaveAll()
 		socket.join("G10.7")
 		socket.join("ArgAccel-"+split[1])
