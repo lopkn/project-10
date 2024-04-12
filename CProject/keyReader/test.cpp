@@ -154,6 +154,8 @@ struct AST{
 
 	bool autoK = true;
 
+	bool enterClick = false;
+
 	double RSscale = 2;
 
 	int autotimer = 0;
@@ -581,6 +583,7 @@ void executeCommandString(std::string str){
 		std::cout << "> [scale] <double> scales reader by number";
 		std::cout << "> [list] list all eventx inputs\n";
 		std::cout << "> [crosshair] toggle crosshair\n";
+		std::cout << "> [enterclick] toggle enterClick\n";
 		std::cout << "> === help ===\n\n";
 	}
 	else if(str == "heatmap"){
@@ -657,6 +660,9 @@ void executeCommandString(std::string str){
 	} else if (spl[0] == "scale"){
 		double scale = stod(spl[1]);
 		mast.RSscale = scale;
+	} else if(str == "enterclick"){
+		mast.enterClick = !mast.enterClick;
+		std::cout << ">enterclick toggled: "<< mast.enterClick <<"\n";
 	}
 
 
@@ -819,6 +825,11 @@ void myDo(int x,std::string s1){
 		std::cout << "\nKrd closed at " << timeNow() << "\n";
 		myPlay("allClose.wav",s1);
 		exit(0);
+	}
+
+	if(mast.enterClick && x == 28){
+		system("xdotool mousemove 3063 650 click 1");
+		return;
 	}
 
 	if(lastKey == x){
@@ -1256,7 +1267,7 @@ void myScreenThread(){
     cr = cairo_create(surf);
 
     //actual colrender
-    bool confetti = true;
+    bool confetti = false;
     if(confetti){
     for(int i = 0; i < 150; i++){
     	myScreen.drawArr1[i].id = "test";
