@@ -827,8 +827,12 @@ void myDo(int x,std::string s1){
 		exit(0);
 	}
 
-	if(mast.enterClick && x == 28){
-		system("xdotool mousemove 3063 650 click 1");
+	if(mast.enterClick){
+		if(x == 28){
+			system("xdotool mousemove 3063 650 click 1");
+		} else if(x == 50){
+			system("xdotool mousemove 3063 1250 click 1");
+		}
 		return;
 	}
 
