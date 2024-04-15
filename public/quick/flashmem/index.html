@@ -50,41 +50,42 @@ function rect(x,y,w,h){
 }
 let counter = 0
 function draw() {
-  // requestAnimationFrame(draw)
-  counter++
-  rectWidth=Math.random()*2000+2
-  // rectWidth=2000
-  // rectWidth=10
-  // if(counter%3==0){
-  //   ctx.fillStyle = "black"
-  //   rect(0,0,window.innerWidth,window.innerHeight)
-  //   return
+  // // requestAnimationFrame(draw)
+  // counter++
+  // rectWidth=Math.random()*2000+2
+  // // rectWidth=2000
+  // // rectWidth=10
+  // // if(counter%3==0){
+  // //   ctx.fillStyle = "black"
+  // //   rect(0,0,window.innerWidth,window.innerHeight)
+  // //   return
+  // // }
+  // for(let i = 0; i < window.innerWidth/rectWidth+1; i++){
+  //   for(let j = 0; j < window.innerHeight/rectWidth+1; j++){
+  //     fill("rgb("+(Math.random()>0.5?255:0)+","+(Math.random()>0.5?255:0)+","+(Math.random()>0.5?255:0)+")")
+  //     rect(i*rectWidth,j*rectWidth,rectWidth,rectWidth)
+  //   }
   // }
-  for(let i = 0; i < window.innerWidth/rectWidth+1; i++){
-    for(let j = 0; j < window.innerHeight/rectWidth+1; j++){
-      fill("rgb("+(Math.random()>0.5?255:0)+","+(Math.random()>0.5?255:0)+","+(Math.random()>0.5?255:0)+")")
-      rect(i*rectWidth,j*rectWidth,rectWidth,rectWidth)
-    }
-  }
 
-  // ctx.fillStyle = "#FFFFFF"
-  // if(counter%2 !==0){
-  // ctx.fillStyle = "#FF30FF"
-  // } else {ctx.fillStyle = "#00FF00"}
-  // ctx.fillRect(0,0,window.innerWidth,window.innerHeight)
-  // if(counter%2 ==0){
-  // ctx.fillStyle = "#FF30FF"
-  // } else {ctx.fillStyle = "#00FF00"}
-  // ctx.font = "bold 148px arial";
-  // ctx.fillText("zybvicab",window.innerWidth/2-400,window.innerHeight/2)
+  ctx.fillStyle = "#FFFFFF"
+  if(counter%2 !==0){
+  ctx.fillStyle = "#FF30FF"
+  } else {ctx.fillStyle = "#00FF00"}
+  ctx.fillRect(0,0,window.innerWidth,window.innerHeight)
+  if(counter%2 ==0){
+  ctx.fillStyle = "#FF30FF"
+  } else {ctx.fillStyle = "#00FF00"}
+  ctx.font = "bold 48px arial";
+  ctx.textAlign = "left"
+  ctx.fillText("zybvicab 21&89324*75",0,window.innerHeight/2)
 }
 
   // requestAnimationFrame(draw)
 
-setInterval(()=>{
-  draw()
-})
-// draw()
+// setInterval(()=>{
+//   draw()
+// })
+draw()
 </script>
 </body>
 </html>
