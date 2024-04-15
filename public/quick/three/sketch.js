@@ -255,7 +255,7 @@ class c{
   static score = [0,0]
   static collideds = {}
 
-  static mouseLocked = false
+  static mouseLocked = true
   static mouseDisp = {"x":0,"y":0,"sensitivity":1}
   static turningInfo = {"fx":0,"fz":0}
 
@@ -277,7 +277,7 @@ class c{
   static frameVel = {"x":0,"y":0,"z":0}
 
   static chaosMode = false
-  static gliding = false
+  static gliding = true
   static music = false
   static paused = false
 
