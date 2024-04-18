@@ -1606,6 +1606,75 @@ function update2D(counter){
 
 }
 
+
+
+
+function touchHandler(event)
+{
+
+  console.log(event.type)
+    var touches = event.changedTouches,
+        first = touches[0],
+        type = "";
+
+    switch(event.type)
+    {
+        case "touchstart": type = "mousedown"; break;
+        case "touchmove":  type = "mousemove"; break;        
+        case "touchend":   type = "mouseup";   break;
+        case "touchcancel":   type = "mouseup";   break;
+        default:           return;
+    }
+
+
+    // initMouseEvent(type, canBubble, cancelable, view, clickCount, 
+    //                screenX, screenY, clientX, clientY, ctrlKey, 
+    //                altKey, shiftKey, metaKey, button, relatedTarget);
+
+
+
+
+    if(type !== "mouseup"){
+    mouseX = event.touches[0].clientX
+    mouseY = event.touches[0].clientY}
+
+
+    var simulatedEvent = document.createEvent("MouseEvent");
+
+    if(event.type == "touchend"){
+        console.log("t4")
+       }
+
+    simulatedEvent.initMouseEvent(type, true, true, window, 1, 
+                                  first.screenX, first.screenY, 
+                                  first.clientX, first.clientY, false, 
+                                  false, false, false, 0/*left*/, null);
+
+    if(event.type == "touchend"){
+        console.log("t5")
+       }
+
+    // if(type=="mouseup"){
+    // console.log("hi")} else {
+    //  console.log(event.type)
+    // }
+    document.body.dispatchEvent(simulatedEvent);
+    
+    event.preventDefault();
+}
+
+
+function init() 
+{
+    document.addEventListener("touchstart", touchHandler, true);
+    document.addEventListener("touchmove", (e)=>{touchHandler(e)}, true);
+    document.addEventListener("touchend", touchHandler, true);
+    document.addEventListener("touchcancel", touchHandler, true);    
+    // document.addEventListener('touchmove', function() { e.preventDefault();GI.debuggingInfo = "cancled" }, { passive:false });
+}
+init()
+
+
 //transition gen -
 //frame fix -
 //curve gen -

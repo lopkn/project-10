@@ -7,18 +7,18 @@
 
 
 
- function initGPU() {
-	try {
-		return new window.GPU.GPU();
-	} catch (e) {
-		return new GPU();
-	}
-}
+//  function initGPU() {
+// 	try {
+// 		return new window.GPU.GPU();
+// 	} catch (e) {
+// 		return new GPU();
+// 	}
+// }
 
 
 
 
-  const gpu = initGPU();
+//   const gpu = initGPU();
   // const multiplyMatrix = gpu.createKernel(function(a, b) {
   //   let sum = 0;
   //   for (let i = 0; i < 512; i++) {
