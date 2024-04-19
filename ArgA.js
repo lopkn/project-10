@@ -386,7 +386,7 @@ class ArgAccel{
 					if(split[2]){
 						let reason = content.substring(8+split[2].length+split[1].length)
 						let reasonString = (reason == ''?'':" because "+reason)
-						this.sMessage(this.nameof(socket)+"<span style='color:pink'> flagged ["+msg.msgid+"] as "+split[2]+reasonString+"</span>",room)
+						// this.sMessage(this.nameof(socket)+"<span style='color:pink'> flagged ["+msg.msgid+"] as "+split[2]+reasonString+"</span>",room)
 						let flag = split[2]+reasonString
 						this.blockMessage(Date.now(),socket,{
 							"stext":this.nameof(socket)+" flagged ["+msg.msgid+"] as "+flag
