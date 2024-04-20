@@ -99,7 +99,7 @@ class ArgAccel{
 			"msghist":{},
 			"msghistArr":[],
 			"settings":{"max":50},
-			"connectedSockets":{}
+			"connectedSockets":{},
 		}
 	}
 
@@ -363,6 +363,7 @@ class ArgAccel{
 					if(split[1]){
 						if(aroom.topic == undefined){
 							aroom.topic = content.substring(7)
+							aroom.conflict = content.substring(7)
 							this.sMessage("The room's topic has been set to: "+aroom.topic,room)
 						} else {
 							this.dsMessage("The room's topic is already set to: "+aroom.topic,socket)
@@ -372,6 +373,7 @@ class ArgAccel{
 						this.dsMessage("Current room topic is unset",socket)
 						}else{
 						this.dsMessage("Current topic is: "+aroom.topic,socket)
+						this.dsMessage("Current conflit is: "+aroom.conflict,socket)
 						}
 					}
 				} else if(s1 == "flag" || s1 == "flags"){
