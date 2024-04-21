@@ -363,6 +363,9 @@ class ArgAccel{
 					if(split[1]){
 						if(aroom.topic == undefined){
 							aroom.topic = content.substring(7)
+
+							let tparr = [{"topic":content.substring(7),"msg":aroom.msghistArr.length-1}]
+
 							aroom.conflict = content.substring(7)
 							this.sMessage("The room's topic has been set to: "+aroom.topic,room)
 						} else {
