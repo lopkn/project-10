@@ -364,9 +364,7 @@ class ArgAccel{
 						if(aroom.topic == undefined){
 							aroom.topic = content.substring(7)
 
-							let tparr = [{"topic":content.substring(7),"msg":aroom.msghistArr.length-1}]
-
-							aroom.conflict = content.substring(7)
+							aroom.conflict = [{"conflict":content.substring(7),"msg":aroom.msghistArr.length-1}]
 							this.sMessage("The room's topic has been set to: "+aroom.topic,room)
 						} else {
 							this.dsMessage("The room's topic is already set to: "+aroom.topic,socket)
@@ -472,6 +470,14 @@ class ArgAccel{
 		socket.join("ArgAccel-"+split[1])
 		socket.join(sid)
 		this.rooms[split[1]].connectedSockets[sid] = true
+	}
+
+	static conflictFuncs(aroom,method,args){
+		if(method == "get"){
+			return(aroom.conflictarr[aroom.conflictarr.length-1].conflict)
+		} else if(method == "add"){
+			aroom.conflictarr.push(args[0])
+		}
 	}
 
 	static message(date,socket, contentBlock, room){
