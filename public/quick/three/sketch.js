@@ -735,6 +735,7 @@ let mouseY = 0
 document.addEventListener("mousemove",(e)=>{
   mouseX = e.clientX
   mouseY = e.clientY
+  console.log(mouseX)
 
   if(c.mouseLocked){
     c.mouseDisp.x += e.movementX
