@@ -1587,24 +1587,18 @@ function touchHandler(event)
     mouseY = event.touches[0].clientY}
 
     c.mouseDisp.x += mouseX - last[0]
+    console.log(c.mouseDisp.x)
     c.mouseDisp.y += mouseY - last[1]
 
 
 
     var simulatedEvent = document.createEvent("MouseEvent");
 
-    if(event.type == "touchend"){
-        console.log("t4")
-       }
-
     simulatedEvent.initMouseEvent(type, true, true, window, 1, 
                                   first.screenX, first.screenY, 
                                   first.clientX, first.clientY, false, 
                                   false, false, false, 0/*left*/, null);
 
-    if(event.type == "touchend"){
-        console.log("t5")
-       }
 
     // if(type=="mouseup"){
     // console.log("hi")} else {
