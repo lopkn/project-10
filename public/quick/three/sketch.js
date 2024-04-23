@@ -735,7 +735,6 @@ let mouseY = 0
 document.addEventListener("mousemove",(e)=>{
   mouseX = e.clientX
   mouseY = e.clientY
-  console.log(mouseX)
 
   if(c.mouseLocked){
     c.mouseDisp.x += e.movementX
@@ -1349,56 +1348,7 @@ let animate = () => {
 
 }
 
-function touchHandler(event)
-{
 
-  console.log(event.type)
-    var touches = event.changedTouches,
-        first = touches[0],
-        type = "";
-
-    switch(event.type)
-    {
-        case "touchstart": type = "mousedown"; break;
-        case "touchmove":  type = "mousemove"; break;        
-        case "touchend":   type = "mouseup";   break;
-        case "touchcancel":   type = "mouseup";   break;
-        default:           return;
-    }
-
-
-    // initMouseEvent(type, canBubble, cancelable, view, clickCount, 
-    //                screenX, screenY, clientX, clientY, ctrlKey, 
-    //                altKey, shiftKey, metaKey, button, relatedTarget);
-
-
-
-
-    if(type !== "mouseup"){
-    mouseX = event.touches[0].clientX
-    mouseY = event.touches[0].clientY
-  }
-
-
-    var simulatedEvent = document.createEvent("MouseEvent");
-
-
-
-    simulatedEvent.initMouseEvent(type, true, true, window, 1, 
-                                  first.screenX, first.screenY, 
-                                  first.clientX, first.clientY, false, 
-                                  false, false, false, 0/*left*/, null);
-
-
-    // if(type=="mouseup"){
-    // console.log("hi")} else {
-    //  console.log(event.type)
-    // }
-    document.body.dispatchEvent(simulatedEvent);
-    
-    event.preventDefault();
-    console.log(mouseX)
-}
 function init2() 
 {
     document.addEventListener("touchstart", touchHandler, true);
@@ -1630,11 +1580,15 @@ function touchHandler(event)
     //                altKey, shiftKey, metaKey, button, relatedTarget);
 
 
-
+    let last = [mouseX,mouseY]
 
     if(type !== "mouseup"){
     mouseX = event.touches[0].clientX
     mouseY = event.touches[0].clientY}
+
+    c.mouseDisp.x += mouseX - last[0]
+    c.mouseDisp.y += mouseY - last[1]
+
 
 
     var simulatedEvent = document.createEvent("MouseEvent");
