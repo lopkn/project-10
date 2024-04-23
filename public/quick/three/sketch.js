@@ -266,7 +266,7 @@ class c{
     "boosting":{"damage":1},
   }
 
-  static vel = 0.04
+  static vel = 0.24
 
   static chaosLimit = 2
 
@@ -1245,7 +1245,7 @@ const init = () => {
 
 
   camera = new THREE.PerspectiveCamera(120, window.innerWidth / window.innerHeight, 0.1, 1000.0);
-  camera.position.set(0, 21, -5);
+  camera.position.set(0, 31, -25);
 
   scene = new THREE.Scene();
   scene.fog = new THREE.Fog("rgb(0,0,0)",350,500)
@@ -1664,7 +1664,7 @@ function touchHandler(event)
 }
 
 
-function init() 
+function init3() 
 {
     document.addEventListener("touchstart", touchHandler, true);
     document.addEventListener("touchmove", (e)=>{touchHandler(e)}, true);
@@ -1672,7 +1672,7 @@ function init()
     document.addEventListener("touchcancel", touchHandler, true);    
     // document.addEventListener('touchmove', function() { e.preventDefault();GI.debuggingInfo = "cancled" }, { passive:false });
 }
-init()
+init3()
 
 
 //transition gen -
