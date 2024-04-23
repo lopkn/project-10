@@ -1473,11 +1473,11 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var app = express();
 var cors = require('cors')//jan7-2024
-// var http = require('http')
+var http = require('http')
 
-var server = app.listen(3000);
-// var server = http.createServer(app);
-// server.listen(3000,"0.0.0.0",()=>{console.log(server.address().address + " port")})
+// var server = app.listen(3000);
+var server = http.createServer(app);
+server.listen(3000,"0.0.0.0",()=>{console.log(server.address().address + " port")})
 
 app.use(cors()) //jan7-2024
 

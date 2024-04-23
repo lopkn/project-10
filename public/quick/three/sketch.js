@@ -1375,23 +1375,19 @@ function touchHandler(event)
 
     if(type !== "mouseup"){
     mouseX = event.touches[0].clientX
-    mouseY = event.touches[0].clientY}
+    mouseY = event.touches[0].clientY
+  }
 
 
     var simulatedEvent = document.createEvent("MouseEvent");
 
-    if(event.type == "touchend"){
-        console.log("t4")
-       }
+
 
     simulatedEvent.initMouseEvent(type, true, true, window, 1, 
                                   first.screenX, first.screenY, 
                                   first.clientX, first.clientY, false, 
                                   false, false, false, 0/*left*/, null);
 
-    if(event.type == "touchend"){
-        console.log("t5")
-       }
 
     // if(type=="mouseup"){
     // console.log("hi")} else {
@@ -1400,6 +1396,7 @@ function touchHandler(event)
     document.body.dispatchEvent(simulatedEvent);
     
     event.preventDefault();
+    console.log(mouseX)
 }
 function init2() 
 {
