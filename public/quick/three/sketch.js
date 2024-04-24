@@ -1349,15 +1349,15 @@ let animate = () => {
 }
 
 
-function init2() 
-{
-    document.addEventListener("touchstart", touchHandler, true);
-    document.addEventListener("touchmove", (e)=>{myh(e);touchHandler(e)}, true);
-    document.addEventListener("touchend", touchHandler, true);
-    document.addEventListener("touchcancel", touchHandler, true);    
-    // document.addEventListener('touchmove', function() { e.preventDefault();GI.debuggingInfo = "cancled" }, { passive:false });
-}
-init2()
+// function init2() 
+// {
+//     document.addEventListener("touchstart", touchHandler, true);
+//     document.addEventListener("touchmove", (e)=>{myh(e);touchHandler(e)}, true);
+//     document.addEventListener("touchend", touchHandler, true);
+//     document.addEventListener("touchcancel", touchHandler, true);    
+//     // document.addEventListener('touchmove', function() { e.preventDefault();GI.debuggingInfo = "cancled" }, { passive:false });
+// }
+// init2()
 
 
 init();
@@ -1587,7 +1587,7 @@ function touchHandler(event)
     mouseY = event.touches[0].clientY}
 
     c.mouseDisp.x += mouseX - last[0]
-    console.log(c.mouseDisp.x)
+    console.log("TEST"+c.mouseDisp.x)
     c.mouseDisp.y += mouseY - last[1]
 
 
