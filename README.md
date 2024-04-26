@@ -25,6 +25,15 @@ visit the join link with suffixes for fun stuff:
 
 - https://game-10.lopkn.unsown.top/quick/bsmeter Bullsh\*t meter that uses your mic somehow
 
+- https://game-10.lopkn.unsown.top/quick/musicbox A cool music box with particle effects
+
+- https://game-10.lopkn.unsown.top/re8 Real time strategy game with ridiculous unit movement and economy
+
+- https://game-10.lopkn.unsown.top/shooter2 2D shooter with bullet ricochet walls at any angle
+
+
+
+
 
 
 other stuff that are served on the server but are still in this repo include:
