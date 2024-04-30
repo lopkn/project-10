@@ -266,6 +266,8 @@ class c{
     "boosting":{"damage":1},
   }
 
+  static touchBreaking = false
+
   static vel = 0.24
 
   static chaosLimit = 2
@@ -1301,6 +1303,7 @@ let animate = () => {
     // dateLogger[2] = dateLogger[1]-1
     dateLogger = [0,0,dateLogger[1]]
   }
+  touchUpdate()
 
   throttleCounter++
   c.update(throttleCounter)
@@ -1554,7 +1557,14 @@ function update2D(counter){
 
 }
 
+function touchUpdate(){
+  if(c.touchBreaking){
+    c.vel *= 0.999
+  }
+}
 
+document.getElementById("break").addEventListener("mousedown",(e)=>{c.touchBreaking=true;console.log("hi?");e.stopPropagation()})
+document.getElementById("break").addEventListener("mouseup",(e)=>{c.touchBreaking=false})
 
 
 function touchHandler(event)
