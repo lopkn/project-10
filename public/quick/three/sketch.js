@@ -1559,11 +1559,11 @@ function update2D(counter){
 
 function touchUpdate(){
   if(c.touchBreaking){
-    c.vel *= 0.999
+    c.vel *= 0.99
   }
 }
 
-document.getElementById("break").addEventListener("mousedown",(e)=>{c.touchBreaking=true;console.log("hi?");e.stopPropagation()})
+document.getElementById("break").addEventListener("mousedown",(e)=>{c.touchBreaking=true;console.log("hi?");e.stopPropagation();e.preventDefault()})
 document.getElementById("break").addEventListener("mouseup",(e)=>{c.touchBreaking=false})
 
 
