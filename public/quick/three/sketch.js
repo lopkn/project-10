@@ -1559,7 +1559,7 @@ function update2D(counter){
 
 function touchUpdate(){
   if(c.touchBreaking){
-    c.vel *= 0.99
+    c.vel *= 0.995
   }
 }
 
