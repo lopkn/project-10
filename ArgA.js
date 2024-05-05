@@ -92,7 +92,8 @@ class ArgAccel{
 	static msgid = 0
 	// static msghist = {}
 
-	static rooms = {"Lobby":{"msghist":{},"msghistArr":[],"settings":{"max":50},"connectedSockets":{}}}
+	static rooms = {"Lobby":{"msghist":{},"msghistArr":[],"settings":{"max":50},"connectedSockets":{}},
+			"triggers":{"stringTrigger":{}}}
 
 	static addRoom(name){
 		this.rooms[name] = {
@@ -100,6 +101,7 @@ class ArgAccel{
 			"msghistArr":[],
 			"settings":{"max":50},
 			"connectedSockets":{},
+			"triggers":{"stringTrigger":{}}
 		}
 	}
 
@@ -150,6 +152,22 @@ class ArgAccel{
 		}
 	}
 
+
+
+	static stringTrigger(stext,socket,aroom){
+
+
+		let triggerDict = aroom.triggers.stringTrigger
+		let ret = true
+
+		if(triggerDict[stext]!==undefined){
+			ret = triggerDict[stext](stext,socket,aroom)
+
+		}
+
+		return false
+	}
+
 	static handle(date,name,content,socket){
 
 		let ihtml = content.ihtml
@@ -180,7 +198,10 @@ class ArgAccel{
 					this.dsMessage("you will create a temporary account if no password is provided",socket)
 				}
 				return
-			}
+			} ///logged in text
+
+
+		    if(this.stringTrigger(processed.stext,socket,this.rooms[room])=="return"){return}
 
 
 			if(txt[0] == "/"){
@@ -188,7 +209,7 @@ class ArgAccel{
 				return
 			}
 
-			let mid = this.message(date,socket,processed,room)
+			let mid = this.message(date,socket,processed,room) //text is sent into room
 			if(processed.desync){
 				this.sMessage("Message ID: "+mid+" is desynced/corrupt",room)
 			}
