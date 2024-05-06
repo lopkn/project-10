@@ -92,11 +92,11 @@ class ArgAccel{
 	static msgid = 0
 	// static msghist = {}
 
-	static rooms = {"Lobby":{"msghist":{},"msghistArr":[],"settings":{"max":50},"connectedSockets":{}},
-			"triggers":{"stringTrigger":{}}}
+	static rooms = {"Lobby":{"name":"Lobby","msghist":{},"msghistArr":[],"settings":{"max":50},"connectedSockets":{},"triggers":{"stringTrigger":{}}}}
 
 	static addRoom(name){
 		this.rooms[name] = {
+			"name":name,
 			"msghist":{},
 			"msghistArr":[],
 			"settings":{"max":50},
@@ -142,6 +142,7 @@ class ArgAccel{
 	}
 
 	static nameof(socket){
+		if(socket.isBot){return(socket.id)}
 		return(this.accounts[socket.loggedin].name)
 	}
 
@@ -152,6 +153,42 @@ class ArgAccel{
 		}
 	}
 
+
+	static decompileRoom(text){
+		if(text.substring(0,6)=="#accel"){
+			text = text.split("\n").slice(1).join("\n")
+			let split = text.split("[")
+			let result = {}
+			split.forEach((e)=>{
+				if(e == ""){return}
+				let sep = e.split("] ")
+				let id = e[0]
+				let content = sep.slice(1).join("] ")
+				if(result[id]){throw(new Error)}
+				result[id] = {"content":content,"title":"","options":[]}
+				if(content[content.length-1] == "\n"){content=content.slice(0,-1)}
+				if(content[0] == "\n"){content=content.substring(1)}
+				let lines = content.split("\n")
+
+				let mode = "title"
+				lines.forEach((a)=>{
+					if(a.substring(0,4) == "&gt;"){
+						mode = "options"
+						let optionsplit = a.split("&gt;")
+						let option = {"text":optionsplit[2],"reference":optionsplit[1]}
+						result[id].options.push(option)
+					}
+					if(mode == "title"){
+						result[id].title += a + "\n"
+					}
+				})
+				if(result[id].title[result[id].title.length-1]=="\n"){result[id].title=result[id].title.slice(0,-1)}
+
+			})
+			return(result)
+		}
+		return("incompatible format")
+	}
 
 
 	static stringTrigger(stext,socket,aroom){
@@ -323,6 +360,31 @@ class ArgAccel{
 		return(e)
 	}
 
+	static accel(aroom,disp){
+		let main = aroom.triggers.accel
+		if(!main.init){
+			main.init = true
+			main.current = disp = 0
+		}
+
+		main.current = disp
+
+		if(disp == -1){
+			this.blockMessage(Date.now(),{"id":"accel","isBot":true},{"stext":"exited"},aroom.name)
+			return;
+		}
+
+		console.log("disp"+disp)
+		this.blockMessage(Date.now(),{"id":"accel","isBot":true},{"stext":main[main.current].title},aroom.name)
+		let block = main[main.current]
+		block.options.forEach((e,i)=>{
+			this.blockMessage(Date.now(),{"id":"accel","isBot":true},{"stext":i+" > "+e.text},aroom.name)
+			aroom.triggers.stringTrigger[i] = ()=>{this.accel(aroom,e.reference)}
+		})
+
+
+	}
+
 	static command(date,content,socket,room){
 		let su = false
 		if(this.keyholders[socket.id]){su = true}
@@ -344,6 +406,10 @@ class ArgAccel{
 						this.sMessage("room settings max = "+aroom.settings.max,room)
 
 					}
+				} else if(s1 == "decompile"){
+					let rm = this.decompileRoom(split.splice(1).join(" "))
+					aroom.triggers.accel = rm
+					this.accel(aroom,0)
 				}
 			}
 
@@ -351,34 +417,7 @@ class ArgAccel{
 					this.dsMessage("your current room is: "+room,socket)
 				} else if(s1 == "joinroom"){
 					this.joinroom(split,room,socket)
-					// if(this.rooms[split[1]]){
-					// 	let objk = Object.keys(this.rooms[split[1]].connectedSockets)
-					// 	if(this.rooms[split[1]].max <= objk.length){
-					// 		this.dsMessage("room is full")
-					// 		return;
-					// 	}
-					// } else {
-					// 	this.addRoom(split[1])			
-					// }
-					// this.sMessage(this.nameof(socket) + " moved to room "+split[1],room)
-					// io.to(socket.id).emit("joinroom",split[1])
-					// let sid = socket.id
-					// delete this.rooms[split[1]].connectedSockets[sid]
-					// socket.leaveAll()
-					// socket.join("G10.7")
-					// socket.join("ArgAccel-"+split[1])
-					// socket.join(sid)
-					// this.rooms[split[1]].connectedSockets[sid] = true
 				} else if(s1 == "lobby"){
-					// split[1] = "Lobby"
-					// this.sMessage(this.nameof(socket) + " moved to room "+split[1],room)
-					// io.to(socket.id).emit("joinroom",split[1])
-					// let sid = socket.id
-					// delete this.rooms[split[1]].connectedSockets[sid]
-					// socket.leaveAll()
-					// socket.join("G10.7")
-					// socket.join("ArgAccel-"+split[1])
-					// socket.join(sid)
 					this.joinroom(["join","Lobby"],room,socket)
 				} else if(s1 == "topic"){
 					if(split[1]){
@@ -491,6 +530,7 @@ class ArgAccel{
 		socket.join("ArgAccel-"+split[1])
 		socket.join(sid)
 		this.rooms[split[1]].connectedSockets[sid] = true
+		return(split[1])
 	}
 
 	static conflictFuncs(aroom,method,args){

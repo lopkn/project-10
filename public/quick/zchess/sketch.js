@@ -329,6 +329,7 @@ function specialRenderIn(){
 	drawText("Roaming",1,6)
 	drawText("Phantom",1,8)
 	drawText("Universal",1,10)
+	drawText("Campaign (WIP)",1,12)
 	
 
 
@@ -368,6 +369,13 @@ function specialRenderIn(){
 	ctx.moveTo(coord1[0],coord1[1]+10*tileSize)
 	ctx.lineTo(coord2[0],coord2[1]+10*tileSize)
 	ctx.lineTo(coord3[0],coord3[1]+10*tileSize)
+	ctx.fill()
+	ctx.closePath()
+	fill(155,0,255,mra)
+	ctx.beginPath()
+	ctx.moveTo(coord1[0],coord1[1]+12*tileSize)
+	ctx.lineTo(coord2[0],coord2[1]+12*tileSize)
+	ctx.lineTo(coord3[0],coord3[1]+12*tileSize)
 	ctx.fill()
 	ctx.closePath()
 
@@ -606,6 +614,10 @@ document.addEventListener("mouseup",(e)=>{
 						startGame()
 					} else if(mouseBoardY == 10){
 						camera.gamemode = "Universal"
+						gameStart = "started"
+						startGame()
+					}else if(mouseBoardY == 12){
+						camera.gamemode = "Campaign"
 						gameStart = "started"
 						startGame()
 					}
