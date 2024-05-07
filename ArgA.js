@@ -218,13 +218,15 @@ class ArgAccel{
 
 		if(txt.length == 0){return}
 		ihtml = ihtml.replaceAll("&quot;","\"")
+		ihtml = ihtml.replaceAll("<br>","\n")
 		txt = txt.replaceAll("<","&lt;")
 		txt = txt.replaceAll(">","&gt;")
 		ihtml = ihtml.replaceAll("<","&lt;")
 		ihtml = ihtml.replaceAll(">","&gt;")
 
-		console.log(txt)
 		let processed = this.ihtmlProcess(ihtml,txt,room,socket)
+		console.log("processed")
+		console.log(processed)
 		if(name == "msg"){
 
 			if(!socket.loggedin){
@@ -256,6 +258,7 @@ class ArgAccel{
 	}
 
 	static ihtmlProcess(str,cont,room,socket){
+		console.log("str",str)
 		let id = "normal"
 		let out = ['']
 		for(let i = 0; i < str.length; i++){
@@ -336,7 +339,6 @@ class ArgAccel{
 		if(cont!=ftext){
 			console.log("["+cont+"]","["+ftext+"]")
 		}
-
 		return({"text":cont,"processed":out,"stext":stext,"desync":cont!=ftext,"verifieds":verifieds})
 	}
 

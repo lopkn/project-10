@@ -550,6 +550,32 @@ function initiateTextFuncs(elm){
 function collapseAll(){
 	collapseSelect()
 	collapseEmpty()
+	for(let i = 0; i < MIP.children.length; i++){
+		let e = MIP.children[i]
+		if(e.classList.length == 0){
+			e.classList.add("collapseTag")
+		}
+	}
+		
+
+	collapseTagged()
+}
+
+function collapseTagged(){
+	let b = MIP.getElementsByClassName("collapseTag");
+	let x = 0
+	let lc;
+	while(b.length && x < 500) {
+			x++
+	    let parent = b[0].parentNode;
+
+	    let SPAN = document.createElement("span")
+	    SPAN.classList.add("collapsed")
+	    SPAN.innerHTML = b[0].innerHTML
+	     parent.insertBefore(SPAN,b[0]);
+	     parent.removeChild(b[0]);
+	}
+	return(lc)
 }
 
 function collapseEmpty(){
