@@ -375,7 +375,7 @@ class ArgAccel{
 		}
 
 		console.log("disp"+disp)
-		this.blockMessage(Date.now(),{"id":"accel","isBot":true},{"stext":main[main.current].title},aroom.name)
+		this.blockMessage(Date.now(),{"id":"accel","isBot":true},{"stext":"<span style='color:white'>"+main[main.current].title+"</span>"},aroom.name)
 		let block = main[main.current]
 		block.options.forEach((e,i)=>{
 			this.blockMessage(Date.now(),{"id":"accel","isBot":true},{"stext":i+" > "+e.text},aroom.name)
