@@ -87,7 +87,7 @@ class ArgAug{
 
 
 class ArgAccel{
-	static keyholders = {}
+	static keyholders = {"accel":true}
 
 	static msgid = 0
 	// static msghist = {}
@@ -165,7 +165,7 @@ class ArgAccel{
 				let id = e[0]
 				let content = sep.slice(1).join("] ")
 				if(result[id]){throw(new Error)}
-				result[id] = {"content":content,"title":"","options":[]}
+				result[id] = {"content":content,"title":"","options":[],"citations":[]}
 				if(content[content.length-1] == "\n"){content=content.slice(0,-1)}
 				if(content[0] == "\n"){content=content.substring(1)}
 				let lines = content.split("\n")
@@ -177,6 +177,13 @@ class ArgAccel{
 						let optionsplit = a.split("&gt;")
 						let option = {"text":optionsplit[2],"reference":optionsplit[1]}
 						result[id].options.push(option)
+					}
+					if(a.substring(0,6) == "#link " || a.substring(0,6) == "#cite "){
+						mode = "options"
+						let citation = a.substring(6)
+						let cite = {"citation":"/cite -1 "+citation}
+						result[id].citations.push(cite)
+
 					}
 					if(mode == "title"){
 						result[id].title += a + "\n"
@@ -275,7 +282,8 @@ class ArgAccel{
 				}
 			}
 
-				out[out.length-1] += char
+			out[out.length-1] += char
+			
 			} else if(id == "spanAttr"){
 				if(char == "&"){
 					if(str.substring(i+1,i+4) == "gt;"){
@@ -290,13 +298,13 @@ class ArgAccel{
 			} else if(id == "inSpan"){
 
 				if(char == "&"){
-				if(str.substring(i+1,i+13) == "lt;/span&gt;"){
-					i+=12
-					id = "normal"
-					out.push('')
-					continue
+					if(str.substring(i+1,i+13) == "lt;/span&gt;"){
+						i+=12
+						id = "normal"
+						out.push('')
+						continue
+					}
 				}
-			}
 				out[out.length-1].text += char
 			}
 
@@ -339,6 +347,10 @@ class ArgAccel{
 		if(cont!=ftext){
 			console.log("["+cont+"]","["+ftext+"]")
 		}
+		//text is the HTML text client sends
+		//stext is the HTML text server sends back
+		//ftext is the EXTRACTED TEXT server processed
+		//str is the PLAINTEXT client sends
 		return({"text":cont,"processed":out,"stext":stext,"desync":cont!=ftext,"verifieds":verifieds})
 	}
 
@@ -379,10 +391,19 @@ class ArgAccel{
 		console.log("disp"+disp)
 		this.blockMessage(Date.now(),{"id":"accel","isBot":true},{"stext":"<span style='color:white'>"+main[main.current].title+"</span>"},aroom.name)
 		let block = main[main.current]
+		block.citations.forEach((e,i)=>{
+			this.command(Date.now,e.citation,{"id":"accel","isBot":true},aroom.name)
+		})
+		let maxoptions=0
 		block.options.forEach((e,i)=>{
+			maxoptions=i
 			this.blockMessage(Date.now(),{"id":"accel","isBot":true},{"stext":i+" > "+e.text},aroom.name)
 			aroom.triggers.stringTrigger[i] = ()=>{this.accel(aroom,e.reference)}
 		})
+		while(aroom.triggers.stringTrigger[maxoptions+1]){
+			delete aroom.triggers.stringTrigger[maxoptions+1]
+			maxoptions+=1
+		}
 
 
 	}
@@ -468,10 +489,21 @@ class ArgAccel{
 					}
 				} else if(s1 == "cite"){
 					let msg = this.isMessage(split[1],aroom)?aroom.msghist[split[1]]:this.latestMessage(aroom)
+					
 					let citestr = ''
+					if(split[1] == -1){
+						if(split[2].substring(0,8)=="https://"){split[2]=split[2].substring(8)}
+						let citation = "<span style='color:SlateBlue'><a target='_blank' rel='noopener noreferrer' href='//"+split[2]+"'>"+split[2]+"</a></span>"+content.substring(7+split[1].length+split[2].length)
+						this.blockMessage(Date.now(),socket,{
+							"stext":this.nameof(socket)+" cited with "+citation
+						},room)
+						return;
+					}
 
 					if(!msg.canReference){return}
+					
 					if(split[2]){
+						if(split[2].substring(0,8)=="https://"){split[2]=split[2].substring(8)}
 						let citation = "<span style='color:SlateBlue'><a target='_blank' rel='noopener noreferrer' href='//"+split[2]+"'>"+split[2]+"</a></span>"+content.substring(7+split[1].length+split[2].length)
 						// this.sMessage(socket.id+" cited ["+msg.msgid+"] with "+citation,room)
 						this.blockMessage(Date.now(),socket,{

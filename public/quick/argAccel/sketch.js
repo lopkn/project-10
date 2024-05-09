@@ -296,7 +296,8 @@ MIP.addEventListener("keydown",(e)=>{
 })
 
 function sendPlain(str){
-		socket.emit("msg",{"ihtml":str,"txt":str,"room":ROOM})
+		// socket.emit("msg",{"ihtml":str,"txt":str,"room":ROOM})
+		socket.emit("msg",{"ihtml":str,"txt":htmlToPlainText(str),"room":ROOM})
 }
 
 document.getElementById("chat").addEventListener("keydown",(e)=>{
@@ -545,6 +546,11 @@ function initiateTextFuncs(elm){
 			e.onclick = ()=>{chatAttributes.deleting(e)}
 		}
 	}
+}
+
+function htmlToPlainText(htmlString) {
+  var doc = new DOMParser().parseFromString(htmlString, "text/html");
+  return doc.documentElement.textContent;
 }
 
 function collapseAll(){
