@@ -155,6 +155,9 @@ class ArgAccel{
 
 
 	static decompileRoom(text){
+		while(text[0] !== "#"){
+			text = text.substring(1)
+		}
 		if(text.substring(0,6)=="#accel"){
 			text = text.split("\n").slice(1).join("\n")
 			let split = text.split("[")
@@ -247,7 +250,6 @@ class ArgAccel{
 			} ///logged in text
 
 
-		    if(this.stringTrigger(processed.stext,socket,this.rooms[room])=="return"){return}
 
 
 			if(txt[0] == "/"){
@@ -256,6 +258,7 @@ class ArgAccel{
 			}
 
 			let mid = this.message(date,socket,processed,room) //text is sent into room
+		    if(this.stringTrigger(processed.stext,socket,this.rooms[room])=="return"){return}
 			if(processed.desync){
 				this.sMessage("Message ID: "+mid+" is desynced/corrupt",room)
 			}
@@ -374,11 +377,13 @@ class ArgAccel{
 		return(e)
 	}
 
-	static accel(aroom,disp){
+	static accel(aroom,disp,socket){
 		let main = aroom.triggers.accel
 		if(!main.init){
 			main.init = true
 			main.current = disp = 0
+			main.userHistories = {}
+			aroom.triggers.stringTrigger['r'] = (a,socket)=>{this.accel(aroom,"r",socket)}
 		}
 
 		main.current = disp
@@ -388,7 +393,17 @@ class ArgAccel{
 			return;
 		}
 
-		console.log("disp"+disp)
+		if(main.userHistories[socket.id] == undefined){
+			main.userHistories[socket.id] = []
+		}
+		if(disp == "r"){
+			main.userHistories[socket.id].pop()
+			if(main.userHistories[socket.id].length==0){return}
+			main.current = main.userHistories[socket.id][main.userHistories[socket.id].length-1]
+		} else {
+			main.userHistories[socket.id].push(disp) 
+		}
+
 		this.blockMessage(Date.now(),{"id":"accel","isBot":true},{"stext":"<span style='color:white'>"+main[main.current].title+"</span>"},aroom.name)
 		let block = main[main.current]
 		block.citations.forEach((e,i)=>{
@@ -398,8 +413,12 @@ class ArgAccel{
 		block.options.forEach((e,i)=>{
 			maxoptions=i
 			this.blockMessage(Date.now(),{"id":"accel","isBot":true},{"stext":i+" > "+e.text},aroom.name)
-			aroom.triggers.stringTrigger[i] = ()=>{this.accel(aroom,e.reference)}
+			aroom.triggers.stringTrigger[i] = (a,socket)=>{this.accel(aroom,e.reference,socket)}
 		})
+		if(block.options.length==0){
+			this.blockMessage(Date.now(),{"id":"accel","isBot":true},{"stext":"r > Back"},aroom.name)
+			maxoptions=-1
+		}
 		while(aroom.triggers.stringTrigger[maxoptions+1]){
 			delete aroom.triggers.stringTrigger[maxoptions+1]
 			maxoptions+=1
@@ -432,7 +451,7 @@ class ArgAccel{
 				} else if(s1 == "decompile"){
 					let rm = this.decompileRoom(split.splice(1).join(" "))
 					aroom.triggers.accel = rm
-					this.accel(aroom,0)
+					this.accel(aroom,0,socket)
 				}
 			}
 
