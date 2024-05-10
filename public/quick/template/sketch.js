@@ -15,3 +15,6 @@ let ctx = document.getElementById("myCanvas").getContext("2d")
 let mouseX = 0
 let mouseY = 0
 onmousemove = (e)=>{mouseX = (e.clientX); mouseY = (e.clientY)}
+
+
+// const socket = io.connect('/')
