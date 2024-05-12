@@ -1,0 +1,258 @@
+
+ [1715466278945] okay let's try okay hello
+ [1715466284748] okay see okay so there's the email oh my God
+ [1715466288334] email
+ [1715466291119] the email
+ [1715466301536] oh wow okay it's not if you can put the accuracy like all for that just want to come or something
+ [1715466310209] anyways
+ [1715466343711] using the raw data is the the UI wouldn't automatically delete what it it isn't sure about so you see how I said it's not that even accurate anyways and I didn't know what accurate to put here it didn't hear accurate so it just deleted it's not that even like there's no it's not that even here it deleted it but even though it already recognized it
+ [1715466348788] do you what I mean no I don't
+ [1715466353205] okay anyway do you want to mean no I don't
+ [1715466357878] anyway okay anyway I could just do this give me a second
+ [1715466362393] what is the password does have a space
+ [1715466368967] because after the full stop it does a space
+ [1715466377976] except for the first one
+ [1715466384365] it's easy to fix just make it so that the first one does have a space look I could literally just do that
+ [1715466391352] what else okay yeah okay that that seems great
+ [1715466394146] then how I could run this though
+ [1715466401848]
+ [1715466404150]
+ [1715466411448]
+ [1715466419333] my screen is supposed to be charged in my screen is being shut okay
+ [1715466426937] what successful old
+ [1715466434141] I don't know what that is it's successful anyway okay go oh you might need to use Chrome this time then
+ [1715466441931] maybe Edge Works anyway
+ [1715466452924]
+ [1715466460700] and I got a project 10
+ [1715466466992] public
+ [1715466472710] quick
+ [1715466476600] up up
+ [1715466479584] all right down r e c
+ [1715466487182] okay download this entire folder I think can you download the entire Rec folder
+ [1715466494776] okay go into Rec
+ [1715466503380] okay just download the the first three files you see
+ [1715466511870] click on it click on click on index no no you don't need that one and next okay copy
+ [1715466516457] save it into a folder okay
+ [1715466525667] whoops
+ [1715466532166] put them all into the same folder
+ [1715466544635] then
+ [1715466549439] and then okay on your terminal go to that folder
+ [1715466567926] and do you have a dash console do you have any bash consoles is that is this I don't know okay whatever
+ [1715466574785]Dash V
+ [1715466578985] V4 Verizon
+ [1715466586804] space server.js
+ [1715466598298] do you have a server.js
+ [1715466609782] oh oh it gave you an error no no it ran it gave you an error go go back to terminal okay internal module loader npm install Express
+ [1715466612365] space install
+ [1715466613782] Express
+ [1715466623354] wow some nice thinking is doing yeah
+ [1715466626451] I like her
+ [1715466634645]s
+ [1715466636839]y stuff
+ [1715466661634] what is that
+ [1715466665425] Brad
+ [1715466674716] delete line 18
+ [1715466680112] K control s safe
+ [1715466683531] go terminal rerun
+ [1715466689911] okay
+ [1715466692509] npm install socket dial
+ [1715466701538] I'm I'm just installing no socket.io
+ [1715466706424] oh that might not be good
+ [1715466709200] I don't know what you just installed
+ [1715466712306] 10 vulnerabilities
+ [1715466718124] well okay try to run the service see if you insult the correct thing I am pretty sure there needs to be a DOT
+ [1715466722813] in the socket.io
+ [1715466723984]
+ [1715466725111]
+ [1715466731294]
+ [1715466738506] vulnerability
+ [1715466747607] okay it worked okay now go to Edge reload your my go to go to Edge go to localhost call them 3000
+ [1715466757889] allow say something let me know
+ [1715466762573] Jesus
+ [1715466766282] oh Jesus control a you can control a
+ [1715466771373] night
+ [1715466778887] I can't click on it but it's goofing out I was just close that thing then take a screenshot
+ [1715466788851] okay so now if I go over here then is there then
+ [1715466797662] you didn't give it a file
+ [1715466801731]
+ [1715466816355] oh oh crap cuz he downloaded a version of the server where it didn't it didn't know how to do I didn't update it this is yesterday's code so I didn't make it so that it can write a file yet so let me just go home I said
+ [1715466820234] yeah just like Google so
+ [1715466822430] gives you the server
+ [1715466830731] doing this again
+ [1715466833638] just just the server file
+ [1715466838308] I just I just do the server
+ [1715466845119] address it's insane
+ [1715466856918] and see if this is
+ [1715466859522] doing anything different
+ [1715466869793] text
+ [1715466897139]oh you can also set the language so let me just teach you how to set the language now I'm not going to do anything other than English it doesn't matter is not handled
+ [1715466909152] oh my god when I spoke in the most obscure American accent honest with it heavily fine but I spoke in a normal British accent I didn't understand what I was saying
+ [1715466916336] let me see this is
+ [1715466927930] where is it where is it there is a thing that I need what are the supported languages
+ [1715466943402] why is that running
+ [1715466953189] over there you don't even need it
+ [1715466964085] is it gay
+ [1715466967183] who the hell cares about that
+ [1715466970378] no one gives a crap about portugals
+ [1715466976994] bro there is there are a lot of englishes
+ [1715466980070] how many
+ [1715466986580] why are there so many is there like a lot of spaces or something
+ [1715466988062] oh there are
+ [1715466996287] I'm just going to delete some spaces and it's going to look very interesting places yeah
+ [1715467000183] how do I you know what you know what
+ [1715467004053] I'm just going to programmatically remove all these spaces
+ [1715467010848] dot replace all
+ [1715467014447] space with nothing
+ [1715467017957] they're going to replace old doubles fit okay whatever
+ [1715467028843] okay I have two options here you didn't make the message daughter
+ [1715467032941] or make it so much longer that I just does message don't text you
+ [1715467038832] there has to be I actually I used to have another one
+ [1715467040638] if I don't
+ [1715467048549] here it is I'm just going to send you this website now
+ [1715467054837] and I will check this out
+ [1715467058217] yeah there's English UK and English us
+ [1715467066933] so how do you set it is okay go to go to your sketch.js
+ [1715467069406] let me just find
+ [1715467071119] us
+ [1715467077302] sketch this is server
+ [1715467091408] get all scroll down a little bit is there like a lang or control f l a n g
+ [1715467099410] no no okay control up about like 70
+ [1715467100887] okay
+ [1715467104186] the forward enter a new line
+ [1715467110900] no no no no no no before 64 new line is 63
+ [1715467116697] okay
+ [1715467122401] yep
+ [1715467124283] e n g b
+ [1715467130065] save control apps for safe
+ [1715467136567] no I don't need control ass because I haven't saw it as soon as I leave the window I want to take what time it says
+ [1715467143175] okay so tell me that now
+ [1715467148380] there's always is keeps the stuff it's pretty done that's that's actually a good thing
+ [1715467152472] oh this is beautiful
+ [1715467159444] wow okay
+ [1715467162344] do I have to have this open
+ [1715467164962] they close this I'm going to
+ [1715467170138] oh yeah of course you need to have the tab open bro yeah
+ [1715467174799]have it like open open
+ [1715467176399] no
+ [1715467182810] well we can try to see if it will attend I can make it work in Opera
+ [1715467189814] when they just look like I want to make it like so ultimately that like it just runs in the background
+ [1715467196704] no this is not this is a browser thing so like your browser that's the recognition
+ [1715467198289] not the server
+ [1715467203381] is always a height of a window
+ [1715467206989] no
+ [1715467214985] probably not I don't know
+ [1715467217984] I don't have this issue you can figure it out
+ [1715467252383]anyway so are you going to write the python what are you going to do with the python
+ [1715467259979] but it's always great together for future projects
+ [1715467264171]or
+ [1715467278166] just see how many times I use the word goofy or something
+ [1715467281563] I think you can add new words into the thing
+ [1715467287538] yeah oh it does recognize that it doesn't recognize bro
+ [1715467303035] I think this bra yeah
+ [1715467322268]this is a chrome plugin though
+ [1715467328396] this is
+ [1715467339338] oh this one
+ [1715467342155] invisible tab
+ [1715467349630] panic button
+ [1715467352151] oh that's F12
+ [1715467358946] that's for like if you're watching something
+ [1715467372629] yeah can I turn off this is annoying cuz I sometimes click it and it's just I don't even know turn off
+ [1715467380929] battery saver bro I'm on a PC
+ [1715467383023] that whatever
+ [1715467398696] please tell me yeah okay
+ [1715467416479] I don't know
+ [1715467420684] I could just put it in a different thing
+ [1715467430571] yeah
+ [1715467433493] I just put a different one I just put in this one
+ [1715467435941] but is it still read it
+ [1715467438363] yeah
+ [1715467439689] are you sure
+ [1715467445871] yeah it's just as if it's open like normal but it doesn't show it on her and said yes cuz
+ [1715467458579] I'm so sorry bro I think I'm just going to go to this point
+ [1715467468460] period
+ [1715467475273] forward it to write a file and then also not the last question
+ [1715467488150] you better just keep this open just eating up all that juicy data
+ [1715467495749] dude
+ [1715467504566] on Opera local on 300
+ [1715467514340] no no you're Opera console
+ [1715467519838] watch I want to see why it doesn't work on Opera
+ [1715467522531] what do you mean my upper console
+ [1715467531922] do you not have console on Opera like debugger.com
+ [1715467536099] okay wait
+ [1715467541220] do type in speech Let's see what you can tab
+ [1715467542794] no speech
+ [1715467546910] no there's only huh
+ [1715467550789] is this opera or Opera GX
+ [1715467555385] it's the same thing
+ [1715467568587] the West Beach recognition API is available on Chrome Edge but not Opera
+ [1715467578868] no it doesn't work on Opera
+ [1715467587185] okay okay good night
+ [1715467594610] do you like that
+ [1715467598857] you like my own
+ [1715467602150] a juicy awesome what
+ [1715467610450] old s*** A
+ [1715467613442] hold shift a
+ [1715467619714]speech recognition is actually kind of bad
+ [1715467626216] I feel better on my side recognized that whatever you said
+ [1715467632307] my music
+ [1715467634802] oh maybe yeah maybe
+ [1715467639612] so if I turned off and I speak now then what I like to ride
+ [1715467643297] no not really
+ [1715467662992] rent her on my side it never works that bad like like for me it always
+ [1715467670088] rent her they turn from printer to renter but anyway on my side
+ [1715467673996] it usually works pretty good
+ [1715467681984] yeah I don't know maybe it's just my overly British accents messing with the code
+ [1715467691219] no I feel that right yeah wait let's see if if your side to get it wrong and my side could get it right
+ [1715467696190] but when I speak or like when either when we speak
+ [1715467719413]better or your side okay
+ [1715467726008] reload your your reload your tab first so that it's
+ [1715467741198]come on
+ [1715467746099] telecast
+ [1715467755429] a Russian businessman who okay no this has a bunch of words and stuff that like no one knows
+ [1715467757606] I need like a mall
+ [1715467759188] better one
+ [1715467763687] he very quickly got onto the private property
+ [1715467768490] bandwagon and end up doing a hot dog seller
+ [1715467780088] and this was where things became very mysterious transformed himself so restaurant
+ [1715467795180] he his mother on his stepfather salted Hospital business out of flea market in the city governments wooded him contracts for food provision to schools in the Army and other governments Enterprises
+ [1715467801364] seems kind of right
+ [1715467813980] I'm going to Ryan okay so now let's let's copy the everything and then and then type it into Discord to compare
+ [1715467825875] I don't know why my thing okay look it said in alternative okay wait where's the first
+ [1715467842848] look it's the what you said was actually okay I'm looking at this okay and then what it the first most confident one is you said that entire thing is called it's it's just telecast that's what she said
+ [1715467848155] and then the third option is okay I'm looking at it okay
+ [1715467853333] like like there's such a big difference
+ [1715467857421] yeah
+ [1715467866625] so two is what it actually heard like what it actually thought it was conf is a confidence out of the alternatives
+ [1715467875936] up is so different difficult the Russian business okay I go Russia never had roses Russian businessman
+ [1715467882116] we're coming over there okay so this stuff from the same place this ends
+ [1715467891521] just goes to compatible
+ [1715467898623]??
+ [1715467900711]
+ [1715467912194]
+ [1715467913973]
+ [1715467918073]
+ [1715467922775]
+ [1715467929080] okay this is like completely different
+ [1715467937500] oh I need I need like a mole better one I need a mole better one oh mine actually got that kind of rap
+ [1715467942578] he's very quickly go on to
+ [1715467947582] the private property after I can add it up
+ [1715467949776] being a hard work seven
+ [1715467957478] and this was where things became very materials
+ [1715467961256] what
+ [1715467965179] I remember the same time because why I'm bringing it so yeah
+ [1715467971748] okay I missed because he on this one on yours I'm so far hot dog
+ [1715467987945] say okay this is completely different this is just skipping stuff it's more accurate
+ [1715467989626] later
+ [1715467993439] okay restaurant
+ [1715467998723] to the ground of grades okay this is
+ [1715468001338] bad this is
+ [1715468006635] so kind of bad no that's totally correct
+ [1715468010923] but I'm really confused Hospital business
+ [1715468025800]
+ [1715468027523] and surprises
+ [1715468035306] being kind of right I'm going to Ryan I'm going to Ryan okay you just got the last sentence right
+ [1715468042677]okay I think online this time is scored last they always Dumber
+ [1715468047663] that took surprisingly long compare
+ [1715468060569] but I actually should go to bed I'm actually so tired right now okay well anyway okay see I'm great I'm awesome
+ [1715468066353]?
+ [1715468069359] good night night

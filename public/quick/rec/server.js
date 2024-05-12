@@ -43,6 +43,8 @@ console.log("new short validation code: " +shortValidationCode)
 function newConnection(socket){
 	// socket.on('requestMap', sendMap)
 	socket.on("text",(e)=>{
-		exec('xdotool type "'+e+'" && xdotool key Return')
+		// exec('xdotool type "'+e+'" && xdotool key Return')
+		fs.writeFileSync("textlog.txt","\n [" + Date.now()+"]" + e,{'flag':'a'}) 
+
 	})
 }
