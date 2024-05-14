@@ -78,6 +78,7 @@ function recf(e){
   rst=e.results
   storestring = e.results[e.results.length-1][0].transcript
   console.log(e.results.length+"::"+storestring)
+  interm(storestring)
 
   if(e.results[final].isFinal){
 
@@ -139,6 +140,20 @@ function whiteText(){
     }
     span.innerHTML = str
     document.getElementById("final").appendChild(span)
+}
+
+function interm(){
+  let span = document.createElement("span")
+    span.classList.add('temp')
+    span.style.color = "white"
+    let str = ""
+    let ff = final
+    while(ff < rst.length){
+      str += rst[ff][0].transcript
+      ff+=1
+    }
+    span.innerHTML = str
+    document.getElementById("term").appendChild(span)
 }
 
 function restart(){
