@@ -13,12 +13,21 @@ let myCanvas = document.getElementById("myCanvas")
 
 let myrec = document.getElementById("final")
 
-  myrec.width = Math.floor(Width)
+  myrec.width = "80%"
   myrec.height = Math.floor(Height)
-  myrec.style.width = Math.floor(Width)+"px"
+  myrec.style.width = "80%"
   myrec.style.height = Math.floor(Height)+"px"
   myrec.style.top = "0px"
   myrec.style.left = "0px"
+
+let myterm = document.getElementById("term")
+
+  myterm.width = "20%"
+  myterm.height = Math.floor(Height)
+  myterm.style.width = "20%"
+  myterm.style.height = Math.floor(Height)+"px"
+  myterm.style.top = "0px"
+  myterm.style.left = "80%"
 
 let ctx = document.getElementById("myCanvas").getContext("2d")
 let mouseX = 0
@@ -146,19 +155,22 @@ function interm(){
   let span = document.createElement("span")
     span.classList.add('temp')
     span.style.color = "white"
-    let str = ""
+    let str = "</br>"
     let ff = final
     while(ff < rst.length){
       str += rst[ff][0].transcript
       ff+=1
     }
     span.innerHTML = str
-    document.getElementById("term").appendChild(span)
+    if(myterm.children.length == 0 || span.innerHTML != myterm.firstChild.innerHTML ){
+      document.getElementById("term").insertBefore(span,myterm.firstChild)
+    }
 }
 
 function restart(){
   rec.stop()
 }
+
 
 
 
