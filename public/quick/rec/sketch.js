@@ -165,6 +165,10 @@ function interm(){
     if(myterm.children.length == 0 || span.innerHTML != myterm.firstChild.innerHTML ){
       document.getElementById("term").insertBefore(span,myterm.firstChild)
     }
+
+    if(myterm.children.length > 100){
+      myterm.lastChild.remove()
+    }
 }
 
 function restart(){
