@@ -162,6 +162,14 @@ function interm(){
       ff+=1
     }
     span.innerHTML = str
+    let lower = str.toLowerCase()
+    if(lower.includes("translate chinese")){
+      rec.lang = "zh-yue"
+      restart()
+    } else if(lower.includes("英")){
+      rec.lang = "en-ca"
+      restart()
+    }
     if(myterm.children.length == 0 || span.innerHTML != myterm.firstChild.innerHTML ){
       document.getElementById("term").insertBefore(span,myterm.firstChild)
     }
