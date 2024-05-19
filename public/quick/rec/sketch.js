@@ -184,6 +184,19 @@ function restart(){
 }
 
 
+function moveCaretToEnd(element) {
+  var range = document.createRange();
+  var selection = window.getSelection();
+
+  range.selectNodeContents(element);
+  range.collapse(false);
+
+  selection.removeAllRanges();
+  selection.addRange(range);
+
+  element.focus();
+}
+
 
 
 
