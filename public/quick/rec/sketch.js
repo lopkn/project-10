@@ -32,6 +32,7 @@ let myterm = document.getElementById("term")
 let ctx = document.getElementById("myCanvas").getContext("2d")
 let mouseX = 0
 let mouseY = 0
+let moveEnd = false
 onmousemove = (e)=>{mouseX = (e.clientX); mouseY = (e.clientY)}
 
 const socket = io.connect('/')
@@ -48,9 +49,12 @@ document.addEventListener('keydown',(e)=>{
 
     span.innerHTML = rst[final][0].transcript
     lastMeanualSave = rst[final][0].transcript
-    document.getElementById("final").appendChild(span)
+    myrec.appendChild(span)
+    if(moveEnd){
+      moveCaretToEnd(myrec)
+    }
 
-    let arr = document.getElementById("final").getElementsByClassName("temp")
+    let arr = myrec.getElementsByClassName("temp")
     for(let i = 0; i < arr.length; i++){
       arr[i].remove()
     }
@@ -63,8 +67,12 @@ let final = 0
 let rec = new webkitSpeechRecognition()
 rec.onresult = (e)=>{recf(e)}
     
-rec.onend=()=>{rec.start();console.log("restart");final = 0; 
-  document.getElementById("final").innerHTML += storestring
+rec.onend=()=>{rec.start();console.log("restart");
+  final = 0; 
+  myrec.innerHTML += storestring
+  if(moveEnd){
+      moveCaretToEnd(myrec)
+    }
   storestring = ""
 }
 rec.continuous = true
@@ -126,7 +134,9 @@ function recf(e){
     }
 
     document.getElementById("final").appendChild(span)
-
+if(moveEnd){
+  moveCaretToEnd(myrec)
+}
     // document.getElementById("final").innerHTML += "<span style='color:rgb("+rgb+")'>"+e.results[final][0].transcript+"</span>"
 
     final+=1
