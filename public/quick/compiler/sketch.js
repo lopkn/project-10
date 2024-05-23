@@ -109,6 +109,12 @@ function pword(word){
   if(word == "if"){
     jump = 1
     return("if(^){^}")
+  }if(word == "while"){
+    jump = 1
+    return("while(^){^}")
+  }if(word == "for"){
+    jump = 1
+    return("for(^){^}")
   } else if(word == "then"){
     jump = 1
     return("")
