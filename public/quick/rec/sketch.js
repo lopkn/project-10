@@ -179,6 +179,8 @@ function interm(){
     } else if(lower.includes("英")){
       rec.lang = "en-ca"
       restart()
+    } else if(lower.includes("clip")){
+      localStorage.setItem('storage', myrec.innerText);
     }
     if(myterm.children.length == 0 || span.innerHTML != myterm.firstChild.innerHTML ){
       document.getElementById("term").insertBefore(span,myterm.firstChild)
