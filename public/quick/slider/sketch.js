@@ -20,6 +20,8 @@ onmousemove = (e)=>{mouseX = (e.clientX); mouseY = (e.clientY)}
 // const socket = io.connect('/')
 
 
+let transcript = []
+
 class connection{
   constructor(f,t,r){
     this.relations = ["a causes of","correlated to","the only cause of"]
@@ -35,16 +37,37 @@ class connection{
   }
 
   updateRenderPos(){
-    let offsets1 = m[this.from].name.getBoundingClientRect();
+    let offsets1 = m[this.from].div.getBoundingClientRect();
     let tp1t = offsets1.top
-    let tp1l = offsets1.left
+    let tp1l = (offsets1.left+offsets1.right)/2
 
-    let offsets2 = m[this.to].name.getBoundingClientRect();
+    let offsets2 = m[this.to].div.getBoundingClientRect();
     let tp2t = offsets2.top
-    let tp2l = offsets2.left
+    let tp2l = (offsets2.left+offsets2.right)/2
 
     this.div.style.top = Math.floor((tp1t+tp2t)/2)+"px"
     this.div.style.left = Math.floor((tp1l+tp2l)/2)+"px"
+    this.draw()
+  }
+
+  draw(){
+    let offsets1 = m[this.from].div.getBoundingClientRect();
+    let tp1t = offsets1.top
+    let tp1l = (offsets1.left+offsets1.right)/2
+
+    let offsets2 = m[this.to].div.getBoundingClientRect();
+    let tp2t = offsets2.top
+    let tp2l = (offsets2.left+offsets2.right)/2
+
+    if(tp2l > tp1l){
+    ctx.strokeStyle = "#FF0000"
+    } else {
+      ctx.strokeStyle = "#00FF00"
+    }
+    ctx.beginPath()
+    ctx.moveTo(tp1l,tp1t)
+    ctx.lineTo(tp2l,tp2t)
+    ctx.stroke()
   }
 
   relationFunction(){
@@ -57,6 +80,8 @@ class connection{
 
   remove(){
     this.div.remove()
+    let a = m[this.to]
+    let b = m[this.from]
   }
 }
 
@@ -112,6 +137,7 @@ class slider{
 
   remove(){
     console.log("REMOVE")
+    transcript.push("RM "+this.id)
     delete m[this.id]
     this.div.remove()
   }
@@ -127,22 +153,48 @@ function create(name){
 
 document.addEventListener("keydown",(e)=>{
   let key = e.key
-  if(key == "c"){
-    let cre = prompt("name?")
-    create(cre)
-  } else if(key == "r"){
-    let cre = prompt("rule?")
-    create(cre)
-    m[cre].slider.remove()
-  } else if(key == "t"){
-    let cre = prompt("teather?")
-    let cre2 = prompt("to?")
-    let relation = prompt("relation?")
-    let con = new connection(cre,cre2,relation)
-    m[cre].connections.push(con)
-    m[cre2].connections.push(con)
+  // if(key == "c"){
+  //   let cre = DO[0]?DO[0]:prompt("name?")
+  //   if(m[cre] || cre === null|| cre == ""){console.log("already exists");return}
+  //   create(cre)
+  //   transcript.push("c "+cre)
+  // } else if(key == "r"){
+  //   let cre = DO[0]?DO[0]:prompt("rule?")
+  //   if(m[cre]|| cre === null || cre == ""){console.log("already exists");return}
+  //   create(cre)
+  //   m[cre].slider.remove()
+  //   transcript.push("r "+cre)
+  // } else if(key == "s"){
+  //   let cre = DO[0]?DO[0]:prompt("switch?")
+  //   if(m[cre]|| cre === null || cre == ""){console.log("already exists");return}
+  //   create(cre)
+  //   m[cre].slider.remove()
+  //   m[cre].button = document.createElement("button")
+  //   m[cre].button.innerHTML = "True"
+  //   m[cre].button.onclick = ()=>{if(m[cre].button.innerHTML=="True"){
+  //     m[cre].button.style.backgroundColor = "#A00000"
+  //     m[cre].button.innerHTML = "False"
+  //   }else{
+  //     m[cre].button.innerHTML = "True"
+  //     m[cre].button.style.backgroundColor = "#00A000"
+  //   }}
+  //   m[cre].div.appendChild(m[cre].button)
+  //   transcript.push("s "+cre)
+  // } else if(key == "t"){
+  //   let cre = DO[0]?DO[0]:prompt("teather?")
+  //   if(m[cre] ==undefined){return}
+  //   let cre2 = DO[1]?DO[1]:prompt("to?")
+  //   if(m[cre2] ==undefined){return}
+  //   let relation = DO[2]?DO[2]:prompt("relation?")
+  //   let con = new connection(cre,cre2,relation)
+  //   m[cre].connections.push(con)
+  //   m[cre2].connections.push(con)
 
-  }
+  //   transcript.push("t "+cre+","+cre2+","+relation)
+  // } else if(key == "p"){
+  //   console.log(JSON.stringify(transcript))
+  // }
+  pro(key,[])
 })
 
 create("main")
@@ -190,10 +242,66 @@ function dragElement(elmnt) {
   }
 }
 
+function loadTranscript(str){
+  let arr = JSON.parse(str)
+  arr.forEach((e)=>{
+    pro(e[0],e.split("@%").splice(1))
+    if(e[0] == "R"&&e[1] == "M"){
+      m[e.substring(3)].remove()
+    }
+  })
+}
 
 
+function pro(key,DO){
+  if(key == "c"){
+    let cre = DO[0]?DO[0]:prompt("name?")
+    if(m[cre] || cre === null|| cre == ""){console.log("already exists");return}
+    create(cre)
+    transcript.push("c@%"+cre)
+  } else if(key == "r"){
+    let cre = DO[0]?DO[0]:prompt("rule?")
+    if(m[cre]|| cre === null || cre == ""){console.log("already exists");return}
+    create(cre)
+    m[cre].slider.remove()
+    transcript.push("r@%"+cre)
+  } else if(key == "s"){
+    let cre = DO[0]?DO[0]:prompt("switch?")
+    if(m[cre]|| cre === null || cre == ""){console.log("already exists");return}
+    create(cre)
+    m[cre].slider.remove()
+    m[cre].button = document.createElement("button")
+    m[cre].button.innerHTML = "True"
+    m[cre].button.onclick = ()=>{if(m[cre].button.innerHTML=="True"){
+      m[cre].button.style.backgroundColor = "#A00000"
+      m[cre].button.innerHTML = "False"
+    }else{
+      m[cre].button.innerHTML = "True"
+      m[cre].button.style.backgroundColor = "#00A000"
+    }}
+    m[cre].div.appendChild(m[cre].button)
+    transcript.push("s@%"+cre)
+  } else if(key == "t"){
+    let cre = DO[0]?DO[0]:prompt("teather?")
+    if(m[cre] ==undefined){return}
+    let cre2 = DO[1]?DO[1]:prompt("to?")
+    if(m[cre2] ==undefined){return}
+    let relation = DO[2]?DO[2]:prompt("relation?")
+    let con = new connection(cre,cre2,relation)
+    m[cre].connections.push(con)
+    m[cre2].connections.push(con)
+
+    transcript.push("t@%"+cre+"@%"+cre2+"@%"+relation)
+  } else if(key == "p"){
+    console.log(JSON.stringify(transcript))
+  }
+}
 
 
+setInterval(()=>{
+  ctx.fillStyle = "rgba(0,0,0,0.1)"
+  ctx.fillRect(0,0,20000,20000)
+},1000)
 
 
 
