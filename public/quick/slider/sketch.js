@@ -22,6 +22,8 @@ onmousemove = (e)=>{mouseX = (e.clientX); mouseY = (e.clientY)}
 
 let transcript = []
 
+let lastselect = ["main"]
+
 class connection{
   constructor(f,t,r){
     this.relations = ["a causes of","correlated to","the only cause of"]
@@ -82,6 +84,12 @@ class connection{
     this.div.remove()
     let a = m[this.to]
     let b = m[this.from]
+    for(let i = a.connections.length-1; i > -1 ; a--){
+      if(a.connections[i] == this){a.connections.splice(i,1)}
+    }
+    for(let i = b.connections.length-1; i > -1 ; b--){
+      if(b.connections[i] == this){b.connections.splice(i,1)}
+    }
   }
 }
 
@@ -106,6 +114,7 @@ class slider{
     this.div.id=id
     this.id=id
     this.div.appendChild(this.x)
+    this.div.onclick = ()=>{lastselect.unshift(id)}
     this.div.appendChild(this.name)
     this.div.appendChild(this.slider)
 
@@ -137,6 +146,9 @@ class slider{
 
   remove(){
     console.log("REMOVE")
+
+    this.connections.forEach((e)=>{e.remove()})
+
     transcript.push("RM "+this.id)
     delete m[this.id]
     this.div.remove()
@@ -151,8 +163,11 @@ function create(name){
   m[name] = new slider(name)
 }
 
-document.addEventListener("keydown",(e)=>{
+document.body.addEventListener("keydown",(e)=>{
   let key = e.key
+  if(document.activeElement !== document.body){
+    return
+  }
   // if(key == "c"){
   //   let cre = DO[0]?DO[0]:prompt("name?")
   //   if(m[cre] || cre === null|| cre == ""){console.log("already exists");return}
@@ -285,13 +300,37 @@ function pro(key,DO){
     let cre = DO[0]?DO[0]:prompt("teather?")
     if(m[cre] ==undefined){return}
     let cre2 = DO[1]?DO[1]:prompt("to?")
-    if(m[cre2] ==undefined){return}
+    if(m[cre2] ==undefined || cre2==cre){return}
     let relation = DO[2]?DO[2]:prompt("relation?")
     let con = new connection(cre,cre2,relation)
     m[cre].connections.push(con)
     m[cre2].connections.push(con)
-
     transcript.push("t@%"+cre+"@%"+cre2+"@%"+relation)
+  } else if(key == "T"){
+    let cre = lastselect[0]
+    if(m[cre] ==undefined){return}
+    let cre2 = lastselect[1]
+    if(m[cre2] ==undefined || cre2==cre){return}
+    let relation = DO[2]?DO[2]:prompt("relation?")
+    let con = new connection(cre,cre2,relation)
+    m[cre].connections.push(con)
+    m[cre2].connections.push(con)
+    transcript.push("t@%"+cre+"@%"+cre2+"@%"+relation)
+  } else if(key == "N"){
+    let i = 1;
+    while(m["Notepad"+i]){
+      i++
+    }
+    let cre = "Notepad"+i
+    create(cre)
+    m[cre].slider.remove()
+    m[cre].notepad = document.createElement("div")
+    m[cre].notepad.contentEditable = true
+    m[cre].notepad.style.color = "yellow"
+    m[cre].notepad.style.minWidth = "10px"
+    m[cre].div.appendChild(m[cre].notepad)
+    m[cre].notepad.style.backgroundColor = "#202020"
+    transcript.push("N")
   } else if(key == "p"){
     console.log(JSON.stringify(transcript))
   }
