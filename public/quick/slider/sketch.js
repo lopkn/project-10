@@ -19,6 +19,8 @@ onmousemove = (e)=>{mouseX = (e.clientX); mouseY = (e.clientY)}
 
 // const socket = io.connect('/')
 
+let defaultFunc = (x)=>{return(1.5*x)}
+
 
 let transcript = []
 
@@ -76,20 +78,51 @@ class connection{
 
   }
 
-  update(e){
+  relationFrom(val){
+    // let aval = val/2
 
+
+    // if(aval > m[this.from].slider.max && !m[this.from].lockRange){
+    //   m[this.from].slider.max = ""+aval
+    //   m[this.from].slider.style.width = Math.floor(aval)+"px"
+    // }
+
+    // m[this.from].slider.value = aval
+
+
+
+    // m[this.from].processInput("prop")
+  }
+
+  relationTo(val){
+    let aval = defaultFunc(val)
+
+    m[this.to].updateValue(aval)
+
+
+
+    m[this.to].processInput("prop")
+  }
+
+  update(id,forwards){
+    if(forwards){
+      this.relationTo(m[id].slider.value)
+    } else {
+      this.relationFrom(m[id].slider.value)
+    }
   }
 
   remove(){
-    this.div.remove()
     let a = m[this.to]
     let b = m[this.from]
-    for(let i = a.connections.length-1; i > -1 ; a--){
+    console.log(a,b)
+    for(let i = a.connections.length-1; i > -1 ; i--){
       if(a.connections[i] == this){a.connections.splice(i,1)}
     }
-    for(let i = b.connections.length-1; i > -1 ; b--){
+    for(let i = b.connections.length-1; i > -1 ; i--){
       if(b.connections[i] == this){b.connections.splice(i,1)}
     }
+    this.div.remove()
   }
 }
 
@@ -110,6 +143,7 @@ class slider{
     this.slider.type = "range"
     this.slider.min="0" 
     this.slider.max="100" 
+    this.slider.style.width="100px" 
     this.slider.value="50" 
     this.div.id=id
     this.id=id
@@ -117,7 +151,7 @@ class slider{
     this.div.onclick = ()=>{lastselect.unshift(id)}
     this.div.appendChild(this.name)
     this.div.appendChild(this.slider)
-
+    this.value = 50
     this.connections = []
 
 
@@ -136,10 +170,21 @@ class slider{
     this.div.style.top = Math.floor(y)+"px"
   }
 
+  updateValue(x){
+    if(x > this.slider.max && !this.lockRange && x < Infinity){
+      this.slider.max = ""+Math.floor(x)
+      this.slider.style.width = Math.floor(x)+"px"
+    }
+    this.value = x
+    this.slider.value = ""+x
+  }
+
   processInput(E){
     this.connections.forEach((e)=>{
-      if(e.to == this.id){
-        e.update(E)
+      if(e.from == this.id){
+        e.update(this.id,true)
+      } else {
+        e.update(this.id)
       }
     })
   }
@@ -212,7 +257,6 @@ document.body.addEventListener("keydown",(e)=>{
   pro(key,[])
 })
 
-create("main")
 
 
 function dragElement(elmnt) {
@@ -260,7 +304,7 @@ function dragElement(elmnt) {
 function loadTranscript(str){
   let arr = JSON.parse(str)
   arr.forEach((e)=>{
-    pro(e[0],e.split("@%").splice(1))
+    pro(e.split("@%")[0],e.split("@%").splice(1))
     if(e[0] == "R"&&e[1] == "M"){
       m[e.substring(3)].remove()
     }
@@ -287,12 +331,15 @@ function pro(key,DO){
     m[cre].slider.remove()
     m[cre].button = document.createElement("button")
     m[cre].button.innerHTML = "True"
-    m[cre].button.onclick = ()=>{if(m[cre].button.innerHTML=="True"){
+    m[cre].value = true
+    m[cre].button.onclick = ()=>{if(m[cre].value==true){
       m[cre].button.style.backgroundColor = "#A00000"
       m[cre].button.innerHTML = "False"
+      m[cre].value = false
     }else{
       m[cre].button.innerHTML = "True"
       m[cre].button.style.backgroundColor = "#00A000"
+      m[cre].value = true
     }}
     m[cre].div.appendChild(m[cre].button)
     transcript.push("s@%"+cre)
@@ -307,9 +354,9 @@ function pro(key,DO){
     m[cre2].connections.push(con)
     transcript.push("t@%"+cre+"@%"+cre2+"@%"+relation)
   } else if(key == "T"){
-    let cre = lastselect[0]
+    let cre = lastselect[1]
     if(m[cre] ==undefined){return}
-    let cre2 = lastselect[1]
+    let cre2 = lastselect[0]
     if(m[cre2] ==undefined || cre2==cre){return}
     let relation = DO[2]?DO[2]:prompt("relation?")
     let con = new connection(cre,cre2,relation)
@@ -331,11 +378,20 @@ function pro(key,DO){
     m[cre].div.appendChild(m[cre].notepad)
     m[cre].notepad.style.backgroundColor = "#202020"
     transcript.push("N")
+  } else if(key == "POS"){
+    let cre = m[DO[0]].div
+    cre.style.left = parseInt(DO[1])+"px"
+    cre.style.top = parseInt(DO[2])+"px"
   } else if(key == "p"){
+    Object.values(m).forEach((e)=>{
+      transcript.push("POS@%"+e.id+"@%"+e.div.offsetLeft+"@%"+e.div.offsetTop)
+    })
     console.log(JSON.stringify(transcript))
   }
 }
 
+
+loadTranscript('["c@%main"]')
 
 setInterval(()=>{
   ctx.fillStyle = "rgba(0,0,0,0.1)"
