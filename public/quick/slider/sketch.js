@@ -105,6 +105,7 @@ class connection{
   }
 
   update(id,forwards){
+    this.updateRenderPos()
     if(forwards){
       this.relationTo(m[id].slider.value)
     } else {
@@ -382,6 +383,10 @@ function pro(key,DO){
     let cre = m[DO[0]].div
     cre.style.left = parseInt(DO[1])+"px"
     cre.style.top = parseInt(DO[2])+"px"
+  } else if(key=="F"){
+    let p = DO[0]?DO[0]:prompt("func","(x)=>{return()}")
+    defaultFunc = eval(p)
+    transcript.push("F@%"+p)
   } else if(key == "p"){
     Object.values(m).forEach((e)=>{
       transcript.push("POS@%"+e.id+"@%"+e.div.offsetLeft+"@%"+e.div.offsetTop)
@@ -390,6 +395,10 @@ function pro(key,DO){
   }
 }
 
+
+function multivarEq(str){
+  
+}
 
 loadTranscript('["c@%main"]')
 
