@@ -387,6 +387,8 @@ function pro(key,DO){
     let p = DO[0]?DO[0]:prompt("func","(x)=>{return()}")
     defaultFunc = eval(p)
     transcript.push("F@%"+p)
+  } else if(key == ""){
+
   } else if(key == "p"){
     Object.values(m).forEach((e)=>{
       transcript.push("POS@%"+e.id+"@%"+e.div.offsetLeft+"@%"+e.div.offsetTop)
@@ -397,7 +399,7 @@ function pro(key,DO){
 
 
 function multivarEq(str){
-  
+
 }
 
 loadTranscript('["c@%main"]')
@@ -407,6 +409,107 @@ setInterval(()=>{
   ctx.fillRect(0,0,20000,20000)
 },1000)
 
+
+
+
+
+
+////
+let word = ""
+
+// document.addEventListener("keydown",(e)=>{
+//   let key = e.key
+//   if(key == " "){
+//     p(word)
+//     word = ""
+//   } else if(/[a-zA-Z0-9]/.test(key)){
+//     word += key
+//   }
+// })
+
+
+function p(str){
+
+  if(str[str.length-1] !== " "){str = str+" "}
+
+  let word = ""
+  let phrase = ""
+  let result = ""
+  while(str.length>0){
+    jump = 0
+    let char = str[0]
+    if(/[a-zA-Z0-9]/.test(char)){
+      word += char
+      phrase += char
+    } else if(char == " "){
+
+      result = pr(result,pword(word))
+
+      phrase = phrase.substring(word.length)
+      word = ""
+    } else if(char == ","){
+      result = pr(result,pphrase(phrase))
+      word = ""
+      phrase = ""
+    }
+
+    str = str.substring(1)
+  }
+
+  return(result.replace("^",""))
+}
+
+let jump = false
+function pr(result,input){
+  if(result.indexOf("^") !== -1 ){
+    if(jump){
+      return(result.replace("^",input))
+    } else {
+      return(result.replace("^",input+"^"))
+    }
+  } else {return(result+input)}
+}
+
+function pword(word){
+  if(word == "if"){
+    jump = 1
+    return("if(^){^}")
+  }if(word == "while"){
+    jump = 1
+    return("while(^){^}")
+  }if(word == "for"){
+    jump = 1
+    return("for(^){^}")
+  } else if(word == "then"){
+    jump = 1
+    return("")
+  } else if(word == "not"){
+    return("!")
+  }else {return(word)}
+}
+
+function pphrase(phrase){
+  {return(phrase)}
+}
+
+function placeCaretAtCharacter() {
+  var input = document.getElementById('myrec'); // Replace 'myInput' with the actual ID of your input field or textarea
+  var text = input.innerText;
+  var caretPosition = text.indexOf('^');
+
+  if (caretPosition > -1) {
+    if (input.setSelectionRange) {
+      input.focus();
+      input.setSelectionRange(caretPosition-1, caretPosition);
+    } else if (input.createTextRange) {
+      var range = input.createTextRange();
+      range.collapse(true);
+      range.moveEnd('character', caretPosition);
+      range.moveStart('character', caretPosition);
+      range.select();
+    }
+  }
+}
 
 
 
