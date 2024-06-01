@@ -1,0 +1,1645 @@
+Skip to content
+
+      
+    
+      
+      
+      
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  {"props":{"docsUrl":"https://docs.github.com/get-started/accessibility/keyboard-shortcuts"}}
+  
+
+
+
+
+
+      
+
+        
+
+            
+
+
+
+  Navigation Menu
+
+  
+    Toggle navigation
+  
+
+  
+    
+      
+        
+    
+
+      
+
+      
+        
+          Sign in
+        
+      
+
+      
+          
+    
+            
+            
+  
+
+      
+    
+
+
+    
+      
+          
+            
+                
+      
+        Product
+        
+    
+
+      
+      
+          
+            
+                
+  
+      
+    
+
+      
+        Actions
+        Automate any workflow
+      
+
+    
+
+
+                
+  
+      
+    
+
+      
+        Packages
+        Host and manage packages
+      
+
+    
+
+
+                
+  
+      
+    
+
+      
+        Security
+        Find and fix vulnerabilities
+      
+
+    
+
+
+                
+  
+      
+    
+
+      
+        Codespaces
+        Instant dev environments
+      
+
+    
+
+
+                
+  
+      
+    
+
+      
+        Copilot
+        Write better code with AI
+      
+
+    
+
+
+                
+  
+      
+    
+
+      
+        Code review
+        Manage code changes
+      
+
+    
+
+
+                
+  
+      
+    
+
+      
+        Issues
+        Plan and track work
+      
+
+    
+
+
+                
+  
+      
+    
+
+      
+        Discussions
+        Collaborate outside of code
+      
+
+    
+
+
+            
+          
+          
+              Explore
+            
+                
+  
+      All features
+
+    
+
+
+                
+  
+      Documentation
+
+    
+    
+
+
+
+                
+  
+      GitHub Skills
+
+    
+    
+
+
+
+                
+  
+      Blog
+
+    
+    
+
+
+
+            
+          
+      
+
+
+
+                
+      
+        Solutions
+        
+    
+
+      
+      
+          
+              For
+            
+                
+  
+      Enterprise
+
+    
+
+
+                
+  
+      Teams
+
+    
+
+
+                
+  
+      Startups
+
+    
+
+
+                
+  
+      Education
+
+    
+    
+
+
+
+            
+          
+          
+              By Solution
+            
+                
+  
+      CI/CD & Automation
+
+    
+
+
+                
+  
+      DevOps
+
+    
+
+
+                
+  
+      DevSecOps
+
+    
+    
+
+
+
+            
+          
+          
+              Resources
+            
+                
+  
+      Learning Pathways
+
+    
+    
+
+
+
+                
+  
+      White papers, Ebooks, Webinars
+
+    
+    
+
+
+
+                
+  
+      Customer Stories
+
+    
+
+
+                
+  
+      Partners
+
+    
+    
+
+
+
+            
+          
+      
+
+
+
+                
+      
+        Open Source
+        
+    
+
+      
+      
+          
+            
+                
+  
+      
+      
+        GitHub Sponsors
+        Fund open source developers
+      
+
+    
+
+
+            
+          
+          
+            
+                
+  
+      
+      
+        The ReadME Project
+        GitHub community articles
+      
+
+    
+
+
+            
+          
+          
+              Repositories
+            
+                
+  
+      Topics
+
+    
+
+
+                
+  
+      Trending
+
+    
+
+
+                
+  
+      Collections
+
+    
+
+
+            
+          
+      
+
+
+
+                
+      
+        Enterprise
+        
+    
+
+      
+      
+          
+            
+                
+  
+      
+    
+
+      
+        Enterprise platform
+        AI-powered developer platform
+      
+
+    
+
+
+            
+          
+          
+              Available add-ons
+            
+                
+  
+      
+    
+
+      
+        Advanced Security
+        Enterprise-grade security features
+      
+
+    
+
+
+                
+  
+      
+    
+
+      
+        Copilot Enterprise
+        Enterprise-grade AI features
+      
+
+    
+
+
+                
+  
+      
+    
+
+      
+        Premium Support
+        Enterprise-grade 24/7 support
+      
+
+    
+
+
+            
+          
+      
+
+
+
+                
+    Pricing
+
+
+            
+          
+
+        
+                
+
+
+
+  
+      
+        
+          
+    
+
+        
+        Search or jump to...
+          
+            
+
+          
+      
+
+    
+
+    
+
+  
+      Search code, repositories, users, issues, pull requests...
+    
+      
+                  
+          
+  
+    
+      
+        Search
+      
+      
+          
+            
+    
+
+          
+        
+          
+          
+            
+            
+          
+        
+          Clear
+            
+    
+
+
+
+      
+      
+  
+    
+
+
+
+
+  
+    
+
+
+
+
+  
+    
+
+
+
+
+  
+    
+
+
+
+
+  
+    
+
+
+
+
+  
+    
+
+
+
+
+  
+    
+
+
+
+
+  
+    
+
+
+
+
+  
+    
+
+
+
+
+  
+    
+
+
+
+
+  
+    
+
+
+
+
+  
+    
+
+
+
+
+  
+    
+
+
+
+
+  
+    
+
+
+
+
+  
+    
+
+
+
+
+  
+    
+
+
+
+
+  
+    
+
+
+
+
+  
+    
+
+
+
+
+  
+    
+
+
+
+
+  
+    
+
+
+
+
+  
+    
+
+
+
+
+  
+    
+
+
+
+
+  
+    
+
+
+
+
+  
+    
+
+
+
+
+  
+    
+
+
+
+
+  
+    
+
+
+
+
+  
+    
+
+
+
+
+  
+    
+
+
+
+
+  
+    
+
+
+
+
+  
+    
+
+
+
+
+  
+    
+
+
+
+
+  
+    
+
+
+
+
+  
+    
+
+
+
+        
+                
+        
+      
+        
+          
+    
+
+        
+        
+    
+    
+
+          
+            
+              Search syntax tips
+            
+          
+        
+
+
+    
+
+  
+  
+  
+    
+
+  
+    
+  
+    
+      
+        Provide feedback
+      
+        
+    
+    
+      
+    
+
+    
+  
+  
+
+      
+                
+          We read every piece of feedback, and take your input very seriously.
+          
+          
+          Include my email address so I can be contacted
+
+      
+                    Cancel
+
+              Submit feedback
+
+
+
+
+    
+    
+
+  
+    
+  
+    
+      
+        Saved searches
+      
+        Use saved searches to filter your results more quickly
+    
+    
+      
+    
+
+    
+  
+  
+
+      
+                
+
+        
+        
+          
+
+          
+
+          
+            Name
+            
+              
+              
+            
+          
+
+          
+            Query
+            
+          
+
+          
+            To see all available qualifiers, see our documentation.
+          
+        
+
+        
+          
+        
+
+
+      
+                    Cancel
+
+              Create saved search
+
+
+
+    
+  
+
+
+
+          
+            
+              Sign in
+            
+          
+
+            
+              Sign up
+            
+        
+      
+    
+  
+
+
+      
+  
+        
+    
+
+        You signed in with another tab or window. Reload to refresh your session.
+        You signed out in another tab or window. Reload to refresh your session.
+        You switched accounts on another tab or window. Reload to refresh your session.
+
+      
+    
+
+Dismiss alert
+
+
+  
+
+    
+
+  
+
+
+
+
+
+
+
+
+    
+
+
+
+
+
+  
+    
+
+  
+    
+      
+    
+
+    
+    
+      
+      {{ message }}
+
+    
+  
+
+  
+
+
+
+    
+    
+
+
+
+
+
+  
+      
+        
+
+  
+      
+        
+    
+
+      
+    
+      
+  
+
+
+  
+    
+        
+  
+              
+              
+                
+                  
+                
+                
+                  lopkn
+                  
+  
+    
+      Follow
+    
+  
+
+                
+              
+            
+
+              
+              
+  
+    
+    
+
+    Overview
+
+  
+    
+    
+
+    Repositories
+    6
+
+  
+    
+    
+
+    Projects
+    0
+
+    
+      
+    
+
+      Packages
+      0
+
+  
+    
+    
+
+    Stars
+    0
+
+
+
+
+
+    
+          
+        
+    
+
+        More
+      
+
+          
+        
+          
+            Overview
+          
+          
+            Repositories
+          
+          
+            Projects
+          
+            
+              Packages
+            
+          
+            Stars
+          
+        
+      
+
+
+
+            
+
+    
+  
+
+
+  
+  
+        
+          
+            
+              
+                
+              
+              
+                
+                  lopkn
+              
+              
+                
+  
+    
+      Follow
+    
+  
+
+              
+            
+          
+
+          
+  
+    
+        
+      
+
+    
+
+    
+      
+        
+          
+        
+        
+          lopkn
+
+        
+      
+    
+  
+
+  
+
+  
+    
+        
+              
+                
+                
+  
+    
+      Follow
+    
+  
+
+              
+        
+
+
+    
+
+    
+
+  
+
+
+    
+      
+        
+          
+    
+
+          1
+          follower
+        · 
+          3
+          following
+        
+      
+    
+
+  
+
+
+
+
+    
+
+
+  
+
+
+  
+
+      
+    
+    
+    
+    
+          
+        Block or Report
+      
+
+  
+    
+      
+        
+    
+
+      
+        Block or report lopkn
+    
+      
+            
+      
+          
+        
+
+        Block user
+        
+            Prevent this user from interacting with your repositories and sending you notifications.
+          Learn more about blocking users.
+        
+
+
+
+
+
+            
+              You must be logged in to block users.
+            
+
+          
+              
+      
+        Add an optional note:
+    
+  
+    
+      
+
+      
+  
+    
+
+  
+    
+
+  
+
+      Please don't include any personal information such as legal names or email addresses. Maximum 100 characters, markdown supported. This note will be visible to only you.
+
+
+
+          
+
+        
+          Block user
+        
+    
+    
+      Report abuse
+      
+        Contact GitHub support about this user’s behavior.
+        Learn more about reporting abuse.
+      
+      Report abuse
+    
+
+      
+  
+
+
+
+
+      
+
+          
+          
+  
+    
+    
+
+    Overview
+
+  
+    
+    
+
+    Repositories
+    6
+
+  
+    
+    
+
+    Projects
+    0
+
+    
+      
+    
+
+      Packages
+      0
+
+  
+    
+    
+
+    Stars
+    0
+
+
+
+
+
+    
+          
+        
+    
+
+        More
+      
+
+          
+        
+          
+            Overview
+          
+          
+            Repositories
+          
+          
+            Projects
+          
+            
+              Packages
+            
+          
+            Stars
+          
+        
+      
+
+
+
+        
+      
+
+        
+          
+    
+
+
+
+
+  
+  
+    
+      
+        lopkn/README.md
+      
+
+    
+    
+👋 Hi, I’m @lopkn
+👀 I’m interested in NodeJs and front end javascript
+💞️ I’m looking to collaborate on basically anything pure javascript
+📫 How to reach me: discord, lopkn#0019
+
+
+
+  
+
+
+
+
+  
+  
+      Popular repositories
+    
+  
+  
+
+    
+  
+
+    
+
+    
+      
+        
+          
+            
+              
+                project-10
+              
+project-10            
+              Public
+            
+          
+
+
+          
+            
+          
+
+          
+              
+  
+  JavaScript
+
+
+              
+                
+    
+
+                2
+              
+          
+        
+      
+    
+
+    
+      
+        
+          
+            
+              
+                lopkn
+              
+lopkn            
+              Public
+            
+          
+
+
+          
+            
+          
+
+          
+              
+  
+  Python
+
+
+          
+        
+      
+    
+
+    
+      
+        
+          
+            
+              
+                shooter
+              
+shooter            
+              Public
+            
+          
+
+
+          
+            
+          
+
+          
+              
+  
+  JavaScript
+
+
+          
+        
+      
+    
+
+    
+      
+        
+          
+            
+              
+                game-8
+              
+game-8            
+              Public
+            
+          
+
+
+          
+            
+          
+
+          
+              
+  
+  JavaScript
+
+
+          
+        
+      
+    
+
+    
+      
+        
+          
+            
+              
+                project-9
+              
+project-9            
+              Public
+            
+          
+
+
+          
+            
+          
+
+          
+              
+  
+  JavaScript
+
+
+          
+        
+      
+    
+
+    
+      
+        
+          
+            
+              
+                Pocket_Tanks
+              
+Pocket_Tanks            
+              Public
+            
+          
+
+
+          
+            Pocket Tanks game made from HTML,CSS and JS
+          
+
+          
+              
+  
+  JavaScript
+
+
+          
+        
+      
+    
+
+
+
+
+
+
+
+      
+        
+          
+  
+  
+
+        
+        
+          Something went wrong, please refresh the page to try again.
+          If the problem persists, check the GitHub status page
+          or contact support.
+        
+      
+
+
+
+
+        
+      
+
+
+
+      
+  
+
+          
+  Footer
+
+  
+
+
+  
+    
+      
+        
+    
+
+
+      
+        © 2024 GitHub, Inc.
+      
+    
+
+    
+      Footer navigation
+
+      
+
+          
+            Terms
+          
+
+          
+            Privacy
+          
+
+          
+            Security
+          
+
+          
+            Status
+          
+
+          
+            Docs
+          
+
+          
+            Contact
+          
+
+          
+  
+    
+      Manage cookies
+    
+  
+
+
+
+  
+    
+      Do not share my personal information
+    
+  
+
+
+      
+    
+  
+
+
+
+
+
+    
+
+
+  
+    
+    
+
+    
+      
+    
+
+    
+    You can’t perform that action at this time.
