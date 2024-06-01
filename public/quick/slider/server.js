@@ -23,18 +23,25 @@ function getWebsiteText(url) {
   });
 }
 let web = 'https://en.wikipedia.org/wiki/Main_Page'
-while(true){
+while(next){
+  next = false
   getWebsiteText(web)
   .then((data) => {
-    process(data);
+    pro(data);
+    web = prompt("WEBsite?")
+    next=true
+    if(web == "q"){
+      next = false
+    }
   })
   .catch((error) => {
     console.error('Error:', error);
   });
-
+  
+  
 }
 
-function process(str){
+function pro(str){
   console.log(str)
 }
 
