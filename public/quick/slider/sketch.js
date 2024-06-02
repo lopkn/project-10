@@ -211,50 +211,9 @@ function create(name){
 
 document.body.addEventListener("keydown",(e)=>{
   let key = e.key
-  if(document.activeElement !== document.body){
-    return
-  }
-  // if(key == "c"){
-  //   let cre = DO[0]?DO[0]:prompt("name?")
-  //   if(m[cre] || cre === null|| cre == ""){console.log("already exists");return}
-  //   create(cre)
-  //   transcript.push("c "+cre)
-  // } else if(key == "r"){
-  //   let cre = DO[0]?DO[0]:prompt("rule?")
-  //   if(m[cre]|| cre === null || cre == ""){console.log("already exists");return}
-  //   create(cre)
-  //   m[cre].slider.remove()
-  //   transcript.push("r "+cre)
-  // } else if(key == "s"){
-  //   let cre = DO[0]?DO[0]:prompt("switch?")
-  //   if(m[cre]|| cre === null || cre == ""){console.log("already exists");return}
-  //   create(cre)
-  //   m[cre].slider.remove()
-  //   m[cre].button = document.createElement("button")
-  //   m[cre].button.innerHTML = "True"
-  //   m[cre].button.onclick = ()=>{if(m[cre].button.innerHTML=="True"){
-  //     m[cre].button.style.backgroundColor = "#A00000"
-  //     m[cre].button.innerHTML = "False"
-  //   }else{
-  //     m[cre].button.innerHTML = "True"
-  //     m[cre].button.style.backgroundColor = "#00A000"
-  //   }}
-  //   m[cre].div.appendChild(m[cre].button)
-  //   transcript.push("s "+cre)
-  // } else if(key == "t"){
-  //   let cre = DO[0]?DO[0]:prompt("teather?")
-  //   if(m[cre] ==undefined){return}
-  //   let cre2 = DO[1]?DO[1]:prompt("to?")
-  //   if(m[cre2] ==undefined){return}
-  //   let relation = DO[2]?DO[2]:prompt("relation?")
-  //   let con = new connection(cre,cre2,relation)
-  //   m[cre].connections.push(con)
-  //   m[cre2].connections.push(con)
-
-  //   transcript.push("t "+cre+","+cre2+","+relation)
-  // } else if(key == "p"){
-  //   console.log(JSON.stringify(transcript))
-  // }
+    if(document.activeElement !== document.body){
+      return
+    }
   pro(key,[])
 })
 
