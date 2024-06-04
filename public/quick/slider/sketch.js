@@ -346,8 +346,9 @@ function pro(key,DO){
     let p = DO[0]?DO[0]:prompt("func","(x)=>{return()}")
     defaultFunc = eval(p)
     transcript.push("F@%"+p)
-  } else if(key == ""){
-
+  } else if(key == "q"){
+    console.log("h")
+    console.log(p(prompt("compile?")))
   } else if(key == "p"){
     Object.values(m).forEach((e)=>{
       transcript.push("POS@%"+e.id+"@%"+e.div.offsetLeft+"@%"+e.div.offsetTop)
