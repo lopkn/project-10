@@ -60,6 +60,9 @@ document.addEventListener('keydown',(e)=>{
     }
     // final +=1
   }
+  if(e.key == "2"){
+    last.remove()
+  }
 })
 let final = 0
 
@@ -84,6 +87,7 @@ let storestring = ""
 
 let rst = {}
 let AUTO = true
+let last = ""
 
 function recf(e){
 
@@ -133,6 +137,7 @@ function recf(e){
       socket.emit("text",e.results[final][0].transcript)
     }
 
+    last = span
     document.getElementById("final").appendChild(span)
 if(moveEnd){
   moveCaretToEnd(myrec)
