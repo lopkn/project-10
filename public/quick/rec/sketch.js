@@ -71,8 +71,9 @@ let rec = new webkitSpeechRecognition()
 rec.onresult = (e)=>{recf(e)}
     
 rec.onend=()=>{rec.start();console.log("restart");
+
   final = 0; 
-  myrec.innerHTML += storestring
+  myrec.innerHTML += storestring + "\n"
   if(moveEnd){
       moveCaretToEnd(myrec)
     }
