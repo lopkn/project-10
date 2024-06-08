@@ -911,6 +911,8 @@ function clientCommand(str){
 
 
 
+
+
 class genericContBox{
 	constructor(endFunction=(e)=>{console.log(e.d.innerHTML)}){
 		this.db = document.createElement("div")

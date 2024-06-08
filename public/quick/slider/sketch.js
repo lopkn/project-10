@@ -78,6 +78,10 @@ class connection{
 
   }
 
+  trigger(){
+
+  }
+
   relationFrom(val){
     // let aval = val/2
 
@@ -278,6 +282,11 @@ function pro(key,DO){
     if(m[cre] || cre === null|| cre == ""){console.log("already exists");return}
     create(cre)
     transcript.push("c@%"+cre)
+  } else if(key == "q"){
+    let m = DO[0]?DO[0]:lastselect[0]
+    let p = DO[1]?DO[1]:prompt("func","(x)=>{return()}")
+    defaultFunc = eval(p)
+    transcript.push("q@%"+m+"@%"+p)
   } else if(key == "r"){
     let cre = DO[0]?DO[0]:prompt("rule?")
     if(m[cre]|| cre === null || cre == ""){console.log("already exists");return}
@@ -303,7 +312,7 @@ function pro(key,DO){
     }}
     m[cre].div.appendChild(m[cre].button)
     transcript.push("s@%"+cre)
-  } else if(key == "t"){
+  } else if(key == "T"){
     let cre = DO[0]?DO[0]:prompt("teather?")
     if(m[cre] ==undefined){return}
     let cre2 = DO[1]?DO[1]:prompt("to?")
@@ -313,7 +322,7 @@ function pro(key,DO){
     m[cre].connections.push(con)
     m[cre2].connections.push(con)
     transcript.push("t@%"+cre+"@%"+cre2+"@%"+relation)
-  } else if(key == "T"){
+  } else if(key == "t"){
     let cre = lastselect[1]
     if(m[cre] ==undefined){return}
     let cre2 = lastselect[0]
