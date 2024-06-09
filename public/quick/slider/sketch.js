@@ -283,9 +283,9 @@ function pro(key,DO){
     create(cre)
     transcript.push("c@%"+cre)
   } else if(key == "q"){
-    let m = DO[0]?DO[0]:lastselect[0]
+    let cre = DO[0]?DO[0]:lastselect[0]
     let p = DO[1]?DO[1]:prompt("func","(x)=>{return()}")
-    defaultFunc = eval(p)
+    m[cre].trigger = eval(p)
     transcript.push("q@%"+m+"@%"+p)
   } else if(key == "r"){
     let cre = DO[0]?DO[0]:prompt("rule?")
