@@ -363,6 +363,9 @@ function pro(key,DO){
       transcript.push("POS@%"+e.id+"@%"+e.div.offsetLeft+"@%"+e.div.offsetTop)
     })
     console.log(JSON.stringify(transcript))
+    window.localStorage.setItem("transcript",JSON.stringify(transcript))
+  } else if(key == "l"){
+    loadTranscript(window.localStorage.getItem("transcript"))
   }
 }
 
