@@ -1,3 +1,4 @@
+let io;
 class shooter2C{
 	static walls = {}
 	static bullets = []
@@ -8,6 +9,9 @@ class shooter2C{
 	static wallPushers = {}
 
 	static nuuIDGEN = 0
+	static setio(i){
+		io = i
+	}
 
 	static pushBullet(x,y,vx,vy,id,type){
 		switch(type){
