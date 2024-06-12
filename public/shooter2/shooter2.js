@@ -57,6 +57,7 @@ weaponInfo = {
 	"heal":{"repeating":2},
 	"dril":{"repeating":2},
 	"lzr2":{"repeating":2},
+	"zapr":{"repeating":3},
 	"mchg":{"repeating":3}
 
 }
@@ -70,7 +71,7 @@ class player{
 	static snapping = false
 	static gridSize = 80
 	static weaponCounter = 1
-	static weaponDict = {"1":"norm","2":"scat","3":"lazr","4":"cnon","5":"heal","6":"grnd","7":"msl","8":"dril","9":"msl2","10":"snpr","11":"lzr2","12":"mchg"}
+	static weaponDict = {"1":"norm","2":"scat","3":"lazr","4":"cnon","5":"heal","6":"grnd","7":"msl","8":"dril","9":"msl2","10":"snpr","11":"lzr2","12":"mchg","13":"zapr","14":"dbgd","15":"dbml"}
 	static wallCounter = 1
 	static wallDict = {
 		"1":"norm","2":"bhol","3":"ghol","4":"body","5":"metl",
@@ -121,7 +122,7 @@ function crobject(e){
 }
 
 
-	let bulletAtt = {"norm":10,"scat":6,"lazr":20,"cnon":10,"heal":2,"grnd":4,"msl":4,"msl2":4,"dril":3,"lzr2":3}
+	let bulletAtt = {"norm":10,"scat":6,"lazr":20,"cnon":10,"heal":2,"grnd":4,"msl":4,"msl2":4,"dril":3,"lzr2":3,"zapr":3,"dbgd":20,"dbml":20}
 
 
 let tripVel = 0
@@ -242,13 +243,13 @@ mainCTX.stroke()
 		}
 		mainCTX.lineWidth = (e[1]+1) * (e[6].tailmult == undefined?1:e[6].tailmult) * player.zoom
 		if(e[0] == "norm" || e[0] == "scat" || e[0] == "cnon"){
-		mainCTX.strokeStyle = "#FFFF00"} else if(e[0] == "lazr" || e[0] == "lzr2"){
+		mainCTX.strokeStyle = "#FFFF00"} else if(e[0] == "lazr" || e[0] == "lzr2" || e[0] == "zapr"){
 			mainCTX.strokeStyle = "#00FFFF"
 		} else if(e[0] == "heal"){
 			mainCTX.strokeStyle = "#FF0000"
-		} else if(e[0] == "grnd"){
+		} else if(e[0] == "grnd" || e[0] == "dbgd"){
 			mainCTX.strokeStyle = "#007000"
-		} else if(e[0] === "msl" || e[0] == "msl2"){
+		} else if(e[0] === "msl" || e[0] == "msl2" || e[0] == "dbml"){
 			mainCTX.strokeStyle = "#A00000"
 		} else if(e[0] === "trak" || e[0] === "dril"){
 			mainCTX.strokeStyle = "#A0A000"

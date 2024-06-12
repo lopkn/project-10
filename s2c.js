@@ -80,6 +80,49 @@ class shooter2C{
 					}}
 				})
 				break;
+			case "zapr":
+				this.bullets.push({"shooter":id,"type":"zapr","x":x,"y":y,"vx":vx/4,"vy":vy/4,"wallMult":1,"unBouncer":0,
+					"tailLength":4,"dmgmult":0.01,"lingerance":2,"tail":[],"life":4,"slowd":1,"extra":{"tailmult":2},
+					"tick":(b)=>{
+						b.vx += Math.random()*120-60
+						b.vy += Math.random()*120-60
+					}
+				})
+				break;
+
+			case "dbgd":
+				this.bullets.push({"shooter":id,"type":"dbgd","x":x,"y":y,"vx":vx/4,"vy":vy/4,"wallMult":0,"deathVel":10,"unBouncer":-1,
+					"lingerance":4,"dmgmult":0,"tailLength":4,"tail":[],"life":100,"slowd":1,"extra":{"tailmult":1},
+					"onDeath":(b)=>{
+						let tdmg = 120 * Math.random()
+						for(let i = 0; i < 20; i++){let a = this.pushBullet(b.x,b.y,Math.random()*150-75,Math.random()*150-75,b.shooter,"norm")
+							a.slowd = 0.95
+							a.dmgmult = tdmg
+							a.extra = {"tailmult":3,"tailLength":6}
+							a.tailLength = 6; a.lingerance = 6;
+					}},
+					"tick":(b)=>{
+						b.vx += Math.random()*12-6
+						b.vy += Math.random()*12-6
+					}
+				})
+				break;
+			case "dbml":
+				this.bullets.push({"shooter":id,"type":"msl2","x":x,"y":y,"vx":vx/6,"vy":vy/6,"wallMult":0,"deathVel":10,"unBouncer":1,
+					"lingerance":4,"dmgmult":0,"tailLength":4,"tail":[],"life":50,"slowd":1.18,"extra":{"tailmult":8},"date":Date.now(),
+					"onDeath":(b)=>{
+						let dd = Date.now()
+							for(let i = 0; i < 20; i++){let a = this.pushBullet(b.x,b.y,Math.random()*300-150+vx*0.1,Math.random()*300-150+vy*0.1,b.shooter,"norm")
+							a.slowd = 0.5
+							a.life = 50
+							a.dmgmult = ((dd-b.date)*(dd-b.date)/2500)
+							a.extra = {"tailmult":3,"tailLength":6}
+							a.tailLength = 6; a.lingerance = 6;
+							}
+						
+					}
+				})
+				break;
 
 		}
 		return(this.bullets[this.bullets.length-1])
@@ -163,7 +206,21 @@ class shooter2C{
 			case "msl2":
 				this.pushBullet(p.x,p.y,(n[2]-p.x)*25,(n[3]-p.y)*25,id,"msl2")
 				reload += 40
-		p.materials -= 5
+				p.materials -= 5
+				break;
+			case "zapr":
+				this.pushBullet(p.x,p.y,(n[2]-p.x)*1100,(n[3]-p.y)*1100,id,"zapr")
+				reload += 1
+				break;
+			case "dbgd":
+				this.pushBullet(p.x,p.y,(n[2]-p.x)*80+p.vx,(n[3]-p.y)*80+p.vy,id,"dbgd")
+				reload += 2
+				p.materials -= 1
+				break;
+			case "dbml":
+				this.pushBullet(p.x,p.y,(n[2]-p.x)*80+p.vx,(n[3]-p.y)*80+p.vy,id,"dbml")
+				reload += 2
+				p.materials -= 1
 				break;
 		}
 		p.reloading += reload;
@@ -647,6 +704,7 @@ class shooter2C{
 				this.bullets.splice(k,1)
 				continue;
 			}
+			B.tick?B.tick(B):0
 			let coled = "dn"
 
 			
@@ -796,6 +854,7 @@ class shooter2C{
 						// let actualMult = 1-(1-B.wallMult)*angleDamageMult
 						let actualMult = (1 - (1 - B.wallMult)*angleDamageMult)*(1-(tw.wallMult?1-tw.wallMult:0.4)*angleDamageMult)
 						if(actualMult < 0){actualMult = 0}
+						if(B.unBouncer == -1){actualMult = 1}
 						// let actualMult = (tw.wallMult?1-(1-tw.wallMult)*angleDamageMult:1-0.4*angleDamageMult)
 						// let actualMult = (tw.wallMult?tw.wallMult:1-0.4*reverseADmgMult)
 						// i.vx = B.wallMult*(tcol[2]-tcol[0])*(tw.wallMult?tw.wallMult:0.6)*reverseADmgMult
