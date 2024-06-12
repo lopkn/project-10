@@ -68,7 +68,7 @@ class shooter2C{
 				})
 				break;
 			case "msl2":
-				this.bullets.push({"shooter":id,"type":"msl2","x":x,"y":y,"vx":vx/6,"vy":vy/6,"wallMult":0,"deathVel":10,"unBouncer":1,
+				this.bullets.push({"shooter":id,"type":"msl2","x":x,"y":y,"vx":vx/6,"vy":vy/6,"wallMult":0.1,"deathVel":10,"unBouncer":1,
 					"lingerance":4,"dmgmult":0,"tailLength":4,"tail":[],"life":50,"slowd":1.08,"extra":{"tailmult":8},"date":Date.now(),
 					"onDeath":(b)=>{
 						let dd = Date.now()
@@ -81,8 +81,8 @@ class shooter2C{
 				})
 				break;
 			case "zapr":
-				this.bullets.push({"shooter":id,"type":"zapr","x":x,"y":y,"vx":vx/4,"vy":vy/4,"wallMult":1,"unBouncer":0,
-					"tailLength":4,"dmgmult":0.01,"lingerance":2,"tail":[],"life":4,"slowd":1,"extra":{"tailmult":2},
+				this.bullets.push({"shooter":id,"type":"zapr","x":x,"y":y,"vx":vx/4,"vy":vy/4,"wallMult":0,"deathVel":10,"unBouncer":Math.floor(Math.random()*2),
+					"tailLength":4,"dmgmult":0.1,"lingerance":2,"tail":[],"life":4,"slowd":1,"extra":{"tailmult":2},"instant":true,
 					"tick":(b)=>{
 						b.vx += Math.random()*120-60
 						b.vy += Math.random()*120-60
@@ -91,7 +91,7 @@ class shooter2C{
 				break;
 
 			case "dbgd":
-				this.bullets.push({"shooter":id,"type":"dbgd","x":x,"y":y,"vx":vx/4,"vy":vy/4,"wallMult":0,"deathVel":10,"unBouncer":-1,
+				this.bullets.push({"shooter":id,"type":"dbgd","x":x,"y":y,"vx":vx/4,"vy":vy/4,"wallMult":0,"deathVel":10,"ignoreWallMult":1,
 					"lingerance":4,"dmgmult":0,"tailLength":4,"tail":[],"life":100,"slowd":1,"extra":{"tailmult":1},
 					"onDeath":(b)=>{
 						let tdmg = 120 * Math.random()
@@ -160,10 +160,10 @@ class shooter2C{
 				break;
 			case "snpr":
 				theBullet = this.pushBullet(p.x,p.y,(n[2]-p.x)*190+p.vx,(n[3]-p.y)*190+p.vy,id,"norm")
-				theBullet.dmgmult = 5
+				theBullet.dmgmult = 7
 				theBullet.wallMult = 0.1
 				theBullet.deathVel = 200
-		reload += 10
+		reload += 30
 				break;
 			case "scat":
 			for(let i = 0; i < 5; i++){
@@ -704,6 +704,9 @@ class shooter2C{
 				this.bullets.splice(k,1)
 				continue;
 			}
+			if(B.instant){
+				k++
+			}
 			B.tick?B.tick(B):0
 			let coled = "dn"
 
@@ -854,7 +857,7 @@ class shooter2C{
 						// let actualMult = 1-(1-B.wallMult)*angleDamageMult
 						let actualMult = (1 - (1 - B.wallMult)*angleDamageMult)*(1-(tw.wallMult?1-tw.wallMult:0.4)*angleDamageMult)
 						if(actualMult < 0){actualMult = 0}
-						if(B.unBouncer == -1){actualMult = 1}
+						if(B.ignoreWallMult){actualMult = 1}
 						// let actualMult = (tw.wallMult?1-(1-tw.wallMult)*angleDamageMult:1-0.4*angleDamageMult)
 						// let actualMult = (tw.wallMult?tw.wallMult:1-0.4*reverseADmgMult)
 						// i.vx = B.wallMult*(tcol[2]-tcol[0])*(tw.wallMult?tw.wallMult:0.6)*reverseADmgMult

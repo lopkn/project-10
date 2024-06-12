@@ -4,7 +4,9 @@ socket.emit("JOINGAME",GAMESESSION)
 
 let COOKIE = {"playerType":"tank"}
 try{
-	COOKIE = JSON.parse(document.cookie)
+	if(window.localStorage.getItem("playerType") !== null){
+		COOKIE.playerType=window.localStorage.getItem("playerType")
+	}
 }catch(e){}
 socket.on("drawers",(e)=>{drawDrawers(e[0],e[1]);tick();})
 // socket.on("walls",(e)=>{drawWalls(e)})
@@ -476,6 +478,9 @@ document.addEventListener("keydown",(e)=>{
   			unALTF3()
   		}
   		break;
+  	case "F1":
+  		window.localStorage.setItem("playerType",prompt("type?"))
+  		COOKIE.playerType = window.localStorage.getItem('playerType')
   }  
   console.log(key)
 
