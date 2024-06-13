@@ -72,7 +72,7 @@ class shooter2C{
 				})
 				break;
 			case "msl2":
-				this.bullets.push({"shooter":id,"type":"msl2","x":x,"y":y,"vx":vx/6,"vy":vy/6,"wallMult":0.1,"deathVel":10,"unBouncer":1,
+				this.bullets.push({"shooter":id,"type":"msl2","x":x,"y":y,"vx":vx/6,"vy":vy/6,"wallMult":0,"deathVel":10,"unBouncer":1,
 					"lingerance":4,"dmgmult":0,"tailLength":4,"tail":[],"life":50,"slowd":1.08,"extra":{"tailmult":8},"date":Date.now(),
 					"onDeath":(b)=>{
 						let dd = Date.now()
@@ -124,6 +124,15 @@ class shooter2C{
 							a.tailLength = 6; a.lingerance = 6;
 							}
 						
+					}
+				})
+				break;
+			case "vipr":
+				this.bullets.push({"shooter":id,"type":"vipr","x":x,"y":y,"vx":vx/4,"vy":vy/4,"wallMult":0,"deathVel":10,"ignoreWallMult":-1,
+					"lingerance":4,"dmgmult":100,"tailLength":4,"tail":[],"life":100,"slowd":1,"extra":{"tailmult":1},
+					"tick":(b)=>{
+						b.vx += Math.random()*12-6
+						b.vy += Math.random()*12-6
 					}
 				})
 				break;
@@ -226,6 +235,11 @@ class shooter2C{
 				reload += 2
 				p.materials -= 1
 				break;
+			case "vipr":
+				this.pushBullet(p.x,p.y,(n[2]-p.x)*80+p.vx,(n[3]-p.y)*80+p.vy,id,"vipr")
+				reload += 2
+				p.materials -= 1
+				break;
 		}
 		p.reloading += reload;
 	}
@@ -240,6 +254,8 @@ class shooter2C{
 		let player = this.players[p]
 		if(t == "turr2"){
 			l = 100
+		}if(t == "turr3"){
+			l = 120
 		} else if(t == "turr" || t=== "Bmr"){
 			l = 50
 		} else if(t == "ghol" ||t == "bhol"||t == "whol"){
@@ -257,6 +273,17 @@ class shooter2C{
 		return(true)
 	}
 
+	static playerWall(p,ar,a){
+		p.boidyVect.push([
+					(ar[0] * p.rotation[1] - ar[1] * p.rotation[0]),
+					(ar[1] * p.rotation[1] + ar[0] * p.rotation[0]),
+					(ar[2] * p.rotation[1] - ar[3] * p.rotation[0]),
+					(ar[3] * p.rotation[1] + ar[2] * p.rotation[0])])
+				p.unmovePos[2] = true
+				p.boidy.push(a)
+				this.walls[a].plid = p.id
+	}
+
 	static placeWall(player,x1,y1,x2,y2,type,options,special){
 		
 		if(type == undefined){
@@ -269,6 +296,7 @@ class shooter2C{
 			return
 		}
 
+		let ar = [x1-p.x,y1-p.y,x2-p.x,y2-p.y]
 		let a = this.getNewNUUID()
 
 		let tarr;
@@ -289,6 +317,7 @@ class shooter2C{
 					"defense":5,
 					"frad":wLength/2
 				}
+				this.playerWall(p,ar,a)
 				break;
 			case "rflc":
 				this.walls[a] = {
@@ -311,7 +340,7 @@ class shooter2C{
 					"defense":0.2,"midpt":myMath.midPointOfLine(x1,y1,x2,y2)
 				}
 				let pp = this.players[options.id]
-				let ar = [x1-pp.x,y1-pp.y,x2-pp.x,y2-pp.y]
+				// let ar = [x1-pp.x,y1-pp.y,x2-pp.x,y2-pp.y]
 				let xx1 = (ar[0] * pp.rotation[1] - ar[1] * pp.rotation[0]) 
 				let yy1 = (ar[1] * pp.rotation[1] + ar[0] * pp.rotation[0]) 
 				let xx2 = (ar[2] * pp.rotation[1] - ar[3] * pp.rotation[0]) 
@@ -323,7 +352,7 @@ class shooter2C{
 				this.players[options.id].boidy.push(a)
 				break;
 			case "mbdy":
-			this.walls[a] = {"frad":wLength/2,"plid":options.id,"type":"mbdy","x1":0,"y1":0,"x2":0,"y2":0,"hp":1000,
+			this.walls[a] = {"frad":wLength/2,"plid":options.id,"type":"mbdy","x1":x1,"y1":y1,"x2":x2,"y2":y2,"hp":1000, // chanaged
 					"defense":4,"midpt":myMath.midPointOfLine(x1,y1,x2,y2)
 				}
 				let ppr = this.players[options.id]
@@ -421,6 +450,41 @@ class shooter2C{
 					this.walls[pw].onDeath = (w,b)=>{this.delWall(a)}
 				}
 				break;
+			case "turr3":
+				tarr = [[40,30,40,-30],[40,-30,-40,-30],[-40,-30,-40,30],[-40,30,40,30]]
+				this.playerLook(p,x1,y1)
+				this.walls[a] = {"type":"turr3","x":x1,"y":y1,"radius":960,"velmult":0.98,
+					"midpt":[x1,y1],"handle":"none","hp":1000,
+					"defense":0.2,
+					"time":Math.floor(Math.random()*20),
+					"frad":x2,"plid":player};
+				this.walldo[a] = (TIMES)=>{if(TIMES%40===this.walls[a].time){
+
+					let obpr = Object.keys(this.players)
+					for(let i = 0; i < obpr.length; i++){
+						let TTP = obpr[i]
+						let TPP = this.players[TTP]
+						if(distance(TPP.x,TPP.y,x1,y1) < this.walls[a].radius && TTP != player&& !TPP.dead){
+							let nrm = vectorFuncs.originVectorNormalize(TPP.x-x1,TPP.y-y1)
+							let abb = this.pushBullet(x1,y1,nrm[0]*195,nrm[1]*195,player,"norm")
+							abb.dmgmult = 4
+							abb.wallMult = 0.1
+							abb.deathVel = 200
+							break;
+						}
+					}
+
+				}}
+				for(let i = 0; i < tarr.length; i++){
+					let ar = tarr[i]
+					let xx1 = (ar[0] * p.rotation[1] + ar[1] * p.rotation[0])+ x1
+					let yy1 = (ar[1] * p.rotation[1] - ar[0] * p.rotation[0]) + y1
+					let xx2 = (ar[2] * p.rotation[1] + ar[3] * p.rotation[0]) + x1
+					let yy2 = (ar[3] * p.rotation[1] - ar[2] * p.rotation[0]) + y1
+					let pw = this.placeWall(player,xx1,yy1,xx2,yy2,"norm",{"force":true},{"plid":player})
+					this.walls[pw].onDeath = (w,b)=>{this.delWall(a)}
+				}
+				break;
 			case "turr2":
 				tarr = [[40,30,40,-30],[40,-30,-40,-30],[-40,-30,-40,30],[-40,30,40,30]]
 				this.playerLook(p,x1,y1)
@@ -438,7 +502,7 @@ class shooter2C{
 						if(distance(TPP.x,TPP.y,x1,y1) < this.walls[a].radius && TTP != player && !TPP.dead){
 							let nrm = vectorFuncs.originVectorNormalize(TPP.x-x1,TPP.y-y1)
 							let shx = nrm[0]*65+TPP.vx*1.7+Math.random()*45-22.5 // bullet supposed to go here
-							let shy = nrm[1]*65+Math.random()*45-22.5+TPP.vy*1.7
+							let shy = nrm[1]*65+TPP.vy*1.7+Math.random()*45-22.5
 							let obwl = Object.values(this.walls)
 							let willCollide = false
 							for(let j = 0; j < obwl.length; j++){
@@ -446,7 +510,7 @@ class shooter2C{
 								if(player === W.plid || TPP.id === W.plid){
 									continue;
 								}
-								let col = this.pointLineCollision(x1,y1,x1+shx*20,shy*20,W.x1,W.y1,W.x2,W.y2)
+								let col = this.pointLineCollision(x1,y1,x1+shx*20,y1+shy*20,W.x1,W.y1,W.x2,W.y2)
 								if(col[4]){
 									willCollide = true
 									break;
@@ -501,7 +565,25 @@ class shooter2C{
 		 a = this.placeWall(id,410,390,425,425,"player",{"id":id,"force":true})
 		 this.players[id].boidy.push(a)
 		} else if(type == "shld") {
-			this.players[id].boidy.push(this.placeWall(id,0,0,0,0,"player",{"id":id,"force":true},{"defense":10}))
+			
+			this.players[id] = {"reloading":0,"unmovePos":[0,0],"rotation":[0,1],
+		"boidyVect":[[10,40,30,-30],[30,-30,-30,-30],[-30,-30,-10,40],[-10,40,10,40]],
+		"boidy":[],"x":410,"y":410,"vx":0,"vy":0,"hp":100,"id":id,"keys":{},
+		"materials":100,"speed":0.5,"tracking":true,"boidyAll":4
+		}
+		io.to(id).emit("spec",["zoom",0.8])
+		let a = this.placeWall(id,410,390,395,425,"player",{"id":id,"force":true},{"defense":3})
+		this.players[id].boidy.push(a)
+		 a = this.placeWall(id,425,425,395,425,"player",{"id":id,"force":true},{"defense":3})
+		 this.players[id].boidy.push(a)
+
+		 a = this.placeWall(id,410,390,425,425,"player",{"id":id,"force":true},{"defense":3})
+		 this.players[id].boidy.push(a)
+		 a = this.placeWall(id,410,390,425,425,"player",{"id":id,"force":true},{"defense":3})
+		 this.players[id].boidy.push(a)
+
+		
+
 		} else if(type == "tank") {
 			this.players[id] = {"reloading":0,"unmovePos":[0,0],"rotation":[0,1],
 		"boidyVect":[[10,-40,30,30],[30,30,-30,30],[-30,30,-10,-40],[-10,-40,10,-40]],
@@ -861,7 +943,7 @@ class shooter2C{
 						// let actualMult = 1-(1-B.wallMult)*angleDamageMult
 						let actualMult = (1 - (1 - B.wallMult)*angleDamageMult)*(1-(tw.wallMult?1-tw.wallMult:0.4)*angleDamageMult)
 						if(actualMult < 0){actualMult = 0}
-						if(B.ignoreWallMult){actualMult = 1}
+						if(B.ignoreWallMult !== undefined){actualMult = B.ignoreWallMult}
 						// let actualMult = (tw.wallMult?1-(1-tw.wallMult)*angleDamageMult:1-0.4*angleDamageMult)
 						// let actualMult = (tw.wallMult?tw.wallMult:1-0.4*reverseADmgMult)
 						// i.vx = B.wallMult*(tcol[2]-tcol[0])*(tw.wallMult?tw.wallMult:0.6)*reverseADmgMult
