@@ -34,9 +34,9 @@ class shooter2C{
 					"tailLength":2,"dmgmult":0.01,"lingerance":2,"tail":[],"life":1,"slowd":1,"extra":{"tailmult":2}})
 				break;
 			case "cnon":
-				this.bullets.push({"shooter":id,"type":"cnon","x":x,"y":y,"vx":vx,"vy":vy,"wallMult":1,
-					"tailLength":10,"lingerance":10,"tail":[],"life":200,
-					"slowd":1,"dmgmult":12,"extra":{"tailmult":3}})
+				this.bullets.push({"shooter":id,"type":"cnon","x":x,"y":y,"vx":vx,"vy":vy,"wallMult":1,"deathVel":6000,
+					"tailLength":10,"lingerance":10,"tail":[],"life":200,"penMult":0.45,"ignoreWallMult":-0.7,
+					"slowd":1,"dmgmult":17,"ignoreAngleDamageMult":1,"extra":{"tailmult":3}})
 				break;
 
 			case "heal":
@@ -157,7 +157,8 @@ class shooter2C{
 			p.lastWeapon = w
 		}
 
-		let n = vectorNormalize([p.x,p.y,x+p.x-410,y+p.y-410])
+		let n = vectorNormalize([p.x,p.y,x+p.x,y+p.y])
+		// let n = vectorNormalize([p.x,p.y,x+p.x-410,y+p.y-410])
 		p.rotation = [n[2]-p.x,n[3]-p.y]
 		p.unmovePos[2] = true
 		let reload = 0
@@ -983,7 +984,13 @@ class shooter2C{
 						// let actualMult = 1-(1-B.wallMult)*angleDamageMult
 						let actualMult = (1 - (1 - B.wallMult)*angleDamageMult)*(1-(tw.wallMult?1-tw.wallMult:0.4)*angleDamageMult)
 						if(actualMult < 0){actualMult = 0}
-						if(B.ignoreWallMult !== undefined){actualMult = B.ignoreWallMult}
+						if(B.ignoreWallMult !== undefined){actualMult = -B.ignoreWallMult * angleDamageMult
+							i.vx *= actualMult
+							i.vy *= actualMult
+						} else{
+							i.vx = actualMult*(tcol[2]-tcol[0])
+							i.vy = actualMult*(tcol[3]-tcol[1])
+						}
 						// let actualMult = (tw.wallMult?1-(1-tw.wallMult)*angleDamageMult:1-0.4*angleDamageMult)
 						// let actualMult = (tw.wallMult?tw.wallMult:1-0.4*reverseADmgMult)
 						// i.vx = B.wallMult*(tcol[2]-tcol[0])*(tw.wallMult?tw.wallMult:0.6)*reverseADmgMult
@@ -991,8 +998,7 @@ class shooter2C{
 						// i.vy = B.wallMult*(tcol[3]-tcol[1])*(tw.wallMult?tw.wallMult:0.6)
 						// bspeed *= B.wallMult*(tw.wallMult?tw.wallMult:0.6)
 
-						i.vx = actualMult*(tcol[2]-tcol[0])
-						i.vy = actualMult*(tcol[3]-tcol[1])
+						
 						bspeed *= actualMult
 
 						if(tw.onDamage !== undefined){
@@ -1001,9 +1007,10 @@ class shooter2C{
 
 					} else {
 						this.drawers.push([i.type,i.tailLength,i.x,i.y,tcol[0],tcol[1],i.extra])
-						i.vx = (i.vx - (tcol[0] - i.x)) * 0.3
-						i.vy = (i.vy - (tcol[1] - i.y)) * 0.3
-						bspeed *= 0.3
+						let avmult = B.penMult?B.penMult:0.3
+						i.vx = (i.vx - (tcol[0] - i.x)) * avmult
+						i.vy = (i.vy - (tcol[1] - i.y)) * avmult
+						bspeed *= avmult
 						i.x = tcol[0]
 						i.y = tcol[1]
 					}
@@ -1033,11 +1040,9 @@ class shooter2C{
 			B.vx = vnorm[2] * bspeed
 			B.vy = vnorm[3] * bspeed
 			
-			// if(B.type == "norm" || B.type == "scat" || B.type == "cnon"){
 				B.vx *= B.slowd
 				B.vy *= B.slowd
 	
-			// }
 
 				
 			let sp = B.vx*B.vx + B.vy*B.vy 
@@ -1076,6 +1081,9 @@ class shooter2C{
 			if(o){
 		 		vy = o.vy
 		 		dp = o.adp
+		 		if(b.ignoreAngleDamageMult){
+		 			dp = b.ignoreAngleDamageMult
+		 		}
 		 		vx = o.vx
 			} else {
 				vy = b.vy

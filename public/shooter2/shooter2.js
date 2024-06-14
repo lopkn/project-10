@@ -14,10 +14,11 @@ socket.on("acknowledge G10.2",acknowledge)
 socket.on("CROBJECT",(e)=>{crobject(e)})
 socket.on("spec",(e)=>{spec(e)})
 socket.on("upwalls",upwalls)
-socket.on("cameraUp",(e)=>{cameraX = e[0]-410;cameraY = e[1]-410})
+socket.on("cameraUp",(e)=>{cameraX = e[0]-canvasDimensions[2];cameraY = e[1]-canvasDimensions[3]})
 
 
-
+let mid = [410,410]
+let canvasDimensions = [820,820,410,410]
 
 function StCcord(x,y){
 	return([ (x-cameraX)  ])
@@ -154,7 +155,7 @@ function tick(){
 	socket.emit("keys",[ID,keyHolds])
 
 	if(player.clickheld && weaponInfo[player.weaponDict[player.weaponCounter]]?.repeating &&cttr%weaponInfo[player.weaponDict[player.weaponCounter]]?.repeating === 0){
-		socket.emit("click",[ID,mouseX,mouseY])
+		socket.emit("click",[ID,mouseX-mid[0],mouseY-mid[1]])
 	}
 
 	mainCTX.clearRect(0,0,840,840)
@@ -332,8 +333,12 @@ mainCTX.stroke()
 	mainCTX.fillText("materials: "+player.materials,320,770)
 }
 
+let mainCanvas = document.getElementById("myCanvas")
+let mainCTX = mainCanvas.getContext("2d")
 
-let mainCTX = document.getElementById("myCanvas").getContext("2d")
+mainCanvas.style.left = Math.floor(window.innerWidth/2-canvasDimensions[0]/2)+"px"
+mid[0] += Math.floor(window.innerWidth/2-canvasDimensions[0]/2)
+mid[2] = Math.floor(window.innerWidth/2-canvasDimensions[0]/2)
 
 
 
@@ -424,7 +429,7 @@ var mouseY = 0
 onmousemove = (e)=>{mouseX = (e.clientX - 5*allzoom)/allzoom; mouseY = (e.clientY - 2*allzoom)/allzoom}
 
 document.addEventListener("mousedown",(e)=>{
-	socket.emit("click",[ID,mouseX,mouseY,player.weapon])
+	socket.emit("click",[ID,mouseX-mid[0],mouseY-mid[1],player.weapon])
 	player.clickheld = true
 })
 
@@ -445,7 +450,7 @@ document.addEventListener("keydown",(e)=>{
 
   switch(key){
   	case "r":
-  		placing = [true,mouseX/player.zoom-player.zoomR/player.zoom+cameraX,mouseY/player.zoom-player.zoomR/player.zoom+cameraY]
+  		placing = [true,(mouseX-mid[2])/player.zoom-player.zoomR/player.zoom+cameraX,mouseY/player.zoom-player.zoomR/player.zoom+cameraY]
   		break;
     case "q":
   		player.weaponCounter -= 1
@@ -504,7 +509,7 @@ document.addEventListener("keyup",(e)=>{
   	if(player.snapping){
   		placing[1] += player.gridSize/2
   		placing[2] += player.gridSize/2
-  		let mx = mouseX/player.zoom-player.zoomR/player.zoom+cameraX+player.gridSize/2
+  		let mx = (mouseX-mid[2])/player.zoom-player.zoomR/player.zoom+cameraX+player.gridSize/2
   		let my = mouseY/player.zoom-player.zoomR/player.zoom+cameraY+player.gridSize/2
   		if(placing[1] < 0){
   			placing[1] -= player.gridSize
@@ -520,7 +525,7 @@ document.addEventListener("keyup",(e)=>{
   		}
   		socket.emit("placeWall",[placing[1]-(placing[1]%player.gridSize),placing[2]-(placing[2]%player.gridSize),mx-(mx%player.gridSize),my-(my%player.gridSize),player.wall])
   	} else {
-  	socket.emit("placeWall",[placing[1],placing[2],mouseX/player.zoom-player.zoomR/player.zoom+cameraX,mouseY/player.zoom-player.zoomR/player.zoom+cameraY,player.wall])}
+  	socket.emit("placeWall",[placing[1],placing[2],(mouseX-mid[2])/player.zoom-player.zoomR/player.zoom+cameraX,mouseY/player.zoom-player.zoomR/player.zoom+cameraY,player.wall])}
   	placing = [false]
   }
 
