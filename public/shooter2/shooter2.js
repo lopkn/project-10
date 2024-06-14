@@ -81,7 +81,7 @@ class player{
 	static wallDict = {
 		"1":"norm","2":"bhol","3":"ghol","4":"body","5":"metl",
 		"6":"rflc","7":"mbdy","8":"whol","9":"box","10":"turr",
-		"11":"turr2","12":"turr3","13":"Bmr"
+		"11":"turr2","12":"turr3","13":"Bmr","14":"brfc"
 	}
 
 	static zoom = 1
@@ -270,6 +270,11 @@ mainCTX.stroke()
 	let rwc = Math.random()
 	for(let j = 0 ; j < wallsArr.length; j++){
 		let i = map.walls[wallsArr[j]]
+
+		if(i.hp < 0){
+			i.hp = 20
+		}
+
 		if(i.type == "norm" || i.type == "player" || i.type == "body"){
 		mainCTX.beginPath()
 		mainCTX.lineWidth = 3*player.zoom
@@ -513,9 +518,9 @@ document.addEventListener("keyup",(e)=>{
   		if(my < 0){
   			my -= player.gridSize
   		}
-  		socket.emit("placeWall",[placing[1]-(placing[1]%player.gridSize),placing[2]-(placing[2]%player.gridSize),mx-(mx%player.gridSize),my-(my%player.gridSize),player.wall,ID])
+  		socket.emit("placeWall",[placing[1]-(placing[1]%player.gridSize),placing[2]-(placing[2]%player.gridSize),mx-(mx%player.gridSize),my-(my%player.gridSize),player.wall])
   	} else {
-  	socket.emit("placeWall",[placing[1],placing[2],mouseX/player.zoom-player.zoomR/player.zoom+cameraX,mouseY/player.zoom-player.zoomR/player.zoom+cameraY,player.wall,ID])}
+  	socket.emit("placeWall",[placing[1],placing[2],mouseX/player.zoom-player.zoomR/player.zoom+cameraX,mouseY/player.zoom-player.zoomR/player.zoom+cameraY,player.wall])}
   	placing = [false]
   }
 
