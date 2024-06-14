@@ -1503,7 +1503,7 @@ re8L.io = io
 ten.io = io
 ArgAccel.setio(io)
 re8.setio(io)
-shooter2C.setio(io)
+shooter2C.setio(io,myMath)
 
 // socket = io("https://home.unsown.top")
 

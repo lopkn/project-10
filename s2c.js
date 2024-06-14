@@ -1,5 +1,5 @@
 let io;
-
+let myMath
 function distance(x1,y1,x2,y2) {
 	let a = x2-x1
 	let b = y2-y1
@@ -16,8 +16,9 @@ class shooter2C{
 	static wallPushers = {}
 
 	static nuuIDGEN = 0
-	static setio(i){
+	static setio(i,m){
 		io = i
+		myMath = m
 	}
 
 	static pushBullet(x,y,vx,vy,id,type){
@@ -432,7 +433,7 @@ class shooter2C{
 					let yy1 = (ar[1] * p.rotation[1] - ar[0] * p.rotation[0]) + y1
 					let xx2 = (ar[2] * p.rotation[1] + ar[3] * p.rotation[0]) + x1
 					let yy2 = (ar[3] * p.rotation[1] - ar[2] * p.rotation[0]) + y1
-					this.placeWall(player,xx1,yy1,xx2,yy2,"norm",{"force":true})
+					this.placeWall(player,xx1,yy1,xx2,yy2,"norm",Object.assign({},options,{"force":true}),special)
 				}
 				// this.placeWall(player,40,40,40,-40,"norm",{"force":true})
 				return;
@@ -446,7 +447,7 @@ class shooter2C{
 					let yy1 = (ar[1] * p.rotation[1] - ar[0] * p.rotation[0]) + y1
 					let xx2 = (ar[2] * p.rotation[1] + ar[3] * p.rotation[0]) + x1
 					let yy2 = (ar[3] * p.rotation[1] - ar[2] * p.rotation[0]) + y1
-					this.placeWall(player,xx1,yy1,xx2,yy2,"metl",{"force":true})
+					this.placeWall(player,xx1,yy1,xx2,yy2,"metl",Object.assign({},options,{"force":true}),special)
 				}
 				return;
 				break;
@@ -570,8 +571,8 @@ class shooter2C{
 		}
 
 		if(options.regen){
-			this.walls[a].undying = 5
-			this.walls[a].onDeath = (w,b)=>{setTimeout(()=>{{w.hp = 1000; w.dead = undefined; this.updateWall_MightBeDead(w.id)}},options.regen*1000)}
+			this.walls[a].undying = 4
+			this.walls[a].onDeath = (w,b)=>{if(w.undying<1){return};setTimeout(()=>{w.hp = 1000; w.dead = undefined; this.updateWall_MightBeDead(w.id)},options.regen*1000)}
 		}
 
 		if(special != undefined){
