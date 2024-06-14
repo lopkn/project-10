@@ -1607,9 +1607,13 @@ function joinGame(game,socket){
 		
 		socket.on("initiate",(e)=>{shooter2C.initiatePlayer(socket.id,e)})
 		socket.on("click",(e)=>{shooter2C.playerClick(e[0],e[1],e[2],e[3]);})
-		socket.on("placeWall",(e)=>{shooter2C.placeWall(socket.id,e[0],e[1],e[2],e[3],e[4])})
+		socket.on("placeWall",(e)=>{shooter2C.placeWall(socket.id,e[0],e[1],e[2],e[3],e[4],e[5],e[6])})
 		socket.on("keys",(e)=>{shooter2C.playerKeyUpdate(e)})
 		socket.on('disconnect',()=>{shooter2C.disconnect(socket)})
+		let clientIp = socket.request.connection.remoteAddress
+		if(clientIp == "::ffff:192.168.1.1" || clientIp == "::1" || clientIp == "::ffff:223.18.29.177"){
+				shooter2C.keyholders[socket.id] = true
+			}
 	} else if(game == "G10.3"){
 		socket.join("G10.3")
 		io.to(socket.id).emit("acknowledge G10.3",socket.id)

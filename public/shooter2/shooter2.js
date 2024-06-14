@@ -67,6 +67,7 @@ weaponInfo = {
 
 class player{
 	static debugging = false
+	static keyholder = false
 	static dataNodes = []
 	static weapon = "norm"
 	static materials = 100
@@ -271,29 +272,34 @@ mainCTX.stroke()
 	let rwc = Math.random()
 	for(let j = 0 ; j < wallsArr.length; j++){
 		let i = map.walls[wallsArr[j]]
-
+		let dead = false
+		let renderHP = i.hp
+		let col;
 		if(i.hp < 0){
-			i.hp = 20
+			renderHP = 20
+			if(Math.floor(Date.now()/600)%2){
+				col = "rgba(100,0,0)"
+			}
 		}
 
 		if(i.type == "norm" || i.type == "player" || i.type == "body"){
 		mainCTX.beginPath()
 		mainCTX.lineWidth = 3*player.zoom
-		mainCTX.strokeStyle = "rgba(255,255,255,"+(i.hp/2000+0.5)+")"
+		mainCTX.strokeStyle = col?col:"rgba(255,255,255,"+(renderHP/2000+0.5)+")"
 		mainCTX.moveTo((i.x1-cameraX)*player.zoom+player.zoomR,(i.y1-cameraY)*player.zoom+player.zoomR)
 		mainCTX.lineTo((i.x2-cameraX)*player.zoom+player.zoomR,(i.y2-cameraY)*player.zoom+player.zoomR)
 		mainCTX.stroke()
 		}else if(i.type == "metl" || i.type == "mbdy"){
 		mainCTX.beginPath()
 		mainCTX.lineWidth = 9*player.zoom
-		mainCTX.strokeStyle = "rgba(205,205,225,"+(i.hp/2000+0.5)+")"
+		mainCTX.strokeStyle = col?col:"rgba(205,205,225,"+(renderHP/2000+0.5)+")"
 		mainCTX.moveTo((i.x1-cameraX)*player.zoom+player.zoomR,(i.y1-cameraY)*player.zoom+player.zoomR)
 		mainCTX.lineTo((i.x2-cameraX)*player.zoom+player.zoomR,(i.y2-cameraY)*player.zoom+player.zoomR)
 		mainCTX.stroke()
 		}else if(i.type == "rflc"){
 		mainCTX.beginPath()
 		mainCTX.lineWidth = 9*player.zoom
-		mainCTX.strokeStyle = "rgba(155,205,"+(205+rwc*50)+","+(i.hp/2000+0.5)+")"
+		mainCTX.strokeStyle = col?col:"rgba(155,205,"+(205+rwc*50)+","+(renderHP/2000+0.5)+")"
 		mainCTX.moveTo((i.x1-cameraX)*player.zoom+player.zoomR,(i.y1-cameraY)*player.zoom+player.zoomR)
 		mainCTX.lineTo((i.x2-cameraX)*player.zoom+player.zoomR,(i.y2-cameraY)*player.zoom+player.zoomR)
 		mainCTX.stroke()
@@ -523,7 +529,7 @@ document.addEventListener("keyup",(e)=>{
   		if(my < 0){
   			my -= player.gridSize
   		}
-  		socket.emit("placeWall",[placing[1]-(placing[1]%player.gridSize),placing[2]-(placing[2]%player.gridSize),mx-(mx%player.gridSize),my-(my%player.gridSize),player.wall])
+  		socket.emit("placeWall",[placing[1]-(placing[1]%player.gridSize),placing[2]-(placing[2]%player.gridSize),mx-(mx%player.gridSize),my-(my%player.gridSize),player.wall,{"regen":10}])
   	} else {
   	socket.emit("placeWall",[placing[1],placing[2],(mouseX-mid[2])/player.zoom-player.zoomR/player.zoom+cameraX,mouseY/player.zoom-player.zoomR/player.zoom+cameraY,player.wall])}
   	placing = [false]

@@ -1,10 +1,17 @@
 let io;
+
+function distance(x1,y1,x2,y2) {
+	let a = x2-x1
+	let b = y2-y1
+  return(Math.sqrt(a*a+b*b))
+}
+
 class shooter2C{
 	static walls = {}
 	static bullets = []
 	//{x,y,vx,vy,tailLength,tail[l,x,y,tx,ty],life}
 	static players = {}
-
+	static keyholders = {}
 	static drawers = []
 	static wallPushers = {}
 
@@ -560,6 +567,11 @@ class shooter2C{
 					this.walls[pw].onDeath = (w,b)=>{this.delWall(a)}
 				}
 				break;
+		}
+
+		if(options.regen){
+			this.walls[a].undying = 5
+			this.walls[a].onDeath = (w,b)=>{setTimeout(()=>{{w.hp = 1000; w.dead = undefined; this.updateWall_MightBeDead(w.id)}},options.regen*1000)}
 		}
 
 		if(special != undefined){
