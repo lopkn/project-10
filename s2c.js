@@ -49,7 +49,7 @@ class shooter2C{
 
 			case "heal":
 				this.bullets.push({"shooter":id,"type":"heal","x":x,"y":y,"vx":vx,"vy":vy,"wallMult":1,
-					"lingerance":2,"dmgmult":-1,"tailLength":2,"tail":[],"life":20,"slowd":0.95})
+					"lingerance":2,"dmgmult":-1,"tailLength":2,"tail":[],"life":1000,"slowd":1})
 				break;
 			case "dril":
 				this.bullets.push({"shooter":id,"type":"dril","x":x,"y":y,"vx":vx,"vy":vy,"wallMult":0.2,
@@ -667,6 +667,9 @@ class shooter2C{
 
 		}
 
+
+		this.players[id].minRadius = this.getPlayerRadius(this.players[id])
+
 		this.sendAllWombjects(id)
 	}
 
@@ -712,7 +715,6 @@ class shooter2C{
 
 				if(dd < p.boidyAll){
 					p.dead = true
-					console.log(p.boidy)
 					p.boidy.forEach((e)=>{
 						this.walls[e].undying = false
 					})
@@ -1242,7 +1244,9 @@ class shooter2C{
 
 	static disconnect(s){
 		this.players[s.id].boidy.forEach((e)=>{
-			this.walls[e].undying = false
+			if(this.walls[e]){
+				this.walls[e].undying = false
+			}
 		})
 		delete this.players[s.id]
 	}
@@ -1265,6 +1269,18 @@ class shooter2C{
   		return("noCol")
   	}
 	}
+
+	static getPlayerRadius(p){
+		let mostDist = 0
+		p.boidyVect.forEach((e)=>{
+			let d = distance(0,0,e[0],e[1])
+			let d2 = distance(0,0,e[2],e[2])
+			d = d>d2?d:d2
+			if(mostDist<d){mostDist=d}
+		})
+		return(mostDist)
+	}
+
 }
 
 
