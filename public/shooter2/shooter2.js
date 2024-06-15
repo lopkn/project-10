@@ -342,9 +342,6 @@ mainCTX.stroke()
 let mainCanvas = document.getElementById("myCanvas")
 let mainCTX = mainCanvas.getContext("2d")
 
-mainCanvas.style.left = Math.floor(window.innerWidth/2-canvasDimensions[0]/2)+"px"
-mid[0] += Math.floor(window.innerWidth/2-canvasDimensions[0]/2)
-mid[2] = Math.floor(window.innerWidth/2-canvasDimensions[0]/2)
 
 
 
@@ -398,6 +395,10 @@ function windowRescale(e){
 }
 
 windowRescale()
+
+mainCanvas.style.left = Math.floor(window.innerWidth/allzoom/2-canvasDimensions[0]/2)+"px"
+mid[0] += Math.floor(window.innerWidth/allzoom/2-canvasDimensions[0]/2)
+mid[2] = Math.floor(window.innerWidth/allzoom/2-canvasDimensions[0]/2)
 
 	// mainCTX.clearRect(0,0,840,840)
 

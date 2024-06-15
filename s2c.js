@@ -1165,17 +1165,18 @@ class shooter2C{
 		let pobjk = Object.keys(this.players)
 		pobjk.forEach((e)=>{
 			let p = this.players[e]
-			if(p.tracking && pobjk.length > 1){
+			if( p.tracking && pobjk.length > 1){
 				let op;
+				let traks = []
 				for(let J = 0; J < pobjk.length; J++){
 					if(e !== pobjk[J] && !this.players[pobjk[J]].dead){
 						op = this.players[pobjk[J]]
-						continue;
+						traks.push(["trak",p.x,p.y,op.x,op.y])
 					}
 				}
-				if(op === undefined){op = p}
+				// if(op === undefined){op = p}
 
-				io.to(e).emit("drawers",[this.drawers,[["trak",p.x,p.y,op.x,op.y]]])
+				io.to(e).emit("drawers",[this.drawers,traks])
 			// this.drawers.push([i.type,i.tailLength,i.x,i.y,i.x+i.vx,i.y+i.vy,i.extra])
 			} else {
 				io.to(e).emit("drawers",[this.drawers])
