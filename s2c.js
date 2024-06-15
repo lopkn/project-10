@@ -49,7 +49,7 @@ class shooter2C{
 
 			case "heal":
 				this.bullets.push({"shooter":id,"type":"heal","x":x,"y":y,"vx":vx,"vy":vy,"wallMult":1,
-					"lingerance":2,"dmgmult":-1,"tailLength":2,"tail":[],"life":1000,"slowd":1})
+					"lingerance":2,"dmgmult":-1,"tailLength":2,"tail":[],"life":20,"slowd":0.98})
 				break;
 			case "dril":
 				this.bullets.push({"shooter":id,"type":"dril","x":x,"y":y,"vx":vx,"vy":vy,"wallMult":0.2,

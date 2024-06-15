@@ -433,7 +433,7 @@ function drawWalls(e){
 var mouseX = 0
 var mouseY = 0
 
-onmousemove = (e)=>{mouseX = (e.clientX - 5*allzoom)/allzoom; mouseY = (e.clientY - 2*allzoom)/allzoom}
+onmousemove = (e)=>{mouseX = (e.clientX)/allzoom; mouseY = (e.clientY - 2*allzoom)/allzoom}
 
 document.addEventListener("mousedown",(e)=>{
 	socket.emit("click",[ID,mouseX-mid[0],mouseY-mid[1],player.weapon])
