@@ -570,7 +570,7 @@ class shooter2C{
 				break;
 		}
 
-		if(options.regen){
+		if(options.regen && this.keyholders[p.id]){
 			this.walls[a].undying = 4
 			this.walls[a].onDeath = (w,b)=>{if(w.undying<1){return};setTimeout(()=>{w.hp = 1000; w.dead = undefined; this.updateWall_MightBeDead(w.id)},options.regen*1000)}
 		}
@@ -581,6 +581,11 @@ class shooter2C{
 				this.walls[a][e] = special[e]
 			})
 		}
+
+		if(options.attach){
+			p.currentRadius = this.getPlayerRadius(p)
+		}
+
 		this.walls[a].id = a
 		this.updateWall(a)
 		return(a)
@@ -664,11 +669,10 @@ class shooter2C{
 		 a = this.placeWall(id,410,390,425,425,"player",{"id":id,"force":true},{"defense":0.3})
 		 this.players[id].boidy.push(a)
 
-
 		}
 
 
-		this.players[id].minRadius = this.getPlayerRadius(this.players[id])
+		this.players[id].minRadius = this.players[id].currentRadius = this.getPlayerRadius(this.players[id])
 
 		this.sendAllWombjects(id)
 	}
@@ -694,17 +698,25 @@ class shooter2C{
 				io.to(p.id).emit("spec",["mat",Math.floor(p.materials)])
 			}
 
-			let cont = false
-			p.boidy.forEach((BOI,i)=>{
-				if(this.walls[BOI] == undefined){
-					p.boidy.splice(i,1)
-					p.boidyVect.splice(i,1)
+			let cont = false //overhauled jun1524
+			// p.boidy.forEach((BOI,i)=>{
+			// 	if(this.walls[BOI] == undefined){
+			// 		p.boidy.splice(i,1)
+			// 		p.boidyVect.splice(i,1)
+			// 		cont = true
+			// 	}
+			// })
+			for(let j = p.boidy.length-1; j > -1; j--){
+				if(this.walls[p.boidy[j]] == undefined){
+					p.boidy.splice(j,1)
+					p.boidyVect.splice(j,1)
 					cont = true
 				}
-			})
-			if(cont){
-				continue
 			}
+			if(cont){
+				p.currentRadius = this.getPlayerRadius(p)
+			// 	continue //commented jun 15 24, seemingly does nothing?
+			}          
 
 			let dd = 0
 				p.boidy.forEach((e)=>{
@@ -737,8 +749,8 @@ class shooter2C{
 
 			let ttv = vectorNormalize([0,0,tv[0],tv[1]])
 		
-			p.vx += ttv[2]*p.speed
-			p.vy += ttv[3]*p.speed
+			p.vx += ttv[2]*p.speed/p.currentRadius*p.minRadius
+			p.vy += ttv[3]*p.speed/p.currentRadius*p.minRadius
 			p.vx *= 0.97
 			p.vy *= 0.97
 
@@ -1082,6 +1094,7 @@ class shooter2C{
 	}
 
 	static delWall(wid){
+
 		delete this.walldo[wid]
 		delete this.walls[wid]
 		this.wallPushers[wid] = "_DEL"
@@ -1112,6 +1125,7 @@ class shooter2C{
 				this.walls[wid].onDeath(this.walls[wid],b)
 			}
 			if(!this.walls[wid].undying){
+
 				delete this.walls[wid]
 				this.wallPushers[wid] = "_DEL"
 			return(false)
