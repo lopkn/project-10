@@ -166,7 +166,7 @@ class shooter2C{
 
 	static playerClick(id,x,y,w){
 		let p = this.players[id]
-		if(p.reloading > 0 || p.reloading == undefined || p.dead){
+		if(p.reloading > 0 || p.reloading == undefined || (p.dead&&!this.keyholders[id])){
 			return;
 		}
 		if(w === undefined){
@@ -623,14 +623,6 @@ class shooter2C{
 
 			 a = this.placeWall(id,410,390,425,425,"player",{"id":id,"force":true})
 			 this.players[id].boidy.push(a)
-		}if(type == "spec"){
-
-			this.players[id] = {"reloading":0,"unmovePos":[0,0],"rotation":[0,1],
-				"boidyVect":[],
-				"boidy":[],"x":410,"y":410,"vx":0,"vy":0,"hp":100,"id":id,"keys":{},
-				"materials":100,"speed":1.5,"boidyAll":-1,"dead":true,"spectator":true,"minRadius":1,"currentRadius":1
-			}
-			io.to(id).emit("spec",["zoom",0.6])
 		} else if(type == "shld") {
 			
 			this.players[id] = {"reloading":0,"unmovePos":[0,0],"rotation":[0,1],
@@ -692,12 +684,22 @@ class shooter2C{
 		 a = this.placeWall(id,410,390,425,425,"player",{"id":id,"force":true},{"defense":0.3})
 		 this.players[id].boidy.push(a)
 
+		} else{ 
+		// if(type == "spec"){
+
+			this.players[id] = {"reloading":0,"unmovePos":[0,0],"rotation":[0,1],
+				"boidyVect":[],
+				"boidy":[],"x":410,"y":410,"vx":0,"vy":0,"hp":100,"id":id,"keys":{},
+				"materials":100,"speed":1.5,"boidyAll":-1,"dead":true,"spectator":true,"minRadius":1,"currentRadius":1,"tracking":false
+			}
+			io.to(id).emit("spec",["zoom",0.6])
 		}
 
 
-		this.players[id].minRadius = this.players[id].currentRadius = this.getPlayerRadius(this.players[id])
 		if(this.players[id].spectator){
 			this.players[id].minRadius = this.players[id].currentRadius = 1
+		} else {
+		this.players[id].minRadius = this.players[id].currentRadius = this.getPlayerRadius(this.players[id])
 		}
 		this.players[id].tv = [0,0]
 		this.sendAllWombjects(id)
@@ -1342,24 +1344,35 @@ class shooter2C{
 		return(this.entities[eid])
 	}
 
-	static entityTemplates(type){
-		
-		if(type == "ntri1" || type == undefined){
-			let entity = this.initiateEntity()
+	static entityTemplates(type,durability=1){
+			let entity;
+
+			if(type == "rand"){
+				let list = ["ntri1","ntri2","snpr1","shld1"]
+				type = list[Math.floor(Math.random()*list.length)]
+			}
+
+		if(type == "ntri1" || type == undefined || type == "ntri2" || type == "ntri3"){
+			 entity = this.initiateEntity()
 			entity.x = Math.random()*1500-750
 			entity.y = Math.random()*1500-750
 			entity.range = 3500
 			entity.fireRange = 1000
+			entity.pullx = Math.random()
+			entity.pully = Math.random()
 			entity.reloadMultiplier = 1
 			entity.findTarget = (e)=>{
-				if(e.target && this.players[e.target]&& !this.players[e.target].dead && distance(e.x,e.y,this.players[e.target].x,this.players[e.target].y < e.range)){
+				if(Math.random()>0.05&&e.target && this.players[e.target]&& !this.players[e.target].dead && distance(e.x,e.y,this.players[e.target].x,this.players[e.target].y < e.range)){
 					return(e.target)
 				}
 				e.target = undefined
+				let ldst = Infinity
 				Object.values(this.players).forEach((E)=>{
 					if(e == E){return}
-					if(!E.dead &&distance(e.x,e.y,E.x,E.y)< e.range){
+						let dst = distance(e.x,e.y,E.x,E.y)
+					if(!E.dead && dst < e.range && dst < ldst){
 						e.target = E.id
+						ldst = dst
 					}
 				})
 				return(e.target)
@@ -1369,10 +1382,19 @@ class shooter2C{
 					let p = this.players[e.target]
 					let dst = distance(e.x,e.y,p.x,p.y)
 					if(dst > 300){
-						e.tv = [(p.x-e.x)/dst*3+Math.random(), (p.y-e.y)/dst*3+Math.random()]
+						e.tv = [(p.x-e.x)/dst*3+Math.random()-e.pullx, (p.y-e.y)/dst*3+Math.random()-e.pully]
 					}
 					if(dst < e.fireRange){
-						this.playerClick(e.id,p.x-e.x,p.y-e.y,"scat")
+						if(Math.random()>0.99){
+							this.playerClick(e.id,Math.random(),Math.random(),"tlpt")
+						}
+						if(type == "ntri2"){
+							this.playerClick(e.id,p.x-e.x+p.vx*7,p.y-e.y+p.vy*7,Math.random()>0.1?"zapr":"cnon")
+						} else if(type == "ntri3"){
+							this.playerClick(e.id,p.x-e.x+p.vx*2,p.y-e.y+p.vy*2,Math.random()>0.01?"lzr2":"lazr")
+						} else{
+							this.playerClick(e.id,p.x-e.x,p.y-e.y,Math.random()>0.2?"scat":"grnd")
+						}
 					}
 				} else {
 					e.tv = [0,0]
@@ -1384,7 +1406,7 @@ class shooter2C{
 			
 			}
 		} else if(type == "shld1"){
-			let entity = this.initiateEntity("shld")
+			 entity = this.initiateEntity("shld")
 			entity.x = Math.random()*1500-750
 			entity.y = Math.random()*1500-750
 			entity.lead = 2
@@ -1424,7 +1446,7 @@ class shooter2C{
 			
 			}
 		}else if(type == "snpr1"){
-			let entity = this.initiateEntity("snpr")
+			 entity = this.initiateEntity("snpr")
 			entity.x = Math.random()*1500-750
 			entity.y = Math.random()*1500-750
 			entity.lead = 2
@@ -1466,6 +1488,7 @@ class shooter2C{
 			
 			}
 		}
+		entity.boidy.forEach((e)=>{this.walls[e].defense*=durability})
 	}
 
 	static entityUpdate(){
