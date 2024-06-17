@@ -144,6 +144,16 @@ class shooter2C{
 					}
 				})
 				break;
+			case "tlpt":
+				this.bullets.push({"shooter":id,"type":"tlpt","x":x,"y":y,"vx":vx*2,"vy":vy*2,"wallMult":0,"deathVel":10,"ignoreWallMult":-0.9,
+					"lingerance":4,"dmgmult":0,"tailLength":4,"tail":[],"life":100,"slowd":0.6,"extra":{"tailmult":1},"deathVel":2000,
+					"onDeath":(b)=>{
+						if(!this.players[id]){return}
+						this.players[id].x = b.x
+						this.players[id].y = b.y
+					}
+				})
+				break;
 
 		}
 		return(this.bullets[this.bullets.length-1])
@@ -249,8 +259,12 @@ class shooter2C{
 				reload += 2
 				p.materials -= 1
 				break;
+			case "tlpt":
+				this.pushBullet(p.x,p.y,(n[2]-p.x)*160,(n[3]-p.y)*160,id,"tlpt")
+				reload += 20
+				break;
 		}
-		p.reloading += reload;
+		p.reloading += reload*(p.reloadMultiplier?p.reloadMultiplier:1);
 	}
 
 	static getNewNUUID(){
@@ -533,7 +547,8 @@ class shooter2C{
 					for(let i = 0; i < obpr.length; i++){
 						let TTP = obpr[i]
 						let TPP = this.players[TTP]
-						if(distance(TPP.x,TPP.y,x1,y1) < this.walls[a].radius && TTP != player && !TPP.dead){
+						let distanceToPlayer = distance(TPP.x,TPP.y,x1,y1)
+						if(distanceToPlayer < this.walls[a].radius && TTP != player && !TPP.dead){
 							let nrm = vectorFuncs.originVectorNormalize(TPP.x-x1,TPP.y-y1)
 							let shx = nrm[0]*65+TPP.vx*1.7+Math.random()*45-22.5 // bullet supposed to go here
 							let shy = nrm[1]*65+TPP.vy*1.7+Math.random()*45-22.5
@@ -545,7 +560,7 @@ class shooter2C{
 									continue;
 								}
 								let col = this.pointLineCollision(x1,y1,x1+shx*20,y1+shy*20,W.x1,W.y1,W.x2,W.y2)
-								if(col[4]){
+								if(col !== "none" && col[4] && distanceToPlayer > distance(x1,y1,col[0],col[1])){
 									willCollide = true
 									break;
 								}
@@ -594,45 +609,53 @@ class shooter2C{
 
 		if(type == undefined || type == "ntri"){
 
-		this.players[id] = {"reloading":0,"unmovePos":[0,0],"rotation":[0,1],
-		"boidyVect":[[0,-40,30,30],[30,30,-30,30],[-30,30,0,-40]],
-		"boidy":[],"x":410,"y":410,"vx":0,"vy":0,"hp":100,"id":id,"keys":{},
-		"materials":100,"speed":1.5,"boidyAll":3
-	}
-		io.to(id).emit("spec",["zoom",1])
+			this.players[id] = {"reloading":0,"unmovePos":[0,0],"rotation":[0,1],
+				"boidyVect":[[0,-40,30,30],[30,30,-30,30],[-30,30,0,-40]],
+				"boidy":[],"x":410,"y":410,"vx":0,"vy":0,"hp":100,"id":id,"keys":{},
+				"materials":100,"speed":1.5,"boidyAll":3
+			}
+			io.to(id).emit("spec",["zoom",1])
 
-		let a = this.placeWall(id,410,390,395,425,"player",{"id":id,"force":true})
-		this.players[id].boidy.push(a)
-		 a = this.placeWall(id,425,425,395,425,"player",{"id":id,"force":true})
-		 this.players[id].boidy.push(a)
+			let a = this.placeWall(id,410,390,395,425,"player",{"id":id,"force":true})
+			this.players[id].boidy.push(a)
+			 a = this.placeWall(id,425,425,395,425,"player",{"id":id,"force":true})
+			 this.players[id].boidy.push(a)
 
-		 a = this.placeWall(id,410,390,425,425,"player",{"id":id,"force":true})
-		 this.players[id].boidy.push(a)
+			 a = this.placeWall(id,410,390,425,425,"player",{"id":id,"force":true})
+			 this.players[id].boidy.push(a)
+		}if(type == "spec"){
+
+			this.players[id] = {"reloading":0,"unmovePos":[0,0],"rotation":[0,1],
+				"boidyVect":[],
+				"boidy":[],"x":410,"y":410,"vx":0,"vy":0,"hp":100,"id":id,"keys":{},
+				"materials":100,"speed":1.5,"boidyAll":-1,"dead":true,"spectator":true,"minRadius":1,"currentRadius":1
+			}
+			io.to(id).emit("spec",["zoom",0.6])
 		} else if(type == "shld") {
 			
 			this.players[id] = {"reloading":0,"unmovePos":[0,0],"rotation":[0,1],
-		"boidyVect":[[10,40,30,-30],[30,-30,-30,-30],[-30,-30,-10,40],[-10,40,10,40],[-70,45,-10,57],[10,57,70,45]],
-		"boidy":[],"x":410,"y":410,"vx":0,"vy":0,"hp":100,"id":id,"keys":{},
-		"materials":100,"speed":0.5,"tracking":true,"boidyAll":4
-		}
-		io.to(id).emit("spec",["zoom",0.8])
-		let a = this.placeWall(id,0,0,0,0,"player",{"id":id,"force":true},{"defense":3})
-		this.players[id].boidy.push(a)
-		 a = this.placeWall(id,0,0,0,0,"player",{"id":id,"force":true},{"defense":3})
-		 this.players[id].boidy.push(a)
+			"boidyVect":[[10,40,30,-30],[30,-30,-30,-30],[-30,-30,-10,40],[-10,40,10,40],[-70,45,-10,57],[10,57,70,45]],
+			"boidy":[],"x":410,"y":410,"vx":0,"vy":0,"hp":100,"id":id,"keys":{},
+			"materials":100,"speed":0.5,"tracking":true,"boidyAll":4
+			}
+			io.to(id).emit("spec",["zoom",0.8])
+			let a = this.placeWall(id,0,0,0,0,"player",{"id":id,"force":true},{"defense":3})
+			this.players[id].boidy.push(a)
+			 a = this.placeWall(id,0,0,0,0,"player",{"id":id,"force":true},{"defense":3})
+			 this.players[id].boidy.push(a)
 
-		 a = this.placeWall(id,0,0,0,0,"player",{"id":id,"force":true},{"defense":3})
-		 this.players[id].boidy.push(a)
-		 a = this.placeWall(id,0,0,0,0,"player",{"id":id,"force":true},{"defense":3})
-		 this.players[id].boidy.push(a)
-		 a = this.placeWall(id,0,0,0,0,"rflc",{"id":id,"force":true},{"playerIntegral":false,"plid":id,"undying":Infinity})
-		 this.players[id].boidy.push(a)
-		 this.walls[a].onDeath = (w,b)=>{setTimeout(()=>{w.hp = 1000; w.dead = undefined; this.updateWall_MightBeDead(w.id)},13000)}
-		 a = this.placeWall(id,0,0,0,0,"rflc",{"id":id,"force":true},{"playerIntegral":false,"plid":id,"undying":Infinity})
-		 this.players[id].boidy.push(a)
-		 this.walls[a].onDeath = (w,b)=>{setTimeout(()=>{w.hp = 1000; w.dead = undefined; this.updateWall_MightBeDead(w.id)},13000)}
+			 a = this.placeWall(id,0,0,0,0,"player",{"id":id,"force":true},{"defense":3})
+			 this.players[id].boidy.push(a)
+			 a = this.placeWall(id,0,0,0,0,"player",{"id":id,"force":true},{"defense":3})
+			 this.players[id].boidy.push(a)
+			 a = this.placeWall(id,0,0,0,0,"rflc",{"id":id,"force":true},{"playerIntegral":false,"plid":id,"undying":Infinity})
+			 this.players[id].boidy.push(a)
+			 this.walls[a].onDeath = (w,b)=>{setTimeout(()=>{w.hp = 1000; w.dead = undefined; this.updateWall_MightBeDead(w.id)},13000)}
+			 a = this.placeWall(id,0,0,0,0,"rflc",{"id":id,"force":true},{"playerIntegral":false,"plid":id,"undying":Infinity})
+			 this.players[id].boidy.push(a)
+			 this.walls[a].onDeath = (w,b)=>{setTimeout(()=>{w.hp = 1000; w.dead = undefined; this.updateWall_MightBeDead(w.id)},13000)}
 
-		
+			
 
 		} else if(type == "tank") {
 			this.players[id] = {"reloading":0,"unmovePos":[0,0],"rotation":[0,1],
@@ -673,19 +696,26 @@ class shooter2C{
 
 
 		this.players[id].minRadius = this.players[id].currentRadius = this.getPlayerRadius(this.players[id])
-
+		if(this.players[id].spectator){
+			this.players[id].minRadius = this.players[id].currentRadius = 1
+		}
+		this.players[id].tv = [0,0]
 		this.sendAllWombjects(id)
+		return(this.players[id])
 	}
 
 	static pvuCounter = 0
 
 	static playerVelUpdate(){
 
+
 		this.pvuCounter += 1
+		this.entityUpdate()
+
 		let objt = Object.keys(this.players)
 		for(let i = 0; i < objt.length; i++){
 			let p = this.players[objt[i]]
-			if(p.dead){
+			if(p.dead && !p.spectator){
 				continue
 			}
 
@@ -730,10 +760,15 @@ class shooter2C{
 					p.boidy.forEach((e)=>{
 						this.walls[e].undying = false
 					})
+					if(p.entity){
+						this.disconnect({"id":p.id})
+					}
+					
 				continue
 				}
 
-			let tv = [0,0]
+			if(!p.entity){p.tv = [0,0]}
+			let tv = p.tv
 			if(p.keys.w == "a"){
 				tv[1] -= 1
 			}
@@ -1118,7 +1153,7 @@ class shooter2C{
 		 		vx = b.vx
 			}
 
-		WALL.hp -= 0.0065*(vx*vx+vy*vy)*(b.dmgmult?b.dmgmult:1)/this.walls[wid].defense*dp
+		WALL.hp -= 0.0065*(vx*vx+vy*vy)*(b.dmgmult!==undefined?b.dmgmult:1)/this.walls[wid].defense*dp
 		if(this.walls[wid].hp < 0 && !this.walls[wid].dead){
 			this.walls[wid].dead = true
 			if(this.walls[wid].onDeath !== undefined){
@@ -1247,7 +1282,7 @@ class shooter2C{
     let cola = myMath.pointInLine(xc,yc,x1,y1,x2,y2)
     let colb = myMath.pointInLine(xc,yc,x3,y3,x4,y4)
     let colc = (cola&&colb)
-    return([xc,yc,cola,colb,colc])
+    return([xc,yc,cola,colb,colc]) // if extending infinitely theres a point, (point X, point Y, whether line 2 extended would intersect line 1, vice versa, whether they collide)
   } else {
     return("none")
   }
@@ -1263,6 +1298,7 @@ class shooter2C{
 				this.walls[e].undying = false
 			}
 		})
+		delete this.entities[s.id]
 		delete this.players[s.id]
 	}
 
@@ -1294,6 +1330,149 @@ class shooter2C{
 			if(mostDist<d){mostDist=d}
 		})
 		return(mostDist)
+	}
+
+
+	static entities = {}
+	static initiateEntity(type){
+		let eid = ""+Math.random()
+		this.entities[eid] = this.initiatePlayer(eid,type?type:"ntri")
+		this.entities[eid].entity = true
+		this.entities[eid].ai = (e)=>{e.vx = 1;this.playerClick(eid,Math.random()-0.5,Math.random()-0.5,"norm")}
+		return(this.entities[eid])
+	}
+
+	static entityTemplates(type){
+		
+		if(type == "ntri1" || type == undefined){
+			let entity = this.initiateEntity()
+			entity.x = Math.random()*1500-750
+			entity.y = Math.random()*1500-750
+			entity.range = 3500
+			entity.fireRange = 1000
+			entity.reloadMultiplier = 1
+			entity.findTarget = (e)=>{
+				if(e.target && this.players[e.target]&& !this.players[e.target].dead && distance(e.x,e.y,this.players[e.target].x,this.players[e.target].y < e.range)){
+					return(e.target)
+				}
+				e.target = undefined
+				Object.values(this.players).forEach((E)=>{
+					if(e == E){return}
+					if(!E.dead &&distance(e.x,e.y,E.x,E.y)< e.range){
+						e.target = E.id
+					}
+				})
+				return(e.target)
+			}
+			entity.doWithTarget = (e)=>{
+				if(e.target&&this.players[e.target]){
+					let p = this.players[e.target]
+					let dst = distance(e.x,e.y,p.x,p.y)
+					if(dst > 300){
+						e.tv = [(p.x-e.x)/dst*3+Math.random(), (p.y-e.y)/dst*3+Math.random()]
+					}
+					if(dst < e.fireRange){
+						this.playerClick(e.id,p.x-e.x,p.y-e.y,"scat")
+					}
+				} else {
+					e.tv = [0,0]
+				}
+			}
+			entity.ai = (e)=>{
+				e.findTarget(e)
+				e.doWithTarget(e)
+			
+			}
+		} else if(type == "shld1"){
+			let entity = this.initiateEntity("shld")
+			entity.x = Math.random()*1500-750
+			entity.y = Math.random()*1500-750
+			entity.lead = 2
+			entity.range = 3500
+			entity.fireRange = 1000
+			entity.reloadMultiplier = 2.5
+			entity.findTarget = (e)=>{
+				if(e.target && this.players[e.target]&& !this.players[e.target].dead && distance(e.x,e.y,this.players[e.target].x,this.players[e.target].y < e.range)){
+					return(e.target)
+				}
+				e.target = undefined
+				Object.values(this.players).forEach((E)=>{
+					if(e == E){return}
+					if(!E.dead &&distance(e.x,e.y,E.x,E.y)< e.range){
+						e.target = E.id
+					}
+				})
+				return(e.target)
+			}
+			entity.doWithTarget = (e)=>{
+				if(e.target&&this.players[e.target]){
+					let p = this.players[e.target]
+					let dst = distance(e.x,e.y,p.x,p.y)
+					if(dst > 300){
+						e.tv = [(p.x-e.x)/dst*3+Math.random()*14-7, (p.y-e.y)/dst*3+Math.random()*14-7]
+					}
+					if(dst < e.fireRange){
+						this.playerClick(e.id,p.x-e.x+Math.random()*144-72+p.vx*e.lead,p.y-e.y+Math.random()*144-72+p.vy*e.lead,"norm")
+					}
+				} else {
+					e.tv = [0,0]
+				}
+			}
+			entity.ai = (e)=>{
+				e.findTarget(e)
+				e.doWithTarget(e)
+			
+			}
+		}else if(type == "snpr1"){
+			let entity = this.initiateEntity("snpr")
+			entity.x = Math.random()*1500-750
+			entity.y = Math.random()*1500-750
+			entity.lead = 2
+			entity.range = 7500
+			entity.fireRange = 2000
+			entity.reloadMultiplier = 2.5
+			entity.findTarget = (e)=>{
+				if(e.target && this.players[e.target]&& !this.players[e.target].dead && distance(e.x,e.y,this.players[e.target].x,this.players[e.target].y < e.range)){
+					return(e.target)
+				}
+				e.target = undefined
+				Object.values(this.players).forEach((E)=>{
+					if(e == E){return}
+					if(!E.dead &&distance(e.x,e.y,E.x,E.y)< e.range){
+						e.target = E.id
+					}
+				})
+				return(e.target)
+			}
+			entity.doWithTarget = (e)=>{
+				if(e.target&&this.players[e.target]){
+					let p = this.players[e.target]
+					let dst = distance(e.x,e.y,p.x,p.y)
+					if(dst > 1400){
+						e.tv = [(p.x-e.x)/dst*3+Math.random()*14-7, (p.y-e.y)/dst*3+Math.random()*14-7]
+					} else {
+						e.tv = [-(p.x-e.x)/dst*3+Math.random()*14-7, -(p.y-e.y)/dst*3+Math.random()*14-7]
+					}
+					if(dst < e.fireRange){
+						this.playerClick(e.id,p.x-e.x+Math.random()*70-35+p.vx*e.lead,p.y-e.y+Math.random()*70-35+p.vy*e.lead,"snpr")
+					}
+				} else {
+					e.tv = [0,0]
+				}
+			}
+			entity.ai = (e)=>{
+				e.findTarget(e)
+				e.doWithTarget(e)
+			
+			}
+		}
+	}
+
+	static entityUpdate(){
+		let ENobj = Object.values(this.entities)
+		ENobj.forEach((e)=>{
+			e.ai?e.ai(e):0
+		})
 	}
 
 }

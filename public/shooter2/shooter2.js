@@ -77,7 +77,7 @@ class player{
 	static weaponCounter = 1
 	static weaponDict = {"1":"norm","2":"scat","3":"lazr","4":"cnon","5":"heal","6":"grnd","7":"msl","8":"dril",
 											"9":"msl2","10":"snpr","11":"lzr2","12":"mchg","13":"zapr","14":"dbgd","15":"dbml",
-											"16":"vipr"
+											"16":"vipr","17":"tlpt"
 										}
 	static wallCounter = 1
 	static wallDict = {
@@ -130,7 +130,7 @@ function crobject(e){
 
 
 	let bulletAtt = {"norm":10,"scat":6,"lazr":20,"cnon":10,"heal":2,"grnd":4,"msl":4,"msl2":4,
-									"dril":3,"lzr2":3,"zapr":3,"dbgd":20,"dbml":20,"vipr":20}
+									"dril":3,"lzr2":3,"zapr":3,"dbgd":20,"dbml":20,"vipr":20,"tlpt":20}
 
 
 let tripVel = 0
@@ -153,7 +153,7 @@ function tick(){
 	// 		player.levelTrip = 6
 	// 	}
 
-	socket.emit("keys",[ID,keyHolds])
+	socket.emit("keys",[ID,keyHolds]) //inefficient!!!!!!!!!!!!!!!!!!!!!!! 
 
 	if(player.clickheld && weaponInfo[player.weaponDict[player.weaponCounter]]?.repeating &&cttr%weaponInfo[player.weaponDict[player.weaponCounter]]?.repeating === 0){
 		socket.emit("click",[ID,mouseX-mid[0],mouseY-mid[1]])
@@ -261,6 +261,8 @@ mainCTX.stroke()
 			mainCTX.strokeStyle = "#A00000"
 		} else if(e[0] === "trak" || e[0] === "dril"){
 			mainCTX.strokeStyle = "#A0A000"
+		} else if(e[0] === "tlpt"){
+			mainCTX.strokeStyle = "rgb(0,"+Math.floor(Math.random()*255)+",255)"
 		}
 		mainCTX.moveTo((e[2]-cameraX)*player.zoom + player.zoomR,(e[3]-cameraY)*player.zoom + player.zoomR)
 		mainCTX.lineTo((e[4]-cameraX)*player.zoom + player.zoomR,(e[5]-cameraY)*player.zoom + player.zoomR)
