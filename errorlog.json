@@ -1,1 +1,1 @@
-{"error":"SyntaxError: Unexpected token ','\nshooter2C.entityTemplates(,200)\n                          ^\n\nSyntaxError: Unexpected token ','\n\n1718603134968"}
+{"error":"ReferenceError: shooer2C is not defined\nReferenceError: shooer2C is not defined\n1718665597085"}

@@ -14,8 +14,46 @@ socket.on("acknowledge G10.2",acknowledge)
 socket.on("CROBJECT",(e)=>{crobject(e)})
 socket.on("spec",(e)=>{spec(e)})
 socket.on("upwalls",upwalls)
+socket.on("particle",(e)=>{updateParticles(e)})
 socket.on("cameraUp",(e)=>{cameraX = e[0]-canvasDimensions[2];cameraY = e[1]-canvasDimensions[3]})
 
+
+
+class explosionR{
+	constructor(x,y,color,speed,s2,size){
+		this.x = x
+		this.speed = speed?speed:1
+		this.s2 = (s2?s2:1)/5
+		this.y = y
+		this.color = color
+		if(typeof(color) !== "string"){this.colorf = color; this.color = "#FF00FF"}
+		this.size = 3
+		this.lineWidth = size?size:1
+		this.actLife = 600
+		this.lastTime = Date.now()		
+	}
+
+	update(t){
+		this.size += this.speed*(t-this.lastTime)/50
+		this.actLife -= this.s2*(t-this.lastTime)
+		this.lastTime = t
+		if(this.colorf !== undefined){
+			this.color = this.colorf(this.actLife/600)
+		}
+	}
+	draw(){
+		if(this.actLife < 0){
+			return('del')
+		}
+		mainCTX.strokeStyle = this.color
+		mainCTX.lineWidth = (1 + this.actLife/10)*this.lineWidth//*camera.tileRsize
+		mainCTX.beginPath()
+		let bts = coordToMap(this.x,this.y)
+		mainCTX.arc(bts[0],bts[1], this.size/**camera.tileRsize*/, 0, 2 * Math.PI);
+		mainCTX.stroke()
+		
+	}
+}
 
 let mid = [410,410]
 let canvasDimensions = [820,820,410,410]
@@ -76,7 +114,7 @@ class player{
 	static gridSize = 80
 	static weaponCounter = 1
 	static weaponDict = {"1":"norm","2":"scat","3":"lazr","4":"cnon","5":"heal","6":"grnd","7":"msl","8":"dril",
-											"9":"msl2","10":"snpr","11":"lzr2","12":"mchg","13":"zapr","14":"dbgd","15":"dbml",
+											"9":"msl2","10":"snpr","11":"lzr2","12":"mchg","13":"zapr","14":"dbgd","15":"kbml",
 											"16":"vipr","17":"tlpt"
 										}
 	static wallCounter = 1
@@ -101,6 +139,8 @@ class map{
 	static walls = {}
 	static players = []
 	static bullets = []
+	static particles = []
+
 }
 
 
@@ -130,7 +170,7 @@ function crobject(e){
 
 
 	let bulletAtt = {"norm":10,"scat":6,"lazr":20,"cnon":10,"heal":2,"grnd":4,"msl":4,"msl2":4,
-									"dril":3,"lzr2":3,"zapr":3,"dbgd":20,"dbml":20,"vipr":20,"tlpt":20}
+									"dril":3,"lzr2":3,"zapr":3,"dbgd":20,"kbml":20,"vipr":20,"tlpt":20}
 
 
 let tripVel = 0
@@ -235,9 +275,34 @@ function tick(){
 	}
 
 mainCTX.stroke()
+/// draw grid ^
+//draw particles starting Jun 17 24
+let tn = Date.now()
+
+for(let i = map.particles.length-1; i > -1; i--){
+		let p = map.particles[i]
+		p.update(tn)
+		if(p.draw()=="del"){
+			map.particles.splice(i,1)
+		}
+	} 
+
+	// let XXX = YYY = 0
+	// map.particles.push(new explosionR(XXX+0.5,YYY+0.5,
+	// 				(x)=>{
+	// 					let rr = 250*Math.random()
+	// 					return("rgb("+(rr)+","+(Math.random()*rr)+","+(Math.random()*15)+")")},
+	// 				16,8,2))
+			// camera.particles.push(new explosionR(pc.x+0.5,pc.y+0.5,
+			// 		(x)=>{
+			// 			let rr = 250*Math.random()
+			// 			return("rgb("+(rr)+","+(Math.random()*rr)+","+(Math.random()*15)+")")},
+			// 		6,2,1))
 
 
 
+
+///start drawing bullets
 	for(let i = map.bullets.length-1; i > -1; i--){
 		map.bullets[i][1]--
 		if(map.bullets[i][1] < 0){
@@ -257,7 +322,7 @@ mainCTX.stroke()
 			mainCTX.strokeStyle = "#FF0000"
 		} else if(e[0] == "grnd" || e[0] == "dbgd" || e[0] == "vipr"){
 			mainCTX.strokeStyle = "#007000"
-		} else if(e[0] === "msl" || e[0] == "msl2" || e[0] == "dbml"){
+		} else if(e[0] === "msl" || e[0] == "msl2" || e[0] == "kbml"){
 			mainCTX.strokeStyle = "#A00000"
 		} else if(e[0] === "trak" || e[0] === "dril"){
 			mainCTX.strokeStyle = "#A0A000"
@@ -352,7 +417,9 @@ var ZOOMSETTINGS = {"windowWidth":window.innerWidth, "windowHeight":window.inner
 var allzoom = 1
 
 
-
+function coordToMap(x,y){
+	return([(x-cameraX)*player.zoom + player.zoomR,(y-cameraY)*player.zoom + player.zoomR])
+}
 
 function windowRescale(e){
 
@@ -501,9 +568,13 @@ document.addEventListener("keydown",(e)=>{
   			unALTF3()
   		}
   		break;
+  	case "F2":
+  		player.weapon = prompt("weapon?")
+  		break;
   	case "F1":
   		window.localStorage.setItem("playerType",prompt("type?"))
   		COOKIE.playerType = window.localStorage.getItem('playerType')
+  		break;
   }  
   console.log(key)
 
@@ -540,3 +611,39 @@ document.addEventListener("keyup",(e)=>{
 
 
 })
+
+
+
+
+function updateParticles(arr){
+	arr.forEach((e)=>{
+		if(e.type == "explosion"){
+				map.particles.push(new explosionR(e.x+0.5,e.y+0.5,
+					(x)=>{
+						let rr = 250*Math.random()
+						return("rgb("+(rr)+","+(Math.random()*rr)+","+(Math.random()*15)+")")},
+					16,8,2))
+				map.particles.push(new explosionR(e.x+0.5,e.y+0.5,
+					(x)=>{
+						let rr = 250*Math.random()
+						return("rgb("+(rr)+","+(Math.random()*rr)+","+(Math.random()*15)+")")},
+					10,5,1))
+
+		}
+	})
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
