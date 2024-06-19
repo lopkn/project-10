@@ -13,7 +13,8 @@ socket.on("drawers",(e)=>{drawDrawers(e[0],e[1]);tick();})
 socket.on("acknowledge G10.2",acknowledge)
 socket.on("CROBJECT",(e)=>{crobject(e)})
 socket.on("spec",(e)=>{spec(e)})
-socket.on("upwalls",upwalls)
+socket.on("upWalls",upwalls2)
+socket.on("upEntities",upEntities)
 socket.on("particle",(e)=>{updateParticles(e)})
 socket.on("cameraUp",(e)=>{cameraX = e[0]-canvasDimensions[2];cameraY = e[1]-canvasDimensions[3]})
 
@@ -152,7 +153,6 @@ function acknowledge(e){
 
 function upwalls(e){
 	let ob = Object.keys(e)
-	// console.log(e)
 	for(let i = 0; i < ob.length; i++){
 		if(e[ob[i]] == "_DEL"){
 			delete map.walls[ob[i]]
@@ -160,6 +160,75 @@ function upwalls(e){
 		}
 		map.walls[ob[i]] = e[ob[i]]
 	}
+}
+
+function upwalls2(e){
+	let ob = Object.keys(e)
+	for(let i = 0; i < ob.length; i++){
+		let obj = e[ob[i]]
+		if(obj == "_DEL"){
+			delete map.walls[ob[i]]
+
+			continue
+		}
+		if(obj["hpUpdate"]){
+			map.walls[ob[i]].hp = obj.hp
+			continue
+		} // remember to continue or else it will default to cloning
+		if(!map.walls[ob[i]]){map.walls[ob[i]] = {}} 
+			Object.assign(map.walls[ob[i]],obj)
+	}
+}
+function upEntities(a){
+	a.forEach((e)=>{
+
+		if(e.type == "pos"){
+			// console.log(e)
+			map.players[e.id].x = e.x
+			map.players[e.id].y = e.y
+			map.players[e.id].rotation = e.r
+
+			updatePlayerRot(e.id)
+		}  else if(e.type == "createEntity"){
+			map.players[e.entity.id] = e.entity
+		}else if(e.type == "create"){
+			map.players[e.id].boidyVect.push(e.v)
+			map.players[e.id].boidy.push(e.wid)
+		}
+	})
+}
+
+
+function updatePlayerRot(id){
+	let p = map.players[id]
+
+	for(let j = p.boidy.length-1; j > -1; j--){
+				if(map.walls[p.boidy[j]] == undefined){
+					p.boidy.splice(j,1)
+					p.boidyVect.splice(j,1)
+					// this.entityPushers[]
+					cont = true
+				}
+			}
+
+	for(let k = 0; k < p.boidyVect.length; k++){
+				if(p.boidyVect[k][2] == "next"){
+				map.walls[p.boidy[k]].x1 = ((p.boidyVect[k][0] * p.rotation[1] + p.boidyVect[k][1] * p.rotation[0]) + p.x)
+				map.walls[p.boidy[k]].y1 = ((p.boidyVect[k][1] * p.rotation[1] - p.boidyVect[k][0] * p.rotation[0]) + p.y)
+				let K = k+1
+				if(K == p.boidyVect.length){
+					K = 0
+				}
+				
+				map.walls[p.boidy[k]].x2 = ((p.boidyVect[K][0] * p.rotation[1] + p.boidyVect[K][1] * p.rotation[0]) + p.x)
+				map.walls[p.boidy[k]].y2 = ((p.boidyVect[K][1] * p.rotation[1] - p.boidyVect[K][0] * p.rotation[0]) + p.y)
+				} else {
+				map.walls[p.boidy[k]].x1 = ((p.boidyVect[k][0] * p.rotation[1] + p.boidyVect[k][1] * p.rotation[0]) + p.x)
+				map.walls[p.boidy[k]].y1 = ((p.boidyVect[k][1] * p.rotation[1] - p.boidyVect[k][0] * p.rotation[0]) + p.y)
+				map.walls[p.boidy[k]].x2 = ((p.boidyVect[k][2] * p.rotation[1] + p.boidyVect[k][3] * p.rotation[0]) + p.x)
+				map.walls[p.boidy[k]].y2 = ((p.boidyVect[k][3] * p.rotation[1] - p.boidyVect[k][2] * p.rotation[0]) + p.y)
+				}
+			}
 }
 
 function crobject(e){
@@ -214,7 +283,7 @@ function tick(){
 			case "cameraUp":
 				mainCTX.strokeStyle = "#FF0000"
 				break;
-			case "upwalls":
+			case "upWalls":
 				mainCTX.strokeStyle = "#00FF00"
 				break;
 			case "drawers":
@@ -225,6 +294,12 @@ function tick(){
 				break;
 			case "spec":
 				mainCTX.strokeStyle = "#00FFFF"
+				break;
+			case "upEntities":
+				mainCTX.strokeStyle = "#FFFFFF"
+				break;
+			default:
+				mainCTX.strokeStyle = "rgb(255,255,"+Math.floor(Math.random()*255)+")"
 				break;
 		}
 		

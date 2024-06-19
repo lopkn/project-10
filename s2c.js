@@ -14,6 +14,7 @@ class shooter2C{
 	static keyholders = {}
 	static drawers = []
 	static wallPushers = {}
+	static entityPushers = []
 
 	static nuuIDGEN = 0
 	static setio(i,m){
@@ -59,24 +60,36 @@ class shooter2C{
 				this.bullets.push({"shooter":id,"type":"grnd","x":x,"y":y,"vx":vx,"vy":vy,"wallMult":1,"deathVel":10,
 					"lingerance":4,"dmgmult":0,"tailLength":4,"tail":[],"life":2000,"slowd":0.82,"extra":{"tailmult":8},
 					"onDeath":(b)=>{
+						
+							Object.values(this.bullets).forEach((e)=>{
+								let dst = distance(e.x,e.y,b.x,b.y)
+								if(dst<900){
+									let inverse = 1/dst
+									let min = 50
+									e.vx += Math.max(-min, Math.min((e.x-b.x)*inverse*inverse*15000, min))
+									e.vy += Math.max(-min, Math.min((e.y-b.y)*inverse*inverse*15000, min))
+									e.deathVel?e.deathVel*=2:e.deathVel=200
+								}
+							})
 						for(let i = 0; i < 20; i++){let a = this.pushBullet(b.x,b.y,Math.random()*150-75,Math.random()*150-75,b.shooter,"norm")
 							a.slowd = 0.95
 							a.dmgmult = 12
 							a.extra = {"tailmult":3,"tailLength":6}
 							a.tailLength = 6; a.lingerance = 6;
-							io.to("G10.2").emit("particle",[{"type":"explosion","x":b.x,"y":b.y}])
 
 					}
+							io.to("G10.2").emit("particle",[{"type":"explosion","x":b.x,"y":b.y}])
 					Object.values(this.players).forEach((e)=>{
 								if(e.dead){return}
 								let dst = distance(e.x,e.y,b.x,b.y)
 								if(dst<500){
 									let inverse = 1/dst
 									let min = 50
-									e.vx += Math.max(-min, Math.min((e.x-b.x)*inverse*inverse*5000*e.weight*e.speed, min))
-									e.vy += Math.max(-min, Math.min((e.y-b.y)*inverse*inverse*5000*e.weight*e.speed, min))
+									e.vx += Math.max(-min, Math.min((e.x-b.x)*inverse*inverse*5000/e.weight*e.speed, min))
+									e.vy += Math.max(-min, Math.min((e.y-b.y)*inverse*inverse*5000/e.weight*e.speed, min))
 								}
 							})
+
 				}
 				})
 				break;
@@ -166,8 +179,8 @@ class shooter2C{
 								if(dst<500){
 									let inverse = 1/dst
 									let min = 50
-									e.vx += Math.max(-min, Math.min((e.x-b.x)*inverse*inverse*7000*e.weight*e.speed, min))
-									e.vy += Math.max(-min, Math.min((e.y-b.y)*inverse*inverse*7000*e.weight*e.speed, min))
+									e.vx += Math.max(-min, Math.min((e.x-b.x)*inverse*inverse*7000/e.weight*e.speed, min))
+									e.vy += Math.max(-min, Math.min((e.y-b.y)*inverse*inverse*7000/e.weight*e.speed, min))
 								}
 							})
 							io.to("G10.2").emit("particle",[{"type":"explosion","x":b.x,"y":b.y}])
@@ -232,7 +245,7 @@ class shooter2C{
 				break;
 			case "snpr":
 				theBullet = this.pushBullet(p.x,p.y,(n[2]-p.x)*190+p.vx,(n[3]-p.y)*190+p.vy,id,"norm")
-				theBullet.dmgmult = 7
+				theBullet.dmgmult = 4
 				theBullet.wallMult = 0.1
 				theBullet.deathVel = 200
 		reload += 30
@@ -342,13 +355,15 @@ class shooter2C{
 	}
 
 	static playerWall(p,ar,a){
-		p.boidyVect.push([
+		let vect = [
 					(ar[0] * p.rotation[1] - ar[1] * p.rotation[0]),
 					(ar[1] * p.rotation[1] + ar[0] * p.rotation[0]),
 					(ar[2] * p.rotation[1] - ar[3] * p.rotation[0]),
-					(ar[3] * p.rotation[1] + ar[2] * p.rotation[0])])
+					(ar[3] * p.rotation[1] + ar[2] * p.rotation[0])]
+		p.boidyVect.push(vect)
 				p.unmovePos[2] = true
 				p.boidy.push(a)
+				this.entityPushers.push({"type":"create","v":vect,"id":p.id,"wid":a})
 				this.walls[a].plid = p.id
 	}
 
@@ -736,7 +751,7 @@ class shooter2C{
 			this.players[id] = {"reloading":0,"unmovePos":[0,0],"rotation":[0,1],
 				"boidyVect":[],
 				"boidy":[],"x":410,"y":410,"vx":0,"vy":0,"hp":100,"id":id,"keys":{},
-				"materials":100,"speed":1.5,"boidyAll":-1,"dead":true,"spectator":true,"minRadius":1,"currentRadius":1,"tracking":true
+				"materials":100,"speed":2,"boidyAll":-1,"dead":true,"spectator":true,"minRadius":1,"currentRadius":1,"tracking":true
 			}
 			io.to(id).emit("spec",["zoom",0.6])
 		}
@@ -750,6 +765,7 @@ class shooter2C{
 		this.players[id].weight = 1
 		this.players[id].tv = [0,0]
 		this.sendAllWombjects(id)
+		io.to("G10.2").emit("upEntities",[{"type":"createEntity","entity":this.players[id]}])
 		return(this.players[id])
 	}
 
@@ -789,6 +805,7 @@ class shooter2C{
 				if(this.walls[p.boidy[j]] == undefined){
 					p.boidy.splice(j,1)
 					p.boidyVect.splice(j,1)
+					// this.entityPushers[]
 					cont = true
 				}
 			}
@@ -834,8 +851,8 @@ class shooter2C{
 
 			let ttv = vectorNormalize([0,0,tv[0],tv[1]])
 		
-			p.vx += ttv[2]*p.speed*p.weight
-			p.vy += ttv[3]*p.speed*p.weight
+			p.vx += ttv[2]*p.speed/p.weight
+			p.vy += ttv[3]*p.speed/p.weight
 			p.vx *= 0.97
 			p.vy *= 0.97
 
@@ -863,10 +880,11 @@ class shooter2C{
 			}
 
 			if(distance(p.unmovePos[0],p.unmovePos[1],p.x,p.y) > 1 || p.unmovePos[2]){
-			p.boidy.forEach((B)=>{
-				this.updateWall(B)
-			})
+			// p.boidy.forEach((B)=>{
+			// 	// this.updateWall(B)
+			// })
 			p.unmovePos = [p.x,p.y,false]
+			this.entityPushers.push({"type":"pos","id":p.id,"x":p.x,"y":p.y,"r":p.rotation})
 			}
 
 			io.to(objt[i]).emit("cameraUp",[p.x,p.y])
@@ -920,9 +938,17 @@ class shooter2C{
 
 		this.drawers = []
 		if(Object.keys(this.wallPushers).length > 0){
-			io.to("G10.2").emit("upwalls",this.wallPushers)
+			io.to("G10.2").emit("upWalls",this.wallPushers)
 		}
 		this.wallPushers = {}
+		if(this.entityPushers.length > 0){
+			// console.log(this.wallPushers)
+			// this.entityPushers.forEach((e,i)=>{
+			// 	this.entityPushers[i] = 
+			// })
+			io.to("G10.2").emit("upEntities",this.entityPushers)
+		}
+		this.entityPushers = []
 
 		this.playerVelUpdate()
 
@@ -1217,10 +1243,10 @@ class shooter2C{
 			} else {
 				this.walls[wid].undying -= 1
 			}
-			this.updateWall(wid)
+			this.updateWallHP(wid)
 			return(true)
 		}
-		this.updateWall(wid)
+		this.updateWallHP(wid)
 		return(true)
 		
 		} else if(this.walls[wid].type == "bhol"){
@@ -1231,7 +1257,7 @@ class shooter2C{
 			this.wallPushers[wid] = "_DEL"
 			return(false)
 		}
-		this.updateWall(wid)
+		this.updateWallHP(wid)
 		return(true)
 		} else if(this.walls[wid].type == "whol"){
 			b.shooter = ""
@@ -1241,7 +1267,7 @@ class shooter2C{
 			this.wallPushers[wid] = "_DEL"
 			return(false)
 		}
-		this.updateWall(wid)
+		this.updateWallHP(wid)
 		return(true)
 		} else if(this.walls[wid].type == "ghol"){
 			// b.shooter = ""
@@ -1270,6 +1296,7 @@ class shooter2C{
 				for(let J = 0; J < pobjk.length; J++){
 					if(e !== pobjk[J] && !this.players[pobjk[J]].dead){
 						op = this.players[pobjk[J]]
+						if(distance(p.x,p.y,op.x,op.y)<1000){continue}
 						traks.push(["trak",p.x,p.y,op.x,op.y])
 					}
 				}
@@ -1296,6 +1323,10 @@ class shooter2C{
 			return
 		}
 		this.wallPushers[nuuid] = this.wallCompressor(nuuid)
+	}
+
+	static updateWallHP(nuuid){
+		this.wallPushers[nuuid] = {"hpUpdate":true,"hp":this.walls[nuuid].hp}
 	}
 
 	static wallCompressor(nuuid){
@@ -1400,7 +1431,7 @@ class shooter2C{
 				type = list[Math.floor(Math.random()*list.length)]
 			}
 
-		if(type == "ntri1" || type == undefined || type == "ntri2" || type == "ntri3"){
+		if(type == "ntri1" || type == undefined || type == "ntri2" || type == "ntri3" || type=="ntri4"){
 			 entity = this.initiateEntity()
 			entity.x = Math.random()*1500-750
 			entity.y = Math.random()*1500-750
@@ -1437,9 +1468,27 @@ class shooter2C{
 							this.playerClick(e.id,Math.random(),Math.random(),"tlpt")
 						}
 						if(type == "ntri2"){
-							this.playerClick(e.id,p.x-e.x+p.vx*7,p.y-e.y+p.vy*7,Math.random()>0.1?"zapr":"cnon")
+							if(Math.random()>0.1){
+								this.playerClick(e.id,p.x-e.x+p.vx*2,p.y-e.y+p.vy*2,"zapr")
+								if(Math.random()>0.99){
+									for(let i = 0; i < 5; i++){
+										e.reloading = -1
+										this.playerClick(e.id,p.x-e.x+p.vx*2,p.y-e.y+p.vy*2,"zapr")
+									}
+								}
+							} else {
+								this.playerClick(e.id,p.x-e.x+p.vx*7,p.y-e.y+p.vy*7,"cnon")
+							}
 						} else if(type == "ntri3"){
 							this.playerClick(e.id,p.x-e.x+p.vx*2,p.y-e.y+p.vy*2,Math.random()>0.01?"lzr2":"lazr")
+						} else if(type == "ntri4"){
+							if(Math.random()>0.03){
+								e.reloadMultiplier = 2 //inefficient
+								this.playerClick(e.id,p.x-e.x+p.vx*3,p.y-e.y+p.vy*3,"mchg")
+							} else {
+								this.playerClick(e.id,p.x-e.x+p.vx*7-e.vx,p.y-e.y+p.vy*7-e.vy,"kbml")
+							}
+
 						} else{
 							this.playerClick(e.id,p.x-e.x+p.vx*2,p.y-e.y+p.vy*2,Math.random()>0.2?"scat":"grnd")
 						}
@@ -1535,6 +1584,61 @@ class shooter2C{
 				e.doWithTarget(e)
 			
 			}
+		} else {
+			entity = this.initiateEntity("shld")
+			entity.x = Math.random()*1500-750
+			entity.y = Math.random()*1500-750
+			entity.lead = 2
+			entity.range = 3500
+			entity.fireRange = 1000
+			entity.reloadMultiplier = 2.5
+
+			let wallPlies = []
+			// let wallPlies = [[100,100,-100,100]]
+
+			wallPlies.forEach((e)=>{
+				this.placeWall(entity.id,entity.x+e[0],entity.y+e[1],entity.x+e[2],entity.y+e[3],"metl",{"id":entity.id,"force":true,"attach":true})
+			})
+			entity.findTarget = (e)=>{
+				if(e.target && this.players[e.target]&& !this.players[e.target].dead && distance(e.x,e.y,this.players[e.target].x,this.players[e.target].y < e.range)){
+					return(e.target)
+				}
+				e.target = undefined
+				Object.values(this.players).forEach((E)=>{
+					if(e == E){return}
+					if(!E.dead &&distance(e.x,e.y,E.x,E.y)< e.range){
+						e.target = E.id
+					}
+				})
+				return(e.target)
+			}
+			entity.doWithTarget = (e)=>{
+				if(e.target&&this.players[e.target]){
+					let p = this.players[e.target]
+					let dst = distance(e.x,e.y,p.x,p.y)
+					if(dst > 300){
+						e.tv = [(p.x-e.x)/dst*3+Math.random()*14-7, (p.y-e.y)/dst*3+Math.random()*14-7]
+					}
+					if(dst < e.fireRange){
+						this.playerClick(e.id,p.x-e.x+Math.random()*144-72+p.vx*e.lead,p.y-e.y+Math.random()*144-72+p.vy*e.lead,"norm")
+						if(this.pvuCounter%5==0){
+						this.KB(e.x+Math.random()*2000-1000,e.y+Math.random()*2000-1000)
+						}
+
+
+					}
+
+					
+				} else {
+					e.tv = [0,0]
+				}
+			}
+			entity.ai = (e)=>{
+				e.findTarget(e)
+				e.doWithTarget(e)
+			
+			}
+			
 		}
 		entity.boidy.forEach((e)=>{this.walls[e].defense*=durability})
 	}
@@ -1544,6 +1648,37 @@ class shooter2C{
 		ENobj.forEach((e)=>{
 			e.ai?e.ai(e):0
 		})
+	}
+
+	static KB(x,y){
+		let b = {"x":x,"y":y}
+		Object.values(this.bullets).forEach((e)=>{
+								let dst = distance(e.x,e.y,b.x,b.y)
+								if(dst<900){
+									let inverse = 1/dst
+									let min = 50
+									e.vx += Math.max(-min, Math.min((e.x-b.x)*inverse*inverse*15000, min))
+									e.vy += Math.max(-min, Math.min((e.y-b.y)*inverse*inverse*15000, min))
+								}
+							})
+					// 	for(let i = 0; i < 20; i++){let a = this.pushBullet(b.x,b.y,Math.random()*150-75,Math.random()*150-75,b.shooter,"norm")
+					// 		a.slowd = 0.95
+					// 		a.dmgmult = 12
+					// 		a.extra = {"tailmult":3,"tailLength":6}
+					// 		a.tailLength = 6; a.lingerance = 6;
+
+					// }
+						io.to("G10.2").emit("particle",[{"type":"explosion","x":b.x,"y":b.y}])
+					Object.values(this.players).forEach((e)=>{
+								if(e.dead){return}
+								let dst = distance(e.x,e.y,b.x,b.y)
+								if(dst<500){
+									let inverse = 1/dst
+									let min = 50
+									e.vx += Math.max(-min, Math.min((e.x-b.x)*inverse*inverse*5000/e.weight*e.speed, min))
+									e.vy += Math.max(-min, Math.min((e.y-b.y)*inverse*inverse*5000/e.weight*e.speed, min))
+								}
+							})
 	}
 
 }
