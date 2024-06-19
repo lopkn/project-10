@@ -1355,6 +1355,7 @@ function touchHandler(event)
 
 function init() 
 {
+
     document.addEventListener("touchstart", touchHandler, true);
     document.addEventListener("touchmove", (e)=>{touchHandler(e)}, true);
     document.addEventListener("touchend", touchHandler, true);

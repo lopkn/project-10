@@ -720,5 +720,78 @@ function updateParticles(arr){
 
 
 
+function touchHandler(event)
+{
+
+	// console.log(event.type)
+    var touches = event.changedTouches,
+        first = touches[0],
+        type = "";
+
+    switch(event.type)
+    {
+        case "touchstart": type = "mousedown"; break;
+        case "touchmove":  type = "mousemove"; break;        
+        case "touchend":   type = "mouseup";   break;
+        case "touchcancel":   type = "mouseup";   break;
+        default:           return;
+    }
+
+
+
+
+
+    if(type !== "mouseup"){
+    mouseX = event.touches[0].clientX
+    mouseY = event.touches[0].clientY}
+
+
+    var simulatedEvent = document.createEvent("MouseEvent");
+
+    if(event.type == "touchend"){
+       	console.log("t4")
+       	pinchDist = -1
+       }
+
+    simulatedEvent.initMouseEvent(type, true, true, window, 1, 
+                                  first.screenX, first.screenY, 
+                                  first.clientX, first.clientY, false, 
+                                  false, false, false, 0/*left*/, null);
+
+    if(event.type == "touchend"){
+       	console.log("t5")
+       }
+
+
+    document.body.dispatchEvent(simulatedEvent);
+    
+    event.preventDefault();
+}
+
+
+function init() 
+{
+
+  document.body.style.touchAction = 'none';
+    document.addEventListener("touchstart", touchHandler, true);
+    document.addEventListener("touchmove", (e)=>{e.preventDefault();touchHandler(e)}, true);
+    document.addEventListener("touchend", touchHandler, true);
+    document.addEventListener("touchcancel", touchHandler, true);    
+    document.addEventListener('touchmove', function(e) { e.preventDefault() }, { passive:false });
+}
+init()
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

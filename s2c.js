@@ -673,7 +673,7 @@ class shooter2C{
 			this.players[id] = {"reloading":0,"unmovePos":[0,0],"rotation":[0,1],
 				"boidyVect":[[0,-40,30,30],[30,30,-30,30],[-30,30,0,-40]],
 				"boidy":[],"x":410,"y":410,"vx":0,"vy":0,"hp":100,"id":id,"keys":{},
-				"materials":100,"speed":1.5,"boidyAll":3
+				"materials":100,"speed":1.5,"boidyAll":3,"tracking":true
 			}
 			io.to(id).emit("spec",["zoom",1])
 
