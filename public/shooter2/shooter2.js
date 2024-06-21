@@ -644,7 +644,11 @@ document.addEventListener("keydown",(e)=>{
   		}
   		break;
   	case "F2":
-  		player.weapon = prompt("weapon?")
+  		if(e.shiftKey){
+  			player.wall = prompt("wall?")
+  		} else {
+				player.weapon = prompt("weapon?")
+  		}
   		break;
   	case "F1":
   		window.localStorage.setItem("playerType",prompt("type?"))
@@ -720,67 +724,117 @@ function updateParticles(arr){
 
 
 
-function touchHandler(event)
+function touchHandler(e)
 {
-
-	// console.log(event.type)
-    var touches = event.changedTouches,
-        first = touches[0],
-        type = "";
-
-    switch(event.type)
-    {
-        case "touchstart": type = "mousedown"; break;
-        case "touchmove":  type = "mousemove"; break;        
-        case "touchend":   type = "mouseup";   break;
-        case "touchcancel":   type = "mouseup";   break;
-        default:           return;
-    }
+	let touches = e.changedTouches,
+        first = touches[0]
 
 
 
+    // if(event.type == 'touchmove' && event.touches.length == 2){
+    // 	let newDist = Math.hypot(
+    // 		e.touches[0].pageX - e.touches[1].pageX,
+    // 		e.touches[0].pageY - e.touches[1].pageY);
+    // }
+
+      if(e.type == "touchstart"){
+      	if(e.target == Mobile.canvas){
+      		touches[touches.length-1].uuid = Math.random()+""
+      	}
+      }
+
+    if(e.type !== "touchend"){
+   
+    		Mobile.ctx.fillStyle = "cyan"
+
+    		// console.log(touches[0].pageX)
+    	// touches.forEach((E)=>{
 
 
-    if(type !== "mouseup"){
-    mouseX = event.touches[0].clientX
-    mouseY = event.touches[0].clientY}
+    		for(let i = 0; i < touches.length; i++){
+    			let E = touches[i]
+    			console.log(E.uuid)
+    		Mobile.ctx.fillRect(E.pageX/allzoom,E.pageY/allzoom,10,10)
+    	}
+
+  }
 
 
-    var simulatedEvent = document.createEvent("MouseEvent");
+
+
+
 
     if(event.type == "touchend"){
-       	console.log("t4")
-       	pinchDist = -1
-       }
 
-    simulatedEvent.initMouseEvent(type, true, true, window, 1, 
-                                  first.screenX, first.screenY, 
-                                  first.clientX, first.clientY, false, 
-                                  false, false, false, 0/*left*/, null);
-
-    if(event.type == "touchend"){
-       	console.log("t5")
        }
 
 
-    document.body.dispatchEvent(simulatedEvent);
     
-    event.preventDefault();
+	e.preventDefault()
 }
 
 
 function init() 
 {
 
-  document.body.style.touchAction = 'none';
-    document.addEventListener("touchstart", touchHandler, true);
+    document.addEventListener("touchstart", (e)=>{touchHandler(e)}, true);
     document.addEventListener("touchmove", (e)=>{e.preventDefault();touchHandler(e)}, true);
-    document.addEventListener("touchend", touchHandler, true);
-    document.addEventListener("touchcancel", touchHandler, true);    
-    document.addEventListener('touchmove', function(e) { e.preventDefault() }, { passive:false });
+    document.addEventListener("touchend", (e)=>{touchHandler(e)}, true);
+    document.addEventListener("touchcancel", (e)=>{touchHandler(e)}, true);    
+    // document.addEventListener('touchmove', function(e) { e.preventDefault() }, { passive:false });
 }
+
+
+
+
+class Mobile {
+	static joystick_move = {"mx":185,"my":821,"x":100,"y":100,"r":100}
+	static joystick_fire = {"mx":600,"my":100,"x":600,"y":100,"r":100}
+	static canvas;
+	static initialized = false
+	static init(){
+	this.initialized = true
+
+  document.body.style.touchAction = 'none';
+		let mobileCanvas = document.createElement("canvas")
+		mobileCanvas.width = window.innerWidth/allzoom
+		mobileCanvas.height = window.innerHeight/allzoom
+		mobileCanvas.style.position = "absolute"
+		mobileCanvas.style.top = "0px"
+		mobileCanvas.style.left = "0px"
+		mobileCanvas.id = "mcanvas"
+		mobileCanvas.style.userSelect = "none"
+		mobileCanvas.style.touchAction = "none"
+		this.ctx = mobileCanvas.getContext("2d")
+		this.canvas = mobileCanvas
+		document.body.insertBefore(mobileCanvas,myCanvas)
+		mobileCanvas.addEventListener("touchstart",(e)=>{})
+		let r = myCanvas.getBoundingClientRect()
+		this.joystick_move.my = r.bottom - this.joystick_move.r-25
+		this.joystick_move.mx = r.left - this.joystick_move.r-25
+		this.joystick_fire.my = r.bottom - this.joystick_move.r-25
+		this.joystick_fire.mx = r.left + r.width + this.joystick_move.r + 25
+		console.log(r)
 init()
 
+	}
+	static draw(){
+		this.ctx.clearRect(0,0,4000,4000)
+		if(!this.initialized){return}
+			this.ctx.beginPath()
+		this.ctx.strokeStyle="white"
+		this.ctx.lineWidth = 5
+			this.ctx.arc(this.joystick_move.mx, this.joystick_move.my, this.joystick_move.r, 0, 2*Math.PI)
+			this.ctx.stroke()
+			this.ctx.beginPath()
+			this.ctx.arc(this.joystick_fire.mx, this.joystick_fire.my, this.joystick_fire.r, 0, 2*Math.PI)
+			this.ctx.stroke()
+
+	}
+}
+
+Mobile.init()
+Mobile.draw()
 
 
 

@@ -339,7 +339,7 @@ class shooter2C{
 			l = 120
 		} else if(t == "turr" || t=== "Bmr"){
 			l = 50
-		} else if(t == "ghol" ||t == "bhol"||t == "whol"){
+		} else if(t == "ghol" ||t == "bhol"||t == "whol" || t=="grv1" || t == "grv2"){
 			l = 50
 		} else if(t == "metl" || t == "mbdy"){
 			l *= 3
@@ -482,10 +482,26 @@ class shooter2C{
 					"frad":x2
 				}
 				break;
+			case "grv1":
+				this.walls[a] = {
+					"type":"bhol","x":x1,"y":y1,"radius":1460,"velmult":0.95,
+					"midpt":[x1,y1],"handle":"bhol","hp":400000,
+					"defense":1,
+					"frad":x2
+				}
+				break;
 			case "ghol":
 				this.walls[a] = {
 					"type":"ghol","x":x1,"y":y1,"radius":460,"velmult":0.98,
 					"midpt":[x1,y1],"handle":"ghol","hp":4000,
+					"defense":1,
+					"frad":x2
+				}
+				break;
+			case "grv2":
+				this.walls[a] = {
+					"type":"ghol","x":x1,"y":y1,"radius":11460,"velmult":0.98,
+					"midpt":[x1,y1],"handle":"ghol","hp":400000,"strength":9,
 					"defense":1,
 					"frad":x2
 				}
@@ -1035,7 +1051,7 @@ class shooter2C{
 										let td = distance(w.x,w.y,B.x,B.y)
 										let ad = 1000000/(td*td)
 										let nor = vectorNormalize([0,0,w.x-B.x,w.y-B.y])
-										ad = ad>50?50:ad
+										ad = ad*(w.strength?w.strength:1)>50?50:ad*(w.strength?w.strength:1)
 										i.vx += nor[2]*ad
 										i.vy += nor[3]*ad
 										// bspeed += distance(B.x,B.y,B.vx+nor[2]*ad,B.vy+nor[2]*ad)-bspeed
