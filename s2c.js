@@ -484,7 +484,7 @@ class shooter2C{
 				break;
 			case "grv1":
 				this.walls[a] = {
-					"type":"bhol","x":x1,"y":y1,"radius":1460,"velmult":1.05,
+					"type":"bhol","x":x1,"y":y1,"radius":1600,"velmult":1.05,
 					"midpt":[x1,y1],"handle":"bhol","hp":400000,"strength":0.025,
 					"defense":1,
 					"frad":x2
@@ -850,7 +850,7 @@ class shooter2C{
 				continue
 				}
 
-			if(!p.entity){p.tv = [0,0]}
+			if(!p.entity && p.tv[2] ){p.tv = [0,0]}
 			let tv = p.tv
 			if(p.keys.w == "a"){
 				tv[1] -= 1
@@ -1386,8 +1386,12 @@ class shooter2C{
   }
 }
 
-	static playerKeyUpdate(e){
-		this.players[e[0]].keys = e[1]
+	static playerKeyUpdate(e,mobile,id){
+		if(mobile){
+			this.players[id].tv = e[0]
+		} else {
+			this.players[e[0]].keys = e[1] // can fix id later
+		}
 	}
 
 	static disconnect(s){

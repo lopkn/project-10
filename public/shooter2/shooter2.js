@@ -105,7 +105,7 @@ weaponInfo = {
 }
 
 class player{
-	static debugging = false
+	static debugging = true
 	static keyholder = false
 	static dataNodes = []
 	static weapon = "norm"
@@ -246,6 +246,7 @@ let tripVel = 0
 
 let cttr = 0
 function tick(){
+	let tickTimeTracker = Date.now()
 	cttr++
 	// if(cttr%2===0){
 	// tripVel += (Math.random()-0.5)/20
@@ -262,15 +263,17 @@ function tick(){
 	// 		player.levelTrip = 6
 	// 	}
 
+
+	mainCTX.clearRect(0,0,840,840)
+
+	if(Mobile.initialized){Mobile.draw();socket.emit("joys",[Mobile.joystick_move.vect,Mobile.joystick_fire.vect])}
 	socket.emit("keys",[ID,keyHolds]) //inefficient!!!!!!!!!!!!!!!!!!!!!!! 
 
 	if(player.clickheld && weaponInfo[player.weaponDict[player.weaponCounter]]?.repeating &&cttr%weaponInfo[player.weaponDict[player.weaponCounter]]?.repeating === 0){
 		socket.emit("click",[ID,mouseX-mid[0],mouseY-mid[1]])
 	}
 
-	mainCTX.clearRect(0,0,840,840)
-
-
+	
 	
 	let nodeDate = Date.now()
 	for(let i = player.dataNodes.length-1; i > -1 ; i--){
@@ -479,6 +482,7 @@ for(let i = map.particles.length-1; i > -1; i--){
 	mainCTX.fillStyle = "rgba(0,"+(150+ala*55)+",0,"+(alb*0.2+0.8)+")"
 	mainCTX.fillText("position: "+Math.floor(cameraX/20)+" "+Math.floor(cameraY/20),20,770)
 	mainCTX.fillText("materials: "+player.materials,320,770)
+	mainCTX.fillText("tick: "+(Date.now()- tickTimeTracker),620,770)
 }
 
 let mainCanvas = document.getElementById("myCanvas")
@@ -724,6 +728,8 @@ function updateParticles(arr){
 
 
 
+
+
 function touchHandler(e)
 {
 	let touches = e.changedTouches,
@@ -737,15 +743,38 @@ function touchHandler(e)
     // 		e.touches[0].pageY - e.touches[1].pageY);
     // }
 
+        for(let i = 0; i < touches.length; i++){
+    			let E = touches[i]
+    			if(!Mobile.activeTouches[E.identifier]){
+    				Mobile.activeTouches[E.identifier] = {"type":"unidentified"}
+    			}
+    	}
+
+
+
       if(e.type == "touchstart"){
       	if(e.target == Mobile.canvas){
-      		touches[touches.length-1].uuid = Math.random()+""
+      		let E = touches[touches.length-1]
+      		if(E.pageX/allzoom < 400){
+
+      		Mobile.activeTouches[E.identifier].type = "joystick_move"
+      		Mobile.activeTouches[E.identifier].color = "green"
+      			} else {
+      		Mobile.activeTouches[E.identifier].type = "joystick_fire"
+      		Mobile.activeTouches[E.identifier].color = "red"
+      			}
+      	} else if(e.target == myCanvas){
+      		Mobile.activeTouches[E.identifier].type = "mainCanvas"
+      		Mobile.activeTouches[E.identifier].color = "purple"
       	}
       }
 
+      // if(e.type == "touchmove"){
+      	
+      // }
+
     if(e.type !== "touchend"){
    
-    		Mobile.ctx.fillStyle = "cyan"
 
     		// console.log(touches[0].pageX)
     	// touches.forEach((E)=>{
@@ -753,8 +782,25 @@ function touchHandler(e)
 
     		for(let i = 0; i < touches.length; i++){
     			let E = touches[i]
-    			console.log(E.uuid)
-    		Mobile.ctx.fillRect(E.pageX/allzoom,E.pageY/allzoom,10,10)
+    			let EUID = Mobile.activeTouches[E.identifier]
+    		Mobile.ctx.fillStyle = EUID.color?EUID.color:"cyan"
+
+    		let x = E.pageX/allzoom, y = E.pageY/allzoom
+
+    		Mobile.ctx.fillRect(x,y,10,10)
+
+    		if(EUID.type == "joystick_move"){
+    			Mobile.joystick_move.vect = [(x-Mobile.joystick_move.mx)/Mobile.joystick_move.r,(y-Mobile.joystick_move.my)/Mobile.joystick_move.r]
+    			Mobile.ctx.beginPath()
+    			Mobile.ctx.moveTo(Mobile.joystick_move.mx,Mobile.joystick_move.my)
+    			Mobile.ctx.lineTo(Mobile.joystick_move.mx+Mobile.joystick_move.vect[0],Mobile.joystick_move.my+Mobile.joystick_move.vect[1])
+    			Mobile.ctx.strokeStyle="white"
+    			Mobile.ctx.stroke()
+    		} else if(EUID.type == "joystick_fire"){
+    			Mobile.joystick_fire.vect = [x-Mobile.joystick_fire.mx,y-Mobile.joystick_fire.my]
+    		}
+
+
     	}
 
   }
@@ -788,8 +834,9 @@ function init()
 
 
 class Mobile {
-	static joystick_move = {"mx":185,"my":821,"x":100,"y":100,"r":100}
-	static joystick_fire = {"mx":600,"my":100,"x":600,"y":100,"r":100}
+	static joystick_move = {"mx":185,"my":821,"x":100,"y":100,"r":100,"vect":[0,0]}
+	static joystick_fire = {"mx":600,"my":100,"x":600,"y":100,"r":100,"vect":[0,0]}
+	static activeTouches = {}
 	static canvas;
 	static initialized = false
 	static init(){
@@ -836,7 +883,7 @@ init()
 Mobile.init()
 Mobile.draw()
 
-
+ALTF3()
 
 
 
