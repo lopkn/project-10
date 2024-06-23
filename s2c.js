@@ -484,8 +484,8 @@ class shooter2C{
 				break;
 			case "grv1":
 				this.walls[a] = {
-					"type":"bhol","x":x1,"y":y1,"radius":1460,"velmult":0.95,
-					"midpt":[x1,y1],"handle":"bhol","hp":400000,
+					"type":"bhol","x":x1,"y":y1,"radius":1460,"velmult":1.05,
+					"midpt":[x1,y1],"handle":"bhol","hp":400000,"strength":0.025,
 					"defense":1,
 					"frad":x2
 				}
@@ -1038,12 +1038,13 @@ class shooter2C{
 							switch(w.handle){
 								case "bhol":
 									if(distance(B.x,B.y,w.x,w.y) < w.radius){
-										i.vx += (w.x-B.x)
-										i.vy += (w.y-B.y)
+										i.vx += (w.x-B.x)*(w.strength?w.strength:1)
+										i.vy += (w.y-B.y)*(w.strength?w.strength:1)
 										this.damageWall(wallsArr[j],B)
 										bspeed *= w.velmult
 										coled = "dn"
 										lastCol[wallsArr[j]] = "infinite"
+
 									}
 									break;
 								case "ghol":
