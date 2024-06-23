@@ -18,6 +18,8 @@ socket.on("upEntities",upEntities)
 socket.on("particle",(e)=>{updateParticles(e)})
 socket.on("cameraUp",(e)=>{cameraX = e[0]-canvasDimensions[2];cameraY = e[1]-canvasDimensions[3]})
 
+socket.onAny(()=>{player.packetSec.push(Date.now()+1000)})
+
 
 
 class explosionR{
@@ -108,6 +110,7 @@ class player{
 	static debugging = true
 	static keyholder = false
 	static dataNodes = []
+	static packetSec = []
 	static weapon = "norm"
 	static materials = 100
 	static wall = "norm"
@@ -482,7 +485,13 @@ for(let i = map.particles.length-1; i > -1; i--){
 	mainCTX.fillStyle = "rgba(0,"+(150+ala*55)+",0,"+(alb*0.2+0.8)+")"
 	mainCTX.fillText("position: "+Math.floor(cameraX/20)+" "+Math.floor(cameraY/20),20,770)
 	mainCTX.fillText("materials: "+player.materials,320,770)
-	mainCTX.fillText("tick: "+(Date.now()- tickTimeTracker),620,770)
+	mainCTX.fillText("tick: "+(Date.now()- tickTimeTracker)+"ps-"+player.packetSec.length,620,770)
+	let dn = Date.now()
+	for(let i = player.packetSec.length-1; i>-1; i--){
+		if(player.packetSec[i] < dn){
+			player.packetSec.splice(i,1)
+		}
+	}
 }
 
 let mainCanvas = document.getElementById("myCanvas")
@@ -793,7 +802,7 @@ function touchHandler(e)
     			Mobile.joystick_move.vect = [(x-Mobile.joystick_move.mx)/Mobile.joystick_move.r,(y-Mobile.joystick_move.my)/Mobile.joystick_move.r]
     			Mobile.ctx.beginPath()
     			Mobile.ctx.moveTo(Mobile.joystick_move.mx,Mobile.joystick_move.my)
-    			Mobile.ctx.lineTo(Mobile.joystick_move.mx+Mobile.joystick_move.vect[0],Mobile.joystick_move.my+Mobile.joystick_move.vect[1])
+    			Mobile.ctx.lineTo(Mobile.joystick_move.mx+Mobile.joystick_move.vect[0]*100,Mobile.joystick_move.my+Mobile.joystick_move.vect[1]*100)
     			Mobile.ctx.strokeStyle="white"
     			Mobile.ctx.stroke()
     		} else if(EUID.type == "joystick_fire"){
@@ -803,6 +812,21 @@ function touchHandler(e)
 
     	}
 
+  } else {
+    		for(let i = 0; i < touches.length; i++){
+    			let E = touches[i]
+    			let EUID = Mobile.activeTouches[E.identifier]
+
+    		if(EUID.type == "joystick_move"){Mobile.joystick_move.vect = [0,0]}
+    		else if(EUID.type == "joystick_fire"){
+
+					socket.emit("click",[ID,Mobile.joystick_fire.vect[0],Mobile.joystick_fire.vect[1],player.weapon])
+					Mobile.joystick_fire.vect = [0,0]
+					// console.log(Mobile.joystick_fire[0]+mid[0],Mobile.joystick_fire[1]+mid[1])
+    		}
+    		delete Mobile.activeTouches[E.identifier]
+    	}
+
   }
 
 
@@ -810,7 +834,7 @@ function touchHandler(e)
 
 
 
-    if(event.type == "touchend"){
+    if(e.type == "touchend"){
 
        }
 
@@ -857,9 +881,9 @@ class Mobile {
 		document.body.insertBefore(mobileCanvas,myCanvas)
 		mobileCanvas.addEventListener("touchstart",(e)=>{})
 		let r = myCanvas.getBoundingClientRect()
-		this.joystick_move.my = r.bottom - this.joystick_move.r-25
+		this.joystick_move.my = r.bottom - this.joystick_move.r-75
 		this.joystick_move.mx = r.left - this.joystick_move.r-25
-		this.joystick_fire.my = r.bottom - this.joystick_move.r-25
+		this.joystick_fire.my = r.bottom - this.joystick_move.r-75
 		this.joystick_fire.mx = r.left + r.width + this.joystick_move.r + 25
 		console.log(r)
 init()
@@ -876,6 +900,12 @@ init()
 			this.ctx.beginPath()
 			this.ctx.arc(this.joystick_fire.mx, this.joystick_fire.my, this.joystick_fire.r, 0, 2*Math.PI)
 			this.ctx.stroke()
+
+			if(this.joystick_fire.vect[0] !== 0 && this.joystick_fire.vect[1] !== 0){
+				mainCTX.fillStyle = "rgba(255,0,0,0.5)"
+				mainCTX.fillRect(this.joystick_fire.vect[0]*4-5+canvasDimensions[2],this.joystick_fire.vect[1]*4-5+canvasDimensions[3],10,10)
+			}
+		
 
 	}
 }

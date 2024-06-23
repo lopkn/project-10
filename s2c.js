@@ -864,8 +864,11 @@ class shooter2C{
 			if(p.keys.d == "a"){
 				tv[0] += 1
 			}
-
-			let ttv = vectorNormalize([0,0,tv[0],tv[1]])
+			let ttv = [0,0,tv[0],tv[1]]
+			if(distance(tv[0],tv[1],0,0)>1){
+				ttv = vectorNormalize([0,0,tv[0],tv[1]])
+			}
+			 
 		
 			p.vx += ttv[2]*p.speed/p.weight
 			p.vy += ttv[3]*p.speed/p.weight
@@ -895,15 +898,16 @@ class shooter2C{
 				}
 			}
 
-			if(distance(p.unmovePos[0],p.unmovePos[1],p.x,p.y) > 1 || p.unmovePos[2]){
+			let MINMOVDIST = distance(p.unmovePos[0],p.unmovePos[1],p.x,p.y)
+			if(MINMOVDIST > 1 || p.unmovePos[2]){
 			// p.boidy.forEach((B)=>{
 			// 	// this.updateWall(B)
 			// })
 			p.unmovePos = [p.x,p.y,false]
 			this.entityPushers.push({"type":"pos","id":p.id,"x":p.x,"y":p.y,"r":p.rotation})
+			io.to(objt[i]).emit("cameraUp",[p.x,p.y])
 			}
 
-			io.to(objt[i]).emit("cameraUp",[p.x,p.y])
 		}
 	}
 
