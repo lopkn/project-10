@@ -1,5 +1,5 @@
 Welcome to Node.js v16.20.2.
 Type ".help" for more information.
 > Process pid 9
-server is opened: 1719203851227
-new short validation code: 361
+server is opened: 1719205518701
+new short validation code: 402

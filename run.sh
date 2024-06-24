@@ -1,7 +1,7 @@
 echo "using run.sh";
 
 node -e "$(cat server.js)" -i 1>public/debug/errorlog3.txt 2>&1;
-echo "server crash 1, restarting in 5 seconds" 2>&1;
+echo "server crash 1, restarting in 5 seconds";
 sleep 5;
 node server.js;
 echo "server crash 2, restarting in 10 seconds";
