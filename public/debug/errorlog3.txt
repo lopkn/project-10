@@ -1,0 +1,5 @@
+Welcome to Node.js v16.20.2.
+Type ".help" for more information.
+> Process pid 152114
+server is opened: 1719200982820
+new short validation code: 729

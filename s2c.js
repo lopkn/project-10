@@ -971,7 +971,7 @@ class shooter2C{
 					}
 				}
 				// if(op === undefined){op = p}
-				massDrive["trak"] = trak
+				massDrive["trak"] = traks
 
 			} else {
 				delete massDrive["trak"]
