@@ -15,6 +15,7 @@ class shooter2C{
 	static drawers = []
 	static wallPushers = {}
 	static entityPushers = []
+	static massPushers = {"specific":{},"general":{}}
 
 	static nuuIDGEN = 0
 	static setio(i,m){
@@ -905,7 +906,8 @@ class shooter2C{
 			// })
 			p.unmovePos = [p.x,p.y,false]
 			this.entityPushers.push({"type":"pos","id":p.id,"x":p.x,"y":p.y,"r":p.rotation})
-			io.to(objt[i]).emit("cameraUp",[p.x,p.y])
+			// io.to(objt[i]).emit("cameraUp",[p.x,p.y])
+			this.massPushers.specific[objt[i]] = {"cameraUp":[p.x,p.y]}
 			}
 
 		}
@@ -944,10 +946,55 @@ class shooter2C{
 
 	}
 
+	static massPush(){
+		this.drawers.forEach((e)=>{
+			e.splice(1,1)
+		}) //removes first element of array in each el
+
+		
+
+		let pobjk = Object.keys(this.players)
+		let traks;
+		let massDrive = {"drawers":[this.drawers],"upWalls":this.massPushers.general["upWalls"],
+					"upEntities":this.massPushers.general["upEntities"]
+				}
+		pobjk.forEach((e)=>{
+			let p = this.players[e]
+			if( p.tracking && pobjk.length > 1){
+				let op;
+				traks = []
+				for(let J = 0; J < pobjk.length; J++){
+					if(e !== pobjk[J] && !this.players[pobjk[J]].dead){
+						op = this.players[pobjk[J]]
+						if(distance(p.x,p.y,op.x,op.y)<1000){continue}
+						traks.push(["trak",p.x,p.y,op.x,op.y])
+					}
+				}
+				// if(op === undefined){op = p}
+				massDrive["trak"] = trak
+
+			} else {
+				delete massDrive["trak"]
+			}
+				// io.to(e).emit("drawers",[this.drawers,traks])
+
+				
+				if(this.massPushers.specific[e]?.cameraUp){
+					massDrive["cameraUp"] = this.massPushers.specific[e].cameraUp
+ 				} else {
+ 					delete massDrive["cameraUp"]
+ 				}
+ 				// console.log(massDrive)
+				io.to(e).emit("mass",massDrive)
+		})
+	}
+
 	static RSTotal = 0
 	static rpuCounter = 0
 	static walldo = {}
 	static repeat(){
+
+		// previous tick
 		this.rpuCounter += 1
 		let RSTIME = Date.now()
 
@@ -956,19 +1003,26 @@ class shooter2C{
 			e(this.rpuCounter)
 		})
 
-		this.drawers = []
 		if(Object.keys(this.wallPushers).length > 0){
-			io.to("G10.2").emit("upWalls",this.wallPushers)
+			// io.to("G10.2").emit("upWalls",this.wallPushers)
+			this.massPushers.general["upWalls"] = this.wallPushers
 		}
-		this.wallPushers = {}
 		if(this.entityPushers.length > 0){
 			// console.log(this.wallPushers)
 			// this.entityPushers.forEach((e,i)=>{
 			// 	this.entityPushers[i] = 
 			// })
-			io.to("G10.2").emit("upEntities",this.entityPushers)
+			// io.to("G10.2").emit("upEntities",this.entityPushers)
+			this.massPushers.general["upEntities"] = this.entityPushers
 		}
+		// this.send()
+		this.massPush()
+
+		this.wallPushers = {}
+		this.massPushers = {"specific":{},"general":{}}
+		this.drawers = []
 		this.entityPushers = []
+
 
 		this.playerVelUpdate()
 
@@ -1136,7 +1190,11 @@ class shooter2C{
 					if(DAM){
 						let tw = this.walls[tj]
 						tcol = this.p5rre(tcol,colsave[f][2][0],colsave[f][2][1],tw.x1,tw.y1,tw.x2,tw.y2)
+						// if(i.extra){
 						this.drawers.push([i.type,i.tailLength,i.x,i.y,tcol[0],tcol[1],i.extra])
+					// } else {
+						// this.drawers.push([i.type,i.tailLength,i.x,i.y,tcol[0],tcol[1]])
+					// }
 						i.x = tcol[0]
 						i.y = tcol[1]
 						let reverseADmgMult = 1-angleDamageMult
@@ -1165,7 +1223,11 @@ class shooter2C{
 						}
 
 					} else {
-						this.drawers.push([i.type,i.tailLength,i.x,i.y,tcol[0],tcol[1],i.extra])
+						// if(i.extra){
+							this.drawers.push([i.type,i.tailLength,i.x,i.y,tcol[0],tcol[1],i.extra])
+						// } else {
+							// this.drawers.push([i.type,i.tailLength,i.x,i.y,tcol[0],tcol[1]])
+						// }
 						let avmult = B.penMult?B.penMult:0.3
 						i.vx = (i.vx - (tcol[0] - i.x)) * avmult
 						i.vy = (i.vy - (tcol[1] - i.y)) * avmult
@@ -1182,15 +1244,20 @@ class shooter2C{
 			}
 
 
-
-
-			// B.tail.push([i.tailLength,i.x,i.y,i.x+i.vx,i.y+i.vy])
-			// this.drawers.push([i.type,i.tailLength,i.x,i.y,i.x+i.vx,i.y+i.vy,i.extra])
-	this.drawers.push([i.type,i.tailLength,
+			if(i.extra){
+				this.drawers.push([i.type,i.tailLength,
 				parseFloat(i.x.toFixed(2)),
 				parseFloat(i.y.toFixed(2)),
 				parseFloat((i.x+i.vx).toFixed(2)),
 				parseFloat((i.y+i.vy).toFixed(2)),i.extra])
+			} else {
+				this.drawers.push([i.type,i.tailLength,
+				parseFloat(i.x.toFixed(2)),
+				parseFloat(i.y.toFixed(2)),
+				parseFloat((i.x+i.vx).toFixed(2)),
+				parseFloat((i.y+i.vy).toFixed(2))])
+			}
+	
 			
 
 			let vnorm = vectorNormalize([0,0,i.vx,i.vy])
@@ -1212,7 +1279,7 @@ class shooter2C{
 
 
 
-		this.send()
+		// this.send()
 
 
 		this.RSTotal += Date.now()-RSTIME
@@ -1304,7 +1371,7 @@ class shooter2C{
 
 		this.drawers.forEach((e)=>{
 			e.splice(1,1)
-		})
+		}) //removes first element of array in each el
 
 		// io.to("G10.2").emit("drawers",[this.drawers])
 
@@ -1324,7 +1391,6 @@ class shooter2C{
 				// if(op === undefined){op = p}
 
 				io.to(e).emit("drawers",[this.drawers,traks])
-			// this.drawers.push([i.type,i.tailLength,i.x,i.y,i.x+i.vx,i.y+i.vy,i.extra])
 			} else {
 				io.to(e).emit("drawers",[this.drawers])
 			}

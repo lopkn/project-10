@@ -18,6 +18,28 @@ socket.on("upEntities",upEntities)
 socket.on("particle",(e)=>{updateParticles(e)})
 socket.on("cameraUp",(e)=>{cameraX = e[0]-canvasDimensions[2];cameraY = e[1]-canvasDimensions[3]})
 
+
+socket.on("mass",(e)=>{MASS(e)})
+
+
+function MASS(e){
+
+	drawDrawers(e.drawers[0],e.drawers[1]);
+	drawDynam(e.trak)
+	tick();
+	if(e.upWalls){
+		upwalls2(e.upWalls)
+	}
+	if(e.upEntities){
+		upEntities(e.upEntities)
+	}
+
+	if(e.cameraUp){
+		cameraX = e.cameraUp[0]-canvasDimensions[2];cameraY = e.cameraUp[1]-canvasDimensions[3]
+	}
+}
+
+
 socket.onAny(()=>{player.packetSec.push(Date.now()+1000)})
 
 
@@ -568,6 +590,13 @@ function drawDrawers(e,dynam){
 		map.bullets.push(i)
 	})
 
+	if(dynam){
+		drawDynam(dynam)
+	}
+
+	}
+
+function drawDynam(dynam){
 	if(dynam){
 	dynam.forEach((i)=>{
 		i.splice(1,0,3)
