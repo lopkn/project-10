@@ -139,9 +139,10 @@ class player{
 	static snapping = false
 	static gridSize = 80
 	static weaponCounter = 1
+	static weaponMin = 1
 	static weaponDict = {"1":"norm","2":"scat","3":"lazr","4":"cnon","5":"heal","6":"grnd","7":"msl","8":"dril",
 											"9":"msl2","10":"snpr","11":"lzr2","12":"mchg","13":"zapr","14":"dbgd","15":"kbml",
-											"16":"vipr","17":"tlpt"
+											"16":"vipr","17":"tlpt","18":"trak"
 										}
 	static wallCounter = 1
 	static wallDict = {
@@ -361,20 +362,35 @@ function tick(){
 // 	}
 
 // 	player.rezoom(player.zoom*player.levelTrip)
-
-
 	// mainCTX.stroke()
 
 	mainCTX.strokeStyle = "#404040"
 	mainCTX.lineWidth = 3
 	mainCTX.beginPath()
-	for(let i = -player.gridSize-player.gridSize*Math.floor(1+player.zoomR/player.gridSize/player.zoom); i < 900/player.zoom; i+= player.gridSize){
-		mainCTX.moveTo( (i + CXR)*player.zoom+player.zoomR,0)
-		mainCTX.lineTo( (i + CXR)*player.zoom+player.zoomR,840)
+	// for(let i = -player.gridSize-player.gridSize*Math.floor(1+player.zoomR/player.gridSize/player.zoom); i < canvasDimensions[0]/player.zoom; i+= player.gridSize){
+	// 	mainCTX.moveTo( (i + CXR)*player.zoom+player.zoomR,0)
+	// 	mainCTX.lineTo( (i + CXR)*player.zoom+player.zoomR,840)
+	// }
+	// for(let i = -player.gridSize-player.gridSize*Math.floor(1+player.zoomR/player.gridSize/player.zoom); i < canvasDimensions[1]/player.zoom; i+= player.gridSize){
+	// 	mainCTX.moveTo(0,(i + CYR)*player.zoom+player.zoomR)
+	// 	mainCTX.lineTo(840,(i + CYR)*player.zoom+player.zoomR)
+	// }
+
+	for(let i = canvasDimensions[2]+CXR*player.zoom; i < canvasDimensions[0]; i+=player.gridSize*player.zoom){
+		mainCTX.moveTo(i,0)
+		mainCTX.lineTo(i,840)
 	}
-	for(let i = -player.gridSize-player.gridSize*Math.floor(1+player.zoomR/player.gridSize/player.zoom); i < 900/player.zoom; i+= player.gridSize){
-		mainCTX.moveTo(0,(i + CYR)*player.zoom+player.zoomR)
-		mainCTX.lineTo(840,(i + CYR)*player.zoom+player.zoomR)
+	for(let i = canvasDimensions[2]+CXR*player.zoom; i > 0; i-=player.gridSize*player.zoom){
+		mainCTX.moveTo(i,0)
+		mainCTX.lineTo(i,840)
+	}
+	for(let i = canvasDimensions[3]+CYR*player.zoom; i < canvasDimensions[1]; i+=player.gridSize*player.zoom){
+		mainCTX.moveTo(0,i)
+		mainCTX.lineTo(840,i)
+	}
+	for(let i = canvasDimensions[3]+CYR*player.zoom; i > 0; i-=player.gridSize*player.zoom){
+		mainCTX.moveTo(0,i)
+		mainCTX.lineTo(840,i)
 	}
 
 mainCTX.stroke()
@@ -626,6 +642,10 @@ document.addEventListener("mousedown",(e)=>{
 	player.clickheld = true
 })
 
+document.addEventListener("wheel",(e)=>{
+	player.rezoom(player.zoom-e.deltaY/5000)
+})
+
 document.addEventListener("mouseup",(e)=>{
 	player.clickheld = false
 })
@@ -647,22 +667,22 @@ document.addEventListener("keydown",(e)=>{
   		break;
     case "q":
   		player.weaponCounter -= 1
-  		if(player.weaponCounter < 1){
-  			player.weaponCounter = Object.values(player.weaponDict).length
+  		if(player.weaponCounter < player.weaponMin){
+  			player.weaponCounter = Object.values(player.weaponDict).length+ player.weaponMin-1
   		}
   		player.weapon = player.weaponDict[player.weaponCounter]
   		break;
   	case "e":
   		player.weaponCounter += 1
-  		if(player.weaponCounter > Object.values(player.weaponDict).length){
-  			player.weaponCounter = 1
+  		if(player.weaponCounter > Object.values(player.weaponDict).length+ player.weaponMin-1){
+  			player.weaponCounter = player.weaponMin
   		}
   		player.weapon = player.weaponDict[player.weaponCounter]
   		break;
   	case "z":
   		player.wallCounter -= 1
   		if(player.wallCounter < 1){
-  			player.wallCounter = Object.values(player.wallDict).length
+  			player.wallCounter = Object.values(player.wallDict).length 
   		}
   		player.wall = player.wallDict[player.wallCounter]
   		break;
@@ -691,6 +711,13 @@ document.addEventListener("keydown",(e)=>{
   		} else {
 				player.weapon = prompt("weapon?")
   		}
+  		break;
+  	case "F4":
+  		player.weaponMin = -3
+  		player.weaponDict["0"] = "dbdril"
+  		player.weaponDict["-1"] = "dbml"
+  		player.weaponDict["-2"] = "spawner"
+  		player.weaponDict["-3"] = "keyheal"
   		break;
   	case "F1":
   		window.localStorage.setItem("playerType",prompt("type?"))
@@ -724,7 +751,8 @@ document.addEventListener("keyup",(e)=>{
   		if(my < 0){
   			my -= player.gridSize
   		}
-  		socket.emit("placeWall",[placing[1]-(placing[1]%player.gridSize),placing[2]-(placing[2]%player.gridSize),mx-(mx%player.gridSize),my-(my%player.gridSize),player.wall,{"regen":10}])
+  		//idfk where this 10 came from
+  		socket.emit("placeWall",[placing[1]+10-(placing[1]%player.gridSize),placing[2]+10-(placing[2]%player.gridSize),mx+10-(mx%player.gridSize),my+10-(my%player.gridSize),player.wall,{"regen":10}])
   	} else {
   	socket.emit("placeWall",[placing[1],placing[2],(mouseX-mid[2])/player.zoom-player.zoomR/player.zoom+cameraX,mouseY/player.zoom-player.zoomR/player.zoom+cameraY,player.wall])}
   	placing = [false]

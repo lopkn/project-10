@@ -45,8 +45,14 @@ class shooter2C{
 				break;
 			case "cnon":
 				this.bullets.push({"shooter":id,"type":"cnon","x":x,"y":y,"vx":vx,"vy":vy,"wallMult":1,"deathVel":6000,
-					"tailLength":10,"lingerance":10,"tail":[],"life":200,"penMult":0.45,"ignoreWallMult":-0.7,
-					"slowd":1,"dmgmult":17,"ignoreAngleDamageMult":1,"extra":{"tailmult":3}})
+						"tailLength":10,"lingerance":10,"tail":[],"life":200,"penMult":0.45,"ignoreWallMult":-0.7,
+						"slowd":1,"dmgmult":17,"ignoreAngleDamageMult":1,"extra":{"tailmult":3},
+						"onHit":(w,b)=>{
+							if(w.plid &&w.attached&& this.players[w.plid]){
+								this.KB(this.players[w.plid],vx/10,vy/10)
+							}
+						}
+					})
 				break;
 
 			case "heal":
@@ -56,6 +62,10 @@ class shooter2C{
 			case "dril":
 				this.bullets.push({"shooter":id,"type":"dril","x":x,"y":y,"vx":vx,"vy":vy,"wallMult":0.2,
 					"lingerance":2,"dmgmult":3,"tailLength":2,"tail":[],"life":2,"slowd":0.9,"extra":{"tailmult":3}})
+				break;
+			case "dbdril":
+				this.bullets.push({"shooter":id,"type":"dril","x":x,"y":y,"vx":vx*150,"vy":vy*150,"wallMult":0.2,
+					"lingerance":2,"dmgmult":1003,"tailLength":2,"tail":[],"life":3,"slowd":0.9,"extra":{"tailmult":3}})
 				break;
 			case "grnd":
 				this.bullets.push({"shooter":id,"type":"grnd","x":x,"y":y,"vx":vx,"vy":vy,"wallMult":1,"deathVel":10,
@@ -148,7 +158,7 @@ class shooter2C{
 				break;
 			case "dbml":
 				this.bullets.push({"shooter":id,"type":"msl2","x":x,"y":y,"vx":vx/6,"vy":vy/6,"wallMult":0,"deathVel":10,"unBouncer":1,
-					"lingerance":4,"dmgmult":0,"tailLength":4,"tail":[],"life":50,"slowd":1.18,"extra":{"tailmult":8},"date":Date.now(),
+					"lingerance":4,"deathTimer":5,"dmgmult":0,"tailLength":4,"tail":[],"life":50,"slowd":1.18,"extra":{"tailmult":8},"date":Date.now(),
 					"onDeath":(b)=>{
 						let dd = Date.now()
 							for(let i = 0; i < 20; i++){let a = this.pushBullet(b.x,b.y,Math.random()*300-150+vx*0.1,Math.random()*300-150+vy*0.1,b.shooter,"norm")
@@ -162,6 +172,23 @@ class shooter2C{
 					}
 				})
 				break;
+			case "spawner":
+				if(!this.keyholders[id]){return}
+				let rndlist = ["shld1","snpr1","ntri1","ntri2","ntri3","ntri4","ntri5"]
+				let rnd = rndlist[Math.floor(Math.random()*rndlist.length)]
+				let en = this.entityTemplates(rnd,2,{"team":"spawner1","x":x+Math.random()*3000-1500,"y":Math.random()*3000-1500+y})
+				en.reloadMultiplier = 3
+				en.speed = 0.6
+				break;
+
+			case "keyheal":
+				if(!this.keyholders[id]){return}
+				this.players[id].boidy.forEach((e)=>{
+					this.walls[e].defense = 10
+					this.walls[e].hp = 1000
+				})
+				break;
+
 			case "kbml":
 				this.bullets.push({"shooter":id,"type":"msl2","x":x,"y":y,"vx":vx/6,"vy":vy/6,"wallMult":0,"deathVel":10,"unBouncer":1,
 					"lingerance":4,"dmgmult":0,"tailLength":4,"tail":[],"life":50,"slowd":1.18,"extra":{"tailmult":8},"date":Date.now(),
@@ -322,6 +349,9 @@ class shooter2C{
 				this.pushBullet(p.x,p.y,(n[2]-p.x)*160,(n[3]-p.y)*160,id,"tlpt")
 				reload += 20
 				break;
+			default:
+				this.pushBullet(p.x,p.y,(n[2]-p.x),(n[3]-p.y),id,w)
+				reload += 1
 		}
 		p.reloading += reload*(p.reloadMultiplier?p.reloadMultiplier:1);
 	}
@@ -677,6 +707,7 @@ class shooter2C{
 		if(options.attach){
 			p.currentRadius = this.getPlayerRadius(p)
 			p.weight = p.currentRadius/p.minRadius
+			this.walls[a].attached = true
 		}
 
 		this.walls[a].id = a
@@ -690,7 +721,7 @@ class shooter2C{
 			this.players[id] = {"reloading":0,"unmovePos":[0,0],"rotation":[0,1],
 				"boidyVect":[[0,-40,30,30],[30,30,-30,30],[-30,30,0,-40]],
 				"boidy":[],"x":410,"y":410,"vx":0,"vy":0,"hp":100,"id":id,"keys":{},
-				"materials":100,"speed":1.5,"boidyAll":3,"tracking":true
+				"materials":100,"speed":1.5,"boidyAll":3,"tracking":false
 			}
 			io.to(id).emit("spec",["zoom",1])
 
@@ -779,6 +810,10 @@ class shooter2C{
 		} else {
 		this.players[id].minRadius = this.players[id].currentRadius = this.getPlayerRadius(this.players[id])
 		}
+		this.players[id].boidy.forEach((e)=>{
+			this.walls[e].attached = true
+		})
+
 		this.players[id].weight = 1
 		this.players[id].tv = [0,0]
 		this.sendAllWombjects(id)
@@ -960,7 +995,7 @@ class shooter2C{
 				}
 		pobjk.forEach((e)=>{
 			let p = this.players[e]
-			if( p.tracking && pobjk.length > 1){
+			if( (p.tracking || p.lastWeapon == "trak") && pobjk.length > 1){
 				let op;
 				traks = []
 				for(let J = 0; J < pobjk.length; J++){
@@ -1148,7 +1183,6 @@ class shooter2C{
 
 					 	B.shooter = ""
 
-
 						let f = 0
 					if(colsave.length != 1){
 						let fd = Infinity
@@ -1165,6 +1199,7 @@ class shooter2C{
 					lastCol[tj] = "single"
 
 					let WALL = this.walls[tj]
+					B.onHit?B.onHit(WALL,B):0
 					let angleDamageMult = 1
 					let DAM;
 					if(B.unBouncer === undefined){
@@ -1272,8 +1307,9 @@ class shooter2C{
 
 				
 			let sp = B.vx*B.vx + B.vy*B.vy 
-				if(B.life > 6 &&  sp < 5+(B.deathVel?B.deathVel:0)){
-					B.life = 5
+			let deathLife = B.deathTimer?B.deathTimer:5
+				if(B.life > deathLife &&  sp < (B.deathVel?B.deathVel:5)){
+					B.life = deathLife
 				}
 		}
 
@@ -1713,7 +1749,7 @@ class shooter2C{
 					if(dst < e.fireRange){
 						this.playerClick(e.id,p.x-e.x+Math.random()*144-72+p.vx*e.lead,p.y-e.y+Math.random()*144-72+p.vy*e.lead,"norm")
 						if(this.pvuCounter%5==0){
-						this.KB(e.x+Math.random()*2000-1000,e.y+Math.random()*2000-1000)
+						this.KBR(e.x+Math.random()*2000-1000,e.y+Math.random()*2000-1000)
 						}
 
 
@@ -1733,6 +1769,7 @@ class shooter2C{
 		}
 		Object.assign(entity,options)
 		entity.boidy.forEach((e)=>{this.walls[e].defense*=durability})
+		return(entity)
 	}
 
 	static entityUpdate(){
@@ -1742,7 +1779,12 @@ class shooter2C{
 		})
 	}
 
-	static KB(x,y){
+	static KB(player,vx,vy){
+		player.vx += vx * player.weight * player.speed
+		player.vy += vy * player.weight * player.speed
+	}
+
+	static KBR(x,y){
 		let b = {"x":x,"y":y}
 		Object.values(this.bullets).forEach((e)=>{
 								let dst = distance(e.x,e.y,b.x,b.y)
