@@ -40,7 +40,7 @@ function MASS(e){
 }
 
 
-socket.onAny(()=>{player.packetSec.push(Date.now()+1000)})
+// socket.onAny(()=>{})
 
 
 
@@ -71,10 +71,10 @@ class explosionR{
 			return('del')
 		}
 		mainCTX.strokeStyle = this.color
-		mainCTX.lineWidth = (1 + this.actLife/10)*this.lineWidth//*camera.tileRsize
+		mainCTX.lineWidth = (1 + this.actLife/10)*this.lineWidth*player.zoom*2//*camera.tileRsize
 		mainCTX.beginPath()
 		let bts = coordToMap(this.x,this.y)
-		mainCTX.arc(bts[0],bts[1], this.size/**camera.tileRsize*/, 0, 2 * Math.PI);
+		mainCTX.arc(bts[0],bts[1], this.size*player.zoom*2, 0, 2 * Math.PI);
 		mainCTX.stroke()
 		
 	}
@@ -105,7 +105,7 @@ function drawCircle(x,y,size){
 
 function ALTF3(){
 	altf3 = (n,e)=>{player.dataNodes.push([n,JSON.stringify(e).length,Date.now()])}
-	socket.onAny((n,e)=>{altf3(n,e)})
+	socket.onAny((n,e)=>{altf3(n,e);player.packetSec.push(Date.now()+1000)})
 }
 function altf3(n,e){
 	player.dataNodes.push([n,JSON.stringify(e).length,Date.now()])
@@ -333,7 +333,7 @@ function tick(){
 		
 		mainCTX.lineWidth = 3
 		mainCTX.beginPath()
-		mainCTX.moveTo((nodeDate-n[2])/2,n[1]/10)
+		mainCTX.moveTo((nodeDate-n[2])/2,n[1]/20)
 		mainCTX.lineTo((nodeDate-n[2])/2,0)
 		mainCTX.stroke()
 		// console.log(lastNode,nodeDate)

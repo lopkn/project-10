@@ -74,7 +74,7 @@ class shooter2C{
 							})
 						for(let i = 0; i < 20; i++){let a = this.pushBullet(b.x,b.y,Math.random()*150-75,Math.random()*150-75,b.shooter,"norm")
 							a.slowd = 0.95
-							a.dmgmult = 12
+							a.dmgmult = 35
 							a.extra = {"tailmult":3,"tailLength":6}
 							a.tailLength = 6; a.lingerance = 6;
 
@@ -907,7 +907,7 @@ class shooter2C{
 			p.unmovePos = [p.x,p.y,false]
 			this.entityPushers.push({"type":"pos","id":p.id,"x":p.x,"y":p.y,"r":p.rotation})
 			// io.to(objt[i]).emit("cameraUp",[p.x,p.y])
-			this.massPushers.specific[objt[i]] = {"cameraUp":[p.x,p.y]}
+			this.massPushers.specific[objt[i]] = {"cameraUp":[p.x.toFixed(4),p.y.toFixed(4)]}
 			}
 
 		}
@@ -1514,7 +1514,7 @@ class shooter2C{
 		return(this.entities[eid])
 	}
 
-	static entityTemplates(type,durability=1){
+	static entityTemplates(type,durability=1,options={}){
 			let entity;
 
 			if(type == "rand"){
@@ -1538,7 +1538,7 @@ class shooter2C{
 				e.target = undefined
 				let ldst = Infinity
 				Object.values(this.players).forEach((E)=>{
-					if(e == E){return}
+					if(e == E || (e.team && e.team == E.team)){return}
 						let dst = distance(e.x,e.y,E.x,E.y)
 					if(!E.dead && dst < e.range && dst < ldst){
 						e.target = E.id
@@ -1607,7 +1607,7 @@ class shooter2C{
 				}
 				e.target = undefined
 				Object.values(this.players).forEach((E)=>{
-					if(e == E){return}
+					if(e == E || (e.team && e.team == E.team)){return}
 					if(!E.dead &&distance(e.x,e.y,E.x,E.y)< e.range){
 						e.target = E.id
 					}
@@ -1647,7 +1647,7 @@ class shooter2C{
 				}
 				e.target = undefined
 				Object.values(this.players).forEach((E)=>{
-					if(e == E){return}
+					if(e == E || (e.team && e.team == E.team)){return}
 					if(!E.dead &&distance(e.x,e.y,E.x,E.y)< e.range){
 						e.target = E.id
 					}
@@ -1696,7 +1696,7 @@ class shooter2C{
 				}
 				e.target = undefined
 				Object.values(this.players).forEach((E)=>{
-					if(e == E){return}
+					if(e == E || (e.team && e.team == E.team)){return}
 					if(!E.dead &&distance(e.x,e.y,E.x,E.y)< e.range){
 						e.target = E.id
 					}
@@ -1731,6 +1731,7 @@ class shooter2C{
 			}
 			
 		}
+		Object.assign(entity,options)
 		entity.boidy.forEach((e)=>{this.walls[e].defense*=durability})
 	}
 
