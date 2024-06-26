@@ -1,5 +1,6 @@
 let io;
 let myMath
+let crypto = require("crypto")
 function distance(x1,y1,x2,y2) {
 	let a = x2-x1
 	let b = y2-y1
@@ -34,6 +35,10 @@ class shooter2C{
 			case "scat":
 				this.bullets.push({"shooter":id,"type":"scat","x":x,"y":y,"vx":vx,"vy":vy,"wallMult":1,
 					"tailLength":6,"dmgmult":3,"lingerance":6,"tail":[],"life":2000,"slowd":0.95})
+				break;
+			case "scat2":
+				this.bullets.push({"shooter":id,"type":"scat","x":x,"y":y,"vx":vx,"vy":vy,"wallMult":1,
+					"tailLength":6,"dmgmult":1,"lingerance":6,"tail":[],"life":2000,"slowd":0.5})
 				break;
 			case "lazr":
 				this.bullets.push({"shooter":id,"type":"lazr","x":x,"y":y,"vx":vx,"vy":vy,"wallMult":1,"deathVel":1002500,
@@ -138,6 +143,22 @@ class shooter2C{
 					}
 				})
 				break;
+			case "zapr2":
+				this.bullets.push({"shooter":id,"type":"zapr2","x":x,"y":y,"vx":vx/3,"vy":vy/3,"wallMult":0,"deathVel":10,"unBouncer":1,
+					"tailLength":4,"dmgmult":2,"lingerance":2,"tail":[],"life":8,"slowd":1,"extra":{"tailmult":2},"instant":true,
+					"tick":(b)=>{
+						b.vx += Math.random()*120-60
+						b.vy += Math.random()*120-60
+					},
+					"onHit":(w,b)=>{
+						this.pushBullet(b.x,b.y,b.vx,b.vy,b.shooter,"zapr")
+						this.bullets[this.bullets.length-1].ignoreWallMult = -1
+						this.bullets[this.bullets.length-1].penMult = 1
+						this.bullets[this.bullets.length-1].unBouncer = 1
+						this.bullets[this.bullets.length-1].dmgmult = b.life * b.dmgmult
+					}
+				})
+				break;
 
 			case "dbgd":
 				this.bullets.push({"shooter":id,"type":"dbgd","x":x,"y":y,"vx":vx/4,"vy":vy/4,"wallMult":0,"deathVel":10,"ignoreWallMult":1,
@@ -174,7 +195,7 @@ class shooter2C{
 				break;
 			case "spawner":
 				if(!this.keyholders[id]){return}
-				let rndlist = ["shld1","snpr1","ntri1","ntri2","ntri3","ntri4","ntri5"]
+				let rndlist = ["shld1","snpr1","ntri1","ntri2","ntri3","ntri4","shld"]
 				let rnd = rndlist[Math.floor(Math.random()*rndlist.length)]
 				let en = this.entityTemplates(rnd,2,{"team":"spawner1","x":x+Math.random()*3000-1500,"y":Math.random()*3000-1500+y})
 				en.reloadMultiplier = 3
@@ -285,6 +306,13 @@ class shooter2C{
 			}
 		reload += 10
 				break;
+			case "scat2":
+			for(let i = 0; i < 7; i++){
+				this.pushBullet(p.x,p.y,(n[2]-p.x)*310+Math.random()*140-70,(n[3]-p.y)*310+Math.random()*140-70,id,"scat2")
+			}
+			this.KB(p,-(n[2]-p.x)*5,-(n[3]-p.y)*5)
+		reload += 30
+				break;
 			case "lazr":
 				
 				this.pushBullet(p.x,p.y,(n[2]-p.x)*1100,(n[3]-p.y)*1100,id,"lazr")
@@ -325,6 +353,10 @@ class shooter2C{
 				this.pushBullet(p.x,p.y,(n[2]-p.x)*1100,(n[3]-p.y)*1100,id,"zapr")
 				reload += 1
 				break;
+			case "zapr2":
+				this.pushBullet(p.x,p.y,(n[2]-p.x)*1100,(n[3]-p.y)*1100,id,"zapr2")
+				reload += 40
+				break;
 			case "dbgd":
 				this.pushBullet(p.x,p.y,(n[2]-p.x)*80+p.vx,(n[3]-p.y)*80+p.vy,id,"dbgd")
 				reload += 2
@@ -334,6 +366,11 @@ class shooter2C{
 				this.pushBullet(p.x,p.y,(n[2]-p.x)*80+p.vx,(n[3]-p.y)*80+p.vy,id,"dbml")
 				reload += 2
 				p.materials -= 1
+				break;
+			case "unloader":
+				if(!this.keyholders[p.id]){return}
+				reload -= 2000000
+				p.materials += 100
 				break;
 			case "kbml":
 				this.pushBullet(p.x,p.y,(n[2]-p.x)*80+p.vx,(n[3]-p.y)*80+p.vy,id,"kbml")
@@ -816,12 +853,22 @@ class shooter2C{
 
 		this.players[id].weight = 1
 		this.players[id].tv = [0,0]
+
+		this.players[id].color = Math.floor(this.stringToRandomNumber(this.players[id].team?this.players[id].team:id)*360)
+
+
 		this.sendAllWombjects(id)
 		io.to("G10.2").emit("upEntities",[{"type":"createEntity","entity":this.players[id]}])
 		return(this.players[id])
 	}
 
 	static pvuCounter = 0
+
+	static stringToRandomNumber(str) {
+  const hash = crypto.createHash('sha256').update(str).digest('hex');
+  const decimalPortion = parseInt(hash.slice(0, 8), 16) / parseInt('FFFFFFFF', 16);
+  return decimalPortion;
+}
 
 	static playerVelUpdate(){
 
@@ -883,6 +930,7 @@ class shooter2C{
 						this.disconnect({"id":p.id})
 					}
 					
+				this.entityPushers.push({"type":"dead","id":p.id})
 				continue
 				}
 
@@ -1550,6 +1598,11 @@ class shooter2C{
 		return(this.entities[eid])
 	}
 
+	static changeTeam(p,team){
+		p.color = Math.floor(this.stringToRandomNumber(p.team))
+		this.entityPushers.push({"type":"team","c":p.color,"id":p.id})
+	}
+
 	static entityTemplates(type,durability=1,options={}){
 			let entity;
 
@@ -1682,13 +1735,16 @@ class shooter2C{
 				e.doWithTarget(e)
 			
 			}
-		}else if(type == "tank1"){
+		}else if(type == "tank1" || type == "tank2"){
 			 entity = this.initiateEntity("tank")
 			entity.x = Math.random()*1500-750
 			entity.y = Math.random()*1500-750
 			entity.lead = 2
 			entity.range = 3500
 			entity.fireRange = 1000
+			entity.antirecoil = (type == "tank1")
+			entity.weapon = "cnon"
+			if(type == "tank2"){entity.fireRange = 400;entity.weapon = "scat2"}
 			entity.reloadMultiplier = 2.5
 			entity.burst = 3
 			entity.randomMovement = Math.random()*20
@@ -1718,9 +1774,12 @@ class shooter2C{
 					if(dst < e.fireRange && entity.reloading < 1){
 						let vvx = entity.vx
 						let vvy = entity.vy
-						this.playerClick(e.id,p.x-e.x+Math.random()*144-72+p.vx*e.lead,p.y-e.y+Math.random()*144-72+p.vy*e.lead,"cnon")
-						entity.vx = vvx
-						entity.vy = vvy
+						this.playerClick(e.id,p.x-e.x+Math.random()*144-72+p.vx*e.lead,p.y-e.y+Math.random()*144-72+p.vy*e.lead,entity.weapon)
+						if(entity.antirecoil){
+							entity.vx = vvx
+							entity.vy = vvy
+						}
+						
 						if(entity.burst){
 							entity.burst -= 1
 							entity.reloading = 5
@@ -1844,6 +1903,8 @@ class shooter2C{
 		}
 		Object.assign(entity,options)
 		entity.boidy.forEach((e)=>{this.walls[e].defense*=durability})
+
+		if(entity.team){this.changeTeam(entity,entity.team)}
 		return(entity)
 	}
 

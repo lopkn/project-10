@@ -220,6 +220,10 @@ function upEntities(a){
 		}else if(e.type == "create"){
 			map.players[e.id].boidyVect.push(e.v)
 			map.players[e.id].boidy.push(e.wid)
+		} else if(e.type == "dead"){
+			map.players[e.id].dead = true
+		} else if(e.type == "team"){
+			map.players[e.id].color = e.c
 		}
 	})
 }
@@ -265,7 +269,7 @@ function crobject(e){
 
 
 	let bulletAtt = {"norm":10,"scat":6,"lazr":20,"cnon":10,"heal":2,"grnd":4,"msl":4,"msl2":4,
-									"dril":3,"lzr2":3,"zapr":3,"dbgd":20,"kbml":20,"vipr":20,"tlpt":20}
+									"dril":3,"lzr2":3,"zapr":3,"zapr2":13,"dbgd":20,"kbml":20,"vipr":20,"tlpt":20}
 
 
 let tripVel = 0
@@ -365,7 +369,7 @@ function tick(){
 	// mainCTX.stroke()
 
 	mainCTX.strokeStyle = "#404040"
-	mainCTX.lineWidth = 3
+	mainCTX.lineWidth = player.zoom>0.3?3:player.zoom*10
 	mainCTX.beginPath()
 	// for(let i = -player.gridSize-player.gridSize*Math.floor(1+player.zoomR/player.gridSize/player.zoom); i < canvasDimensions[0]/player.zoom; i+= player.gridSize){
 	// 	mainCTX.moveTo( (i + CXR)*player.zoom+player.zoomR,0)
@@ -447,6 +451,9 @@ for(let i = map.particles.length-1; i > -1; i--){
 			mainCTX.strokeStyle = "#A0A000"
 		} else if(e[0] === "tlpt"){
 			mainCTX.strokeStyle = "rgb(0,"+Math.floor(Math.random()*255)+",255)"
+		} else if(e[0] === "zapr2"){
+
+			mainCTX.strokeStyle = "rgb("+Math.floor(Math.random()*255)+",255,255)"
 		}
 		mainCTX.moveTo((e[2]-cameraX)*player.zoom + player.zoomR,(e[3]-cameraY)*player.zoom + player.zoomR)
 		mainCTX.lineTo((e[4]-cameraX)*player.zoom + player.zoomR,(e[5]-cameraY)*player.zoom + player.zoomR)
@@ -509,6 +516,21 @@ for(let i = map.particles.length-1; i > -1; i--){
 			mainCTX.stroke()
 		}
 	}
+
+
+	// map.players[e.id].x
+	Object.values(map.players).forEach((e)=>{
+		if(e.dead){return}
+		let ran = Math.random()*10
+			mainCTX.fillStyle = "hsla("+e.color+",70%,75%,"+((10-ran)/5)+")"
+			mainCTX.fillRect((e.x-cameraX)*player.zoom+player.zoomR-ran,(e.y-cameraY)*player.zoom+player.zoomR-ran,ran*2,ran*2)
+	})
+
+			
+
+
+
+
 	// mainCTX.fillStyle = "#00FF00"
 	// mainCTX.fillRect(mouseX+player.gridSize/2-5,mouseY+player.gridSize/2-5,10,10)
 	// mainCTX.fillRect(mouseX+cameraX+player.gridSize/2-(Math.abs((mouseX+cameraX+player.gridSize/2)%player.gridSize))-5-cameraX,
@@ -644,6 +666,9 @@ document.addEventListener("mousedown",(e)=>{
 
 document.addEventListener("wheel",(e)=>{
 	player.rezoom(player.zoom-e.deltaY/5000)
+	if(player.zoom < 0){
+		player.rezoom(0.01)
+	}
 })
 
 document.addEventListener("mouseup",(e)=>{
@@ -713,11 +738,14 @@ document.addEventListener("keydown",(e)=>{
   		}
   		break;
   	case "F4":
-  		player.weaponMin = -3
+  		player.weaponMin = -6
   		player.weaponDict["0"] = "dbdril"
   		player.weaponDict["-1"] = "dbml"
   		player.weaponDict["-2"] = "spawner"
   		player.weaponDict["-3"] = "keyheal"
+  		player.weaponDict["-4"] = "zapr2"
+  		player.weaponDict["-5"] = "scat2"
+  		player.weaponDict["-6"] = "unloader"
   		break;
   	case "F1":
   		window.localStorage.setItem("playerType",prompt("type?"))
@@ -971,6 +999,10 @@ Mobile.init()
 Mobile.draw()
 
 ALTF3()
+
+function ranrange(x){
+	return(Math.random()*x-x/2)
+}
 
 
 
