@@ -65,7 +65,7 @@ class shooter2C{
 				break;
 			case "dbdril":
 				this.bullets.push({"shooter":id,"type":"dril","x":x,"y":y,"vx":vx*150,"vy":vy*150,"wallMult":0.2,
-					"lingerance":2,"dmgmult":1003,"tailLength":2,"tail":[],"life":3,"slowd":0.9,"extra":{"tailmult":3}})
+					"lingerance":2,"dmgmult":1003,"tailLength":2,"tail":[],"life":7,"slowd":0.9,"extra":{"tailmult":3}})
 				break;
 			case "grnd":
 				this.bullets.push({"shooter":id,"type":"grnd","x":x,"y":y,"vx":vx,"vy":vy,"wallMult":1,"deathVel":10,
@@ -1112,7 +1112,7 @@ class shooter2C{
 										continue;
 			
 								}
-							}
+							} // if already collided with wall, don't collide same wall again
 
 					if(w?.handle == undefined){
 							
@@ -1125,7 +1125,7 @@ class shooter2C{
 							if(col[4]){
 								colsave.push([col,wallsArr[j],[i.x+i.vx,i.y+i.vy]])
 								coled = "c1"
-							}
+							} //for each wall that collided with the bullet, push it into colsave
 
 					}else{
 							switch(w.handle){
@@ -1179,7 +1179,7 @@ class shooter2C{
 
 			
 
-				if(coled == "c1"){
+				if(coled == "c1"){ //if there was one or more solid line collisions
 
 					 	B.shooter = ""
 
@@ -1194,8 +1194,8 @@ class shooter2C{
 							}
 						}
 					}
-						let tj = colsave[f][1]
-						let tcol = colsave[f][0]
+						let tj = colsave[f][1] //the wall id that was collided with
+						let tcol = colsave[f][0] //the collision information
 					lastCol[tj] = "single"
 
 					let WALL = this.walls[tj]
@@ -1226,7 +1226,7 @@ class shooter2C{
 						let tw = this.walls[tj]
 						tcol = this.p5rre(tcol,colsave[f][2][0],colsave[f][2][1],tw.x1,tw.y1,tw.x2,tw.y2)
 						// if(i.extra){
-						this.drawers.push([i.type,i.tailLength,i.x,i.y,tcol[0],tcol[1],i.extra])
+						this.drawers.push([i.type,i.tailLength,i.x,i.y,tcol[0],tcol[1],i.extra]) // it looks like i.x and i.y is uneccessary?
 					// } else {
 						// this.drawers.push([i.type,i.tailLength,i.x,i.y,tcol[0],tcol[1]])
 					// }
@@ -1558,7 +1558,7 @@ class shooter2C{
 				type = list[Math.floor(Math.random()*list.length)]
 			}
 
-		if(type == "ntri1" || type == undefined || type == "ntri2" || type == "ntri3" || type=="ntri4"){
+		if(type == "ntri1" || type == undefined || type == "ntri2" || type == "ntri3" || type=="ntri4" || type =="ntri5"){
 			 entity = this.initiateEntity()
 			entity.x = Math.random()*1500-750
 			entity.y = Math.random()*1500-750
@@ -1567,8 +1567,10 @@ class shooter2C{
 			entity.pullx = Math.random()*2-1
 			entity.pully = Math.random()*2-1
 			entity.reloadMultiplier = 1
+			entity.retargeting = 0.05
+			if(type == "ntri5"){entity.retargeting = 0.5}
 			entity.findTarget = (e)=>{
-				if(Math.random()>0.05&&e.target && this.players[e.target]&& !this.players[e.target].dead && distance(e.x,e.y,this.players[e.target].x,this.players[e.target].y < e.range)){
+				if(Math.random()>entity.retargeting&&e.target && this.players[e.target]&& !this.players[e.target].dead && distance(e.x,e.y,this.players[e.target].x,this.players[e.target].y < e.range)){
 					return(e.target)
 				}
 				e.target = undefined
@@ -1616,6 +1618,14 @@ class shooter2C{
 								this.playerClick(e.id,p.x-e.x+p.vx*7-e.vx,p.y-e.y+p.vy*7-e.vy,"kbml")
 							}
 
+						} else if(type == "ntri5"){
+							if(entity.reloading < 1 && Math.random()>0.3){
+								this.playerClick(e.id,p.x-e.x+p.vx*7-e.vx,p.y-e.y+p.vy*7-e.vy,"tlpt")
+								entity.reloading = 12
+							} else {
+								entity.reloading = 0
+								this.playerClick(e.id,p.x-e.x+p.vx*7-e.vx,p.y-e.y+p.vy*7-e.vy,"dril")
+							}
 						} else{
 							this.playerClick(e.id,p.x-e.x+p.vx*2,p.y-e.y+p.vy*2,Math.random()>0.2?"scat":"grnd")
 						}
@@ -1638,14 +1648,17 @@ class shooter2C{
 			entity.fireRange = 1000
 			entity.reloadMultiplier = 2.5
 			entity.findTarget = (e)=>{
-				if(e.target && this.players[e.target]&& !this.players[e.target].dead && distance(e.x,e.y,this.players[e.target].x,this.players[e.target].y < e.range)){
+				if(Math.random()>0.05&&e.target && this.players[e.target]&& !this.players[e.target].dead && distance(e.x,e.y,this.players[e.target].x,this.players[e.target].y < e.range)){
 					return(e.target)
 				}
 				e.target = undefined
+				let ldst = Infinity
 				Object.values(this.players).forEach((E)=>{
 					if(e == E || (e.team && e.team == E.team)){return}
-					if(!E.dead &&distance(e.x,e.y,E.x,E.y)< e.range){
+						let dst = distance(e.x,e.y,E.x,E.y)
+					if(!E.dead && dst < e.range && dst < ldst){
 						e.target = E.id
+						ldst = dst
 					}
 				})
 				return(e.target)
@@ -1669,6 +1682,62 @@ class shooter2C{
 				e.doWithTarget(e)
 			
 			}
+		}else if(type == "tank1"){
+			 entity = this.initiateEntity("tank")
+			entity.x = Math.random()*1500-750
+			entity.y = Math.random()*1500-750
+			entity.lead = 2
+			entity.range = 3500
+			entity.fireRange = 1000
+			entity.reloadMultiplier = 2.5
+			entity.burst = 3
+			entity.randomMovement = Math.random()*20
+			entity.findTarget = (e)=>{
+				if(Math.random()>0.05&&e.target && this.players[e.target]&& !this.players[e.target].dead && distance(e.x,e.y,this.players[e.target].x,this.players[e.target].y < e.range)){
+					return(e.target)
+				}
+				e.target = undefined
+				let ldst = Infinity
+				Object.values(this.players).forEach((E)=>{
+					if(e == E || (e.team && e.team == E.team)){return}
+						let dst = distance(e.x,e.y,E.x,E.y)
+					if(!E.dead && dst < e.range && dst < ldst){
+						e.target = E.id
+						ldst = dst
+					}
+				})
+				return(e.target)
+			}
+			entity.doWithTarget = (e)=>{
+				if(e.target&&this.players[e.target]){
+					let p = this.players[e.target]
+					let dst = distance(e.x,e.y,p.x,p.y)
+					if(dst > 300){
+						e.tv = [(p.x-e.x)/dst*3+Math.random()*entity.randomMovement-entity.randomMovement/2, (p.y-e.y)/dst*3+Math.random()*entity.randomMovement-entity.randomMovement/2]
+					}
+					if(dst < e.fireRange && entity.reloading < 1){
+						let vvx = entity.vx
+						let vvy = entity.vy
+						this.playerClick(e.id,p.x-e.x+Math.random()*144-72+p.vx*e.lead,p.y-e.y+Math.random()*144-72+p.vy*e.lead,"cnon")
+						entity.vx = vvx
+						entity.vy = vvy
+						if(entity.burst){
+							entity.burst -= 1
+							entity.reloading = 5
+						} else {
+							entity.burst = 3
+							entity.reloading = 40
+						}
+					}
+				} else {
+					e.tv = [0,0]
+				}
+			}
+			entity.ai = (e)=>{
+				e.findTarget(e)
+				e.doWithTarget(e)
+			
+			}
 		}else if(type == "snpr1"){
 			 entity = this.initiateEntity("snpr")
 			entity.x = Math.random()*1500-750
@@ -1678,14 +1747,17 @@ class shooter2C{
 			entity.fireRange = 2000
 			entity.reloadMultiplier = 2.5
 			entity.findTarget = (e)=>{
-				if(e.target && this.players[e.target]&& !this.players[e.target].dead && distance(e.x,e.y,this.players[e.target].x,this.players[e.target].y < e.range)){
+				if(Math.random()>0.05&&e.target && this.players[e.target]&& !this.players[e.target].dead && distance(e.x,e.y,this.players[e.target].x,this.players[e.target].y < e.range)){
 					return(e.target)
 				}
 				e.target = undefined
+				let ldst = Infinity
 				Object.values(this.players).forEach((E)=>{
 					if(e == E || (e.team && e.team == E.team)){return}
-					if(!E.dead &&distance(e.x,e.y,E.x,E.y)< e.range){
+						let dst = distance(e.x,e.y,E.x,E.y)
+					if(!E.dead && dst < e.range && dst < ldst){
 						e.target = E.id
+						ldst = dst
 					}
 				})
 				return(e.target)
@@ -1727,14 +1799,17 @@ class shooter2C{
 				this.placeWall(entity.id,entity.x+e[0],entity.y+e[1],entity.x+e[2],entity.y+e[3],"metl",{"id":entity.id,"force":true,"attach":true})
 			})
 			entity.findTarget = (e)=>{
-				if(e.target && this.players[e.target]&& !this.players[e.target].dead && distance(e.x,e.y,this.players[e.target].x,this.players[e.target].y < e.range)){
+				if(Math.random()>0.05&&e.target && this.players[e.target]&& !this.players[e.target].dead && distance(e.x,e.y,this.players[e.target].x,this.players[e.target].y < e.range)){
 					return(e.target)
 				}
 				e.target = undefined
+				let ldst = Infinity
 				Object.values(this.players).forEach((E)=>{
 					if(e == E || (e.team && e.team == E.team)){return}
-					if(!E.dead &&distance(e.x,e.y,E.x,E.y)< e.range){
+						let dst = distance(e.x,e.y,E.x,E.y)
+					if(!E.dead && dst < e.range && dst < ldst){
 						e.target = E.id
+						ldst = dst
 					}
 				})
 				return(e.target)
