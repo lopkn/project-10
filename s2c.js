@@ -558,6 +558,24 @@ class shooter2C{
 					"frad":x2
 				}
 				break;
+			case "spawnpad":
+				this.walls[a] = {
+					"type":"whol","x":x1,"y":y1,"radius":360,"velmult":0.98,
+					"midpt":[x1,y1],"handle":"whol","hp":1000,
+					"defense":0.2,
+					"frad":x2,"onDeath":(w,b)=>{this.delWall(a)},
+					"spawns":["ntri6","ntri6","ntri6","ntri6","ntri6"]
+					
+				}
+				this.walldo[a] = (t)=>{
+						let w = this.walls[a]
+						if(!w.entity || !this.players[w.entity]){
+						let rnd = w.spawns[Math.floor(Math.random()*w.spawns.length)]
+						w.entity = this.entityTemplates(rnd,2,{"team":"zombiePad","x":x1+Math.random()*150-75,"y":y1+Math.random()*150-75}).id
+						this.players[w.entity].speed *= 1+Math.random()
+					}
+				}
+				break;
 			case "ghol":
 				this.walls[a] = {
 					"type":"ghol","x":x1,"y":y1,"radius":460,"velmult":0.98,
@@ -774,7 +792,7 @@ class shooter2C{
 			this.players[id] = {"reloading":0,"unmovePos":[0,0],"rotation":[0,1],
 			"boidyVect":[[10,40,30,-30],[30,-30,-30,-30],[-30,-30,-10,40],[-10,40,10,40],[-70,45,-10,57],[10,57,70,45]],
 			"boidy":[],"x":410,"y":410,"vx":0,"vy":0,"hp":100,"id":id,"keys":{},
-			"materials":100,"speed":0.5,"tracking":true,"boidyAll":4
+			"materials":100,"speed":0.5,"tracking":false,"boidyAll":4
 			}
 			io.to(id).emit("spec",["zoom",0.8])
 			let a = this.placeWall(id,0,0,0,0,"player",{"id":id,"force":true},{"defense":3})
@@ -799,7 +817,7 @@ class shooter2C{
 			this.players[id] = {"reloading":0,"unmovePos":[0,0],"rotation":[0,1],
 		"boidyVect":[[10,-40,30,30],[30,30,-30,30],[-30,30,-10,-40],[-10,-40,10,-40]],
 		"boidy":[],"x":410,"y":410,"vx":0,"vy":0,"hp":100,"id":id,"keys":{},
-		"materials":100,"speed":0.5,"tracking":true,"boidyAll":4
+		"materials":100,"speed":0.5,"tracking":false,"boidyAll":4
 		}
 		io.to(id).emit("spec",["zoom",0.8])
 		let a = this.placeWall(id,410,390,395,425,"player",{"id":id,"force":true},{"defense":3})
@@ -817,7 +835,7 @@ class shooter2C{
 			this.players[id] = {"reloading":0,"unmovePos":[0,0],"rotation":[0,1],
 		"boidyVect":[[0,-50,0,70],[0,-15,-23,-35],[0,20,40,-20],[40,-20,0,-50]],
 		"boidy":[],"x":410,"y":410,"vx":0,"vy":0,"hp":100,"id":id,"keys":{},
-		"materials":100,"speed":0.35,"tracking":true,"boidyAll":4
+		"materials":100,"speed":0.35,"tracking":false,"boidyAll":4
 		}
 		io.to(id).emit("spec",["zoom",0.5])
 		let a = this.placeWall(id,410,390,395,425,"player",{"id":id,"force":true},{"defense":3})
@@ -836,7 +854,7 @@ class shooter2C{
 			this.players[id] = {"reloading":0,"unmovePos":[0,0],"rotation":[0,1],
 				"boidyVect":[],
 				"boidy":[],"x":410,"y":410,"vx":0,"vy":0,"hp":100,"id":id,"keys":{},
-				"materials":100,"speed":2,"boidyAll":-1,"dead":true,"spectator":true,"minRadius":1,"currentRadius":1,"tracking":true
+				"materials":100,"speed":2,"boidyAll":-1,"dead":true,"spectator":true,"minRadius":1,"currentRadius":1,"tracking":false
 			}
 			io.to(id).emit("spec",["zoom",0.6])
 		}
@@ -1425,6 +1443,9 @@ class shooter2C{
 			b.shooter = ""
 		this.walls[wid].hp -= 1
 		if(this.walls[wid].hp < 0){
+			if(this.walls[wid].onDeath !== undefined){
+				this.walls[wid].onDeath(this.walls[wid],b)
+			}
 			delete this.walls[wid]
 			this.wallPushers[wid] = "_DEL"
 			return(false)
@@ -1432,9 +1453,12 @@ class shooter2C{
 		this.updateWallHP(wid)
 		return(true)
 		} else if(this.walls[wid].type == "whol"){
-			b.shooter = ""
+			// b.shooter = ""
 		this.walls[wid].hp -= 1
 		if(this.walls[wid].hp < 0){
+			if(this.walls[wid].onDeath !== undefined){
+				this.walls[wid].onDeath(this.walls[wid],b)
+			}
 			delete this.walls[wid]
 			this.wallPushers[wid] = "_DEL"
 			return(false)
@@ -1445,6 +1469,9 @@ class shooter2C{
 			// b.shooter = ""
 		this.walls[wid].hp -= 1
 		if(this.walls[wid].hp < 0){
+			if(this.walls[wid].onDeath !== undefined){
+				this.walls[wid].onDeath(this.walls[wid],b)
+			}
 			delete this.walls[wid]
 			this.wallPushers[wid] = "_DEL"
 			return(false)
@@ -1599,7 +1626,7 @@ class shooter2C{
 	}
 
 	static changeTeam(p,team){
-		p.color = Math.floor(this.stringToRandomNumber(p.team))
+		p.color = Math.floor(this.stringToRandomNumber(p.team)*360)
 		this.entityPushers.push({"type":"team","c":p.color,"id":p.id})
 	}
 
@@ -1611,7 +1638,7 @@ class shooter2C{
 				type = list[Math.floor(Math.random()*list.length)]
 			}
 
-		if(type == "ntri1" || type == undefined || type == "ntri2" || type == "ntri3" || type=="ntri4" || type =="ntri5"){
+		if(type == "ntri1" || type == undefined || type == "ntri2" || type == "ntri3" || type=="ntri4" || type =="ntri5" || type == "ntri6"){
 			 entity = this.initiateEntity()
 			entity.x = Math.random()*1500-750
 			entity.y = Math.random()*1500-750
@@ -1622,6 +1649,7 @@ class shooter2C{
 			entity.reloadMultiplier = 1
 			entity.retargeting = 0.05
 			if(type == "ntri5"){entity.retargeting = 0.5}
+			if(type == "ntri6"){entity.speed = 0.2;entity.fireRange = 200;entity.pullx*=1+Math.random();entity.pull5*=1+Math.random()}
 			entity.findTarget = (e)=>{
 				if(Math.random()>entity.retargeting&&e.target && this.players[e.target]&& !this.players[e.target].dead && distance(e.x,e.y,this.players[e.target].x,this.players[e.target].y < e.range)){
 					return(e.target)
@@ -1642,7 +1670,7 @@ class shooter2C{
 				if(e.target&&this.players[e.target]){
 					let p = this.players[e.target]
 					let dst = distance(e.x,e.y,p.x,p.y)
-					if(dst > 300){
+					if(dst > 300 || dst > entity.fireRange){
 						e.tv = [(p.x-e.x)/dst*3+Math.random()-0.5-e.pullx, (p.y-e.y)/dst*3+Math.random()-0.5-e.pully]
 					}
 					if(dst < e.fireRange){
@@ -1678,6 +1706,11 @@ class shooter2C{
 							} else {
 								entity.reloading = 0
 								this.playerClick(e.id,p.x-e.x+p.vx*7-e.vx,p.y-e.y+p.vy*7-e.vy,"dril")
+							}
+						} else if(type == "ntri6"){
+							if(entity.reloading < 1 && Math.random()>0.3){
+								this.playerClick(e.id,p.x-e.x+p.vx*7-e.vx,p.y-e.y+p.vy*7-e.vy,"dril")
+								entity.reloading = 12
 							}
 						} else{
 							this.playerClick(e.id,p.x-e.x+p.vx*2,p.y-e.y+p.vy*2,Math.random()>0.2?"scat":"grnd")
