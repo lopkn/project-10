@@ -123,13 +123,14 @@ weaponInfo = {
 	"heal":{"repeating":2},
 	"dril":{"repeating":2},
 	"lzr2":{"repeating":2},
+	"fire":{"repeating":2},
 	"zapr":{"repeating":3},
 	"mchg":{"repeating":3}
 
 }
 
 class player{
-	static debugging = true
+	static debugging = false
 	static keyholder = false
 	static dataNodes = []
 	static packetSec = []
@@ -140,6 +141,7 @@ class player{
 	static gridSize = 80
 	static weaponCounter = 1
 	static weaponMin = 1
+	static wallMin = 1
 	static weaponDict = {"1":"norm","2":"scat","3":"lazr","4":"cnon","5":"heal","6":"grnd","7":"msl","8":"dril",
 											"9":"msl2","10":"snpr","11":"lzr2","12":"mchg","13":"zapr","14":"dbgd","15":"kbml",
 											"16":"vipr","17":"tlpt","18":"trak"
@@ -706,15 +708,15 @@ document.addEventListener("keydown",(e)=>{
   		break;
   	case "z":
   		player.wallCounter -= 1
-  		if(player.wallCounter < 1){
-  			player.wallCounter = Object.values(player.wallDict).length 
+  		if(player.wallCounter < player.wallMin){
+  			player.wallCounter = Object.values(player.wallDict).length + player.wallMin-1
   		}
   		player.wall = player.wallDict[player.wallCounter]
   		break;
   	case "c":
   		player.wallCounter += 1
-  		if(player.wallCounter > Object.values(player.wallDict).length){
-  			player.wallCounter = 1
+  		if(player.wallCounter > Object.values(player.wallDict).length+ player.wallMin-1){
+  			player.wallCounter = player.wallMin
   		}
   		player.wall = player.wallDict[player.wallCounter]
   		break;
@@ -746,6 +748,12 @@ document.addEventListener("keydown",(e)=>{
   		player.weaponDict["-4"] = "zapr2"
   		player.weaponDict["-5"] = "scat2"
   		player.weaponDict["-6"] = "unloader"
+
+  		player.wallMin = -2
+  		player.wallDict["0"] = "spawnpad"
+  		player.wallDict["-1"] = "grv1"
+  		player.wallDict["-2"] = "grv2"
+
   		break;
   	case "F1":
   		window.localStorage.setItem("playerType",prompt("type?"))
@@ -998,7 +1006,7 @@ init()
 Mobile.init()
 Mobile.draw()
 
-ALTF3()
+// ALTF3()
 
 function ranrange(x){
 	return(Math.random()*x-x/2)

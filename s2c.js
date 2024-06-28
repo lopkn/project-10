@@ -32,6 +32,23 @@ class shooter2C{
 				this.bullets.push({"shooter":id,"type":"norm","x":x,"y":y,"vx":vx,"vy":vy,"wallMult":1,
 					"lingerance":10,"tailLength":10,"tail":[],"life":2000,"slowd":0.95})
 				break;
+			case "fire":
+				this.bullets.push({"shooter":id,"type":"norm","x":x,"y":y,"vx":vx,"vy":vy,"wallMult":0,"ignoreWallMult":1,
+					"lingerance":10,"tailLength":10,"tail":[],"life":Math.floor(Math.random()*10)+10,"slowd":0.5,"dmgmult":4,
+					"tick":(b)=>{
+						b.vx += Math.random()*12-6
+						b.vy += Math.random()*12-6
+						b.vx *= 1.4-Math.random()*0.8
+						b.vy *= 1.4-Math.random()*0.8
+					},
+					"onHit":(w,b,i)=>{
+						i.vx *= 0.5
+						i.vy *= 0.5
+						i.vx += Math.random()*120-60
+						i.vy += Math.random()*120-60
+					}
+				})
+				break;
 			case "scat":
 				this.bullets.push({"shooter":id,"type":"scat","x":x,"y":y,"vx":vx,"vy":vy,"wallMult":1,
 					"tailLength":6,"dmgmult":3,"lingerance":6,"tail":[],"life":2000,"slowd":0.95})
@@ -94,7 +111,7 @@ class shooter2C{
 							a.tailLength = 6; a.lingerance = 6;
 
 					}
-							io.to("G10.2").emit("particle",[{"type":"explosion","x":b.x,"y":b.y}])
+					io.to("G10.2").emit("particle",[{"type":"explosion","x":b.x,"y":b.y}])
 					Object.values(this.players).forEach((e)=>{
 								if(e.dead){return}
 								let dst = distance(e.x,e.y,b.x,b.y)
@@ -105,6 +122,25 @@ class shooter2C{
 									e.vy += Math.max(-min, Math.min((e.y-b.y)*inverse*inverse*5000/e.weight*e.speed, min))
 								}
 							})
+
+				}
+				})
+				break;
+			case "grnd2":
+				this.bullets.push({"shooter":id,"type":"grnd","x":x,"y":y,"vx":vx,"vy":vy,"wallMult":1,"deathVel":10,
+					"lingerance":4,"dmgmult":0,"tailLength":4,"tail":[],"life":2000,"slowd":0.82,"extra":{"tailmult":8},
+					"onDeath":(b)=>{
+						
+						this.KBR(b.x,b.y)
+							
+						for(let i = 0; i < 20; i++){let a = this.pushBullet(b.x,b.y,Math.random()*400-200,Math.random()*400-200,b.shooter,"norm")
+							a.slowd = 0.5
+							a.dmgmult = 10
+							a.extra = {"tailmult":3,"tailLength":6}
+							a.tailLength = 6; a.lingerance = 6;
+
+					}
+							
 
 				}
 				})
@@ -195,7 +231,7 @@ class shooter2C{
 				break;
 			case "spawner":
 				if(!this.keyholders[id]){return}
-				let rndlist = ["shld1","snpr1","ntri1","ntri2","ntri3","ntri4","shld"]
+				let rndlist = ["shld1","snpr1","ntri1","ntri2","ntri3","ntri4","ntri6"]
 				let rnd = rndlist[Math.floor(Math.random()*rndlist.length)]
 				let en = this.entityTemplates(rnd,2,{"team":"spawner1","x":x+Math.random()*3000-1500,"y":Math.random()*3000-1500+y})
 				en.reloadMultiplier = 3
@@ -264,6 +300,7 @@ class shooter2C{
 	static playerLook(p,x,y){
 		let n = vectorFuncs.originVectorNormalize(x-p.x,y-p.y)
 		p.rotation = [n[0],n[1]]
+		p.unmovePos[2] = true
 	}
 
 	static playerClick(id,x,y,w){
@@ -323,10 +360,16 @@ class shooter2C{
 				this.pushBullet(p.x,p.y,(n[2]-p.x)*1100,(n[3]-p.y)*1100,id,"lzr2")
 				break;
 			case "cnon":
-				p.vx -= (n[2]-p.x)*10
-				p.vy -= (n[3]-p.y)*10
+				// p.vx -= (n[2]-p.x)*10
+				// p.vy -= (n[3]-p.y)*10
+				this.KB(p,(n[2]-p.x)*-10,(n[3]-p.y)*-10)
 				this.pushBullet(p.x,p.y,(n[2]-p.x)*100,(n[3]-p.y)*100,id,"cnon")
 		reload += 10
+				break;
+			case "fire":
+				this.KB(p,-(n[2]-p.x),-(n[3]-p.y))
+				this.pushBullet(p.x,p.y,(n[2]-p.x)*200+Math.random()*100-50,(n[3]-p.y)*200+Math.random()*100-50,id,"fire")
+		reload += 2
 				break;
 			case "heal":
 				this.pushBullet(p.x,p.y,(n[2]-p.x)*160,(n[3]-p.y)*160,id,"heal")
@@ -336,6 +379,11 @@ class shooter2C{
 				break;
 			case "grnd":
 				this.pushBullet(p.x,p.y,(n[2]-p.x)*80+p.vx,(n[3]-p.y)*80+p.vy,id,"grnd")
+		reload += 20
+		p.materials -= 5
+				break;
+			case "grnd2":
+				this.pushBullet(p.x,p.y,(n[2]-p.x)*80+p.vx,(n[3]-p.y)*80+p.vy,id,"grnd2")
 		reload += 20
 		p.materials -= 5
 				break;
@@ -782,7 +830,7 @@ class shooter2C{
 
 			let a = this.placeWall(id,410,390,395,425,"player",{"id":id,"force":true})
 			this.players[id].boidy.push(a)
-			 a = this.placeWall(id,425,425,395,425,"player",{"id":id,"force":true})
+			 a = this.placeWall(id,425,425,395,425,"player",{"id":id,"force":true},{"defense":3})
 			 this.players[id].boidy.push(a)
 
 			 a = this.placeWall(id,410,390,425,425,"player",{"id":id,"force":true})
@@ -870,6 +918,7 @@ class shooter2C{
 		})
 
 		this.players[id].weight = 1
+		this.players[id].horsePower = 1
 		this.players[id].tv = [0,0]
 
 		this.players[id].color = Math.floor(this.stringToRandomNumber(this.players[id].team?this.players[id].team:id)*360)
@@ -971,9 +1020,11 @@ class shooter2C{
 				ttv = vectorNormalize([0,0,tv[0],tv[1]])
 			}
 			 
-		
-			p.vx += ttv[2]*p.speed/p.weight
-			p.vy += ttv[3]*p.speed/p.weight
+			let movepower = p.weight/p.horsePower
+			if(movepower<1){movepower = 1}
+
+			p.vx += ttv[2]*p.speed/movepower
+			p.vy += ttv[3]*p.speed/movepower
 			p.vx *= 0.97
 			p.vy *= 0.97
 
@@ -1265,7 +1316,7 @@ class shooter2C{
 					lastCol[tj] = "single"
 
 					let WALL = this.walls[tj]
-					B.onHit?B.onHit(WALL,B):0
+					B.onHit?B.onHit(WALL,B,i):0
 					let angleDamageMult = 1
 					let DAM;
 					if(B.unBouncer === undefined){
@@ -1638,7 +1689,7 @@ class shooter2C{
 				type = list[Math.floor(Math.random()*list.length)]
 			}
 
-		if(type == "ntri1" || type == undefined || type == "ntri2" || type == "ntri3" || type=="ntri4" || type =="ntri5" || type == "ntri6"){
+		if(type.substring(0,4) == "ntri"){
 			 entity = this.initiateEntity()
 			entity.x = Math.random()*1500-750
 			entity.y = Math.random()*1500-750
@@ -1650,6 +1701,17 @@ class shooter2C{
 			entity.retargeting = 0.05
 			if(type == "ntri5"){entity.retargeting = 0.5}
 			if(type == "ntri6"){entity.speed = 0.2;entity.fireRange = 200;entity.pullx*=1+Math.random();entity.pull5*=1+Math.random()}
+			if(type == "ntri7"){
+				let wallPlies = [[-80,-80,80,-80,"rflc"],[-40,-40,0,40],[0,40,40,-40],[-40,0,0,40],[0,40,40,0],[80,0,0,40],[0,40,-80,0],[-40,40,0,80],[0,80,40,40],[-40,80,0,120],[0,120,40,80]]
+
+			wallPlies.forEach((e)=>{
+				this.placeWall(entity.id,entity.x+e[0],entity.y+e[1],entity.x+e[2],entity.y+e[3],(e[4]?e[4]:"metl"),{"id":entity.id,"force":true,"attach":true})
+			})
+				
+			}
+			if(type == "ntri8"){
+				entity.fireRange = 300
+			}
 			entity.findTarget = (e)=>{
 				if(Math.random()>entity.retargeting&&e.target && this.players[e.target]&& !this.players[e.target].dead && distance(e.x,e.y,this.players[e.target].x,this.players[e.target].y < e.range)){
 					return(e.target)
@@ -1664,6 +1726,7 @@ class shooter2C{
 						ldst = dst
 					}
 				})
+				if(e.target!==undefined){this.playerLook(entity,this.players[e.target].x,this.players[e.target].y)}
 				return(e.target)
 			}
 			entity.doWithTarget = (e)=>{
@@ -1712,6 +1775,16 @@ class shooter2C{
 								this.playerClick(e.id,p.x-e.x+p.vx*7-e.vx,p.y-e.y+p.vy*7-e.vy,"dril")
 								entity.reloading = 12
 							}
+						} else if(type == "ntri8"){
+							let vvx = e.vx
+							let vvy = e.vy
+							for(let i = 0; i < 2; i++){
+								this.playerClick(e.id,p.x-e.x+p.vx*3-e.vx,p.y-e.y+p.vy*3-e.vy,"fire")
+								entity.reloading = 0
+							}
+							e.vx = vvx*0.5+e.vx*0.5
+							e.vy = vvy*0.5+e.vy*0.5
+								entity.reloading = 1
 						} else{
 							this.playerClick(e.id,p.x-e.x+p.vx*2,p.y-e.y+p.vy*2,Math.random()>0.2?"scat":"grnd")
 						}
@@ -1747,6 +1820,7 @@ class shooter2C{
 						ldst = dst
 					}
 				})
+				if(e.target!==undefined){this.playerLook(entity,this.players[e.target].x,this.players[e.target].y)}
 				return(e.target)
 			}
 			entity.doWithTarget = (e)=>{
@@ -1768,7 +1842,7 @@ class shooter2C{
 				e.doWithTarget(e)
 			
 			}
-		}else if(type == "tank1" || type == "tank2"){
+		}else if(type.substring(0,4)=="tank"){
 			 entity = this.initiateEntity("tank")
 			entity.x = Math.random()*1500-750
 			entity.y = Math.random()*1500-750
@@ -1777,9 +1851,20 @@ class shooter2C{
 			entity.fireRange = 1000
 			entity.antirecoil = (type == "tank1")
 			entity.weapon = "cnon"
+			entity.aimDeviation = 140
+			entity.burst = entity.maxburst = 3
 			if(type == "tank2"){entity.fireRange = 400;entity.weapon = "scat2"}
+			if(type == "tank3"){
+				let wallPlies = [[-80,-80,80,-80,"rflc"],[-40,-40,0,40],[0,40,40,-40],[-40,0,0,40],[0,40,40,0],[80,0,0,40],[0,40,-80,0],[-40,40,0,80],[0,80,40,40],[-40,80,0,120],[0,120,40,80]]
+
+					wallPlies.forEach((e)=>{
+						this.placeWall(entity.id,entity.x+e[0],entity.y+e[1],entity.x+e[2],entity.y+e[3],(e[4]?e[4]:"metl"),{"id":entity.id,"force":true,"attach":true})
+					})
+					entity.maxburst = 1
+					entity.weight = 20
+					entity.aimDeviation = 15
+			}
 			entity.reloadMultiplier = 2.5
-			entity.burst = 3
 			entity.randomMovement = Math.random()*20
 			entity.findTarget = (e)=>{
 				if(Math.random()>0.05&&e.target && this.players[e.target]&& !this.players[e.target].dead && distance(e.x,e.y,this.players[e.target].x,this.players[e.target].y < e.range)){
@@ -1795,6 +1880,9 @@ class shooter2C{
 						ldst = dst
 					}
 				})
+				if(e.target!==undefined){
+					this.playerLook(entity,this.players[e.target].x,this.players[e.target].y)
+				}
 				return(e.target)
 			}
 			entity.doWithTarget = (e)=>{
@@ -1807,7 +1895,7 @@ class shooter2C{
 					if(dst < e.fireRange && entity.reloading < 1){
 						let vvx = entity.vx
 						let vvy = entity.vy
-						this.playerClick(e.id,p.x-e.x+Math.random()*144-72+p.vx*e.lead,p.y-e.y+Math.random()*144-72+p.vy*e.lead,entity.weapon)
+						this.playerClick(e.id,p.x-e.x+Math.random()*e.aimDeviation-e.aimDeviation/2+p.vx*e.lead,p.y-e.y+Math.random()*e.aimDeviation-e.aimDeviation/2+p.vy*e.lead,entity.weapon)
 						if(entity.antirecoil){
 							entity.vx = vvx
 							entity.vy = vvy
@@ -1817,7 +1905,7 @@ class shooter2C{
 							entity.burst -= 1
 							entity.reloading = 5
 						} else {
-							entity.burst = 3
+							entity.burst = entity.maxburst
 							entity.reloading = 40
 						}
 					}
@@ -1838,10 +1926,12 @@ class shooter2C{
 			entity.range = 7500
 			entity.fireRange = 2000
 			entity.reloadMultiplier = 2.5
+			entity.path = []
 			entity.findTarget = (e)=>{
 				if(Math.random()>0.05&&e.target && this.players[e.target]&& !this.players[e.target].dead && distance(e.x,e.y,this.players[e.target].x,this.players[e.target].y < e.range)){
 					return(e.target)
 				}
+				let prevtarget = e.target
 				e.target = undefined
 				let ldst = Infinity
 				Object.values(this.players).forEach((E)=>{
@@ -1852,19 +1942,30 @@ class shooter2C{
 						ldst = dst
 					}
 				})
+				if(e.target!==undefined){
+					this.playerLook(entity,this.players[e.target].x,this.players[e.target].y)
+				}
 				return(e.target)
 			}
 			entity.doWithTarget = (e)=>{
 				if(e.target&&this.players[e.target]){
 					let p = this.players[e.target]
 					let dst = distance(e.x,e.y,p.x,p.y)
-					if(dst > 1400){
+					if(dst > 1400 || entity.obscured){
 						e.tv = [(p.x-e.x)/dst*3+Math.random()*14-7, (p.y-e.y)/dst*3+Math.random()*14-7]
+						if(entity.obscured){
+							e.tv = [-e.tv[1],e.tv[0]]
+						}
 					} else {
 						e.tv = [-(p.x-e.x)/dst*3+Math.random()*14-7, -(p.y-e.y)/dst*3+Math.random()*14-7]
 					}
-					if(dst < e.fireRange){
-						this.playerClick(e.id,p.x-e.x+Math.random()*70-35+p.vx*e.lead,p.y-e.y+Math.random()*70-35+p.vy*e.lead,"snpr")
+					if( entity.reloading < 1 && dst < e.fireRange) {
+						if(!this.aimWallCheck(entity,this.players[e.target])){
+							this.playerClick(e.id,p.x-e.x+Math.random()*70-35+p.vx*e.lead,p.y-e.y+Math.random()*70-35+p.vy*e.lead,"snpr")
+							entity.obscured = false
+						} else {
+							entity.obscured = true
+						}
 					}
 				} else {
 					e.tv = [0,0]
@@ -1904,6 +2005,9 @@ class shooter2C{
 						ldst = dst
 					}
 				})
+				if(e.target!==undefined){
+					this.playerLook(entity,this.players[e.target].x,this.players[e.target].y)
+				}
 				return(e.target)
 			}
 			entity.doWithTarget = (e)=>{
@@ -1949,8 +2053,8 @@ class shooter2C{
 	}
 
 	static KB(player,vx,vy){
-		player.vx += vx * player.weight * player.speed
-		player.vy += vy * player.weight * player.speed
+		player.vx += vx / player.weight * player.speed
+		player.vy += vy / player.weight * player.speed
 	}
 
 	static KBR(x,y){
@@ -1983,6 +2087,33 @@ class shooter2C{
 								}
 							})
 	}
+
+	static aimWallCheck(TPP,op,shx,shy){
+
+
+		if(shx === undefined && shy === undefined){
+			shx = op.x
+			shy = op.y
+		}
+
+			let plid = TPP.id //player id
+			let distanceToPlayer = distance(TPP.x,TPP.y,shx,shy)
+
+				let obwl = Object.values(this.walls)
+				let willCollide = false
+				for(let j = 0; j < obwl.length; j++){
+					let W = obwl[j]
+					if(op.id === W.plid || plid === W.plid){
+						continue;
+					}
+					let col = this.pointLineCollision(TPP.x,TPP.y,shx,shy,W.x1,W.y1,W.x2,W.y2)
+					if(col !== "none" && col[4] && distanceToPlayer > distance(TPP.x,TPP.y,col[0],col[1])){
+						willCollide = true
+						break;
+					}
+				}
+				return(willCollide)
+			}
 
 }
 
