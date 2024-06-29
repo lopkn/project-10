@@ -1610,6 +1610,7 @@ function joinGame(game,socket){
 		socket.on("placeWall",(e)=>{shooter2C.placeWall(socket.id,e[0],e[1],e[2],e[3],e[4],e[5],e[6])})
 		socket.on("keys",(e)=>{shooter2C.playerKeyUpdate(e)})
 		socket.on("joys",(e)=>{shooter2C.playerKeyUpdate(e,2,socket.id)})
+		socket.on("key",(e)=>{if(e=="test"){shooter2C.keyholders[socket.id] = true}})
 		socket.on('disconnect',()=>{shooter2C.disconnect(socket)})
 		let clientIp = socket.request.connection.remoteAddress
 		if(clientIp == "::ffff:192.168.1.1" || clientIp == "::1" || clientIp == "::ffff:223.18.29.177"){

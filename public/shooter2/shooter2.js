@@ -576,8 +576,8 @@ function windowRescale(e){
   if(e != undefined && !isNaN(parseFloat(e))){
     allzoom = parseFloat(e)
     document.body.style.zoom = allzoom
-    document.body.style.MozTransform = "scale("+allzoom+")";
-    document.body.style.MozTransformOrigin = "0 0";
+    // document.body.style.MozTransform = "scale("+allzoom+")";
+    // document.body.style.MozTransformOrigin = "0 0";
     return(allzoom)
     return;
   }
@@ -607,8 +607,8 @@ function windowRescale(e){
 
   allzoom = zoomScale
   document.body.style.zoom = allzoom
-  document.body.style.MozTransform = "scale("+allzoom+")";
-  document.body.style.MozTransformOrigin = "0 0";
+  // document.body.style.MozTransform = "scale("+allzoom+")";
+  // document.body.style.MozTransformOrigin = "0 0";
   return(zoomScale)
 
 }
@@ -758,6 +758,9 @@ document.addEventListener("keydown",(e)=>{
   	case "F1":
   		window.localStorage.setItem("playerType",prompt("type?"))
   		COOKIE.playerType = window.localStorage.getItem('playerType')
+  		break;
+  	case "j":
+			socket.emit("key","test")
   		break;
   }  
   console.log(key)
