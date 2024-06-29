@@ -1504,7 +1504,7 @@ ten.io = io
 ArgAccel.setio(io)
 re8.setio(io)
 shooter2C.setio(io,myMath)
-sa
+
 // socket = io("https://home.unsown.top")
 
 io.sockets.on('connection', newConnection)
@@ -1609,7 +1609,7 @@ function joinGame(game,socket){
 		socket.on("click",(e)=>{shooter2C.playerClick(e[0],e[1],e[2],e[3]);})
 		socket.on("placeWall",(e)=>{shooter2C.placeWall(socket.id,e[0],e[1],e[2],e[3],e[4],e[5],e[6])})
 		socket.on("keys",(e)=>{shooter2C.playerKeyUpdate(e)})
-		socket.on("joys",(e)=>{shooter2C.playerKeyUpdate(e,2,socket.id)})
+		socket.on("joys",(e)=>{shooter2C.playerKeyUpdate(e,1,socket.id)})
 		socket.on("key",(e)=>{if(e=="test"){shooter2C.keyholders[socket.id] = true}})
 		socket.on('disconnect',()=>{shooter2C.disconnect(socket)})
 		let clientIp = socket.request.connection.remoteAddress

@@ -298,7 +298,7 @@ function tick(){
 
 	mainCTX.clearRect(0,0,840,840)
 
-	if(Mobile.initialized){Mobile.draw();socket.emit("joys",[Mobile.joystick_move.vect,Mobile.joystick_fire.vect])}
+	// if(Mobile.initialized){Mobile.draw();socket.emit("joys",[Mobile.joystick_move.vect,Mobile.joystick_fire.vect])}
 	socket.emit("keys",[ID,keyHolds]) //inefficient!!!!!!!!!!!!!!!!!!!!!!! 
 
 	if(player.clickheld && weaponInfo[player.weaponDict[player.weaponCounter]]?.repeating &&cttr%weaponInfo[player.weaponDict[player.weaponCounter]]?.repeating === 0){
@@ -1006,8 +1006,8 @@ init()
 	}
 }
 
-Mobile.init()
-Mobile.draw()
+// Mobile.init()
+// Mobile.draw()
 
 // ALTF3()
 

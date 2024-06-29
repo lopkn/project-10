@@ -251,10 +251,11 @@ class shooter2C{
 					"deathTimer":1,"lingerance":4,"dmgmult":0,"tailLength":4,"tail":[],"life":50,"slowd":1.18,"extra":{"tailmult":8},"date":Date.now(),
 					"onDeath":(b)=>{
 						let dd = Date.now()
+						let dmg = b.dmg?b.dmg:((dd-b.date)*(dd-b.date)/250000)
 							for(let i = 0; i < 20; i++){let a = this.pushBullet(b.x,b.y,Math.random()*300-150+vx*0.1,Math.random()*300-150+vy*0.1,b.shooter,"norm")
 							a.slowd = 0.5
 							a.life = 50
-							a.dmgmult = ((dd-b.date)*(dd-b.date)/250000)
+							a.dmgmult = dmg
 							a.extra = {"tailmult":3,"tailLength":6}
 							a.tailLength = 6; a.lingerance = 6;
 							}
@@ -423,12 +424,14 @@ class shooter2C{
 				p.materials += 100
 				break;
 			case "kbml":
-				this.pushBullet(p.x,p.y,(n[2]-p.x)*380+p.vx,(n[3]-p.y)*380+p.vy,id,"kbml").slowd = 1
+				let b = this.pushBullet(p.x,p.y,(n[2]-p.x)*380+p.vx,(n[3]-p.y)*380+p.vy,id,"kbml")
+				b.slowd = 1
+				b.dmg = 2.3
 				reload += 40
 				p.materials -= 30
 				break;
 			case "kbml2":
-				this.pushBullet(p.x,p.y,(n[2]-p.x)*80+p.vx,(n[3]-p.y)*80+p.vy,id,"kbml")
+				this.pushBullet(p.x,p.y,(n[2]-p.x)*80+p.vx,(n[3]-p.y)*80+p.vy,id,"kbml").deathTimer = 5
 				reload += 2
 				p.materials -= 1
 				break;
@@ -1008,7 +1011,7 @@ class shooter2C{
 				continue
 				}
 
-			if(!p.entity && p.tv[2] ){p.tv = [0,0]}
+			if(!p.entity /*&& !p.tv[2]*/ ){p.tv = [0,0]}
 			let tv = p.tv
 			if(p.keys.w == "a"){
 				tv[1] -= 1
