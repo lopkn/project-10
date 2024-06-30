@@ -298,7 +298,7 @@ function tick(){
 
 	mainCTX.clearRect(0,0,840,840)
 
-	// if(Mobile.initialized){Mobile.draw();socket.emit("joys",[Mobile.joystick_move.vect,Mobile.joystick_fire.vect])}
+	if(Mobile.initialized){Mobile.draw();socket.emit("joys",[Mobile.joystick_move.vect,Mobile.joystick_fire.vect])}
 	socket.emit("keys",[ID,keyHolds]) //inefficient!!!!!!!!!!!!!!!!!!!!!!! 
 
 	if(player.clickheld && weaponInfo[player.weaponDict[player.weaponCounter]]?.repeating &&cttr%weaponInfo[player.weaponDict[player.weaponCounter]]?.repeating === 0){
@@ -860,14 +860,25 @@ function touchHandler(e)
       if(e.type == "touchstart"){
       	if(e.target == Mobile.canvas){
       		let E = touches[touches.length-1]
-      		if(E.pageX/allzoom < 400){
+      		// if(E.pageX/allzoom < 400){
+
+      		// Mobile.activeTouches[E.identifier].type = "joystick_move"
+      		// Mobile.activeTouches[E.identifier].color = "green"
+      		// 	} else {
+      		// Mobile.activeTouches[E.identifier].type = "joystick_fire"
+      		// Mobile.activeTouches[E.identifier].color = "red"
+      		// 	}
+
+      		if(distance(Mobile.joystick_move.mx,Mobile.joystick_move.my,E.pageX,E.pageY) < Mobile.joystick_move.r){
 
       		Mobile.activeTouches[E.identifier].type = "joystick_move"
       		Mobile.activeTouches[E.identifier].color = "green"
-      			} else {
+      			} else if(distance(Mobile.joystick_fire.mx,Mobile.joystick_fire.my,E.pageX,E.pageY) < Mobile.joystick_fire.r){
       		Mobile.activeTouches[E.identifier].type = "joystick_fire"
       		Mobile.activeTouches[E.identifier].color = "red"
       			}
+
+
       	} else if(e.target == myCanvas){
       		Mobile.activeTouches[E.identifier].type = "mainCanvas"
       		Mobile.activeTouches[E.identifier].color = "purple"
