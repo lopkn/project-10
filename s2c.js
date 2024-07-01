@@ -7,6 +7,13 @@ function distance(x1,y1,x2,y2) {
   return(Math.sqrt(a*a+b*b))
 }
 
+let vectorNormalize;
+let vectorFuncs;
+function copyFuncs(v,v2){
+	vectorNormalize = v
+	vectorFuncs = v2
+}
+
 class shooter2C{
 	static walls = {}
 	static bullets = []
@@ -19,9 +26,10 @@ class shooter2C{
 	static massPushers = {"specific":{},"general":{}}
 
 	static nuuIDGEN = 0
-	static setio(i,m){
+	static setio(i,m,v,v2){
 		io = i
 		myMath = m
+		copyFuncs(v,v2)
 	}
 
 	static pushBullet(x,y,vx,vy,id,type){
