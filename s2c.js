@@ -278,7 +278,7 @@ class shooter2C{
 							// 	}
 							// })
 							// io.to("G10.2").emit("particle",[{"type":"explosion","x":b.x,"y":b.y}])
-							this.KBR(b.x,b.y,{"pkb":0.25,"noBulletBounce":true})
+							this.KBR(b.x,b.y,{"pkb":0.7,"noBulletBounce":true,"playerBounceMax":30})
 						
 					}
 				})
@@ -2142,7 +2142,7 @@ class shooter2C{
 				let dst = distance(e.x,e.y,b.x,b.y)
 				if(dst<900){
 					let inverse = 1/dst
-					let min = 50
+					let min = options.bulletBounceMax?options.bulletBounceMax:50
 					e.vx += Math.max(-min, Math.min((e.x-b.x)*inverse*inverse*15000, min))
 					e.vy += Math.max(-min, Math.min((e.y-b.y)*inverse*inverse*15000, min))
 				}
@@ -2156,7 +2156,7 @@ class shooter2C{
 			let dst = distance(e.x,e.y,b.x,b.y)
 			if(dst<500){
 				let inverse = 1/dst
-				let min = 50
+				let min = options.playerBounceMax?options.playerBounceMax:50
 				e.vx += Math.max(-min, Math.min((e.x-b.x)*inverse*inverse*playerKBpower/e.weight*e.speed, min))
 				e.vy += Math.max(-min, Math.min((e.y-b.y)*inverse*inverse*playerKBpower/e.weight*e.speed, min))
 			}
@@ -2189,7 +2189,7 @@ class shooter2C{
 					}
 				}
 				return(willCollide)
-			}
+	}
 
 }
 
