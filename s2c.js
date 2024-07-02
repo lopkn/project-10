@@ -238,10 +238,21 @@ class shooter2C{
 				})
 				break;
 			case "spawner":
+			case "spawner2":
 				if(!this.keyholders[id]){return}
 				let rndlist = ["shld1","snpr1","ntri1","ntri2","ntri3","ntri4","ntri6"]
+				let team = type
+				if(type == "spawner2"){
+					rndlist.push("ntri5")
+					rndlist.push("ntri7")
+					rndlist.push("ntri8")
+					rndlist.push("tank1")
+					rndlist.push("tank2")
+					rndlist.push("tank3")
+					team = Math.random()
+				}
 				let rnd = rndlist[Math.floor(Math.random()*rndlist.length)]
-				let en = this.entityTemplates(rnd,2,{"team":"spawner1","x":x+Math.random()*3000-1500,"y":Math.random()*3000-1500+y})
+				let en = this.entityTemplates(rnd,2,{"team":tean,"x":x+Math.random()*3000-1500,"y":Math.random()*3000-1500+y})
 				en.reloadMultiplier = 3
 				en.speed = 0.6
 				break;
@@ -294,6 +305,17 @@ class shooter2C{
 				break;
 			case "tlpt":
 				this.bullets.push({"shooter":id,"type":"tlpt","x":x,"y":y,"vx":vx*2,"vy":vy*2,"wallMult":0,"deathVel":10,"ignoreWallMult":-0.9,
+					"lingerance":4,"dmgmult":0,"tailLength":4,"tail":[],"life":100,"slowd":0.6,"extra":{"tailmult":1},"deathVel":2000,
+					"onDeath":(b)=>{
+						if(!this.players[id]){return}
+						this.players[id].x = b.x
+						this.players[id].y = b.y
+					}
+				})
+				break;
+			case "dbtp":
+				if(!this.keyholders[id]){return}
+				this.bullets.push({"shooter":id,"type":"tlpt","x":x,"y":y,"vx":vx*2000,"vy":vy*2000,"wallMult":0,"deathVel":10,"ignoreWallMult":-0.9,
 					"lingerance":4,"dmgmult":0,"tailLength":4,"tail":[],"life":100,"slowd":0.6,"extra":{"tailmult":1},"deathVel":2000,
 					"onDeath":(b)=>{
 						if(!this.players[id]){return}
@@ -625,6 +647,8 @@ class shooter2C{
 				}
 				break;
 			case "spawnpad":
+			case "spawnpad2":
+				let team = type
 				this.walls[a] = {
 					"type":"whol","x":x1,"y":y1,"radius":360,"velmult":0.98,
 					"midpt":[x1,y1],"handle":"whol","hp":1000,
@@ -633,11 +657,15 @@ class shooter2C{
 					"spawns":["ntri6","ntri6","ntri6","ntri6","ntri6"]
 					
 				}
+				if(type == "spawnpad2"){
+					team = Math.random()+""
+					this.walls[a].spawns = ["ntri1","ntri2","ntri3","ntri4","ntri6","tank1","ntri7","tank2","snpr1","shld1"]
+				}
 				this.walldo[a] = (t)=>{
 						let w = this.walls[a]
 						if(!w.entity || !this.players[w.entity]){
 						let rnd = w.spawns[Math.floor(Math.random()*w.spawns.length)]
-						w.entity = this.entityTemplates(rnd,2,{"team":"zombiePad","x":x1+Math.random()*150-75,"y":y1+Math.random()*150-75}).id
+						w.entity = this.entityTemplates(rnd,2,{"team":team,"x":x1+Math.random()*150-75,"y":y1+Math.random()*150-75}).id
 						this.players[w.entity].speed *= 1+Math.random()
 					}
 				}

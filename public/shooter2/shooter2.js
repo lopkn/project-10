@@ -20,6 +20,7 @@ socket.on("cameraUp",(e)=>{cameraX = e[0]-canvasDimensions[2];cameraY = e[1]-can
 
 
 socket.on("mass",(e)=>{MASS(e)})
+socket.on("pong",(e)=>{player.ping = Date.now()-e})
 
 
 function MASS(e){
@@ -132,6 +133,7 @@ weaponInfo = {
 class player{
 	static debugging = false
 	static keyholder = false
+	static ping = 100;
 	static dataNodes = []
 	static packetSec = []
 	static weapon = "norm"
@@ -548,6 +550,15 @@ for(let i = map.particles.length-1; i > -1; i--){
 	mainCTX.fillText("position: "+Math.floor(cameraX/20)+" "+Math.floor(cameraY/20),20,770)
 	mainCTX.fillText("materials: "+player.materials,320,770)
 	mainCTX.fillText("tick: "+(Date.now()- tickTimeTracker)+"ps-"+player.packetSec.length,620,770)
+	if(player.debugging){
+	mainCTX.fillStyle = "rgba("+(150+ala*55)+","+(150+ala*55)+",0,"+(alb*0.2+0.8)+")"
+		mainCTX.fillText("ping: "+player.ping,20,740)
+		if(cttr%50 == 0){
+			socket.emit("ping",Date.now())
+		}
+		// mainCTX.fillText("materials: "+player.materials,320,770)
+		// mainCTX.fillText("tick: "+(Date.now()- tickTimeTracker)+"ps-"+player.packetSec.length,620,770)
+	}
 	let dn = Date.now()
 	for(let i = player.packetSec.length-1; i>-1; i--){
 		if(player.packetSec[i] < dn){
@@ -1020,7 +1031,8 @@ init()
 // Mobile.init()
 // Mobile.draw()
 
-// ALTF3()
+ALTF3()
+player.debugging = true
 
 function ranrange(x){
 	return(Math.random()*x-x/2)

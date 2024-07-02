@@ -1605,6 +1605,7 @@ function joinGame(game,socket){
 		socket.join("G10.2")
 		io.to(socket.id).emit("acknowledge G10.2",socket.id)
 		
+		socket.on("ping",(e)=>{io.to(socket.id).emit("pong",e)})
 		socket.on("initiate",(e)=>{shooter2C.initiatePlayer(socket.id,e)})
 		socket.on("click",(e)=>{shooter2C.playerClick(e[0],e[1],e[2],e[3]);})
 		socket.on("placeWall",(e)=>{shooter2C.placeWall(socket.id,e[0],e[1],e[2],e[3],e[4],e[5],e[6])})
