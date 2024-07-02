@@ -784,11 +784,40 @@ document.addEventListener("keyup",(e)=>{
   let key = e.key
   delete keyHolds[key]
   if(key == "r"){
-  	if(player.snapping){
+  	// if(player.snapping){
+  	// 	placing[1] += player.gridSize/2
+  	// 	placing[2] += player.gridSize/2
+  	// 	let mx = (mouseX-mid[2])/player.zoom-player.zoomR/player.zoom+cameraX+player.gridSize/2
+  	// 	let my = mouseY/player.zoom-player.zoomR/player.zoom+cameraY+player.gridSize/2
+  	// 	if(placing[1] < 0){
+  	// 		placing[1] -= player.gridSize
+  	// 	}
+  	// 	if(placing[2] < 0){
+  	// 		placing[2] -= player.gridSize
+  	// 	}
+  	// 	if(mx < 0){
+  	// 		mx -= player.gridSize
+  	// 	}
+  	// 	if(my < 0){
+  	// 		my -= player.gridSize
+  	// 	}
+  	// 	//idfk where this 10 came from
+  	// 	socket.emit("placeWall",[placing[1]+10-(placing[1]%player.gridSize),placing[2]+10-(placing[2]%player.gridSize),mx+10-(mx%player.gridSize),my+10-(my%player.gridSize),player.wall,{"regen":10}])
+  	// } else {
+  	// socket.emit("placeWall",[placing[1],placing[2],(mouseX-mid[2])/player.zoom-player.zoomR/player.zoom+cameraX,mouseY/player.zoom-player.zoomR/player.zoom+cameraY,player.wall])}
+  	// placing = [false]
+  	buildWall(mouseX,mouseY)
+  }
+
+
+})
+
+function buildWall(x,y){
+	if(player.snapping){
   		placing[1] += player.gridSize/2
   		placing[2] += player.gridSize/2
-  		let mx = (mouseX-mid[2])/player.zoom-player.zoomR/player.zoom+cameraX+player.gridSize/2
-  		let my = mouseY/player.zoom-player.zoomR/player.zoom+cameraY+player.gridSize/2
+  		let mx = (x-mid[2])/player.zoom-player.zoomR/player.zoom+cameraX+player.gridSize/2
+  		let my = y/player.zoom-player.zoomR/player.zoom+cameraY+player.gridSize/2
   		if(placing[1] < 0){
   			placing[1] -= player.gridSize
   		}
@@ -804,12 +833,11 @@ document.addEventListener("keyup",(e)=>{
   		//idfk where this 10 came from
   		socket.emit("placeWall",[placing[1]+10-(placing[1]%player.gridSize),placing[2]+10-(placing[2]%player.gridSize),mx+10-(mx%player.gridSize),my+10-(my%player.gridSize),player.wall,{"regen":10}])
   	} else {
-  	socket.emit("placeWall",[placing[1],placing[2],(mouseX-mid[2])/player.zoom-player.zoomR/player.zoom+cameraX,mouseY/player.zoom-player.zoomR/player.zoom+cameraY,player.wall])}
+  	socket.emit("placeWall",[placing[1],placing[2],(x-mid[2])/player.zoom-player.zoomR/player.zoom+cameraX,y/player.zoom-player.zoomR/player.zoom+cameraY,player.wall])
+  	}
   	placing = [false]
-  }
-
-
-})
+  
+}
 
 
 
@@ -848,6 +876,7 @@ function updateParticles(arr){
 
 function touchHandler(e)
 {
+	e.preventDefault()
 	let touches = e.changedTouches,
         first = touches[0]
 
@@ -868,9 +897,14 @@ function touchHandler(e)
 
 
 
+
+
       if(e.type == "touchstart"){
-      	if(e.target == Mobile.canvas){
       		let E = touches[touches.length-1]
+      		let x = E.pageX/allzoom
+      		let y = E.pageY/allzoom
+      	if(e.target == Mobile.canvas){
+      		
       		// if(E.pageX/allzoom < 400){
 
       		// Mobile.activeTouches[E.identifier].type = "joystick_move"
@@ -880,19 +914,26 @@ function touchHandler(e)
       		// Mobile.activeTouches[E.identifier].color = "red"
       		// 	}
 
-      		if(distance(Mobile.joystick_move.mx,Mobile.joystick_move.my,E.pageX,E.pageY) < Mobile.joystick_move.r){
+      		if(distance(Mobile.joystick_move.mx,Mobile.joystick_move.my,E.pageX/allzoom,E.pageY/allzoom) < Mobile.joystick_move.r){
 
       		Mobile.activeTouches[E.identifier].type = "joystick_move"
       		Mobile.activeTouches[E.identifier].color = "green"
-      			} else if(distance(Mobile.joystick_fire.mx,Mobile.joystick_fire.my,E.pageX,E.pageY) < Mobile.joystick_fire.r){
+      			} else if(distance(Mobile.joystick_fire.mx,Mobile.joystick_fire.my,E.pageX/allzoom,E.pageY/allzoom) < Mobile.joystick_fire.r){
       		Mobile.activeTouches[E.identifier].type = "joystick_fire"
       		Mobile.activeTouches[E.identifier].color = "red"
+      			} else if(x > Mobile.scroller_weapon.x && y > Mobile.scroller_weapon.y && x < Mobile.scroller_weapon.x+Mobile.scroller_weapon.w && y < Mobile.scroller_weapon.y+Mobile.scroller_weapon.h){
+      		Mobile.activeTouches[E.identifier].type = "scroller_weapon"
+      		Mobile.activeTouches[E.identifier].color = "purple"
+      		Mobile.scroller_weapon.startx = x
+      		Mobile.scroller_weapon.oldval = Mobile.scroller_weapon.val
       			}
 
 
       	} else if(e.target == myCanvas){
       		Mobile.activeTouches[E.identifier].type = "mainCanvas"
-      		Mobile.activeTouches[E.identifier].color = "purple"
+      		Mobile.activeTouches[E.identifier].color = "orange"
+  				placing = [true,(x-mid[2])/player.zoom-player.zoomR/player.zoom+cameraX,y/player.zoom-player.zoomR/player.zoom+cameraY]
+
       	}
       }
 
@@ -925,6 +966,13 @@ function touchHandler(e)
     			Mobile.ctx.stroke()
     		} else if(EUID.type == "joystick_fire"){
     			Mobile.joystick_fire.vect = [x-Mobile.joystick_fire.mx,y-Mobile.joystick_fire.my]
+    		}else if(EUID.type == "scroller_weapon"){
+    			Mobile.scroller_weapon.val = Mobile.scroller_weapon.oldval + Math.floor((x-Mobile.scroller_weapon.startx)/20)
+  				player.weapon = player.weaponDict[Mobile.scroller_weapon.val]
+  				player.weaponCounter = Mobile.scroller_weapon.val
+    		}else if (EUID.type == "mainCanvas"){
+    			// placing[3] = x
+    			// placing[4] = y
     		}
 
 
@@ -933,6 +981,7 @@ function touchHandler(e)
   } else {
     		for(let i = 0; i < touches.length; i++){
     			let E = touches[i]
+    			let x = E.pageX/allzoom, y = E.pageY/allzoom
     			let EUID = Mobile.activeTouches[E.identifier]
 
     		if(EUID.type == "joystick_move"){Mobile.joystick_move.vect = [0,0]}
@@ -941,6 +990,8 @@ function touchHandler(e)
 					socket.emit("click",[ID,Mobile.joystick_fire.vect[0],Mobile.joystick_fire.vect[1],player.weapon])
 					Mobile.joystick_fire.vect = [0,0]
 					// console.log(Mobile.joystick_fire[0]+mid[0],Mobile.joystick_fire[1]+mid[1])
+    		} else if (EUID.type == "mainCanvas"){
+    			buildWall(x,y)
     		}
     		delete Mobile.activeTouches[E.identifier]
     	}
@@ -952,15 +1003,19 @@ function touchHandler(e)
 
 
 
-    if(e.type == "touchend"){
+    // if(e.type == "touchend"){
 
-       }
+    //    }
 
 
     
 	e.preventDefault()
 }
-
+function distance(x1,y1,x2,y2) {
+	let a = x2-x1
+	let b = y2-y1
+  return(Math.sqrt(a*a+b*b))
+}
 
 function init() 
 {
@@ -978,6 +1033,7 @@ function init()
 class Mobile {
 	static joystick_move = {"mx":185,"my":821,"x":100,"y":100,"r":100,"vect":[0,0]}
 	static joystick_fire = {"mx":600,"my":100,"x":600,"y":100,"r":100,"vect":[0,0]}
+	static scroller_weapon = {"x":40,"y":60,"w":170,"h":40,"val":0}
 	static activeTouches = {}
 	static canvas;
 	static initialized = false
@@ -992,8 +1048,14 @@ class Mobile {
 		mobileCanvas.style.top = "0px"
 		mobileCanvas.style.left = "0px"
 		mobileCanvas.id = "mcanvas"
-		mobileCanvas.style.userSelect = "none"
+		mobileCanvas.style.userSelect = "none" //gay
 		mobileCanvas.style.touchAction = "none"
+		mobileCanvas.addEventListener("contextmenu",(e)=>{e.preventDefault()})
+		myCanvas.addEventListener("contextmenu",(e)=>{e.preventDefault()})
+		myCanvas.style.touchAction = "none"
+		myCanvas.style.userSelect = "none" //gay
+		myCanvas.classList.add("mobile")
+		mobileCanvas.classList.add("mobile")
 		this.ctx = mobileCanvas.getContext("2d")
 		this.canvas = mobileCanvas
 		document.body.insertBefore(mobileCanvas,myCanvas)
@@ -1004,7 +1066,7 @@ class Mobile {
 		this.joystick_fire.my = r.bottom - this.joystick_move.r-75
 		this.joystick_fire.mx = r.left + r.width + this.joystick_move.r + 25
 		console.log(r)
-init()
+		init()
 
 	}
 	static draw(){
@@ -1023,13 +1085,19 @@ init()
 				mainCTX.fillStyle = "rgba(255,0,0,0.5)"
 				mainCTX.fillRect(this.joystick_fire.vect[0]*4-5+canvasDimensions[2],this.joystick_fire.vect[1]*4-5+canvasDimensions[3],10,10)
 			}
+
+		this.ctx.fillStyle = "#777777"
+		this.ctx.fillRect(this.scroller_weapon.x,this.scroller_weapon.y,this.scroller_weapon.w,this.scroller_weapon.h)
+		this.ctx.fillStyle = "#FFFFFF"
+		this.ctx.font = "28px Arial"
+		this.ctx.fillText(this.scroller_weapon.val,this.scroller_weapon.x+this.scroller_weapon.w/2,this.scroller_weapon.y+this.scroller_weapon.h/1.5)
 		
 
 	}
 }
 
-// Mobile.init()
-// Mobile.draw()
+Mobile.init()
+Mobile.draw()
 
 ALTF3()
 player.debugging = true

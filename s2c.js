@@ -1047,7 +1047,7 @@ class shooter2C{
 				continue
 				}
 
-			if(!p.entity /*&& !p.tv[2]*/ ){p.tv = [0,0]}
+			if(!p.entity && !p.tv[2] ){p.tv = [0,0]}
 			let tv = p.tv
 			if(p.keys.w == "a"){
 				tv[1] -= 1
@@ -1667,6 +1667,7 @@ class shooter2C{
 	static playerKeyUpdate(e,mobile,id){
 		if(mobile){
 			this.players[id].tv = e[0]
+			this.players[id].tv[2] = true
 		} else {
 			this.players[e[0]].keys = e[1] // can fix id later
 		}
