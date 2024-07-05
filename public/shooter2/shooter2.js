@@ -926,6 +926,11 @@ function touchHandler(e)
       		Mobile.activeTouches[E.identifier].color = "purple"
       		Mobile.scroller_weapon.startx = x
       		Mobile.scroller_weapon.oldval = Mobile.scroller_weapon.val
+      			} else if(x > Mobile.scroller_wall.x && y > Mobile.scroller_wall.y && x < Mobile.scroller_wall.x+Mobile.scroller_wall.w && y < Mobile.scroller_wall.y+Mobile.scroller_wall.h){
+      		Mobile.activeTouches[E.identifier].type = "scroller_wall"
+      		Mobile.activeTouches[E.identifier].color = "purple"
+      		Mobile.scroller_wall.startx = x
+      		Mobile.scroller_wall.oldval = Mobile.scroller_wall.val
       			}
 
 
@@ -970,6 +975,10 @@ function touchHandler(e)
     			Mobile.scroller_weapon.val = Mobile.scroller_weapon.oldval + Math.floor((x-Mobile.scroller_weapon.startx)/20)
   				player.weapon = player.weaponDict[Mobile.scroller_weapon.val]
   				player.weaponCounter = Mobile.scroller_weapon.val
+    		}else if(EUID.type == "scroller_wall"){
+    			Mobile.scroller_wall.val = Mobile.scroller_wall.oldval + Math.floor((x-Mobile.scroller_wall.startx)/20)
+  				player.wall = player.wallDict[Mobile.scroller_wall.val]
+  				player.wallCounter = Mobile.scroller_wall.val
     		}else if (EUID.type == "mainCanvas"){
     			// placing[3] = x
     			// placing[4] = y
@@ -1034,6 +1043,7 @@ class Mobile {
 	static joystick_move = {"mx":185,"my":821,"x":100,"y":100,"r":100,"vect":[0,0]}
 	static joystick_fire = {"mx":600,"my":100,"x":600,"y":100,"r":100,"vect":[0,0]}
 	static scroller_weapon = {"x":40,"y":60,"w":170,"h":40,"val":0}
+	static scroller_wall = {"x":(window.innerWidth-10-170)/allzoom,"y":60,"w":170,"h":40,"val":0}
 	static activeTouches = {}
 	static canvas;
 	static initialized = false
@@ -1088,9 +1098,11 @@ class Mobile {
 
 		this.ctx.fillStyle = "#777777"
 		this.ctx.fillRect(this.scroller_weapon.x,this.scroller_weapon.y,this.scroller_weapon.w,this.scroller_weapon.h)
+		this.ctx.fillRect(this.scroller_wall.x,this.scroller_wall.y,this.scroller_wall.w,this.scroller_wall.h)
 		this.ctx.fillStyle = "#FFFFFF"
 		this.ctx.font = "28px Arial"
 		this.ctx.fillText(this.scroller_weapon.val,this.scroller_weapon.x+this.scroller_weapon.w/2,this.scroller_weapon.y+this.scroller_weapon.h/1.5)
+		this.ctx.fillText(this.scroller_wall.val,this.scroller_wall.x+this.scroller_wall.w/2,this.scroller_wall.y+this.scroller_wall.h/1.5)
 		
 
 	}

@@ -70,6 +70,8 @@ let final = 0
 let rec = new webkitSpeechRecognition()
 rec.onresult = (e)=>{recf(e)}
     
+let restartAMT = 2000;
+
 rec.onend=()=>{rec.start();console.log("restart");
 
   final = 0; 
@@ -78,7 +80,13 @@ rec.onend=()=>{rec.start();console.log("restart");
       moveCaretToEnd(myrec)
     }
   storestring = ""
+  restartAMT -= 1
+  if(restartAMT < 0){
+    rec.onend = ()=>{}
+  }
 }
+
+
 rec.continuous = true
 rec.interimResults = true
 rec.maxAlternatives = 3
@@ -133,9 +141,14 @@ function recf(e){
     }
 
 
+    result = resultDecoder(result)
+
     span.innerHTML = result
+
+
+
     if(AUTO){
-      socket.emit("text",e.results[final][0].transcript)
+      // socket.emit("text",e.results[final][0].transcript)
     }
 
     last = span
@@ -151,6 +164,41 @@ if(moveEnd){
     whiteText()
   }
 
+}
+
+function resultDecoder(r){
+  // let letter = ""
+  // if(r[0] != " " && r[1] == " "){
+  //   letter = letter = r[0]
+  // }
+  // for(let i = 1; i < r.length; i++){
+  //   if(r[i] != " " && r[i+1] == " "&& r[i-1] == " "){
+  //     letter = letter + r[i]
+  //     i++
+  //     continue
+  //   }
+  // }
+  // return()
+  let split = r.split(" ")
+  let arr = []
+  split.forEach((e)=>{
+    if(e.length !== 1){
+      if(arr[arr.length-1]?.spaced && e == "space"){
+        arr[arr.length-1].spaced = false
+        return
+      }
+      arr.push({"text":e,"spaced":false})
+    } else {
+      if(arr[arr.length-1]?.spaced){
+        arr[arr.length-1].text += e
+      } else {
+        arr.push({"text":(" "+e),"spaced":true})
+      }
+    }
+  })
+  arr.forEach((e,i)=>{arr[i] = e.text})
+  console.log(arr.join(" "),r)
+  return(arr.join(" "))
 }
 
 function whiteText(){
@@ -182,11 +230,16 @@ function interm(){
     if(lower.includes("translate chinese")){
       rec.lang = "zh-yue"
       restart()
+    }if(lower.includes("translate cantonese")){
+      rec.lang = "yue-Hant-HK"
+      restart()
     } else if(lower.includes("英")){
       rec.lang = "en-ca"
       restart()
     } else if(lower.includes("clip")){
       localStorage.setItem('storage', myrec.innerText);
+    } else if(lower.includes("toggle auto")){
+      AUTO = !AUTO
     }
     if(myterm.children.length == 0 || span.innerHTML != myterm.firstChild.innerHTML ){
       document.getElementById("term").insertBefore(span,myterm.firstChild)
