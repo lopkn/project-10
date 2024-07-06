@@ -11,6 +11,15 @@ let myCanvas = document.getElementById("myCanvas")
   myCanvas.style.top = "0px"
   myCanvas.style.left = "0px"
 
+
+
+
+
+
+
+
+
+
 let myrec = document.getElementById("final")
 
   myrec.width = "80%"
@@ -33,7 +42,29 @@ let ctx = document.getElementById("myCanvas").getContext("2d")
 let mouseX = 0
 let mouseY = 0
 let moveEnd = false
+let autoEnter = false
 onmousemove = (e)=>{mouseX = (e.clientX); mouseY = (e.clientY)}
+
+
+
+
+if ('speechSynthesis' in window) {
+  // Create a new SpeechSynthesisUtterance instance
+  var message = new SpeechSynthesisUtterance();
+  message.voice = speechSynthesis.getVoices()[3];
+
+}
+
+
+function speak(str){
+  message.rate = 1
+  message.voice = speechSynthesis.getVoices()[3];
+  message.text = str;
+  speechSynthesis.cancel()
+  speechSynthesis.speak(message)
+}
+
+
 
 const socket = io.connect('/')
 
@@ -145,10 +176,14 @@ function recf(e){
 
     span.innerHTML = result
 
-
-
-    if(AUTO){
-      // socket.emit("text",e.results[final][0].transcript)
+    let lower = result.toLowerCase()
+    if(lower.includes("toggle auto")){
+      AUTO = !AUTO
+    } else if(lower.includes("toggle enter")){
+      autoEnter = !autoEnter
+      console.log('hi')
+    } else if(AUTO){
+      socket.emit("text",{"text":result,"enter":autoEnter})
     }
 
     last = span
@@ -186,6 +221,9 @@ function resultDecoder(r){
       if(arr[arr.length-1]?.spaced && e == "space"){
         arr[arr.length-1].spaced = false
         return
+      }
+      if(arr[arr.length-1]?.spaced && arr[arr.length-1]?.text.length==2){
+        arr[arr.length-1].text = arr[arr.length-1].text[1] 
       }
       arr.push({"text":e,"spaced":false})
     } else {
@@ -238,8 +276,6 @@ function interm(){
       restart()
     } else if(lower.includes("clip")){
       localStorage.setItem('storage', myrec.innerText);
-    } else if(lower.includes("toggle auto")){
-      AUTO = !AUTO
     }
     if(myterm.children.length == 0 || span.innerHTML != myterm.firstChild.innerHTML ){
       document.getElementById("term").insertBefore(span,myterm.firstChild)

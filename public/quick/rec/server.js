@@ -42,9 +42,15 @@ console.log("new short validation code: " +shortValidationCode)
 
 function newConnection(socket){
 	// socket.on('requestMap', sendMap)
-	socket.on("text",(e)=>{
+	socket.on("text",(a)=>{
+		let e = a.text
+		let enter = a.enter
 		e.replaceAll('"',"quotes")
+		if(a.enter){
 		exec('xdotool type "'+e+'" && xdotool key Return')
+	} else {
+		exec('xdotool type "'+e+'"')
+	}
 		if(e[0] != " "){e = " "+e}
 		fs.writeFileSync("textlog.txt","\n [" + Date.now()+"]" + e,{'flag':'a'}) 
 
