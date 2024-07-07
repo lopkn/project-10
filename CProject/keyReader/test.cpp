@@ -649,7 +649,7 @@ void executeCommandString(std::string str){
 	} else if (str == "autok"){
 		mast.autoK = !mast.autoK;
 		std::cout << ">autoK toggled: "<< mast.autoK <<"\n";
-		system("xdotool --repeat 7 --delay 0 BackSpace");
+		// system("xdotool key --repeat 7 --delay 0 BackSpace");
 		AK("test");
 	} else if (str == "rjump"){
 		mast.Rjump = !mast.Rjump;
@@ -976,6 +976,9 @@ void myDo(int x,std::string s1){
 			std::string s2 = "dummy=$( sleep "+ std::to_string(mast.autotimer) +" && sudo -u '#" + s1 +"' XDG_RUNTIME_DIR=/run/user/"+s1+" aplay "+wavFile+" 2>/dev/null) &";
 			int i3 = std::system(s2.c_str());
 			mast.autotimer = 0;
+		} else if(x == 25){
+			std::cout << "test\n"; 
+			execlp("bash", "bash", "-c", "paplay /tmp/output2.wav &", NULL);
 		}
 	}
 
