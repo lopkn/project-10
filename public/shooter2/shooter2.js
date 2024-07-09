@@ -136,7 +136,7 @@ class player{
 	static ping = 100;
 	static dataNodes = []
 	static packetSec = []
-	static weapon = "norm"
+	static weapon = "trav"
 	static materials = 100
 	static wall = "norm"
 	static snapping = false

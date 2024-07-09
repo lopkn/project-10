@@ -1038,7 +1038,7 @@ void myDo(int x,std::string s1){
 			system("xdotool key space");
 			usleep(5);
 			system("xdotool keydown shift &");
-			pressShiftKey();
+			// pressShiftKey();
 		} else if(x == 57){
 			if(!mast.stopsound){
 				// std::string s2 = "dummy=$(sleep 2 && sudo -u '#" + s1 +"' XDG_RUNTIME_DIR=/run/user/"+s1+" aplay jumpDing.wav 2>/dev/null) &";
@@ -1066,7 +1066,7 @@ void myDoU(int x){
 		} else if(x == 41){
 			std::cout << "upped\n";
 			system("xdotool keyup shift &");
-			releaseShiftKey();
+			// releaseShiftKey();
 		}
 	}
 }

@@ -81,7 +81,7 @@ function bstop(){
 
 	let di = document.createElement("div")
 	di.id = "result"
-	di.innerHTML = "your time ratio is: "+(diffratio.toFixed(3))+"<br>you clicked too "+(diffratio>1?"late":"soon")+" muahaha<br>you will die about "+((years-years*(diffratio>1?2-diffratio:diffratio)).toFixed(3))+" years earlier.<br>"+(diffratio>2?"you literally died like now you idiot":"")
+	di.innerHTML = "your time ratio is: "+(diffratio.toFixed(3))+"<br>you percieved time was "+(diffratio*10).toFixed(3)+" seconds.<br>you clicked too "+(diffratio>1?"late":"soon")+" muahaha<br>you will die about "+((years-years*(diffratio>1?2-diffratio:diffratio)).toFixed(3))+" years earlier.<br>"+(diffratio>2?"you literally died like now you idiot":"")
 	di.style.color = "white"
 	di.style.fontSize = "30px"
 	console.log(diffratio)

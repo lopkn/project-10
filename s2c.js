@@ -40,6 +40,11 @@ class shooter2C{
 				this.bullets.push({"shooter":id,"type":"norm","x":x,"y":y,"vx":vx,"vy":vy,"wallMult":1,
 					"lingerance":10,"tailLength":10,"tail":[],"life":2000,"slowd":0.95})
 				break;
+			case "trav":
+				this.bullets.push({"shooter":id,"type":"norm","x":x,"y":y,"vx":vx,"vy":vy,"wallMult":1,
+					"lingerance":10,"tailLength":10,"tail":[],"life":2000,"slowd":1,"dmgmult":-0.00001})
+				break;
+
 			case "fire":
 				this.bullets.push({"shooter":id,"type":"norm","x":x,"y":y,"vx":vx,"vy":vy,"wallMult":0,"ignoreWallMult":1,
 					"lingerance":10,"tailLength":10,"tail":[],"life":Math.floor(Math.random()*10)+10,"slowd":0.5,"dmgmult":4,
@@ -252,7 +257,7 @@ class shooter2C{
 					team = Math.random()
 				}
 				let rnd = rndlist[Math.floor(Math.random()*rndlist.length)]
-				let en = this.entityTemplates(rnd,2,{"team":tean,"x":x+Math.random()*3000-1500,"y":Math.random()*3000-1500+y})
+				let en = this.entityTemplates(rnd,2,{"team":team,"x":x+Math.random()*3000-1500,"y":Math.random()*3000-1500+y})
 				en.reloadMultiplier = 3
 				en.speed = 0.6
 				break;
@@ -356,6 +361,10 @@ class shooter2C{
 		switch(w){
 			case "norm":
 				this.pushBullet(p.x,p.y,(n[2]-p.x)*160,(n[3]-p.y)*160,id,"norm")
+				reload += 4
+				break;
+			case "trav":
+				this.pushBullet(p.x,p.y,(n[2]-p.x)*160,(n[3]-p.y)*160,id,"trav")
 				reload += 4
 				break;
 			case "mchg":
