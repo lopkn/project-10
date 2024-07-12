@@ -352,6 +352,28 @@ XColor * myXscan(int xstart, int ystart, int xwid = 20, int ywid = 20, int xskip
     return(scanArrP);
 }
 
+void myXscanReload(){
+	const int xskip = 3;
+	const int yskip = 3;
+	const int xstart = 1020;
+	const int ystart = 1020;
+	const int res = xwid*ywid;
+	XColor scanArr[res+xwid]; /// ??????!!!!!???
+	static XColor *scanArrP = scanArr;
+	XImage *image;
+    image = XGetImage (dpy, XRootWindow (dpy, dfs), xstart,ystart, xwid*xskip, ywid*yskip, AllPlanes, XYPixmap);
+
+	for(int i = 0; i < xwid; i++){
+		for(int j = 0; j < ywid; j++){
+			scanArr[i+j*xwid] = getPix(i*xskip,j*yskip,image);
+		}
+	}
+    XFree(image);
+
+    XQueryColors (dpy, XDefaultColormap(dpy, dfs), scanArr, res);
+    
+}
+
 void imageContrast(XColor * carr, int xwid, int ywid){
 	int res = xwid*ywid;
 	int outarr[res];
