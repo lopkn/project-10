@@ -359,6 +359,7 @@ void myXscanReload(){
 	const int ystart = 1020;
 	const int res = xwid*ywid;
 	XColor scanArr[res+xwid]; /// ??????!!!!!???
+	int scanArrInt[res+xwid];
 	static XColor *scanArrP = scanArr;
 	XImage *image;
     image = XGetImage (dpy, XRootWindow (dpy, dfs), xstart,ystart, xwid*xskip, ywid*yskip, AllPlanes, XYPixmap);
@@ -366,7 +367,10 @@ void myXscanReload(){
 	for(int i = 0; i < xwid; i++){
 		for(int j = 0; j < ywid; j++){
 			scanArr[i+j*xwid] = getPix(i*xskip,j*yskip,image);
+			scanArrInt[i+j*xwid] = scanArr[i+j*xwid].blue+scanArr[i+j*xwid].red+scanArr[i+j*xwid].green;
+			std::cout << scanArrInt[i+j*xwid];
 		}
+		std::cout << "\n"
 	}
     XFree(image);
 
