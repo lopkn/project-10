@@ -81,6 +81,39 @@ class explosionR{
 	}
 }
 
+let bloodTiles = {}
+
+function blood(amt,coordx,coordy,wall){
+	if(player.noBlood){return}
+
+	if(wall){
+		coordx = (wall.x1 + wall.x2)/2/player.gridSize
+		coordy = (wall.y1 + wall.y2)/2/player.gridSize
+	}
+
+	coordx = Math.floor(coordx)
+	coordy = Math.floor(coordy)
+
+	if(amt < 0.01){return}
+
+	// if(coordx < 0){coordx+=1}
+	// if(coordy < 0){coordy+=1}
+
+	let coord = coordx + "," + coordy
+	if(bloodTiles[coord]==undefined){
+		bloodTiles[coord] = {"amt":0,"x":coordx,"y":coordy}
+	}
+	bloodTiles[coord].amt += amt
+	if(bloodTiles[coord].amt > 0.7+Math.random()){
+			let leak = bloodTiles[coord].amt * (Math.random()*0.1+0.4)
+			bloodTiles[coord].amt -= leak
+			blood(leak,coordx+Math.random()*2-0.5,coordy+Math.random()*2-0.5)
+		
+	}
+	
+}
+
+
 let mid = [410,410]
 let canvasDimensions = [820,820,410,410]
 
@@ -140,6 +173,7 @@ class player{
 	static materials = 100
 	static wall = "norm"
 	static snapping = false
+	static noBlood = true
 	static gridSize = 80
 	static weaponCounter = 1
 	static weaponMin = 1
@@ -197,12 +231,19 @@ function upwalls2(e){
 	for(let i = 0; i < ob.length; i++){
 		let obj = e[ob[i]]
 		if(obj == "_DEL"){
+			blood(20,0,0,map.walls[ob[i]])
 			delete map.walls[ob[i]]
 
 			continue
 		}
 		if(obj["hpUpdate"]){
+			let originalHP = map.walls[ob[i]].hp
 			map.walls[ob[i]].hp = obj.hp
+			if(map.walls[ob[i]].attached){
+
+				let hpDiff = originalHP-obj.hp
+				blood(hpDiff*0.1,0,0,map.walls[ob[i]])
+			}
 			continue
 		} // remember to continue or else it will default to cloning
 		if(!map.walls[ob[i]]){map.walls[ob[i]] = {}} 
@@ -371,6 +412,14 @@ function tick(){
 
 // 	player.rezoom(player.zoom*player.levelTrip)
 	// mainCTX.stroke()
+
+	let bloodk = Object.values(bloodTiles)
+	bloodk.forEach((e)=>{
+		mainCTX.fillStyle = "rgba(255,0,0,"+e.amt+")"
+		mainCTX.fillRect((e.x*player.gridSize-cameraX+10)*player.zoom+player.zoomR,(e.y*player.gridSize-cameraY+10)*player.zoom+player.zoomR,player.gridSize*player.zoom,player.gridSize*player.zoom)
+		e.amt *= 0.98
+	})
+
 
 	mainCTX.strokeStyle = "#404040"
 	mainCTX.lineWidth = player.zoom>0.3?3:player.zoom*10
@@ -654,18 +703,18 @@ function drawDynam(dynam){
 		map.bullets.push(i)
 	})}
 }
-function drawWalls(e){
-	// console.log(e)
-	e.forEach((i)=>{
-		// let i = a[j]
-		mainCTX.beginPath()
-		mainCTX.lineWidth = 3
-		mainCTX.strokeStyle = "#FFFFFF"
-		mainCTX.moveTo(i.x1,i.y1)
-		mainCTX.lineTo(i.x2,i.y2)
-		mainCTX.stroke()
-	})
-}
+// function drawWalls(e){
+// 	// console.log(e)
+// 	e.forEach((i)=>{
+// 		// let i = a[j]
+// 		mainCTX.beginPath()
+// 		mainCTX.lineWidth = 3
+// 		mainCTX.strokeStyle = "#FFFFFF"
+// 		mainCTX.moveTo(i.x1,i.y1)
+// 		mainCTX.lineTo(i.x2,i.y2)
+// 		mainCTX.stroke()
+// 	})
+// }
 
 var mouseX = 0
 var mouseY = 0
