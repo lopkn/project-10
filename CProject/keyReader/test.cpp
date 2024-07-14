@@ -151,6 +151,8 @@ struct AST{
 	bool crosshair = true;
 
 	bool Rjump = true;
+	bool autoReload = false;
+	bool reloading = false;
 
 	bool autoK = true;
 
@@ -352,12 +354,13 @@ XColor * myXscan(int xstart, int ystart, int xwid = 20, int ywid = 20, int xskip
     return(scanArrP);
 }
 
-void myXscanReload(){
+bool myXscanReload(){
 	const int xskip = 3;
 	const int yskip = 3;
-	const int xstart = 100;
-	const int ystart = 100;
-	const int xwid = 20;
+	// 3460,1930,35*3,20*3
+	const int xstart = 3460;
+	const int ystart = 1930;
+	const int xwid = 35;
 	const int ywid = 20;
 	const int res = xwid*ywid;
 	XColor scanArr[res+xwid]; /// ??????!!!!!???
@@ -375,16 +378,49 @@ void myXscanReload(){
     XFree(image);
 
     XQueryColors (dpy, XDefaultColormap(dpy, dfs), scanArr, res);
+    int counter = 0;
     for(int i = 0; i < xwid; i++){
 		for(int j = 0; j < ywid; j++){
 			scanArrInt[i+j*xwid] = scanArr[i+j*xwid].blue/256+scanArr[i+j*xwid].red/256+scanArr[i+j*xwid].green/256;
 
 			// std::cout << myHeatDict2(scanArrInt[i+j*xwid]/3);
-			std::cout << scanArrInt[i+j*xwid]/3 << " ";
+			if(scanArrInt[i+j*xwid] > 530){
+				// std::cout <<"#";
+				counter++;
+			} else {
+				// std::cout <<" ";
+			}
 		}
-		std::cout << "\n";
+		// std::cout << "\n";
 	}
+	std::cout<<"counter: "<<counter<<"\n";
+	// || counter == 149
+	if(counter<100 ){
+		std::cout << "reload!\n";
+		return(true);
+	}
+	return(false);
     
+}
+
+void mainLoop(){
+	if(mast.autoReload){
+		bool reload = myXscanReload();
+		if(reload){
+			if(mast.reloading==false){
+				mast.reloading = true;
+				std::cout<<"reload NOW!\n";
+				system("xdotool mouseup 1");
+				usleep(3);
+				system("xdotool mousedown 7");
+				usleep(5);
+				system("xdotool mouseup 7 &");
+			}
+			
+		} else {
+			mast.reloading = false;
+		}
+	}
 }
 
 void imageContrast(XColor * carr, int xwid, int ywid){
@@ -1026,7 +1062,9 @@ void myDo(int x,std::string s1){
 			keysounds = 0;
 		}
 	} else if(inputMode == 0){ // 13 07 2024
-		if(x == 19){
+		if(x == 29){
+			mast.autoReload = true;
+			system("xdotool mousedown 1");
 			myXscanReload();
 		}
 	}
@@ -1114,6 +1152,10 @@ void myDoU(int x){
 			// releaseShiftKey();
 			system("xdotool mouseup 6 &");
 		}
+	}
+	if(x == 40 && mast.autoReload){
+		system("xdotool mouseup 1");
+			mast.autoReload = false;
 	}
 }
 
@@ -1347,6 +1389,7 @@ void myScreenThread(){
     while(1){
   
     	cairo_push_group(cr);
+    	mainLoop();
     	// cairo_set_source_rgba(cr,0,0,0,0);
     	// cairo_set_operator(cr,CAIRO_OPERATOR_SOURCE);
     	// cairo_paint(cr);
@@ -1418,7 +1461,7 @@ void myScreenThread(){
     	myRect(cr,Width/2-40,Height/2,80,2,R,G,B,0.9);
 
 
-    	myRect(cr,100,100,20*3,20*3,10,10,10,1);
+    	// myRect(cr,3460,1930,35*3,20*3,10,10,10,1);
 
     	}
     	// myRect(cr,Width/2,Height/2-40,2,80,0,a,1-a,0.9);
