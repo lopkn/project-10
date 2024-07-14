@@ -355,8 +355,10 @@ XColor * myXscan(int xstart, int ystart, int xwid = 20, int ywid = 20, int xskip
 void myXscanReload(){
 	const int xskip = 3;
 	const int yskip = 3;
-	const int xstart = 1020;
-	const int ystart = 1020;
+	const int xstart = 100;
+	const int ystart = 100;
+	const int xwid = 20;
+	const int ywid = 20;
 	const int res = xwid*ywid;
 	XColor scanArr[res+xwid]; /// ??????!!!!!???
 	int scanArrInt[res+xwid];
@@ -367,14 +369,21 @@ void myXscanReload(){
 	for(int i = 0; i < xwid; i++){
 		for(int j = 0; j < ywid; j++){
 			scanArr[i+j*xwid] = getPix(i*xskip,j*yskip,image);
-			scanArrInt[i+j*xwid] = scanArr[i+j*xwid].blue+scanArr[i+j*xwid].red+scanArr[i+j*xwid].green;
-			std::cout << scanArrInt[i+j*xwid];
+
 		}
-		std::cout << "\n"
 	}
     XFree(image);
 
     XQueryColors (dpy, XDefaultColormap(dpy, dfs), scanArr, res);
+    for(int i = 0; i < xwid; i++){
+		for(int j = 0; j < ywid; j++){
+			scanArrInt[i+j*xwid] = scanArr[i+j*xwid].blue/256+scanArr[i+j*xwid].red/256+scanArr[i+j*xwid].green/256;
+
+			// std::cout << myHeatDict2(scanArrInt[i+j*xwid]/3);
+			std::cout << scanArrInt[i+j*xwid]/3 << " ";
+		}
+		std::cout << "\n";
+	}
     
 }
 
@@ -1016,6 +1025,10 @@ void myDo(int x,std::string s1){
 			myPlay("allClose.wav",s1);
 			keysounds = 0;
 		}
+	} else if(inputMode == 0){ // 13 07 2024
+		if(x == 19){
+			myXscanReload();
+		}
 	}
 
 
@@ -1403,6 +1416,10 @@ void myScreenThread(){
     	if(mast.crosshair){
     	myRect(cr,Width/2,Height/2-40,2,80,R,G,B,0.9);
     	myRect(cr,Width/2-40,Height/2,80,2,R,G,B,0.9);
+
+
+    	myRect(cr,100,100,20*3,20*3,10,10,10,1);
+
     	}
     	// myRect(cr,Width/2,Height/2-40,2,80,0,a,1-a,0.9);
     	// myRect(cr,Width/2-40,Height/2,80,2,0,a,1-a,0.9);
