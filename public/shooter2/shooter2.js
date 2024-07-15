@@ -750,6 +750,10 @@ document.addEventListener("keydown",(e)=>{
   e.preventDefault()
   let key = e.key
 
+  if(key == "h"){
+  	helpMenu()
+  }
+
   if(keyHolds[key] == "a"){
   	return
   }
@@ -1182,6 +1186,130 @@ function ranrange(x){
 
 
 
+function helpMenu(){
 
+if(document.getElementById("help") !== null){
+	document.getElementById("help").remove()
+	return
+}
+
+let help = document.createElement("div")
+document.body.appendChild(help)
+
+let Width = window.innerWidth
+let Height = window.innerHeight
+
+help.id = "help"
+help.style.width = Math.floor(Width/allzoom+2)+"px"
+help.style.height = Math.floor(Height)+"px"
+help.style.position = "absolute"
+help.style.left = 0
+help.style.overflowX = "hidden"
+document.body.style.overflowX = "hidden"
+help.style.top = 0
+help.style.zIndex = 100
+help.style.color = "rgba(240,240,240)"
+help.style.backgroundColor = "rgba(0,0,0,0.7)"
+help.innerHTML =
+`
+<strong>
+</br>This is lopkns shooter2 project, S2C for short. (walls and stuff!!)
+</br>S2C is an infinite space wall sandbox built using <span style="color:orange">javascript</span>
+</br>This game was built from scratch starting in 2022 to test out a custom collision engine!
+</br>Press <span style="color:cyan">[h]</span> to toggle this help menu. Please note that this game is <span style="color:yellow">CASE SENSITIVE</span>
+</br>
+</br>This help menu is still being developed, still feel free to tell me what you think should change.
+</br>Lopkns discord tag is <span style="color:yellow">lopkn#0019</span>
+</br>Update, Lopkn's discord tag is just <span style="color:yellow">lopkn</span> now
+</br>
+</br>
+</br><span style="color:green">= == === BASIC INFO === == =</span>
+</br>
+</br>-Content order of help menu:
+</br><span style="color:green">-BASIC INFO-</span>
+</br><span style="color:green">-KEYBOARD & MOUSE CONTROLS-</span>
+</br><span style="color:green">-MOBILE CONTROLS-</span>
+</br>
+</br>
+</br>at the bottom of your screen, you can see your position, weapon, building/wall and materials
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>-Default color schemes:
+</br><span style="color:green">green</span> => content page name
+</br><span style="color:yellow">yellow</span> => important information
+</br><span style="color:cyan">cyan</span> => game controls
+</br><span style="color:red">turquoise</span> => false information
+</br>
+</br>
+</br>-If you are on mobile, stuff is buggy. Report if you find shit fucked up
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br><span style="color:green">= == === KEYBOARD & MOUSE CONTROLS === == =</span>
+</br>
+</br>
+</br><span style="color:orange"> basic mouse controls </span>
+</br>
+</br><span style="color:cyan">left clicking</span> shoot your current mouse weapon
+</br>
+</br>that's it. that's literally it
+</br>
+</br>(for now at least, scrollwheel also has zooming effects, but this will be patched later)
+</br>
+</br>
+</br><span style="color:orange"> keyboard controls </span>
+</br>
+</br><span style="color:cyan">[w] [a] [s] [d]</span> movement
+</br>
+</br><span style="color:cyan">[q]</span> change weapons (lowers your weapon counter)
+</br>
+</br><span style="color:cyan">[e]</span> change weapons (increases your weapon counter)
+</br>
+</br><span style="color:cyan">[z]</span> change buildings (increases your buildings counter)
+</br>
+</br><span style="color:cyan">[c]</span> change buildings (increases your buildings counter)
+</br>
+</br><span style="color:cyan">[h] or [?]</span> toggles this current help menu.
+</br>
+</br><span style="color:cyan">[p]</span> toggles building snap to grid
+</br>
+</br><span style="color:cyan">[r]</span> Hold down, move mouse, release mouse to build walls (will build only if you have enough materials)
+</br>
+</br>
+</br><span style="color:green">= == === MOBILE CONTROLS === == =</span>
+</br>
+</br>
+</br><span style="color:cyan">left joystick</span> movement
+</br>
+</br><span style="color:cyan">right joystick</span> aiming and shooting (hold to aim, release to shoot)
+</br>
+</br><span style="color:cyan">top left scrollwheel</span> drag it left and right to change your weapon
+</br>
+</br><span style="color:cyan">top right scrollwheel</span> drag it left and right to change your building
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br> holy shit im the best
+</br>
+</br>
+</br>
+</strong>
+`
+}
 
 

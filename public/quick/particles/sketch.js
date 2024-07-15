@@ -60,7 +60,7 @@ document.getElementById("help").innerHTML =
 <strong>
 </br>This is lopkns particle simulator, LPRTS for short. (Undulating balls!!)
 </br>LPRTS is an infinite space particle sandbox built using <span style="color:orange">javascript</span>
-</br>This game is currently getting new updates every single day!
+</br>This game is currently getting new updates every other month!
 </br>Press <span style="color:cyan">[h]</span> to toggle this help menu. Please note that this game is <span style="color:yellow">CASE SENSITIVE</span>
 </br>
 </br>This help menu is still being developed, still feel free to tell me what you think should change.

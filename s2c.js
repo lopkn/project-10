@@ -1188,7 +1188,7 @@ class shooter2C{
 										let td = distance(w.x,w.y,B.x,B.y)
 										let ad = 1000000/(td*td)
 										let nor = vectorNormalize([0,0,w.x-B.x,w.y-B.y])
-										ad = ad*(w.strength?w.strength:1)>50?50:ad*(w.strength?w.strength:1)
+										ad = ad*(w.strength?w.strength:1)>150?150:ad*(w.strength?w.strength:1)*0.1
 										i.vx += nor[2]*ad
 										i.vy += nor[3]*ad
 										this.damageWall(wallsArr[j],B)
@@ -1267,8 +1267,8 @@ class shooter2C{
 			let vnorm = vectorNormalize([0,0,i.vx,i.vy])
 			p.x = i.x + i.vx
 			p.y = i.y + i.vy
-			p.vx = i.vx
-			p.vy = i.vy
+			p.vx = vnorm[2] * bspeed
+			p.vy = vnorm[3] * bspeed
 
 			
 			// NEW PLAYERCOL
