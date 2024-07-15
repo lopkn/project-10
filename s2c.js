@@ -41,12 +41,12 @@ class shooter2C{
 					"lingerance":10,"tailLength":10,"tail":[],"life":2000,"slowd":0.95})
 				break;
 			case "trav":
-				this.bullets.push({"shooter":id,"type":"norm","x":x,"y":y,"vx":vx,"vy":vy,"wallMult":1,
+				this.bullets.push({"shooter":id,"type":"trav","x":x,"y":y,"vx":vx,"vy":vy,"wallMult":1,
 					"lingerance":10,"tailLength":10,"tail":[],"life":2000,"slowd":1,"dmgmult":-0.00001})
 				break;
 
 			case "fire":
-				this.bullets.push({"shooter":id,"type":"norm","x":x,"y":y,"vx":vx,"vy":vy,"wallMult":0,"ignoreWallMult":1,
+				this.bullets.push({"shooter":id,"type":"fire","x":x,"y":y,"vx":vx,"vy":vy,"wallMult":0,"ignoreWallMult":1,
 					"lingerance":10,"tailLength":10,"tail":[],"life":Math.floor(Math.random()*10)+10,"slowd":0.5,"dmgmult":4,
 					"tick":(b)=>{
 						b.vx += Math.random()*12-6
@@ -587,6 +587,8 @@ class shooter2C{
 				}
 				if(options.attach){
 					this.playerWall(p,ar,a)
+				} else {
+					this.walls[a].playerCollision = true
 				}
 				break;
 			case "rflc":
@@ -678,6 +680,18 @@ class shooter2C{
 						this.players[w.entity].speed *= 1+Math.random()
 					}
 				}
+				break;
+
+			case "spawnpoint":
+				this.walls[a] = {
+					"type":"whol","x":x1,"y":y1,"radius":60,"velmult":0.98,
+					"midpt":[x1,y1],"handle":"whol","hp":100,
+					"defense":0.2,
+					"frad":x2,"onDeath":(w,b)=>{this.delWall(a)},
+					"spawns":["ntri6","ntri6","ntri6","ntri6","ntri6"]
+					
+				}
+				p.spawnPoint = this.walls[a]
 				break;
 			case "ghol":
 				this.walls[a] = {
@@ -879,7 +893,7 @@ class shooter2C{
 			this.players[id] = {"reloading":0,"unmovePos":[0,0],"rotation":[0,1],
 				"boidyVect":[[0,-40,30,30],[30,30,-30,30],[-30,30,0,-40]],
 				"boidy":[],"x":410,"y":410,"vx":0,"vy":0,"hp":100,"id":id,"keys":{},
-				"materials":100,"speed":1.5,"boidyAll":3,"tracking":false
+				"materials":100,"speed":1.5,"boidyAll":3,"tracking":false,"movement":"spontaneous"
 			}
 			io.to(id).emit("spec",["zoom",1])
 
@@ -999,8 +1013,8 @@ class shooter2C{
 		this.entityUpdate()
 
 		let objt = Object.keys(this.players)
-		for(let i = 0; i < objt.length; i++){
-			let p = this.players[objt[i]]
+		for(let ii = 0; ii < objt.length; ii++){
+			let p = this.players[objt[ii]]
 			if(p.dead && !p.spectator){
 				continue
 			}
@@ -1044,6 +1058,16 @@ class shooter2C{
 				})
 
 				if(dd < p.boidyAll){
+					if(p.onDeath){p.onDeath(p)}
+					if(p.spawnPoint && p.spawnpoint.hp>0){
+						setTimeout(()=>{
+							let np = this.initiatePlayer(p.id,p.type)
+							np.x = p.spawnPoint.x
+							np.y = p.spawnPoint.y
+							np.spawnPoint = p.spawnPoint
+						},1500)
+					}
+
 					p.dead = true
 					p.boidy.forEach((e)=>{
 						this.walls[e].undying = false
@@ -1075,16 +1099,182 @@ class shooter2C{
 				ttv = vectorNormalize([0,0,tv[0],tv[1]])
 			}
 			 
-			let movepower = p.weight/p.horsePower
-			if(movepower<1){movepower = 1}
 
-			p.vx += ttv[2]*p.speed/movepower
-			p.vy += ttv[3]*p.speed/movepower
-			p.vx *= 0.97
-			p.vy *= 0.97
 
-			p.x += p.vx
-			p.y += p.vy
+			if(p.movement == undefined){
+				let movepower = p.weight/p.horsePower
+				if(movepower<1){movepower = 1}
+
+				p.vx += ttv[2]*p.speed/movepower
+				p.vy += ttv[3]*p.speed/movepower
+				p.vx *= 0.97
+				p.vy *= 0.97
+			} else if(p.movement == "spontaneous"){
+				let movepower = p.weight/p.horsePower
+				if(movepower<1){movepower = 1}
+
+				p.vx += ttv[2]*p.speed/movepower*5
+				p.vy += ttv[3]*p.speed/movepower*5
+				p.vx *= 0.7
+				p.vy *= 0.7
+			}
+			
+
+
+			// NEW PLAYERCOL
+			let counter = 20
+
+			let lastCol = {}                             ///lastcol is the walls that i already collided with this frame
+			// let i = JSON.parse(JSON.stringify(B))        ///make a new bullet!
+			let i = {"x":p.x, "y":p.y, "vx":p.vx,"vy":p.vy}
+			let coled = "dn"
+			let wallsArr = Object.keys(this.walls)
+			let bspeed = distance(0,0,p.vx,p.vy)         ///bspeed is the ORIGINAL bullet's speed
+			while(coled != "stop" && counter > 0){
+
+				counter --
+				coled = "stop"
+				let colsave = []                       ///colsave is the walls i can potentially collide with this frame
+				
+				for(let j = 0; j < wallsArr.length; j++){ ////////// JUICY HERE< for each and every wall
+					let w = this.walls[wallsArr[j]]
+
+					if(!w.playerCollision || w?.dead || w == undefined){
+						continue
+					}
+
+					if(lastCol[wallsArr[j]] != undefined){
+								let LC = lastCol[wallsArr[j]]
+								if(LC == "single"){                    /// IF the wall is collidable multiple times a frame
+										delete lastCol[wallsArr[j]]    /// skip this wall!
+										continue;
+
+									}
+									else if(LC == "infinite"){      /// IF the wall is collidable single time a frame
+										continue;
+			
+								}
+							} // if already collided with wall, don't collide same wall again
+
+					if(w?.handle == undefined){                                  //// means this is a solid line wall!
+							
+							// if( this.wallSameTeamBullet(B,w)){ 
+							// 	continue; !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! CAN BE REVAMPED FOR PLAYERS !!!!!!!
+							// }
+							let e = this.walls[wallsArr[j]]                                        //i have no idea why i used E instead of W?
+							let col = this.pointLineCollision(i.x,i.y,i.x+i.vx,i.y+i.vy,e.x1,e.y1,e.x2,e.y2)
+							if(col[4]){
+								colsave.push([col,wallsArr[j],[i.x+i.vx,i.y+i.vy]])
+								coled = "c1" //bullet collided with at least one thing, calculate next subframe
+							} //for each wall that collided with the bullet, push it into colsave
+
+					}else{
+
+							let B = p
+							switch(w.handle){
+								case "bhol":
+									if(distance(B.x,B.y,w.x,w.y) < w.radius){
+										i.vx += (w.x-B.x)*(w.strength?w.strength:1)
+										i.vy += (w.y-B.y)*(w.strength?w.strength:1)
+										this.damageWall(wallsArr[j],B)
+										bspeed *= w.velmult
+										coled = "dn"
+										lastCol[wallsArr[j]] = "infinite"
+
+									}
+									break;
+								case "ghol":
+									if(distance(B.x,B.y,w.x,w.y) < w.radius){
+										let td = distance(w.x,w.y,B.x,B.y)
+										let ad = 1000000/(td*td)
+										let nor = vectorNormalize([0,0,w.x-B.x,w.y-B.y])
+										ad = ad*(w.strength?w.strength:1)>50?50:ad*(w.strength?w.strength:1)
+										i.vx += nor[2]*ad
+										i.vy += nor[3]*ad
+										this.damageWall(wallsArr[j],B)
+										coled = "dn"
+										lastCol[wallsArr[j]] = "infinite"
+									}
+									break;
+								case "whol":
+									if(distance(B.x,B.y,w.x,w.y) < w.radius){
+										let td = distance(w.x,w.y,B.x,B.y)
+										let ad = 1000000/(td*td)
+										let nor = vectorNormalize([0,0,w.x-B.x,w.y-B.y])
+										ad = ad>80?80:ad
+										i.vx -= nor[2]*ad
+										i.vy -= nor[3]*ad
+										this.damageWall(wallsArr[j],B)
+										coled = "dn"
+										lastCol[wallsArr[j]] = "infinite"
+									}
+									break;
+							}
+					} /// end of other handles
+				} ///end of (for each wall)
+
+
+			
+
+				if(coled == "c1"){ //if there was one or more solid line collisions
+
+						let f = 0
+					if(colsave.length != 1){                     /// find the closest collision
+						let fd = Infinity
+						for(let I = 0; I < colsave.length; I++){
+							let tempdist = distance(colsave[I][0][0],colsave[I][0][1],i.x,i.y)
+							if(tempdist<fd && tempdist !== 0){
+								fd = tempdist
+								f = I
+							}
+						}
+					}
+						let tj = colsave[f][1] //the wall id that was collided with
+						let tcol = colsave[f][0] //the collision information
+					lastCol[tj] = "single" //make it so that in the next subframe, it will not collide in the same wall again
+
+					let WALL = this.walls[tj]
+					p.onWallHit?p.onWallHit(WALL,p):0
+					let angleDamageMult = 1
+
+
+
+					let DAM = 1
+					if(DAM){                          ///means the wall aint dead
+						let tw = this.walls[tj]
+						tcol = this.p5rre(tcol,colsave[f][2][0],colsave[f][2][1],tw.x1,tw.y1,tw.x2,tw.y2) //pretty sure this is rebound logic
+						i.x = tcol[0]
+						i.y = tcol[1]
+
+							let actualMult = 1
+
+							i.vx = actualMult*(tcol[2]-tcol[0])
+							i.vy = actualMult*(tcol[3]-tcol[1])
+						
+					}
+
+				}
+			}
+
+			if(counter == 0){
+				console.log("crashed here P")
+			}
+
+
+
+			
+
+			let vnorm = vectorNormalize([0,0,i.vx,i.vy])
+			p.x = i.x + i.vx
+			p.y = i.y + i.vy
+			p.vx = i.vx
+			p.vy = i.vy
+
+			
+			// NEW PLAYERCOL
+
+			// p.x += p.vx
+			// p.y += p.vy
 
 
 			for(let k = 0; k < p.boidyVect.length; k++){
@@ -1114,7 +1304,7 @@ class shooter2C{
 			p.unmovePos = [p.x,p.y,false]
 			this.entityPushers.push({"type":"pos","id":p.id,"x":p.x,"y":p.y,"r":p.rotation})
 			// io.to(objt[i]).emit("cameraUp",[p.x,p.y])
-			this.massPushers.specific[objt[i]] = {"cameraUp":[p.x.toFixed(4),p.y.toFixed(4)]}
+			this.massPushers.specific[objt[ii]] = {"cameraUp":[p.x.toFixed(4),p.y.toFixed(4)]}
 			}
 
 		}
@@ -1234,9 +1424,13 @@ class shooter2C{
 		this.playerVelUpdate()
 
 		// let wallsArr = Object.keys(this.walls)
-		for(let k = this.bullets.length-1; k > -1; k--){
+
+
+		/// 14 07 2024 OK LETS DOCUMENT THIS SHIT
+
+		for(let k = this.bullets.length-1; k > -1; k--){  ///for every single bullet
 			let B = this.bullets[k]
-			B.life--
+			B.life--                                      ///decrease bullet life
 			if(B.life < 0){
 
 				if(this.bullets[k].onDeath !== undefined){
@@ -1246,57 +1440,58 @@ class shooter2C{
 				this.bullets.splice(k,1)
 				continue;
 			}
-			if(B.instant){
+			if(B.instant){                                 ///instantaneous travel for bolts
 				k++
 			}
 			B.tick?B.tick(B):0
-			let coled = "dn"
+			let coled = "dn"                          ///bullet did not collide yet (default)
 
 			
 			let counter = 201
 
-			let lastCol = {}
-			let i = JSON.parse(JSON.stringify(B))
+			let lastCol = {}                             ///lastcol is the walls that i already collided with this frame
+			let i = JSON.parse(JSON.stringify(B))        ///make a new bullet!
 			let wallsArr = Object.keys(this.walls)
-			let bspeed = distance(0,0,B.vx,B.vy)
+			let bspeed = distance(0,0,B.vx,B.vy)         ///bspeed is the ORIGINAL bullet's speed
 			// let unhandledWalls = []
 			while(coled != "stop" && counter > 0){
 
 				counter --
 				coled = "stop"
-				let colsave = []
+				let colsave = []                       ///colsave is the walls i can potentially collide with this frame
 				
-				for(let j = 0; j < wallsArr.length; j++){
+				for(let j = 0; j < wallsArr.length; j++){ ////////// JUICY HERE< for each and every wall
 					let w = this.walls[wallsArr[j]]
 
-					if(w?.dead){
+					if(w?.dead || w == undefined){
 						continue
 					}
 
 					if(lastCol[wallsArr[j]] != undefined){
 								let LC = lastCol[wallsArr[j]]
-								if(LC == "single"){
-										delete lastCol[wallsArr[j]]
+								if(LC == "single"){                    /// IF the wall is collidable multiple times a frame
+										delete lastCol[wallsArr[j]]    /// skip this wall!
 										continue;
 
 									}
-									else if(LC == "infinite"){
+									else if(LC == "infinite"){      /// IF the wall is collidable single time a frame
 										continue;
 			
 								}
 							} // if already collided with wall, don't collide same wall again
 
-					if(w?.handle == undefined){
+					if(w?.handle == undefined){                                  //// means this is a solid line wall!
 							
-							if( w == undefined || this.wallSameTeamBullet(B,w)){
+							if( this.wallSameTeamBullet(B,w)){ //deleted "w == udefined ||" 14 07 2024
 								continue;
 							}
-							let e = this.walls[wallsArr[j]]
+							let e = this.walls[wallsArr[j]]                                        //i have no idea why i used E instead of W?
 							// let col = this.p5re(i.x,i.y,i.x+i.vx,i.y+i.vy,e.x1,e.y1,e.x2,e.y2)
 							let col = this.pointLineCollision(i.x,i.y,i.x+i.vx,i.y+i.vy,e.x1,e.y1,e.x2,e.y2)
+							// returns: if extending infinitely theres a point, (point X, point Y, whether line 2 extended would intersect line 1, vice versa, whether they collide)
 							if(col[4]){
 								colsave.push([col,wallsArr[j],[i.x+i.vx,i.y+i.vy]])
-								coled = "c1"
+								coled = "c1" //bullet collided with at least one thing, calculate next subframe
 							} //for each wall that collided with the bullet, push it into colsave
 
 					}else{
@@ -1345,8 +1540,8 @@ class shooter2C{
 									}
 									break;
 							}
-					}
-				}
+					} /// end of other handles
+				} ///end of (for each wall)
 
 
 			
@@ -1356,7 +1551,7 @@ class shooter2C{
 					 	B.shooter = ""
 
 						let f = 0
-					if(colsave.length != 1){
+					if(colsave.length != 1){                     /// find the closest collision
 						let fd = Infinity
 						for(let I = 0; I < colsave.length; I++){
 							let tempdist = distance(colsave[I][0][0],colsave[I][0][1],i.x,i.y)
@@ -1368,13 +1563,13 @@ class shooter2C{
 					}
 						let tj = colsave[f][1] //the wall id that was collided with
 						let tcol = colsave[f][0] //the collision information
-					lastCol[tj] = "single"
+					lastCol[tj] = "single" //make it so that in the next subframe, it will not collide in the same wall again
 
 					let WALL = this.walls[tj]
 					B.onHit?B.onHit(WALL,B,i):0
 					let angleDamageMult = 1
 					let DAM;
-					if(B.unBouncer === undefined){
+					if(B.unBouncer === undefined){                            ///there is no set damage for the bullet (angle matters)
 						let m1 = i.vy/i.vx //slope of bullet
 						let m2 = (WALL.y1-WALL.y2)/(WALL.x1-WALL.x2) //slope of wall
 						let angle;
@@ -1388,17 +1583,17 @@ class shooter2C{
 						if(angle > Math.PI/2){angle = Math.PI-angle}
 					  angleDamageMult = angle*2/Math.PI
 						DAM = this.damageWall(tj,B,{"vx":i.vx,"vy":i.vy,"x":i.x,"y":i.y,"adp":angleDamageMult},tcol)
-					} else {
+					} else {                                   ///there is set damage for bullet, angle doesnt matter
 						angleDamageMult = B.unBouncer
 						DAM = this.damageWall(tj,B,{"vx":i.vx,"vy":i.vy,"x":i.x,"y":i.y,"adp":1},tcol)
 					}
 
 
-					if(DAM){
+					if(DAM){                          ///means the wall aint dead
 						let tw = this.walls[tj]
-						tcol = this.p5rre(tcol,colsave[f][2][0],colsave[f][2][1],tw.x1,tw.y1,tw.x2,tw.y2)
+						tcol = this.p5rre(tcol,colsave[f][2][0],colsave[f][2][1],tw.x1,tw.y1,tw.x2,tw.y2) //pretty sure this is rebound logic
 						// if(i.extra){
-						this.drawers.push([i.type,i.tailLength,i.x,i.y,tcol[0],tcol[1],i.extra]) // it looks like i.x and i.y is uneccessary?
+						this.drawers.push([i.type,i.tailLength,i.x,i.y,tcol[0],tcol[1],i.extra]) // it looks like i.x and i.y is uneccessary? This line means send the subframe
 					// } else {
 						// this.drawers.push([i.type,i.tailLength,i.x,i.y,tcol[0],tcol[1]])
 					// }
@@ -1408,7 +1603,8 @@ class shooter2C{
 						// let actualMult = 1-(1-B.wallMult)*angleDamageMult
 						let actualMult = (1 - (1 - B.wallMult)*angleDamageMult)*(1-(tw.wallMult?1-tw.wallMult:0.4)*angleDamageMult)
 						if(actualMult < 0){actualMult = 0}
-						if(B.ignoreWallMult !== undefined){actualMult = -B.ignoreWallMult * angleDamageMult
+						if(B.ignoreWallMult !== undefined){
+							actualMult = -B.ignoreWallMult * angleDamageMult
 							i.vx *= actualMult
 							i.vy *= actualMult
 						} else{
@@ -1463,7 +1659,7 @@ class shooter2C{
 				parseFloat(i.y.toFixed(2)),
 				parseFloat((i.x+i.vx).toFixed(2)),
 				parseFloat((i.y+i.vy).toFixed(2))])
-			}
+			} //send final length of bullet that didnt collide with anything
 	
 			
 
@@ -1471,7 +1667,7 @@ class shooter2C{
 			B.x = i.x + i.vx
 			B.y = i.y + i.vy
 			B.vx = vnorm[2] * bspeed
-			B.vy = vnorm[3] * bspeed
+			B.vy = vnorm[3] * bspeed //this means changing i.v will not change the speed, but only the direction? pretty jank
 			
 				B.vx *= B.slowd
 				B.vy *= B.slowd

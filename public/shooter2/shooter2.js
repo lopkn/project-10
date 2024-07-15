@@ -492,9 +492,10 @@ for(let i = map.particles.length-1; i > -1; i--){
 		}
 		mainCTX.lineWidth = (e[1]+1) * (e[6].tailmult == undefined?1:e[6].tailmult) * player.zoom
 		if(e[0] == "norm" || e[0] == "scat" || e[0] == "cnon"){
-		mainCTX.strokeStyle = "#FFFF00"} else if(e[0] == "lazr" || e[0] == "lzr2" || e[0] == "zapr"){
+		mainCTX.strokeStyle = "#FFFF00"
+		} else if(e[0] == "lazr" || e[0] == "lzr2" || e[0] == "zapr"){
 			mainCTX.strokeStyle = "#00FFFF"
-		} else if(e[0] == "heal"){
+		} else if(e[0] == "heal" || e[0] === "trav"){
 			mainCTX.strokeStyle = "#FF0000"
 		} else if(e[0] == "grnd" || e[0] == "dbgd" || e[0] == "vipr"){
 			mainCTX.strokeStyle = "#007000"
@@ -505,8 +506,10 @@ for(let i = map.particles.length-1; i > -1; i--){
 		} else if(e[0] === "tlpt"){
 			mainCTX.strokeStyle = "rgb(0,"+Math.floor(Math.random()*255)+",255)"
 		} else if(e[0] === "zapr2"){
-
 			mainCTX.strokeStyle = "rgb("+Math.floor(Math.random()*255)+",255,255)"
+		} else if(e[0] === "fire"){
+			mainCTX.strokeStyle = "rgba(255,"+Math.floor(Math.random()*255)+",0,"+(Math.random()+0.5)+")"
+			console.log("hey")
 		}
 		mainCTX.moveTo((e[2]-cameraX)*player.zoom + player.zoomR,(e[3]-cameraY)*player.zoom + player.zoomR)
 		mainCTX.lineTo((e[4]-cameraX)*player.zoom + player.zoomR,(e[5]-cameraY)*player.zoom + player.zoomR)
@@ -685,7 +688,11 @@ function drawDrawers(e,dynam){
 
 
 	e.forEach((i)=>{
-		let a = i[5]?(i[5].tailLength?i[5].tailLength:bulletAtt[i[0]]):bulletAtt[i[0]]
+		let bat = bulletAtt[i[0]]
+		if(bat == undefined){
+			bat = 10
+		}
+		let a = i[5]?(i[5].tailLength?i[5].tailLength:bat):bat
 		i.splice(1,0,a)
 		map.bullets.push(i)
 	})
