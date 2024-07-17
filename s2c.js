@@ -158,6 +158,100 @@ class shooter2C{
 				}
 				})
 				break;
+			case "encn2":
+				this.bullets.push({"shooter":id,"type":"encn","x":x,"y":y,"vx":vx*200,"vy":vy*200,"wallMult":0,"deathVel":10,"penMult":0,"unBouncer":1,
+					"lingerance":4,"dmgmult":2,"tailLength":4,"tail":[],"life":1001,"slowd":1.1,"extra":{"tailmult":3},"skipTick":20,"deathTimer":0,
+					"onDeath":(b)=>{
+						
+						this.KBR(b.x,b.y,{"explosionType":"encn explosion"})
+							
+						for(let i = 0; i < 20; i++){
+							let a = this.pushBullet(b.x,b.y,Math.random()*400-200,Math.random()*400-200,b.shooter,"norm")
+							a.slowd = 0.5 + 0.1 * Math.random()
+							a.dmgmult = 10
+							a.extra = {"tailmult":3,"tailLength":6}
+							a.tailLength = 6; a.lingerance = 6;
+
+							
+							}
+							for(let i = 0; i < 20; i++){
+								this.pushBullet(b.x+Math.random()*6-3,b.y+Math.random()*6-3,Math.random()*400-200,Math.random()*400-200,b.shooter,"zapr")
+								this.bullets[this.bullets.length-1].ignoreWallMult = -1
+								this.bullets[this.bullets.length-1].penMult = 1
+								this.bullets[this.bullets.length-1].unBouncer = 1
+								this.bullets[this.bullets.length-1].life += Math.floor(Math.random()*14)
+								this.bullets[this.bullets.length-1].extra.tailLength = 60
+								this.bullets[this.bullets.length-1].extra.tailmult = 0.1
+								this.bullets[this.bullets.length-1].instant = false
+							}
+							
+
+				}
+				})
+				break;
+			case "encn3":
+				this.bullets.push({"shooter":id,"type":"encn","x":x,"y":y,"vx":vx*2200,"vy":vy*2200,"wallMult":0,"deathVel":10,"penMult":0,"unBouncer":1,
+					"lingerance":4,"dmgmult":20000,"tailLength":4,"tail":[],"life":41,"slowd":1.1,"extra":{"tailmult":3},"skipTick":20,"deathTimer":0,
+					"onDeath":(b)=>{
+						
+						this.KBR(b.x,b.y,{"explosionType":"encn explosion"})
+							
+						for(let i = 0; i < 20; i++){
+							let a = this.pushBullet(b.x,b.y,Math.random()*400-200,Math.random()*400-200,b.shooter,"norm")
+							a.slowd = 0.5 + 0.1 * Math.random()
+							a.dmgmult = 10
+							a.extra = {"tailmult":3,"tailLength":6}
+							a.tailLength = 6; a.lingerance = 6;
+
+							
+							}
+							for(let i = 0; i < 20; i++){
+								this.pushBullet(b.x+Math.random()*6-3,b.y+Math.random()*6-3,Math.random()*400-200,Math.random()*400-200,b.shooter,"zapr")
+								this.bullets[this.bullets.length-1].ignoreWallMult = -1
+								this.bullets[this.bullets.length-1].penMult = 1
+								this.bullets[this.bullets.length-1].unBouncer = 1
+								this.bullets[this.bullets.length-1].life += Math.floor(Math.random()*14)
+								this.bullets[this.bullets.length-1].extra.tailLength = 60
+								this.bullets[this.bullets.length-1].extra.tailmult = 0.1
+								this.bullets[this.bullets.length-1].instant = false
+							}
+							
+
+				}
+				})
+				break;
+			case "encn":
+				this.bullets.push({"shooter":id,"type":"encn","x":x,"y":y,"vx":vx*200,"vy":vy*200,"wallMult":0,"deathVel":10,"penMult":0,"unBouncer":1,
+					"lingerance":4,"dmgmult":200000,"tailLength":4,"tail":[],"life":1001,"slowd":1,"extra":{"tailmult":3},"skipTick":40,"deathTimer":0,
+					"onDeath":(b)=>{
+						
+						this.KBR(b.x,b.y,{"explosionType":"encn explosion"})
+							
+						for(let i = 0; i < 18; i++){
+							let a = this.pushBullet(b.x,b.y,Math.random()*400-200,Math.random()*400-200,b.shooter,"norm")
+							a.slowd = 0.5 + 0.1 * Math.random()
+							a.dmgmult = 10
+							a.extra = {"tailmult":3,"tailLength":6}
+							a.tailLength = 6; a.lingerance = 6;
+
+							
+							}
+							let bolts = 8 + Math.floor(Math.random()*12)
+							for(let i = 0; i < bolts; i++){
+								this.pushBullet(b.x+Math.random()*6-3,b.y+Math.random()*6-3,Math.random()*400-200,Math.random()*400-200,b.shooter,"zapr")
+								this.bullets[this.bullets.length-1].ignoreWallMult = -1
+								this.bullets[this.bullets.length-1].penMult = 1
+								this.bullets[this.bullets.length-1].unBouncer = 1
+								this.bullets[this.bullets.length-1].life += Math.floor(Math.random()*4)
+								this.bullets[this.bullets.length-1].extra.tailLength = 60
+								this.bullets[this.bullets.length-1].extra.tailmult = 0.1
+								this.bullets[this.bullets.length-1].instant = false
+							}
+							
+
+				}
+				})
+				break;
 			case "msl":
 				this.bullets.push({"shooter":id,"type":"msl","x":x,"y":y,"vx":vx,"vy":vy,"wallMult":0,"deathVel":619.8,
 					"lingerance":4,"dmgmult":0,"tailLength":4,"tail":[],"life":50,"slowd":1,"extra":{"tailmult":8},"unBouncer":1,
@@ -661,7 +755,7 @@ class shooter2C{
 			case "spawnpad2":
 				let team = type
 				this.walls[a] = {
-					"type":"whol","x":x1,"y":y1,"radius":360,"velmult":0.98,
+					"type":"whol","x":x1,"y":y1,"radius":160,"velmult":0.98,
 					"midpt":[x1,y1],"handle":"whol","hp":1000,
 					"defense":0.2,
 					"frad":x2,"onDeath":(w,b)=>{this.delWall(a)},
@@ -1443,6 +1537,11 @@ class shooter2C{
 			if(B.instant){                                 ///instantaneous travel for bolts
 				k++
 			}
+
+			if(B.skipTick && B.life%B.skipTick !== 0){
+				continue;
+			}
+
 			B.tick?B.tick(B):0
 			let coled = "dn"                          ///bullet did not collide yet (default)
 
@@ -1631,7 +1730,7 @@ class shooter2C{
 						// } else {
 							// this.drawers.push([i.type,i.tailLength,i.x,i.y,tcol[0],tcol[1]])
 						// }
-						let avmult = B.penMult?B.penMult:0.3
+						let avmult = B.penMult==undefined?0.3:B.penMult
 						i.vx = (i.vx - (tcol[0] - i.x)) * avmult
 						i.vy = (i.vy - (tcol[1] - i.y)) * avmult
 						bspeed *= avmult
@@ -1675,7 +1774,7 @@ class shooter2C{
 
 				
 			let sp = B.vx*B.vx + B.vy*B.vy 
-			let deathLife = B.deathTimer?B.deathTimer:5
+			let deathLife = B.deathTimer!==undefined?B.deathTimer:5
 				if(B.life > deathLife &&  sp < (B.deathVel?B.deathVel:5)){
 					B.life = deathLife
 				}
@@ -2395,7 +2494,9 @@ class shooter2C{
 				e.vy += Math.max(-min, Math.min((e.y-b.y)*inverse*inverse*playerKBpower/e.weight*e.speed, min))
 			}
 		})
-						io.to("G10.2").emit("particle",[{"type":"explosion","x":b.x,"y":b.y}])
+
+		let explosionType = options.explosionType?options.explosionType:"explosion"
+		io.to("G10.2").emit("particle",[{"type":explosionType,"x":b.x,"y":b.y}])
 	}
 
 	static aimWallCheck(TPP,op,shx,shy){

@@ -169,7 +169,7 @@ class player{
 	static ping = 100;
 	static dataNodes = []
 	static packetSec = []
-	static weapon = "trav"
+	static weapon = "encn"
 	static materials = 100
 	static wall = "norm"
 	static snapping = false
@@ -314,7 +314,7 @@ function crobject(e){
 
 
 	let bulletAtt = {"norm":10,"scat":6,"lazr":20,"cnon":10,"heal":2,"grnd":4,"msl":4,"msl2":4,
-									"dril":3,"lzr2":3,"zapr":3,"zapr2":13,"dbgd":20,"kbml":20,"vipr":20,"tlpt":20}
+									"dril":3,"lzr2":3,"zapr":3,"zapr2":13,"encn":23,"dbgd":20,"kbml":20,"vipr":20,"tlpt":20}
 
 
 let tripVel = 0
@@ -490,7 +490,8 @@ for(let i = map.particles.length-1; i > -1; i--){
 		if(e[6]==undefined){
 			e[6] = {}
 		}
-		mainCTX.lineWidth = (e[1]+1) * (e[6].tailmult == undefined?1:e[6].tailmult) * player.zoom
+		mainCTX.lineWidth = (e[1]+1) * (e[6].tailmult == undefined?1:e[6].tailmult) * player.zoom // (e[6].tailtime?e[6].tailtime:1)
+
 		if(e[0] == "norm" || e[0] == "scat" || e[0] == "cnon"){
 		mainCTX.strokeStyle = "#FFFF00"
 		} else if(e[0] == "lazr" || e[0] == "lzr2" || e[0] == "zapr"){
@@ -505,7 +506,7 @@ for(let i = map.particles.length-1; i > -1; i--){
 			mainCTX.strokeStyle = "#A0A000"
 		} else if(e[0] === "tlpt"){
 			mainCTX.strokeStyle = "rgb(0,"+Math.floor(Math.random()*255)+",255)"
-		} else if(e[0] === "zapr2"){
+		} else if(e[0] === "zapr2" || e[0] === "encn"){
 			mainCTX.strokeStyle = "rgb("+Math.floor(Math.random()*255)+",255,255)"
 		} else if(e[0] === "fire"){
 			mainCTX.strokeStyle = "rgba(255,"+Math.floor(Math.random()*255)+",0,"+(Math.random()+0.5)+")"
@@ -811,7 +812,7 @@ document.addEventListener("keydown",(e)=>{
   		}
   		break;
   	case "F4":
-  		player.weaponMin = -6
+  		player.weaponMin = -9
   		player.weaponDict["0"] = "dbdril"
   		player.weaponDict["-1"] = "dbml"
   		player.weaponDict["-2"] = "spawner"
@@ -819,11 +820,15 @@ document.addEventListener("keydown",(e)=>{
   		player.weaponDict["-4"] = "zapr2"
   		player.weaponDict["-5"] = "scat2"
   		player.weaponDict["-6"] = "unloader"
+  		player.weaponDict["-7"] = "grnd2"
+  		player.weaponDict["-8"] = "fire"
+  		player.weaponDict["-9"] = "trav"
 
-  		player.wallMin = -2
+  		player.wallMin = -4
   		player.wallDict["0"] = "spawnpad"
   		player.wallDict["-1"] = "grv1"
   		player.wallDict["-2"] = "grv2"
+  		player.wallDict["-3"] = "spawnpad2"
 
   		break;
   	case "F1":
@@ -916,6 +921,17 @@ function updateParticles(arr){
 						return("rgb("+(rr)+","+(Math.random()*rr)+","+(Math.random()*15)+")")},
 					10,5,1))
 
+		} else if(e.type == "encn explosion"){
+			map.particles.push(new explosionR(e.x+0.5,e.y+0.5,
+					(x)=>{
+						let rr = 250*Math.random()
+						return("rgb(0,"+(Math.random()*rr)+","+(rr)+")")},
+					26,7,2))
+				map.particles.push(new explosionR(e.x+0.5,e.y+0.5,
+					(x)=>{
+						let rr = 250*Math.random()
+						return("rgb(0,"+(Math.random()*rr)+","+(rr)+")")},
+					10,2,1))
 		}
 	})
 }
