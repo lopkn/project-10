@@ -546,6 +546,13 @@ for(let i = map.particles.length-1; i > -1; i--){
 		mainCTX.moveTo((i.x1-cameraX)*player.zoom+player.zoomR,(i.y1-cameraY)*player.zoom+player.zoomR)
 		mainCTX.lineTo((i.x2-cameraX)*player.zoom+player.zoomR,(i.y2-cameraY)*player.zoom+player.zoomR)
 		mainCTX.stroke()
+		}else if(i.type == "wall"){
+		mainCTX.beginPath()
+		mainCTX.lineWidth = 12*player.zoom
+		mainCTX.strokeStyle = col?col:"rgba(255,225,205,"+(renderHP/2000+0.5)+")"
+		mainCTX.moveTo((i.x1-cameraX)*player.zoom+player.zoomR,(i.y1-cameraY)*player.zoom+player.zoomR)
+		mainCTX.lineTo((i.x2-cameraX)*player.zoom+player.zoomR,(i.y2-cameraY)*player.zoom+player.zoomR)
+		mainCTX.stroke()
 		}else if(i.type == "rflc"){
 		mainCTX.beginPath()
 		mainCTX.lineWidth = 9*player.zoom
@@ -812,7 +819,7 @@ document.addEventListener("keydown",(e)=>{
   		}
   		break;
   	case "F4":
-  		player.weaponMin = -9
+  		player.weaponMin = -12
   		player.weaponDict["0"] = "dbdril"
   		player.weaponDict["-1"] = "dbml"
   		player.weaponDict["-2"] = "spawner"
@@ -823,12 +830,16 @@ document.addEventListener("keydown",(e)=>{
   		player.weaponDict["-7"] = "grnd2"
   		player.weaponDict["-8"] = "fire"
   		player.weaponDict["-9"] = "trav"
+  		player.weaponDict["-10"] = "encn"
+  		player.weaponDict["-11"] = "encn2"
+  		player.weaponDict["-12"] = "encn3"
 
   		player.wallMin = -4
   		player.wallDict["0"] = "spawnpad"
   		player.wallDict["-1"] = "grv1"
   		player.wallDict["-2"] = "grv2"
   		player.wallDict["-3"] = "spawnpad2"
+  		player.wallDict["-4"] = "rbuild"
 
   		break;
   	case "F1":
@@ -1187,8 +1198,8 @@ class Mobile {
 Mobile.init()
 Mobile.draw()
 
-ALTF3()
-player.debugging = true
+// ALTF3()
+// player.debugging = true
 
 function ranrange(x){
 	return(Math.random()*x-x/2)

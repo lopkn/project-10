@@ -1,6 +1,7 @@
 let io;
 let myMath
 let crypto = require("crypto")
+let fs = require("fs")
 function distance(x1,y1,x2,y2) {
 	let a = x2-x1
 	let b = y2-y1
@@ -183,6 +184,7 @@ class shooter2C{
 								this.bullets[this.bullets.length-1].extra.tailLength = 60
 								this.bullets[this.bullets.length-1].extra.tailmult = 0.1
 								this.bullets[this.bullets.length-1].instant = false
+									this.bullets[this.bullets.length-1].dmgmult *= 60
 							}
 							
 
@@ -191,7 +193,7 @@ class shooter2C{
 				break;
 			case "encn3":
 				this.bullets.push({"shooter":id,"type":"encn","x":x,"y":y,"vx":vx*2200,"vy":vy*2200,"wallMult":0,"deathVel":10,"penMult":0,"unBouncer":1,
-					"lingerance":4,"dmgmult":20000,"tailLength":4,"tail":[],"life":41,"slowd":1.1,"extra":{"tailmult":3},"skipTick":20,"deathTimer":0,
+					"lingerance":4,"dmgmult":200,"tailLength":4,"tail":[],"life":41,"slowd":1.1,"extra":{"tailmult":3},"skipTick":20,"deathTimer":0,
 					"onDeath":(b)=>{
 						
 						this.KBR(b.x,b.y,{"explosionType":"encn explosion"})
@@ -199,7 +201,7 @@ class shooter2C{
 						for(let i = 0; i < 20; i++){
 							let a = this.pushBullet(b.x,b.y,Math.random()*400-200,Math.random()*400-200,b.shooter,"norm")
 							a.slowd = 0.5 + 0.1 * Math.random()
-							a.dmgmult = 10
+							a.dmgmult = 5
 							a.extra = {"tailmult":3,"tailLength":6}
 							a.tailLength = 6; a.lingerance = 6;
 
@@ -214,6 +216,10 @@ class shooter2C{
 								this.bullets[this.bullets.length-1].extra.tailLength = 60
 								this.bullets[this.bullets.length-1].extra.tailmult = 0.1
 								this.bullets[this.bullets.length-1].instant = false
+									this.bullets[this.bullets.length-1].dmgmult *= 60
+								if(Math.random()>0.9){
+									this.bullets[this.bullets.length-1].dmgmult *= 3
+								}
 							}
 							
 
@@ -222,7 +228,7 @@ class shooter2C{
 				break;
 			case "encn":
 				this.bullets.push({"shooter":id,"type":"encn","x":x,"y":y,"vx":vx*200,"vy":vy*200,"wallMult":0,"deathVel":10,"penMult":0,"unBouncer":1,
-					"lingerance":4,"dmgmult":200000,"tailLength":4,"tail":[],"life":1001,"slowd":1,"extra":{"tailmult":3},"skipTick":40,"deathTimer":0,
+					"lingerance":4,"dmgmult":200,"tailLength":4,"tail":[],"life":1001,"slowd":1,"extra":{"tailmult":3},"skipTick":40,"deathTimer":0,
 					"onDeath":(b)=>{
 						
 						this.KBR(b.x,b.y,{"explosionType":"encn explosion"})
@@ -246,6 +252,7 @@ class shooter2C{
 								this.bullets[this.bullets.length-1].extra.tailLength = 60
 								this.bullets[this.bullets.length-1].extra.tailmult = 0.1
 								this.bullets[this.bullets.length-1].instant = false
+									this.bullets[this.bullets.length-1].dmgmult *= 80
 							}
 							
 
@@ -651,7 +658,7 @@ class shooter2C{
 			options.attach = true
 		}
 
-		if(wLength < 40 && (type=="norm" || type == "metl" || type == "rflc") && !options.force){
+		if(wLength < 40 && (type=="norm" || type == "metl" || type == "rflc" || type=="wall") && !options.force){
 			return
 		}
 
@@ -685,6 +692,141 @@ class shooter2C{
 					this.walls[a].playerCollision = true
 				}
 				break;
+			case "wall":
+				this.walls[a] = {
+					"type":"wall","x1":x1,"y1":y1,"x2":x2,"y2":y2,
+					"hp":1000,"midpt":myMath.midPointOfLine(x1,y1,x2,y2),
+					"defense":50,
+					"frad":wLength/2
+				}
+				if(options.attach){
+					this.playerWall(p,ar,a)
+				} else {
+					this.walls[a].playerCollision = true
+				}
+				break;
+			case "infwall":
+				this.walls[a] = {
+					"type":"wall","x1":x1,"y1":y1,"x2":x2,"y2":y2,
+					"hp":1000,"midpt":myMath.midPointOfLine(x1,y1,x2,y2),
+					"defense":39999,
+					"frad":wLength/2
+				}
+				if(options.attach){
+					this.playerWall(p,ar,a)
+				} else {
+					this.walls[a].playerCollision = true
+				}
+				break;
+			case "rbuildc":
+				this.walls[a] = {
+					"type":"metl","x1":x1,"y1":y1,"x2":x2,"y2":y2,
+					"hp":1000,"midpt":myMath.midPointOfLine(x1,y1,x2,y2),
+					"defense":5,
+					"frad":wLength/2
+				}
+				let wallInfo = {"lx":x2,"ly":y2,"vx":x2-x1,"vy":y2-y1,"chaos":1+Math.random()*2,"proliferate":2}
+				for(let i = 0; i < 7; i++){
+					let wle = distance(0,0,wallInfo.vx,wallInfo.vy)
+					if(wle<50){
+						wallInfo.vx*=2
+						wallInfo.vy*=2
+					} else if(wle > 500){
+						wallInfo.vx*=0.5
+						wallInfo.vy*=0.5
+						i--
+					}
+					wallInfo.vx+= wallInfo.vx*(Math.random()*wallInfo.chaos-wallInfo.chaos/2)
+					wallInfo.vy+= wallInfo.vy*(Math.random()*wallInfo.chaos-wallInfo.chaos/2)
+					this.placeWall(player,wallInfo.lx,wallInfo.ly,wallInfo.lx+wallInfo.vx,wallInfo.ly+wallInfo.vy,"metl",{"force":true})
+					wallInfo.lx+=wallInfo.vx
+					wallInfo.ly+=wallInfo.vy
+					if(Math.random()>0.9 && wallInfo.proliferate >0){
+						wallInfo.proliferate -= 1
+						this.placeWall(player,wallInfo.lx,wallInfo.ly,wallInfo.lx+wallInfo.vx+Math.random()*50-25,wallInfo.ly+wallInfo.vy+Math.random()*50-25,"rbuild",{"force":true})
+					}
+				}
+
+
+				if(options.attach){
+					this.playerWall(p,ar,a)
+				} else {
+					this.walls[a].playerCollision = true
+				}
+				break;
+			case "dbuild":
+				this.walls[a] = {
+					"type":"metl","x1":x1,"y1":y1,"x2":x2,"y2":y2,
+					"hp":1000,"midpt":myMath.midPointOfLine(x1,y1,x2,y2),
+					"defense":5,
+					"frad":wLength/2
+				}
+				{
+					let wallInfo = {"lx":x2,"ly":y2,"vx":x2-x1,"vy":y2-y1,"chaos":1+Math.random()*2}
+				for(let i = 0; i < 700; i++){
+					let wle = distance(0,0,wallInfo.vx,wallInfo.vy)
+					if(wle<50){
+						wallInfo.vx*=2
+						wallInfo.vy*=2
+					} else if(wle > 500){
+						wallInfo.vx*=0.5
+						wallInfo.vy*=0.5
+						i--
+					}
+					wallInfo.vx+= wallInfo.vx*(Math.random()*wallInfo.chaos-wallInfo.chaos/2)
+					wallInfo.vy+= wallInfo.vy*(Math.random()*wallInfo.chaos-wallInfo.chaos/2)
+					this.placeWall(player,wallInfo.lx,wallInfo.ly,wallInfo.lx+wallInfo.vx,wallInfo.ly+wallInfo.vy,"metl",{"force":true})
+					wallInfo.lx+=wallInfo.vx
+					wallInfo.ly+=wallInfo.vy
+				}
+
+
+				if(options.attach){
+					this.playerWall(p,ar,a)
+				} else {
+					this.walls[a].playerCollision = true
+				}
+				}
+				
+				break;
+			case "rbuild":
+				this.walls[a] = {
+					"type":"metl","x1":x1,"y1":y1,"x2":x2,"y2":y2,
+					"hp":1000,"midpt":myMath.midPointOfLine(x1,y1,x2,y2),
+					"defense":5,
+					"frad":wLength/2
+				}
+				{
+				let wallInfo = {"lx":x2,"ly":y2,"vx":x2-x1,"vy":y2-y1,"chaos":(Math.random()*200+20),"proliferate":2}
+				let stack = options.stack?options.stack+1:1
+				for(let i = 0; i < 7; i++){
+					let wle = distance(0,0,wallInfo.vx,wallInfo.vy)
+					if(wle<50){
+						wallInfo.vx*=1.2
+						wallInfo.vy*=1.2
+					} else if(wle > 500){
+						wallInfo.vx*=0.8
+						wallInfo.vy*=0.8
+						i--
+					}
+					wallInfo.vx+= (Math.random()*wallInfo.chaos-wallInfo.chaos/2)
+					wallInfo.vy+= (Math.random()*wallInfo.chaos-wallInfo.chaos/2)
+					this.placeWall(player,wallInfo.lx,wallInfo.ly,wallInfo.lx+wallInfo.vx,wallInfo.ly+wallInfo.vy,"metl",{"force":true})
+					wallInfo.lx+=wallInfo.vx
+					wallInfo.ly+=wallInfo.vy
+					if(Math.random()>0.8 && wallInfo.proliferate >0 && stack < 8){
+						wallInfo.proliferate -= 1
+						this.placeWall(player,wallInfo.lx,wallInfo.ly,wallInfo.lx+wallInfo.vx+Math.random()*50-25,wallInfo.ly+wallInfo.vy+Math.random()*50-25,"rbuild",{"force":true,"stack":stack+1})
+					}
+				}}
+
+
+				if(options.attach){
+					this.playerWall(p,ar,a)
+				} else {
+					this.walls[a].playerCollision = true
+				}
+				break;
 			case "rflc":
 				this.walls[a] = {
 					"type":"rflc","x1":x1,"y1":y1,"x2":x2,"y2":y2,
@@ -704,37 +846,7 @@ class shooter2C{
 					"compression":["type","x1","y1","x2","y2","hp"]
 				}
 				break;
-			// case "body":
-			// this.walls[a] = {"frad":distance(x1,y1,x2,y2)/2,"plid":options.id,"type":"body","x1":0,"y1":0,"x2":0,"y2":0,"hp":1000,
-			// 		"defense":0.2,"midpt":myMath.midPointOfLine(x1,y1,x2,y2)
-			// 	}
-			// 	let pp = this.players[options.id]
-			// 	// let ar = [x1-pp.x,y1-pp.y,x2-pp.x,y2-pp.y]
-			// 	let xx1 = (ar[0] * pp.rotation[1] - ar[1] * pp.rotation[0]) 
-			// 	let yy1 = (ar[1] * pp.rotation[1] + ar[0] * pp.rotation[0]) 
-			// 	let xx2 = (ar[2] * pp.rotation[1] - ar[3] * pp.rotation[0]) 
-			// 	let yy2 = (ar[3] * pp.rotation[1] + ar[2] * pp.rotation[0])
-
-			// 	// this.players[options.id].boidyVect.push([x1-pp.x,y1-pp.y,x2-pp.x,y2-pp.y])
-			// 	this.players[options.id].boidyVect.push([xx1,yy1,xx2,yy2])
-			// 	pp.unmovePos[2] = true
-			// 	this.players[options.id].boidy.push(a)
-			// 	break;
-			// case "mbdy":
-			// this.walls[a] = {"frad":wLength/2,"plid":options.id,"type":"mbdy","x1":x1,"y1":y1,"x2":x2,"y2":y2,"hp":1000, // chanaged
-			// 		"defense":4,"midpt":myMath.midPointOfLine(x1,y1,x2,y2)
-			// 	}
-			// 	let ppr = this.players[options.id]
-			// 	let aar = [x1-ppr.x,y1-ppr.y,x2-ppr.x,y2-ppr.y]
-
-			// 	this.players[options.id].boidyVect.push([
-			// 		(aar[0] * ppr.rotation[1] - aar[1] * ppr.rotation[0]),
-			// 		(aar[1] * ppr.rotation[1] + aar[0] * ppr.rotation[0]),
-			// 		(aar[2] * ppr.rotation[1] - aar[3] * ppr.rotation[0]),
-			// 		(aar[3] * ppr.rotation[1] + aar[2] * ppr.rotation[0])])
-			// 	ppr.unmovePos[2] = true
-			// 	this.players[options.id].boidy.push(a)
-			// 	break;
+//17 07 2024 deleted body and a lot of commented stuff
 			case "bhol":
 				this.walls[a] = {
 					"type":"bhol","x":x1,"y":y1,"radius":160,"velmult":0.95,
@@ -1222,6 +1334,7 @@ class shooter2C{
 			// let i = JSON.parse(JSON.stringify(B))        ///make a new bullet!
 			let i = {"x":p.x, "y":p.y, "vx":p.vx,"vy":p.vy}
 			let coled = "dn"
+			if(p.spectator || p.dead){coled = "stop"}
 			let wallsArr = Object.keys(this.walls)
 			let bspeed = distance(0,0,p.vx,p.vy)         ///bspeed is the ORIGINAL bullet's speed
 			while(coled != "stop" && counter > 0){
@@ -1522,6 +1635,8 @@ class shooter2C{
 
 		/// 14 07 2024 OK LETS DOCUMENT THIS SHIT
 
+		this.CALCULATIONS = 0
+
 		for(let k = this.bullets.length-1; k > -1; k--){  ///for every single bullet
 			let B = this.bullets[k]
 			B.life--                                      ///decrease bullet life
@@ -1579,7 +1694,10 @@ class shooter2C{
 								}
 							} // if already collided with wall, don't collide same wall again
 
-					if(w?.handle == undefined){                                  //// means this is a solid line wall!
+
+							this.CALCULATIONS +=1;
+
+							if(w?.handle == undefined){                  //// means this is a solid line wall!
 							
 							if( this.wallSameTeamBullet(B,w)){ //deleted "w == udefined ||" 14 07 2024
 								continue;
@@ -1792,7 +1910,7 @@ class shooter2C{
 
 	}
 	static wallTypes = {
-		"norm":true,"metl":true,"rflc":true,"player":true,"body":true,"mbdy":true
+		"norm":true,"metl":true,"rflc":true,"player":true,"body":true,"mbdy":true,"wall":true
 	}
 
 	static delWall(wid){
@@ -1809,12 +1927,12 @@ class shooter2C{
 			let vx
 			let dp = 1
 			if(o){
-		 		vy = o.vy
 		 		dp = o.adp
 		 		if(b.ignoreAngleDamageMult){
 		 			dp = b.ignoreAngleDamageMult
 		 		}
 		 		vx = o.vx
+		 		vy = o.vy
 			} else {
 				vy = b.vy
 		 		vx = b.vx
@@ -2524,6 +2642,18 @@ class shooter2C{
 					}
 				}
 				return(willCollide)
+	}
+
+
+	static exportMap(){
+			fs.writeFileSync('./S2Cmap.json',JSON.stringify({"walls":this.walls,"nuuid":this.nuuIDGEN}), function writeJSON(err){if(err)return console.log(err)})
+	}
+	static loadMap(map){
+		map = map?("./"+map+".json"):"./S2Cmap.json"
+		let mapdata = JSON.parse(fs.readFileSync(map,"utf8"))
+		this.walls = mapdata.walls
+		this.nuuIDGEN = mapdata.nuuid
+		
 	}
 
 }
