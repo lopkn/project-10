@@ -1265,7 +1265,7 @@ class shooter2C{
 
 				if(dd < p.boidyAll){
 					if(p.onDeath){p.onDeath(p)}
-					if(p.spawnPoint && p.spawnpoint.hp>0){
+					if(p.spawnPoint && p.spawnPoint.hp>0){
 						setTimeout(()=>{
 							let np = this.initiatePlayer(p.id,p.type)
 							np.x = p.spawnPoint.x
