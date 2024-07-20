@@ -1377,9 +1377,9 @@ void myScreenThread(){
 		myScreen.drawArr1[i].floats[0] = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);;
 		myScreen.drawArr1[i].floats[1] = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);;
 		myScreen.drawArr1[i].floats[2] = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);;
-		// myScreen.drawArr1[i].floats[0] = 1;
-		// myScreen.drawArr1[i].floats[1] = 1;
-		// myScreen.drawArr1[i].floats[2] = 1;
+		myScreen.drawArr1[i].floats[0] = 0;
+		myScreen.drawArr1[i].floats[1] = 1;
+		myScreen.drawArr1[i].floats[2] = 0;
 		myScreen.drawArr1[i].floats[3] = 0.5;
 		}
     //actual colrender

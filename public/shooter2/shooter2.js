@@ -738,7 +738,9 @@ var mouseY = 0
 onmousemove = (e)=>{mouseX = (e.clientX)/allzoom; mouseY = (e.clientY - 2*allzoom)/allzoom}
 
 document.addEventListener("mousedown",(e)=>{
-	if(!weaponInfo[player.weapon].hold){
+	if(weaponInfo[player.weapon]?.hold){
+		socket.emit("clickdown",[(mouseX-mid[0])/player.zoom,(mouseY-mid[1])/player.zoom,player.weapon])
+	} else {
 		socket.emit("click",[ID,mouseX-mid[0],mouseY-mid[1],player.weapon])
 	}
 	player.clickheld = true
@@ -752,7 +754,7 @@ document.addEventListener("wheel",(e)=>{
 })
 
 document.addEventListener("mouseup",(e)=>{
-	if(weaponInfo[player.weapon].hold){
+	if(weaponInfo[player.weapon]?.hold){
 		socket.emit("clickup",[mouseX-mid[0],mouseY-mid[1],player.weapon])
 	}
 	player.clickheld = false

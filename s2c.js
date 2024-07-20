@@ -442,12 +442,13 @@ class shooter2C{
 	}
 
 	static playerHoldDown(id,x,y,w){ //clickupper id, x, y, weapon
-		this.players[id].holdDownPos = [x,y]
+		let p = this.players[id]
+		p.holdDownPos = [x,y,p.x+x,p.y+y]
 	}
 
 	static playerClickUp(id,x,y,w){ //clickupper id, x, y, weapon
 		let p = this.players[id]
-		this.playerClick(id,p.holdDownPos[0],p.holdDownPos[1],w)
+		this.playerClick(id,p.holdDownPos[2]-p.x,p.holdDownPos[3]-p.y,w)
 	}
 
 	static playerClick(id,x,y,w){
@@ -531,18 +532,18 @@ class shooter2C{
 				break;
 			case "grnd":
 				this.pushBullet(p.x,p.y,(n[2]-p.x)*80+p.vx,(n[3]-p.y)*80+p.vy,id,"grnd")
-		reload += 20
-		p.materials -= 5
+					reload += 20
+					p.materials -= 5
 				break;
 			case "grnd2":
 				this.pushBullet(p.x,p.y,(n[2]-p.x)*80+p.vx,(n[3]-p.y)*80+p.vy,id,"grnd2")
-		reload += 20
-		p.materials -= 5
+				reload += 20
+				p.materials -= 5
 				break;
 			case "msl":
 				this.pushBullet(p.x,p.y,(n[2]-p.x)*25,(n[3]-p.y)*25,id,"msl")
-		reload += 30
-		p.materials -= 5
+				reload += 30
+				p.materials -= 5
 				break;
 			case "msl2":
 				this.pushBullet(p.x,p.y,(n[2]-p.x)*25,(n[3]-p.y)*25,id,"msl2")
@@ -1955,8 +1956,9 @@ class shooter2C{
 			}
 			if(!this.walls[wid].undying){
 
-				delete this.walls[wid]
-				this.wallPushers[wid] = "_DEL"
+				// delete this.walls[wid]
+				// this.wallPushers[wid] = "_DEL"
+				this.delWall(wid)
 			return(false)
 			} else {
 				this.walls[wid].undying -= 1
@@ -1974,8 +1976,10 @@ class shooter2C{
 			if(this.walls[wid].onDeath !== undefined){
 				this.walls[wid].onDeath(this.walls[wid],b)
 			}
-			delete this.walls[wid]
-			this.wallPushers[wid] = "_DEL"
+			// delete this.walls[wid]
+			// this.wallPushers[wid] = "_DEL"
+				this.delWall(wid)
+
 			return(false)
 		}
 		this.updateWallHP(wid)
@@ -1987,8 +1991,9 @@ class shooter2C{
 			if(this.walls[wid].onDeath !== undefined){
 				this.walls[wid].onDeath(this.walls[wid],b)
 			}
-			delete this.walls[wid]
-			this.wallPushers[wid] = "_DEL"
+			// delete this.walls[wid]
+			// this.wallPushers[wid] = "_DEL"
+				this.delWall(wid)
 			return(false)
 		}
 		this.updateWallHP(wid)
@@ -2000,8 +2005,9 @@ class shooter2C{
 			if(this.walls[wid].onDeath !== undefined){
 				this.walls[wid].onDeath(this.walls[wid],b)
 			}
-			delete this.walls[wid]
-			this.wallPushers[wid] = "_DEL"
+			// delete this.walls[wid]
+			// this.wallPushers[wid] = "_DEL"
+				this.delWall(wid)
 			return(false)
 		}
 	}

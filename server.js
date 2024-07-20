@@ -1608,6 +1608,7 @@ function joinGame(game,socket){
 		socket.on("ping",(e)=>{io.to(socket.id).emit("pong",e)})
 		socket.on("initiate",(e)=>{shooter2C.initiatePlayer(socket.id,e)})
 		socket.on("click",(e)=>{shooter2C.playerClick(e[0],e[1],e[2],e[3]);})
+		socket.on("clickdown",(e)=>{shooter2C.playerHoldDown(socket.id,e[0],e[1],e[2]);})
 		socket.on("clickup",(e)=>{shooter2C.playerClickUp(socket.id,e[0],e[1],e[2]);})
 		socket.on("placeWall",(e)=>{shooter2C.placeWall(socket.id,e[0],e[1],e[2],e[3],e[4],e[5],e[6])})
 		socket.on("keys",(e)=>{shooter2C.playerKeyUpdate(e)})
