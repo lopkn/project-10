@@ -441,6 +441,15 @@ class shooter2C{
 		p.unmovePos[2] = true
 	}
 
+	static playerHoldDown(id,x,y,w){ //clickupper id, x, y, weapon
+		this.players[id].holdDownPos = [x,y]
+	}
+
+	static playerClickUp(id,x,y,w){ //clickupper id, x, y, weapon
+		let p = this.players[id]
+		this.playerClick(id,p.holdDownPos[0],p.holdDownPos[1],w)
+	}
+
 	static playerClick(id,x,y,w){
 		let p = this.players[id]
 		if(p.reloading > 0 || p.reloading == undefined || (p.dead&&!this.keyholders[id])){

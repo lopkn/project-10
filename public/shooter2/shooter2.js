@@ -159,7 +159,8 @@ weaponInfo = {
 	"lzr2":{"repeating":2},
 	"fire":{"repeating":2},
 	"zapr":{"repeating":3},
-	"mchg":{"repeating":3}
+	"mchg":{"repeating":3},
+	"grnd":{"hold":true}
 
 }
 
@@ -737,7 +738,9 @@ var mouseY = 0
 onmousemove = (e)=>{mouseX = (e.clientX)/allzoom; mouseY = (e.clientY - 2*allzoom)/allzoom}
 
 document.addEventListener("mousedown",(e)=>{
-	socket.emit("click",[ID,mouseX-mid[0],mouseY-mid[1],player.weapon])
+	if(!weaponInfo[player.weapon].hold){
+		socket.emit("click",[ID,mouseX-mid[0],mouseY-mid[1],player.weapon])
+	}
 	player.clickheld = true
 })
 
@@ -749,6 +752,9 @@ document.addEventListener("wheel",(e)=>{
 })
 
 document.addEventListener("mouseup",(e)=>{
+	if(weaponInfo[player.weapon].hold){
+		socket.emit("clickup",[mouseX-mid[0],mouseY-mid[1],player.weapon])
+	}
 	player.clickheld = false
 })
 
