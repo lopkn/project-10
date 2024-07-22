@@ -23,6 +23,22 @@ socket.on("mass",(e)=>{MASS(e)})
 socket.on("pong",(e)=>{player.ping = Date.now()-e})
 
 
+weaponInfo = {
+	"heal":{"repeating":2},
+	"dril":{"repeating":2},
+	"lzr2":{"repeating":2},
+	"fire":{"repeating":2},
+	"zapr":{"repeating":3},
+	"mchg":{"repeating":3},
+	"grnd":{"hold":true},
+	"bounder":{"hold":true},
+	"bounder2":{"hold":true},
+	"dbheal":{"hold":true},
+	"kb":{"hold":true}
+
+}
+
+
 function MASS(e){
 
 	drawDrawers(e.drawers[0],e.drawers[1]);
@@ -196,19 +212,7 @@ var ID = ""
 var cameraX = 0
 var cameraY = 0
 
-weaponInfo = {
-	"heal":{"repeating":2},
-	"dril":{"repeating":2},
-	"lzr2":{"repeating":2},
-	"fire":{"repeating":2},
-	"zapr":{"repeating":3},
-	"mchg":{"repeating":3},
-	"grnd":{"hold":true},
-	"bounder":{"hold":true},
-	"bounder2":{"hold":true},
-	"kb":{"hold":true}
 
-}
 
 class player{
 	static debugging = false
@@ -1404,6 +1408,10 @@ function updateParticles(arr){
 			map.particles.push(new explosionR2(e.x,e.y,"#0000A0",3000,(x)=>{return(4)},(x)=>{return((3000-x)*3)}))
 		} else if(e.type == "bounded"){
 			map.particles.push(new explosionR2(e.x,e.y,"#0000A0",3000,(x)=>{return(x/300)},(x)=>{return(e.r)},(x)=>{return("rgba(20,20,125,"+(0.6*x)+")")}))
+		} else if(e.type == "dbheal_bounding"){
+			map.particles.push(new explosionR2(e.x,e.y,"#A00000",3000,(x)=>{return(4)},(x)=>{return((3000-x)/3)}))
+		} else if(e.type == "dbheal_bounded"){
+			map.particles.push(new explosionR2(e.x,e.y,"#A00000",3000,(x)=>{return(x/300)},(x)=>{return(e.r)},(x)=>{return("rgba(175,20,20,"+(0.6*x)+")")}))
 		}
 	})
 }

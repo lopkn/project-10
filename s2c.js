@@ -372,6 +372,7 @@ class shooter2C{
 				let rnd = rndlist[Math.floor(Math.random()*rndlist.length)]
 				let en = this.entityTemplates(rnd,2,{"team":team,"x":x+Math.random()*3000-1500,"y":Math.random()*3000-1500+y})
 				en.reloadMultiplier = 3
+				en.noTeamfire=true
 				en.speed = 0.6
 				break;
 
@@ -533,9 +534,19 @@ class shooter2C{
 					}
 					
 				break;
+			case "dbheal":
+					if(extra.release){
+						let warr = this.getWallsInRadius(p.holdDownPos[2],p.holdDownPos[3],(Date.now()-p.holdDownPos[4])/3)
+						warr.forEach((e)=>{if(this.walls[e].hp<1000){this.walls[e].hp = 1000;this.updateWallHP(e)}})
+						io.to("G10.2").emit("particle",[{"type":"dbheal_bounded","x":p.holdDownPos[2],"y":p.holdDownPos[3],"r":(Date.now()-p.holdDownPos[4])/3}])
+					} else {
+						io.to("G10.2").emit("particle",[{"type":"dbheal_bounding","x":p.holdDownPos[2],"y":p.holdDownPos[3]}])
+					}
+					
+				break;
 			case "bounder":
 					if(extra.release){
-						this.groupStaticWalls(p.holdDownPos[2],p.holdDownPos[3],(Date.now()-p.holdDownPos[4])/3)
+						this.groupStaticWalls2(p.holdDownPos[2],p.holdDownPos[3],(Date.now()-p.holdDownPos[4])/3)
 						io.to("G10.2").emit("particle",[{"type":"bounded","x":p.holdDownPos[2],"y":p.holdDownPos[3],"r":(Date.now()-p.holdDownPos[4])/3}])
 					} else {
 						io.to("G10.2").emit("particle",[{"type":"bounding","x":p.holdDownPos[2],"y":p.holdDownPos[3]}])
@@ -544,7 +555,7 @@ class shooter2C{
 				break;
 			case "bounder2":
 					if(extra.release){
-						this.groupStaticWalls(p.holdDownPos[2],p.holdDownPos[3],(Date.now()-p.holdDownPos[4])*3)
+						this.groupStaticWalls2(p.holdDownPos[2],p.holdDownPos[3],(Date.now()-p.holdDownPos[4])*3)
 						io.to("G10.2").emit("particle",[{"type":"bounded","x":p.holdDownPos[2],"y":p.holdDownPos[3],"r":(Date.now()-p.holdDownPos[4])*3}])
 					} else {
 						io.to("G10.2").emit("particle",[{"type":"bounding2","x":p.holdDownPos[2],"y":p.holdDownPos[3]}])
@@ -936,6 +947,7 @@ class shooter2C{
 						let rnd = w.spawns[Math.floor(Math.random()*w.spawns.length)]
 						w.entity = this.entityTemplates(rnd,2,{"team":team,"x":x1+Math.random()*150-75,"y":y1+Math.random()*150-75}).id
 						this.players[w.entity].speed *= 1+Math.random()
+						this.players[w.entity].noTeamfire=true
 					}
 				}
 				break;
@@ -1419,9 +1431,9 @@ class shooter2C{
 
 					if(w?.handle == undefined){                                  //// means this is a solid line wall!
 							
-							// if( this.wallSameTeamBullet(B,w)){ 
-							// 	continue; !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! CAN BE REVAMPED FOR PLAYERS !!!!!!!
-							// }
+							if( this.wallSameTeamPlayer(p,w)){ 
+								continue; //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! CAN BE REVAMPED FOR PLAYERS !!!!!!!
+							}
 							let e = this.walls[wallsArr[j]]                                        //i have no idea why i used E instead of W?
 							let col = this.pointLineCollision(i.x,i.y,i.x+i.vx,i.y+i.vy,e.x1,e.y1,e.x2,e.y2)
 							if(col[4]){
@@ -1577,9 +1589,22 @@ class shooter2C{
 	}
 
 	static wallSameTeamBullet(bullet,wall){
-		if(bullet.shooter == wall.plid){
-			return(true)
+		let player = this.players[bullet.shooter]
+		if(wall.plid !== undefined){
+			if(bullet.shooter == wall.plid || (player?.team && player.noTeamfire && player.team == this.players[wall.plid]?.team)){
+				return(true)
+			}
 		}
+		
+		return(false)
+	}
+	static wallSameTeamPlayer(player,wall){
+		if(wall.plid !== undefined){
+			if(player.team && player.noTeamfire && player.team == this.players[wall.plid]?.team){
+				return(true)
+			}
+		}
+		
 		return(false)
 	}
 
@@ -2317,7 +2342,7 @@ class shooter2C{
 					}
 					if(dst < e.fireRange){
 						if(Math.random()>0.99){
-							this.playerClick(e.id,Math.random(),Math.random(),"tlpt")
+							this.playerClick(e.id,Math.random()-0.5,Math.random()-0.5,"tlpt")
 						}
 						if(type == "ntri2"){
 							if(Math.random()>0.1){
@@ -2828,45 +2853,148 @@ class shooter2C{
 		return(amount)
 	}
 
+	static groupStaticWalls2(x,y,r){
+		console.log(x,y,r)
+		let boundingGroupID = this.getNewNUUID()
+
+		let boundingDict = {}
+		let amount = 0
+		let gamount = 0
+		let wallsArr = Object.keys(this.wallGroups.d)
+		wallsArr.forEach((WB)=>{
+
+			if(this.wallGroups.d[WB] == "wall"){
+					let w = this.walls[WB]
+					if(w !== undefined && !w.attached && w.handle===undefined){
+					if(this.boundingCircleIncludesWall(w,x,y,r)){
+						delete this.wallGroups.d[w.id]
+						boundingDict[w.id]="wall" //maybe set it so that the wall knows its bounding parent
+						amount++
+					}
+				}
+			} else {
+				let childGroup = this.wallGroups.d[WB]
+				if(distance(childGroup.x,childGroup.y,x,y) + childGroup.r < r){
+					boundingDict[WB] = childGroup
+					delete this.wallGroups.d[WB]
+					gamount++
+				}
+			}
+			
+		})
+		if(amount > 0 || gamount > 0){
+			this.wallGroups.d[boundingGroupID]={"x":x,"y":y,"r":r,"d":boundingDict,"a":amount}
+			console.log("bounded "+amount+" walls and "+gamount+" groups")
+		}
+		return(amount)
+	}
+	static getWallsInRadius(x,y,r){
+		console.log(x,y,r)
+		let boundingGroupID = this.getNewNUUID()
+
+		let walls = []
+		let processing = [this.wallGroups]
+		let amount = 0
+		let gamount = 0
+
+		while(processing.length>0){
+			let p = processing[0]
+			let wallsArr = Object.keys(p.d)
+			processing.splice(0,1)
+			wallsArr.forEach((WB)=>{
+
+				if(p.d[WB] == "wall"){
+						let w = this.walls[WB]
+						if(w !== undefined && w.handle===undefined){ //ATTACHED WALLS ALSO
+						if(this.boundingCircleIncludesWall(w,x,y,r)){
+							walls.push(w.id)
+							amount++
+						}
+					}
+				} else {
+					let childGroup = p.d[WB]
+					if(distance(childGroup.x,childGroup.y,x,y)  < r + childGroup.r){
+						processing.push(childGroup)
+						gamount++
+					}
+				}
+				
+			})
+		}
+		if(amount > 0 || gamount > 0){
+			console.log("found "+amount+" walls and "+gamount+" groups")
+		}
+		return(walls)
+	}
+
 	static boundingCircleIncludesWall(w,x,y,r){
-		if(!w.attached && w.handle===undefined){
+		if( w.handle===undefined){
 			if(distance(w.x1,w.y1,x,y)<r && distance(w.x2,w.y2,x,y)<r){return(true)}
 		}
 		return(false)
 	}
 
 
-	static improvedWallCheck(){
+	// static improvedWallCheck(){
 
 
-		//wallgroups HAS all walls, but might be in side!
+	// 	//wallgroups HAS all walls, but might be in side!
+	// 	let processing = [this.wallGroups]
+
+	// 	// wallgroups {"x","y","r":Infinity,"d":{"":GroupObject,"":wall}}
+
+	// 	let needCollideWalls = {}
+		
+	// 	while(processing.length > 0){
+	// 		let newprocessing = []
+
+	// 		processing.forEach((e)=>{
+	// 			let a = Object.keys(e.d)
+	// 			a.forEach((E)=>{
+	// 		  		if(e.d[a]!=="wall"){
+	// 		  			if(collide){
+	// 		  				newprocessing.push(e.d[a])
+	// 		  			}
+	// 		  		} else {
+	// 		  			needCollideWalls[a] = true
+	// 		  		}
+	// 			})
+			  
+	// 		})
+	// 		processing = newprocessing
+			 
+	// 	}
+		
+
+	// }
+
+	static getWallsInApproximate(x,y,bdist){
 		let processing = [this.wallGroups]
 
-		// wallgroups {"x","y","r":Infinity,"d":{"":GroupObject,"":wall}}
+			// wallgroups {"x","y","r":Infinity,"d":{"":GroupObject,"":wall}}
 
-		let needCollideWalls = {}
-		
-		while(processing.length > 0){
-			let newprocessing = []
+			let needCollideWalls = {}
+			
+			while(processing.length > 0){
+				let newprocessing = []
 
-			processing.forEach((e)=>{
-				let a = Object.keys(e.d)
-				a.forEach((E)=>{
-			  		if(e.d[a]!=="wall"){
-			  			if(collide){
-			  				newprocessing.push(e.d[a])
-			  			}
-			  		} else {
-			  			needCollideWalls[a] = true
-			  		}
+				processing.forEach((e)=>{
+					let a = Object.keys(e.d)
+					a.forEach((E)=>{
+				  		if(e.d[E]!=="wall"){
+				  			if(distance(x,y,e.d[E].x,e.d[E].y) < bdist + e.d[E].r){
+				  				newprocessing.push(e.d[E])
+				  			}
+				  		} else {
+				  			needCollideWalls[E] = true
+				  		}
+					})
+				  
 				})
-			  
-			})
-			processing = newprocessing
-			 
-		}
-		
-
+				processing = newprocessing
+			}
+		wallsArr = Object.keys(needCollideWalls)
+		return({"arr":wallsArr,"dict":needCollideWalls})
 	}
 
 }
