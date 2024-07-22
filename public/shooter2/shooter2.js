@@ -81,6 +81,49 @@ class explosionR{
 	}
 }
 
+class explosionR2{
+	constructor(x,y,color,life=600,lineRelation,radiusRelation,fillcolor="rgba(0,0,0,0)"){
+		this.x = x
+		this.y = y
+		this.color = color
+		this.fillcolor = fillcolor
+		if(typeof(color) !== "string"){this.colorf = color; this.color = "#FF00FF"}
+		if(typeof(fillcolor) !== "string"){this.fillcolorf = fillcolor; this.fillcolor = "#FF00FF"}
+		this.lineRelation = lineRelation?lineRelation:((x)=>{return(15*x/life)})
+		this.radiusRelation = radiusRelation?radiusRelation:((x)=>{return((life-x)*300/life)})
+		this.actLife = life
+		this.maxlife = life
+		this.lastTime = Date.now()		
+	}
+
+	update(t){
+		this.actLife -= t-this.lastTime
+		this.frameLineWidth = this.lineRelation(this.actLife)
+		this.frameRadius = this.radiusRelation(this.actLife)
+		this.lastTime = t
+		if(this.colorf !== undefined){
+			this.color = this.colorf(this.actLife/this.maxlife)
+		}
+		if(this.fillcolorf !== undefined){
+			this.fillcolor = this.fillcolorf(this.actLife/this.maxlife)
+		}
+	}
+	draw(){
+		if(this.actLife < 0){
+			return('del')
+		}
+		mainCTX.strokeStyle = this.color
+		mainCTX.fillStyle = this.fillcolor
+		mainCTX.lineWidth = this.frameLineWidth*player.zoom
+		mainCTX.beginPath()
+		let bts = coordToMap(this.x,this.y)
+		mainCTX.arc(bts[0],bts[1], this.frameRadius*player.zoom, 0, 2 * Math.PI);
+		mainCTX.stroke()
+		mainCTX.fill()
+		
+	}
+}
+
 let bloodTiles = {}
 
 function blood(amt,coordx,coordy,wall){
@@ -160,7 +203,10 @@ weaponInfo = {
 	"fire":{"repeating":2},
 	"zapr":{"repeating":3},
 	"mchg":{"repeating":3},
-	"grnd":{"hold":true}
+	"grnd":{"hold":true},
+	"bounder":{"hold":true},
+	"bounder2":{"hold":true},
+	"kb":{"hold":true}
 
 }
 
@@ -741,7 +787,7 @@ document.addEventListener("mousedown",(e)=>{
 	if(weaponInfo[player.weapon]?.hold){
 		socket.emit("clickdown",[(mouseX-mid[0])/player.zoom,(mouseY-mid[1])/player.zoom,player.weapon])
 	} else {
-		socket.emit("click",[ID,mouseX-mid[0],mouseY-mid[1],player.weapon])
+		socket.emit("click",[ID,(mouseX-mid[0])/player.zoom,(mouseY-mid[1])/player.zoom,player.weapon])
 	}
 	player.clickheld = true
 })
@@ -755,7 +801,7 @@ document.addEventListener("wheel",(e)=>{
 
 document.addEventListener("mouseup",(e)=>{
 	if(weaponInfo[player.weapon]?.hold){
-		socket.emit("clickup",[mouseX-mid[0],mouseY-mid[1],player.weapon])
+		socket.emit("clickup",[(mouseX-mid[0])/player.zoom,(mouseY-mid[1])/player.zoom,player.weapon])
 	}
 	player.clickheld = false
 })
@@ -925,35 +971,6 @@ function buildWall(x,y){
 
 
 
-
-function updateParticles(arr){
-	arr.forEach((e)=>{
-		if(e.type == "explosion"){
-				map.particles.push(new explosionR(e.x+0.5,e.y+0.5,
-					(x)=>{
-						let rr = 250*Math.random()
-						return("rgb("+(rr)+","+(Math.random()*rr)+","+(Math.random()*15)+")")},
-					16,8,2))
-				map.particles.push(new explosionR(e.x+0.5,e.y+0.5,
-					(x)=>{
-						let rr = 250*Math.random()
-						return("rgb("+(rr)+","+(Math.random()*rr)+","+(Math.random()*15)+")")},
-					10,5,1))
-
-		} else if(e.type == "encn explosion"){
-			map.particles.push(new explosionR(e.x+0.5,e.y+0.5,
-					(x)=>{
-						let rr = 250*Math.random()
-						return("rgb(0,"+(Math.random()*rr)+","+(rr)+")")},
-					26,7,2))
-				map.particles.push(new explosionR(e.x+0.5,e.y+0.5,
-					(x)=>{
-						let rr = 250*Math.random()
-						return("rgb(0,"+(Math.random()*rr)+","+(rr)+")")},
-					10,2,1))
-		}
-	})
-}
 
 
 
@@ -1348,3 +1365,41 @@ help.innerHTML =
 }
 
 
+
+function updateParticles(arr){
+	arr.forEach((e)=>{
+		if(e.type == "explosion"){
+				map.particles.push(new explosionR(e.x,e.y,
+					(x)=>{
+						let rr = 250*Math.random()
+						return("rgb("+(rr)+","+(Math.random()*rr)+","+(Math.random()*15)+")")},
+					16,8,2))
+				map.particles.push(new explosionR(e.x,e.y,
+					(x)=>{
+						let rr = 250*Math.random()
+						return("rgb("+(rr)+","+(Math.random()*rr)+","+(Math.random()*15)+")")},
+					10,5,1))
+
+		} else if(e.type == "encn explosion"){
+			map.particles.push(new explosionR(e.x,e.y,
+					(x)=>{
+						let rr = 250*Math.random()
+						return("rgb(0,"+(Math.random()*rr)+","+(rr)+")")},
+					26,7,2))
+				map.particles.push(new explosionR(e.x,e.y,
+					(x)=>{
+						let rr = 250*Math.random()
+						return("rgb(0,"+(Math.random()*rr)+","+(rr)+")")},
+					10,2,1))
+		} else if(e.type == "conc"){
+			map.particles.push(new explosionR2(e.x,e.y,"#FFFF00",1000,(x)=>{return(x/40+3)},(x)=>{return(x/4)}))
+
+		} else if(e.type == "bounding"){
+			map.particles.push(new explosionR2(e.x,e.y,"#0000A0",3000,(x)=>{return(4)},(x)=>{return((3000-x)/3)}))
+		} else if(e.type == "bounding2"){
+			map.particles.push(new explosionR2(e.x,e.y,"#0000A0",3000,(x)=>{return(4)},(x)=>{return((3000-x)*3)}))
+		} else if(e.type == "bounded"){
+			map.particles.push(new explosionR2(e.x,e.y,"#0000A0",3000,(x)=>{return(x/300)},(x)=>{return(e.r)},(x)=>{return("rgba(20,20,125,"+(0.6*x)+")")}))
+		}
+	})
+}

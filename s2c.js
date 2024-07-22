@@ -17,6 +17,10 @@ function copyFuncs(v,v2){
 
 class shooter2C{
 	static walls = {}
+
+	static wallGroups = {"x":0,"y":0,"r":Infinity,"d":{}}
+	//groupID:{x,y,radius,wallIds{}}
+
 	static bullets = []
 	//{x,y,vx,vy,tailLength,tail[l,x,y,tx,ty],life}
 	static players = {}
@@ -443,15 +447,16 @@ class shooter2C{
 
 	static playerHoldDown(id,x,y,w){ //clickupper id, x, y, weapon
 		let p = this.players[id]
-		p.holdDownPos = [x,y,p.x+x,p.y+y]
+		p.holdDownPos = [x,y,p.x+x,p.y+y,Date.now()]
+		this.playerClick(id,p.holdDownPos[2]-p.x,p.holdDownPos[3]-p.y,w,{"holdDown":true})
 	}
 
 	static playerClickUp(id,x,y,w){ //clickupper id, x, y, weapon
 		let p = this.players[id]
-		this.playerClick(id,p.holdDownPos[2]-p.x,p.holdDownPos[3]-p.y,w)
+		this.playerClick(id,p.holdDownPos[2]-p.x,p.holdDownPos[3]-p.y,w,{"release":true})
 	}
 
-	static playerClick(id,x,y,w){
+	static playerClick(id,x,y,w,extra={}){
 		let p = this.players[id]
 		if(p.reloading > 0 || p.reloading == undefined || (p.dead&&!this.keyholders[id])){
 			return;
@@ -503,6 +508,41 @@ class shooter2C{
 			this.KB(p,-(n[2]-p.x)*5,-(n[3]-p.y)*5)
 		reload += 30
 				break;
+			case "kb":
+					if(extra.release){
+						if(Date.now()-p.holdDownPos[4] < 1000){return}
+						this.KBR(p.holdDownPos[2],p.holdDownPos[3])
+							
+						for(let i = 0; i < 20; i++){
+							let a = this.pushBullet(p.holdDownPos[2],p.holdDownPos[3],Math.random()*400-200,Math.random()*400-200,id,"norm")
+							a.slowd = 0.5
+							a.dmgmult = 10
+							a.extra = {"tailmult":3,"tailLength":6}
+							a.tailLength = 6; a.lingerance = 6;
+						}
+					} else {
+						io.to("G10.2").emit("particle",[{"type":"conc","x":p.holdDownPos[2],"y":p.holdDownPos[3]}])
+					}
+					
+				break;
+			case "bounder":
+					if(extra.release){
+						this.groupStaticWalls(p.holdDownPos[2],p.holdDownPos[3],(Date.now()-p.holdDownPos[4])/3)
+						io.to("G10.2").emit("particle",[{"type":"bounded","x":p.holdDownPos[2],"y":p.holdDownPos[3],"r":(Date.now()-p.holdDownPos[4])/3}])
+					} else {
+						io.to("G10.2").emit("particle",[{"type":"bounding","x":p.holdDownPos[2],"y":p.holdDownPos[3]}])
+					}
+					
+				break;
+			case "bounder2":
+					if(extra.release){
+						this.groupStaticWalls(p.holdDownPos[2],p.holdDownPos[3],(Date.now()-p.holdDownPos[4])*3)
+						io.to("G10.2").emit("particle",[{"type":"bounded","x":p.holdDownPos[2],"y":p.holdDownPos[3],"r":(Date.now()-p.holdDownPos[4])*3}])
+					} else {
+						io.to("G10.2").emit("particle",[{"type":"bounding2","x":p.holdDownPos[2],"y":p.holdDownPos[3]}])
+					}
+					
+				break;
 			case "lazr":
 				
 				this.pushBullet(p.x,p.y,(n[2]-p.x)*1100,(n[3]-p.y)*1100,id,"lazr")
@@ -531,7 +571,8 @@ class shooter2C{
 				this.pushBullet(p.x,p.y,(n[2]-p.x)*160,(n[3]-p.y)*160,id,"dril")
 				break;
 			case "grnd":
-				this.pushBullet(p.x,p.y,(n[2]-p.x)*80+p.vx,(n[3]-p.y)*80+p.vy,id,"grnd")
+				if(extra.holdDown){return}
+				this.pushBullet(p.x,p.y,x/4+p.vx,y/4+p.vy,id,"grnd")
 					reload += 20
 					p.materials -= 5
 				break;
@@ -671,6 +712,7 @@ class shooter2C{
 		if(wLength < 40 && (type=="norm" || type == "metl" || type == "rflc" || type=="wall") && !options.force){
 			return
 		}
+		if(x1 === null){return}
 
 		let ar = [x1-p.x,y1-p.y,x2-p.x,y2-p.y]
 		let a = this.getNewNUUID()
@@ -775,14 +817,6 @@ class shooter2C{
 					let wallInfo = {"lx":x2,"ly":y2,"vx":x2-x1,"vy":y2-y1,"chaos":1+Math.random()*2}
 				for(let i = 0; i < 700; i++){
 					let wle = distance(0,0,wallInfo.vx,wallInfo.vy)
-					if(wle<50){
-						wallInfo.vx*=2
-						wallInfo.vy*=2
-					} else if(wle > 500){
-						wallInfo.vx*=0.5
-						wallInfo.vy*=0.5
-						i--
-					}
 					wallInfo.vx+= wallInfo.vx*(Math.random()*wallInfo.chaos-wallInfo.chaos/2)
 					wallInfo.vy+= wallInfo.vy*(Math.random()*wallInfo.chaos-wallInfo.chaos/2)
 					this.placeWall(player,wallInfo.lx,wallInfo.ly,wallInfo.lx+wallInfo.vx,wallInfo.ly+wallInfo.vy,"metl",{"force":true})
@@ -1099,6 +1133,7 @@ class shooter2C{
 		}
 
 		this.walls[a].id = a
+		this.wallGroups.d[a] = "wall"
 		this.updateWall(a)
 		return(a)
 	}
@@ -1109,7 +1144,7 @@ class shooter2C{
 			this.players[id] = {"reloading":0,"unmovePos":[0,0],"rotation":[0,1],
 				"boidyVect":[[0,-40,30,30],[30,30,-30,30],[-30,30,0,-40]],
 				"boidy":[],"x":410,"y":410,"vx":0,"vy":0,"hp":100,"id":id,"keys":{},
-				"materials":100,"speed":1.5,"boidyAll":3,"tracking":false,"movement":"spontaneous"
+				"materials":100,"speed":1.5,"boidyAll":3,"tracking":false
 			}
 			io.to(id).emit("spec",["zoom",1])
 
@@ -1125,7 +1160,7 @@ class shooter2C{
 			this.players[id] = {"reloading":0,"unmovePos":[0,0],"rotation":[0,1],
 			"boidyVect":[[10,40,30,-30],[30,-30,-30,-30],[-30,-30,-10,40],[-10,40,10,40],[-70,45,-10,57],[10,57,70,45]],
 			"boidy":[],"x":410,"y":410,"vx":0,"vy":0,"hp":100,"id":id,"keys":{},
-			"materials":100,"speed":0.5,"tracking":false,"boidyAll":4
+			"materials":100,"speed":0.5,"tracking":false,"boidyAll":4,"movement":"spontaneous"
 			}
 			io.to(id).emit("spec",["zoom",0.8])
 			let a = this.placeWall(id,0,0,0,0,"player",{"id":id,"force":true},{"defense":3})
@@ -1287,6 +1322,7 @@ class shooter2C{
 					p.dead = true
 					p.boidy.forEach((e)=>{
 						this.walls[e].undying = false
+						this.walls[e].attached = false
 					})
 					if(p.entity){
 						this.disconnect({"id":p.id})
@@ -1643,7 +1679,7 @@ class shooter2C{
 		// let wallsArr = Object.keys(this.walls)
 
 
-		/// 14 07 2024 OK LETS DOCUMENT THIS SHIT
+		/// 14 07 2024 OK LETS DOCUMENT THIS SHIT. BULLET PROCESSING
 
 		this.CALCULATIONS = 0
 
@@ -1684,10 +1720,61 @@ class shooter2C{
 				coled = "stop"
 				let colsave = []                       ///colsave is the walls i can potentially collide with this frame
 				
+				// //grouping check
+				// let noColWalls = {}
+				// let bdist = distance(i.x,i.y,i.x+i.vx,i.y+i.vy)
+				// Object.values(this.wallGroups).forEach((e)=>{
+				// 	if(distance(i.x,i.y,e.x,e.y) > bdist + e.r){
+				// 		Object.assign(noColWalls,e.d)
+				// 	}
+				// })
+
+				// let skipped = Object.keys(noColWalls).length
+				// if(skipped > 50){
+				// 	console.log("skipped "+skipped)
+				// }
+
+				//group check2
+				{
+				let startTime = Date.now()
+				let processing = [this.wallGroups]
+
+						// wallgroups {"x","y","r":Infinity,"d":{"":GroupObject,"":wall}}
+
+						let needCollideWalls = {}
+						
+						let bdist = distance(i.x,i.y,i.x+i.vx,i.y+i.vy)
+						while(processing.length > 0){
+							let newprocessing = []
+
+							processing.forEach((e)=>{
+								let a = Object.keys(e.d)
+								a.forEach((E)=>{
+							  		if(e.d[E]!=="wall"){
+							  			if(distance(i.x,i.y,e.d[E].x,e.d[E].y) < bdist + e.d[E].r){
+							  				newprocessing.push(e.d[E])
+							  			}
+							  		} else {
+							  			needCollideWalls[E] = true
+							  		}
+								})
+							  
+							})
+							processing = newprocessing
+						}
+					wallsArr = Object.keys(needCollideWalls)
+					// console.log(wallsArr)
+					let compressTime = Date.now() - startTime
+					if(compressTime>5){console.log("took "+compressTime+ " to compress")}
+				}
+				 // wallsArr = Object.keys(this.walls)
+				//group check
+
+
 				for(let j = 0; j < wallsArr.length; j++){ ////////// JUICY HERE< for each and every wall
 					let w = this.walls[wallsArr[j]]
 
-					if(w?.dead || w == undefined){
+					if( w == undefined || w.dead){
 						continue
 					}
 
@@ -2671,7 +2758,82 @@ class shooter2C{
 		
 	}
 
+
+
+	static groupAllStaticWalls(){
+		let boundingGroupID = this.getNewNUUID()
+
+		let boundingDict = {}
+
+	}
+	static groupStaticWalls(x,y,r){
+		console.log(x,y,r)
+		let boundingGroupID = this.getNewNUUID()
+
+		let boundingDict = {}
+		let amount = 0
+		let wallsArr = Object.values(this.walls)
+		wallsArr.forEach((w)=>{
+			if(!w.attached && w.handle===undefined){
+				if(this.boundingCircleIncludesWall(w,x,y,r)){
+					delete this.wallGroups.d[w.id]
+					boundingDict[w.id]="wall" //maybe set it so that the wall knows its bounding parent
+					amount++
+				}
+			}
+		})
+		if(amount > 0){
+			this.wallGroups.d[boundingGroupID]={"x":x,"y":y,"r":r,"d":boundingDict,"a":amount}
+			console.log("bounded "+amount+" walls")
+		}
+		return(amount)
+	}
+
+	static boundingCircleIncludesWall(w,x,y,r){
+		if(!w.attached && w.handle===undefined){
+			if(distance(w.x1,w.y1,x,y)<r && distance(w.x2,w.y2,x,y)<r){return(true)}
+		}
+		return(false)
+	}
+
+
+	static improvedWallCheck(){
+
+
+		//wallgroups HAS all walls, but might be in side!
+		let processing = [this.wallGroups]
+
+		// wallgroups {"x","y","r":Infinity,"d":{"":GroupObject,"":wall}}
+
+		let needCollideWalls = {}
+		
+		while(processing.length > 0){
+			let newprocessing = []
+
+			processing.forEach((e)=>{
+				let a = Object.keys(e.d)
+				a.forEach((E)=>{
+			  		if(e.d[a]!=="wall"){
+			  			if(collide){
+			  				newprocessing.push(e.d[a])
+			  			}
+			  		} else {
+			  			needCollideWalls[a] = true
+			  		}
+				})
+			  
+			})
+			processing = newprocessing
+			 
+		}
+		
+
+	}
+
 }
+
+
+
 
 
 module.exports={shooter2C}
