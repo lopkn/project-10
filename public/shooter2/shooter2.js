@@ -1220,8 +1220,12 @@ class Mobile {
 	}
 }
 
-Mobile.init()
-Mobile.draw()
+document.body.addEventListener('touchstart', function() {
+  Mobile.init()
+	Mobile.draw()
+}, { once: true })
+
+
 
 // ALTF3()
 // player.debugging = true
