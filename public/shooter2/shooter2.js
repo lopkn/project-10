@@ -18,6 +18,8 @@ socket.on("upEntities",upEntities)
 socket.on("particle",(e)=>{updateParticles(e)})
 socket.on("cameraUp",(e)=>{cameraX = e[0]-canvasDimensions[2];cameraY = e[1]-canvasDimensions[3]})
 
+let cameraX2 = 0
+let cameraY2 = 0
 
 socket.on("mass",(e)=>{MASS(e)})
 socket.on("pong",(e)=>{player.ping = Date.now()-e})
@@ -53,6 +55,7 @@ function MASS(e){
 
 	if(e.cameraUp){
 		cameraX = e.cameraUp[0]-canvasDimensions[2];cameraY = e.cameraUp[1]-canvasDimensions[3]
+		cameraX2 = e.cameraUp[0]-0;cameraY2 = e.cameraUp[1]-0 //turn into number. bruh
 	}
 }
 
@@ -442,8 +445,8 @@ function tick(){
 
 	
 
-	let CXR = player.gridSize-(cameraX%player.gridSize)
-	let CYR = player.gridSize-(cameraY%player.gridSize)
+	let CXR = player.gridSize-(cameraX2%player.gridSize)
+	let CYR = player.gridSize-(cameraY2%player.gridSize)
 
 
 // 	mainCTX.strokeStyle = "#101040"
@@ -561,10 +564,9 @@ for(let i = map.particles.length-1; i > -1; i--){
 			mainCTX.strokeStyle = "rgb("+Math.floor(Math.random()*255)+",255,255)"
 		} else if(e[0] === "fire"){
 			mainCTX.strokeStyle = "rgba(255,"+Math.floor(Math.random()*255)+",0,"+(Math.random()+0.5)+")"
-			console.log("hey")
 		}
-		mainCTX.moveTo((e[2]-cameraX)*player.zoom + player.zoomR,(e[3]-cameraY)*player.zoom + player.zoomR)
-		mainCTX.lineTo((e[4]-cameraX)*player.zoom + player.zoomR,(e[5]-cameraY)*player.zoom + player.zoomR)
+		mainCTX.moveTo((e[2]-cameraX2)*player.zoom + canvasDimensions[2],(e[3]-cameraY2)*player.zoom + canvasDimensions[3])
+		mainCTX.lineTo((e[4]-cameraX2)*player.zoom + canvasDimensions[2],(e[5]-cameraY2)*player.zoom + canvasDimensions[3])
 		mainCTX.stroke()
 	}
 
@@ -587,47 +589,47 @@ for(let i = map.particles.length-1; i > -1; i--){
 		mainCTX.beginPath()
 		mainCTX.lineWidth = 3*player.zoom
 		mainCTX.strokeStyle = col?col:"rgba(255,255,255,"+(renderHP/2000+0.5)+")"
-		mainCTX.moveTo((i.x1-cameraX)*player.zoom+player.zoomR,(i.y1-cameraY)*player.zoom+player.zoomR)
-		mainCTX.lineTo((i.x2-cameraX)*player.zoom+player.zoomR,(i.y2-cameraY)*player.zoom+player.zoomR)
+		mainCTX.moveTo((i.x1-cameraX2)*player.zoom + canvasDimensions[2] ,(i.y1-cameraY2)*player.zoom + canvasDimensions[3])
+		mainCTX.lineTo((i.x2-cameraX2)*player.zoom + canvasDimensions[2] ,(i.y2-cameraY2)*player.zoom + canvasDimensions[3])
 		mainCTX.stroke()
 		}else if(i.type == "metl" || i.type == "mbdy"){
 		mainCTX.beginPath()
 		mainCTX.lineWidth = 9*player.zoom
 		mainCTX.strokeStyle = col?col:"rgba(205,205,225,"+(renderHP/2000+0.5)+")"
-		mainCTX.moveTo((i.x1-cameraX)*player.zoom+player.zoomR,(i.y1-cameraY)*player.zoom+player.zoomR)
-		mainCTX.lineTo((i.x2-cameraX)*player.zoom+player.zoomR,(i.y2-cameraY)*player.zoom+player.zoomR)
+		mainCTX.moveTo((i.x1-cameraX2)*player.zoom + canvasDimensions[2] ,(i.y1-cameraY2)*player.zoom + canvasDimensions[3])
+		mainCTX.lineTo((i.x2-cameraX2)*player.zoom + canvasDimensions[2] ,(i.y2-cameraY2)*player.zoom + canvasDimensions[3])
 		mainCTX.stroke()
 		}else if(i.type == "wall"){
 		mainCTX.beginPath()
 		mainCTX.lineWidth = 12*player.zoom
 		mainCTX.strokeStyle = col?col:"rgba(255,225,205,"+(renderHP/2000+0.5)+")"
-		mainCTX.moveTo((i.x1-cameraX)*player.zoom+player.zoomR,(i.y1-cameraY)*player.zoom+player.zoomR)
-		mainCTX.lineTo((i.x2-cameraX)*player.zoom+player.zoomR,(i.y2-cameraY)*player.zoom+player.zoomR)
+		mainCTX.moveTo((i.x1-cameraX2)*player.zoom + canvasDimensions[2] ,(i.y1-cameraY2)*player.zoom + canvasDimensions[3])
+		mainCTX.lineTo((i.x2-cameraX2)*player.zoom + canvasDimensions[2] ,(i.y2-cameraY2)*player.zoom + canvasDimensions[3])
 		mainCTX.stroke()
 		}else if(i.type == "rflc"){
 		mainCTX.beginPath()
 		mainCTX.lineWidth = 9*player.zoom
 		mainCTX.strokeStyle = col?col:"rgba(155,205,"+(205+rwc*50)+","+(renderHP/2000+0.5)+")"
-		mainCTX.moveTo((i.x1-cameraX)*player.zoom+player.zoomR,(i.y1-cameraY)*player.zoom+player.zoomR)
-		mainCTX.lineTo((i.x2-cameraX)*player.zoom+player.zoomR,(i.y2-cameraY)*player.zoom+player.zoomR)
+		mainCTX.moveTo((i.x1-cameraX2)*player.zoom + canvasDimensions[2] ,(i.y1-cameraY2)*player.zoom + canvasDimensions[3])
+		mainCTX.lineTo((i.x2-cameraX2)*player.zoom + canvasDimensions[2] ,(i.y2-cameraY2)*player.zoom + canvasDimensions[3])
 		mainCTX.stroke()
 		}  else if(i.type == "bhol" || i.type == "ghol"){
 			mainCTX.beginPath()
 			mainCTX.lineWidth = 3*player.zoom
 			mainCTX.strokeStyle = i.type == "bhol"?"#FF0000":"#0000FF"
-			mainCTX.moveTo( (i.x-i.radius-cameraX)*player.zoom+player.zoomR,(i.y-cameraY)*player.zoom+player.zoomR)
-			mainCTX.lineTo( (i.x+i.radius-cameraX)*player.zoom+player.zoomR,(i.y-cameraY)*player.zoom+player.zoomR)
-			mainCTX.moveTo( (i.x-cameraX)*player.zoom+player.zoomR,(i.y-i.radius-cameraY)*player.zoom+player.zoomR)
-			mainCTX.lineTo( (i.x-cameraX)*player.zoom+player.zoomR,(i.y+i.radius-cameraY)*player.zoom+player.zoomR)
+			mainCTX.moveTo( (i.x-i.radius-cameraX2)*player.zoom+canvasDimensions[2],(i.y-cameraY2)*player.zoom+canvasDimensions[3])
+			mainCTX.lineTo( (i.x+i.radius-cameraX2)*player.zoom+canvasDimensions[2],(i.y-cameraY2)*player.zoom+canvasDimensions[3])
+			mainCTX.moveTo( (i.x-cameraX2)*player.zoom+canvasDimensions[2],(i.y-i.radius-cameraY2)*player.zoom+canvasDimensions[3])
+			mainCTX.lineTo( (i.x-cameraX2)*player.zoom+canvasDimensions[2],(i.y+i.radius-cameraY2)*player.zoom+canvasDimensions[3])
 			mainCTX.stroke()
 		}else if(i.type == "whol"){
 			mainCTX.beginPath()
 			mainCTX.lineWidth = 3*player.zoom
 			mainCTX.strokeStyle = "#707000"
-			mainCTX.moveTo( (i.x-i.radius-cameraX)*player.zoom+player.zoomR,(i.y-cameraY)*player.zoom+player.zoomR)
-			mainCTX.lineTo( (i.x+i.radius-cameraX)*player.zoom+player.zoomR,(i.y-cameraY)*player.zoom+player.zoomR)
-			mainCTX.moveTo( (i.x-cameraX)*player.zoom+player.zoomR,(i.y-i.radius-cameraY)*player.zoom+player.zoomR)
-			mainCTX.lineTo( (i.x-cameraX)*player.zoom+player.zoomR,(i.y+i.radius-cameraY)*player.zoom+player.zoomR)
+			mainCTX.moveTo( (i.x-i.radius-cameraX2)*player.zoom+canvasDimensions[2],(i.y-cameraY2)*player.zoom+canvasDimensions[3])
+			mainCTX.lineTo( (i.x+i.radius-cameraX2)*player.zoom+canvasDimensions[2],(i.y-cameraY2)*player.zoom+canvasDimensions[3])
+			mainCTX.moveTo( (i.x-cameraX2)*player.zoom+canvasDimensions[2],(i.y-i.radius-cameraY2)*player.zoom+canvasDimensions[3])
+			mainCTX.lineTo( (i.x-cameraX2)*player.zoom+canvasDimensions[2],(i.y+i.radius-cameraY2)*player.zoom+canvasDimensions[3])
 			mainCTX.stroke()
 		}
 	}
@@ -638,7 +640,7 @@ for(let i = map.particles.length-1; i > -1; i--){
 		if(e.dead){return}
 		let ran = Math.random()*10
 			mainCTX.fillStyle = "hsla("+e.color+",70%,75%,"+((10-ran)/5)+")"
-			mainCTX.fillRect((e.x-cameraX)*player.zoom+player.zoomR-ran,(e.y-cameraY)*player.zoom+player.zoomR-ran,ran*2,ran*2)
+			mainCTX.fillRect((e.x-cameraX2)*player.zoom+canvasDimensions[2]-ran,(e.y-cameraY2)*player.zoom+canvasDimensions[3]-ran,ran*2,ran*2)
 	})
 
 			
@@ -658,7 +660,7 @@ for(let i = map.particles.length-1; i > -1; i--){
 	mainCTX.fillText("building: "+player.wallCounter+" - "+player.wall,280,800)
 	mainCTX.fillText("snapping: "+(player.snapping?"on":"off"),560,800)
 	mainCTX.fillStyle = "rgba(0,"+(150+ala*55)+",0,"+(alb*0.2+0.8)+")"
-	mainCTX.fillText("position: "+Math.floor(cameraX/20)+" "+Math.floor(cameraY/20),20,770)
+	mainCTX.fillText("position: "+Math.floor(cameraX2/20)+" "+Math.floor(cameraY2/20),20,770)
 	mainCTX.fillText("materials: "+player.materials,320,770)
 	mainCTX.fillText("tick: "+(Date.now()- tickTimeTracker)+"ps-"+player.packetSec.length,620,770)
 	if(player.debugging){
@@ -690,7 +692,8 @@ var allzoom = 1
 
 
 function coordToMap(x,y){
-	return([(x-cameraX)*player.zoom + player.zoomR,(y-cameraY)*player.zoom + player.zoomR])
+	// return([(x-cameraX)*player.zoom + player.zoomR,(y-cameraY)*player.zoom + player.zoomR])
+	return([(x-cameraX2)*player.zoom + canvasDimensions[2],(y-cameraY2)*player.zoom + canvasDimensions[3]])
 }
 
 function windowRescale(e){
@@ -784,8 +787,13 @@ function drawDynam(dynam){
 
 var mouseX = 0
 var mouseY = 0
+// var mouseX2 = 0
+// var mouseY2 = 0
 
-onmousemove = (e)=>{mouseX = (e.clientX)/allzoom; mouseY = (e.clientY - 2*allzoom)/allzoom}
+onmousemove = (e)=>{mouseX = (e.clientX)/allzoom; mouseY = (e.clientY - 2*allzoom)/allzoom
+
+	// mouseX2 = 
+}
 
 document.addEventListener("mousedown",(e)=>{
 	if(weaponInfo[player.weapon]?.hold){
@@ -797,6 +805,10 @@ document.addEventListener("mousedown",(e)=>{
 })
 
 document.addEventListener("wheel",(e)=>{
+	if(e.altKey){
+		player.gridSize += e.deltaY/50
+		return;	
+	}
 	player.rezoom(player.zoom-e.deltaY/5000)
 	if(player.zoom < 0){
 		player.rezoom(0.01)
@@ -827,7 +839,8 @@ document.addEventListener("keydown",(e)=>{
 
   switch(key){
   	case "r":
-  		placing = [true,(mouseX-mid[2])/player.zoom-player.zoomR/player.zoom+cameraX,mouseY/player.zoom-player.zoomR/player.zoom+cameraY]
+  		// placing2 = [true,(mouseX-mid[2])/player.zoom-player.zoomR/player.zoom+cameraX,mouseY/player.zoom-player.zoomR/player.zoom+cameraY]
+  		placing = [true,(mouseX-mid[0])/player.zoom+cameraX2,(mouseY-mid[1])/player.zoom+cameraY2]
   		break;
     case "q":
   		player.weaponCounter -= 1
@@ -948,24 +961,35 @@ document.addEventListener("keyup",(e)=>{
 
 function buildWall(x,y){
 	if(player.snapping){
-  		placing[1] += player.gridSize/2
-  		placing[2] += player.gridSize/2
-  		let mx = (x-mid[2])/player.zoom-player.zoomR/player.zoom+cameraX+player.gridSize/2
-  		let my = y/player.zoom-player.zoomR/player.zoom+cameraY+player.gridSize/2
-  		if(placing[1] < 0){
-  			placing[1] -= player.gridSize
-  		}
-  		if(placing[2] < 0){
-  			placing[2] -= player.gridSize
-  		}
-  		if(mx < 0){
-  			mx -= player.gridSize
-  		}
-  		if(my < 0){
-  			my -= player.gridSize
-  		}
-  		//idfk where this 10 came from
-  		socket.emit("placeWall",[placing[1]+10-(placing[1]%player.gridSize),placing[2]+10-(placing[2]%player.gridSize),mx+10-(mx%player.gridSize),my+10-(my%player.gridSize),player.wall,{"regen":10}])
+  		// placing[1] += player.gridSize/2
+  		// placing[2] += player.gridSize/2
+  		// let mx = (x-mid[2])/player.zoom-player.zoomR/player.zoom+cameraX+player.gridSize/2
+  		// let my = y/player.zoom-player.zoomR/player.zoom+cameraY+player.gridSize/2
+  		// if(placing[1] < 0){
+  		// 	placing[1] -= player.gridSize
+  		// }
+  		// if(placing[2] < 0){
+  		// 	placing[2] -= player.gridSize
+  		// }
+  		// if(mx < 0){
+  		// 	mx -= player.gridSize
+  		// }
+  		// if(my < 0){
+  		// 	my -= player.gridSize
+  		// }
+  		// //idfk where this 10 came from
+  		// socket.emit("placeWall",[placing[1]+10-(placing[1]%player.gridSize),placing[2]+10-(placing[2]%player.gridSize),mx+10-(mx%player.gridSize),my+10-(my%player.gridSize),player.wall,{"regen":10}])
+  	
+  		placing[1] = Math.round(placing[1]/player.gridSize)*player.gridSize
+  		placing[2] = Math.round(placing[2]/player.gridSize)*player.gridSize
+  		let mx = (mouseX-mid[2])/player.zoom-player.zoomR/player.zoom+cameraX
+  		let my = mouseY/player.zoom-player.zoomR/player.zoom+cameraY
+  		mx = Math.round(mx/player.gridSize)*player.gridSize
+  		my = Math.round(my/player.gridSize)*player.gridSize
+
+
+  		socket.emit("placeWall",[placing[1],placing[2],mx,my,player.wall,{"regen":10}])
+
   	} else {
   	socket.emit("placeWall",[placing[1],placing[2],(x-mid[2])/player.zoom-player.zoomR/player.zoom+cameraX,y/player.zoom-player.zoomR/player.zoom+cameraY,player.wall])
   	}

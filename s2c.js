@@ -478,7 +478,6 @@ class shooter2C{
 		}
 
 		let n = vectorNormalize([p.x,p.y,x+p.x,y+p.y])
-		// let n = vectorNormalize([p.x,p.y,x+p.x-410,y+p.y-410])
 		p.rotation = [n[2]-p.x,n[3]-p.y]
 		p.unmovePos[2] = true
 		let reload = 0
@@ -1163,7 +1162,7 @@ class shooter2C{
 
 			this.players[id] = {"reloading":0,"unmovePos":[0,0],"rotation":[0,1],
 				"boidyVect":[[0,-40,30,30],[30,30,-30,30],[-30,30,0,-40]],
-				"boidy":[],"x":410,"y":410,"vx":0,"vy":0,"hp":100,"id":id,"keys":{},
+				"boidy":[],"x":0,"y":0,"vx":0,"vy":0,"hp":100,"id":id,"keys":{},
 				"materials":100,"speed":1.5,"boidyAll":3,"tracking":false
 			}
 			io.to(id).emit("spec",["zoom",1])
@@ -1179,7 +1178,7 @@ class shooter2C{
 			
 			this.players[id] = {"reloading":0,"unmovePos":[0,0],"rotation":[0,1],
 			"boidyVect":[[10,40,30,-30],[30,-30,-30,-30],[-30,-30,-10,40],[-10,40,10,40],[-70,45,-10,57],[10,57,70,45]],
-			"boidy":[],"x":410,"y":410,"vx":0,"vy":0,"hp":100,"id":id,"keys":{},
+			"boidy":[],"x":0,"y":0,"vx":0,"vy":0,"hp":100,"id":id,"keys":{},
 			"materials":100,"speed":0.5,"tracking":false,"boidyAll":4,"movement":"spontaneous"
 			}
 			io.to(id).emit("spec",["zoom",0.8])
@@ -1204,7 +1203,7 @@ class shooter2C{
 		} else if(type == "tank") {
 			this.players[id] = {"reloading":0,"unmovePos":[0,0],"rotation":[0,1],
 		"boidyVect":[[10,-40,30,30],[30,30,-30,30],[-30,30,-10,-40],[-10,-40,10,-40]],
-		"boidy":[],"x":410,"y":410,"vx":0,"vy":0,"hp":100,"id":id,"keys":{},
+		"boidy":[],"x":0,"y":0,"vx":0,"vy":0,"hp":100,"id":id,"keys":{},
 		"materials":100,"speed":0.5,"tracking":false,"boidyAll":4
 		}
 		io.to(id).emit("spec",["zoom",0.8])
@@ -1222,7 +1221,7 @@ class shooter2C{
 		} else if(type == "snpr") {
 			this.players[id] = {"reloading":0,"unmovePos":[0,0],"rotation":[0,1],
 		"boidyVect":[[0,-50,0,70],[0,-15,-23,-35],[0,20,40,-20],[40,-20,0,-50]],
-		"boidy":[],"x":410,"y":410,"vx":0,"vy":0,"hp":100,"id":id,"keys":{},
+		"boidy":[],"x":0,"y":0,"vx":0,"vy":0,"hp":100,"id":id,"keys":{},
 		"materials":100,"speed":0.35,"tracking":false,"boidyAll":4
 		}
 		io.to(id).emit("spec",["zoom",0.5])
@@ -1241,7 +1240,7 @@ class shooter2C{
 
 			this.players[id] = {"reloading":0,"unmovePos":[0,0],"rotation":[0,1],
 				"boidyVect":[],
-				"boidy":[],"x":410,"y":410,"vx":0,"vy":0,"hp":100,"id":id,"keys":{},
+				"boidy":[],"x":0,"y":0,"vx":0,"vy":0,"hp":100,"id":id,"keys":{},
 				"materials":100,"speed":2,"boidyAll":-1,"dead":true,"spectator":true,"minRadius":1,"currentRadius":1,"tracking":false
 			}
 			io.to(id).emit("spec",["zoom",0.6])
@@ -1266,6 +1265,9 @@ class shooter2C{
 
 		this.sendAllWombjects(id)
 		io.to("G10.2").emit("upEntities",[{"type":"createEntity","entity":this.players[id]}])
+
+		this.entityPushers.push({"type":"pos","id":this.players[id].id,"x":this.players[id].x,"y":this.players[id].y,"r":this.players[id].rotation})
+		this.massPushers.specific[id] = {"cameraUp":[this.players[id].x.toFixed(4),this.players[id].y.toFixed(4)]}
 		return(this.players[id])
 	}
 
@@ -1599,6 +1601,11 @@ class shooter2C{
 		return(false)
 	}
 	static wallSameTeamPlayer(player,wall){
+			if(player.team !== undefined){
+				if(wall.team == player.team){
+					return(true)
+				}
+			}
 		if(wall.plid !== undefined){
 			if(player.team && player.noTeamfire && player.team == this.players[wall.plid]?.team){
 				return(true)
@@ -2298,6 +2305,7 @@ class shooter2C{
 			entity.x = Math.random()*1500-750
 			entity.y = Math.random()*1500-750
 			entity.range = 3500
+			entity.onDeath = (e)=>{e.boidy.forEach((E)=>{if(this.walls[E]!==undefined){this.walls[E].playerCollision=true;this.walls[E].team=e.team}})}
 			entity.fireRange = 1000
 			entity.pullx = Math.random()*2-1
 			entity.pully = Math.random()*2-1
