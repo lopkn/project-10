@@ -8,6 +8,13 @@ function distance(x1,y1,x2,y2) {
   return(Math.sqrt(a*a+b*b))
 }
 
+function gaussianRandom(mean=0, stdev=1) {
+    const u = 1 - Math.random();
+    const v = Math.random();
+    const z = Math.sqrt( -2.0 * Math.log( u ) ) * Math.cos( 2.0 * Math.PI * v );
+    return z * stdev + mean;
+}
+
 let vectorNormalize;
 let vectorFuncs;
 function copyFuncs(v,v2){
@@ -359,6 +366,7 @@ class shooter2C{
 					rndlist.push("tank1")
 					rndlist.push("tank2")
 					rndlist.push("tank3")
+					rndlist.push("tank4")
 					team = Math.random()
 				}
 				let rnd = rndlist[Math.floor(Math.random()*rndlist.length)]
@@ -2420,9 +2428,11 @@ class shooter2C{
 			entity.lead = 2
 			entity.range = 3500
 			entity.fireRange = 1000
+			entity.baseFireRange = 1000
 			entity.antirecoil = (type == "tank1")
 			entity.weapon = "cnon"
 			entity.aimDeviation = 140
+			entity.burstReload = 5
 			entity.burst = entity.maxburst = 3
 			if(type == "tank2"){entity.fireRange = 400;entity.weapon = "scat2"}
 			if(type == "tank3"){
@@ -2434,6 +2444,16 @@ class shooter2C{
 					entity.maxburst = 1
 					entity.weight = 20
 					entity.aimDeviation = 15
+			}
+			if(type == "tank4"){
+				let wallPlies = [[-80,-80,80,-80,"rflc"],[-40,-40,0,40],[0,40,40,-40],[-40,0,0,40],[0,40,40,0],[80,0,0,40],[0,40,-80,0],[-40,40,0,80],[0,80,40,40],[-40,80,0,120],[0,120,40,80]]
+
+					wallPlies.forEach((e)=>{
+						this.placeWall(entity.id,entity.x+e[0],entity.y+e[1],entity.x+e[2],entity.y+e[3],(e[4]?e[4]:"metl"),{"id":entity.id,"force":true,"attach":true})
+					})
+					entity.maxburst = 3
+					entity.horsePower = 20000
+					entity.aimDeviation = 145
 			}
 			entity.reloadMultiplier = 2.5
 			entity.randomMovement = Math.random()*20
@@ -2474,9 +2494,23 @@ class shooter2C{
 						
 						if(entity.burst){
 							entity.burst -= 1
-							entity.reloading = 5
+							entity.reloading = entity.burstReload
+							entity.fireRange = entity.baseFireRange * 3
 						} else {
 							entity.burst = entity.maxburst
+							if(type=="tank4"){
+								entity.burst+=Math.floor(Math.abs(gaussianRandom(0,2)))
+								if(entity.burst > 8){
+									if(Math.random()>0.5){
+										entity.burst*=6;entity.aimDeviation=400;entity.antirecoil=true;entity.burstReload=2;entity.baseFireRange=3000
+									} else {
+									if(Math.random()>0.5){entity.weapon = "lazr"}
+										entity.burst*=18;entity.aimDeviation=Math.random()*5400+400;entity.antirecoil=true;entity.burstReload=1;entity.baseFireRange=6000
+									}
+								}
+								else{entity.aimDeviation=145;entity.burstReload=5;entity.antirecoil=false;entity.baseFireRange=1000;entity.weapon="cnon"}
+							}
+							entity.fireRange = entity.baseFireRange
 							entity.reloading = 40
 						}
 					}
@@ -2754,8 +2788,13 @@ class shooter2C{
 		map = map?("./"+map+".json"):"./S2Cmap.json"
 		let mapdata = JSON.parse(fs.readFileSync(map,"utf8"))
 		this.walls = mapdata.walls
+		let objk = Object.keys(this.walls)
+		objk.forEach((e)=>{
+			this.wallGroups.d[e] = "wall"
+		})
 		this.nuuIDGEN = mapdata.nuuid
-		
+		console.log("loaded "+objk.length+" walls")
+		console.log("map loaded!")
 	}
 
 
