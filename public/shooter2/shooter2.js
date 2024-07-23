@@ -797,7 +797,10 @@ onmousemove = (e)=>{mouseX = (e.clientX)/allzoom; mouseY = (e.clientY - 2*allzoo
 
 document.addEventListener("mousedown",(e)=>{
 	if(e.button==2){
-		console.log("hi")
+
+		if(placing[0] === false){
+			placing = [true,(mouseX-mid[0])/player.zoom+cameraX2,(mouseY-mid[1])/player.zoom+cameraY2]
+		}
 		e.preventDefault()
 		return;
 	}
@@ -828,6 +831,12 @@ document.addEventListener("wheel",(e)=>{
 })
 
 document.addEventListener("mouseup",(e)=>{
+
+	if(e.button==2){
+		buildWall(mouseX,mouseY)
+		return;
+	}
+
 	if(weaponInfo[player.weapon]?.hold){
 		socket.emit("clickup",[(mouseX-mid[0])/player.zoom,(mouseY-mid[1])/player.zoom,player.weapon])
 	}
