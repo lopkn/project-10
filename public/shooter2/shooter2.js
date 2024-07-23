@@ -233,7 +233,7 @@ class player{
 	static weaponMin = 1
 	static wallMin = 1
 	static weaponDict = {"1":"norm","2":"scat","3":"lazr","4":"cnon","5":"heal","6":"grnd","7":"msl","8":"dril",
-											"9":"msl2","10":"snpr","11":"lzr2","12":"mchg","13":"zapr","14":"dbgd","15":"kbml",
+											"9":"msl2","10":"snpr","11":"lzr2","12":"mchg","13":"zapr","14":"kb","15":"kbml",
 											"16":"vipr","17":"tlpt","18":"trak"
 										}
 	static wallCounter = 1
@@ -796,6 +796,11 @@ onmousemove = (e)=>{mouseX = (e.clientX)/allzoom; mouseY = (e.clientY - 2*allzoo
 }
 
 document.addEventListener("mousedown",(e)=>{
+	if(e.button==2){
+		console.log("hi")
+		e.preventDefault()
+		return;
+	}
 	if(weaponInfo[player.weapon]?.hold){
 		socket.emit("clickdown",[(mouseX-mid[0])/player.zoom,(mouseY-mid[1])/player.zoom,player.weapon])
 	} else {
@@ -804,8 +809,15 @@ document.addEventListener("mousedown",(e)=>{
 	player.clickheld = true
 })
 
+document.addEventListener("contextmenu",(e)=>{e.preventDefault()})
+
 document.addEventListener("wheel",(e)=>{
 	if(e.altKey){
+		let CXR = player.gridSize-(cameraX2%player.gridSize)
+		let CYR = player.gridSize-(cameraY2%player.gridSize)
+
+		console.log(CXR,CYR)
+
 		player.gridSize += e.deltaY/50
 		return;	
 	}
@@ -840,7 +852,9 @@ document.addEventListener("keydown",(e)=>{
   switch(key){
   	case "r":
   		// placing2 = [true,(mouseX-mid[2])/player.zoom-player.zoomR/player.zoom+cameraX,mouseY/player.zoom-player.zoomR/player.zoom+cameraY]
-  		placing = [true,(mouseX-mid[0])/player.zoom+cameraX2,(mouseY-mid[1])/player.zoom+cameraY2]
+  		if(placing[0] === false){
+  			placing = [true,(mouseX-mid[0])/player.zoom+cameraX2,(mouseY-mid[1])/player.zoom+cameraY2]
+  		}
   		break;
     case "q":
   		player.weaponCounter -= 1
@@ -931,28 +945,7 @@ document.addEventListener("keyup",(e)=>{
   let key = e.key
   delete keyHolds[key]
   if(key == "r"){
-  	// if(player.snapping){
-  	// 	placing[1] += player.gridSize/2
-  	// 	placing[2] += player.gridSize/2
-  	// 	let mx = (mouseX-mid[2])/player.zoom-player.zoomR/player.zoom+cameraX+player.gridSize/2
-  	// 	let my = mouseY/player.zoom-player.zoomR/player.zoom+cameraY+player.gridSize/2
-  	// 	if(placing[1] < 0){
-  	// 		placing[1] -= player.gridSize
-  	// 	}
-  	// 	if(placing[2] < 0){
-  	// 		placing[2] -= player.gridSize
-  	// 	}
-  	// 	if(mx < 0){
-  	// 		mx -= player.gridSize
-  	// 	}
-  	// 	if(my < 0){
-  	// 		my -= player.gridSize
-  	// 	}
-  	// 	//idfk where this 10 came from
-  	// 	socket.emit("placeWall",[placing[1]+10-(placing[1]%player.gridSize),placing[2]+10-(placing[2]%player.gridSize),mx+10-(mx%player.gridSize),my+10-(my%player.gridSize),player.wall,{"regen":10}])
-  	// } else {
-  	// socket.emit("placeWall",[placing[1],placing[2],(mouseX-mid[2])/player.zoom-player.zoomR/player.zoom+cameraX,mouseY/player.zoom-player.zoomR/player.zoom+cameraY,player.wall])}
-  	// placing = [false]
+  	//deleted stuff 22 07 2024
   	buildWall(mouseX,mouseY)
   }
 
@@ -961,29 +954,11 @@ document.addEventListener("keyup",(e)=>{
 
 function buildWall(x,y){
 	if(player.snapping){
-  		// placing[1] += player.gridSize/2
-  		// placing[2] += player.gridSize/2
-  		// let mx = (x-mid[2])/player.zoom-player.zoomR/player.zoom+cameraX+player.gridSize/2
-  		// let my = y/player.zoom-player.zoomR/player.zoom+cameraY+player.gridSize/2
-  		// if(placing[1] < 0){
-  		// 	placing[1] -= player.gridSize
-  		// }
-  		// if(placing[2] < 0){
-  		// 	placing[2] -= player.gridSize
-  		// }
-  		// if(mx < 0){
-  		// 	mx -= player.gridSize
-  		// }
-  		// if(my < 0){
-  		// 	my -= player.gridSize
-  		// }
-  		// //idfk where this 10 came from
-  		// socket.emit("placeWall",[placing[1]+10-(placing[1]%player.gridSize),placing[2]+10-(placing[2]%player.gridSize),mx+10-(mx%player.gridSize),my+10-(my%player.gridSize),player.wall,{"regen":10}])
-  	
+  		//overhauled 22 07 2024
   		placing[1] = Math.round(placing[1]/player.gridSize)*player.gridSize
   		placing[2] = Math.round(placing[2]/player.gridSize)*player.gridSize
-  		let mx = (mouseX-mid[2])/player.zoom-player.zoomR/player.zoom+cameraX
-  		let my = mouseY/player.zoom-player.zoomR/player.zoom+cameraY
+  		let mx = (x-mid[2])/player.zoom-player.zoomR/player.zoom+cameraX
+  		let my = y/player.zoom-player.zoomR/player.zoom+cameraY
   		mx = Math.round(mx/player.gridSize)*player.gridSize
   		my = Math.round(my/player.gridSize)*player.gridSize
 

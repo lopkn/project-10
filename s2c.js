@@ -367,7 +367,7 @@ class shooter2C{
 					rndlist.push("tank2")
 					rndlist.push("tank3")
 					rndlist.push("tank4")
-					team = Math.random()
+					team = Math.random()+""
 				}
 				let rnd = rndlist[Math.floor(Math.random()*rndlist.length)]
 				let en = this.entityTemplates(rnd,2,{"team":team,"x":x+Math.random()*3000-1500,"y":Math.random()*3000-1500+y})
@@ -2466,6 +2466,8 @@ class shooter2C{
 			entity.weapon = "cnon"
 			entity.aimDeviation = 140
 			entity.burstReload = 5
+			entity.reloadMultiplier = 2.5
+			entity.randomMovement = Math.random()*20
 			entity.burst = entity.maxburst = 3
 			if(type == "tank2"){entity.fireRange = 400;entity.weapon = "scat2"}
 			if(type == "tank3"){
@@ -2487,9 +2489,21 @@ class shooter2C{
 					entity.maxburst = 3
 					entity.horsePower = 20000
 					entity.aimDeviation = 145
+			} else if(type == "tank5"){
+				let wallPlies = [[-40,24,0,40],[0,40,40,24],[40,24,0,-56],[0,-56,-40,24]]
+				wallPlies.forEach((e)=>{
+						this.placeWall(entity.id,entity.x+e[0],entity.y+e[1],entity.x+e[2],entity.y+e[3],(e[4]?e[4]:"metl"),{"id":entity.id,"force":true,"attach":true})
+					})
+			} else if(type == "tank6"){
+				let wallPlies = [[0,42,-42,21,"rflc"],[0,42,42,21,"rflc"],[42,21,0,-73,"rflc"],[0,-73,-42,21,"rflc"],[0,62,-21,0],[0,62,21,0],[21,0,0,-135],[0,-135,-21,0],[0,62,62,0],[0,62,-62,0],[0,62,-52,-42],[0,62,52,-42],[0,0,-21,-156],[21,-156,0,0]] 
+				wallPlies.forEach((e)=>{
+						this.placeWall(entity.id,entity.x+e[0],entity.y+e[1],entity.x+e[2],entity.y+e[3],(e[4]?e[4]:"metl"),{"id":entity.id,"force":true,"attach":true})
+					})
+				entity.speed *= 3
+				entity.horsePower = 30000
+				entity.randomMovement = 0
 			}
-			entity.reloadMultiplier = 2.5
-			entity.randomMovement = Math.random()*20
+			
 			entity.findTarget = (e)=>{
 				if(Math.random()>0.05&&e.target && this.players[e.target]&& !this.players[e.target].dead && distance(e.x,e.y,this.players[e.target].x,this.players[e.target].y < e.range)){
 					return(e.target)
