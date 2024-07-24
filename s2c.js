@@ -491,6 +491,11 @@ class shooter2C{
 				this.pushBullet(p.x,p.y,(n[2]-p.x)*160,(n[3]-p.y)*160,id,"trav")
 				reload += 4
 				break;
+			case "dbtrav":
+				theBullet = this.pushBullet(p.x,p.y,(n[2]-p.x)*160,(n[3]-p.y)*160,id,"trav")
+				theBullet.dmgmult = -200
+				reload += 4
+				break;
 			case "mchg":
 				this.pushBullet(p.x,p.y,(n[2]-p.x)*160+Math.random()*30-15,(n[3]-p.y)*160+Math.random()*30-15,id,"scat")
 				reload += 2
