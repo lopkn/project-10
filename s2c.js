@@ -36,6 +36,7 @@ class shooter2C{
 	static wallPushers = {}
 	static entityPushers = []
 	static massPushers = {"specific":{},"general":{}}
+	static mapFriction = 0
 
 	static nuuIDGEN = 0
 	static setio(i,m,v,v2){
@@ -1386,8 +1387,8 @@ class shooter2C{
 
 				p.vx += ttv[2]*p.speed/movepower
 				p.vy += ttv[3]*p.speed/movepower
-				p.vx *= 0.97
-				p.vy *= 0.97
+				p.vx *= 1 - (0.03 * this.mapFriction)
+				p.vy *= 1 - (0.03 * this.mapFriction)
 			} else if(p.movement == "spontaneous"){
 				let movepower = p.weight/p.horsePower
 				if(movepower<1){movepower = 1}
