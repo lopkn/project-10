@@ -2051,6 +2051,11 @@ class shooter2C{
 			this.RSTotal = 0
 		}
 
+		if(this.CALCULATIONS > 5000 && this.CALCULATIONS != this.lastCalculation){
+			console.log("a lot of calculations! "+this.CALCULATIONS)
+		}
+		this.lastCalculation = this.CALCULATIONS
+
 	}
 	static wallTypes = {
 		"norm":true,"metl":true,"rflc":true,"player":true,"body":true,"mbdy":true,"wall":true
