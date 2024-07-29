@@ -36,7 +36,7 @@ class shooter2C{
 	static wallPushers = {}
 	static entityPushers = []
 	static massPushers = {"specific":{},"general":{}}
-	static mapFriction = 0
+	static mapFriction = 1
 
 	static nuuIDGEN = 0
 	static setio(i,m,v,v2){

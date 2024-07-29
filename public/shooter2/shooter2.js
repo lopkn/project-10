@@ -223,7 +223,7 @@ class player{
 	static ping = 100;
 	static dataNodes = []
 	static packetSec = []
-	static weapon = "encn"
+	static weapon = "norm"
 	static materials = 100
 	static wall = "norm"
 	static snapping = false
@@ -942,6 +942,9 @@ document.addEventListener("keydown",(e)=>{
   		break;
   	case "j":
 			socket.emit("key","test")
+  		break;
+  	case "/":
+			socket.emit("chat",player.chat)
   		break;
   }  
   console.log(key)
