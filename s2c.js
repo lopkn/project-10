@@ -3030,6 +3030,11 @@ class shooter2C{
 		return({"arr":wallsArr,"dict":needCollideWalls})
 	}
 
+	static playerChat(id,chat){
+		let p = this.players[id]
+		io.to("G10.2").emit("chat",{"x":p.x,"y":p.y,"c":chat,"id":id})
+	}
+
 }
 
 

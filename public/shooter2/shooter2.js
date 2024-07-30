@@ -22,6 +22,7 @@ let cameraX2 = 0
 let cameraY2 = 0
 
 socket.on("mass",(e)=>{MASS(e)})
+socket.on("chat",(e)=>{pchat(e)})
 socket.on("pong",(e)=>{player.ping = Date.now()-e})
 
 
@@ -641,6 +642,20 @@ for(let i = map.particles.length-1; i > -1; i--){
 		let ran = Math.random()*10
 			mainCTX.fillStyle = "hsla("+e.color+",70%,75%,"+((10-ran)/5)+")"
 			mainCTX.fillRect((e.x-cameraX2)*player.zoom+canvasDimensions[2]-ran,(e.y-cameraY2)*player.zoom+canvasDimensions[3]-ran,ran*2,ran*2)
+	
+
+	//draw chat (temporary)
+			if(e.chat){
+				// mainCTX.font = "bold "+Math.floor(23*player.zoom)+"px Courier New"
+				// mainCTX.fillText(e.chat,(e.x-cameraX2)*player.zoom+canvasDimensions[2]+25*player.zoom,(e.y-cameraY2)*player.zoom+canvasDimensions[3]-55*player.zoom,200)
+
+
+				e.chatp.style.font = "bold "+Math.floor(23*player.zoom)+"px Courier New"
+				e.chatp.style.bottom = Math.floor( ( (-(e.y-75)+cameraY2)*player.zoom+canvasDimensions[3]))+"px"
+				e.chatp.style.left = Math.floor( ( (e.x+25-cameraX2)*player.zoom+canvasDimensions[2]+mid[2]) )+"px"
+
+			}
+		
 	})
 
 			
@@ -682,7 +697,10 @@ for(let i = map.particles.length-1; i > -1; i--){
 
 let mainCanvas = document.getElementById("myCanvas")
 let mainCTX = mainCanvas.getContext("2d")
+mainCanvas.style.overflowX = "hidden"
 
+document.body.style.overflowX = "hidden"
+document.body.style.overflowY = "hidden"
 
 
 
@@ -734,6 +752,15 @@ function windowRescale(e){
   document.body.style.zoom = allzoom
   // document.body.style.MozTransform = "scale("+allzoom+")";
   // document.body.style.MozTransformOrigin = "0 0";
+
+
+  // new shit 29 07 2024
+  canvasWrapper.style.width = Math.floor(myCanvas.offsetWidth) + "px"
+  canvasWrapper.style.height = Math.floor(myCanvas.offsetHeight) + "px"
+  canvasWrapper.style.top = Math.floor(myCanvas.offsetTop) + "px"
+  canvasWrapper.style.left = Math.floor(myCanvas.offsetLeft) + "px"
+
+
   return(zoomScale)
 
 }
@@ -743,6 +770,14 @@ windowRescale()
 mainCanvas.style.left = Math.floor(window.innerWidth/allzoom/2-canvasDimensions[0]/2)+"px"
 mid[0] += Math.floor(window.innerWidth/allzoom/2-canvasDimensions[0]/2)
 mid[2] = Math.floor(window.innerWidth/allzoom/2-canvasDimensions[0]/2)
+
+
+
+	canvasWrapper.style.width = Math.floor(myCanvas.offsetWidth) + "px"
+  canvasWrapper.style.height = Math.floor(myCanvas.offsetHeight) + "px"
+  canvasWrapper.style.top = Math.floor(myCanvas.offsetTop) + "px"
+  canvasWrapper.style.left = Math.floor(myCanvas.offsetLeft) + "px"
+  console.log(myCanvas.offsetLeft)
 
 	// mainCTX.clearRect(0,0,840,840)
 
@@ -846,7 +881,7 @@ document.addEventListener("mouseup",(e)=>{
 var placing = [false]
 var keyHolds = {}
 document.addEventListener("keydown",(e)=>{
-  e.preventDefault()
+  if(player.chatting){return}
   let key = e.key
 
   if(key == "h"){
@@ -858,6 +893,8 @@ document.addEventListener("keydown",(e)=>{
   }
   keyHolds[key] = "a"
 
+
+  e.preventDefault()
   switch(key){
   	case "r":
   		// placing2 = [true,(mouseX-mid[2])/player.zoom-player.zoomR/player.zoom+cameraX,mouseY/player.zoom-player.zoomR/player.zoom+cameraY]
@@ -944,7 +981,28 @@ document.addEventListener("keydown",(e)=>{
 			socket.emit("key","test")
   		break;
   	case "/":
-			socket.emit("chat",player.chat)
+  		let inputElm = document.createElement("div")
+  		inputElm.contentEditable = true
+  		inputElm.style.position = "absolute"
+  		inputElm.style.zIndex = "4"
+  		inputElm.style.minWidth = "20%"
+  		inputElm.style.maxWidth = "30%"
+  		inputElm.style.minHeight = "10%"
+  		inputElm.style.padding = "1px"
+  		inputElm.id = "chatInput"
+  		inputElm.style.backgroundColor = "#A0A0A0"
+  		inputElm.style.overflowY = "visible"
+  		inputElm.addEventListener("keydown",(e)=>{
+  			if(e.key == "Enter" && !e.shiftKey){
+  		player.chatting = false
+  				player.chat = inputElm.innerText
+					socket.emit("chat",player.chat)
+					inputElm.remove()
+  			}
+  		})
+  		document.body.appendChild(inputElm)
+  		player.chatting = true
+  		inputElm.focus()
   		break;
   }  
   console.log(key)
@@ -1425,4 +1483,25 @@ function updateParticles(arr){
 			map.particles.push(new explosionR2(e.x,e.y,"#A00000",3000,(x)=>{return(x/300)},(x)=>{return(e.r)},(x)=>{return("rgba(175,20,20,"+(0.6*x)+")")}))
 		}
 	})
+}
+
+function pchat(e){
+	map.players[e.id].chat = e.c
+	if(map.players[e.id].chatp !== undefined){
+		map.players[e.id].chatp.innerText = e.c
+		return
+	}
+	let nd = document.createElement("div")
+	nd.style.pointerEvents =  "none";
+  nd.style.backgroundColor= "transparent";
+  nd.style.color = "hsla("+map.players[e.id].color+",70%,75%,0.9"
+  nd.style.position = "absolute"
+  // nd.style.width = "200px"
+  // nd.style.height = "200px"
+  nd.style.maxWidth = "300px"
+  nd.style.overflowY = "visible"
+  nd.style.zIndex = "4"
+  nd.innerText = e.c
+  myCanvas.appendChild(nd)
+  map.players[e.id].chatp = nd
 }

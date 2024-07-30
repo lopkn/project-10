@@ -1616,6 +1616,7 @@ function joinGame(game,socket){
 		socket.on("clickup",(e)=>{shooter2C.playerClickUp(socket.id,e[0],e[1],e[2]);})
 		socket.on("placeWall",(e)=>{shooter2C.placeWall(socket.id,e[0],e[1],e[2],e[3],e[4],e[5],e[6])})
 		socket.on("keys",(e)=>{shooter2C.playerKeyUpdate(e)})
+		socket.on("chat",(e)=>{shooter2C.playerChat(socket.id,e)})
 		socket.on("joys",(e)=>{shooter2C.playerKeyUpdate(e,1,socket.id)})
 		socket.on("key",(e)=>{if(e=="test"){shooter2C.keyholders[socket.id] = true}})
 		
