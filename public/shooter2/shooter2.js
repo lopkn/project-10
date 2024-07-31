@@ -1,4 +1,8 @@
+
+document.body.style.backgroundColor = "black"
 const socket = io.connect('/')
+
+
 let GAMESESSION = "G10.2"
 socket.emit("JOINGAME",GAMESESSION)
 
@@ -322,6 +326,7 @@ function upEntities(a){
 			map.players[e.id].boidy.push(e.wid)
 		} else if(e.type == "dead"){
 			map.players[e.id].dead = true
+			map.players[e.id].chatp?.remove()
 		} else if(e.type == "team"){
 			map.players[e.id].color = e.c
 		}
@@ -651,8 +656,8 @@ for(let i = map.particles.length-1; i > -1; i--){
 
 
 				e.chatp.style.font = "bold "+Math.floor(23*player.zoom)+"px Courier New"
-				e.chatp.style.bottom = Math.floor( ( (-(e.y-75)+cameraY2)*player.zoom+canvasDimensions[3]))+"px"
-				e.chatp.style.left = Math.floor( ( (e.x+25-cameraX2)*player.zoom+canvasDimensions[2]+mid[2]) )+"px"
+				e.chatp.style.bottom = Math.floor( ( (-e.y+35+cameraY2)*player.zoom+canvasDimensions[3]))+"px"
+				e.chatp.style.left = Math.floor( ( (e.x+25-cameraX2)*player.zoom+canvasDimensions[2]) )+"px"
 
 			}
 		
@@ -695,9 +700,10 @@ for(let i = map.particles.length-1; i > -1; i--){
 	}
 }
 
-let mainCanvas = document.getElementById("myCanvas")
+let mainCanvas = document.getElementById("canvasRegress")
 let mainCTX = mainCanvas.getContext("2d")
-mainCanvas.style.overflowX = "hidden"
+myCanvas.style.overflowX = "hidden"
+myCanvas.style.overflowY = "hidden"
 
 document.body.style.overflowX = "hidden"
 document.body.style.overflowY = "hidden"
@@ -754,11 +760,7 @@ function windowRescale(e){
   // document.body.style.MozTransformOrigin = "0 0";
 
 
-  // new shit 29 07 2024
-  canvasWrapper.style.width = Math.floor(myCanvas.offsetWidth) + "px"
-  canvasWrapper.style.height = Math.floor(myCanvas.offsetHeight) + "px"
-  canvasWrapper.style.top = Math.floor(myCanvas.offsetTop) + "px"
-  canvasWrapper.style.left = Math.floor(myCanvas.offsetLeft) + "px"
+
 
 
   return(zoomScale)
@@ -767,17 +769,18 @@ function windowRescale(e){
 
 windowRescale()
 
-mainCanvas.style.left = Math.floor(window.innerWidth/allzoom/2-canvasDimensions[0]/2)+"px"
+myCanvas.style.left = Math.floor(window.innerWidth/allzoom/2-canvasDimensions[0]/2)+"px"
 mid[0] += Math.floor(window.innerWidth/allzoom/2-canvasDimensions[0]/2)
 mid[2] = Math.floor(window.innerWidth/allzoom/2-canvasDimensions[0]/2)
 
 
+  // new shit 29 07 2024
 
-	canvasWrapper.style.width = Math.floor(myCanvas.offsetWidth) + "px"
-  canvasWrapper.style.height = Math.floor(myCanvas.offsetHeight) + "px"
-  canvasWrapper.style.top = Math.floor(myCanvas.offsetTop) + "px"
-  canvasWrapper.style.left = Math.floor(myCanvas.offsetLeft) + "px"
-  console.log(myCanvas.offsetLeft)
+	// canvasWrapper.style.width = Math.floor(myCanvas.offsetWidth) + "px"
+  // canvasWrapper.style.height = Math.floor(myCanvas.offsetHeight) + "px"
+  // canvasWrapper.style.top = Math.floor(myCanvas.offsetTop) + "px"
+  // canvasWrapper.style.left = Math.floor(myCanvas.offsetLeft) + "px"
+  // console.log(myCanvas.offsetLeft)
 
 	// mainCTX.clearRect(0,0,840,840)
 
@@ -1100,12 +1103,11 @@ function touchHandler(e)
       		// 	}
 
       		if(distance(Mobile.joystick_move.mx,Mobile.joystick_move.my,E.pageX/allzoom,E.pageY/allzoom) < Mobile.joystick_move.r){
-
-      		Mobile.activeTouches[E.identifier].type = "joystick_move"
-      		Mobile.activeTouches[E.identifier].color = "green"
+      				Mobile.activeTouches[E.identifier].type = "joystick_move"
+      				Mobile.activeTouches[E.identifier].color = "green"
       			} else if(distance(Mobile.joystick_fire.mx,Mobile.joystick_fire.my,E.pageX/allzoom,E.pageY/allzoom) < Mobile.joystick_fire.r){
-      		Mobile.activeTouches[E.identifier].type = "joystick_fire"
-      		Mobile.activeTouches[E.identifier].color = "red"
+      				Mobile.activeTouches[E.identifier].type = "joystick_fire"
+      				Mobile.activeTouches[E.identifier].color = "red"
       			} else if(x > Mobile.scroller_weapon.x && y > Mobile.scroller_weapon.y && x < Mobile.scroller_weapon.x+Mobile.scroller_weapon.w && y < Mobile.scroller_weapon.y+Mobile.scroller_weapon.h){
       		Mobile.activeTouches[E.identifier].type = "scroller_weapon"
       		Mobile.activeTouches[E.identifier].color = "purple"
@@ -1119,11 +1121,23 @@ function touchHandler(e)
       			}
 
 
-      	} else if(e.target == myCanvas){
+      	} else if(e.target == mainCanvas || e.target == myCanvas){
       		Mobile.activeTouches[E.identifier].type = "mainCanvas"
       		Mobile.activeTouches[E.identifier].color = "orange"
+      		if(x > mid[2] && x < window.innerWidth-mid[2]){
+      		Mobile.activeTouches[E.identifier].color = "#FF00A0"
+      		}
   				placing = [true,(x-mid[2])/player.zoom-player.zoomR/player.zoom+cameraX,y/player.zoom-player.zoomR/player.zoom+cameraY]
 
+  				Mobile.canvasFingers += 1
+    			if(Mobile.canvasFingers == 1){
+    				Mobile.canvasGesture = "placing"
+    			} else if(Mobile.canvasFingers == 2){
+    				Mobile.canvasGesture = "zooming"
+      		Mobile.activeTouches[E.identifier].color = "purple"
+      		Mobile.activeTouches[E.identifier].secondTouch = true
+      		Mobile.zooming = {"orgZoom":player.zoom,"orgDist":undefined,"x2":x,"y2":y,"x1":undefined,"y1":undefined}
+    			}
       	}
       }
 
@@ -1167,6 +1181,29 @@ function touchHandler(e)
     		}else if (EUID.type == "mainCanvas"){
     			// placing[3] = x
     			// placing[4] = y
+    			if(Mobile.canvasGesture == "zooming"){
+    				let mz = Mobile.zooming
+    				if(EUID.secondTouch){
+    			 		EUID.color = "green"
+    			 		mz.x2 = x
+    			 		mz.y2 = y
+    				} else if(EUID.color == "orange"){
+    					mz.x1 = x
+    			 		mz.y1 = y
+    				}
+    				if(mz.x1 !== undefined){
+    					if(mz.orgDist !==undefined){
+    						mz.dist = distance(mz.x1,mz.y1,mz.x2,mz.y2)
+    						player.rezoom(mz.orgZoom-(mz.orgDist-mz.dist)/500)
+								if(player.zoom < 0){
+									player.rezoom(0.01)
+								}
+    					} else {
+    						mz.orgDist = distance(mz.x1,mz.y1,mz.x2,mz.y2)
+    					}
+    				}
+    			}
+    			
     		}
 
 
@@ -1185,7 +1222,13 @@ function touchHandler(e)
 					Mobile.joystick_fire.vect = [0,0]
 					// console.log(Mobile.joystick_fire[0]+mid[0],Mobile.joystick_fire[1]+mid[1])
     		} else if (EUID.type == "mainCanvas"){
-    			buildWall(x,y)
+    			if(Mobile.canvasGesture == "placing"){
+    				buildWall(x,y)
+    			}
+    			Mobile.canvasFingers-=1
+    			if(Mobile.canvasFingers == 0){
+    				Mobile.canvasGesture = "none"
+    			}
     		}
     		delete Mobile.activeTouches[E.identifier]
     	}
@@ -1231,6 +1274,8 @@ class Mobile {
 	static scroller_wall = {"x":(window.innerWidth-10-170)/allzoom,"y":60,"w":170,"h":40,"val":0}
 	static activeTouches = {}
 	static canvas;
+	static canvasFingers = 0
+  static canvasGesture = "none"
 	static initialized = false
 	static init(){
 	this.initialized = true

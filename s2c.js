@@ -2007,6 +2007,12 @@ class shooter2C{
 			}
 
 
+			if(i.x == null){
+				console.log(i.x)
+				console.log(JSON.stringify(i))
+			}
+
+
 			if(i.extra){
 				this.drawers.push([i.type,i.tailLength,
 				parseFloat(i.x.toFixed(2)),
