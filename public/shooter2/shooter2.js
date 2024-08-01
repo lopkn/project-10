@@ -1124,7 +1124,7 @@ function touchHandler(e)
       	} else if(e.target == mainCanvas || e.target == myCanvas){
       		Mobile.activeTouches[E.identifier].type = "mainCanvas"
       		Mobile.activeTouches[E.identifier].color = "orange"
-      		if(x > mid[2] && x < window.innerWidth-mid[2]){
+      		if(x > mid[2] && x < mid[2] + 820){
       		Mobile.activeTouches[E.identifier].color = "#FF00A0"
       		}
   				placing = [true,(x-mid[2])/player.zoom-player.zoomR/player.zoom+cameraX,y/player.zoom-player.zoomR/player.zoom+cameraY]
