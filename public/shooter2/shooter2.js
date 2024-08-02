@@ -999,7 +999,24 @@ document.addEventListener("keydown",(e)=>{
   			if(e.key == "Enter" && !e.shiftKey){
   		player.chatting = false
   				player.chat = inputElm.innerText
-					socket.emit("chat",player.chat)
+
+  				if(player.chat[0] == ";"){
+  					let command = player.chat.substring(1)
+  					let split = command.split(" ")
+  					if(split[0] == "w" || split[0] == "weapon"){
+  						player.weapon = split[1]
+  					} else if(split[0] == "b" || split[0] == "building"){
+  						player.wall = split[1]
+  					} else if(split[0] == "c" || split[0] == "class"){
+  						window.localStorage.setItem("playerType",split[1])
+  						COOKIE.playerType = window.localStorage.getItem('playerType')
+  					} else if(split[0] == "r" || split[0] == "reload"){
+  						window.location.reload()
+  					}
+  				} else {
+						socket.emit("chat",player.chat)
+  				}
+
 					inputElm.remove()
   			}
   		})
