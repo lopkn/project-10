@@ -3038,7 +3038,16 @@ class shooter2C{
 
 	static playerChat(id,chat){
 		let p = this.players[id]
-		io.to("G10.2").emit("chat",{"x":p.x,"y":p.y,"c":chat,"id":id})
+		if(chat[0] == "/"){
+			let split = chat.substring(1).split(" ")
+			if(split[0] == "spawn"){
+				let en = this.entityTemplates(split[1],split[2])
+				en.x = p.x
+				en.y = p.y
+			}
+		} else {
+			io.to("G10.2").emit("chat",{"x":p.x,"y":p.y,"c":chat,"id":id})
+		}
 	}
 
 }
