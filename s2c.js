@@ -3041,7 +3041,13 @@ class shooter2C{
 		if(chat[0] == "/"){
 			let split = chat.substring(1).split(" ")
 			if(split[0] == "spawn"){
-				let en = this.entityTemplates(split[1],split[2])
+				let en;
+				if(split.length>3){
+					en = this.entityTemplates(split[1],split[2],JSON.parse(split[3]))
+				}else{
+
+				 en = this.entityTemplates(split[1],split[2])
+				}
 				en.x = p.x
 				en.y = p.y
 			}
