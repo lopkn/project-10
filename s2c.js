@@ -3050,6 +3050,9 @@ class shooter2C{
 				}
 				en.x = p.x
 				en.y = p.y
+			} else if(split[0] == "tp"){
+				p.x = parseInt(split[1])
+				p.y = parseInt(split[2])
 			}
 		} else {
 			io.to("G10.2").emit("chat",{"x":p.x,"y":p.y,"c":chat,"id":id})
