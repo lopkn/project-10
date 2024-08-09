@@ -366,6 +366,12 @@ function updatePlayerRot(id){
 			}
 }
 
+function getFPlayerRot(x,y,p){
+	let x1 = ((x * p.rotation[1] + y * p.rotation[0]) + p.x)
+	let y1 = ((y * p.rotation[1] - x * p.rotation[0]) + p.y)
+	return([x1,y1])
+}
+
 function crobject(e){
 	// console.log(e[0])
 	map.walls = e[0]
