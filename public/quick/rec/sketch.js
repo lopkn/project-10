@@ -265,10 +265,10 @@ function interm(){
     }
     span.innerHTML = str
     let lower = str.toLowerCase()
-    if(lower.includes("translate chinese")){
+    if(lower.includes("translate chinese"),lower.includes("start chinese")){
       rec.lang = "zh-yue"
       restart()
-    }if(lower.includes("translate cantonese")){
+    }if(lower.includes("translate cantonese") || lower.includes("start cantonese")){
       rec.lang = "yue-Hant-HK"
       restart()
     } else if(lower.includes("英")){
