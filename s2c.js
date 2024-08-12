@@ -549,6 +549,16 @@ class shooter2C{
 					}
 					
 				break;
+			case "delete":
+					if(extra.release){
+						let warr = this.getWallsInRadius(p.holdDownPos[2],p.holdDownPos[3],(Date.now()-p.holdDownPos[4])/3)
+						warr.forEach((e)=>{this.delWall(e)})
+						io.to("G10.2").emit("particle",[{"type":"dbheal_bounded","x":p.holdDownPos[2],"y":p.holdDownPos[3],"r":(Date.now()-p.holdDownPos[4])/3}])
+					} else {
+						io.to("G10.2").emit("particle",[{"type":"dbheal_bounding","x":p.holdDownPos[2],"y":p.holdDownPos[3]}])
+					}
+					
+				break;
 			case "bounder":
 					if(extra.release){
 						this.groupStaticWalls2(p.holdDownPos[2],p.holdDownPos[3],(Date.now()-p.holdDownPos[4])/3)
@@ -2074,7 +2084,7 @@ class shooter2C{
 		this.wallPushers[wid] = "_DEL"
 	}
 
-	static damageWall(wid,b,o,tcol){
+	static damageWall(wid,b,o/*,tcol*/){
 		let WALL = this.walls[wid]
 		if(this.wallTypes[WALL.type]){
 			let vy
