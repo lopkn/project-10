@@ -172,6 +172,7 @@ let myStat = INFUNCS.myStat
 let re8L = require("./re8.js")
 let serTen = require("./serTen.js")
 let ArgA = require("./ArgA.js")
+let quant = require("./quantum.js")
 let compact = require("./compact.js")
 let s2cc = require("./s2c.js")
 
@@ -180,6 +181,7 @@ let flightSim = compact.flightSim
 let responder = compact.responder
 let ten = serTen.ten
 let re8 = re8L.re8
+let quantum = quant.quantum
 let ArgAccel = ArgA.ArgAccel
 let ArgAug = ArgA.ArgAug
 
@@ -1502,6 +1504,7 @@ INFUNCS.io = io
 re8L.io = io
 ten.io = io
 ArgAccel.setio(io)
+quantum.setio(io)
 re8.setio(io)
 shooter2C.setio(io,myMath,vectorNormalize,vectorFuncs)
 
@@ -1679,6 +1682,11 @@ function joinGame(game,socket){
 			io.to(socket.id).emit("string","you are a keyholder")
 		}
 		socket.onAny((e,n)=>{ArgAccel.handle(Date.now(),e,n,socket)})
+	}else if(game == "G10.8"){
+		socket.join("G10.8")
+		io.to(socket.id).emit("acknowledge G10.8",socket.id)
+		let clientIp = socket.request.connection.remoteAddress
+		socket.onAny((e,n)=>{quantum.handle(Date.now(),e,n,socket)})
 	} else if(game == "debug"){
 		io.to(socket.id).emit("debugReturn",{"sid":socket.id,"str":fs.readFileSync("./errorlog.json","utf8"),"str2":fs.readFileSync("./public/debug/errorlog3.txt","utf8")})
 	}
