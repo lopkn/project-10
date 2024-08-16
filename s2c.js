@@ -587,10 +587,10 @@ class shooter2C{
 				this.pushBullet(p.x,p.y,(n[2]-p.x)*1100,(n[3]-p.y)*1100,id,"lzr2")
 				break;
 			case "lzr3":
-				this.pushBullet(p.x,p.y,(n[2]-p.x)*1100+Math.random()*500-250,(n[3]-p.y)*1100+Math.random()*500-250,id,"lzr2")
-				this.pushBullet(p.x,p.y,(n[2]-p.x)*1100+Math.random()*500-250,(n[3]-p.y)*1100+Math.random()*500-250,id,"lzr2")
-				this.pushBullet(p.x,p.y,(n[2]-p.x)*1100+Math.random()*500-250,(n[3]-p.y)*1100+Math.random()*500-250,id,"lzr2")
-				this.pushBullet(p.x,p.y,(n[2]-p.x)*1100+Math.random()*500-250,(n[3]-p.y)*1100+Math.random()*500-250,id,"lzr2")
+				for(let i = 0; i < 5; i++){
+					this.pushBullet(p.x,p.y,(n[2]-p.x)*1100+Math.random()*500-250,(n[3]-p.y)*1100+Math.random()*500-250,id,"lzr2")
+				}
+				reload += 20
 				break;
 			case "cnon":
 				// p.vx -= (n[2]-p.x)*10
