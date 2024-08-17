@@ -91,6 +91,10 @@ class shooter2C{
 				this.bullets.push({"shooter":id,"type":"lzr2","x":x,"y":y,"vx":vx,"vy":vy,"wallMult":1,"unBouncer":0,
 					"tailLength":2,"dmgmult":0.01,"lingerance":2,"tail":[],"life":1,"slowd":1,"extra":{"tailmult":2}})
 				break;
+			case "lzr4":
+				this.bullets.push({"shooter":id,"type":"lzr4","x":x,"y":y,"vx":vx,"vy":vy,"wallMult":1,"unBouncer":0,
+					"tailLength":2,"dmgmult":-0.01,"lingerance":2,"tail":[],"life":1,"slowd":1,"extra":{"tailmult":2}})
+				break;
 			case "cnon":
 				this.bullets.push({"shooter":id,"type":"cnon","x":x,"y":y,"vx":vx,"vy":vy,"wallMult":1,"deathVel":6000,
 						"tailLength":10,"lingerance":10,"tail":[],"life":200,"penMult":0.45,"ignoreWallMult":-0.7,
@@ -591,6 +595,9 @@ class shooter2C{
 					this.pushBullet(p.x,p.y,(n[2]-p.x)*1100+Math.random()*500-250,(n[3]-p.y)*1100+Math.random()*500-250,id,"lzr2")
 				}
 				reload += 20
+				break;
+			case "lzr4":	
+				this.pushBullet(p.x,p.y,(n[2]-p.x)*1100,(n[3]-p.y)*1100,id,"lzr4")
 				break;
 			case "cnon":
 				// p.vx -= (n[2]-p.x)*10
@@ -2833,7 +2840,7 @@ class shooter2C{
 		io.to("G10.2").emit("particle",[{"type":explosionType,"x":b.x,"y":b.y}])
 	}
 
-	static aimWallCheck(TPP,op,shx,shy){
+	static aimWallCheck(TPP,op,shx,shy,EDST){
 
 
 		if(shx === undefined && shy === undefined){
@@ -2844,7 +2851,14 @@ class shooter2C{
 			let plid = TPP.id //player id
 			let distanceToPlayer = distance(TPP.x,TPP.y,shx,shy)
 
-				let obwl = Object.values(this.walls)
+
+			let obwl;
+
+				if(EDST == false){
+					obwl = Object.values(this.walls)
+				} else {
+					obwl = this.getWallsInApproximate(TPP.x,TPP.y,EDST)
+				}
 				let willCollide = false
 				for(let j = 0; j < obwl.length; j++){
 					let W = obwl[j]
