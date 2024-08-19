@@ -29,7 +29,7 @@ socket.on("return",(e)=>{console.log(e)
   document.getElementById("results").innerText = e
 
 })
-
+socket.on("message",(e)=>{console.log(message)})
 let b0 = document.createElement("button")
 let b1 = document.createElement("button")
 let res = document.createElement("div")

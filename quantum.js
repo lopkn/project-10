@@ -30,7 +30,7 @@ class quantum{
 		}
 
 		if(other == undefined){
-			other = {"input":[],"id":socket.id,"room":measurer.room,"measured":[]}
+			other = {"input":[],"id":socket.id,"room":measurer.room,"measured":[],"messages":[]}
 		}
 
 		measurer.input.push(input)
@@ -49,9 +49,21 @@ class quantum{
 		return(measurer.measured[measurer.measured.length-1])
 	}
 
+	static sendChallenge(room){
+		room = this.rooms[room]
+		let val1 = Math.random()>0.5?1:0
+		let val2 = Math.random()>0.5?1:0
+		io.to(room[0].id).emit("message",val1)
+		io.to(room[1].id).emit("message",val2)
+		room[0].messages.push(val1)
+		room[1].messages.push(val2)
+	}
+
 	static setio(i){
 		io = i
 	}
+
+
 }
 
 module.exports = {quantum}
