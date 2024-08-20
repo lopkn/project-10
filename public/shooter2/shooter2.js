@@ -91,6 +91,12 @@ class explosionR{
 		if(this.colorf !== undefined){
 			this.color = this.colorf(this.actLife/600)
 		}
+		if(this.tracking){
+			let coords = getFPlayerRot(this.tx,this.ty,this.tracking)
+			this.x = coords[0]
+			this.y = coords[1]
+		}
+
 	}
 	draw(){
 		if(this.actLife < 0){

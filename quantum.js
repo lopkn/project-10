@@ -16,6 +16,9 @@ class quantum{
 		} 
 		this.rooms[roomName].push({"input":[],"id":socket.id,"room":roomName,"measured":[]})
 		socket.join("G10.8-"+roomName)
+
+
+
 	}
 
 	static collapseMeasure(room,socket,input){
@@ -46,6 +49,7 @@ class quantum{
 			measurer.measured.push(Math.random()>0.5?1:0)
 		}
 		io.to(socket.id).emit("return",measurer.measured[measurer.measured.length-1])
+
 		return(measurer.measured[measurer.measured.length-1])
 	}
 
