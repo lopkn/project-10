@@ -92,9 +92,12 @@ class explosionR{
 			this.color = this.colorf(this.actLife/600)
 		}
 		if(this.tracking){
-			let coords = getFPlayerRot(this.tx,this.ty,this.tracking)
-			this.x = coords[0]
-			this.y = coords[1]
+			if(map.players[this.tracking]){
+			 this.coords = getFPlayerRot(this.tx,this.ty,this.tracking)
+			
+		} 
+		this.x = this.coords[0]
+			this.y = this.coords[1]
 		}
 
 	}
