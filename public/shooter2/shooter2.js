@@ -141,6 +141,15 @@ class explosionR2{
 		if(this.fillcolorf !== undefined){
 			this.fillcolor = this.fillcolorf(this.actLife/this.maxlife)
 		}
+
+		if(this.tracking){
+			if(map.players[this.tracking]){
+			 this.coords = getFPlayerRot(this.tx,this.ty,this.tracking)
+			
+		} 
+		this.x = this.coords[0]
+		this.y = this.coords[1]
+		}
 	}
 	draw(){
 		if(this.actLife < 0){
