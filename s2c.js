@@ -553,6 +553,16 @@ class shooter2C{
 					}
 					
 				break;
+			case "dmg":
+					if(extra.release){
+						let warr = this.getWallsInRadius(p.holdDownPos[2],p.holdDownPos[3],(Date.now()-p.holdDownPos[4])/3)
+						warr.forEach((e)=>{this.walls[e].hp *= 0.9; this.walls[e].hp -= 10;if(this.walls[e].hp<0){this.delWall(e)}})
+						io.to("G10.2").emit("particle",[{"type":"dbheal_bounded","x":p.holdDownPos[2],"y":p.holdDownPos[3],"r":(Date.now()-p.holdDownPos[4])/3}])
+					} else {
+						io.to("G10.2").emit("particle",[{"type":"dbheal_bounding","x":p.holdDownPos[2],"y":p.holdDownPos[3]}])
+					}
+					
+				break;
 			case "delete":
 					if(extra.release){
 						let warr = this.getWallsInRadius(p.holdDownPos[2],p.holdDownPos[3],(Date.now()-p.holdDownPos[4])/3)

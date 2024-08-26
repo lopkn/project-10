@@ -41,6 +41,7 @@ weaponInfo = {
 	"bounder":{"hold":true},
 	"bounder2":{"hold":true},
 	"dbheal":{"hold":true},
+	"dmg":{"hold":true},
 	"delete":{"hold":true},
 	"kb":{"hold":true}
 
