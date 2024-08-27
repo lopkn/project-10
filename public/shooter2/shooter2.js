@@ -43,7 +43,8 @@ weaponInfo = {
 	"dbheal":{"hold":true},
 	"dmg":{"hold":true},
 	"delete":{"hold":true},
-	"kb":{"hold":true}
+	"kb":{"hold":true},
+	"areaspawn":{"hold":true}
 
 }
 
@@ -248,7 +249,7 @@ class player{
 	static ping = 100;
 	static dataNodes = []
 	static packetSec = []
-	static weapon = "norm"
+	static weapon = "areaspawn"
 	static materials = 100
 	static wall = "norm"
 	static snapping = false

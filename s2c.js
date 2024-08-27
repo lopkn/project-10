@@ -556,12 +556,38 @@ class shooter2C{
 			case "dmg":
 					if(extra.release){
 						let warr = this.getWallsInRadius(p.holdDownPos[2],p.holdDownPos[3],(Date.now()-p.holdDownPos[4])/3)
-						warr.forEach((e)=>{this.walls[e].hp *= 0.9; this.walls[e].hp -= 10;if(this.walls[e].hp<0){this.delWall(e)}})
+						warr.forEach((e)=>{this.walls[e].hp *= 0.9; this.walls[e].hp -= 10;if(this.walls[e].hp<0){this.delWall(e)}else{this.updateWallHP(e)}})
 						io.to("G10.2").emit("particle",[{"type":"dbheal_bounded","x":p.holdDownPos[2],"y":p.holdDownPos[3],"r":(Date.now()-p.holdDownPos[4])/3}])
 					} else {
 						io.to("G10.2").emit("particle",[{"type":"dbheal_bounding","x":p.holdDownPos[2],"y":p.holdDownPos[3]}])
 					}
 					
+				break;
+			case "areaspawn":
+				if(extra.release){
+						let radius = (Date.now()-p.holdDownPos[4])/3
+						let x = p.holdDownPos[2];
+						let y = p.holdDownPos[3]
+						let spawns = radius/50
+						let team = "conjure"+Math.random()
+
+						let spawnItem = "ntri6"
+						if(!p.entity && p.commandOptions.summon){spawnItem = p.commandOptions.summon}
+						while(spawns > 0){
+							let tx = x+Math.random()*radius*2-radius
+							let ty = y+Math.random()*radius*2-radius
+							let dist = distance(x,y,tx,ty)
+							if(dist<radius){
+								spawns -= 1
+								setTimeout(()=>{
+									let en = this.entityTemplates(spawnItem,2,{"team":team,"x":tx,"y":ty})
+									en.speed *= 1+Math.random();en.noTeamfire=true},dist*5)
+							}
+						}
+						io.to("G10.2").emit("particle",[{"type":"dbheal_bounded","x":x,"y":y,"r":radius}])
+					} else {
+						io.to("G10.2").emit("particle",[{"type":"dbheal_bounding","x":p.holdDownPos[2],"y":p.holdDownPos[3]}])
+					}
 				break;
 			case "delete":
 					if(extra.release){
@@ -1298,6 +1324,7 @@ class shooter2C{
 		this.players[id].weight = 1
 		this.players[id].horsePower = 1
 		this.players[id].tv = [0,0]
+		this.players[id].commandOptions = {} //entities dont need this. improve later
 
 		this.players[id].color = Math.floor(this.stringToRandomNumber(this.players[id].team?this.players[id].team:id)*360)
 
@@ -2091,7 +2118,7 @@ class shooter2C{
 		}
 
 		if(this.CALCULATIONS > 5000 && this.CALCULATIONS != this.lastCalculation){
-			console.log("a lot of calculations! "+this.CALCULATIONS)
+			console.log("a lot of calculations! "+this.CALCULATIONS+" actual "+(Object.keys(this.walls).length*this.bullets.length))
 		}
 		this.lastCalculation = this.CALCULATIONS
 
@@ -2864,7 +2891,7 @@ class shooter2C{
 
 			let obwl;
 
-				if(EDST == false){
+				if(EDST == undefined){
 					obwl = Object.values(this.walls)
 				} else {
 					obwl = this.getWallsInApproximate(TPP.x,TPP.y,EDST)
@@ -3072,7 +3099,7 @@ class shooter2C{
 				})
 				processing = newprocessing
 			}
-		wallsArr = Object.keys(needCollideWalls)
+		let wallsArr = Object.keys(needCollideWalls)
 		return({"arr":wallsArr,"dict":needCollideWalls})
 	}
 
@@ -3095,6 +3122,12 @@ class shooter2C{
 				p.y = parseInt(split[2])
 			} else if(split[0] == "attribute"){
 				p[split[1]] = split[2]
+			} else if(split[0] == "option"){
+				if(split[1] == "delete"){
+					p.commandOptions[split[2]] = undefined
+				} else {
+					p.commandOptions[split[1]] = split[2]
+				}
 			}
 		} else {
 			io.to("G10.2").emit("chat",{"x":p.x,"y":p.y,"c":chat,"id":id})
