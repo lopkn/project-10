@@ -1161,6 +1161,47 @@ function touchHandler(e)
       		Mobile.activeTouches[E.identifier].color = "purple"
       		Mobile.scroller_wall.startx = x
       		Mobile.scroller_wall.oldval = Mobile.scroller_wall.val
+      			} else if(x > Mobile.button_chat.x && y > Mobile.button_chat.y && x < Mobile.button_chat.x+Mobile.button_chat.w && y < Mobile.button_chat.y+Mobile.button_chat.h){
+      				Mobile.chatting = true;
+      				let inputElm = document.createElement("div")
+  		inputElm.contentEditable = true
+  		inputElm.style.position = "absolute"
+  		inputElm.style.zIndex = "4"
+  		inputElm.style.minWidth = "20%"
+  		inputElm.style.maxWidth = "30%"
+  		inputElm.style.minHeight = "10%"
+  		inputElm.style.padding = "1px"
+  		inputElm.id = "chatInput"
+  		inputElm.style.backgroundColor = "#A0A0A0"
+  		inputElm.style.overflowY = "visible"
+  		inputElm.addEventListener("keydown",(e)=>{
+  			if(e.key == "Enter" && !e.shiftKey){
+  		player.chatting = false
+  				player.chat = inputElm.innerText
+
+  				if(player.chat[0] == ";"){
+  					let command = player.chat.substring(1)
+  					let split = command.split(" ")
+  					if(split[0] == "w" || split[0] == "weapon"){
+  						player.weapon = split[1]
+  					} else if(split[0] == "b" || split[0] == "building"){
+  						player.wall = split[1]
+  					} else if(split[0] == "c" || split[0] == "class"){
+  						window.localStorage.setItem("playerType",split[1])
+  						COOKIE.playerType = window.localStorage.getItem('playerType')
+  					} else if(split[0] == "r" || split[0] == "reload"){
+  						window.location.reload()
+  					}
+  				} else {
+						socket.emit("chat",player.chat)
+  				}
+
+					inputElm.remove()
+  			}
+  		})
+  		document.body.appendChild(inputElm)
+  		player.chatting = true
+  		inputElm.focus()
       			}
 
 
@@ -1315,6 +1356,7 @@ class Mobile {
 	static joystick_fire = {"mx":600,"my":100,"x":600,"y":100,"r":100,"vect":[0,0]}
 	static scroller_weapon = {"x":40,"y":60,"w":170,"h":40,"val":0}
 	static scroller_wall = {"x":(window.innerWidth-10-170)/allzoom,"y":60,"w":170,"h":40,"val":0}
+	static button_chat = {"x":(window.innerWidth-10-170)/allzoom,"y":110,"w":170,"h":40,"val":"chat"}
 	static activeTouches = {}
 	static canvas;
 	static canvasFingers = 0
@@ -1372,10 +1414,12 @@ class Mobile {
 		this.ctx.fillStyle = "#777777"
 		this.ctx.fillRect(this.scroller_weapon.x,this.scroller_weapon.y,this.scroller_weapon.w,this.scroller_weapon.h)
 		this.ctx.fillRect(this.scroller_wall.x,this.scroller_wall.y,this.scroller_wall.w,this.scroller_wall.h)
+		this.ctx.fillRect(this.button_chat.x,this.button_chat.y,this.button_chat.w,this.button_chat.h)
 		this.ctx.fillStyle = "#FFFFFF"
 		this.ctx.font = "28px Arial"
 		this.ctx.fillText(this.scroller_weapon.val,this.scroller_weapon.x+this.scroller_weapon.w/2,this.scroller_weapon.y+this.scroller_weapon.h/1.5)
 		this.ctx.fillText(this.scroller_wall.val,this.scroller_wall.x+this.scroller_wall.w/2,this.scroller_wall.y+this.scroller_wall.h/1.5)
+		this.ctx.fillText(this.button_chat.val,this.button_chat.x+this.button_chat.w/2,this.button_chat.y+this.button_chat.h/1.5)
 		
 
 	}
