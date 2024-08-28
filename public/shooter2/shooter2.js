@@ -339,7 +339,11 @@ function upEntities(a){
 			map.players[e.id].y = e.y
 			map.players[e.id].rotation = e.r
 
-			updatePlayerRot(e.id)
+			if(e.r !== undefined){
+				updatePlayerRot(e.id)
+			} else {
+
+			}
 		}  else if(e.type == "createEntity"){
 			map.players[e.entity.id] = e.entity
 		}else if(e.type == "create"){
@@ -355,6 +359,7 @@ function upEntities(a){
 }
 
 
+
 function updatePlayerRot(id){
 	let p = map.players[id]
 
@@ -362,8 +367,7 @@ function updatePlayerRot(id){
 				if(map.walls[p.boidy[j]] == undefined){
 					p.boidy.splice(j,1)
 					p.boidyVect.splice(j,1)
-					// this.entityPushers[]
-					cont = true
+					// cont = true
 				}
 			}
 

@@ -36,7 +36,7 @@ class shooter2C{
 	static wallPushers = {}
 	static entityPushers = []
 	static massPushers = {"specific":{},"general":{}}
-	static mapFriction = 1
+	static mapFriction = 0
 
 	static nuuIDGEN = 0
 	static setio(i,m,v,v2){
@@ -1221,7 +1221,7 @@ class shooter2C{
 		this.updateWall(a)
 		return(a)
 	}
-	static initiatePlayer(id,type){
+	static initiatePlayer(id,type,options){
 
 		if(type == undefined || type == "ntri"){
 
@@ -1232,12 +1232,12 @@ class shooter2C{
 			}
 			io.to(id).emit("spec",["zoom",1])
 
-			let a = this.placeWall(id,410,390,395,425,"player",{"id":id,"force":true})
+			let a = this.placeWall(id,0,0,0,0,"player",{"id":id,"force":true})
 			this.players[id].boidy.push(a)
-			 a = this.placeWall(id,425,425,395,425,"player",{"id":id,"force":true},{"defense":3})
+			 a = this.placeWall(id,0,0,0,0,"player",{"id":id,"force":true},{"defense":3})
 			 this.players[id].boidy.push(a)
 
-			 a = this.placeWall(id,410,390,425,425,"player",{"id":id,"force":true})
+			 a = this.placeWall(id,0,0,0,0,"player",{"id":id,"force":true})
 			 this.players[id].boidy.push(a)
 		} else if(type == "shld") {
 			
@@ -1272,14 +1272,14 @@ class shooter2C{
 		"materials":100,"speed":0.5,"tracking":false,"boidyAll":4
 		}
 		io.to(id).emit("spec",["zoom",0.8])
-		let a = this.placeWall(id,410,390,395,425,"player",{"id":id,"force":true},{"defense":3})
+		let a = this.placeWall(id,0,0,0,0,"player",{"id":id,"force":true},{"defense":3})
 		this.players[id].boidy.push(a)
-		 a = this.placeWall(id,425,425,395,425,"player",{"id":id,"force":true},{"defense":3})
+		 a = this.placeWall(id,0,0,0,0,"player",{"id":id,"force":true},{"defense":3})
 		 this.players[id].boidy.push(a)
 
-		 a = this.placeWall(id,410,390,425,425,"player",{"id":id,"force":true},{"defense":3})
+		 a = this.placeWall(id,0,0,0,0,"player",{"id":id,"force":true},{"defense":3})
 		 this.players[id].boidy.push(a)
-		 a = this.placeWall(id,410,390,425,425,"player",{"id":id,"force":true},{"defense":3})
+		 a = this.placeWall(id,0,0,0,0,"player",{"id":id,"force":true},{"defense":3})
 		 this.players[id].boidy.push(a)
 
 
@@ -1290,14 +1290,14 @@ class shooter2C{
 		"materials":100,"speed":0.35,"tracking":false,"boidyAll":4
 		}
 		io.to(id).emit("spec",["zoom",0.5])
-		let a = this.placeWall(id,410,390,395,425,"player",{"id":id,"force":true},{"defense":3})
+		let a = this.placeWall(id,0,0,0,0,"player",{"id":id,"force":true},{"defense":3})
 		this.players[id].boidy.push(a)
-		 a = this.placeWall(id,425,425,395,425,"player",{"id":id,"force":true},{"defense":3})
+		 a = this.placeWall(id,0,0,0,0,"player",{"id":id,"force":true},{"defense":3})
 		 this.players[id].boidy.push(a)
 
-		 a = this.placeWall(id,410,390,425,425,"player",{"id":id,"force":true},{"defense":0.3})
+		 a = this.placeWall(id,0,0,0,0,"player",{"id":id,"force":true},{"defense":0.3})
 		 this.players[id].boidy.push(a)
-		 a = this.placeWall(id,410,390,425,425,"player",{"id":id,"force":true},{"defense":0.3})
+		 a = this.placeWall(id,0,0,0,0,"player",{"id":id,"force":true},{"defense":0.3})
 		 this.players[id].boidy.push(a)
 
 		} else{ 
@@ -1328,11 +1328,21 @@ class shooter2C{
 
 		this.players[id].color = Math.floor(this.stringToRandomNumber(this.players[id].team?this.players[id].team:id)*360)
 
+		if(options){
+			if(options.x && options.y){
+				this.players[id].x = options.x
+				this.players[id].y = options.y
+			}
+			if(options.entity){
+				this.players[id].entity = true
+			}
+		}
 
+		this.players[id].unmovePos[2] = true
 		this.sendAllWombjects(id)
 		io.to("G10.2").emit("upEntities",[{"type":"createEntity","entity":this.players[id]}])
 
-		this.entityPushers.push({"type":"pos","id":this.players[id].id,"x":this.players[id].x,"y":this.players[id].y,"r":this.players[id].rotation})
+		this.entityPushers.push({"type":"pos","id":this.players[id].id,"x":this.players[id].x,"y":this.players[id].y,"r":undefined})
 		this.massPushers.specific[id] = {"cameraUp":[this.players[id].x.toFixed(4),this.players[id].y.toFixed(4)]}
 		return(this.players[id])
 	}
@@ -1400,9 +1410,9 @@ class shooter2C{
 					if(p.onDeath){p.onDeath(p)}
 					if(p.spawnPoint && p.spawnPoint.hp>0){
 						setTimeout(()=>{
-							let np = this.initiatePlayer(p.id,p.type)
-							np.x = p.spawnPoint.x
-							np.y = p.spawnPoint.y
+							let np = this.initiatePlayer(p.id,p.type,{"x":p.spawnPoint.x,"y":p.spawnPoint.y})
+							// np.x = p.spawnPoint.x
+							// np.y = p.spawnPoint.y
 							np.spawnPoint = p.spawnPoint
 						},1500)
 					}
@@ -2356,10 +2366,9 @@ class shooter2C{
 
 
 	static entities = {}
-	static initiateEntity(type){
+	static initiateEntity(type,x,y){
 		let eid = ""+Math.random()
-		this.entities[eid] = this.initiatePlayer(eid,type?type:"ntri")
-		this.entities[eid].entity = true
+		this.entities[eid] = this.initiatePlayer(eid,type?type:"ntri",{"entity":true,"x":x,"y":y})
 		this.entities[eid].ai = (e)=>{e.vx = 1;this.playerClick(eid,Math.random()-0.5,Math.random()-0.5,"norm")}
 		return(this.entities[eid])
 	}
