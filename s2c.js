@@ -36,7 +36,6 @@ class shooter2C{
 	static wallPushers = {}
 	static entityPushers = []
 	static massPushers = {"specific":{},"general":{}}
-	static mapFriction = 0
 
 	static nuuIDGEN = 0
 	static setio(i,m,v,v2){
@@ -402,17 +401,7 @@ class shooter2C{
 							a.extra = {"tailmult":3,"tailLength":6}
 							a.tailLength = 6; a.lingerance = 6;
 							}
-							// Object.values(this.players).forEach((e)=>{
-							// 	if(e.dead){return}
-							// 	let dst = distance(e.x,e.y,b.x,b.y)
-							// 	if(dst<500){
-							// 		let inverse = 1/dst
-							// 		let min = 50
-							// 		e.vx += Math.max(-min, Math.min((e.x-b.x)*inverse*inverse*7000/e.weight*e.speed, min))
-							// 		e.vy += Math.max(-min, Math.min((e.y-b.y)*inverse*inverse*7000/e.weight*e.speed, min))
-							// 	}
-							// })
-							// io.to("G10.2").emit("particle",[{"type":"explosion","x":b.x,"y":b.y}])
+	
 							this.KBR(b.x,b.y,{"pkb":0.7,"noBulletBounce":true,"playerBounceMax":30})
 						
 					}

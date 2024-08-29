@@ -103,6 +103,8 @@ rec.onresult = (e)=>{recf(e)}
     
 let restartAMT = 2000;
 
+setInterval((e)=>{restartAMT+=1},1000)
+
 rec.onend=()=>{rec.start();console.log("restart");
 
   final = 0; 
