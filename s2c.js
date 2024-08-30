@@ -36,6 +36,7 @@ class shooter2C{
 	static wallPushers = {}
 	static entityPushers = []
 	static massPushers = {"specific":{},"general":{}}
+	static mapFriction = 1;
 
 	static nuuIDGEN = 0
 	static setio(i,m,v,v2){
@@ -1327,7 +1328,7 @@ class shooter2C{
 			}
 		}
 
-		this.players[id].unmovePos[2] = true
+		// this.players[id].unmovePos[2] = true
 		this.sendAllWombjects(id)
 		io.to("G10.2").emit("upEntities",[{"type":"createEntity","entity":this.players[id]}])
 
