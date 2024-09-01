@@ -207,6 +207,20 @@ class slider{
 }
 
 
+class logicNode{
+  constructor(){
+    this.input = []
+    this.output = []
+    this.singleOutput = 0;
+  }
+
+  activate(arr){
+    if(arr = undefined){arr = this.input}else{this.input=arr}
+
+  }
+}
+
+
 m = {}
 
 function create(name){

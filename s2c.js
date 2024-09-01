@@ -637,6 +637,13 @@ class shooter2C{
 				this.pushBullet(p.x,p.y,(n[2]-p.x)*200+Math.random()*100-50,(n[3]-p.y)*200+Math.random()*100-50,id,"fire")
 		reload += 2
 				break;
+			case "thrst":
+				this.KB(p,-(n[2]-p.x),-(n[3]-p.y))
+				this.pushBullet(p.x,p.y,(n[2]-p.x)*200+Math.random()*100-50,(n[3]-p.y)*200+Math.random()*100-50,id,"fire")
+				p.rotation[0] = -p.rotation[0]
+				p.rotation[1] = -p.rotation[1]
+		reload += 2
+				break;
 			case "heal":
 				this.pushBullet(p.x,p.y,(n[2]-p.x)*160,(n[3]-p.y)*160,id,"heal")
 				break;
