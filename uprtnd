@@ -1098,6 +1098,170 @@ Why should we not have a private healthcare system
 
 
 
+====
+
+let div = document.createElement("div")
+div.innerText=`> test
+> test2
+> whatever
+
+
+`
+div.style.backgroundColor = "black"
+div.style.color = "lime"
+div.contentEditable=true
+
+
+let button = document.createElement("button")
+button.innerText = "load"
+button.onclick=()=>{load();console.log('loaded')}
+
+var canvas;
+function setup() {
+  // createCanvas(400, 400);
+  noCanvas()
+  // canvas = document.getElementById("defaultCanvas0")
+  document.body.appendChild(div)
+  document.body.appendChild(button)
+}
+
+function draw() {
+  background(220);
+}
+
+let BITMAP = {}
+
+function setState(k,value){
+  if(BITMAP[k].state){BITMAP[k].state = value}else{
+    BITMAP[k] = {"state":value}
+  }
+}
+
+let uuid = 1
+function registerBit(name){
+  if(name){
+    let aname = name
+    let i = 1
+    while(BITMAP[aname]){
+      aname = name+i
+      i++
+    }
+    
+    BITMAP[aname]={"state":false}
+    return(aname)
+  }
+  while(BITMAP[uuid]){uuid++}
+  BITMAP[uuid]={"state":false}
+  return(uuid)
+}
+
+class logicNode{
+  constructor(KEY){
+    this.input = []
+    // this.output = {}
+    this.outputKey = KEY?KEY:registerBit(); //map key
+    this.activity = Date.now()
+    this.lastInput = []
+    this.lastlastInput = []
+    this.relay = {}
+  }
+  
+  setInput(arr){
+    this.input=arr
+  }
+  
+  getInputs(){
+    let outarr = []
+    this.input.forEach((e,i)=>{
+      outarr[i] = BITMAP[e].state
+    })
+    this.lastlastInput = this.lastInput
+    this.lastInput = outarr
+    return(outarr)
+  }
+  
+  
+  activate(arr,activation=Date.now()){
+    if(arr==undefined){arr = this.getInputs()}
+    let result = this.func(arr)
+    // setState(this.outputKey,result)
+    BITMAP[this.outputKey].state = result
+    BITMAP[this.outputKey].activation = activation
+    console.log(this.outputKey + " is set to "+ result)
+    return(result)
+  }
+  func(arr){
+    
+  }
+  
+  back(revert){
+    
+  }
+}
+
+//logic nodes should have multiple inputs
+
+
+//there is a master BIT map
+//base OR node will activate, retrieve inputs, create an output
+
+
+
+//the premise is: Computers work, but somewhere they work redundantly.
+
+
+//backprop of "or"
+//Turned from False to True:
+//11 -> revert both
+//10 -> (inverse/not inverse)
+//01 -> (inverse/not inverse)
+//Turned from true to false: (inverse/not inverse)
+
+function load(){
+  let str = div.innerText
+  let lines = str.split("\n")
+  lines.forEach((e)=>{
+    if(e[0] == ">"){
+      let item = e.substring(1)
+      while(item[0]==" "){item=item.substring(1)}
+      console.log("bit > "+item)
+      registerBit(item.split(" ")[0])
+    } else if(e[1] == "!"){
+      let item = e.substring(1)
+      while(item[0]==" "){item=item.substring(1)}
+      console.log("relay > "+item)
+    } else if(e[1] == "|"){
+      
+    }
+  })
+}
+
+
+
+
+var ORnode = new logicNode()
+ORnode.func = (arr)=>{if(arr[0] || arr[1]){return(true)}return(false)}
+ORnode.back = (revert)=>{
+  let back = []
+  if(revert){
+    if(BITMAP[ORnode.outputKey].state){
+      if(ORnode.input[0] != ORnode.lastlastInput[0]){
+        back.push(ORnode.input[0])
+      }
+      if(ORnode.input[1] != ORnode.lastlastInput[1]){
+        back.push(ORnode.input[1])
+      }
+    }
+  }
+  return(back)
+}
+
+registerBit("test")
+registerBit("test2")
+BITMAP.test.state = true
+ORnode.setInput(["test","test2"])
+ORnode.activate()
+
 
 
 
