@@ -94,10 +94,14 @@ document.addEventListener('keydown',(e)=>{
   if(e.key == "2"){
     last.remove()
   }
+  if(e.key == "\\" && e.metaKey){
+    fahadMode=true
+    document.body.style.backgroundColor = "white"
+  }
 })
 let final = 0
 
-
+let fahadMode = false
 let rec = new webkitSpeechRecognition()
 rec.onresult = (e)=>{recf(e)}
     
@@ -163,6 +167,9 @@ function recf(e){
 
     rgb = Math.floor((1-conf)*255) + "," +Math.floor(conf*255) +",0"
     span.style.color = "rgb("+rgb+")"
+    if(fahadMode){
+      span.style.color="black"
+    }
 
     let result = e.results[final][0].transcript
     if(lastManualSave != ""){
@@ -245,6 +252,7 @@ function whiteText(){
   let span = document.createElement("span")
     span.classList.add('temp')
     span.style.color = "white"
+    if(fahadMode){span.style.color="green"}
     let str = ""
     let ff = final
     while(ff < rst.length){
@@ -259,6 +267,7 @@ function interm(){
   let span = document.createElement("span")
     span.classList.add('temp')
     span.style.color = "white"
+    if(fahadMode){span.style.color="black"}
     let str = "</br>"
     let ff = final
     while(ff < rst.length){

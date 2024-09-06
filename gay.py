@@ -25,7 +25,6 @@ def random(*args: int) -> float:
     return result * inverseFs
 
 
-
 width = 50
 height = 50
 pixelsPerSquare = 15

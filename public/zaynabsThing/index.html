@@ -40,6 +40,19 @@
 
 <script>
 	let arr = ["hi","hi2","hi3","hi4","hi5",6,7,8,1,2,3]
+
+	let i = 999
+	function createDiv(stuff){
+		let div = document.createElement("div")
+		div.innerHTML = stuff
+		div.style.fontSize = "50px"
+		div.style.position = "absolute"
+		div.id = i
+		arr.push(div.id)
+		document.body.appendChild(div)
+		i++
+	}
+
 	setInterval(()=>{
 	document.body.style.backgroundColor = "rgb("+Math.floor(Math.random()*15)+","+Math.floor(Math.random()*15)+","+Math.floor(Math.random()*15)+")"
 
@@ -50,7 +63,7 @@
 	d.style.fontSize = Math.floor(Math.random()*120)+"px"
 	d.style.color = "rgb("+Math.floor(Math.random()*255)+","+Math.floor(Math.random()*255)+","+Math.floor(Math.random()*255)+")"
 	})
-},100)
+},300)
 </script>
 
 
