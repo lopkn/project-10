@@ -115,7 +115,7 @@ INFUNCS.plArr = plArr
 	getRelativity,
 	itemStackable,
 	structureArrDecompress,
-	structureArrCompress,
+	structureArrCompress, 
 	rotateStructure,
 	deductStrAtt,
 	amountOfItems,
