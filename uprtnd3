@@ -41,6 +41,17 @@ i can make a ctrl+f work for multiple web pages and also give u the link
 
 var a; var b
 
+let l = document.links
+let r = []
+for(let i = 0; i < l.length; i++){
+	GetWeb(l[i].href,i)
+}
+
+function GetWeb(link,i){
+	fetch(link).then(res=>{return(res.text())}).then(txt=>{r[i] = txt})
+}
+
+
 fetch("https://canvas.ubc.ca/courses/155723").then(response=>{return(response.text())}).then(text=>{console.log(text); a = text})
 
 
