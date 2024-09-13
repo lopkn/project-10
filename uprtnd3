@@ -11,18 +11,18 @@ morphology -> finding similarity by strucure
 
 
 
-FFMFFMFFmffmfmfffmf < 
+FFMFFMFFmffmfmfffmfffmmffmmfmmfff < 
 
 "Women answer less questions"-rosie
 well lets test that theory
 
-i guess this means
-"a "
 
 
 
 
 
+
+"self sustaining chemical system capable of darwinian evolution"
 
 
 
@@ -43,9 +43,19 @@ var a; var b
 
 let l = document.links
 let r = []
-for(let i = 0; i < l.length; i++){
-	GetWeb(l[i].href,i)
+
+function myFind(){
+	for(let i = 0; i < l.length; i++){
+		GetWeb(l[i].href,i)
+	}
 }
+
+function mySearch(wrd){
+	r.forEach((e,i)=>{
+		console.log(l[i].text+" found at "+e.indexOf(wrd))
+	})
+}
+
 
 function GetWeb(link,i){
 	fetch(link).then(res=>{return(res.text())}).then(txt=>{r[i] = txt})
