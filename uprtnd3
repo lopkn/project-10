@@ -52,7 +52,9 @@ function myFind(){
 
 function mySearch(wrd){
 	r.forEach((e,i)=>{
-		console.log(l[i].text+" found at "+e.indexOf(wrd))
+		let ind = e.indexOf(wrd)
+		if(ind == -1){return}
+		console.log(l[i].text+" found at "+ind)
 	})
 }
 
