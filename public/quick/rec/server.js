@@ -50,7 +50,7 @@ function newConnection(socket){
 		exec('xdotool type "'+e+'" && xdotool key Return')
 	} else {
 		exec('xdotool type "'+e+'"')
-		//exec(echo "'tell application \"System Events\" to keystroke \"kelaterol\"' | osascript")
+		//exec(echo "'tell application \"System Events\" to keystroke \"+e+\"' | osascript")
 	}
 		if(e[0] != " "){e = " "+e}
 		fs.writeFileSync("textlog.txt","\n [" + Date.now()+"]" + e,{'flag':'a'}) 
