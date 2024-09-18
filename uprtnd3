@@ -81,4 +81,115 @@ TD
 Video
 Achieve chem
 Eng tempest (mon)
-Lab coat n stuff		
+Lab coat n stuff	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Analytical vs eulers method:
+
+
+
+The equation for analytical method will always produce a perfect result for what you ask it to do
+But you are asking it to do the wrong thing
+
+I dont know the analytical equation for with drag
+
+
+yes. It is much easier to model anything with eulers model, and much harder for analytical equations
+But eulers is always wrong by a bit
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Analytical is always perfect
+eulers is an estimate of analytical
+
+
+BUT
+
+they have to be modeling the same thing
+
+In this case, the analytical is producing "The perfect graph for no drag"
+and the eulers is producing "Not so perfect graph WITH drag"
+
+so eulers method is more accurate to real life because there is drag
+But analytical is PERFECT at what it does, 
+
+
+Also, if you knew the ANALYTICAL equation with drag, it will be better than euler method with drag
+
+
+
+Here is an analogy i guess
+
+An Atom clock is more accurate than a mechanical clock
+
+But, an atom clock can be more wrong than a mechanical clock if you put in some situations
+Like flying really fast
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
