@@ -168,7 +168,107 @@ document.getElementById("help").innerHTML =
 </br> Category D: viruses
 </br>
 </br>
+</br>Particles!
+</br>CATEGORY A: simple particles
 </br>
+</br>-A1 : simple attraction
+</br>
+</br>-A2 : simple repulsion
+</br>
+</br>-A3 : clockwise spin
+</br>
+</br>-A4 : anticlockwise spin
+</br>
+</br>-A5 : disproportional clockwise spin
+</br>
+</br>-A6 : disproportional anticlockwise spin
+</br>
+</br>
+</br>CATEGORY B: universal stable particles (effects of these particles are mostly universal, but smaller when further away.)
+</br>
+</br>-B1 : repulsion
+</br>
+</br>-B2 : weak shell attraction
+</br>
+</br>-B3 : top down wall particle
+</br>
+</br>-B4 : attraction
+</br>
+</br>-B5 : strong shell attraction
+</br>
+</br>-B6 : left right wall particle
+</br>
+</br>-B7 : strong attraction
+</br>
+</br>-B8 : repulsion (non universal)
+</br>
+</br>
+</br>CATEGORY C: decaying particles, particles turn into another particle after some time/ they die
+</br>
+</br>-C1 : strong attraction, decays into B4
+</br>
+</br>-C2 : universally disproportional attraction. (gravity gets stronger farter away, useful for stablizing the simulation), decays into C1
+</br>
+</br>-C3 : universally disproportional shell. (makes cool patterns), decays into B5
+</br>
+</br>
+</br>CATEGORY D: virus particles / enzymes, turns other particles into new particles or kills them.
+</br>
+</br>-D1: kills surrounding particles, attracting, decays into nothing after a while
+</br>
+</br>-D2: attracting, turns surrounding particles into itself, decays into B1
+</br>
+</br>-D3: attracting, turns surrounding particles into itself, decays into nothing
+</br>
+</br>-D4: FOLLOWING, particle tries to find surrounding particles and moves towards it, targeting one particle at a time. Turns found particles into itself, decays into nothing.
+</br>
+</br>-D5: strong repulsar enzyme. Turns B4 particles into 2 B1 particles. dies after a few uses
+</br>
+</br>-D6: strong attraction enzyme. Turns B1 particles into 2 B4 particles. dies after a few uses
+</br>
+</br>-D7: repulsar enzyme. Turns B4 into B1 particles. dies after many uses
+</br>
+</br>-D8: attraction enzyme. Turns B1 into B4 particles. dies after many uses 
+</br>
+</br>-D9: FOLLOWING, particle tries to find surrounding particles and moves towards it, targeting one particle at a time. Turns found particles into itself, decays into B8 particles.
+</br>
+</br>
+</br>CATEGORY E: misc particles, usually generators / enzymes.
+</br>
+</br>-E1: attractor, turns nearby particles into B1 particles. On death explodes into 4 B8 particles.
+</br>
+</br>-E2: infinite generator particle, generates B8 particles infinitely. On death explodes into 2 E1 particles.
+</br>
+</br>-E3: generator particle, generates B4, B8 and B5 particles, has a cap of 20 particles. On death explodes into 2 E1 particles.
+</br>
+</br>-E4: generator particle, generates B4, B3 and B5 particles, has a cap of 20 particles. On death explodes into 6 B5 particles.
+</br>
+</br>-E5: generator particle, generates B4, B6 and B5 particles, has a cap of 20 particles. On death explodes into 6 B5 particles.
+</br>
+</br>-E6: generator particle, generates A3 particles in the background, has a cap of 20 particles. On death explodes into 6 A3 particles.
+</br>
+</br>-E7: generator particle, generates A4 particles in the background, has a cap of 20 particles. On death explodes into 6 A4 particles.
+</br>
+</br>-E8: converts A3 particles to A4 particles. dies after a few uses, explodes into 4 B4 particles on death.
+</br>
+</br>-E9: converts A4 particles to A3 particles. dies after a few uses, explodes into 4 B3 particles on death.
+</br>
+</br>
+</br>CATEGORY F: extremely unstable usually universal, some will scatter particles to infinity or break the simulation in ways. These particles have spawn sequence differences, meaning if you placed them in a different order even if its at the same place, different things will happen.
+</br>
+</br>-F1: arranges in a square pattern.
+</br>
+</br>-F2: arranges in a smaller square pattern (a bit stronger).
+</br>
+</br>-F3: forces a very small square pattern, disproportial, extremely unstable (particles far away from F3 get effected by a very strong force)
+</br>
+</br>-F4: axis repulsion, has a repulsion that nears infinity when particles are along the same axis as the particle.
+</br>
+</br>-F5: does nothing, used to show how particles interact
+</br>
+</br>-F6: universal attraction, has same attraction nomatter how far particles are apart.
+</br>
+</br>-F7: strong shell that does not decay, disproportional. (similar to C3)
 </strong>
 `
 
