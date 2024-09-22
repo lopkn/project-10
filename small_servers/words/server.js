@@ -25,3 +25,8 @@ function crack(str,words=json){
 	})
 }
 
+function def(word){
+	console.log(json[word])
+	console.log(json2[word])
+}
+
