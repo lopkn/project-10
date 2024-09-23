@@ -995,7 +995,7 @@ class shooter2C{
 					"midpt":[x1,y1],"handle":"whol","hp":1000,
 					"defense":0.2,
 					"frad":x2,"onDeath":(w,b)=>{this.delWall(a)},
-					"spawns":["ntri6","ntri6","ntri6","ntri6","ntri6"]
+					"spawns":["ntri6"]
 					
 				}
 				if(type == "spawnpad2"){
@@ -3121,11 +3121,13 @@ class shooter2C{
 
 				 en = this.entityTemplates(split[1],split[2])
 				}
-				en.x = p.x
+				en.x = p.xf
 				en.y = p.y
 			} else if(split[0] == "tp"){
 				p.x = parseInt(split[1])
 				p.y = parseInt(split[2])
+			} else if(split[0] == "send"){
+				io.to(split[1]).emit(split.splice(2,Infinity).join(" "))
 			} else if(split[0] == "attribute"){
 				p[split[1]] = split[2]
 			} else if(split[0] == "option"){
