@@ -1,286 +1,3 @@
-sick -> email sci 1
-
-same charge -> higher proton -> smaller radius
-
-Effective Nuclear Charge = Atomic number - Screening constant
-
-shielding constant -> screening constant
-
-homology -> similarity due to shared ancestry
-morphology -> finding similarity by strucure
-
-
-
-FFMFFMFFmffmfmfffmfffmmffmmfmmfffmmfmmfffmfmffmmfmffm < 
-
-"Women answer less questions"-rosie
-well lets test that theory
-
-
-
-
-
-
-
-"self sustaining chemical system capable of darwinian evolution"
-
-
-
-
-
-you know how its a pain in the ass to find some shit in canvas
-and ctrl+f doesnt usually work cuz in another webpage
-i can make a ctrl+f work for multiple web pages and also give u the link
-
-
-
-
-
-
-
-
-var a; var b
-
-let l = document.links
-let r = []
-
-function myFind(){
-	for(let i = 0; i < l.length; i++){
-		GetWeb(l[i].href,i)
-	}
-}
-
-function mySearch(wrd){
-	r.forEach((e,i)=>{
-		let ind = e.indexOf(wrd)
-		if(ind == -1){return}
-		console.log(l[i].text+" found at "+ind)
-	})
-}
-
-
-function GetWeb(link,i){
-	fetch(link).then(res=>{return(res.text())}).then(txt=>{r[i] = txt})
-}
-
-
-fetch("https://canvas.ubc.ca/courses/155723").then(response=>{return(response.text())}).then(text=>{console.log(text); a = text})
-
-
-
-
-
-
-
-Q
-why doesnt an electron just fall into the proton
-are tails limbs?
-What counts as a limb
-
-TD
-Video
-Achieve chem
-Eng tempest (mon)
-Lab coat n stuff	
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Analytical vs eulers method:
-
-
-
-The equation for analytical method will always produce a perfect result for what you ask it to do
-But you are asking it to do the wrong thing
-
-I dont know the analytical equation for with drag
-
-
-yes. It is much easier to model anything with eulers model, and much harder for analytical equations
-But eulers is always wrong by a bit
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Analytical is always perfect
-eulers is an estimate of analytical
-
-
-BUT
-
-they have to be modeling the same thing
-
-In this case, the analytical is producing "The perfect graph for no drag"
-and the eulers is producing "Not so perfect graph WITH drag"
-
-so eulers method is more accurate to real life because there is drag
-But analytical is PERFECT at what it does, 
-
-
-Also, if you knew the ANALYTICAL equation with drag, it will be better than euler method with drag
-
-
-
-Here is an analogy i guess
-
-An Atom clock is more accurate than a mechanical clock
-
-But, an atom clock can be more wrong than a mechanical clock if you put in some situations
-Like flying really fast
-
-
-
-
-
-
-
-
-
-
-//sqript3
-
-
-rule of thumb: Change the base activators of whatever you want to actually change
-
-
-nodes have a set of connected switches as input
-nodes can do logic on the set of input
-after doing logic, the node should have 1 switch as output
-
-
-if any node switch is changed, it should back propegate the information
-Any back propegated node switch should also back propegate
-
-keep a backpropegation list of switches that has been processed
-
-When backpropegating, if the same switch is being processed again, there is a collision
-if the collision results in different states, the logic is wrong and everything should be reverted.
-
-
-for any switch that was changed, propegate the information
-
-
-keep a propegation list of switches that has been processed
-
-When propegating, if the same switch is being processed again, there is a collision
-if the collision results in different states, the logic is wrong and everything should be reverted.
-
-
-
-Nodes can be forced to read switches to produce an output
-   if the output is different, propegate
-
-
-
-
-Experimental:
-No chiral chains allowed
-children chain
-
-
-Every node should store all its subchildren in a dict
-Nodes can only be processed when none of their subchildren are done
-
-
-Experimental 2:
-every node switch should have an UUID higher than all of its children
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 let div = document.createElement("div")
 div.innerText=`> a
 > b
@@ -381,13 +98,16 @@ function registerBit(name,hard){
 class logicNode{
   constructor(KEY){
     this.input = []
-    // this.output = {}
     this.outputKey = KEY?registerBit(KEY):registerBit(); //map key
     this.activity = Date.now()
     this.lastInput = []
     this.lastlastInput = []
     this.lastDifferentInput = []
     this.relay = {}
+    
+    //experimental:
+    this.children = {}
+    this.parents = {}
     
     BITMAP[this.outputKey].owner = this
   }
@@ -399,6 +119,13 @@ class logicNode{
       if(BITMAP[e].prop===undefined){BITMAP[e].prop=[]}
       BITMAP[e].prop.push(this)
     })
+  }
+  
+  connectToChild(e){
+    this.children[e] = true
+    if(BITMAP[e].owner){
+      Object.assign(this.children,BITMAP[e].owner.children)
+    }
   }
   
   getInputs(){
@@ -418,18 +145,19 @@ class logicNode{
   
   
   activate(activation=Date.now()){
-    if(this.activity == activation){console.log(this.outputKey+" was already activated");return}
+    let activatedAlready = false
+    if(this.activity == activation){console.log(this.outputKey+" was already activated");activatedAlready=true}
     this.activity = activation
     let arr = this.getInputs()
     let result = this.func(arr)
-    // setState(this.outputKey,result)
     if(result !== BITMAP[this.outputKey].state){
-      // console.log("prev:"+BITMAP[this.outputKey].state+"now:"+result)
-      // console.log(JSON.stringify(this.lastlastInput),JSON.stringify(this.lastInput))
+      if(activatedAlready){
+        console.log("logic error in back/prop at "+this.outputKey)
+        return;
+      }
       this.lastDifferentInput = this.lastlastInput
       newStateChanges.push(this.outputKey)
     }
-    // setState(this.outputKey,result)
     BITMAP[this.outputKey].activation = activation
     console.log(this.outputKey + " is set to "+ result)
     return(result)
@@ -440,29 +168,16 @@ class logicNode{
   
   backProp(revert,activation=Date.now()){
     
-    // if(this.activity == activation){return}
-    // this.activity = activation
-    
     if(this.back){
       let arr = this.back(revert)
       console.log(arr)
       arr.forEach((e)=>{
-        // if(BITMAP[e].owner){
-        //   BITMAP[e].owner.backProp(revert)
-        // } else {
-          // BITMAP[e].state = !BITMAP[e].state
-        
-        
         BITMAP[e].activation = activation
           newStateChanges.push(e)
           propPending.push(e)
-        // }
       })
     }
-    // BITMAP[this.outputKey].state = !BITMAP[this.outputKey].state
-          // newStateChanges.push(this.outputKey)
     let thisInput = this.lastDifferentInput
-    // console.log(JSON.stringify(this.lastlastInput))
     this.lastlastInput = this.lastInput
     this.lastDifferentInput = this.lastInput
     console.log(JSON.stringify(this.lastInput),JSON.stringify(thisInput))
@@ -746,42 +461,3 @@ newANDnode([1,"c"])
 // setState("test2",true)
 // ORnode.activate()
 // ORnode.activate()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
