@@ -13,12 +13,13 @@ function genUUID(){
   return(uuid++)
 }
 
-class switch{
-    constructor(){
+class SWITCH{
+    constructor(name){
       this.id = genUUID()
       pushTrain(this.id)
       this.trainId = 0
       this.state = false
+      this.name = name
       this.inputs = []
       this.neededInputs = 0
       this.oldInputs = {}
@@ -28,6 +29,7 @@ class switch{
     
     this.connectInput(inp){
       this.inputs.push(inp)
+      pushTrain(this.id)
     }
     getResult(){ //changable
       return(this.newInputs[this.inputs[0]])
@@ -49,7 +51,7 @@ class switch{
       })
     }
     
-    getInput(id,state){a
+    getInput(id,state){
       this.newInputs[id] = state
       this.neededInputs -= 1
       if(this.neededInputs === 0){
@@ -58,7 +60,11 @@ class switch{
     }
 
     pullRemainingInputs(){
-      this.inputs.forEach((e)=>{})
+      this.inputs.forEach((e)=>{
+        if(this.newInputs[e] === undefined){
+          this.getInput(e,switches[e].state)
+        }
+      })
     }
 }
 
@@ -103,12 +109,17 @@ function tick(){
       mode = "updates"
     }
     
-    updates.forEach((e)=>{
-      switches[e].pullRemainingInputs()
-    })
+    updates[0].pullRemainingInputs()
+    
   }
   
 }
+
+let a = new SWITCH("a")
+let b = new SWITCH("b")
+a.connectInput(b.id)
+
+
 
 
 
