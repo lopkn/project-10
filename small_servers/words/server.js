@@ -25,6 +25,21 @@ function crack(str,words=json){
 	})
 }
 
+function crackarr(str){
+	let dict = {}
+	for(let i = 0; i < 4; i++){
+		for(let j = 0; j < 4; j++){
+			dict[i+","+j] = str[j+i*4]
+		}
+	}
+
+
+
+
+
+}
+
+
 function def(word){
 	console.log(json[word])
 	console.log(json2[word])

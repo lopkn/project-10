@@ -53,7 +53,7 @@ function draw() {
   // requestAnimationFrame(draw)
   counter++
   rectWidth=Math.random()*2000+2
-  // rectWidth=2000
+  rectWidth=2000
   // rectWidth=10
   // if(counter%3==0){
   //   ctx.fillStyle = "black"
@@ -62,7 +62,8 @@ function draw() {
   // }
   for(let i = 0; i < window.innerWidth/rectWidth+1; i++){
     for(let j = 0; j < window.innerHeight/rectWidth+1; j++){
-      fill("rgb("+(Math.random()>0.5?255:0)+","+(Math.random()>0.5?255:0)+","+(Math.random()>0.5?255:0)+")")
+      // fill("rgb("+(Math.random()>0.5?255:0)+","+(Math.random()>0.5?255:0)+","+(Math.random()>0.5?255:0)+")")
+      fill(Math.floor(counter/25)%2 == 0?"red":"blue")
       rect(i*rectWidth,j*rectWidth,rectWidth,rectWidth)
     }
   }

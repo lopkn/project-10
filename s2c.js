@@ -1062,6 +1062,24 @@ class shooter2C{
 				// this.placeWall(player,40,40,40,-40,"norm",{"force":true})
 				return;
 				break;
+			case "ebox":
+				tarr = [[40,30,40,-30],[40,-30,-40,-30],[-40,-30,-40,30],[-40,30,40,30]]
+				this.playerLook(p,x1,y1)
+				this.walls[a] = {"type":"trigger","x":x1,"y":y1,"radius":460,"velmult":0.98,
+					"midpt":[x1,y1],"handle":"none","hp":1000,
+					"defense":0.2,
+					"time":Math.floor(Math.random()*20),
+					"frad":x2};
+				for(let i = 0; i < tarr.length; i++){
+					let ar = tarr[i]
+					let xx1 = (ar[0] * p.rotation[1] + ar[1] * p.rotation[0])+ x1
+					let yy1 = (ar[1] * p.rotation[1] - ar[0] * p.rotation[0]) + y1
+					let xx2 = (ar[2] * p.rotation[1] + ar[3] * p.rotation[0]) + x1
+					let yy2 = (ar[3] * p.rotation[1] - ar[2] * p.rotation[0]) + y1
+					let pw = this.placeWall(player,xx1,yy1,xx2,yy2,"norm",{"force":true})
+					this.walls[pw].onDeath = (w,b)=>{if(this.walls[a]){this.KBR(x1,y1,{"frags":20})};this.delWall(a)}
+				}
+				break;
 			case "Bmr":
 				tarr = [[40,30,40,-30],[40,-30,-40,-30],[-40,-30,-40,30],[-40,30,40,30],[40,30,-40,-30],[-40,30,40,-30]]
 				this.playerLook(p,x1,y1)
@@ -2853,6 +2871,18 @@ class shooter2C{
 
 	static KBR(x,y,options={}){
 		let b = {"x":x,"y":y}
+
+
+		if(options.frags){
+			for(let i = 0; i < options.frags; i++){
+				let a = this.pushBullet(0,0,Math.random()*150-75,Math.random()*150-75,"","norm")
+				a.slowd = 0.95
+				a.dmgmult = 35
+				a.extra = {"tailmult":3,"tailLength":6}
+				a.tailLength = 6; a.lingerance = 6;
+				console.log(a)
+			}
+		}
 
 		if(!options.noBulletBounce){
 			Object.values(this.bullets).forEach((e)=>{
