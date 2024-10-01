@@ -2873,16 +2873,7 @@ class shooter2C{
 		let b = {"x":x,"y":y}
 
 
-		if(options.frags){
-			for(let i = 0; i < options.frags; i++){
-				let a = this.pushBullet(0,0,Math.random()*150-75,Math.random()*150-75,"","norm")
-				a.slowd = 0.95
-				a.dmgmult = 35
-				a.extra = {"tailmult":3,"tailLength":6}
-				a.tailLength = 6; a.lingerance = 6;
-				console.log(a)
-			}
-		}
+		
 
 		if(!options.noBulletBounce){
 			Object.values(this.bullets).forEach((e)=>{
@@ -2894,6 +2885,17 @@ class shooter2C{
 					e.vy += Math.max(-min, Math.min((e.y-b.y)*inverse*inverse*15000, min))
 				}
 			})
+		}
+
+		if(options.frags){
+			for(let i = 0; i < options.frags; i++){
+				let a = this.pushBullet(b.x,b.y,Math.random()*150-75,Math.random()*150-75,"","norm")
+				a.slowd = 0.95
+				a.dmgmult = 35
+				a.extra = {"tailmult":3,"tailLength":6}
+				a.tailLength = 6; a.lingerance = 6;
+				console.log(a)
+			}
 		}
 		
 
