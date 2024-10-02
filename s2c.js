@@ -1063,7 +1063,7 @@ class shooter2C{
 				return;
 				break;
 			case "ebox":
-				tarr = [[40,30,40,-30],[40,-30,-40,-30],[-40,-30,-40,30],[-40,30,40,30]]
+				tarr = [[30,30,30,-30],[40,-30,-30,-30],[-30,-30,-30,30],[-30,30,30,30]]
 				this.playerLook(p,x1,y1)
 				this.walls[a] = {"type":"trigger","x":x1,"y":y1,"radius":460,"velmult":0.98,
 					"midpt":[x1,y1],"handle":"none","hp":1000,
@@ -2889,7 +2889,7 @@ class shooter2C{
 
 		if(options.frags){
 			for(let i = 0; i < options.frags; i++){
-				let a = this.pushBullet(b.x,b.y,Math.random()*150-75,Math.random()*150-75,"","norm")
+				let a = this.pushBullet(b.x+Math.random()*2-1,b.y+Math.random()*2-1,Math.random()*150-75,Math.random()*150-75,"","norm")
 				a.slowd = 0.95
 				a.dmgmult = 35
 				a.extra = {"tailmult":3,"tailLength":6}
