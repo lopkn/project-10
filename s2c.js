@@ -1065,7 +1065,7 @@ class shooter2C{
 			case "ebox":
 				tarr = [[30,30,30,-30],[40,-30,-30,-30],[-30,-30,-30,30],[-30,30,30,30]]
 				this.playerLook(p,x1,y1)
-				this.walls[a] = {"type":"trigger","x":x1,"y":y1,"radius":460,"velmult":0.98,
+				this.walls[a] = {"type":"trigger","x":x1,"y":y1,"radius":50,"velmult":0.98,
 					"midpt":[x1,y1],"handle":"none","hp":1000,
 					"defense":0.2,
 					"time":Math.floor(Math.random()*20),
