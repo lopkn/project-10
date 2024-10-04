@@ -87,6 +87,7 @@ class SWITCH{
       this.newInputs = {} // list of uuids
       this.outputs = [] //maybe it should be a dict?
       pushTrain(this.id)
+      return(this)
     }
     
     connectInput(inp){
@@ -289,9 +290,10 @@ function wrapInit(body,out){
 }
 
 
-blueprint(){
-  
-}
+// amounts of node to build
+// links all nodes
+// relative push train
+
 
 
 
