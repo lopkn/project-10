@@ -734,7 +734,7 @@ class shooter2C{
 			l = 100
 		}if(t == "turr3"){
 			l = 120
-		} else if(t == "turr" || t=== "Bmr"){
+		} else if(t == "turr" || t=== "Bmr" || t == "ebox"){
 			l = 50
 		} else if(t == "ghol" ||t == "bhol"||t == "whol" || t=="grv1" || t == "grv2"){
 			l = 50
