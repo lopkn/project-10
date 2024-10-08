@@ -106,8 +106,10 @@ class SWITCH{
       return(this.state)
     }
     
-    outputResult(){
+    outputResult(overwriter){
       
+      if(overwriter){}
+
       this.oldInputs = this.newInputs
       this.neededInputs = this.inputs.length
       this.newInputs = {}
@@ -287,6 +289,17 @@ function wrapInit(body,out){
     })
   }) // finding all children nodes that are not wrapped
   
+}
+
+function generateInputArray(A,str,i){
+  i--
+  if(i > 0){
+    generateInputArray(A,str+"1",i)
+    generateInputArray(A,str+"0",i)
+    return(A)
+  }
+  A.push(str)
+  return(A)
 }
 
 
