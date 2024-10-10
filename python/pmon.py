@@ -8,6 +8,7 @@ import tkinter as tk
 
 root = tk.Tk()
 
+
 if platform == "linux" or platform == "linux2":
     root.overrideredirect(True)
     root.wait_visibility(root)
@@ -150,6 +151,7 @@ file.write("TESTING\n")
 
 
 
+root.mainloop()
 # try:
 #     while 1:
 #         if(started):
@@ -173,6 +175,5 @@ print(3)
 
 
 
-root.mainloop()
 print("a")
 
