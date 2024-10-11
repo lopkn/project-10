@@ -42,6 +42,7 @@ def on_press(key):
                     # else:  # Show the window if it's hidden
                     root.deiconify()
                     root.wm_attributes("-topmost",True)
+                    root.wm_attributes("-alpha",0.5)
                     ON = True
          # if key.char == "/":
          #     constants.commandMode += 1
@@ -110,7 +111,7 @@ def open_window():
     # label.pack()
     # window.protocol("WM_DELETE_WINDOW", hide_window)  # Handle window close
 
-
+    root.config(takefocus = 0)
 
 
 
@@ -152,3 +153,16 @@ except KeyboardInterrupt:
     if window is not None:
         window.destroy()  # Clean up the window if it exists
     listener.stop()  # Stop the listener thread
+
+
+
+
+
+
+
+
+
+
+
+
+
