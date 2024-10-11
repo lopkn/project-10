@@ -11,7 +11,7 @@ logstr = ""
 logdstr = ""
 
 
-constants = {"commandMode":0,"commanding":False}
+constants = {"commandMode":0,"commanding":False,"displayCounter":0}
 
 
 def on_press(key):
@@ -26,37 +26,41 @@ def on_press(key):
         logstr += key.char
         logdstr += key.char
         if key.char == '\\':  # Check if backslash is pressed
-            if ON:
-                root.withdraw()
-                # window.withdraw()
-                ON = False
-                print("CLOSE")
-            elif not ON:
-                # if window is None:  # Create the window if it doesn't exist
-                    # open_window()
-                    # ON = True
-                # else:  # Show the window if it's hidden
-                root.deiconify()
-                root.wm_attributes("-topmost",True)
-                ON = True
-         if key.char == "/":
-         	constants.commandMode += 1
-         	if constants.commandMode > 3:
-         		constants.commandMode = 0
-         		constants.commanding = True
+            constants["displayCounter"] += 1
+            if constants["displayCounter"] > 2:
+                constants["displayCounter"] = 0
+            
+                if ON:
+                    root.withdraw()
+                    # window.withdraw()
+                    ON = False
+                    print("CLOSE")
+                elif not ON:
+                    # if window is None:  # Create the window if it doesn't exist
+                        # open_window()
+                        # ON = True
+                    # else:  # Show the window if it's hidden
+                    root.deiconify()
+                    root.wm_attributes("-topmost",True)
+                    ON = True
+         # if key.char == "/":
+         #     constants.commandMode += 1
+         #     if constants.commandMode > 3:
+         #         constants.commandMode = 0
+         #         constants.commanding = True
 
 
     except AttributeError:
         print(f'Special key pressed: {key}')
         if key == keyboard.Key.space:
-        	logstr += " "
-        	logdstr += " "
+            logstr += " "
+            logdstr += " "
         elif key == keyboard.Key.backspace:
-        	logstr += "[b]"
-        	logdstr = logdstr[:-1]
+            logstr += "[b]"
+            logdstr = logdstr[:-1]
         elif key == keyboard.Key.enter:
-        	logstr += "[e]"
-        	logdstr += "\n"
+            logstr += "[e]"
+            logdstr += "\n"
         pass  # Handle special keys here is\ thomas is a homosexual why is he so homosexual? he looks at leo and his homosexuality inspires 
     labelUpdate()
 
@@ -84,7 +88,8 @@ def open_window():
         # root.image = tk.PhotoImage(file="test.png")
         # Display the image on a label
         # label = tk.Label(root, image=root.image)
-        label = tk.Label(root,text="===== overlay initialized =====",fg="#00FF00",font=(60),bg="systemTransparent",wraplength=root.winfo_screenwidth()/4,anchor="w")
+
+        label = tk.Label(root,text="===== overlay initialized =====",fg="#00FF00",font=(60),bg="systemTransparent",wraplength=root.winfo_screenwidth(),anchor="w")
         # Set the label background color to a transparent color
         label.pack()
     elif platform == "win32":
@@ -112,13 +117,13 @@ def open_window():
 
 
 def labelUpdate():
-	global label
-	global logstr
-	global logdstr
-	dispstr = logstr.replace("[e]","\n")
-	label.config(text=logdstr)
-	label.config(anchor="w")
-	label.config(justify=tk.LEFT)
+    global label
+    global logstr
+    global logdstr
+    dispstr = logstr.replace("[e]","\n")
+    label.config(text=logstr)
+    label.config(anchor="w")
+    label.config(justify=tk.LEFT)
 
 
 
