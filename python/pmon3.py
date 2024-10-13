@@ -22,7 +22,7 @@ def on_press(key):
     global logdstr
     global constants
     try:
-        print(key.char, " was pressed")
+        print(key.char, "was pressed")
         logstr += key.char
         logdstr += key.char
         if key.char == '\\':  # Check if backslash is pressed
@@ -44,11 +44,12 @@ def on_press(key):
                     root.wm_attributes("-topmost",True)
                     root.wm_attributes("-alpha",0.5)
                     ON = True
-         # if key.char == "/":
-         #     constants.commandMode += 1
-         #     if constants.commandMode > 3:
-         #         constants.commandMode = 0
-         #         constants.commanding = True
+        if key.char == "/":
+            constants["commandMode"] += 1
+            if constants["commandMode"] > 3:
+                constants["commandMode"] = 0
+                constants["commanding"]= True
+                logstr += "ENTERED COMMAND MODE:"
 
 
     except AttributeError:
@@ -64,6 +65,9 @@ def on_press(key):
             logdstr += "\n"
         pass  # Handle special keys here is\ thomas is a homosexual why is he so homosexual? he looks at leo and his homosexuality inspires 
     labelUpdate()
+
+def keyHandler(k):
+	pass
 
 def open_window():
     global window
