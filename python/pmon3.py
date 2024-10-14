@@ -79,7 +79,7 @@ def open_window():
     if platform == "linux" or platform == "linux2":
         root.overrideredirect(True)
         root.wait_visibility(root)
-        root.wm_attributes("-alpha", 0.5)
+        # root.wm_attributes("-alpha", 0.5)
     elif platform == "darwin":
         root.overrideredirect(True)
         # Make the root window always on top
