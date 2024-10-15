@@ -10,6 +10,8 @@ label = None
 logstr = ""
 logdstr = ""
 
+textHandlers = {"normal":{"lvl":0,"txt":"","type":"log"}}
+currentHandlers = [textHandlers["normal"]]
 
 constants = {"commandMode":0,"commanding":False,"displayCounter":0}
 
