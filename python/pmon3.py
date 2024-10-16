@@ -69,7 +69,20 @@ def on_press(key):
     labelUpdate()
 
 def keyHandler(k):
+	for i in currentHandlers:
+		textHandle(i,k)
 	pass
+
+def textHandle(handle,k)
+	if(handle["type"] == "log"):
+		handle.txt += k
+	if(handle["type"] == "normal"):
+		if(len(k) == 1):
+			handle["txt"] += k
+		elif k == "[b]":
+			handle["txt"] = handle["txt"][:-1]
+		elif k == "[e]":
+			handle["txt"] += "\n"
 
 def open_window():
     global window
@@ -159,8 +172,6 @@ except KeyboardInterrupt:
     if window is not None:
         window.destroy()  # Clean up the window if it exists
     listener.stop()  # Stop the listener thread
-
-
 
 
 
