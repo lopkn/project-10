@@ -108,7 +108,9 @@ class SWITCH{
     
     outputResult(overwriter){
       
-      if(overwriter){}
+      if(overwriter){
+        this.newInputs = overwriter
+      }
 
       this.oldInputs = this.newInputs
       this.neededInputs = this.inputs.length
@@ -291,11 +293,11 @@ function wrapInit(body,out){
   
 }
 
-function generateInputArray(A,str,i){
+function generateInputArray(i,A=[],str=""){ //use as g()
   i--
   if(i > 0){
-    generateInputArray(A,str+"1",i)
-    generateInputArray(A,str+"0",i)
+    generateInputArray(i,A,str+"1")
+    generateInputArray(i,A,str+"0")
     return(A)
   }
   A.push(str)
