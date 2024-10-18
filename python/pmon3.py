@@ -10,8 +10,19 @@ label = None
 logstr = ""
 logdstr = ""
 
-textHandlers = {"normal":{"lvl":0,"txt":"","type":"log"}}
+textHandlers = {"normal":{"lvl":0,"txt":"","type":"log"},"command":{"lvl":1,"txt":"","type":"normal"}}
 currentHandlers = [textHandlers["normal"]]
+
+def commandHandler(i,k):
+	if(k == "[e]"):
+		print("command recieved:",i["txt"])
+		i["txt"] = ""
+		constants["commanding"]=False
+		return("exit")
+	textHandle(i,k)
+
+textHandlers["command"]["handler"] = commandHandler
+
 
 constants = {"commandMode":0,"commanding":False,"displayCounter":0}
 
@@ -27,6 +38,7 @@ def on_press(key):
         print(key.char, "was pressed")
         logstr += key.char
         logdstr += key.char
+        keyHandler(key.char)
         if key.char == '\\':  # Check if backslash is pressed
             constants["displayCounter"] += 1
             if constants["displayCounter"] > 2:
@@ -48,34 +60,41 @@ def on_press(key):
                     ON = True
         if key.char == "/":
             constants["commandMode"] += 1
-            if constants["commandMode"] > 3:
+            if constants["commandMode"] > 2:
                 constants["commandMode"] = 0
                 constants["commanding"]= True
                 logstr += "ENTERED COMMAND MODE:"
+                currentHandlers.append(textHandlers["command"])
 
 
     except AttributeError:
         print(f'Special key pressed: {key}')
         if key == keyboard.Key.space:
             logstr += " "
+            keyHandler(" ")
             logdstr += " "
         elif key == keyboard.Key.backspace:
             logstr += "[b]"
+            keyHandler("[b]")
             logdstr = logdstr[:-1]
         elif key == keyboard.Key.enter:
             logstr += "[e]"
+            keyHandler("[e]")
             logdstr += "\n"
         pass  # Handle special keys here is\ thomas is a homosexual why is he so homosexual? he looks at leo and his homosexuality inspires 
     labelUpdate()
 
 def keyHandler(k):
 	for i in currentHandlers:
-		textHandle(i,k)
+		if not "handler" in i:
+			textHandle(i,k)
+		else:
+			i["handler"](i,k)
 	pass
 
-def textHandle(handle,k)
+def textHandle(handle,k):
 	if(handle["type"] == "log"):
-		handle.txt += k
+		handle["txt"] += k
 	if(handle["type"] == "normal"):
 		if(len(k) == 1):
 			handle["txt"] += k
