@@ -13,11 +13,20 @@ logdstr = ""
 textHandlers = {"normal":{"lvl":0,"txt":"","type":"log"},"command":{"lvl":1,"txt":"","type":"normal"}}
 currentHandlers = [textHandlers["normal"]]
 
+def runCommand(c):
+	csp = c.split()
+	print(csp,c)
+	if(csp[0] == "getlog"):
+		if(csp[1] in textHandlers):
+			print(textHandlers[csp[1]]["txt"])
+
 def commandHandler(i,k):
 	if(k == "[e]"):
 		print("command recieved:",i["txt"])
+		runCommand(i["txt"])
 		i["txt"] = ""
 		constants["commanding"]=False
+		currentHandlers.remove(i)
 		return("exit")
 	textHandle(i,k)
 
