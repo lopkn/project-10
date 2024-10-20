@@ -14,11 +14,14 @@ textHandlers = {"normal":{"lvl":0,"txt":"","type":"log"},"command":{"lvl":1,"txt
 currentHandlers = [textHandlers["normal"]]
 
 def runCommand(c):
+	global label
 	csp = c.split()
 	print(csp,c)
 	if(csp[0] == "getlog"):
 		if(csp[1] in textHandlers):
 			print(textHandlers[csp[1]]["txt"])
+	if(csp[0] == "color"):
+		label.config(fg=csp[1])
 
 def commandHandler(i,k):
 	if(k == "[e]"):
