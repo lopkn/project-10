@@ -22,6 +22,9 @@ def runCommand(c):
 			print(textHandlers[csp[1]]["txt"])
 	if(csp[0] == "color"):
 		label.config(fg=csp[1])
+	if(csp[0] == "save"):
+		jstr = json.dumps(textHandlers)
+		print(jstr)
 
 def commandHandler(i,k):
 	if(k == "[e]"):
