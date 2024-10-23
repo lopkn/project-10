@@ -338,6 +338,7 @@ class rollingBall{
 			if(this.trailer){
 			ps("Sf3")}
 		}
+		// if(this.invincible){this.invincible-=1}
 		this.actLife -= 1
 		this.counter += 1
 
@@ -393,6 +394,7 @@ class liner{
 		this.colType = colType
 		this.bounded = false
 		this.following = false
+		return(this)
 
 	}
 
@@ -507,8 +509,11 @@ class liner{
 
 
 		if(this.x < 0 || this.y < 0 || this.x > Width || this.y > Height){
-			this.bounded = true
-
+			if(this.invincible>0){
+				this.invincible -= 1
+			} else {
+				this.bounded = true
+			}
 		}
 		
 	}
@@ -531,6 +536,7 @@ class liner{
 	
 
 		if(this.oldPath.length == 0){
+			this.DEL = true
 			return("del")
 		}
 
@@ -640,11 +646,61 @@ function distance(x,y,x2,y2){
 let parr = []
 
 
+
+class events{
+	static happening = {}
+	static updateAll(){
+		let objk = Object.keys(this.happening)
+		objk.forEach((E)=>{
+			let e = this.happening[E]
+			if(e.life < 0){
+				delete this.happening[E]
+				return
+			}	
+			e.update(e)
+			e.life -= 1
+		})
+	}
+
+	//an event needs to have life (num) and update (func)
+
+	static addEvent(name,e){
+		if(this.happening[name] == undefined){
+			this.happening[name] = e
+		} else {
+			this.happening[name].life += e.life/2
+		}
+	}
+}
+
+function randomEvents(){
+	if(Math.random() > 0.6){
+		events.addEvent("storm",{"parr":[],"life":500,"vect":[Math.random()-0.5,Math.random()-0.5],"update":(e)=>{
+			if(COUNTER%5 == 0){
+				let rain = new liner(Math.random()*Width-e.vect[0]*Width,Math.random()*Height-e.vect[1]*Height,Math.floor(Math.random()*3),Math.floor(Math.random()*1))
+				parr.push(rain)
+				e.parr.push(rain)
+				rain.invincible = 500
+				for(let i = e.parr.length-1; i > -1; i--){
+					let E = e.parr[i]
+					if(E.DEL){
+						e.parr.splice(i,1)
+						continue;
+					}
+					E.nvx += e.vect[0] * 5
+					E.nvy += e.vect[1] * 5
+				}
+			}
+		}})
+	}
+}
+
 let COUNTER = 0
 setInterval(()=>{
 	COUNTER ++
 	if(COUNTER %2 ===0){
 	ctx.clearRect(0,0,Width,Height)
+	events.updateAll()
 	}
 	for(let i = parr.length-1; i > -1; i--){
 		let e = parr[i]
@@ -654,12 +710,22 @@ setInterval(()=>{
 			parr.splice(i,1)
 		}}
 	}
+
+
+	if(COUNTER%50 == 0){
+		randomEvents()
+	}
+
 	// if(ctoggle){
 	// parr.forEach((e)=>{
 	// 		let d = distance(e.x,e.y,mouseX,mouseY)
 	// 		e.nvy -= (e.y - mouseY)/d*0.4
 	// 		e.nvx -= (e.x - mouseX)/d*0.4
 	// 	})}
+
+
+
+
 	ctx.fillStyle = "#B00000"
 	ctx.strokeStyle = "#900000"
 	ctx.font = "80px Arial"
@@ -674,3 +740,34 @@ setInterval(()=>{
 
 
 })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -312,6 +312,7 @@ function generateInputArray(i,A=[],str=""){ //use as g()
 
 
 
-
+//cant hear u type whatd u get
+//3.smthe23
 
 
