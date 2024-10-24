@@ -758,7 +758,9 @@ newANDnode([1,"c"])
 
 
 
-
+For molecule with 2 chiral centers
+switching 1 of the ciral center = diastereomer
+switching both of the center = enatiomer
 
 
 

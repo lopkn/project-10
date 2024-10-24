@@ -286,7 +286,7 @@ class explosionR{
 		this.actLife = 600
 		this.counter = 0
 		this.following = false
-
+		this.basename = "explosionR"
 	}
 
 	update(){
@@ -319,13 +319,23 @@ class rollingBall{
 		this.actLife = 400
 		this.counter = 0
 		this.following = false
-
+		this.mover = false
+		this.basename = "ball"
+		this.mass = this.size * this.size
 	}
 
 
 	update(){
 		this.x += this.vx
 		this.y += this.vy
+
+		if(this.mover){
+			this.vx += Math.random()*this.mover-this.mover-2
+			this.vy += Math.random()*this.mover-this.mover-2
+			this.vx *= 0.99
+			this.vy *= 0.99
+		}
+
 
 		if(this.x < 0 || this.x > Width){
 			this.vx *= -1
@@ -394,7 +404,10 @@ class liner{
 		this.colType = colType
 		this.bounded = false
 		this.following = false
+		this.basename = "liner"
 		return(this)
+
+		this.mass = this.size
 
 	}
 
@@ -409,7 +422,7 @@ class liner{
 			this.nvx -= (this.x - mouseX)/d*0.4
 		}
 
-		if(this.type == 0){
+		if(this.type == 0){ //small line
 			this.x += this.vx
 			this.y += this.vy
 			this.vx += Math.random()-0.5
@@ -420,7 +433,7 @@ class liner{
 			this.nvy = 0
 			updated = true
 
-		} else if(this.type == 1){
+		} else if(this.type == 1){ //more spontaneous small line
 			if(this.counter%5 == 0){
 				this.x += this.vx
 				this.y += this.vy
@@ -433,7 +446,7 @@ class liner{
 				updated = true
 				
 			}
-		} else if(this.type == 2){
+		} else if(this.type == 2){ // slower electric small line
 			if(this.counter%15 == 0){
 				this.x += this.vx
 				this.y += this.vy
@@ -446,7 +459,7 @@ class liner{
 				updated = true
 				
 			}
-		} else if(this.type == 3){
+		} else if(this.type == 3){  //grower
 			if(this.counter%15 == 0){
 				this.x += this.vx
 				this.y += this.vy
@@ -459,7 +472,7 @@ class liner{
 				this.vy += (Math.random()-0.5)*15
 				updated = true
 			}
-		} else if(this.type == 4){
+		} else if(this.type == 4){ //lightning
 			if(this.counter%5 == 0){
 				this.x += this.vx
 				this.y += this.vy
@@ -472,7 +485,7 @@ class liner{
 				this.vy += (Math.random()-0.5)*55
 				updated = true
 			}
-		} else if(this.type == 5){
+		} else if(this.type == 5){ //tree
 			if(this.counter%500 == 0){
 				this.x += this.vx
 				this.y += this.vy
@@ -497,7 +510,7 @@ class liner{
 					parr.push(c)
 				}
 				updated = true
-			}
+			} // type 6 is used for the tree! 
 		}
 
 
@@ -544,35 +557,59 @@ class liner{
 
 }
 
+
+class textile{
+	constructor(text,x,y){
+
+		this.x = x
+		this.y = y
+		this.vx = vx
+		this.vy = vy
+		this.trailer = false
+		this.size = 3 + Math.random()*3
+		this.actLife = 400
+		this.counter = 0
+		this.following = false
+
+		return(this)
+	}
+}
+
+
+
 function getCol(type,l,e){
 	let a = Math.random()
 	switch(type){
 		case 0:
-    		ctx.strokeStyle = ("rgba(0,"+e[4]*3.5*(1-a)+",255,"+(0.7+0.3*l)+")")
+    		ctx.strokeStyle = ("rgba(0,"+e[4]*3.5*(1-a)+",255,"+(0.7+0.3*l)+")") // dark blue
 			break;
 		case 1:
-			ctx.strokeStyle = ("rgba("+(1-a)*255+","+(a)*255+",255,"+(0.7+0.3*l)+")")
+			ctx.strokeStyle = ("rgba("+(1-a)*255+","+(a)*255+",255,"+(0.7+0.3*l)+")") // lightning
 			break;
 		case 2:
-			ctx.strokeStyle = ("rgba(255,"+(1-a)*255+",255,"+(0.7+0.3*l)+")")
+			ctx.strokeStyle = ("rgba(255,"+(1-a)*255+",255,"+(0.7+0.3*l)+")") //cherry blossom
 			break;
-		case 3:
+		case 3: 
 			if(Math.random()<0.70){
-			ctx.strokeStyle = ("rgba(255,"+(a*255)+",0,"+(0.7+0.3*l)+")")} else {
+			ctx.strokeStyle = ("rgba(255,"+(a*255)+",0,"+(0.7+0.3*l)+")")} else { //keyfire
 				ctx.strokeStyle = ("rgba(235,0,0,"+l+")")
 			}
 			break;
 		case 4:
-			ctx.strokeStyle = ("rgba(0,"+(1-a)*255+",0,"+(0.7+0.3*l)+")")
+			ctx.strokeStyle = ("rgba(0,"+(1-a)*255+",0,"+(0.7+0.3*l)+")") //conjure darkgreen
 			break;
 		case 5:
-			ctx.strokeStyle = ("rgba("+(1-a)*255+",255,"+(1-a)*255+","+l+")")
+			ctx.strokeStyle = ("rgba("+(1-a)*255+",255,"+(1-a)*255+","+l+")") // conjure lightgreen
 			break;
 		case 6:
-			ctx.strokeStyle = ("rgba(0,"+((1-a)*55+200)+",0,"+(l)+")")
+			ctx.strokeStyle = ("rgba(0,"+((1-a)*55+200)+",0,"+(l)+")") // tree green
 			break;
 		case 7:
-			ctx.strokeStyle = ("rgba("+((1-a)*55+200)+",0,0,"+(l)+")")
+			ctx.strokeStyle = ("rgba("+((1-a)*55+200)+",0,0,"+(l)+")") // tree red
+			break;
+		case 8:
+			a = 1-a/2
+			ctx.strokeStyle = ("rgba(0,"+e[4]*3.5*(1-a)+",255,"+(0.7+0.3*l)+")") // quelled darkblue
 			break;
 	}
 }
@@ -608,6 +645,12 @@ document.addEventListener("mousedown",()=>{
 	}
 })
 
+
+var GLO = 0
+let summonItem = ()=>{parr.push(
+	new liner(mouseX,mouseY,GLO,2)
+	)}
+
 document.addEventListener("keydown",(e)=>{
 	let k = e.key
 	if(k == " "){
@@ -619,6 +662,10 @@ document.addEventListener("keydown",(e)=>{
 
 	} else if(k == "/"){
 		ctoggle = !ctoggle
+	} else if(k == "\\"){
+
+		summonItem()
+
 	} else{
 		let r = Math.random()*5
 	if(Math.random()>0.9){
@@ -673,29 +720,57 @@ class events{
 	}
 }
 
+function push(particle,dx,dy){
+	if(particle.mass === undefined){return}
+	if(particle.basename === "ball"){
+		particle.vx += dx / particle.mass
+		particle.vy += dy / particle.mass
+	}
+}
+
+
+
 function randomEvents(){
 	if(Math.random() > 0.6){
-		events.addEvent("storm",{"parr":[],"life":500,"vect":[Math.random()-0.5,Math.random()-0.5],"update":(e)=>{
+		events.addEvent("storm",{"chaotic":0,"strength":1,"parr":[],"life":500,
+			"vect":[Math.random()-0.5,Math.random()-0.5],"update":(e)=>{
 			if(COUNTER%5 == 0){
-				let rain = new liner(Math.random()*Width-e.vect[0]*Width,Math.random()*Height-e.vect[1]*Height,Math.floor(Math.random()*3),Math.floor(Math.random()*1))
-				parr.push(rain)
-				e.parr.push(rain)
-				rain.invincible = 500
+				for(let i = 0; i < e.strength; i++){
+					let rain = new liner(Math.random()*Width-e.vect[0]*Width,Math.random()*Height-e.vect[1]*Height,Math.floor(Math.random()*3),
+						e.chaotic?"none":8
+						)
+					parr.push(rain)
+					e.parr.push(rain)
+					rain.invincible = 50
+					rain.nvx += e.vect[0] * 15
+					rain.nvy += e.vect[1] * 15
+				}
+				
+
+				e.life -= e.strength
+
 				for(let i = e.parr.length-1; i > -1; i--){
 					let E = e.parr[i]
 					if(E.DEL){
 						e.parr.splice(i,1)
 						continue;
 					}
-					E.nvx += e.vect[0] * 5
-					E.nvy += e.vect[1] * 5
+					E.nvx += e.vect[0] * 5 * (1+e.strength/5)
+					E.nvy += e.vect[1] * 5 * (1+e.strength/5)
 				}
+
+				parr.forEach((E)=>{
+					push(E,e.vect[0]* 5 * (1+e.strength/5),e.vect[1]* 5 * (1+e.strength/5))
+				})
+
 			}
 		}})
 	}
 }
 
 let COUNTER = 0
+time_fill_color = "#900000"
+time_outline_color = "#900000"
 setInterval(()=>{
 	COUNTER ++
 	if(COUNTER %2 ===0){
@@ -727,10 +802,13 @@ setInterval(()=>{
 
 
 	ctx.fillStyle = "#B00000"
-	ctx.strokeStyle = "#900000"
+	ctx.strokeStyle = time_fill_color
 	ctx.font = "80px Arial"
 	let d = "" + Date.now()
 	ctx.fillText(d,Width/2,Height/2)
+	ctx.lineWidth = 2
+	ctx.strokeStyle = time_outline_color
+	ctx.strokeText(d,Width/2,Height/2) 
 	comparer.compare(d)
 	if(Math.random()>0.99){
 		parr.push(new liner(Math.random()*Width,Math.random()*Height,Math.floor(Math.random()*3),Math.floor(Math.random()*2)))
