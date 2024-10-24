@@ -11,12 +11,27 @@ myCanvas.height = Height
 HeightM = Height/2
 myCanvas.style.position = "absolute"
 
+
+function normalRandom(mean, stderr) {
+    const u1 = Math.random();
+    const u2 = Math.random();
+
+    const z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
+    return z0 * stderr + mean;
+}
+
+
+// get cos/sin from time
+// cos(COUNTER/100)
+
 let sounds = true
 
 let soundNameDict = {
 	"Sf3":"./../../soundEffects/sinF3.mp3",
 	"Sc4":"./../../soundEffects/sinC4.mp3",
 }
+
+date_disruptor = 0
 
 let soundDict = {
 	"Sf3":[],
@@ -63,7 +78,7 @@ class comparer{
 		"8":0,
 		"9":0
 	}
-	static last = "" + Date.now()
+	static last = "" + (Date.now()+date_disruptor)
 
 	static compare(d){
 		for(let i = 1; i < d.length+1; i++){
@@ -172,6 +187,7 @@ class comparer{
 			}
 			c = new rollingBall(a,Height/2-30,Math.random()*8-4,Math.random()*8-4)
 				c.actLife = 6000+Math.random()*6200
+				c.dissapearLife = c.actLife/10
 				c.size += 20
 				c.trailer = true
 				parr.push(c)
@@ -317,6 +333,7 @@ class rollingBall{
 		this.vy = vy
 		this.size = 3 + Math.random()*3
 		this.actLife = 400
+		this.dissapearLife = 40
 		this.counter = 0
 		this.following = false
 		this.mover = false
@@ -352,6 +369,10 @@ class rollingBall{
 		this.actLife -= 1
 		this.counter += 1
 
+		if(distance(this.vx,this.vy,0,0) < 0.1){
+			this.actLife -= this.size/10
+		}
+
 
 		if(this.trailer && Math.random()>0.8){
 			let c = new explosionR(this.x,this.y,"rgb(2,"+(125+Math.random()*125)+",255)",0.2-Math.random()*0.16,0.3-Math.random()*0.2)
@@ -366,9 +387,9 @@ class rollingBall{
 
 		ctx.strokeStyle = Math.random()>0.5?"#FFB0FF":"#FFFFFF"
 		ctx.lineWidth = 1
-		ctx.fillStyle = "rgba(255,0,0,"+(this.actLife/40)+")"
-		if(this.actLife < 40){
-			ctx.lineWidth = this.actLife/40
+		ctx.fillStyle = "rgba(255,0,0,"+(this.actLife/this.dissapearLife)+")"
+		if(this.actLife < this.dissapearLife){
+			ctx.lineWidth = this.actLife/this.dissapearLife
 		}
 		ctx.beginPath()
 		ctx.arc(this.x, this.y, this.size, 0, 2 * Math.PI);
@@ -405,10 +426,18 @@ class liner{
 		this.bounded = false
 		this.following = false
 		this.basename = "liner"
-		return(this)
-
 		this.mass = this.size
 
+		if(type == 5){
+			this.nonPlayerControllable = true
+		} else if(type == 6){
+			this.rotation = [1,1]
+			this.radius = Math.random()*8+0.2
+		}
+
+
+
+		return(this)
 	}
 
 
@@ -416,7 +445,7 @@ class liner{
 		this.counter += 1
 		let updated = false
 
-		if(this.following || ctoggle){
+		if(this.following || ctoggle && !this.nonPlayerControllable){
 		let d = distance(this.x,this.y,mouseX,mouseY)
 			this.nvy -= (this.y - mouseY)/d*0.4
 			this.nvx -= (this.x - mouseX)/d*0.4
@@ -487,6 +516,7 @@ class liner{
 			}
 		} else if(this.type == 5){ //tree
 			if(this.counter%500 == 0){
+				this.mass = Infinity
 				this.x += this.vx
 				this.y += this.vy
 				this.vx += this.nvx
@@ -510,8 +540,20 @@ class liner{
 					parr.push(c)
 				}
 				updated = true
-			} // type 6 is used for the tree! 
-		}
+			} 
+		} else if(this.type == 6){
+				if(this.counter%5 == 0){
+					this.x += this.vx 
+					this.y += this.vy 
+					this.vx += this.nvx + Math.cos(COUNTER/10) * this.radius
+					this.vy += this.nvy + Math.sin(COUNTER/10) * this.radius
+					this.nvx = 0
+					this.nvy = 0
+					this.vx += (Math.random()-0.5)*2
+					this.vy += (Math.random()-0.5)*2
+					updated = true
+				}
+			}
 
 
 
@@ -646,7 +688,7 @@ document.addEventListener("mousedown",()=>{
 })
 
 
-var GLO = 0
+var GLO = 6
 let summonItem = ()=>{parr.push(
 	new liner(mouseX,mouseY,GLO,2)
 	)}
@@ -655,6 +697,7 @@ document.addEventListener("keydown",(e)=>{
 	let k = e.key
 	if(k == " "){
 		parr.forEach((e)=>{
+			if(e.nonPlayerControllable){return}
 			let d = distance(e.x,e.y,mouseX,mouseY)
 			e.nvy -= (e.y - mouseY)/d*15
 			e.nvx -= (e.x - mouseX)/d*15
@@ -662,6 +705,9 @@ document.addEventListener("keydown",(e)=>{
 
 	} else if(k == "/"){
 		ctoggle = !ctoggle
+	} else if(k == "="){
+		time_fill_color = "rgba(100,0,0,0.2)"
+		time_outline_color = "rgba(0,0,0,0)"
 	} else if(k == "\\"){
 
 		summonItem()
@@ -690,6 +736,9 @@ function distance(x,y,x2,y2){
   return(Math.sqrt(a*a+b*b))
 }
 
+
+
+
 let parr = []
 
 
@@ -701,6 +750,9 @@ class events{
 		objk.forEach((E)=>{
 			let e = this.happening[E]
 			if(e.life < 0){
+				if(e.end){
+					e.end(e)
+				}
 				delete this.happening[E]
 				return
 			}	
@@ -714,6 +766,9 @@ class events{
 	static addEvent(name,e){
 		if(this.happening[name] == undefined){
 			this.happening[name] = e
+			if(e.start){
+				e.start(e)
+			}
 		} else {
 			this.happening[name].life += e.life/2
 		}
@@ -731,8 +786,8 @@ function push(particle,dx,dy){
 
 
 function randomEvents(){
-	if(Math.random() > 0.6){
-		events.addEvent("storm",{"chaotic":0,"strength":1,"parr":[],"life":500,
+	if(Math.random() > 0.9995){
+		events.addEvent("storm",{"chaotic":0,"strength":1,"parr":[],"life":7000,
 			"vect":[Math.random()-0.5,Math.random()-0.5],"update":(e)=>{
 			if(COUNTER%5 == 0){
 				for(let i = 0; i < e.strength; i++){
@@ -766,10 +821,33 @@ function randomEvents(){
 			}
 		}})
 	}
+	if(Math.random() > 0.09996){
+		events.addEvent("calm",{"life":7000,"store":{},"start":(e)=>{
+			NATURAL_BOLTRATE = 1 - (1-NATURAL_BOLTRATE)/3
+		},"update":(e)=>{
+			if(COUNTER%5 == 0){
+			comparer.disabled[4] = e.life
+			comparer.disabled[3] = e.life
+			comparer.disabled[2] = e.life
+				parr.forEach((E)=>{
+					if(E.following || E.mass == Infinity){return}
+					E.vx *= 1 - (0.05)
+					E.vy *= 1 - (0.05)
+					E.nvx *= 0.95
+					E.nvy *= 0.95
+					E.life -= 50
+				})
+			}
+		},"end":(e)=>{
+
+				//boltrate is not restored!!
+		}})
+	}
 }
 
 let COUNTER = 0
-time_fill_color = "#900000"
+NATURAL_BOLTRATE = 0.99
+time_fill_color = "#B00000"
 time_outline_color = "#900000"
 setInterval(()=>{
 	COUNTER ++
@@ -801,16 +879,15 @@ setInterval(()=>{
 
 
 
-	ctx.fillStyle = "#B00000"
-	ctx.strokeStyle = time_fill_color
+	ctx.fillStyle = time_fill_color
+	ctx.strokeStyle = time_outline_color
 	ctx.font = "80px Arial"
-	let d = "" + Date.now()
+	let d = "" + (Date.now()+date_disruptor)
 	ctx.fillText(d,Width/2,Height/2)
 	ctx.lineWidth = 2
-	ctx.strokeStyle = time_outline_color
 	ctx.strokeText(d,Width/2,Height/2) 
 	comparer.compare(d)
-	if(Math.random()>0.99){
+	if(Math.random()>NATURAL_BOLTRATE){
 		parr.push(new liner(Math.random()*Width,Math.random()*Height,Math.floor(Math.random()*3),Math.floor(Math.random()*2)))
 	}
 
@@ -831,13 +908,16 @@ setInterval(()=>{
 
 
 
+function disrupt(d){
+	date_disruptor += d
+}
 
 
 
 
-
-
-
+//howler polytone
+//player controlling events
+//more events
 
 
 
