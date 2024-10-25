@@ -515,9 +515,9 @@ class liner{
 
 		if(type == 5){
 			this.nonPlayerControllable = true
-		} else if(type == 6){ // spinner
-			this.rotation = [1,1]
+		} else if(type == 6){
 			this.radius = Math.random()*8+0.2
+			if(Math.random()>0.5){this.radius*=-1}
 		}
 
 
@@ -626,12 +626,12 @@ class liner{
 				}
 				updated = true
 			} 
-		} else if(this.type == 6){ // spinner
+		} else if(this.type == 6){
 				if(this.counter%5 == 0){
 					this.x += this.vx 
 					this.y += this.vy 
 					this.vx += this.nvx + Math.cos(COUNTER/10) * this.radius
-					this.vy += this.nvy + Math.sin(COUNTER/10) * this.radius
+					this.vy += this.nvy + Math.sin(COUNTER/10) * Math.abs(this.radius)
 					this.nvx = 0
 					this.nvy = 0
 					this.vx += (Math.random()-0.5)*2
@@ -912,6 +912,7 @@ function randomEvents(){
 		},"update":(e)=>{
 			if(COUNTER%5 == 0){
 			comparer.disabled[4] = e.life
+			comparer.disabled[4.5] = e.life
 			comparer.disabled[3] = e.life
 			comparer.disabled[2] = e.life
 				parr.forEach((E)=>{
