@@ -12,6 +12,35 @@ HeightM = Height/2
 myCanvas.style.position = "absolute"
 
 
+
+var SOUND = {}
+
+function init(){
+	initSounds([])
+}
+
+function initSounds(arr){
+
+{	let audio = new Tone.Sampler({
+	urls: {
+		"C4":"./../../soundEffects/sinC4.mp3",
+		"F3":"./../../soundEffects/sinF3.mp3",
+	},
+}).toDestination();
+		SOUND["sinC4"] = audio
+
+}
+	arr.forEach((E,i)=>{
+		let e = "./../../soundEffects/"+E+".mp3"
+		let audio = new Tone.Sampler({
+	urls: {
+		"C4":e,
+	},
+}).toDestination();
+		SOUND[E] = audio
+	})
+}
+
 function normalRandom(mean, stderr) {
     const u1 = Math.random();
     const u2 = Math.random();
@@ -19,6 +48,62 @@ function normalRandom(mean, stderr) {
     const z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
     return z0 * stderr + mean;
 }
+
+let soundMapper = {
+	"0":"C2",
+	"1":"C4",
+	"2":"C#4",
+	"3":"D4",
+	"4":"D#4",
+	"5":"E4",
+	"6":"F4",
+	"7":"F#4",
+	"8":"G4",
+	"9":"G#4",
+	"10":"A4",
+	"11":"A#4",
+	"12":"B4",
+	"13":"C5",
+	"14":"C#5",
+	"15":"D5",
+	"16":"D#5",
+	"17":"E5",
+	"18":"F5",
+	"19":"F#5",
+	"20":"G5",
+	"21":"G#5",
+	"22":"A5",
+	"23":"A#5",
+	"24":"B5",
+	"25":"C6",
+	"26":"C#6",
+	"27":"D6",
+	"28":"D#6",
+	"29":"E6",
+	"30":"F6",
+	"31":"F#6",
+	"32":"G6",
+	"33":"G#6",
+	"34":"A6",
+	"35":"A#6",
+	"36":"B6",
+	"37":"C7"
+}
+
+NoteRelativity = {
+	"major":{"0":0,"1":2,"2":4,"3":5,"4":7,"5":9,"6":11,"7":12},
+	"mainor":{"0":0,"1":2,"2":3,"3":5,"4":7,"5":8,"6":11,"7":12},
+}
+
+function startPlay(){
+	setInterval((e)=>{
+	// let note=Math.floor(15+normalRandom(0,5));
+		let rnum = Math.floor(Math.random()*8)
+		let note = 1+NoteRelativity.major[rnum]
+		console.log(rnum)
+	SOUND.sinC4.triggerAttack(soundMapper[note]);},250)
+}
+
 
 
 // get cos/sin from time
@@ -430,7 +515,7 @@ class liner{
 
 		if(type == 5){
 			this.nonPlayerControllable = true
-		} else if(type == 6){
+		} else if(type == 6){ // spinner
 			this.rotation = [1,1]
 			this.radius = Math.random()*8+0.2
 		}
@@ -541,7 +626,7 @@ class liner{
 				}
 				updated = true
 			} 
-		} else if(this.type == 6){
+		} else if(this.type == 6){ // spinner
 				if(this.counter%5 == 0){
 					this.x += this.vx 
 					this.y += this.vy 
