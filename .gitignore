@@ -1,4 +1,5 @@
 node_modules
+package-lock.json
 process.env
 disc/token.json
 errorlog.json
