@@ -20,6 +20,10 @@ function init(){
 }
 
 function initSounds(arr){
+Tone.Transport.start();
+Tone.Transport.scheduleRepeat((time) => {
+    music.runbar(time)
+}, 1.2)
 
 {	let audio = new Tone.Sampler({
 	urls: {
@@ -90,16 +94,159 @@ let soundMapper = {
 	"37":"C7"
 }
 
+function mtn(midiNumber) {
+    return Tone.Frequency(midiNumber, "midi");
+}
+
+
+class music{
+	static bar = {"scheduled":false,"position":0,"noteTimes":[60,64,67,72,71,72,67,64],"interval":0.3,"relativity":0} //64 for now
+	static stanza = {"repeats":0,"position":0,"bars":[]}
+	static counter = 0
+	static synth = new Tone.PolySynth(Tone.Synth,4).toDestination(); // Connect to audio output
+
+	static reverb = new Tone.Reverb({
+    decay: 20, // Duration of the reverb tail
+    preDelay: 0.3,
+    wet: 0.7
+}).toDestination();
+
+	static runbar(time){
+		this.counter += 1
+		// if(this.counter%2==0){return}
+		if(Math.random()>0.3){return}
+		// this.scheduleBar(this.bar,time)
+		// this.playBell(Math.floor(normalRandom(50,7)))
+
+		this.playBellSynthChord(Math.floor(normalRandom(40,7)))
+	}
+
+	static scheduleBar(bar,time){
+		if(!bar){bar = this.bar}
+
+			bar.noteTimes.forEach((e,i)=>{
+				if(e===undefined){return}
+				Tone.Transport.schedule((time) => {
+			    this.synth.triggerAttackRelease(mtn(e+bar.relativity), "4n", time);
+				}, time + bar.interval*i);
+			})
+		bar.scheduled = true
+		// this.generateNextBar(bar)
+		this.getBarStanza(this.stanza)
+	}
+
+	static generateNextBar(oldBar){
+		if(!oldBar){oldBar = this.bar}
+			let newbar = {"scheduled":false,"position":oldBar.position+1,"noteTimes": oldBar.noteTimes,"interval":0.25}
+			let rnd = Math.floor(Math.random()*6-3)
+			newbar.noteTimes.forEach((e,i)=>{newbar.noteTimes[i] = e+rnd})
+			// this.bar = newbar
+			return(newbar)
+	}
+	static generateDefaultBar(r){
+		return({"scheduled":false,"position":0,"noteTimes":[50,54,57,62,61,62,57,54],"interval":0.3,"relativity":r})
+	}
+	static getBarStanza(stanza){
+			stanza.position += 1
+			this.bar = stanza.bars[stanza.position]
+		if(stanza.position+1 >= stanza.repeats){
+			this.generateNextStanza(stanza)
+		}
+	}
+	static generateNextStanza(oldStanza){
+		if(!oldStanza){oldStanza = this.stanza}
+			this.stanza = {"repeats":8,"position":-1,"bars":[],"relatives":[0,0,-2,-2,-4,-4,-2,-2]}
+			let rnd = Math.floor(Math.random()*4-2)
+			for(let i = 0; i < 8; i++){
+				this.stanza.bars.push(this.generateDefaultBar(this.stanza.relatives[i]+rnd))
+			}
+	}
+	static playBell(note,vel=1){
+			this.synth.triggerAttackRelease(mtn(note),0.7,undefined,vel);
+			// this.synth.triggerAttackRelease(mtn(note+4),0.7,undefined,0.2);
+	}
+
+	static checkCollide(note,arr,dist=1){
+
+		let mod = note%12
+		for(let i = 0; i < arr.length; i++){
+			let resd = Math.abs(arr[i]-mod)%12
+			if(resd == dist || resd == 12-dist){
+				return(true)
+			}
+		}
+		return(false)
+	}
+
+
+	static playBellSynthChord(note,vel=1){
+		let notes = [note]
+		this.playBell(note,vel)
+		while(note < 75)
+		if(Math.random() > 0.5){
+			let rel = 4
+			note += rel
+			if(this.checkCollide(note,notes)){note -= rel;continue}
+			if(this.checkCollide(note,notes,2)){note -= rel;continue}
+			vel *= 0.8
+			this.playBell(note,vel)
+			notes.push(note)
+		} else if(Math.random() > 0.5){
+			let rel = 5
+			note += rel
+			if(this.checkCollide(note,notes)){note -= rel;continue}
+			if(this.checkCollide(note,notes,2)){note -= rel;continue}
+			vel *= 0.8
+			this.playBell(note,vel)
+			notes.push(note)
+		} else {
+			let rel = Math.floor(Math.random()*8)
+			note += rel
+			if(this.checkCollide(note,notes)){note -= rel;continue}
+			if(this.checkCollide(note,notes,2)){note -= rel;continue}
+			vel *= 0.8
+			this.playBell(note,vel)
+			notes.push(note)
+		}
+		return(notes)
+	}
+}
+
+music.synth.connect(music.reverb)
+music.synth.set({
+    oscillator: {
+        type: 'sine4' 
+    },
+    envelope: {
+		    attack: 0.005,
+		    decay: 0.5,
+		    sustain:1,
+		    release:2
+    },
+    volume: -20
+})
+music.generateNextStanza()
+
+
 NoteRelativity = {
 	"major":{"0":0,"1":2,"2":4,"3":5,"4":7,"5":9,"6":11,"7":12},
+	// "nathan"
 	"mainor":{"0":0,"1":2,"2":3,"3":5,"4":7,"5":8,"6":11,"7":12},
 }
 
+let lastnote = 0
+let updown = false
 function startPlay(){
 	setInterval((e)=>{
 	// let note=Math.floor(15+normalRandom(0,5));
-		let rnum = Math.floor(Math.random()*8)
-		let note = 1+NoteRelativity.major[rnum]
+		let note 
+		let rnum
+		while (note == lastnote || (updown?(note>lastnote):(note<lastnote)) || note == undefined){
+			rnum = Math.floor(Math.random()*8)
+			note = 1+NoteRelativity.major[rnum]
+		}
+		updown = !updown
+		lastnote = note		
 		console.log(rnum)
 	SOUND.sinC4.triggerAttack(soundMapper[note]);},250)
 }
@@ -109,7 +256,7 @@ function startPlay(){
 // get cos/sin from time
 // cos(COUNTER/100)
 
-let sounds = true
+let sounds = false
 
 let soundNameDict = {
 	"Sf3":"./../../soundEffects/sinF3.mp3",
@@ -442,7 +589,7 @@ class rollingBall{
 		if(this.x < 0 || this.x > Width){
 			this.vx *= -1
 			if(this.trailer){
-				console.log(ps("Sc4"))
+				ps("Sc4")
 			}
 		}
 		if(this.y < 0 || this.y > Height){
@@ -906,7 +1053,7 @@ function randomEvents(){
 			}
 		}})
 	}
-	if(Math.random() > 0.09996){
+	if(Math.random() > 0.9996){
 		events.addEvent("calm",{"life":7000,"store":{},"start":(e)=>{
 			NATURAL_BOLTRATE = 1 - (1-NATURAL_BOLTRATE)/3
 		},"update":(e)=>{
