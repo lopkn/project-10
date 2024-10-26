@@ -11,6 +11,14 @@ myCanvas.height = Height
 HeightM = Height/2
 myCanvas.style.position = "absolute"
 
+let myCanvas2 = document.getElementById("myCanvas2")
+
+myCanvas2.style.top = 0
+myCanvas2.style.left = 0
+myCanvas2.style.zIndex = 6
+myCanvas2.width = Width
+myCanvas2.height = Height
+myCanvas2.style.position = "absolute"
 
 
 var SOUND = {}
@@ -103,22 +111,35 @@ class music{
 	static bar = {"scheduled":false,"position":0,"noteTimes":[60,64,67,72,71,72,67,64],"interval":0.3,"relativity":0} //64 for now
 	static stanza = {"repeats":0,"position":0,"bars":[]}
 	static counter = 0
-	static synth = new Tone.PolySynth(Tone.Synth,4).toDestination(); // Connect to audio output
-
+	static synth = new Tone.PolySynth(Tone.Synth,8).toDestination(); // Connect to audio output
+	static eq = new Tone.EQ3(-10, 3, 0);
 	static reverb = new Tone.Reverb({
     decay: 20, // Duration of the reverb tail
     preDelay: 0.3,
-    wet: 0.7
+    wet: 0.95,
+    input:1,
+    output:1
 }).toDestination();
+	static bell = new Tone.Sampler({
+	urls: {
+		"C4":"./untitled.mp3",
+	},
+}).toDestination();
+	static pluck = new Tone.Sampler({
+	urls: {
+		"C4":"./untitled.mp3",
+	},
+}).toDestination();
+	static echo = new Tone.PingPongDelay(0.6, 0.6).toDestination();
 
 	static runbar(time){
 		this.counter += 1
-		// if(this.counter%2==0){return}
-		if(Math.random()>0.3){return}
+		if(this.counter%4!==0){return}
+		// if(Math.random()>0.3){return}
 		// this.scheduleBar(this.bar,time)
 		// this.playBell(Math.floor(normalRandom(50,7)))
 
-		this.playBellSynthChord(Math.floor(normalRandom(40,7)))
+		this.playBellSynthChord(Math.floor(normalRandom(50,7)))
 	}
 
 	static scheduleBar(bar,time){
@@ -161,8 +182,9 @@ class music{
 				this.stanza.bars.push(this.generateDefaultBar(this.stanza.relatives[i]+rnd))
 			}
 	}
-	static playBell(note,vel=1){
-			this.synth.triggerAttackRelease(mtn(note),0.7,undefined,vel);
+	static playBell(note,vel=1,delay=0){
+			this.bell.triggerAttackRelease(mtn(note),1.7,Tone.now()+delay,vel);
+			// this.synth.triggerAttackRelease(mtn(note),1.7,Tone.now()+delay,vel);
 			// this.synth.triggerAttackRelease(mtn(note+4),0.7,undefined,0.2);
 	}
 
@@ -179,40 +201,62 @@ class music{
 	}
 
 
-	static playBellSynthChord(note,vel=1){
+	static playBellSynthChord(note,vel=1,adel=0.2){
 		let notes = [note]
+		let dell = 0.2
+		let avel = vel
 		this.playBell(note,vel)
-		while(note < 75)
-		if(Math.random() > 0.5){
-			let rel = 4
-			note += rel
-			if(this.checkCollide(note,notes)){note -= rel;continue}
-			if(this.checkCollide(note,notes,2)){note -= rel;continue}
-			vel *= 0.8
-			this.playBell(note,vel)
-			notes.push(note)
-		} else if(Math.random() > 0.5){
-			let rel = 5
-			note += rel
-			if(this.checkCollide(note,notes)){note -= rel;continue}
-			if(this.checkCollide(note,notes,2)){note -= rel;continue}
-			vel *= 0.8
-			this.playBell(note,vel)
-			notes.push(note)
-		} else {
-			let rel = Math.floor(Math.random()*8)
-			note += rel
-			if(this.checkCollide(note,notes)){note -= rel;continue}
-			if(this.checkCollide(note,notes,2)){note -= rel;continue}
-			vel *= 0.8
-			this.playBell(note,vel)
-			notes.push(note)
-		}
+		while(notes.length<16){
+					let del = adel 
+					if(Math.random()>0.7){
+						del*=2
+					} else if(Math.random()>0.9){
+						del*=3
+					}
+			if(note > 85){
+				note-=48
+			}
+			if(Math.random() > 0.9){
+					let rel = 4
+					note += rel
+					if(this.checkCollide(note,notes)){note -= rel;continue}
+					if(this.checkCollide(note,notes,2)){note -= rel;continue}
+					vel *= 0.8
+					// this.playBell(note,vel,dell)
+					dell += del
+					notes.push(note)
+				} else if(Math.random() > 0.1){
+					let rel = 5
+					note += rel
+					if(this.checkCollide(note,notes)){note -= rel;continue}
+					if(this.checkCollide(note,notes,2)){note -= rel;continue}
+					vel *= 0.8
+					// this.playBell(note,vel,dell)
+					dell += del
+					notes.push(note)
+				} else {
+					let rel = Math.floor(1+Math.random()*8)
+					note += rel
+					if(this.checkCollide(note,notes)){note -= rel;continue}
+					if(this.checkCollide(note,notes,2)){note -= rel;continue}
+					vel *= 0.8
+					// this.playBell(note,vel,dell)
+					dell += del
+					notes.push(note)
+				}
+			}
+		let shuffledNotes = notes.sort((a,b)=>{return(0.5-Math.random())})
+		shuffledNotes.forEach((e,i)=>{
+			this.playBell(e,avel*0.9**(i-1),i*adel)
+		})
+		console.log(JSON.stringify(notes))
 		return(notes)
 	}
 }
 
-music.synth.connect(music.reverb)
+music.bell.connect(music.reverb)
+music.bell.connect(music.echo)
+music.bell.connect(music.eq)
 music.synth.set({
     oscillator: {
         type: 'sine4' 
@@ -223,7 +267,7 @@ music.synth.set({
 		    sustain:1,
 		    release:2
     },
-    volume: -20
+    volume: -60
 })
 music.generateNextStanza()
 
@@ -289,11 +333,12 @@ function ps(s){
 }
 
 let ctx = myCanvas.getContext("2d")
+let ctx2 = myCanvas2.getContext("2d")
 
 let GTOGGLE = false
 
 
-ctx.textAlign = 'center'
+ctx2.textAlign = 'center'
 
 class comparer{
 
@@ -352,7 +397,16 @@ class comparer{
 			c = new explosionR(Math.random()*Width,Math.random()*Height,"rgb(2,"+(125+Math.random()*125)+",255)")
 			c.actLife = Math.random()*20+20
 			c.size += 2
-			parr.push(c)
+			// parr.push(c)
+			if(Math.random()>0.009){
+				let thiscol = "rgba(2,"+(125+Math.random()*125)+",255,"
+				c = new explosionR(Math.random()*Width,Math.random()*Height,(a)=>{return(thiscol+(0.7+0.3*a)+")")})
+				c.actLife = (Math.random()*20+20)*events.varbs.rippleStrength
+				c.size += 2
+				c.colf = true
+				parr.push(c)
+			}
+
 			break;
 		case 8:
 			let G = setInterval(()=>{
@@ -381,6 +435,7 @@ class comparer{
 			c.counter = 18
 			c.lineUp = 0
 			c.myDat = 2
+			c.updateSpeed = 250
 			parr.push(c)
 
 
@@ -400,6 +455,7 @@ class comparer{
 			c.counter = 18
 			c.lineUp = 0
 			c.myDat = 2
+			c.updateSpeed = 500
 			parr.push(c)
 
 
@@ -542,7 +598,11 @@ class explosionR{
 		this.actLife -= this.s2
 	}
 	draw(){
-		ctx.strokeStyle = this.color
+		if(this.colf){
+			ctx.strokeStyle = this.color(this.actLife/600,this.color)
+		} else {
+			ctx.strokeStyle = this.color
+		}
 		ctx.lineWidth = 1 + this.actLife/10
 		ctx.beginPath()
 		ctx.arc(this.x, this.y, this.size, 0, 2 * Math.PI);
@@ -747,7 +807,7 @@ class liner{
 				updated = true
 			}
 		} else if(this.type == 5){ //tree
-			if(this.counter%500 == 0){
+			if(this.counter%this.updateSpeed == 0){
 				this.mass = Infinity
 				this.x += this.vx
 				this.y += this.vy
@@ -764,16 +824,17 @@ class liner{
 					c.maxActLife = 10000000
 					c.vx = this.vx + Math.random()*100-50
 					c.vy = this.vy + Math.random()*100-50
-					c.lineLife = 6000
+					c.lineLife = this.lineLife
 					c.size = this.size - 1
 					c.lineUp = 1
 					c.counter = 18
 					c.myDat = 1+this.myDat
+					c.updateSpeed = this.updateSpeed
 					parr.push(c)
 				}
 				updated = true
 			} 
-		} else if(this.type == 6){
+		} else if(this.type == 6){ // rotary
 				if(this.counter%5 == 0){
 					this.x += this.vx 
 					this.y += this.vy 
@@ -783,6 +844,16 @@ class liner{
 					this.nvy = 0
 					this.vx += (Math.random()-0.5)*2
 					this.vy += (Math.random()-0.5)*2
+					updated = true
+				}
+			} else if(this.type == 7){ // line
+				if(this.counter%5 == 0){
+					this.x += this.vx 
+					this.y += this.vy 
+					this.vx += this.nvx 
+					this.vy += this.nvy
+					this.nvx = 0
+					this.nvy = 0
 					updated = true
 				}
 			}
@@ -885,6 +956,13 @@ function getCol(type,l,e){
 			a = 1-a/2
 			ctx.strokeStyle = ("rgba(0,"+e[4]*3.5*(1-a)+",255,"+(0.7+0.3*l)+")") // quelled darkblue
 			break;
+		case 8:
+			a = 1-a/2
+			ctx.strokeStyle = (""+e+(0.7+0.3*l)+")") // quelled darkblue
+			break;
+		case 9:
+    		ctx.strokeStyle = ("rgba("+e[4]*3.5*(1-a)*5+","+e[4]*3.5*(1-a)*5+","+(e[4])+","+(0.7+0.3*l)+")") // dark blue
+			break;
 	}
 }
 
@@ -920,10 +998,25 @@ document.addEventListener("mousedown",()=>{
 })
 
 
-var GLO = 6
-let summonItem = ()=>{parr.push(
-	new liner(mouseX,mouseY,GLO,2)
-	)}
+var GLO = 9
+let summonItem = ()=>{
+	// parr.push(new liner(mouseX,mouseY,GLO,2))
+	let c = new liner(mouseX,mouseY,7,9)
+	c.vx = Math.random()*16+4
+	c.vy = Math.random()*16+4
+	parr.push(c)
+			// let c = new liner(mouseX,mouseY,5,6,0)
+			// c.maxActLife = 10000000
+			// c.vx += Math.random()*50-25
+			// c.vy += Math.random()*50-25
+			// c.lineLife = 120
+			// c.size += 10
+			// c.counter = 7
+			// c.lineUp = 0
+			// c.myDat = 2
+			// c.updateSpeed = 15
+			// parr.push(c)
+	}
 
 document.addEventListener("keydown",(e)=>{
 	let k = e.key
@@ -933,6 +1026,11 @@ document.addEventListener("keydown",(e)=>{
 			let d = distance(e.x,e.y,mouseX,mouseY)
 			e.nvy -= (e.y - mouseY)/d*15
 			e.nvx -= (e.x - mouseX)/d*15
+			if(e.basename == "ball"){
+				e.vy -= (e.y - mouseY)/d*1 / e.mass
+				console.log("yo")
+				e.vx -= (e.x - mouseX)/d*1 / e.mass
+			}
 		})
 
 	} else if(k == "/"){
@@ -977,6 +1075,7 @@ let parr = []
 
 class events{
 	static happening = {}
+	static varbs = {rippleStrength:1,trip:1}
 	static updateAll(){
 		let objk = Object.keys(this.happening)
 		objk.forEach((E)=>{
@@ -987,8 +1086,10 @@ class events{
 				}
 				delete this.happening[E]
 				return
-			}	
-			e.update(e)
+			}
+			if(e.update){
+				e.update(e)
+			}
 			e.life -= 1
 		})
 	}
@@ -1019,8 +1120,8 @@ function push(particle,dx,dy){
 
 function randomEvents(){
 	if(Math.random() > 0.9995){
-		events.addEvent("storm",{"chaotic":0,"strength":1,"parr":[],"life":7000,
-			"vect":[Math.random()-0.5,Math.random()-0.5],"update":(e)=>{
+		events.addEvent("storm",{"chaotic":(Math.random()>0.97),"strength":(1+Math.floor(Math.random()*3)),"parr":[],"life":7000,
+			"vect":[Math.random()-0.5,Math.random()-0.15],"update":(e)=>{
 			if(COUNTER%5 == 0){
 				for(let i = 0; i < e.strength; i++){
 					let rain = new liner(Math.random()*Width-e.vect[0]*Width,Math.random()*Height-e.vect[1]*Height,Math.floor(Math.random()*3),
@@ -1073,7 +1174,22 @@ function randomEvents(){
 			}
 		},"end":(e)=>{
 
-				//boltrate is not restored!!
+				NATURAL_BOLTRATE = 3 * NATURAL_BOLTRATE - 2
+		}})
+	}
+
+	if(Math.random() > 0.9996){
+		events.addEvent("ripple",{"life":8000,"store":{},"start":(e)=>{
+			events.varbs.rippleStrength = Math.random()*6 + 2
+		},"end":(e)=>{
+			events.varbs.rippleStrength = 1
+		}})
+	}
+	if(Math.random() > 0.999){
+		events.addEvent("trip",{"life":8000,"store":{},"start":(e)=>{
+			events.varbs.trip = Math.random()*0.3 + 0.01
+		},"end":(e)=>{
+			events.varbs.trip = 1
 		}})
 	}
 }
@@ -1085,7 +1201,9 @@ time_outline_color = "#900000"
 setInterval(()=>{
 	COUNTER ++
 	if(COUNTER %2 ===0){
-	ctx.clearRect(0,0,Width,Height)
+		ctx2.clearRect(0,0,Width,Height)
+		ctx.fillStyle = "rgba(0,0,0,"+events.varbs.trip+")"
+		ctx.fillRect(0,0,Width,Height)
 	events.updateAll()
 	}
 	for(let i = parr.length-1; i > -1; i--){
@@ -1112,13 +1230,13 @@ setInterval(()=>{
 
 
 
-	ctx.fillStyle = time_fill_color
-	ctx.strokeStyle = time_outline_color
-	ctx.font = "80px Arial"
+	ctx2.fillStyle = time_fill_color
+	ctx2.strokeStyle = time_outline_color
+	ctx2.font = "80px Arial"
 	let d = "" + (Date.now()+date_disruptor)
-	ctx.fillText(d,Width/2,Height/2)
-	ctx.lineWidth = 2
-	ctx.strokeText(d,Width/2,Height/2) 
+	ctx2.fillText(d,Width/2,Height/2)
+	ctx2.lineWidth = 2
+	ctx2.strokeText(d,Width/2,Height/2) 
 	comparer.compare(d)
 	if(Math.random()>NATURAL_BOLTRATE){
 		parr.push(new liner(Math.random()*Width,Math.random()*Height,Math.floor(Math.random()*3),Math.floor(Math.random()*2)))
@@ -1153,7 +1271,7 @@ function disrupt(d){
 //more events
 
 
-
+//shooting starat\
 
 
 
