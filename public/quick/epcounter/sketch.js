@@ -206,6 +206,7 @@ class music{
 		let dell = 0.2
 		let avel = vel
 		this.playBell(note,vel)
+		let str = ""
 		while(notes.length<16){
 					let del = adel 
 					if(Math.random()>0.7){
@@ -213,10 +214,13 @@ class music{
 					} else if(Math.random()>0.9){
 						del*=3
 					}
-			if(note > 85){
+			if(note > events.varbs.noteCeiling){
 				note-=48
+				str += ("notes too high, reducing by 4 octaves (48 semitones)")
 			}
+			str += ("notes:"+JSON.stringify(notes)+"\n")
 			if(Math.random() > 0.9){
+					// str += ("trying to do 1...")
 					let rel = 4
 					note += rel
 					if(this.checkCollide(note,notes)){note -= rel;continue}
@@ -225,30 +229,38 @@ class music{
 					// this.playBell(note,vel,dell)
 					dell += del
 					notes.push(note)
-				} else if(Math.random() > 0.1){
+					// str += ("note checker 1 passed")
+				} else if(Math.random() > 0.2){
 					let rel = 5
 					note += rel
+					// str += ("trying to do 2...")
 					if(this.checkCollide(note,notes)){note -= rel;continue}
 					if(this.checkCollide(note,notes,2)){note -= rel;continue}
 					vel *= 0.8
 					// this.playBell(note,vel,dell)
 					dell += del
+					// str += ("note checker 2 passed")
 					notes.push(note)
 				} else {
 					let rel = Math.floor(1+Math.random()*8)
 					note += rel
+					// str += ("trying to do 3... random semitone used:"+rel)
 					if(this.checkCollide(note,notes)){note -= rel;continue}
 					if(this.checkCollide(note,notes,2)){note -= rel;continue}
 					vel *= 0.8
 					// this.playBell(note,vel,dell)
 					dell += del
+					// str += ("note 3 passed, random semitone added:"+rel)
 					notes.push(note)
 				}
 			}
 		let shuffledNotes = notes.sort((a,b)=>{return(0.5-Math.random())})
-		shuffledNotes.forEach((e,i)=>{
+		notes.forEach((e,i)=>{
 			this.playBell(e,avel*0.9**(i-1),i*adel)
+			notes[i] = Tone.Frequency(e, "midi").toNote();
 		})
+		// console.log(str)
+
 		console.log(JSON.stringify(notes))
 		return(notes)
 	}
@@ -663,10 +675,7 @@ class rollingBall{
 
 		if(distance(this.vx,this.vy,0,0) < 0.1){
 			this.actLife -= this.size/10
-		}
-
-
-		if(this.trailer && Math.random()>0.8){
+		} else if(this.trailer && Math.random()>0.8){
 			let c = new explosionR(this.x,this.y,"rgb(2,"+(125+Math.random()*125)+",255)",0.2-Math.random()*0.16,0.3-Math.random()*0.2)
 			c.actLife = Math.random()*20+10
 			c.size += 12
@@ -725,7 +734,7 @@ class liner{
 		} else if(type == 6){
 			this.radius = Math.random()*8+0.2
 			if(Math.random()>0.5){this.radius*=-1}
-		}
+		} 
 
 
 
@@ -847,7 +856,7 @@ class liner{
 					updated = true
 				}
 			} else if(this.type == 7){ // line
-				if(this.counter%5 == 0){
+				if(this.counter%3 == 2){
 					this.x += this.vx 
 					this.y += this.vy 
 					this.vx += this.nvx 
@@ -882,6 +891,9 @@ class liner{
 			let e = this.oldPath[i]
 			getCol(this.colType,e[4]/this.lineLife,e)
     		ctx.lineWidth = this.size
+    		if(this.sizef){
+    			ctx.lineWidth = this.sizef(this,(i+1)/this.oldPath.length)
+    		}
 			ctx.beginPath()
 			ctx.moveTo(e[0],e[1])
 			ctx.lineTo(e[2],e[3])
@@ -890,6 +902,10 @@ class liner{
 			if(e[4] <= 0){
 				this.oldPath.splice(i,1)
 			}
+		}
+
+		if(this.specialDraw){
+			this.specialDraw(this)
 		}
 	
 
@@ -961,7 +977,10 @@ function getCol(type,l,e){
 			ctx.strokeStyle = (""+e+(0.7+0.3*l)+")") // quelled darkblue
 			break;
 		case 9:
-    		ctx.strokeStyle = ("rgba("+e[4]*3.5*(1-a)*5+","+e[4]*3.5*(1-a)*5+","+(e[4])+","+(0.7+0.3*l)+")") // dark blue
+    		ctx.strokeStyle = ("rgba("+e[4]*3.5*(1-a)*5+","+e[4]*3.5*(1-a)*5+","+(e[4]*3.5*(1-a)*2.5*Math.random())+","+(0.7+0.3*l)+")") // shooting star
+			break;
+		case 10:
+			ctx.strokeStyle = ("rgba(255,255,"+(e[4]*3.5*2.5*Math.random())+","+(0.7+0.3*l)+")") // shooting star
 			break;
 	}
 }
@@ -1001,9 +1020,23 @@ document.addEventListener("mousedown",()=>{
 var GLO = 9
 let summonItem = ()=>{
 	// parr.push(new liner(mouseX,mouseY,GLO,2))
-	let c = new liner(mouseX,mouseY,7,9)
-	c.vx = Math.random()*16+4
-	c.vy = Math.random()*16+4
+	let c = new liner(mouseX,mouseY,7,10)
+	c.vx = Math.random()*9
+	c.vy = Math.random()*9
+	c.size = distance(c.vx,c.vy,0,0)/3
+	c.sizef = (a,b)=>{return(c.size*b*b*4)}
+	c.mass = c.size * 300
+	let asize = 20*c.size
+	c.specialDraw = (a)=>{
+		gradient = ctx.createRadialGradient(a.x, a.y, 0, a.x, a.y, asize)
+		let A = Math.abs(Math.sin(COUNTER/20))*100+125
+		gradient.addColorStop(0, "rgba("+A+","+A+","+A*Math.random()+","+1+")");
+		gradient.addColorStop(1, "transparent");
+
+		ctx.fillStyle = gradient;
+		ctx.fillRect(a.x-asize, a.y-asize, asize*2, asize*2);
+	}
+
 	parr.push(c)
 			// let c = new liner(mouseX,mouseY,5,6,0)
 			// c.maxActLife = 10000000
@@ -1018,8 +1051,12 @@ let summonItem = ()=>{
 			// parr.push(c)
 	}
 
+let keymapper = {"w":"B3","2":"A#3","q":"A3","e":"C4","4":"C#4","r":"D4","5":"D#4","t":"E4","y":"F4","7":"F#4","u":"G4","8":"G#4","i":"A4","9":"A#4","o":"B4","p":"C5"}
+
 document.addEventListener("keydown",(e)=>{
 	let k = e.key
+	// music.playBell(e.keyCode-10)
+	if(keymapper[e.key])(music.playBell(Tone.Frequency(keymapper[e.key]).toMidi()))
 	if(k == " "){
 		parr.forEach((e)=>{
 			if(e.nonPlayerControllable){return}
@@ -1028,7 +1065,6 @@ document.addEventListener("keydown",(e)=>{
 			e.nvx -= (e.x - mouseX)/d*15
 			if(e.basename == "ball"){
 				e.vy -= (e.y - mouseY)/d*1 / e.mass
-				console.log("yo")
 				e.vx -= (e.x - mouseX)/d*1 / e.mass
 			}
 		})
@@ -1075,7 +1111,7 @@ let parr = []
 
 class events{
 	static happening = {}
-	static varbs = {rippleStrength:1,trip:1}
+	static varbs = {rippleStrength:1,trip:1,noteCeiling:85}
 	static updateAll(){
 		let objk = Object.keys(this.happening)
 		objk.forEach((E)=>{
@@ -1105,6 +1141,10 @@ class events{
 		} else {
 			this.happening[name].life += e.life/2
 		}
+	}
+
+	static loop(){
+		// this.varb.starShineGradient = ctx.createRadialGradient(a.x, a.y, 0, a.x, a.y, asize);
 	}
 }
 
@@ -1153,6 +1193,80 @@ function randomEvents(){
 
 			}
 		}})
+	}
+	if(Math.random() > 0.99995 && events.happening.storm == undefined){
+		let startPoint = [Math.random()*Width*3-Width,Math.random()*Height-Height]
+		if(!(startPoint[0]>0 && startPoint[0]<Width &&startPoint[1]>0 && startPoint[1]<Height)){
+		events.addEvent("beam storm",{"chaotic":(Math.random()>0.97),"strength":(1+Math.floor(Math.random()*3)),"parr":[],"life":7000,
+			"startPoint":startPoint,"target":[Math.random()*Width,Math.random()*Height],"update":(e)=>{
+			if(COUNTER%5 == 0){
+				for(let i = 0; i < e.strength; i++){
+					let c = new liner(mouseX,mouseY,7,10)
+					c.vx = e.startPoint[0] - e.target[0]
+					c.vy = e.startPoint[1] - e.target[1]
+					c.size = distance(c.vx,c.vy,0,0)/3
+					c.sizef = (a,b)=>{return(c.size*b*b*4)}
+					c.mass = c.size * 300
+					let asize = 20*c.size
+					c.specialDraw = (a)=>{
+						const gradient = ctx.createRadialGradient(a.x, a.y, 0, a.x, a.y, asize);
+						let A = Math.abs(Math.sin(COUNTER/20))*100+125
+						gradient.addColorStop(0, "rgba("+A+","+A+","+A*Math.random()+","+1+")");
+						gradient.addColorStop(1, "transparent");
+
+						ctx.fillStyle = gradient;
+						ctx.fillRect(a.x-asize, a.y-asize, asize*2, asize*2);
+					}
+
+					parr.push(c)
+					e.parr.push(c)
+					c.invincible = 50
+				}
+				
+
+
+			}
+		}})}
+	}
+	if(Math.random() > 0.9995 && events.happening.storm == undefined){
+		let startPoint = [Math.random()*Width*3-Width,Math.random()*Height-Height]
+		if(!(startPoint[0]>0 && startPoint[0]<Width &&startPoint[1]>0 && startPoint[1]<Height)){
+		events.addEvent("star shower",{"chaotic":(Math.random()>0.97),"strength":(1+Math.floor(Math.random()*2)),
+			"parr":[],"life":1000,"maxLife":1000,
+			"startPoint":startPoint,"target":[Math.random()*Width,Math.random()*Height],
+			"start":(e)=>{e.life = e.maxLife}
+			,"update":(e)=>{
+			if(COUNTER%15 == 0){
+				for(let i = 0; i < e.strength; i++){
+					if(MMath.random()>Math.sin(e.life/e.maxlife*Math.PI)){return}
+					let c = new liner(startPoint[0],startPoint[1],7,10)
+					c.vx = -(e.startPoint[0] - Width*Math.random())/180
+					c.vy = -(e.startPoint[1] - Height*Math.random())/180
+					// c.vx *= Math.random()*2-1
+					// c.vy *= Math.random()*2-1
+					c.size = distance(c.vx,c.vy,0,0)/3
+					c.sizef = (a,b)=>{return(c.size*b*b*4)}
+					c.mass = c.size * 300
+					let asize = 20*c.size
+					c.specialDraw = (a)=>{
+						const gradient = ctx.createRadialGradient(a.x, a.y, 0, a.x, a.y, asize);
+						let A = Math.abs(Math.sin(COUNTER/20))*100+125
+						gradient.addColorStop(0, "rgba("+A+","+A+","+A*Math.random()+","+1+")");
+						gradient.addColorStop(1, "transparent");
+
+						ctx.fillStyle = gradient;
+						ctx.fillRect(a.x-asize, a.y-asize, asize*2, asize*2);
+					}
+
+					parr.push(c)
+					e.parr.push(c)
+					c.invincible = 1550
+				}
+				
+
+
+			}
+		}})}
 	}
 	if(Math.random() > 0.9996){
 		events.addEvent("calm",{"life":7000,"store":{},"start":(e)=>{
@@ -1205,6 +1319,7 @@ setInterval(()=>{
 		ctx.fillStyle = "rgba(0,0,0,"+events.varbs.trip+")"
 		ctx.fillRect(0,0,Width,Height)
 	events.updateAll()
+	events.loop()
 	}
 	for(let i = parr.length-1; i > -1; i--){
 		let e = parr[i]
