@@ -1025,13 +1025,15 @@ let summonItem = ()=>{
 	c.vy = Math.random()*9
 	c.size = distance(c.vx,c.vy,0,0)/3
 	c.sizef = (a,b)=>{return(c.size*b*b*4)}
-	c.mass = c.size * 300
-	let asize = 20*c.size
+	c.mass = c.size * 30
+	c.starSignature = Math.random()*Math.PI*2
+	let asize = 3*(c.size+1)**1.7
 	c.specialDraw = (a)=>{
 		gradient = ctx.createRadialGradient(a.x, a.y, 0, a.x, a.y, asize)
-		let A = Math.abs(Math.sin(COUNTER/20))*100+125
-		gradient.addColorStop(0, "rgba("+A+","+A+","+A*Math.random()+","+1+")");
-		gradient.addColorStop(1, "transparent");
+		let A = Math.abs(Math.sin(COUNTER/(asize+3)+a.starSignature))*0.6+0.4
+		gradient.addColorStop(0.2, "rgba(255,255,"+A*Math.random()*255+","+A+")");
+		// gradient.addColorStop(0, "rgba(255,255,0,1)");
+		gradient.addColorStop(1, "rgba(255,255,0,0)");
 
 		ctx.fillStyle = gradient;
 		ctx.fillRect(a.x-asize, a.y-asize, asize*2, asize*2);
@@ -1212,7 +1214,7 @@ function randomEvents(){
 						const gradient = ctx.createRadialGradient(a.x, a.y, 0, a.x, a.y, asize);
 						let A = Math.abs(Math.sin(COUNTER/20))*100+125
 						gradient.addColorStop(0, "rgba("+A+","+A+","+A*Math.random()+","+1+")");
-						gradient.addColorStop(1, "transparent");
+						gradient.addColorStop(1, "rgba(0,0,0,0)");
 
 						ctx.fillStyle = gradient;
 						ctx.fillRect(a.x-asize, a.y-asize, asize*2, asize*2);
@@ -1232,13 +1234,13 @@ function randomEvents(){
 		let startPoint = [Math.random()*Width*3-Width,Math.random()*Height-Height]
 		if(!(startPoint[0]>0 && startPoint[0]<Width &&startPoint[1]>0 && startPoint[1]<Height)){
 		events.addEvent("star shower",{"chaotic":(Math.random()>0.97),"strength":(1+Math.floor(Math.random()*2)),
-			"parr":[],"life":1000,"maxLife":1000,
+			"parr":[],"life":3000,"maxLife":3000,
 			"startPoint":startPoint,"target":[Math.random()*Width,Math.random()*Height],
 			"start":(e)=>{e.life = e.maxLife}
 			,"update":(e)=>{
-			if(COUNTER%15 == 0){
+			if(COUNTER%25 == 0){
 				for(let i = 0; i < e.strength; i++){
-					if(MMath.random()>Math.sin(e.life/e.maxlife*Math.PI)){return}
+					if(Math.random()>Math.sin(e.life/e.maxLife*Math.PI)){return}
 					let c = new liner(startPoint[0],startPoint[1],7,10)
 					c.vx = -(e.startPoint[0] - Width*Math.random())/180
 					c.vy = -(e.startPoint[1] - Height*Math.random())/180
@@ -1246,13 +1248,15 @@ function randomEvents(){
 					// c.vy *= Math.random()*2-1
 					c.size = distance(c.vx,c.vy,0,0)/3
 					c.sizef = (a,b)=>{return(c.size*b*b*4)}
-					c.mass = c.size * 300
-					let asize = 20*c.size
+					c.mass = c.size * 30
+					c.starSignature = Math.random()*Math.PI*2
+					let asize = 3*(c.size+1)**1.7
 					c.specialDraw = (a)=>{
-						const gradient = ctx.createRadialGradient(a.x, a.y, 0, a.x, a.y, asize);
-						let A = Math.abs(Math.sin(COUNTER/20))*100+125
-						gradient.addColorStop(0, "rgba("+A+","+A+","+A*Math.random()+","+1+")");
-						gradient.addColorStop(1, "transparent");
+						gradient = ctx.createRadialGradient(a.x, a.y, 0, a.x, a.y, asize)
+						let A = Math.abs(Math.sin(COUNTER/(asize+3)+a.starSignature))*0.6+0.4
+						gradient.addColorStop(0.2, "rgba(255,255,"+A*Math.random()*255+","+A+")");
+						// gradient.addColorStop(0, "rgba(255,255,0,1)");
+						gradient.addColorStop(1, "rgba(255,255,0,0)");
 
 						ctx.fillStyle = gradient;
 						ctx.fillRect(a.x-asize, a.y-asize, asize*2, asize*2);
