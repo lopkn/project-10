@@ -1117,9 +1117,9 @@ class events{
 			let phaseColorR = Math.random()*255
 			let phaseColorG = Math.random()*255
 			let phaseColorB = Math.random()*255
-			c.colorf = (a)=>{let phase = 0.5+0.5*Math.sin(COUNTER/50+c.phase);
+			c.colorf = (a)=>{let phase = 0.5+0.5*Math.sin(COUNTER/150+c.phase);
 			// return("rgba("+phase*phaseColorR+","+phase*phaseColorG+","+phase*phaseColorB+","+(0.3*a+0.7)+")")}
-			return("rgba("+phaseColorR+","+phaseColorG+","+phaseColorB+","+Math.min(1,(0.3*a+0.7))*phase+")")}
+			return("rgba("+phaseColorR+","+phaseColorG+","+phaseColorB+","+Math.min(1,(a))*phase+")")}
 			// c.strokef = (a)=>{return("rgba(0,"+(100*Math.sin(COUNTER/30+Math.PI)+100)+",0,"+(0.3*a+0.7)+")")}
 			c.stroke = "transparent"
 			c.mover = 0.2
@@ -1127,6 +1127,7 @@ class events{
 			c.size *= 2
 			c.actLife *= (1+Math.random())
 			c.actLife *= (1+Math.abs(normalRandom(0,2)))
+			c.size *= (1+Math.abs(normalRandom(0,2)))
 			c.dissapearLife = c.actLife/10
 			c.phase = Math.random()*2*Math.PI
 			parr.push(c)
