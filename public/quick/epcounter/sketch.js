@@ -61,47 +61,6 @@ function normalRandom(mean, stderr) {
     return z0 * stderr + mean;
 }
 
-let soundMapper = {
-	"0":"C2",
-	"1":"C4",
-	"2":"C#4",
-	"3":"D4",
-	"4":"D#4",
-	"5":"E4",
-	"6":"F4",
-	"7":"F#4",
-	"8":"G4",
-	"9":"G#4",
-	"10":"A4",
-	"11":"A#4",
-	"12":"B4",
-	"13":"C5",
-	"14":"C#5",
-	"15":"D5",
-	"16":"D#5",
-	"17":"E5",
-	"18":"F5",
-	"19":"F#5",
-	"20":"G5",
-	"21":"G#5",
-	"22":"A5",
-	"23":"A#5",
-	"24":"B5",
-	"25":"C6",
-	"26":"C#6",
-	"27":"D6",
-	"28":"D#6",
-	"29":"E6",
-	"30":"F6",
-	"31":"F#6",
-	"32":"G6",
-	"33":"G#6",
-	"34":"A6",
-	"35":"A#6",
-	"36":"B6",
-	"37":"C7"
-}
-
 function mtn(midiNumber) {
     return Tone.Frequency(midiNumber, "midi");
 }
@@ -139,7 +98,9 @@ class music{
 		// this.scheduleBar(this.bar,time)
 		// this.playBell(Math.floor(normalRandom(50,7)))
 
-		this.playBellSynthChord(Math.floor(normalRandom(50,7)))
+		if(sounds){
+			this.playBellSynthChord(Math.floor(normalRandom(50,7)))
+		}
 	}
 
 	static scheduleBar(bar,time){
@@ -186,6 +147,9 @@ class music{
 			this.bell.triggerAttackRelease(mtn(note),1.7,Tone.now()+delay,vel);
 			// this.synth.triggerAttackRelease(mtn(note),1.7,Tone.now()+delay,vel);
 			// this.synth.triggerAttackRelease(mtn(note+4),0.7,undefined,0.2);
+	}
+	static playFile(file,note,vel=1,delay=0){
+		this.sounds[file].triggerAttackRelease(mtn(note),1.7,Tone.now()+delay,vel);
 	}
 
 	static checkCollide(note,arr,dist=1){
@@ -292,27 +256,14 @@ NoteRelativity = {
 
 let lastnote = 0
 let updown = false
-function startPlay(){
-	setInterval((e)=>{
-	// let note=Math.floor(15+normalRandom(0,5));
-		let note 
-		let rnum
-		while (note == lastnote || (updown?(note>lastnote):(note<lastnote)) || note == undefined){
-			rnum = Math.floor(Math.random()*8)
-			note = 1+NoteRelativity.major[rnum]
-		}
-		updown = !updown
-		lastnote = note		
-		console.log(rnum)
-	SOUND.sinC4.triggerAttack(soundMapper[note]);},250)
-}
+
 
 
 
 // get cos/sin from time
 // cos(COUNTER/100)
 
-let sounds = false
+let sounds = true
 
 let soundNameDict = {
 	"Sf3":"./../../soundEffects/sinF3.mp3",
@@ -327,21 +278,21 @@ let soundDict = {
 }
 
 function ps(s){
-	if(sounds === false){
-		return
-	}
-	let arr = soundDict[s]
-	for(let i = 0; i < arr.length; i++){
-		if(arr[i].paused){
-			arr[i].play()
-			return("this");
-		} else {
-		}
-	}
-	let a = new Audio(soundNameDict[s])
-	arr.push(a)
-	a.play()
-	return(a)
+	// if(sounds === false){
+	// 	return
+	// }
+	// let arr = soundDict[s]
+	// for(let i = 0; i < arr.length; i++){
+	// 	if(arr[i].paused){
+	// 		arr[i].play()
+	// 		return("this");
+	// 	} else {
+	// 	}
+	// }
+	// let a = new Audio(soundNameDict[s])
+	// arr.push(a)
+	// a.play()
+	// return(a)
 }
 
 let ctx = myCanvas.getContext("2d")
@@ -643,6 +594,7 @@ class rollingBall{
 		this.mover = false
 		this.basename = "ball"
 		this.mass = this.size * this.size
+		this.friction = 1
 	}
 
 
@@ -651,11 +603,13 @@ class rollingBall{
 		this.y += this.vy
 
 		if(this.mover){
-			this.vx += Math.random()*this.mover-this.mover-2
-			this.vy += Math.random()*this.mover-this.mover-2
-			this.vx *= 0.99
-			this.vy *= 0.99
+			this.vx += Math.random()*this.mover-this.mover/2
+			this.vy += Math.random()*this.mover-this.mover/2
+			// this.vx *= 0.99
+			// this.vy *= 0.99
 		}
+		this.vx *= this.friction
+		this.vy *= this.friction
 
 
 		if(this.x < 0 || this.x > Width){
@@ -686,9 +640,16 @@ class rollingBall{
 
 	draw(){
 
-		ctx.strokeStyle = Math.random()>0.5?"#FFB0FF":"#FFFFFF"
+		// ctx.strokeStyle = Math.random()>0.5?"#FFB0FF":"#FFFFFF"
+		ctx.strokeStyle = this.stroke?this.stroke:"#FFFFFF"
+		if(this.strokef){
+			ctx.strokeStyle = this.strokef(this.actLife/this.dissapearLife)
+		}
 		ctx.lineWidth = 1
 		ctx.fillStyle = "rgba(255,0,0,"+(this.actLife/this.dissapearLife)+")"
+		if(this.colorf){
+			ctx.fillStyle = this.colorf(this.actLife/this.dissapearLife)
+		}
 		if(this.actLife < this.dissapearLife){
 			ctx.lineWidth = this.actLife/this.dissapearLife
 		}
@@ -828,7 +789,7 @@ class liner{
 				this.vy += (Math.random()-0.5)*55
 
 				this.lineUp += 1
-				if(this.lineUp%this.myDat == 0 && this.bounded === false){
+				if(this.lineUp%this.myDat == 0 && this.bounded === false && parr.length < 1500){
 					let c = new liner(this.x,this.y,5,this.colType,0)
 					c.maxActLife = 10000000
 					c.vx = this.vx + Math.random()*100-50
@@ -1020,25 +981,12 @@ document.addEventListener("mousedown",()=>{
 var GLO = 9
 let summonItem = ()=>{
 	// parr.push(new liner(mouseX,mouseY,GLO,2))
-	let c = new liner(mouseX,mouseY,7,10)
-	c.vx = Math.random()*9
-	c.vy = Math.random()*9
-	c.size = distance(c.vx,c.vy,0,0)/3
-	c.sizef = (a,b)=>{return(c.size*b*b*4)}
-	c.mass = c.size * 30
-	c.starSignature = Math.random()*Math.PI*2
-	let asize = 3*(c.size+1)**1.7
-	c.specialDraw = (a)=>{
-		gradient = ctx.createRadialGradient(a.x, a.y, 0, a.x, a.y, asize)
-		let A = Math.abs(Math.sin(COUNTER/(asize+3)+a.starSignature))*0.6+0.4
-		gradient.addColorStop(0.2, "rgba(255,255,"+A*Math.random()*255+","+A+")");
-		// gradient.addColorStop(0, "rgba(255,255,0,1)");
-		gradient.addColorStop(1, "rgba(255,255,0,0)");
-
-		ctx.fillStyle = gradient;
-		ctx.fillRect(a.x-asize, a.y-asize, asize*2, asize*2);
-	}
-
+	let c = new rollingBall(mouseX,mouseY,Math.random()*10-5,Math.random()*10-5)
+	c.colorf = (a)=>{return("rgba(0,0,"+(100*Math.sin(COUNTER/30)+100)+","+(0.3*a+7)+")")}
+	c.strokef = (a)=>{return("rgba(0,"+(100*Math.sin(COUNTER/30+Math.PI)+100)+",0,"+(0.3*a+7)+")")}
+	c.mover = 0.2
+	c.friction = 0.99
+	c.size *= 2
 	parr.push(c)
 			// let c = new liner(mouseX,mouseY,5,6,0)
 			// c.maxActLife = 10000000
@@ -1053,12 +1001,14 @@ let summonItem = ()=>{
 			// parr.push(c)
 	}
 
-let keymapper = {"w":"B3","2":"A#3","q":"A3","e":"C4","4":"C#4","r":"D4","5":"D#4","t":"E4","y":"F4","7":"F#4","u":"G4","8":"G#4","i":"A4","9":"A#4","o":"B4","p":"C5"}
+// let keymapper = {"w":"B3","2":"A#3","q":"A3","e":"C4","4":"C#4","r":"D4","5":"D#4","t":"E4","y":"F4","7":"F#4","u":"G4","8":"G#4","i":"A4","9":"A#4","o":"B4","p":"C5"}
+let keymapper = {"z":48,"s":49,"x":50,"d":51,"c":52,"v":53,"g":54,"b":55,"h":56,"n":57,"j":58,"m":59,",":60,"l":61,".":62,";":63,"/":64,"0":75,"2":61,"3":63,"5":66,"6":68,"7":70,"9":73,"q":60,"w":62,"e":64,"r":65,"t":67,"y":69,"u":71,"i":72,"o":74,"p":76,"[":77,"=":78,"]":79}
 
 document.addEventListener("keydown",(e)=>{
 	let k = e.key
 	// music.playBell(e.keyCode-10)
-	if(keymapper[e.key])(music.playBell(Tone.Frequency(keymapper[e.key]).toMidi()))
+	// if(keymapper[e.key])(music.playBell(Tone.Frequency(keymapper[e.key]).toMidi()))
+	if(keymapper[e.key])(music.playBell(keymapper[e.key]))
 	if(k == " "){
 		parr.forEach((e)=>{
 			if(e.nonPlayerControllable){return}
@@ -1078,7 +1028,8 @@ document.addEventListener("keydown",(e)=>{
 		time_outline_color = "rgba(0,0,0,0)"
 	} else if(k == "\\"){
 
-		summonItem()
+		// summonItem()
+		events.instantaneous["splatter"](mouseX,mouseY,20)
 
 	} else{
 		let r = Math.random()*5
@@ -1148,6 +1099,48 @@ class events{
 	static loop(){
 		// this.varb.starShineGradient = ctx.createRadialGradient(a.x, a.y, 0, a.x, a.y, asize);
 	}
+
+	static instantaneous = {
+		"blue splatter ball":(x,y)=>{
+			let c = new rollingBall(x,y,Math.random()*10-5,Math.random()*10-5)
+			c.colorf = (a)=>{return("rgba(0,0,"+(100*Math.sin(COUNTER/30)+100)+","+(0.3*a+0.7)+")")}
+			c.strokef = (a)=>{return("rgba(0,"+(100*Math.sin(COUNTER/30+Math.PI)+100)+",0,"+(0.3*a+0.7)+")")}
+			c.mover = 0.2
+			c.friction = 0.99
+			c.size *= 2
+			c.actLife *= (1+Math.random())
+			c.actLife *= (1+Math.abs(normalRandom(0,2)))
+			parr.push(c)
+		},
+		"splatter ball":(x,y)=>{
+			let c = new rollingBall(x,y,Math.random()*10-5,Math.random()*10-5)
+			let phaseColorR = Math.random()*255
+			let phaseColorG = Math.random()*255
+			let phaseColorB = Math.random()*255
+			c.colorf = (a)=>{let phase = 0.5+0.5*Math.sin(COUNTER/50+c.phase);
+			// return("rgba("+phase*phaseColorR+","+phase*phaseColorG+","+phase*phaseColorB+","+(0.3*a+0.7)+")")}
+			return("rgba("+phaseColorR+","+phaseColorG+","+phaseColorB+","+Math.min(1,(0.3*a+0.7))*phase+")")}
+			// c.strokef = (a)=>{return("rgba(0,"+(100*Math.sin(COUNTER/30+Math.PI)+100)+",0,"+(0.3*a+0.7)+")")}
+			c.stroke = "transparent"
+			c.mover = 0.2
+			c.friction = 0.99
+			c.size *= 2
+			c.actLife *= (1+Math.random())
+			c.actLife *= (1+Math.abs(normalRandom(0,2)))
+			c.dissapearLife = c.actLife/10
+			c.phase = Math.random()*2*Math.PI
+			parr.push(c)
+		},
+		"blue splatter":(x,y,n)=>{
+			for(let i = 0; i < n; i++){
+				this.instantaneous["blue splatter ball"](x,y)
+			}
+		},"splatter":(x,y,n)=>{
+			for(let i = 0; i < n; i++){
+				this.instantaneous["splatter ball"](x,y)
+			}
+		}
+	}
 }
 
 function push(particle,dx,dy){
@@ -1176,7 +1169,6 @@ function randomEvents(){
 					rain.nvy += e.vect[1] * 15
 				}
 				
-
 				e.life -= e.strength
 
 				for(let i = e.parr.length-1; i > -1; i--){
@@ -1199,7 +1191,7 @@ function randomEvents(){
 	if(Math.random() > 0.99995 && events.happening.storm == undefined){
 		let startPoint = [Math.random()*Width*3-Width,Math.random()*Height-Height]
 		if(!(startPoint[0]>0 && startPoint[0]<Width &&startPoint[1]>0 && startPoint[1]<Height)){
-		events.addEvent("beam storm",{"chaotic":(Math.random()>0.97),"strength":(1+Math.floor(Math.random()*3)),"parr":[],"life":7000,
+		events.addEvent("beam storm",{"chaotic":(Math.random()>0.97),"strength":1,"parr":[],"life":1000,
 			"startPoint":startPoint,"target":[Math.random()*Width,Math.random()*Height],"update":(e)=>{
 			if(COUNTER%5 == 0){
 				for(let i = 0; i < e.strength; i++){
@@ -1222,7 +1214,7 @@ function randomEvents(){
 
 					parr.push(c)
 					e.parr.push(c)
-					c.invincible = 50
+					c.invincible = 5
 				}
 				
 
@@ -1230,7 +1222,7 @@ function randomEvents(){
 			}
 		}})}
 	}
-	if(Math.random() > 0.9995 && events.happening.storm == undefined){
+	if(Math.random() > 0.9999 && events.happening.storm == undefined){
 		let startPoint = [Math.random()*Width*3-Width,Math.random()*Height-Height]
 		if(!(startPoint[0]>0 && startPoint[0]<Width &&startPoint[1]>0 && startPoint[1]<Height)){
 		events.addEvent("star shower",{"chaotic":(Math.random()>0.97),"strength":(1+Math.floor(Math.random()*2)),
@@ -1283,10 +1275,23 @@ function randomEvents(){
 			comparer.disabled[2] = e.life
 				parr.forEach((E)=>{
 					if(E.following || E.mass == Infinity){return}
-					E.vx *= 1 - (0.05)
-					E.vy *= 1 - (0.05)
-					E.nvx *= 0.95
-					E.nvy *= 0.95
+
+					// if(E.mass){
+					// // if(false){
+					// 	E.vx *= 1 - (1 / E.mass)
+					// 	E.vy *= 1 - (1 / E.mass)
+					// 	E.nvx *= 1 - (1 / E.mass)
+					// 	E.nvy *= 1 - (1 / E.mass)
+					// } else {
+						let calmingEffect = 0.05
+						if(E.calming){calmingEffect*=E.calming}
+						calmingEffect = 1-calmingEffect
+						E.vx *= calmingEffect
+						E.vy *= calmingEffect
+						E.nvx *= calmingEffect
+						E.nvy *= calmingEffect
+					// }
+					
 					E.life -= 50
 				})
 			}
@@ -1296,7 +1301,7 @@ function randomEvents(){
 		}})
 	}
 
-	if(Math.random() > 0.9996){
+	if(Math.random() > 0.9997){
 		events.addEvent("ripple",{"life":8000,"store":{},"start":(e)=>{
 			events.varbs.rippleStrength = Math.random()*6 + 2
 		},"end":(e)=>{
@@ -1315,6 +1320,7 @@ function randomEvents(){
 let COUNTER = 0
 NATURAL_BOLTRATE = 0.99
 time_fill_color = "#B00000"
+time_fill_color = "rgba(0,0,0,0)"
 time_outline_color = "#900000"
 setInterval(()=>{
 	COUNTER ++
@@ -1385,14 +1391,11 @@ function disrupt(d){
 
 
 
-//howler polytone
 //player controlling events
 //more events
 
 
-//shooting starat\
-
-
+//shooting stars
 
 
 
