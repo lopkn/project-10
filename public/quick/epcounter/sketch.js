@@ -27,6 +27,16 @@ function init(){
 	initSounds([])
 }
 
+function RNG(seed) {
+    var m_as_number = 2**53 - 111
+    var m = 2n**53n - 111n
+    var a = 5667072534355537n
+    var s = BigInt(seed) % m
+    return function () {
+        return Number(s = s * a % m) / m_as_number
+    }
+}
+
 function initSounds(arr){
 Tone.Transport.start();
 Tone.Transport.scheduleRepeat((time) => {
@@ -164,18 +174,31 @@ class music{
 		return(false)
 	}
 
+	static checkCollider(note,dict,dist=1,oct=1){
+		for(let i = 0; i < oct+1; i++){
+			if(dict[note+dist+i*12] == true){return(true)}
+			if(dict[note-dist+i*12] == true){return(true)}
+			if(dict[note+dist-i*12] == true){return(true)}
+			if(dict[note-dist-i*12] == true){return(true)}
+		}
+		return(false)
+	}
 
-	static playBellSynthChord(note,vel=1,adel=0.2){
+
+	static playBellSynthChord(note,vel=1,adel=0.2,seed=Math.floor(Math.random()*5000000)){
 		let notes = [note]
 		let dell = 0.2
 		let avel = vel
 		this.playBell(note,vel)
+		let trand = RNG(seed)
 		let str = ""
-		while(notes.length<16){
+		let counter = 0
+		while(notes.length<16  && counter<10000){
+			counter += 1
 					let del = adel 
-					if(Math.random()>0.7){
+					if(trand()>0.7){
 						del*=2
-					} else if(Math.random()>0.9){
+					} else if(trand()>0.9){
 						del*=3
 					}
 			if(note > events.varbs.noteCeiling){
@@ -183,50 +206,135 @@ class music{
 				str += ("notes too high, reducing by 4 octaves (48 semitones)")
 			}
 			str += ("notes:"+JSON.stringify(notes)+"\n")
-			if(Math.random() > 0.9){
-					// str += ("trying to do 1...")
+			if(trand() > 0.9){
 					let rel = 4
 					note += rel
 					if(this.checkCollide(note,notes)){note -= rel;continue}
 					if(this.checkCollide(note,notes,2)){note -= rel;continue}
 					vel *= 0.8
-					// this.playBell(note,vel,dell)
 					dell += del
 					notes.push(note)
-					// str += ("note checker 1 passed")
-				} else if(Math.random() > 0.2){
+				} else if(trand() > 0.2){
 					let rel = 5
 					note += rel
-					// str += ("trying to do 2...")
 					if(this.checkCollide(note,notes)){note -= rel;continue}
 					if(this.checkCollide(note,notes,2)){note -= rel;continue}
 					vel *= 0.8
-					// this.playBell(note,vel,dell)
 					dell += del
-					// str += ("note checker 2 passed")
 					notes.push(note)
 				} else {
-					let rel = Math.floor(1+Math.random()*8)
+					let rel = Math.floor(1+trand()*8)
 					note += rel
-					// str += ("trying to do 3... random semitone used:"+rel)
 					if(this.checkCollide(note,notes)){note -= rel;continue}
 					if(this.checkCollide(note,notes,2)){note -= rel;continue}
 					vel *= 0.8
-					// this.playBell(note,vel,dell)
 					dell += del
-					// str += ("note 3 passed, random semitone added:"+rel)
 					notes.push(note)
 				}
 			}
-		let shuffledNotes = notes.sort((a,b)=>{return(0.5-Math.random())})
+		let shuffledNotes = notes.sort((a,b)=>{return(0.5-trand())})
 		notes.forEach((e,i)=>{
 			this.playBell(e,avel*0.9**(i-1),i*adel)
-			notes[i] = Tone.Frequency(e, "midi").toNote();
+			// notes[i] = Tone.Frequency(e, "midi").toNote();
 		})
-		// console.log(str)
+
+		this.noteProcessing(notes)
 
 		console.log(JSON.stringify(notes))
 		return(notes)
+	}
+	static playBellSynthChord2(notes,avel=1,adel=0.2,seed=Math.floor(Math.random()*5000000)){
+		let dell = 0.2
+		let trand = RNG(seed)
+		let counter = 0
+		let notearr = []
+
+
+
+		while(counter<10000){
+			counter++
+			let note = Math.floor(Math.random()*(events.varbs.noteCeiling-events.varbs.noteFloor)+events.varbs.noteFloor);
+			if(notes[note] !== undefined){continue}
+			let collided1 = this.checkCollider(note,notes,1,2)
+			let collided2 = this.checkCollider(note,notes,2,2)
+			if(collided2 || collided1){notes[note] = false} else {
+				notes[note] = true
+			}
+
+		}
+
+		let objk = Object.keys(notes)
+		objk.forEach((e)=>{
+			if(notes[e] == true){notearr.push(e)}
+		})
+
+		
+
+		// let shuffledNotes = notearr.sort((a,b)=>{return(0.5-trand())})
+		notearr.forEach((e,i)=>{
+			this.playBell(e,avel*0.9**(i-1),i*adel)
+			notes[i] = Tone.Frequency(e, "midi").toNote();
+		})
+		// this.noteProcessing(notearr)
+		console.log(JSON.stringify(notearr))
+		return(notes)
+	}
+	static playBellSynthChord3(notes,avel=1,adel=0.2,seed=Math.floor(Math.random()*5000000)){
+		let dell = 0.2
+		let trand = RNG(seed)
+		let counter = 0
+		let notearr = []
+
+		let objk = Object.keys(notes)
+
+		let note = events.varbs.noteFloor
+		while(note<events.varbs.noteCeiling){
+			note++
+			if(notes[note] !== undefined){continue}
+			let collided1 = this.checkCollider(note,notes,1,2)
+			let collided2 = this.checkCollider(note,notes,2,2)
+			if(collided2 || collided1 || Math.random()>0.8){notes[note] = false } else {
+				notes[note] = true
+			}
+
+		}
+
+		objk = Object.keys(notes)
+		objk.forEach((e)=>{
+			if(notes[e] == true){notearr.push(e)}
+		})
+
+		
+
+		// let shuffledNotes = notearr.sort((a,b)=>{return(0.5-trand())})
+		notearr.forEach((e,i)=>{
+			this.playBell(e,avel*0.9**(i-1),i*adel)
+			notes[i] = Tone.Frequency(e, "midi").toNote();
+		})
+		// this.noteProcessing(notearr)
+		console.log(JSON.stringify(notearr))
+		return(notes)
+	}
+	static noteProcessing(arr){
+		arr = arr.sort((a, b) => a - b)
+		let rootRel = []
+		arr.forEach((e,i)=>{rootRel[i] = arr[i]-arr[0]})
+		console.log(rootRel)
+		let importanceHierarchy = []
+
+		this.chordClash(arr,this.lastChord)
+		this.lastChord = arr
+	}
+
+	static lastChord = []
+
+	static chordClash(c1,c2){
+		let clasharr = []
+		c1.forEach((e,i)=>{
+			if(c2[i] == undefined){return}
+			clasharr[i] = Math.abs(e-c2[i])
+		})
+		console.log("chord clash: "+JSON.stringify(clasharr))
 	}
 }
 
@@ -347,7 +455,7 @@ class comparer{
 			return
 		}
 		if(t > 4)
-		console.log(t)
+		// console.log(t)
 
 		switch(t){
 		case 1:
@@ -1064,7 +1172,7 @@ let parr = []
 
 class events{
 	static happening = {}
-	static varbs = {rippleStrength:1,trip:1,noteCeiling:85}
+	static varbs = {rippleStrength:1,trip:1,noteCeiling:85,noteFloor:45}
 	static updateAll(){
 		let objk = Object.keys(this.happening)
 		objk.forEach((E)=>{
@@ -1117,9 +1225,9 @@ class events{
 			let phaseColorR = Math.random()*255
 			let phaseColorG = Math.random()*255
 			let phaseColorB = Math.random()*255
-			c.colorf = (a)=>{let phase = 0.5+0.5*Math.sin(COUNTER/150+c.phase);
+			c.colorf = (a)=>{let phase = 0.5+0.5*Math.sin(COUNTER/50+c.phase);
 			// return("rgba("+phase*phaseColorR+","+phase*phaseColorG+","+phase*phaseColorB+","+(0.3*a+0.7)+")")}
-			return("rgba("+phaseColorR+","+phaseColorG+","+phaseColorB+","+Math.min(1,(a))*phase+")")}
+			return("rgba("+phaseColorR+","+phaseColorG+","+phaseColorB+","+Math.min(1,(0.3*a+0.7))*phase+")")}
 			// c.strokef = (a)=>{return("rgba(0,"+(100*Math.sin(COUNTER/30+Math.PI)+100)+",0,"+(0.3*a+0.7)+")")}
 			c.stroke = "transparent"
 			c.mover = 0.2
@@ -1127,7 +1235,6 @@ class events{
 			c.size *= 2
 			c.actLife *= (1+Math.random())
 			c.actLife *= (1+Math.abs(normalRandom(0,2)))
-			c.size *= (1+Math.abs(normalRandom(0,2)))
 			c.dissapearLife = c.actLife/10
 			c.phase = Math.random()*2*Math.PI
 			parr.push(c)
@@ -1397,6 +1504,7 @@ function disrupt(d){
 
 
 //shooting stars
+
 
 
 

@@ -773,11 +773,64 @@ tautomers: readily changing isomers
 
 
 
+what did u answer for "which types of cells dont use phagocytosis"
 
 
 
 
 
+
+
+O2.   
+CO2. 
+H.   
+ATP.  
+NAD
+NADH
+
+
+maybe we are missing a simple answer
+
+Maybe, there should be a function of TENSION(chord)
+which outputs an index
+and the index cant deviate for more than X
+and each note would contribute to the tension index,
+with the lowest notes contributing the most to the index?
+
+that sounds like something we can avoid, i.e. i avoided identifying chords to build chords in the first place
+maybe we can avoid chords to string chords as well
+
+Then think of an easy algorithm of naming all the chords, given the notes 
+but this is based on a false assumption that the chord is < 12 semitones in range
+That was but its not modular and i would update my code to optimally play ANY chord that sounds good
+
+i want it to be 100% pseudorandom
+
+so you should find a rule for the naming scheme that will work for any chord
+
+
+imagine it does
+i can literally just unrestrict it by removing the line that puts on the restriction to play decent chords
+
+
+
+
+
+
+
+imagine this
+
+
+
+
+
+
+
+from N major to N+4 diminished = always bad
+
+what is there to do today
+
+Peer review is due when
 
 
 
