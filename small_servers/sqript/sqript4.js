@@ -150,6 +150,7 @@ var RES = {
 
 function algorithm(id,type){
   switches[id].getResult = RES[type]
+  switches[id].algorithm = type
 }
 
 
@@ -293,7 +294,7 @@ function wrapInit(body,out){
   
 }
 
-function generateInputArray(i,A=[],str=""){ //use as g()
+function generateInputArray(i,A=[],str=""){ //use as g(num)
   i--
   if(i > 0){
     generateInputArray(i,A,str+"1")
@@ -302,7 +303,9 @@ function generateInputArray(i,A=[],str=""){ //use as g()
   }
   A.push(str)
   return(A)
-}
+} // this returns a list of all possible combinations for i switches
+
+
 
 
 // amounts of node to build
