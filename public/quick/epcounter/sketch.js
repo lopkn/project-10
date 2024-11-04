@@ -1051,6 +1051,9 @@ function getCol(type,l,e){
 		case 10:
 			ctx.strokeStyle = ("rgba(255,255,"+(e[4]*3.5*2.5*Math.random())+","+(0.7+0.3*l)+")") // shooting star
 			break;
+		case 11: //sinusoidal blue
+			ctx.strokeStyle = "rgba(0,0,"+(100*Math.sin(COUNTER/30+e[4]/30)+100)+","+(0.3*a+0.7)+")"
+			break;
 	}
 }
 
@@ -1110,13 +1113,15 @@ let summonItem = ()=>{
 	}
 
 // let keymapper = {"w":"B3","2":"A#3","q":"A3","e":"C4","4":"C#4","r":"D4","5":"D#4","t":"E4","y":"F4","7":"F#4","u":"G4","8":"G#4","i":"A4","9":"A#4","o":"B4","p":"C5"}
-let keymapper = {"z":48,"s":49,"x":50,"d":51,"c":52,"v":53,"g":54,"b":55,"h":56,"n":57,"j":58,"m":59,",":60,"l":61,".":62,";":63,"/":64,"0":75,"2":61,"3":63,"5":66,"6":68,"7":70,"9":73,"q":60,"w":62,"e":64,"r":65,"t":67,"y":69,"u":71,"i":72,"o":74,"p":76,"[":77,"=":78,"]":79}
+let keymapper = {"z":48,"s":49,"x":50,"d":51,"c":52,"v":53,"g":54,"b":55,"h":56,"n":57,"j":58,"m":59,",":60,"l":61,".":62,";":63,"/":64,"0":75,"2":61,"3":63,"5":66,"6":68,"7":70,"9":73,"q":60,"w":62,"e":64,"r":65,"t":67,"y":69,"u":71,"i":72,"o":74,"p":76,"[":77,"=":78,"]":79,"\\":81,"Backspace":80}
 
 document.addEventListener("keydown",(e)=>{
 	let k = e.key
 	// music.playBell(e.keyCode-10)
 	// if(keymapper[e.key])(music.playBell(Tone.Frequency(keymapper[e.key]).toMidi()))
-	if(keymapper[e.key])(music.playBell(keymapper[e.key]))
+	if(keymapper[e.key] && e.repeat == false)(music.playBell(keymapper[e.key]+12*events.varbs.octave))
+	if(e.code == "ShiftLeft"){events.varbs.octave--}
+	if(e.code == "ShiftRight"){events.varbs.octave++}
 	if(k == " "){
 		parr.forEach((e)=>{
 			if(e.nonPlayerControllable){return}
@@ -1151,7 +1156,7 @@ document.addEventListener("keydown",(e)=>{
 
 			return
 		}
-	parr.push(new liner(mouseX,mouseY,Math.floor(Math.random()*4),3))
+	parr.push(new liner(mouseX,mouseY,Math.floor(Math.random()*4),11))
 
 	}
 	}
@@ -1172,7 +1177,7 @@ let parr = []
 
 class events{
 	static happening = {}
-	static varbs = {rippleStrength:1,trip:1,noteCeiling:85,noteFloor:45}
+	static varbs = {rippleStrength:1,trip:1,noteCeiling:85,noteFloor:45,octave:0}
 	static updateAll(){
 		let objk = Object.keys(this.happening)
 		objk.forEach((E)=>{
