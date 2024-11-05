@@ -41,7 +41,7 @@ function initSounds(arr){
 Tone.Transport.start();
 Tone.Transport.scheduleRepeat((time) => {
     music.runbar(time)
-}, 1.2)
+}, scene.interval*scene.beatsPerBar)
 
 {	let audio = new Tone.Sampler({
 	urls: {
@@ -76,6 +76,12 @@ function mtn(midiNumber) {
 }
 
 
+var scene = {
+	"sounds":true,
+	"interval":0.3,
+	"beatsPerBar":4
+}
+
 class music{
 	static bar = {"scheduled":false,"position":0,"noteTimes":[60,64,67,72,71,72,67,64],"interval":0.3,"relativity":0} //64 for now
 	static stanza = {"repeats":0,"position":0,"bars":[]}
@@ -99,7 +105,7 @@ class music{
 		"C4":"./untitled.mp3",
 	},
 }).toDestination();
-	static echo = new Tone.PingPongDelay(0.6, 0.6).toDestination();
+	static echo = new Tone.PingPongDelay(scene.interval*2, scene.interval*2).toDestination();
 
 	static runbar(time){
 		this.counter += 1
@@ -108,7 +114,7 @@ class music{
 		// this.scheduleBar(this.bar,time)
 		// this.playBell(Math.floor(normalRandom(50,7)))
 
-		if(sounds){
+		if(scene.sounds){
 			this.playBellSynthChord(Math.floor(normalRandom(50,7)))
 		}
 	}
@@ -185,7 +191,7 @@ class music{
 	}
 
 
-	static playBellSynthChord(note,vel=1,adel=0.2,seed=Math.floor(Math.random()*5000000)){
+	static playBellSynthChord(note,vel=1,adel=scene.interval,seed=Math.floor(Math.random()*5000000)){
 		let notes = [note]
 		let dell = 0.2
 		let avel = vel
@@ -232,9 +238,22 @@ class music{
 					notes.push(note)
 				}
 			}
-		let shuffledNotes = notes.sort((a,b)=>{return(0.5-trand())})
+		// let shuffledNotes = notes.sort((a,b)=>{return(0.5-trand())})
+		let delran = 0
+		let delrans = []
 		notes.forEach((e,i)=>{
-			this.playBell(e,avel*0.9**(i-1),i*adel)
+			if(Math.random() > 0.9){delran += adel*1;delrans.push(1)}
+			if(Math.random() > 0.8){delran += adel*0.25;delrans.push(0.25)}
+			if(Math.random() > 0.8){delran += adel*0.5;delrans.push(0.5)}
+			if(Math.random() > 0.8){delran += adel*-0.25;delrans.push(-0.25)}
+			if(Math.random() > 0.8){delran += adel*-0.5;delrans.push(-0.5)}
+			if(Math.random()>0.7 && delrans.length > 0){
+				let delransChoice = Math.floor(Math.random()*delrans.length)
+				delran -= adel*delrans[delransChoice]
+				delrans.splice(delransChoice,1)
+			}
+
+			this.playBell(e,avel*0.9**(i-1),i*adel+delran)
 			// notes[i] = Tone.Frequency(e, "midi").toNote();
 		})
 
@@ -341,6 +360,7 @@ class music{
 music.bell.connect(music.reverb)
 music.bell.connect(music.echo)
 music.bell.connect(music.eq)
+music.bell.set({volume:-20})
 music.synth.set({
     oscillator: {
         type: 'sine4' 
@@ -351,7 +371,7 @@ music.synth.set({
 		    sustain:1,
 		    release:2
     },
-    volume: -60
+    volume:-60
 })
 music.generateNextStanza()
 
@@ -371,7 +391,7 @@ let updown = false
 // get cos/sin from time
 // cos(COUNTER/100)
 
-let sounds = true
+// let sounds = true
 
 let soundNameDict = {
 	"Sf3":"./../../soundEffects/sinF3.mp3",
@@ -1119,6 +1139,8 @@ document.addEventListener("keydown",(e)=>{
 	let k = e.key
 	// music.playBell(e.keyCode-10)
 	// if(keymapper[e.key])(music.playBell(Tone.Frequency(keymapper[e.key]).toMidi()))
+	
+	if(e.key == '`'){command(prompt("enter command:"));return}
 	if(keymapper[e.key] && e.repeat == false)(music.playBell(keymapper[e.key]+12*events.varbs.octave))
 	if(e.code == "ShiftLeft"){events.varbs.octave--}
 	if(e.code == "ShiftRight"){events.varbs.octave++}
@@ -1495,6 +1517,37 @@ setInterval(()=>{
 
 
 
+function command(cmd){
+	let recognized = false
+
+	if(cmd[0]=="/"){
+		let cmdsplit = cmd.substring(1).split(" ")
+		if(cmdsplit[0] == "echo"){
+			if(cmdsplit[1] == "false" || cmdsplit[1] == "off"){
+				music.echo.set({wet:0})
+			} else if(cmdsplit[1] == "true" || cmdsplit[1] == "on") {
+				music.echo.set({wet:1})
+			}
+		} else if(cmdsplit[0] == "reverb"){
+			if(cmdsplit[1] == "false" || cmdsplit[1] == "off"){
+				music.reverb.set({wet:0})
+			} else if(cmdsplit[1] == "true" || cmdsplit[1] == "on") {
+				music.reverb.set({wet:0.95})
+			}
+		} else if(cmdsplit[0] == "tempo" || cmdsplit[0] == "bpm"){
+			if(!isNaN(parseFloat(cmdsplit[1]))){
+				Tone.Transport.bpm.value = parseFloat(cmdsplit[1])
+				scene.interval = 36 / parseFloat(cmdsplit[1])
+
+			}
+		}
+		recognized = true
+	}
+
+	if(!recognized){
+		eval(cmd)
+	}
+}
 
 
 function disrupt(d){
@@ -1509,6 +1562,28 @@ function disrupt(d){
 
 
 //shooting stars
+
+
+
+
+command("/reverb off")
+command("/echo off")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
