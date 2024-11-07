@@ -238,11 +238,11 @@ class music{
 					notes.push(note)
 				}
 			}
-		// let shuffledNotes = notes.sort((a,b)=>{return(0.5-trand())})
+		let shuffledNotes = notes.sort((a,b)=>{return(0.5-trand())})
 		let delran = 0
 		let delrans = []
 		notes.forEach((e,i)=>{
-			if(Math.random() > 0.9){delran += adel*1;delrans.push(1)}
+			if(Math.random() > 0.9){delran += adel*1}
 			if(Math.random() > 0.8){delran += adel*0.25;delrans.push(0.25)}
 			if(Math.random() > 0.8){delran += adel*0.5;delrans.push(0.5)}
 			if(Math.random() > 0.8){delran += adel*-0.25;delrans.push(-0.25)}
@@ -262,6 +262,11 @@ class music{
 		console.log(JSON.stringify(notes))
 		return(notes)
 	}
+
+	static properShuffle(arr){
+
+	}
+
 	static playBellSynthChord2(notes,avel=1,adel=0.2,seed=Math.floor(Math.random()*5000000)){
 		let dell = 0.2
 		let trand = RNG(seed)
@@ -474,7 +479,7 @@ class comparer{
 			this.disabled[t] -= 1
 			return
 		}
-		if(t > 4)
+		// if(t > 4)
 		// console.log(t)
 
 		switch(t){
@@ -730,7 +735,7 @@ class rollingBall{
 		this.x += this.vx
 		this.y += this.vy
 
-		if(this.mover){
+		if(this.mover && COUNTER % 2 == 0){
 			this.vx += Math.random()*this.mover-this.mover/2
 			this.vy += Math.random()*this.mover-this.mover/2
 			// this.vx *= 0.99
@@ -1116,7 +1121,7 @@ let summonItem = ()=>{
 	c.colorf = (a)=>{return("rgba(0,0,"+(100*Math.sin(COUNTER/30)+100)+","+(0.3*a+7)+")")}
 	c.strokef = (a)=>{return("rgba(0,"+(100*Math.sin(COUNTER/30+Math.PI)+100)+",0,"+(0.3*a+7)+")")}
 	c.mover = 0.2
-	c.friction = 0.99
+	c.friction = 0.999
 	c.size *= 2
 	parr.push(c)
 			// let c = new liner(mouseX,mouseY,5,6,0)
@@ -1561,20 +1566,14 @@ function disrupt(d){
 //more events
 
 
-//shooting stars
-
+//peddal
+//firefly events
+//rare dingdong event
 
 
 
 command("/reverb off")
 command("/echo off")
-
-
-
-
-
-
-
 
 
 
