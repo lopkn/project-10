@@ -21,10 +21,13 @@ function syl(str){
 			ending -= 1 
 			if(ending == 0){
 				console.log(syllable)
+				amount += 1
 				syllable=""
 			}
 		}
 
 	}
 	console.log(syllable)
+	amount += 1
+	return(amount)
 }
