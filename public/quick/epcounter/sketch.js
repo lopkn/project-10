@@ -23,6 +23,10 @@ myCanvas2.style.position = "absolute"
 
 var SOUND = {}
 
+function rint(x){
+	return(Math.floor(Math.random()*x))
+}
+
 function init(){
 	initSounds([])
 }
@@ -182,10 +186,10 @@ class music{
 
 	static checkCollider(note,dict,dist=1,oct=1){
 		for(let i = 0; i < oct+1; i++){
-			if(dict[note+dist+i*12] == true){return(true)}
-			if(dict[note-dist+i*12] == true){return(true)}
-			if(dict[note+dist-i*12] == true){return(true)}
-			if(dict[note-dist-i*12] == true){return(true)}
+			if(dict[note+dist+i*12] === true){return(true)}
+			if(dict[note-dist+i*12] === true){return(true)}
+			if(dict[note+dist-i*12] === true){return(true)}
+			if(dict[note-dist-i*12] === true){return(true)}
 		}
 		return(false)
 	}
@@ -339,6 +343,91 @@ class music{
 		console.log(JSON.stringify(notearr))
 		return(notes)
 	}
+	static GSC(notes,avel=1,adel=0.2,seed=Math.floor(Math.random()*5000000)){
+		let dell = 0.2
+		let trand = RNG(seed)
+		let counter = 0
+		let notearr = []
+		let objk = Object.keys(notes)
+		let note = events.varbs.noteFloor
+		while(note<events.varbs.noteCeiling){
+			note++
+			if(notes[note] !== undefined){continue}
+			let collided1 = this.checkCollider(note,notes,1,2)
+			let collided2 = this.checkCollider(note,notes,2,2)
+			if(collided2 || collided1){notes[note] = false } else {
+				if(Math.random()>0.4){
+					notes[note] = "skip"
+				} else {
+					notes[note] = true
+				}
+			}
+		}
+		objk = Object.keys(notes)
+		objk.forEach((e)=>{
+			if(notes[e] == "skip"){notes[e]=!(this.checkCollider(e,notes,1,1),this.checkCollider(e,notes,2,1))}
+		})
+		objk.forEach((e)=>{
+			if(notes[e] == true){notearr.push(e)}
+		})
+		// // let shuffledNotes = notearr.sort((a,b)=>{return(0.5-trand())})
+		// notearr.forEach((e,i)=>{
+		// 	this.playBell(e,avel*0.9**(i-1),i*adel)
+		// 	notes[i] = Tone.Frequency(e, "midi").toNote();
+		// })
+		// // this.noteProcessing(notearr)
+		console.log(JSON.stringify(notearr))
+		return(notes)
+	}
+	static conform(dict,arr){
+		
+	}
+
+	static PD1(dict,avel=1,adel=0.2){
+		let objk = Object.keys(dict)
+		let notearr = []
+		objk.forEach((e)=>{
+			if(dict[e] == true){notearr.push(e)}
+		})
+
+		let delran = 0
+		let delrans = []
+		let summer = 0
+		if(notearr.length>12 || Math.random()>0.8){
+			while(notearr.length < 16){
+			notearr.push(notearr[notearr.length-rint(notearr.length/2)-1])
+			}
+		} else {
+			while(notearr.length < 13){
+			notearr.push(notearr[notearr.length-rint(notearr.length/2)-1])
+			}
+		}
+		
+
+		notearr.forEach((e,i)=>{
+
+			if(e == "blank"){return}
+
+			// if(Math.random() > 0.9){delran += adel*1}
+			// if(Math.random() > 0.9){delran += adel*0.25;delrans.push(0.25)}
+			// if(Math.random() > 0.9){delran += adel*0.5;delrans.push(0.5)}
+			// if(Math.random() > 0.9){delran += adel*-0.25;delrans.push(-0.25)}
+			// if(Math.random() > 0.9){delran += adel*-0.5;delrans.push(-0.5)}
+			// if(Math.random()>0.7 && delrans.length > 0){
+			// 	let delransChoice = Math.floor(Math.random()*delrans.length)
+			// 	delran -= adel*delrans[delransChoice]
+			// 	delrans.splice(delransChoice,1)
+			// }
+			this.playBell(e,avel*0.9**(i-1),i*adel+delran)
+			summer += i
+		})
+		console.log(summer)
+		if(Math.sign(notearr[notearr.length-2]-notearr[notearr.length-1])==Math.sign(notearr[notearr.length-3]-notearr[notearr.length-2])){
+			console.log("comp")
+		} else {console.log("incom")}
+		return(notearr)
+	}
+
 	static noteProcessing(arr){
 		arr = arr.sort((a, b) => a - b)
 		let rootRel = []
@@ -1066,10 +1155,10 @@ function getCol(type,l,e){
 			a = 1-a/2
 			ctx.strokeStyle = ("rgba(0,"+e[4]*3.5*(1-a)+",255,"+(0.7+0.3*l)+")") // quelled darkblue
 			break;
-		case 8:
-			a = 1-a/2
-			ctx.strokeStyle = (""+e+(0.7+0.3*l)+")") // quelled darkblue
-			break;
+		// case 8:
+		// 	a = 1-a/2 // ??? broken?
+		// 	ctx.strokeStyle = (""+e+(0.7+0.3*l)+")") // quelled darkblue
+		// 	break;
 		case 9:
     		ctx.strokeStyle = ("rgba("+e[4]*3.5*(1-a)*5+","+e[4]*3.5*(1-a)*5+","+(e[4]*3.5*(1-a)*2.5*Math.random())+","+(0.7+0.3*l)+")") // shooting star
 			break;
@@ -1574,6 +1663,7 @@ function disrupt(d){
 
 command("/reverb off")
 command("/echo off")
+command("scene.sounds=false")
 
 
 

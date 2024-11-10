@@ -25,7 +25,6 @@ function syl(str){
 				syllable=""
 			}
 		}
-
 	}
 	console.log(syllable)
 	amount += 1
