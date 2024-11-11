@@ -117,11 +117,12 @@ class music{
 		// if(Math.random()>0.3){return}
 		// this.scheduleBar(this.bar,time)
 		// this.playBell(Math.floor(normalRandom(50,7)))
-
+			// music.PD2(music.GSC({70:true,75:true,78:true}),this.mainDel)
 		if(scene.sounds){
 			this.playBellSynthChord(Math.floor(normalRandom(50,7)))
 		}
 	}
+
 
 	static scheduleBar(bar,time){
 		if(!bar){bar = this.bar}
@@ -195,8 +196,8 @@ class music{
 	}
 
 
-	static playBellSynthChord(note,vel=1,adel=scene.interval,seed=Math.floor(Math.random()*5000000)){
-		let notes = [note]
+	static playBellSynthChord(note,vel=1,adel=scene.interval/3*2,seed=Math.floor(Math.random()*5000000)){
+		let notes = [note] // adel here should be /3*2 !! but we made it slow
 		let dell = 0.2
 		let avel = vel
 		this.playBell(note,vel)
@@ -246,16 +247,16 @@ class music{
 		let delran = 0
 		let delrans = []
 		notes.forEach((e,i)=>{
-			if(Math.random() > 0.9){delran += adel*1}
-			if(Math.random() > 0.8){delran += adel*0.25;delrans.push(0.25)}
-			if(Math.random() > 0.8){delran += adel*0.5;delrans.push(0.5)}
-			if(Math.random() > 0.8){delran += adel*-0.25;delrans.push(-0.25)}
-			if(Math.random() > 0.8){delran += adel*-0.5;delrans.push(-0.5)}
-			if(Math.random()>0.7 && delrans.length > 0){
-				let delransChoice = Math.floor(Math.random()*delrans.length)
-				delran -= adel*delrans[delransChoice]
-				delrans.splice(delransChoice,1)
-			}
+			// if(Math.random() > 0.9){delran += adel*1}
+			// if(Math.random() > 0.8){delran += adel*0.25;delrans.push(0.25)}
+			// if(Math.random() > 0.8){delran += adel*0.5;delrans.push(0.5)}
+			// if(Math.random() > 0.8){delran += adel*-0.25;delrans.push(-0.25)}
+			// if(Math.random() > 0.8){delran += adel*-0.5;delrans.push(-0.5)}
+			// if(Math.random()>0.7 && delrans.length > 0){
+			// 	let delransChoice = Math.floor(Math.random()*delrans.length)
+			// 	delran -= adel*delrans[delransChoice]
+			// 	delrans.splice(delransChoice,1)
+			// }
 
 			this.playBell(e,avel*0.9**(i-1),i*adel+delran)
 			// notes[i] = Tone.Frequency(e, "midi").toNote();
@@ -343,7 +344,7 @@ class music{
 		console.log(JSON.stringify(notearr))
 		return(notes)
 	}
-	static GSC(notes,avel=1,adel=0.2,seed=Math.floor(Math.random()*5000000)){
+	static GSC(notes,avel=1,adel=0.2,seed=Math.floor(Math.random()*5000000)){ //generate synthetic chord
 		let dell = 0.2
 		let trand = RNG(seed)
 		let counter = 0
@@ -353,8 +354,8 @@ class music{
 		while(note<events.varbs.noteCeiling){
 			note++
 			if(notes[note] !== undefined){continue}
-			let collided1 = this.checkCollider(note,notes,1,2)
-			let collided2 = this.checkCollider(note,notes,2,2)
+			let collided1 = this.checkCollider(note,notes,1,4)
+			let collided2 = this.checkCollider(note,notes,2,4)
 			if(collided2 || collided1){notes[note] = false } else {
 				if(Math.random()>0.4){
 					notes[note] = "skip"
@@ -365,7 +366,7 @@ class music{
 		}
 		objk = Object.keys(notes)
 		objk.forEach((e)=>{
-			if(notes[e] == "skip"){notes[e]=!(this.checkCollider(e,notes,1,1),this.checkCollider(e,notes,2,1))}
+			if(notes[e] == "skip"){notes[e]=!(this.checkCollider(e,notes,1,4),this.checkCollider(e,notes,2,4))}
 		})
 		objk.forEach((e)=>{
 			if(notes[e] == true){notearr.push(e)}
@@ -379,11 +380,11 @@ class music{
 		console.log(JSON.stringify(notearr))
 		return(notes)
 	}
-	static conform(dict,arr){
-		
+	static conform(dict,arr){ //make notes conform to another set of allowables
+
 	}
 
-	static PD1(dict,avel=1,adel=0.2){
+	static PD1(dict,avel=1,adel=0.2){ //play dict 1
 		let objk = Object.keys(dict)
 		let notearr = []
 		objk.forEach((e)=>{
@@ -402,15 +403,13 @@ class music{
 			notearr.push(notearr[notearr.length-rint(notearr.length/2)-1])
 			}
 		}
-		
-
 		notearr.forEach((e,i)=>{
 
 			if(e == "blank"){return}
 
-			// if(Math.random() > 0.9){delran += adel*1}
-			// if(Math.random() > 0.9){delran += adel*0.25;delrans.push(0.25)}
-			// if(Math.random() > 0.9){delran += adel*0.5;delrans.push(0.5)}
+			if(Math.random() > 0.9){delran += adel*1}
+			if(Math.random() > 0.9){delran += adel*0.25;delrans.push(0.25)}
+			if(Math.random() > 0.9){delran += adel*0.5;delrans.push(0.5)}
 			// if(Math.random() > 0.9){delran += adel*-0.25;delrans.push(-0.25)}
 			// if(Math.random() > 0.9){delran += adel*-0.5;delrans.push(-0.5)}
 			// if(Math.random()>0.7 && delrans.length > 0){
@@ -418,14 +417,73 @@ class music{
 			// 	delran -= adel*delrans[delransChoice]
 			// 	delrans.splice(delransChoice,1)
 			// }
+			summer += i*adel+delran
+			if(summer>16){return}
 			this.playBell(e,avel*0.9**(i-1),i*adel+delran)
-			summer += i
 		})
 		console.log(summer)
 		if(Math.sign(notearr[notearr.length-2]-notearr[notearr.length-1])==Math.sign(notearr[notearr.length-3]-notearr[notearr.length-2])){
 			console.log("comp")
 		} else {console.log("incom")}
 		return(notearr)
+	}
+
+	static PD2(dict,delarr,avel=1){
+		let objk = Object.keys(dict)
+		let notearr = []
+		objk.forEach((e)=>{
+			if(dict[e] == true){notearr.push(e)}
+		})
+
+		let summer = 0
+		if(notearr.length>12 || Math.random()>0.8){
+			while(notearr.length < 16){
+			notearr.push(notearr[notearr.length-rint(notearr.length/2)-1])
+			}
+		} else {
+			while(notearr.length < 13){
+			notearr.push(notearr[notearr.length-rint(notearr.length/2)-1])
+			}
+		}
+		if(delarr === undefined){
+			delarr = []
+		}
+		while(notearr.length > delarr.length){
+				delarr.push(1)
+			}
+		let cumulativeDelay = 0
+		notearr.forEach((e,i)=>{
+
+			if(e == "blank"){return}
+			summer += i*delarr[i]
+			// if(summer>16){return}
+			this.playBell(e,avel*0.9**(i-1),cumulativeDelay*scene.interval)
+			cumulativeDelay += delarr[i]
+		})
+		console.log(summer)
+		if(Math.sign(notearr[notearr.length-2]-notearr[notearr.length-1])==Math.sign(notearr[notearr.length-3]-notearr[notearr.length-2])){
+			console.log("comp")
+		} else {console.log("incom")}
+		return(notearr)
+	}
+
+	static GD1(x=16,arr=[]){ //generate Delay
+		let summer = 0
+		arr.forEach((e)=>{summer+=e})
+
+		while(summer<x){
+			if(Math.random()>0.5){
+				summer += arr[arr.push(0.5)-1]
+			} else {
+				summer += arr[arr.push(1)-1] // only the first number matters
+			}
+		}
+		while(summer>=x){
+			summer -= arr.pop()
+			arr.pop()
+		}
+		console.log(summer)
+		return(arr)
 	}
 
 	static noteProcessing(arr){
@@ -471,9 +529,10 @@ music.generateNextStanza()
 
 
 NoteRelativity = {
-	"major":{"0":0,"1":2,"2":4,"3":5,"4":7,"5":9,"6":11,"7":12},
+	"major":{"0":0,"1":0.5,"2":1,"3":1.5,"4":2,"5":3,"6":3.5,"7":4,"8":4.5,"9":5,"10":5.5,"11":6},
+	"minor":{"0":0,"1":0.5,"2":1,"3":2,"4":2.5,"5":3,"6":3.5,"7":4,"8":4.5,"9":5,"10":5.5,"11":6},
 	// "nathan"
-	"mainor":{"0":0,"1":2,"2":3,"3":5,"4":7,"5":8,"6":11,"7":12},
+	// "mainor":{"0":0,"1":2,"2":3,"3":5,"4":7,"5":8,"6":11,"7":12},
 }
 
 let lastnote = 0
@@ -1661,12 +1720,12 @@ function disrupt(d){
 
 
 
-command("/reverb off")
-command("/echo off")
-command("scene.sounds=false")
+// command("/reverb off")
+// command("/echo off")
+// command("scene.sounds=false")
 
 
-
+music.mainDel = music.GD1()
 
 
 
