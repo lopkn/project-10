@@ -104,11 +104,17 @@ class music{
 		"C4":"./untitled.mp3",
 	},
 }).toDestination();
-	static pluck = new Tone.Sampler({
+	static kick = new Tone.Sampler({
 	urls: {
-		"C4":"./untitled.mp3",
+		"C4":"./kick.mp3",
 	},
 }).toDestination();
+	static click = new Tone.Sampler({
+	urls: {
+		"C4":"./test.mp3",
+	},
+}).toDestination();
+	static drumSynth = new Tone.MembraneSynth().toDestination();
 	static echo = new Tone.PingPongDelay(scene.interval*2, scene.interval*2).toDestination();
 
 	static runbar(time){
@@ -513,6 +519,7 @@ music.bell.connect(music.reverb)
 music.bell.connect(music.echo)
 music.bell.connect(music.eq)
 music.bell.set({volume:-20})
+music.drumSynth.set({volume:-20})
 music.synth.set({
     oscillator: {
         type: 'sine4' 
@@ -1720,9 +1727,9 @@ function disrupt(d){
 
 
 
-// command("/reverb off")
-// command("/echo off")
-// command("scene.sounds=false")
+command("/reverb off")
+command("/echo off")
+command("scene.sounds=false")
 
 
 music.mainDel = music.GD1()
