@@ -491,6 +491,37 @@ class music{
 		console.log(summer)
 		return(arr)
 	}
+	static GD2(x=4,arr=[],symmetry=2){ //4 rep symmetry
+		let summer = 0
+		arr.forEach((e)=>{summer+=e})
+
+		while(summer<x){
+			if(Math.random()>0.5){
+				summer += arr[arr.push(0.5)-1]
+			} else if(Math.random()>0.8){
+				summer += arr[arr.push(0.25)-1]
+			} else {
+				summer += arr[arr.push(1)-1] // only the first number matters
+			}
+		}
+		while(summer>=x){
+			summer -= arr.pop()
+			arr.pop()
+		}
+		let larr = arr.length
+		let lack = x-summer
+		while(symmetry>0){
+			symmetry -= 1
+			arr.push(lack)
+			for(let i = 0; i < larr; i++){
+				arr.push(arr[i])
+				// if(i===0){arr[arr.length-1]+=lack}
+			}
+		}
+		
+		console.log(summer)
+		return(arr)
+	}
 
 	static noteProcessing(arr){
 		arr = arr.sort((a, b) => a - b)
@@ -520,6 +551,7 @@ music.bell.connect(music.echo)
 music.bell.connect(music.eq)
 music.bell.set({volume:-20})
 music.drumSynth.set({volume:-20})
+music.kick.set({volume:-20})
 music.synth.set({
     oscillator: {
         type: 'sine4' 
@@ -1219,7 +1251,7 @@ function getCol(type,l,e){
 			break;
 		case 8:
 			a = 1-a/2
-			ctx.strokeStyle = ("rgba(0,"+e[4]*3.5*(1-a)+",255,"+(0.7+0.3*l)+")") // quelled darkblue
+			ctx.strokeStyle = ("rgba(0,"+e[4]*3.5*(1-a)+",255,"+(0.3+0.7*l)+")") // quelled darkblue
 			break;
 		// case 8:
 		// 	a = 1-a/2 // ??? broken?
@@ -1232,7 +1264,25 @@ function getCol(type,l,e){
 			ctx.strokeStyle = ("rgba(255,255,"+(e[4]*3.5*2.5*Math.random())+","+(0.7+0.3*l)+")") // shooting star
 			break;
 		case 11: //sinusoidal blue
-			ctx.strokeStyle = "rgba(0,0,"+(100*Math.sin(COUNTER/30+e[4]/30)+100)+","+(0.3*a+0.7)+")"
+			ctx.strokeStyle = "rgba(0,0,"+(100*Math.sin(e[4]/30)+100)+","+(0.3*a+0.7)+")"
+			break;
+		case 12: //red green phase shifter
+			ctx.strokeStyle = "hsla("+(360*Math.sin(e[4]/300))+",100%,"+(50*Math.sin(COUNTER/30+e[4]/30)+25)+"%,"+(0.3*a+0.7)+")"
+			break;
+		case 13: //rainbow hsla
+			ctx.strokeStyle = "hsla("+((COUNTER)%360)+",100%,50%,"+(0.3*a+0.7)+")"
+			break;
+		case 14: //stripped hsla
+			ctx.strokeStyle = "hsla("+((COUNTER+Math.sin(e[4]*50)*40)%360)+",100%,50%,"+(0.3*a+0.7)+")"
+			break;
+		case 15: //forward phase shifter
+			ctx.strokeStyle = "hsla("+(360*Math.sin(e[4]/115+COUNTER/150))+",100%,50%,"+(3.7*l)+")"
+			break;
+		case 16: //osmotic forward phase shifter
+			ctx.strokeStyle = "hsla("+(360*Math.sin(e[4]/115+COUNTER/150))+",100%,"+(25*Math.sin(e[4]/10+COUNTER/15)+70)+"%,"+(3.7*l)+")"
+			break;
+		case 17: //reverse osmotic reverse phase shifter
+			ctx.strokeStyle = "hsla("+(360*Math.sin(e[4]/150+COUNTER/115))+",100%,"+(25*Math.sin(e[4]/15+COUNTER/10)+70)+"%,"+(3.7*l)+")"
 			break;
 	}
 }
@@ -1264,7 +1314,17 @@ document.addEventListener("mousedown",()=>{
 			return
 		}
 	parr.push(new liner(mouseX,mouseY,Math.floor(Math.random()*4),3))
-
+	let c = new liner(mouseX,mouseY,1,17)
+			c.maxActLife = 4200
+			c.vx += Math.random()*50-25
+			c.vy += Math.random()*50-25
+			c.lineLife = 4200
+			c.size += 10
+			c.counter = 18
+			c.lineUp = 0
+			c.myDat = 2
+			c.updateSpeed = 25
+			parr.push(c)
 	}
 })
 
@@ -1338,7 +1398,7 @@ document.addEventListener("keydown",(e)=>{
 
 			return
 		}
-	parr.push(new liner(mouseX,mouseY,Math.floor(Math.random()*4),11))
+	parr.push(new liner(mouseX,mouseY,Math.floor(Math.random()*4),15))
 
 	}
 	}
