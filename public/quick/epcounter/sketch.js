@@ -883,6 +883,8 @@ class explosionR{
 	draw(){
 		if(this.colf){
 			ctx.strokeStyle = this.color(this.actLife/600,this.color)
+		} else if(this.colorf){
+			ctx.strokeStyle = this.colorf(this.actLife/600,this.color)
 		} else {
 			ctx.strokeStyle = this.color
 		}
@@ -1146,7 +1148,18 @@ class liner{
 					this.nvy = 0
 					updated = true
 				}
+			} else if(this.type == 8){ //same as type 1 but straight
+			if(this.counter%5 == 0){
+				this.x += this.vx
+				this.y += this.vy
+				this.vx += this.nvx
+				this.vy += this.nvy
+				this.nvx = 0
+				this.nvy = 0
+				updated = true
+				
 			}
+		}
 
 
 
@@ -1326,6 +1339,12 @@ document.addEventListener("mousedown",()=>{
 			c.updateSpeed = 25
 			parr.push(c)
 	}
+	// let thiscol = (a,b)=>"hsla("+COUNTER%360+",100%,50%,1)"
+	// let c = new explosionR(mouseX,mouseY,thiscol,13)
+	// c.actLife = (Math.random()*20+20)*50
+	// c.size += 2
+	// c.colf = true
+	// parr.splice(0,0,c)
 })
 
 
@@ -1787,9 +1806,9 @@ function disrupt(d){
 
 
 
-command("/reverb off")
-command("/echo off")
-command("scene.sounds=false")
+// command("/reverb off")	
+// command("/echo off")
+// command("scene.sounds=false")
 
 
 music.mainDel = music.GD1()

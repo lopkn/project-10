@@ -19,6 +19,14 @@ function fastdistance(x1,y1,x2,y2) {
 
 //EXP1
 
+
+class vectorFuncs2{
+	static dot(x1,y1,x2,y2){
+		return(x1*x2+y1*y2)
+	}
+	
+}
+
 class vectorFuncs{
 	static vectorizor(px,py,vx,vy){
 		//this.walls[p.boidy[k]].x1 = ((p.boidyVect[k][0] * p.rotation[1] + p.boidyVect[k][1] * p.rotation[0]) + p.x)
