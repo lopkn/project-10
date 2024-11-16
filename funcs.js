@@ -20,11 +20,36 @@ function fastdistance(x1,y1,x2,y2) {
 //EXP1
 
 
-class vectorFuncs2{
-	static dot(x1,y1,x2,y2){
+class l{
+	static dotProduct2(x1,y1,x2,y2){
 		return(x1*x2+y1*y2)
 	}
-	
+	static distance2(x1,y1,x2,y2) {
+		let a = x2-x1
+		let b = y2-y1
+	  return(Math.sqrt(a*a+b*b))
+	}
+
+	static boundingBoxPoint(x1,y1,bx1,by1,bx2,by2){ // point, box
+		let bx,sx,by,sy
+		if(bx1 > bx2){bx = bx1;sx=bx2}else{bx=bx2;sx=bx1}
+		if(by1 > by2){by = by1;sy=by2}else{by=by2;sy=by1}
+		if(x1 >= sx && x1 <= bx && y1 >= sy && y2 <= by){return(true)}
+		return(false)
+	}
+
+	static lineCircleCollision(cx,cy,r,x1,y1,x2,y2,leng){ //circle, line segment
+		if(this.distance2(cx,cy,x1,y1) <= r || this.distance2(cx,cy,x2,y2) <= r){return(true)}  //can think about this to optimize
+		if(x1>x2){let a = x2; x2=x1; x1=a}
+		if(y1>y2){let a = y2; y2=y1; y1=a}
+		if(leng === undefined){leng = this.distance2(x1,y1,x2,y2)}
+		let dotdiv = this.dotProduct2(cx-x1,cx-y1,x2-x1,y2-y1)/leng**2
+		let closestx = x1 + dotdiv * (x2-x1)
+		let closesty = y1 + dotdiv * (y2-y1)
+		return(dotdiv >= 0 && dotdiv <= 0)
+
+	}
+
 }
 
 class vectorFuncs{

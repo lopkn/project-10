@@ -31,6 +31,39 @@ function init(){
 	initSounds([])
 }
 
+
+class l{
+	static dotProduct2(x1,y1,x2,y2){
+		return(x1*x2+y1*y2)
+	}
+	static distance2(x1,y1,x2,y2) {
+		let a = x2-x1
+		let b = y2-y1
+	  return(Math.sqrt(a*a+b*b))
+	}
+
+	static boundingBoxPoint(x1,y1,bx1,by1,bx2,by2){ // point, box
+		let bx,sx,by,sy
+		if(bx1 > bx2){bx = bx1;sx=bx2}else{bx=bx2;sx=bx1}
+		if(by1 > by2){by = by1;sy=by2}else{by=by2;sy=by1}
+		if(x1 >= sx && x1 <= bx && y1 >= sy && y2 <= by){return(true)}
+		return(false)
+	}
+
+	static lineCircleCollision(cx,cy,r,x1,y1,x2,y2,leng){ //circle, line segment
+		if(this.distance2(cx,cy,x1,y1) <= r || this.distance2(cx,cy,x2,y2) <= r){return(true)}  //can think about this to optimize
+		if(x1>x2){let a = x2; x2=x1; x1=a}
+		if(y1>y2){let a = y2; y2=y1; y1=a}
+		if(leng === undefined){leng = this.distance2(x1,y1,x2,y2)}
+		let dotdiv = this.dotProduct2(cx-x1,cx-y1,x2-x1,y2-y1)/leng**2
+		let closestx = x1 + dotdiv * (x2-x1)
+		let closesty = y1 + dotdiv * (y2-y1)
+		return(dotdiv >= 0 && dotdiv <= 0)
+
+	}
+
+}
+
 function RNG(seed) {
     var m_as_number = 2**53 - 111
     var m = 2n**53n - 111n
@@ -1303,11 +1336,12 @@ function getCol(type,l,e){
 var mouseX = 0
 var mouseY = 0
 var ctoggle = false
+var mouseTrail = []
 
 onmousemove = (e)=>{mouseX = (e.clientX); mouseY = (e.clientY);
 
 	let dd = distance(0,0,e.movementX,e.movementY)
-if(Math.random()>1-dd*0.005){
+if(Math.random()>1-dd*0.005*events.varbs.conjureStrength){
 		let a = new liner(mouseX+Math.random()-0.5,mouseY+Math.random()-0.5,Math.floor(Math.random()*3),4+Math.floor(Math.random()*2))
 		a.following = true
 		parr.push(a)
@@ -1403,7 +1437,7 @@ document.addEventListener("keydown",(e)=>{
 	} else if(k == "\\"){
 
 		// summonItem()
-		events.instantaneous["splatter"](mouseX,mouseY,20)
+		events.instantaneous["knocker ball"](mouseX,mouseY,20)
 
 	} else{
 		let r = Math.random()*5
@@ -1438,7 +1472,8 @@ let parr = []
 
 class events{
 	static happening = {}
-	static varbs = {rippleStrength:1,trip:1,noteCeiling:85,noteFloor:45,octave:0}
+	static interactions = {"cutInteraction":[]}
+	static varbs = {rippleStrength:1,trip:1,noteCeiling:85,noteFloor:45,octave:0,conjureStrength:0}
 	static updateAll(){
 		let objk = Object.keys(this.happening)
 		objk.forEach((E)=>{
@@ -1455,6 +1490,18 @@ class events{
 			}
 			e.life -= 1
 		})
+
+		if(COUNTER%4===0){
+			mouseTrail.splice(0,0,[mouseX,mouseY])
+			while(mouseTrail.length > 50){
+				mouseTrail.pop()
+			}
+
+		}
+		
+		this.interactions.cutInteraction.forEach((f)=>{
+			f(mouseTrail[0][0],mouseTrail[0][1],mouseTrail[1][0],mouseTrail[1][1])
+		})	
 	}
 
 	//an event needs to have life (num) and update (func)
@@ -1503,6 +1550,37 @@ class events{
 			c.actLife *= (1+Math.abs(normalRandom(0,2)))
 			c.dissapearLife = c.actLife/10
 			c.phase = Math.random()*2*Math.PI
+			parr.push(c)
+		},
+		"knocker ball":(x,y)=>{
+			let c = new rollingBall(x,y,Math.random()*10-5,Math.random()*10-5)
+			let phaseColorR = Math.random()*255
+			let phaseColorG = Math.random()*255
+			let phaseColorB = Math.random()*255
+			// return("rgba("+phase*phaseColorR+","+phase*phaseColorG+","+phase*phaseColorB+","+(0.3*a+0.7)+")")}
+			// c.strokef = (a)=>{return("rgba(0,"+(100*Math.sin(COUNTER/30+Math.PI)+100)+",0,"+(0.3*a+0.7)+")")}
+			c.color = "white"
+			c.stroke = "transparent"
+			c.mover = 0
+			c.friction = 0.999
+			c.size *= 7
+			c.actLife *= (1+Math.random())*5
+			c.actLife *= (1+Math.abs(normalRandom(0,2)))
+			c.dissapearLife = c.actLife/10
+			c.phase = Math.random()*2*Math.PI
+			setTimeout(()=>{events.interactions.cutInteraction.push( (x1,y1,x2,y2)=>{
+				c.vy += 0.01
+				if(l.lineCircleCollision(c.x,c.y,c.size,x1,y1,x2,y2)){
+					c.vx += (x1-x2)*0.02
+					if(c.vy > 0){c.vy = 0}
+					c.vy += -Math.abs((y1-y2)*0.02)
+					if(!c.hit){
+						let r = Math.random()*360
+						c.colorf = ()=>{return("HSL("+r+",100%,50%)")}
+					}
+					c.hit = true
+				} else {c.hit = false}
+			})},200)
 			parr.push(c)
 		},
 		"blue splatter":(x,y,n)=>{
@@ -1739,6 +1817,17 @@ setInterval(()=>{
 	comparer.compare(d)
 	if(Math.random()>NATURAL_BOLTRATE){
 		parr.push(new liner(Math.random()*Width,Math.random()*Height,Math.floor(Math.random()*3),Math.floor(Math.random()*2)))
+	}
+
+
+	//draw mouse trail
+	ctx.strokeStyle = "white"
+	for(let i = mouseTrail.length-2; i > -1;i--){
+		ctx.beginPath()
+		ctx.moveTo(mouseTrail[i+1][0],mouseTrail[i+1][1])
+		ctx.lineTo(mouseTrail[i][0],mouseTrail[i][1])
+		ctx.lineWidth = (mouseTrail.length-i)*0.3
+		ctx.stroke()
 	}
 
 
