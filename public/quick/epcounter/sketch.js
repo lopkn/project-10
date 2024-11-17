@@ -1008,6 +1008,15 @@ class rollingBall{
 		if(this.colorf){
 			ctx.fillStyle = this.colorf(this.actLife/this.dissapearLife)
 		}
+
+		if(this.ballgame){
+			ctx.beginPath()
+			ctx.strokeStyle = "white"
+			ctx.lineWidth = 2
+			ctx.arc(this.x,this.y,this.size,0,2*Math.PI*this.hp/this.maxhp)
+			ctx.stroke()
+		}
+
 		if(this.actLife < this.dissapearLife){
 			ctx.lineWidth = this.actLife/this.dissapearLife
 		}
@@ -1505,13 +1514,17 @@ class events{
 			while(mouseTrail.length > 50){
 				mouseTrail.pop()
 			}
+		let d = l.distance2(mouseTrail[0][0],mouseTrail[0][1],mouseTrail[1][0],mouseTrail[1][1])
+		events.happening["ballgame"].strength = Math.min(events.happening["ballgame"].energy/d,1)
+		events.happening["ballgame"].energy -= d
+
 
 		}
 		
+		let d = l.distance2(mouseTrail[0][0],mouseTrail[0][1],mouseTrail[1][0],mouseTrail[1][1])
 		for(let i = this.interactions.cutInteraction.length-1; i > -1; i--){
 			let e = this.interactions.cutInteraction[i]
 			if(e.DEL){this.interactions.cutInteraction.splice(i,1);continue}
-			let d = l.distance2(mouseTrail[0][0],mouseTrail[0][1],mouseTrail[1][0],mouseTrail[1][1])
 			e.cutInteraction(mouseTrail[0][0],mouseTrail[0][1],mouseTrail[1][0],mouseTrail[1][1],d)
 
 		}
@@ -1585,6 +1598,7 @@ class events{
 			parr.push(c)
 		},
 		"knocker ball":(x,y)=>{
+			let ballgame = events.happening["ballgame"]
 			let c = new rollingBall(x,y,Math.random()*10-5,Math.random()*10-5)
 			let phaseColorR = Math.random()*255
 			let phaseColorG = Math.random()*255
@@ -1596,33 +1610,47 @@ class events{
 			c.mover = 0
 			c.friction = 0.999
 			c.size *= 7
-			c.actLife *= (1+Math.random())*5
-			c.actLife *= (1+Math.abs(normalRandom(0,2)))
+			// c.actLife *= (1+Math.random())*5
+			// c.actLife *= (1+Math.abs(normalRandom(0,2)))
+			c.actLife = 9999999
 			c.dissapearLife = c.actLife/10
-			c.hp = 100
+			c.maxhp = 75
+			c.hp = c.maxhp
+			c.mass  = 1
+			c.difficulty = 1
+			c.ballgame = true
 			events.varbs.boltrate = 1
 			c.phase = Math.random()*2*Math.PI
-			setTimeout(()=>{events.interactions.cutInteraction.push(c)},200)
+			// setTimeout(()=>{events.interactions.cutInteraction.push(c)},200) //used for manual spawning
+			events.interactions.cutInteraction.push(c)
+			ballgame.difficulty += c.difficulty
 			c.cutInteraction = (x1,y1,x2,y2,leng)=>{
 				c.vy += 0.01
+
+				
+
+
 				if(l.lineCircleCollision(c.x,c.y,c.size,x1,y1,x2,y2,leng)){
 					c.vx += (x1-x2)*0.01
 					if(c.vy > 0){c.vy = 0}
 					c.vy += -Math.abs((y1-y2)*0.01)
 					if(!c.hit){
-						console.log("points: "+leng)
 						let r = Math.random()*360
-						c.colorf = ()=>{return("HSL("+r+",100%,50%)")}
-						this.instantaneous["blood splatter"](c.x,c.y,leng/20,(x1-x2)*0.03,(y1-y2)*0.03).forEach((e)=>{
+						c.colorf = ()=>{return("HSL(0,"+c.hp+"%,50%)")}
+						let dmg = leng/3 * ballgame.strength
+						c.hp -= dmg
+						this.instantaneous["blood splatter"](c.x,c.y,dmg/6.6,(x1-x2)*0.03,(y1-y2)*0.03).forEach((e)=>{
 							e.vx *= Math.random()
 							e.vy *= Math.random()
 						})
 						c.size += 0.5
-						c.hp -= leng/3
+						
+						console.log("points: "+dmg)
 						let note = Math.random()*15+50
 						music.playBell(note)
 						music.playBell(note+5)
 						if(c.hp < 0){
+							console.log("KILL: "+(dmg+c.hp))
 							c.actLife = 2
 							music.playBell(note+3,1,scene.interval*0.25)
 							music.playBell(note+8,1,scene.interval*0.25)
@@ -1631,6 +1659,7 @@ class events{
 							setTimeout(()=>{
 								this.instantaneous["blood splatter"](c.x,c.y,leng/20,(x1-x2)*0.03,(y1-y2)*0.03)
 							},100)
+							ballgame.difficulty -= c.difficulty
 						}
 
 					}
@@ -1665,9 +1694,34 @@ function push(particle,dx,dy){
 	}
 }
 
+events.addEvent("ballgame",{
+	"energy":300,
+	"strength":1,
+	"difficulty":0,
+	"maxDifficulty":5,
+	"arcView":false,
+	"update":(e)=>{
+		if(e.energy < 700){
+			if(e.energy < 0){e.energy = 0}
+			e.energy += 5
+		}
+		if(e.arcView){
+			ctx.strokeStyle = "red"
+			ctx.lineWidth = 1
+			ctx.beginPath()
+			ctx.arc(mouseX,mouseY,Math.max(e.energy,0),0,Math.PI*2)
+			ctx.stroke()
+		}
 
+		if(COUNTER%400 === 0 && e.difficulty < e.maxDifficulty){
+			events.instantaneous["knocker ball"](Width*Math.random(),10)
+		}
+		
+	}
+})
 
 function randomEvents(){
+	if(events.happening["ballgame"]!==undefined){return}
 	if(Math.random() > 0.9995){
 		events.addEvent("storm",{"chaotic":(Math.random()>0.97),"strength":(1+Math.floor(Math.random()*3)),"parr":[],"life":7000,
 			"vect":[Math.random()-0.5,Math.random()-0.15],"update":(e)=>{
@@ -1882,8 +1936,8 @@ setInterval(()=>{
 
 
 	//draw mouse trail
-	ctx.strokeStyle = "white"
 	for(let i = mouseTrail.length-2; i > -1;i--){
+		ctx.strokeStyle = "rgba(255,255,255,"+events.happening["ballgame"].energy/100+")"
 		ctx.beginPath()
 		ctx.moveTo(mouseTrail[i+1][0],mouseTrail[i+1][1])
 		ctx.lineTo(mouseTrail[i][0],mouseTrail[i][1])
