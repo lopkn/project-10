@@ -46,7 +46,7 @@ class l{
 		let dotdiv = this.dotProduct2(cx-x1,cx-y1,x2-x1,y2-y1)/leng**2
 		let closestx = x1 + dotdiv * (x2-x1)
 		let closesty = y1 + dotdiv * (y2-y1)
-		return(dotdiv >= 0 && dotdiv <= 0)
+		return(this.distance2(cx,cy,closestx,closesty) <= r)
 
 	}
 

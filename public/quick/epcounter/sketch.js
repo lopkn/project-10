@@ -13,6 +13,7 @@ myCanvas.style.position = "absolute"
 
 let myCanvas2 = document.getElementById("myCanvas2")
 
+
 myCanvas2.style.top = 0
 myCanvas2.style.left = 0
 myCanvas2.style.zIndex = 6
@@ -46,19 +47,20 @@ class l{
 		let bx,sx,by,sy
 		if(bx1 > bx2){bx = bx1;sx=bx2}else{bx=bx2;sx=bx1}
 		if(by1 > by2){by = by1;sy=by2}else{by=by2;sy=by1}
-		if(x1 >= sx && x1 <= bx && y1 >= sy && y2 <= by){return(true)}
+		if(x1 >= sx && x1 <= bx && y1 >= sy && y1 <= by){return(true)}
 		return(false)
 	}
 
 	static lineCircleCollision(cx,cy,r,x1,y1,x2,y2,leng){ //circle, line segment
 		if(this.distance2(cx,cy,x1,y1) <= r || this.distance2(cx,cy,x2,y2) <= r){return(true)}  //can think about this to optimize
-		if(x1>x2){let a = x2; x2=x1; x1=a}
-		if(y1>y2){let a = y2; y2=y1; y1=a}
+		// if(x1>x2){let a = x2; x2=x1; x1=a}
+		// if(y1>y2){let a = y2; y2=y1; y1=a}
 		if(leng === undefined){leng = this.distance2(x1,y1,x2,y2)}
-		let dotdiv = this.dotProduct2(cx-x1,cx-y1,x2-x1,y2-y1)/leng**2
+			if(leng === 0){return(false)}
+		let dotdiv = this.dotProduct2(cx-x1,cy-y1,x2-x1,y2-y1)/leng**2
 		let closestx = x1 + dotdiv * (x2-x1)
 		let closesty = y1 + dotdiv * (y2-y1)
-		return(dotdiv >= 0 && dotdiv <= 0)
+		return(this.distance2(cx,cy,closestx,closesty) <= r && this.boundingBoxPoint(closestx,closesty,x1,y1,x2,y2))
 
 	}
 
@@ -660,16 +662,16 @@ class comparer{
 
 
 	static disabled = {
-		"0":0,
-		"1":0,
-		"2":0,
-		"3":0,
-		"4":0,
-		"5":0,
-		"6":0,
-		"7":0,
-		"8":0,
-		"9":0
+		"0":100000,
+		"1":100000,
+		"2":100000,
+		"3":100000,
+		"4":100000,
+		"5":100000,
+		"6":100000,
+		"7":100000,
+		"8":100000,
+		"9":100000
 	}
 	static last = "" + (Date.now()+date_disruptor)
 
@@ -926,6 +928,7 @@ class explosionR{
 		ctx.arc(this.x, this.y, this.size, 0, 2 * Math.PI);
 		ctx.stroke()
 		if(this.actLife < 0){
+			this.DEL = true
 			return('del')
 		}
 	}
@@ -1013,6 +1016,7 @@ class rollingBall{
 		ctx.fill()
 		ctx.stroke()
 		if(this.actLife < 0){
+			this.DEL = true
 			return('del')
 		}
 	}
@@ -1336,7 +1340,7 @@ function getCol(type,l,e){
 var mouseX = 0
 var mouseY = 0
 var ctoggle = false
-var mouseTrail = []
+var mouseTrail = [[0,0],[0,0],[0,0]]
 
 onmousemove = (e)=>{mouseX = (e.clientX); mouseY = (e.clientY);
 
@@ -1431,6 +1435,11 @@ document.addEventListener("keydown",(e)=>{
 
 	} else if(k == "/"){
 		ctoggle = !ctoggle
+	} else if(k == "-"){
+		// mouseTrail.splice(0,0,[mouseX,mouseY])
+		// while(mouseTrail.length > 50){
+		// 	mouseTrail.pop()
+		// }
 	} else if(k == "="){
 		time_fill_color = "rgba(100,0,0,0.2)"
 		time_outline_color = "rgba(0,0,0,0)"
@@ -1473,7 +1482,7 @@ let parr = []
 class events{
 	static happening = {}
 	static interactions = {"cutInteraction":[]}
-	static varbs = {rippleStrength:1,trip:1,noteCeiling:85,noteFloor:45,octave:0,conjureStrength:0}
+	static varbs = {boltrate:0.99,rippleStrength:1,trip:1,noteCeiling:85,noteFloor:45,octave:0,conjureStrength:0}
 	static updateAll(){
 		let objk = Object.keys(this.happening)
 		objk.forEach((E)=>{
@@ -1499,12 +1508,22 @@ class events{
 
 		}
 		
-		this.interactions.cutInteraction.forEach((f)=>{
-			f(mouseTrail[0][0],mouseTrail[0][1],mouseTrail[1][0],mouseTrail[1][1])
-		})	
+		for(let i = this.interactions.cutInteraction.length-1; i > -1; i--){
+			let e = this.interactions.cutInteraction[i]
+			if(e.DEL){this.interactions.cutInteraction.splice(i,1);continue}
+			let d = l.distance2(mouseTrail[0][0],mouseTrail[0][1],mouseTrail[1][0],mouseTrail[1][1])
+			e.cutInteraction(mouseTrail[0][0],mouseTrail[0][1],mouseTrail[1][0],mouseTrail[1][1],d)
+
+		}
+		//theyre giving uses of "enzymes" not "enzyme kinetics"
+		// this.interactions.cutInteraction.forEach((e)=>{
+			
+		// })	
 	}
 
-	//an event needs to have life (num) and update (func)
+	//an event needs to have life (num) and update (func) 
+	// i want one sentence to explain shannon,,, what do i say
+
 
 	static addEvent(name,e){
 		if(this.happening[name] == undefined){
@@ -1532,6 +1551,19 @@ class events{
 			c.actLife *= (1+Math.random())
 			c.actLife *= (1+Math.abs(normalRandom(0,2)))
 			parr.push(c)
+		},
+		"blood splatter ball":(x,y,vx=0,vy=0)=>{
+			let c = new rollingBall(x,y,Math.random()*5-2.5+vx,Math.random()*5-2.5+vy)
+			c.colorf = (a)=>{return("rgba(125,0,0,"+(1.3*a)+")")}
+			c.strokef = (a)=>{return("rgba("+(100*Math.sin(COUNTER/30+Math.PI)+100)+",0,0,"+(1.3*a)+")")}
+			c.mover = 0.1
+			c.friction = 0.98
+			c.size *= 2
+			c.actLife *= (1+Math.random())
+			c.actLife *= (1+Math.abs(normalRandom(0,2)))
+			c.dissapearLife = c.actLife
+			parr.push(c)
+			return(c)
 		},
 		"splatter ball":(x,y)=>{
 			let c = new rollingBall(x,y,Math.random()*10-5,Math.random()*10-5)
@@ -1567,26 +1599,56 @@ class events{
 			c.actLife *= (1+Math.random())*5
 			c.actLife *= (1+Math.abs(normalRandom(0,2)))
 			c.dissapearLife = c.actLife/10
+			c.hp = 100
+			events.varbs.boltrate = 1
 			c.phase = Math.random()*2*Math.PI
-			setTimeout(()=>{events.interactions.cutInteraction.push( (x1,y1,x2,y2)=>{
+			setTimeout(()=>{events.interactions.cutInteraction.push(c)},200)
+			c.cutInteraction = (x1,y1,x2,y2,leng)=>{
 				c.vy += 0.01
-				if(l.lineCircleCollision(c.x,c.y,c.size,x1,y1,x2,y2)){
-					c.vx += (x1-x2)*0.02
+				if(l.lineCircleCollision(c.x,c.y,c.size,x1,y1,x2,y2,leng)){
+					c.vx += (x1-x2)*0.01
 					if(c.vy > 0){c.vy = 0}
-					c.vy += -Math.abs((y1-y2)*0.02)
+					c.vy += -Math.abs((y1-y2)*0.01)
 					if(!c.hit){
+						console.log("points: "+leng)
 						let r = Math.random()*360
 						c.colorf = ()=>{return("HSL("+r+",100%,50%)")}
+						this.instantaneous["blood splatter"](c.x,c.y,leng/20,(x1-x2)*0.03,(y1-y2)*0.03).forEach((e)=>{
+							e.vx *= Math.random()
+							e.vy *= Math.random()
+						})
+						c.size += 0.5
+						c.hp -= leng/3
+						let note = Math.random()*15+50
+						music.playBell(note)
+						music.playBell(note+5)
+						if(c.hp < 0){
+							c.actLife = 2
+							music.playBell(note+3,1,scene.interval*0.25)
+							music.playBell(note+8,1,scene.interval*0.25)
+							music.playBell(note+6,1,scene.interval*0.5)
+							music.playBell(note+11,1,scene.interval*0.5)
+							setTimeout(()=>{
+								this.instantaneous["blood splatter"](c.x,c.y,leng/20,(x1-x2)*0.03,(y1-y2)*0.03)
+							},100)
+						}
+
 					}
 					c.hit = true
 				} else {c.hit = false}
-			})},200)
+			}
 			parr.push(c)
 		},
 		"blue splatter":(x,y,n)=>{
 			for(let i = 0; i < n; i++){
 				this.instantaneous["blue splatter ball"](x,y)
 			}
+		},"blood splatter":(x,y,n=4,vx=0,vy=0)=>{
+			let arr = []
+			for(let i = 0; i < n; i++){
+				arr.push(this.instantaneous["blood splatter ball"](x,y,vx,vy))
+			}
+			return(arr)
 		},"splatter":(x,y,n)=>{
 			for(let i = 0; i < n; i++){
 				this.instantaneous["splatter ball"](x,y)
@@ -1718,7 +1780,7 @@ function randomEvents(){
 	}
 	if(Math.random() > 0.9996){
 		events.addEvent("calm",{"life":7000,"store":{},"start":(e)=>{
-			NATURAL_BOLTRATE = 1 - (1-NATURAL_BOLTRATE)/3
+			events.varbs.boltrate = 1 - (1-events.varbs.boltrate)/3
 		},"update":(e)=>{
 			if(COUNTER%5 == 0){
 			comparer.disabled[4] = e.life
@@ -1749,7 +1811,7 @@ function randomEvents(){
 			}
 		},"end":(e)=>{
 
-				NATURAL_BOLTRATE = 3 * NATURAL_BOLTRATE - 2
+				events.varbs.boltrate = 3 * events.varbs.boltrate - 2
 		}})
 	}
 
@@ -1770,7 +1832,6 @@ function randomEvents(){
 }
 
 let COUNTER = 0
-NATURAL_BOLTRATE = 0.99
 time_fill_color = "#B00000"
 time_fill_color = "rgba(0,0,0,0)"
 time_outline_color = "#900000"
@@ -1815,7 +1876,7 @@ setInterval(()=>{
 	ctx2.lineWidth = 2
 	ctx2.strokeText(d,Width/2,Height/2) 
 	comparer.compare(d)
-	if(Math.random()>NATURAL_BOLTRATE){
+	if(Math.random()>events.varbs.boltrate){
 		parr.push(new liner(Math.random()*Width,Math.random()*Height,Math.floor(Math.random()*3),Math.floor(Math.random()*2)))
 	}
 
@@ -1896,19 +1957,11 @@ function disrupt(d){
 
 
 // command("/reverb off")	
-// command("/echo off")
-// command("scene.sounds=false")
+command("/echo off")
+command("scene.sounds=false")
 
 
 music.mainDel = music.GD1()
-
-
-
-
-
-
-
-
 
 
 
