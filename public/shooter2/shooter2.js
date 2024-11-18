@@ -1117,23 +1117,12 @@ function touchHandler(e)
         first = touches[0]
 
 
-
-    // if(event.type == 'touchmove' && event.touches.length == 2){
-    // 	let newDist = Math.hypot(
-    // 		e.touches[0].pageX - e.touches[1].pageX,
-    // 		e.touches[0].pageY - e.touches[1].pageY);
-    // }
-
         for(let i = 0; i < touches.length; i++){
     			let E = touches[i]
     			if(!Mobile.activeTouches[E.identifier]){
     				Mobile.activeTouches[E.identifier] = {"type":"unidentified"}
     			}
     	}
-
-
-
-
 
       if(e.type == "touchstart"){
       		let E = touches[touches.length-1]
