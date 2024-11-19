@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<body>
+
+<div id="myPlot" style="width:100%;max-width:700px"></div>
+<input type="range" min="-1" max="10000" step="0.01" value="0" id="slider1">
+<input type="range" min="-1" max="100" step="0.01" value="0" id="slider2">
+<script>
+const xArray = [1,2,3,4,5];
+const yArray = [55, 49, 44, 24, 15];
+
+var t = []
+var T = []
+
+    function P(AA,BB){
+        let n = 0
+    let dt = 0.1
+    let tn = 92.7
+    let T0 = 34.5
+    let d = 0.001
+    let k = 237
+    let Tcel = 273.15
+    let Tn = T0
+    let Tamb = 22
+    let kc = 1.3 + BB
+    let A = 0.028919931
+    let eps = 0.26 + AA
+    let sig = 5.673e-8
+    let heatcap = 11.485314152
+    
+    t = []
+    T = []
+    let counter = 0
+    while(Tn > Tamb + 0.1 && counter < 50000){
+        counter++
+        let dHc = kc * A * (Tn-Tamb) * dt
+        let dHr = eps * sig * A * (Tn**4 - Tamb**4) * dt
+        Tn = Tn - (dHc + dHr)/heatcap
+        tn = tn + dt
+        
+        let delt = (dHc + dHr)*d/k/A/dt 
+        t.push(tn)   
+        T.push(Tn-Tcel)     
+    }    
+
+        let data = [{
+  x:t,
+  y:T,
+
+  type:"line",
+  orientation:"v",
+  marker: {color:"rgba(0,0,255,0.6)"}
+}];
+
+        const layout = {title:"World Wide Wine Production",xaxis:{range:[0,2500]},yaxis:{range:[-260,-200]}};
+        Plotly.newPlot("myPlot", data, layout);
+
+    }
+        
+P(0,0)
+var FIRST = 0
+var SECOND = 0
+document.getElementById("slider1").addEventListener('input', function() {
+            FIRST = parseFloat(document.getElementById("slider1").value);
+            P(FIRST,SECOND);
+        });
+document.getElementById("slider2").addEventListener('input', function() {
+            SECOND = parseFloat(document.getElementById("slider2").value);
+            P(FIRST,SECOND);
+        });
+
+// Plotly.newPlot("myPlot", data, layout);
+</script>
+
+</body>
+</html>
