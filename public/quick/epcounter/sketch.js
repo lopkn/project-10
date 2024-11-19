@@ -1785,7 +1785,7 @@ class events{
 				c.maxhp = 800
 				c.vknockback = 2.3
 				c.stunTime *= 3
-				c.hknockback = 4.2
+				c.hknockback = 5.2
 				c.baseFriction = 0.95
 				c.difficulty = 2
 				c.gravityMultiplier = 2.1
@@ -1794,7 +1794,7 @@ class events{
 				c.wallDamageBase = 6
 				c.hue = 160
 				c.hbaseFriction = 0.6
-				c.stableIgnore = 2
+				c.stableIgnore = 5
 				c.bloodMultiplier = 0.3
 			}
 
@@ -1828,15 +1828,15 @@ class events{
 				if(l.lineCircleCollision(c.x,c.y,c.size,x1,y1,x2,y2,leng)){
 					if(c.stableIgnore!==undefined){if(c.stableIgnore>leng){return}}
 					c.vx += (x1-x2)*0.01*c.hknockback
-					if(c.vy > 0){c.vy = -c.baseKnockUp}
-					c.vy += -Math.abs((y1-y2)*0.01)*c.vknockback
+					if(c.vy > 0 && ballgame.strength == 1){c.vy = -c.baseKnockUp*ballgame.strength}
+					c.vy += -Math.abs((y1-y2)*0.01)*c.vknockback*ballgame.strength
 					if(!c.hit){
 						let r = Math.random()*360
 						if(c.colorff !== undefined){
 							c.colorf = c.colorff()
 						}
 						let dmg = leng/3 * ballgame.strength * ballgame.damageMultiplier * Math.sin(mouseY/Height*Math.PI)
-						ballgame.damageBall(c,dmg,{"vx":(x1-x2),"vy":(y1-y2),leng})
+						ballgame.damageBall(c,dmg,{"vx":(x1-x2),"vy":(y1-y2),leng,"stun":ballgame.strength===1})
 
 					} // end hit
 					c.hit = true
@@ -1889,9 +1889,12 @@ events.addEvent("ballgame",{
 	"balltypes":{},
 	"balltypesMax":{"normal":5,"boss1":2,"boss2":2,"scout1":4},
 	"update":(e)=>{
+		let dm = l.distance2(mouseTrail[0][0],mouseTrail[0][1],mouseTrail[1][0],mouseTrail[1][1])
 		if(e.energy < e.maxEnergy){
 			if(e.energy < 0){e.energy = 0}
-			e.energy += e.energyGen
+			e.energy += e.energyGen / (1+dm/5)
+		} else if(dm<1){
+			e.energy += e.energyGen/(1+(e.energy-e.maxEnergy)/10)
 		}
 		if(e.arcView){
 			ctx.strokeStyle = "red"
@@ -1900,6 +1903,7 @@ events.addEvent("ballgame",{
 			ctx.arc(mouseX,mouseY,Math.max(e.energy,0),0,Math.PI*2)
 			ctx.stroke()
 		}
+
 
 		if(e.gamemode === "endless"){
 			if(COUNTER%400 === 0){
@@ -1923,7 +1927,7 @@ events.addEvent("ballgame",{
 			}
 		} else if(e.gamemode === "waves"){
 			if(COUNTER%400 === 0 && e.amount === 0){
-				e.maxDifficulty += 1
+				e.maxDifficulty += 5
 				setTimeout(()=>{
 					e.summonWave(e.maxDifficulty)
 				},3000)
@@ -1951,7 +1955,7 @@ events.addEvent("ballgame",{
 			events.instantaneous["knocker ball"](Width*Math.random(),10,type)
 
 		}
-	},"damageBall":(c,dmg,direction={"vx":0,"vy":0,"leng":5})=>{
+	},"damageBall":(c,dmg,direction={"vx":0,"vy":0,"leng":5,"stun":true})=>{
 		let x1 = direction.x1
 		let x2 = direction.x2
 		let y1 = direction.y1
@@ -1961,7 +1965,9 @@ events.addEvent("ballgame",{
 		let leng = direction.leng
 		let ballgame = events.happening.ballgame
 		c.hp -= dmg
-		c.stun += c.stunTime
+		if(direction.stun){
+			c.stun += c.stunTime
+		}
 		events.instantaneous["blood splatter"](c.x,c.y,dmg/20*c.bloodMultiplier,(VX)*0.03*c.hknockback,(VY)*0.03*c.vknockback).forEach((e)=>{
 			e.vx *= Math.random()
 			e.vy *= Math.random()
