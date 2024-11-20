@@ -44,6 +44,12 @@ class l{
 	  return(Math.sqrt(a*a+b*b))
 	}
 
+	static vectorCatchUp2(vx1,vy1,vx2,vy2){ // if first vector is catching up to second vector
+		let d = this.dotProduct2(vx1,vy1,vx2,vy2)
+		if(d < 0){return("headon")}
+		let d2 = this.distance2(vx2,vy2,0,0)
+	} //// UNFINISHED
+
 	static boundingBoxPoint(x1,y1,bx1,by1,bx2,by2){ // point, box
 		let bx,sx,by,sy
 		if(bx1 > bx2){bx = bx1;sx=bx2}else{bx=bx2;sx=bx1}
@@ -2350,7 +2356,6 @@ command("scene.sounds=false")
 
 
 music.mainDel = music.GD1()
-
 
 
 
