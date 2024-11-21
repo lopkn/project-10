@@ -1548,6 +1548,7 @@ document.addEventListener("keydown",(e)=>{
 		// while(mouseTrail.length > 50){
 		// 	mouseTrail.pop()
 		// }
+		events.varbs.handOnScreen = !events.varbs.handOnScreen
 	} else if(k == "="){
 		time_fill_color = "rgba(100,0,0,0.2)"
 		time_outline_color = "rgba(0,0,0,0)"
@@ -1590,7 +1591,7 @@ let parr = []
 class events{
 	static happening = {}
 	static interactions = {"cutInteraction":[]}
-	static varbs = {boltrate:0.99,rippleStrength:1,trip:1,noteCeiling:85,noteFloor:45,octave:0,conjureStrength:0}
+	static varbs = {handOnScreen:true,boltrate:0.99,rippleStrength:1,trip:1,noteCeiling:85,noteFloor:45,octave:0,conjureStrength:0}
 	static updateAll(){
 		let objk = Object.keys(this.happening)
 		objk.forEach((E)=>{
@@ -1609,7 +1610,11 @@ class events{
 		})
 
 		if(COUNTER%4===0){
-			mouseTrail.splice(0,0,[mouseX,mouseY])
+			if(events.varbs.handOnScreen){
+				mouseTrail.splice(0,0,[mouseX,mouseY])
+			} else {
+				mouseTrail.splice(0,0,mouseTrail[0])
+			}
 			while(mouseTrail.length > 50){
 				mouseTrail.pop()
 			}
@@ -1623,11 +1628,13 @@ class events{
 		}
 		
 		let d = l.distance2(mouseTrail[0][0],mouseTrail[0][1],mouseTrail[1][0],mouseTrail[1][1])
+		if(mouseTrail[1] !== mouseTrail[2]){
 		for(let i = this.interactions.cutInteraction.length-1; i > -1; i--){
 			let e = this.interactions.cutInteraction[i]
-			if(e.DEL){this.interactions.cutInteraction.splice(i,1);continue}
+			if(e.DEL){if(e.onDeath){e.onDeath(e)};this.interactions.cutInteraction.splice(i,1);continue}
 			e.cutInteraction(mouseTrail[0][0],mouseTrail[0][1],mouseTrail[1][0],mouseTrail[1][1],d)
 
+		}
 		}
 		//theyre giving uses of "enzymes" not "enzyme kinetics"
 		// this.interactions.cutInteraction.forEach((e)=>{
@@ -1698,7 +1705,7 @@ class events{
 			c.phase = Math.random()*2*Math.PI
 			parr.push(c)
 		},
-		"knocker ball":(x,y,type="normal")=>{
+		"knocker ball":(x,y,type="normal",tag=[])=>{
 			let ballgame = events.happening["ballgame"]
 			let c = new rollingBall(x,y,Math.random()*10-5,Math.random()*10-5)
 			let phaseColorR = Math.random()*255
@@ -1802,6 +1809,12 @@ class events{
 				c.hbaseFriction = 0.6
 				c.stableIgnore = 5
 				c.bloodMultiplier = 0.3
+			} else if(tag.includes("bomb") || type === "bomb"){
+				c.onDeath = (c)=>{events.interactions.cutInteraction.forEach((e)=>{
+					let d = Math.max(distance(e.x,e.y,c.x,c.y),1)
+					e.vy += (e.y-c.y)/d/d*500
+					e.vx += (e.x-c.x)/d/d*500
+				})}
 			}
 
 			c.type = type
@@ -1944,6 +1957,7 @@ events.addEvent("ballgame",{
 	},"summonWave":(difficulty)=>{
 		let e = events.happening.ballgame
 		let saturated = {}
+		let tags = []
 		while(e.difficulty<e.maxDifficulty){
 			let type = "normal"
 			if(saturated["normal"]){
@@ -1952,13 +1966,16 @@ events.addEvent("ballgame",{
 				if(Math.random()>0.7){
 					type = "wallBouncer1"
 				}
+				if(Math.random()>0.1){
+					tags.push("bomb")
+				}
 				if(Math.random()>0.9){
 					type = "boss1"
 				} else if(Math.random()>0.97){
 					type = "boss2"
 				} else if(Math.random()>0.99){type = "grunt1"}
 			if(e.balltypesMax[type] !== undefined && e.balltypes[type] >= e.balltypesMax[type]){saturated[type]=true;continue}
-			events.instantaneous["knocker ball"](Width*Math.random(),10,type)
+			events.instantaneous["knocker ball"](Width*Math.random(),10,type,tags)
 
 		}
 	},"damageBall":(c,dmg,direction={"vx":0,"vy":0,"leng":5,"stun":true})=>{
@@ -2243,6 +2260,7 @@ setInterval(()=>{
 		// 	let conc = Math.sin((events.happening["ballgame"].energy-200)/ 200*Math.PI)*50
 		// 	ctx.strokeStyle = "hsl(74,100%,"+(100-conc)+"%,255)"
 		// }
+		if(mouseTrail[i+1] === mouseTrail[i+2]){continue}
 		ctx.strokeStyle = mouseTrail[i][2] 
 		ctx.beginPath()
 		ctx.moveTo(mouseTrail[i+1][0],mouseTrail[i+1][1])
