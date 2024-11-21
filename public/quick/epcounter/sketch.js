@@ -30,7 +30,7 @@ function rint(x){
 
 function init(){
 	initSounds([])
-	events.happening["ballgame"].maxDifficulty = 5
+	events.happening["ballgame"].maxDifficulty = 25
 }
 
 
@@ -134,6 +134,11 @@ class music{
 	static counter = 0
 	static synth = new Tone.PolySynth(Tone.Synth,8).toDestination(); // Connect to audio output
 	static eq = new Tone.EQ3(-10, 3, 0);
+	static bomb = new Tone.Sampler({
+	urls: {
+			"C4":"./bomb.mp3",
+		},
+	}).toDestination();
 	static reverb = new Tone.Reverb({
     decay: 20, // Duration of the reverb tail
     preDelay: 0.3,
@@ -592,6 +597,7 @@ music.bell.connect(music.reverb)
 music.bell.connect(music.echo)
 music.bell.connect(music.eq)
 music.bell.set({volume:-20})
+music.bomb.set({volume:-15})
 music.drumSynth.set({volume:-20})
 music.kick.set({volume:-20})
 music.synth.set({
@@ -964,7 +970,7 @@ class rollingBall{
 
 
 	update(){
-		if(this.stun){this.stun-=1;return}
+		if(this.stun>0){this.stun-=1;return}
 		this.x += this.vx
 		this.y += this.vy
 
@@ -1631,7 +1637,7 @@ class events{
 		if(mouseTrail[1] !== mouseTrail[2]){
 		for(let i = this.interactions.cutInteraction.length-1; i > -1; i--){
 			let e = this.interactions.cutInteraction[i]
-			if(e.DEL){if(e.onDeath){e.onDeath(e)};this.interactions.cutInteraction.splice(i,1);continue}
+			if(e.DEL){/*if(e.onDeath){e.onDeath(e)}*/;this.interactions.cutInteraction.splice(i,1);continue}
 			e.cutInteraction(mouseTrail[0][0],mouseTrail[0][1],mouseTrail[1][0],mouseTrail[1][1],d)
 
 		}
@@ -1809,11 +1815,25 @@ class events{
 				c.hbaseFriction = 0.6
 				c.stableIgnore = 5
 				c.bloodMultiplier = 0.3
-			} else if(tag.includes("bomb") || type === "bomb"){
+			} 
+			if(tag.includes("bomb") || type === "bomb"){
+				c.deathNoteSignature = (c)=>{
+					music.bomb.triggerAttack("C4")
+				}
 				c.onDeath = (c)=>{events.interactions.cutInteraction.forEach((e)=>{
-					let d = Math.max(distance(e.x,e.y,c.x,c.y),1)
-					e.vy += (e.y-c.y)/d/d*500
-					e.vx += (e.x-c.x)/d/d*500
+					if(e===c||e.dead){return}
+					let d = Math.max(distance(e.x,e.y,c.x,c.y),120)
+					let C = new explosionR(c.x,c.y,"#FFFF00")
+					C.actLife = 80+Math.random()*150
+					parr.push(C)
+					if(e.stun < 9000/d){
+						e.stun += 9000/d-e.stun
+						if(e.stun > 100){e.stun=100}
+					}
+					e.vy += (e.y-c.y)/d/d*2500
+					e.vx += (e.x-c.x)/d/d*2500
+					// ballgame.damageBall(e,Math.min(d/10,e.maxhp/d*80),{"vx":(e.x-c.x),"vy":(e.y-c.y),"leng":5,"stun":false,"sound":false})
+					ballgame.damageBall(e,Math.min(e.maxhp/d*280),{"vx":(e.x-c.x)/d,"vy":(e.y-c.y)/d,"leng":d,"stun":false,"sound":false})
 				})}
 			}
 
@@ -1957,7 +1977,7 @@ events.addEvent("ballgame",{
 	},"summonWave":(difficulty)=>{
 		let e = events.happening.ballgame
 		let saturated = {}
-		let tags = []
+		let tags = ["bomb"]
 		while(e.difficulty<e.maxDifficulty){
 			let type = "normal"
 			if(saturated["normal"]){
@@ -1966,25 +1986,28 @@ events.addEvent("ballgame",{
 				if(Math.random()>0.7){
 					type = "wallBouncer1"
 				}
-				if(Math.random()>0.1){
-					tags.push("bomb")
-				}
+				// if(Math.random()>0.1){
+				// }
 				if(Math.random()>0.9){
 					type = "boss1"
 				} else if(Math.random()>0.97){
 					type = "boss2"
 				} else if(Math.random()>0.99){type = "grunt1"}
 			if(e.balltypesMax[type] !== undefined && e.balltypes[type] >= e.balltypesMax[type]){saturated[type]=true;continue}
+			if(Math.random()>0.92){
+					tags.push("bomb")
+			}
 			events.instantaneous["knocker ball"](Width*Math.random(),10,type,tags)
-
+			tags = []
 		}
-	},"damageBall":(c,dmg,direction={"vx":0,"vy":0,"leng":5,"stun":true})=>{
+	},"damageBall":(c,dmg,direction={"vx":0,"vy":0,"leng":5,"stun":true,"sound":true})=>{
 		let x1 = direction.x1
 		let x2 = direction.x2
 		let y1 = direction.y1
 		let y2 = direction.y2
 		let VX = direction.vx
 		let VY = direction.vy
+		let sound = direction.sound===undefined?true:direction.sound
 		let leng = direction.leng
 		let ballgame = events.happening.ballgame
 		c.hp -= dmg
@@ -1999,24 +2022,36 @@ events.addEvent("ballgame",{
 		
 		let note = Math.random()*15+50
 		console.log("points: "+dmg)
+		if(sound){
 		if(c.hitNoteSignature){
 			c.hitNoteSignature()
 		} else {
 			music.playBell(note)
 			music.playBell(note+5)
-		}
+		}}
 		
 		if(c.hp < 0 && !c.dead){
 			c.stun = 0
 			c.dead = true
+			if(c.onDeath){
+				c.onDeath(c)
+			}
 			console.log("KILL: "+(dmg+c.hp))
 			ballgame.score += (dmg+c.hp)*3
 			ballgame.amount -= 1
 			c.actLife = 2
-			music.playBell(note+3,1,scene.interval*0.25)
-			music.playBell(note+8,1,scene.interval*0.25)
-			music.playBell(note+6,1,scene.interval*0.5)
-			music.playBell(note+11,1,scene.interval*0.5)
+			if(sound){
+				if(c.deathNoteSignature){
+					c.deathNoteSignature(c)
+				} else {
+				music.playBell(note+3,1,scene.interval*0.25)
+				music.playBell(note+8,1,scene.interval*0.25)
+				music.playBell(note+6,1,scene.interval*0.5)
+				music.playBell(note+11,1,scene.interval*0.5)
+				}
+
+			}
+			
 			setTimeout(()=>{
 				events.instantaneous["blood splatter"](c.x,c.y,leng/20*c.bloodMultiplier,(VX)*0.03,(VY)*0.03)
 			},100)
