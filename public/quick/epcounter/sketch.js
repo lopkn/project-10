@@ -1679,8 +1679,8 @@ class events{
 			c.actLife *= (1+Math.abs(normalRandom(0,2)))
 			parr.push(c)
 		},
-		"blood splatter ball":(x,y,vx=0,vy=0)=>{
-			let c = new rollingBall(x,y,Math.random()*5-2.5+vx,Math.random()*5-2.5+vy)
+		"blood splatter ball":(x,y,vx=0,vy=0,d=10)=>{
+			let c = new rollingBall(x,y,Math.random()*d-d/2+vx,Math.random()*d-d/2+vy)
 			c.colorf = (a)=>{return("rgba(125,0,0,"+(1.3*a)+")")}
 			c.strokef = (a)=>{return("rgba("+(100*Math.sin(COUNTER/30+Math.PI)+100)+",0,0,"+(1.3*a)+")")}
 			c.mover = 0.1
@@ -1887,10 +1887,10 @@ class events{
 			for(let i = 0; i < n; i++){
 				this.instantaneous["blue splatter ball"](x,y)
 			}
-		},"blood splatter":(x,y,n=4,vx=0,vy=0)=>{
+		},"blood splatter":(x,y,n=4,vx=0,vy=0,d=5)=>{
 			let arr = []
 			for(let i = 0; i < n; i++){
-				arr.push(this.instantaneous["blood splatter ball"](x,y,vx,vy))
+				arr.push(this.instantaneous["blood splatter ball"](x,y,vx,vy,d))
 			}
 			return(arr)
 		},"splatter":(x,y,n)=>{
