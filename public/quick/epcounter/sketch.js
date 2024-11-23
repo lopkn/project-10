@@ -971,9 +971,16 @@ class rollingBall{
 
 
 	update(){
-		if(this.stun>0){this.stun-=1;return}
-		this.x += this.vx
-		this.y += this.vy
+		if(this.ballgame){
+			if(this.stun>0){this.stun-=1;return}
+			this.x += this.vx*this.speed
+			this.y += this.vy*this.speed
+		} else {
+			this.x += this.vx
+			this.y += this.vy
+		}
+
+		
 
 		if(this.mover && COUNTER % 2 == 0){
 			this.vx += Math.random()*this.mover-this.mover/2
@@ -1568,7 +1575,7 @@ document.addEventListener("keydown",(e)=>{
 	} else if(k == "\\"){
 
 		// summonItem()
-		events.instantaneous["knocker ball"](mouseX,mouseY,"boss1")
+		events.instantaneous["knocker ball"](mouseX,mouseY,"normal",["bomb"])
 
 	} else{
 		let r = Math.random()*5
@@ -1750,6 +1757,7 @@ class events{
 			c.stun = 0
 			c.stunTime = 15
 			c.speedLimx = 3.5
+			c.speed = 0.5
 			c.stunMax = 12
 			c.baseKnockUp = 0.2
 			c.ballgame = true
@@ -1844,7 +1852,21 @@ class events{
 					}
 					e.vy += (e.y-c.y)/d/d*2000
 					e.vx += (e.x-c.x)/d/d*2000
-					if(d > c.explosionSize){d = Math.min(1/d,e.maxhp/d*80)} else {d = Math.max(500,e.maxhp/1.5);events.varbs.trip/=3}
+					if(d > c.explosionSize){d = Math.min(1/d,e.maxhp/d*80)} else {
+						d = Math.max(500,e.maxhp/1.5);events.varbs.trip/=3;
+						for(let i = 0; i < 3; i++){
+							let C = new liner(mouseX,mouseY,8,7)
+							C.vx += Math.random()*150-75
+							C.vy += Math.random()*150-75
+							C.size += 3
+							C.counter = 18
+							C.lineUp = 0
+							C.myDat = 2
+							C.updateSpeed = 25
+							parr.push(C)
+						}
+						
+					}
 					ballgame.damageBall(e,d,{"vx":(e.x-c.x),"vy":(e.y-c.y),"leng":25,"stun":false,"sound":false})
 				})
 					if(events.varbs.trip < 0){events.varbs.trip = 0}
@@ -1939,12 +1961,12 @@ events.addEvent("ballgame",{
 	"score":0,
 	"display":0,
 	"maxEnergy":500,
-	"damageMultiplier":6,
+	"damageMultiplier":1,
 	"damageComboMultiplier":1,
 	"energyGen":8,
 	"gamemode":"waves",
 	"balltypes":{},
-	"balltypesMax":{"normal":5,"boss1":2,"boss2":2,"scout1":4},
+	"balltypesMax":{"normal":5,"boss1":2,"boss2":2,"scout1":4,"wallBouncer1":4},
 	"update":(e)=>{
 		let dm = l.distance2(mouseTrail[0][0],mouseTrail[0][1],mouseTrail[1][0],mouseTrail[1][1])
 		if(e.energy < e.maxEnergy){
