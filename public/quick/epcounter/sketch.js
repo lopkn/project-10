@@ -31,6 +31,7 @@ function rint(x){
 function init(){
 	initSounds([])
 	events.happening["ballgame"].maxDifficulty = 25
+	events.happening["ballgame"].summonWave(25)
 }
 
 
@@ -1126,6 +1127,12 @@ class rollingBall{
 				ctx.lineWidth = 2
 				ctx.arc(this.x,this.y,this.size*this.captureCounter/this.maxCaptureCounter,0,2*Math.PI)
 				ctx.stroke()
+			} if (this.tags.includes("bomb")){
+				ctx.beginPath()
+				ctx.strokeStyle = "green"
+				ctx.lineWidth = 5
+				ctx.arc(this.x,this.y,this.size*(COUNTER%50)/50,0,2*Math.PI)
+				ctx.stroke()
 			}
 			
 		}
@@ -1820,24 +1827,33 @@ class events{
 				c.deathNoteSignature = (c)=>{
 					music.bomb.triggerAttack("C4")
 				}
-				c.onDeath = (c)=>{events.interactions.cutInteraction.forEach((e)=>{
-					if(e===c||e.dead){return}
-					let d = Math.max(distance(e.x,e.y,c.x,c.y),120)
-					let C = new explosionR(c.x,c.y,"#FFFF00")
+				c.explosionSize = 280
+				c.onDeath = (c)=>{
+					events.instantaneous["blood splatter"](c.x,c.y,20,0,0,20)
+					let C = new explosionR(c.x,c.y,"#FFFF00",4,2)
 					C.actLife = 80+Math.random()*150
 					parr.push(C)
-					if(e.stun < 9000/d){
-						e.stun += 9000/d-e.stun
-						if(e.stun > 100){e.stun=100}
+					events.interactions.cutInteraction.forEach((e)=>{
+					if(e===c||e.dead){return}
+
+					let d = Math.max(distance(e.x,e.y,c.x,c.y),c.explosionSize)
+					if(d > Width/3){return}
+					if(e.stun < 25000/d){
+						e.stun += 25000/d-e.stun
+						if(e.stun > 150){e.stun=150}
 					}
-					e.vy += (e.y-c.y)/d/d*2500
-					e.vx += (e.x-c.x)/d/d*2500
-					// ballgame.damageBall(e,Math.min(d/10,e.maxhp/d*80),{"vx":(e.x-c.x),"vy":(e.y-c.y),"leng":5,"stun":false,"sound":false})
-					ballgame.damageBall(e,Math.min(e.maxhp/d*280),{"vx":(e.x-c.x)/d,"vy":(e.y-c.y)/d,"leng":d,"stun":false,"sound":false})
-				})}
+					e.vy += (e.y-c.y)/d/d*2000
+					e.vx += (e.x-c.x)/d/d*2000
+					if(d > c.explosionSize){d = Math.min(1/d,e.maxhp/d*80)} else {d = Math.max(500,e.maxhp/1.5);events.varbs.trip/=3}
+					ballgame.damageBall(e,d,{"vx":(e.x-c.x),"vy":(e.y-c.y),"leng":25,"stun":false,"sound":false})
+				})
+					if(events.varbs.trip < 0){events.varbs.trip = 0}
+				}
+
 			}
 
 			c.type = type
+			c.tags = tag
 			ballgame.amount += 1
 			if(ballgame.balltypes[c.type] === undefined){ballgame.balltypes[c.type]=0}
 			ballgame.balltypes[c.type] += 1
@@ -1874,7 +1890,8 @@ class events{
 						if(c.colorff !== undefined){
 							c.colorf = c.colorff()
 						}
-						let dmg = leng/3 * ballgame.strength * ballgame.damageMultiplier * Math.sin(mouseY/Height*Math.PI)
+						let dmg = leng/3 * ballgame.strength * ballgame.damageMultiplier * ballgame.damageComboMultiplier * Math.sin(mouseY/Height*Math.PI)
+						if(ballgame.strength===1){ballgame.damageComboMultiplier += 0.05}
 						ballgame.damageBall(c,dmg,{"vx":(x1-x2),"vy":(y1-y2),leng,"stun":ballgame.strength===1})
 
 					} // end hit
@@ -1923,6 +1940,7 @@ events.addEvent("ballgame",{
 	"display":0,
 	"maxEnergy":500,
 	"damageMultiplier":6,
+	"damageComboMultiplier":1,
 	"energyGen":8,
 	"gamemode":"waves",
 	"balltypes":{},
@@ -1935,6 +1953,12 @@ events.addEvent("ballgame",{
 		} else if(dm<1){
 			e.energy += e.energyGen/(1+(e.energy-e.maxEnergy)/10)
 		}
+
+		e.damageComboMultiplier = 1 + (e.damageComboMultiplier-1)*0.99997
+		e.damageComboMultiplier -= 0.0001
+
+		if(e.damageComboMultiplier<1){e.damageComboMultiplier = 1}
+
 		if(e.arcView){
 			ctx.strokeStyle = "red"
 			ctx.lineWidth = 1
@@ -1974,6 +1998,10 @@ events.addEvent("ballgame",{
 		}
 		
 		
+		if(events.varbs.trip < 1){
+			events.varbs.trip += 0.0001
+		}
+
 	},"summonWave":(difficulty)=>{
 		let e = events.happening.ballgame
 		let saturated = {}
@@ -2277,7 +2305,8 @@ setInterval(()=>{
 	ctx2.font = "80px Arial"
 	let d = "" + (Date.now()+date_disruptor)
 	if(events.happening.ballgame){
-		d = events.happening.ballgame.display?events.happening.ballgame.display:Math.floor(events.happening.ballgame.score)
+		let ballgame = events.happening.ballgame
+		d = ballgame.display?ballgame.display:Math.floor(ballgame.score)+"-=-"+ballgame.damageComboMultiplier.toFixed(2)
 	}
 	ctx2.fillText(d,Width/2,Height/2)
 	ctx2.lineWidth = 2
