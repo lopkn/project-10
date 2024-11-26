@@ -30,9 +30,11 @@ function rint(x){
 
 function init(){
 	initSounds([])
-	events.happening["ballgame"].maxDifficulty = 25
+	events.happening["ballgame"].maxDifficulty = 1
 	events.happening["ballgame"].summonWave(1)
 }
+
+document.addEventListener("contextmenu",(e)=>{e.preventDefault()})
 
 
 class l{
@@ -1521,7 +1523,7 @@ document.addEventListener("mousedown",()=>{
 			c.lineUp = 0
 			c.myDat = 2
 			c.updateSpeed = 25
-			parr.push(c)
+			// parr.push(c)
 	}
 	// let thiscol = (a,b)=>"hsla("+COUNTER%360+",100%,50%,1)"
 	// let c = new explosionR(mouseX,mouseY,thiscol,13)
@@ -1873,10 +1875,11 @@ class events{
 				c.vknockback = 1
 				c.hknockback = 1.2
 				c.baseFriction = 0.95
-				c.difficulty = 3
+				c.difficulty = 10
 				c.gravityMultiplier = 2.1
 				c.speedLimx = 2
-				c.hue = 345
+				c.hue = 335
+				c.light = 70
 			} else if(type === "wallBouncer1"){
 				c.maxhp = 800
 				c.vknockback = 2.3
@@ -2121,24 +2124,28 @@ events.addEvent("ballgame",{
 	"display":0,
 	"maxEnergy":500,
 	"damageMultiplier":1,
-	"damageComboMultiplier":25,
+	"damageComboMultiplier":2,
 	"energyGen":8,
 	"gamemode":"waves",
 	"balltypes":{},
 	"balltypesMax":{"normal":8,"boss1":3,"boss2":3,"scout1":4,"wallBouncer1":4,"necromancer1":1,"necromancer2":1},
 	"waveTable":[
 		{"type":"normal","chance":0,"limit":Infinity,"difficultyThreshold":0},
-		{"type":"TAG","tag":"bomb","chance":0,"limit":1,"difficultyThreshold":0},
+		{"type":"TAG","tag":"bomb","chance":0.9,"limit":1,"difficultyThreshold":0},
 		{"type":"grunt1","chance":0.85,"limit":Infinity,"difficultyThreshold":3},
 		{"type":"boss1","chance":0.8,"limit":2,"difficultyThreshold":11},
 		{"type":"TAG","tag":"freezebomb","chance":0.9,"limit":2,"difficultyThreshold":0},
 		{"type":"boss2","chance":0.9,"limit":2,"difficultyThreshold":18},
 		{"type":"necromancer1","chance":0.98,"limit":1,"difficultyThreshold":28},
+		{"type":"TAG","tag":"bomb","chance":0.4,"limit":1,"difficultyThreshold":28},
 		{"type":"boss1","chance":0.9,"limit":1,"difficultyThreshold":30},
 		{"type":"wallBouncer1","chance":0.8,"limit":5,"difficultyThreshold":33},
 		{"type":"necromancer2","chance":0.99,"limit":1,"difficultyThreshold":65},
-		{"type":"TAG","tag":"reverser","chance":0.99,"limit":1,"difficultyThreshold":65},
-		{"type":"TAG","tag":"motivator","chance":0.98,"limit":3,"difficultyThreshold":70},
+		{"type":"TAG","tag":"reverser","chance":0.95,"limit":1,"difficultyThreshold":65},
+		{"type":"TAG","tag":"motivator","chance":0.95,"limit":1,"difficultyThreshold":70},
+		{"type":"scout1","chance":0.6,"limit":8,"difficultyThreshold":70,"skipper":true},
+		{"type":"TAG","tag":"bomb","chance":0.9,"limit":2,"difficultyThreshold":71},
+		{"type":"TAG","tag":"freezebomb","chance":0.9,"limit":2,"difficultyThreshold":71},
 
 		{"type":"ENDER OF TIME BOSS","chance":0,"limit":1,"difficultyThreshold":Infinity},
 		],
@@ -2248,12 +2255,11 @@ events.addEvent("ballgame",{
 		let saturated = {}
 		let tags = []
 		while(ballgame.difficulty < ballgame.maxDifficulty){
-			for(let i = 0; i < ballgame.waveTableIndex; i++){
+			for(let i = ballgame.waveTableIndex-1; i > -1 ; i--){
 				
 				if(saturated[i]===true){continue}
 				let dex = ballgame.waveTable[i]
 				if(Math.random() < dex.chance){continue}
-
 					if(dex.type === "TAG"){
 						tags.push(dex.tag)
 					} else {
@@ -2264,6 +2270,7 @@ events.addEvent("ballgame",{
 				if(saturated[i] == undefined){saturated[i] = 0}
 				saturated[i] += 1
 				if(saturated[i] >= dex.limit){saturated[i]=true;continue}
+				if(dex.skipper){i = -20} // so the deck reshuffles to top
 			}
 		}
 	},
@@ -2622,6 +2629,13 @@ function command(cmd){
 			if(!isNaN(parseFloat(cmdsplit[1]))){
 				events.happening.ballgame.maxDifficulty += parseFloat(cmdsplit[1])
 			}
+		} else if(cmdsplit[0] == "tester"){
+			let bg = events.happening.ballgame
+			bg.damageComboMultiplier = 12
+			bg.maxDifficulty = 90
+			bg.damageMultiplier = 2
+			bg.energyGen *= 2
+			bg.arcView = true
 		}
 		recognized = true
 	}
