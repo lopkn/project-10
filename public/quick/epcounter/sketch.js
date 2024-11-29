@@ -999,10 +999,15 @@ class rollingBall{
 			this.x = 0
 			hit = true
 			if(this.ballgame){
+				if(this.horizontalPortal){
+					this.x = Width
+					this.vx *= -1
+				} else {
 				this.vx *= this.hbaseFriction
-				if(this.wallDamageBase!==undefined){
-					if(this.vx > this.wallDamageBase){
-						events.happening.ballgame.damageBall(this,this.vx*this.wallDamageMult,{"vx":this.vx*4.5,"vy":this.vy*4.5,"leng":l.distance2(this.vx,this.vy,0,0)*40})
+					if(this.wallDamageBase!==undefined){
+						if(this.vx > this.wallDamageBase){
+							events.happening.ballgame.damageBall(this,this.vx*this.wallDamageMult,{"vx":this.vx*4.5,"vy":this.vy*4.5,"leng":l.distance2(this.vx,this.vy,0,0)*40})
+						}
 					}
 				}
 			}
@@ -1012,12 +1017,18 @@ class rollingBall{
 			this.x = Width
 			hit = true
 			if(this.ballgame){
-				this.vx *= this.hbaseFriction
-				if(this.wallDamageBase!==undefined){
-					if(this.vx < -this.wallDamageBase){
-						events.happening.ballgame.damageBall(this,-this.vx*this.wallDamageMult,{"vx":-this.vx*4.5,"vy":this.vy*4.5,"leng":l.distance2(this.vx,this.vy,0,0)*40})
+				if(this.horizontalPortal){
+					this.vx *= -1
+					this.x = 0
+				} else {
+					this.vx *= this.hbaseFriction
+					if(this.wallDamageBase!==undefined){
+						if(this.vx < -this.wallDamageBase){
+							events.happening.ballgame.damageBall(this,-this.vx*this.wallDamageMult,{"vx":-this.vx*4.5,"vy":this.vy*4.5,"leng":l.distance2(this.vx,this.vy,0,0)*40})
+						}
 					}
 				}
+				
 			}
 		}
 		if(this.y < 0){
@@ -1616,7 +1627,8 @@ document.addEventListener("keydown",(e)=>{
 	} else if(k == "\\"){
 
 		// summonItem()
-		events.instantaneous["knocker ball"](mouseX,mouseY,"ninja1",["arcview"])
+		let summoned = events.instantaneous["knocker ball"](mouseX,mouseY,"assassin1",["arcview","horizontalPortal"])
+		summoned.phasePower = 8
 
 	} else{
 		let r = Math.random()*5
@@ -1941,35 +1953,26 @@ class events{
 				c.difficulty = 8
 				c.hue = 70
 				c.stealthLevel = 9
+				c.gravityMultiplier = 0.5
 				c.hitNoteSignature=()=>{}
 				c.light = 0
 			} else if(type === "assassin1"){
 				c.maxhp = 200
 				c.vknockback = 0.9
 				c.baseFriction = 0.97
+				c.gravityMultiplier = 0.5
 				c.difficulty = 8
 				c.hue = 230
 				c.stealthLevel = 5
+				c.timeframe = 50
+				c.phasePower = 1
 				c.hitNoteSignature=()=>{
 					let note = Math.random()*12+42
 					music.playBell(note)
 				}
 				c.signature = Math.random()*Math.PI*2
-				c.colorf = ()=>{return("HSLA("+c.hue+","+(c.hp/c.maxhp*100)+"%,"+c.light+"%,"+(0.5+Math.sin(COUNTER/50)*0.5+c.signature)+")")}
-			}  else if(type === "assassin2"){
-				c.maxhp = 200
-				c.vknockback = 0.9
-				c.baseFriction = 0.97
-				c.difficulty = 8
-				c.hue = 230
-				c.stealthLevel = 5
-				c.hitNoteSignature=()=>{
-					let note = Math.random()*12+42
-					music.playBell(note)
-				}
-				c.signature = Math.random()*Math.PI*2
-				c.colorf = ()=>{return("HSLA("+c.hue+","+(c.hp/c.maxhp*100)+"%,"+c.light+"%,"+(0.5+Math.sin(COUNTER/50+c.signature)*0.5)**6+")")}
-			} 
+				c.colorf = ()=>{return("HSLA("+c.hue+","+(c.hp/c.maxhp*100)+"%,"+c.light+"%,"+(0.5+Math.sin(COUNTER/c.timeframe+c.signature)*0.5)**c.phasePower+")")}
+			}
 			if(tag.includes("bomb") || type === "bomb"){
 				c.deathNoteSignature = (c)=>{
 					music.bomb.triggerAttack("C4")
@@ -2151,6 +2154,9 @@ class events{
 				}
 
 			}
+			if(tag.includes("horizontalPortal")){
+				c.horizontalPortal = true
+			}
 
 			c.type = type
 			c.tags = tag
@@ -2206,6 +2212,7 @@ class events{
 				} else {c.hit = false}
 			}
 			parr.push(c)
+			return(c)
 		},
 		"blue splatter":(x,y,n=15)=>{
 			for(let i = 0; i < n; i++){
@@ -2251,7 +2258,7 @@ events.addEvent("ballgame",{
 	"damageComboMultiplier":2,
 	"energyGen":8,
 	"reverseKB":true,
-	"gamemode":"waves",
+	"gamemode":"endless waves",
 	"balltypes":{},
 	"balltypesMax":{"normal":8,"boss1":3,"boss2":3,"scout1":4,"wallBouncer1":4,"necromancer1":1,"necromancer2":1},
 	"waveTable":[
@@ -2323,6 +2330,14 @@ events.addEvent("ballgame",{
 		} else if(e.gamemode === "waves"){
 			if(COUNTER%400 === 0 && e.amount === 0){
 				e.maxDifficulty += 1
+				setTimeout(()=>{
+					e.summonWaveTable(e.maxDifficulty)
+				},3000)
+			}
+		} else if(e.gamemode === "endless waves"){
+			if(COUNTER%40 === 0){
+				e.maxDifficulty += 0.05
+				// 0.1 is BRUAL
 				setTimeout(()=>{
 					e.summonWaveTable(e.maxDifficulty)
 				},3000)
