@@ -1074,9 +1074,13 @@ class rollingBall{
 						music.playBell(b+rint(5),1,scene.interval*0.45)
 						music.playBell(b+rint(5),1,scene.interval*0.6)
 						events.instantaneous["blue splatter"](this.x,this.y)
+						events.instantaneous["blue splatter"](this.x,this.y-10)
+						events.interactions.cutInteraction.forEach((e)=>{
+							if(e === this){return}
+							events.happening.ballgame.damageBall(e,9999999,{vx:(e.x-this.x)/3,vy:(e.y-this.y)/3,"leng":10,"sound":false})
+						})
 					} else {
 						this.passThrough = 1
-						
 					}
 					
 				}
@@ -1123,42 +1127,59 @@ class rollingBall{
 		ctx.fill()
 		ctx.stroke()
 		if(this.ballgame){
+			let mainLineMultiplier = 1
+			if(this.stealthLevel){
+					mainLineMultiplier = 1 / this.stealthLevel
+				}
 			if(this.floor > 0){
 				ctx.beginPath()
 				ctx.strokeStyle = "yellow"
-				ctx.lineWidth = 5
+				ctx.lineWidth = 5 * mainLineMultiplier
+				
 				ctx.arc(this.x,this.y,this.size*0.5,0,2*Math.PI*this.floor/events.happening.ballgame.maxFloor)
 				ctx.stroke()
 			}
 			if(this.captureCounter > 0){
 				ctx.beginPath()
 				ctx.strokeStyle = "white"
-				ctx.lineWidth = 2
+				ctx.lineWidth = 2* mainLineMultiplier
 				ctx.arc(this.x,this.y,this.size*this.captureCounter/this.maxCaptureCounter,0,2*Math.PI)
 				ctx.stroke()
 			} if (this.tags.includes("bomb")){
 				ctx.beginPath()
 				ctx.strokeStyle = "green"
-				ctx.lineWidth = 5
+				ctx.lineWidth = 5* mainLineMultiplier
 				ctx.arc(this.x,this.y,this.size*(COUNTER%50)/50,0,2*Math.PI)
 				ctx.stroke()
 			} if (this.tags.includes("freezebomb")){
 				ctx.beginPath()
 				ctx.strokeStyle = "blue"
-				ctx.lineWidth = 5
+				ctx.lineWidth = 5* mainLineMultiplier
 				ctx.arc(this.x,this.y,this.size*(COUNTER%50)/50,0,2*Math.PI)
 				ctx.stroke()
 			} if (this.tags.includes("reverser")){
 				ctx.beginPath()
 				ctx.strokeStyle = "#FFFFFF"
-				ctx.lineWidth = 5
+				ctx.lineWidth = 5* mainLineMultiplier
 				ctx.arc(this.x,this.y,this.size*(150-COUNTER%150)/150,0,2*Math.PI)
 				ctx.stroke()
 			} if (this.tags.includes("motivator")){
 				ctx.beginPath()
 				ctx.strokeStyle = "#FF00FF"
-				ctx.lineWidth = 5
+				ctx.lineWidth = 5* mainLineMultiplier
 				ctx.arc(this.x,this.y,this.size*Math.random(),0,2*Math.PI)
+				ctx.stroke()
+			}if (this.tags.includes("recharger")){
+				ctx.beginPath()
+				ctx.strokeStyle = "#00FFFF"
+				ctx.lineWidth = 7* mainLineMultiplier
+				ctx.arc(this.x,this.y,this.size*(COUNTER%150)/150,0,2*Math.PI)
+				ctx.stroke()
+			}if (this.tags.includes("arcview")){
+				ctx.beginPath()
+				ctx.strokeStyle = "#A00000"
+				ctx.lineWidth = 5* mainLineMultiplier
+				ctx.arc(this.x,this.y,this.size*(COUNTER%110)/110,0,2*Math.PI)
 				ctx.stroke()
 			}
 			
@@ -1595,7 +1616,7 @@ document.addEventListener("keydown",(e)=>{
 	} else if(k == "\\"){
 
 		// summonItem()
-		events.instantaneous["knocker ball"](mouseX,mouseY,"normal",["reverser"])
+		events.instantaneous["knocker ball"](mouseX,mouseY,"ninja1",["arcview"])
 
 	} else{
 		let r = Math.random()*5
@@ -1768,6 +1789,8 @@ class events{
 			c.maxCaptureCounter = 2
 			c.vknockback = 1
 			c.hknockback = 1
+			c.colorf = ()=>{return("HSL("+c.hue+","+(c.hp/c.maxhp*100)+"%,"+c.light+"%)")}
+			c.lastHit = 0
 			c.baseFriction = 1
 			c.hbaseFriction = 1
 			c.floor = 0
@@ -1895,6 +1918,57 @@ class events{
 				c.hbaseFriction = 0.6
 				c.stableIgnore = 5
 				// c.bloodMultiplier = 0.3
+			} else if(type === "wallBouncer2"){
+				c.maxhp = 2500
+				c.vknockback = 2.7
+				c.stunTime *= 3
+				c.hknockback = 7.2
+				c.baseFriction = 0.95
+				c.difficulty = 12
+				c.gravityMultiplier = 2.1
+				c.speedLimx = 1
+				c.wallDamageMult = 50
+				c.wallDamageBase = 8
+				c.hue = 160
+				c.light = 70
+				c.hbaseFriction = 0.4
+				c.stableIgnore = 9
+				c.bloodMultiplier = 1.3
+			} else if(type === "ninja1"){
+				c.maxhp = 200
+				c.vknockback = 0.9
+				c.baseFriction = 0.97
+				c.difficulty = 8
+				c.hue = 70
+				c.stealthLevel = 9
+				c.hitNoteSignature=()=>{}
+				c.light = 0
+			} else if(type === "assassin1"){
+				c.maxhp = 200
+				c.vknockback = 0.9
+				c.baseFriction = 0.97
+				c.difficulty = 8
+				c.hue = 230
+				c.stealthLevel = 5
+				c.hitNoteSignature=()=>{
+					let note = Math.random()*12+42
+					music.playBell(note)
+				}
+				c.signature = Math.random()*Math.PI*2
+				c.colorf = ()=>{return("HSLA("+c.hue+","+(c.hp/c.maxhp*100)+"%,"+c.light+"%,"+(0.5+Math.sin(COUNTER/50)*0.5+c.signature)+")")}
+			}  else if(type === "assassin2"){
+				c.maxhp = 200
+				c.vknockback = 0.9
+				c.baseFriction = 0.97
+				c.difficulty = 8
+				c.hue = 230
+				c.stealthLevel = 5
+				c.hitNoteSignature=()=>{
+					let note = Math.random()*12+42
+					music.playBell(note)
+				}
+				c.signature = Math.random()*Math.PI*2
+				c.colorf = ()=>{return("HSLA("+c.hue+","+(c.hp/c.maxhp*100)+"%,"+c.light+"%,"+(0.5+Math.sin(COUNTER/50+c.signature)*0.5)**6+")")}
 			} 
 			if(tag.includes("bomb") || type === "bomb"){
 				c.deathNoteSignature = (c)=>{
@@ -2028,6 +2102,54 @@ class events{
 				})
 				}
 
+			} if(tag.includes("recharger")){
+				c.deathNoteSignature = (c)=>{
+					let n = 100*(Math.random()+1)
+					let tn = Tone.now()
+					for(let i = 0; i < 6; i++){
+						n*=1.2
+						music.bell.triggerAttack(n,tn+i*0.05)
+					}
+					n /= 2
+					for(let i = 0; i < 6; i++){
+						n*=1.2
+						music.bell.triggerAttack(n,tn+i*0.05+0.3)
+					}
+					n /= 2
+					for(let i = 0; i < 6; i++){
+						n*=1.2
+						music.bell.triggerAttack(n,tn+i*0.05+0.6)
+					}
+
+				}
+				c.onDeath = (c)=>{
+					// let C = new explosionR(c.x,c.y,"#FF00FF",4,1)
+					// C.actLife = 80+Math.random()*150
+					// parr.push(C)
+					ballgame.energy += ballgame.maxEnergy*8
+				}
+
+			}
+			if(tag.includes("arcview")){
+				c.deathNoteSignature = (c)=>{
+					let n = 100*(Math.random()+1)
+					let tn = Tone.now()
+					for(let i = 0; i < 6; i++){
+						n*=1.25
+						music.bell.triggerAttack(n,tn+i*0.05)
+					}
+					n /= 2.3
+					for(let i = 0; i < 6; i++){
+						n*=1.25
+						music.bell.triggerAttack(n,tn+i*0.05+0.3)
+					}
+
+				}
+				c.onDeath = (c)=>{
+
+					ballgame.arcView += 2000
+				}
+
 			}
 
 			c.type = type
@@ -2049,7 +2171,6 @@ class events{
 
 			events.interactions.cutInteraction.push(c)
 			ballgame.difficulty += c.difficulty
-			c.colorf = ()=>{return("HSL("+c.hue+","+(c.hp/c.maxhp*100)+"%,"+c.light+"%)")}
 			c.cutInteraction = (x1,y1,x2,y2,leng)=>{
 
 				if(c.stun<=0){
@@ -2065,6 +2186,9 @@ class events{
 
 				if(l.lineCircleCollision(c.x,c.y,c.size,x1,y1,x2,y2,leng)){
 					if(c.stableIgnore!==undefined){if(c.stableIgnore>leng){return}}
+					if(ballgame.reverseKB &&leng>10&& Math.sign(-c.vx) === Math.sign(x1-x2)){
+						c.vx -= 2*c.vx*Math.min((Date.now()-c.lastHit)/500*c.hknockback**2,1) //think of kbility
+					}
 					c.vx += (x1-x2)*0.01*c.hknockback
 					if(c.vy > 0 && ballgame.strength == 1){c.vy = -c.baseKnockUp*ballgame.strength}
 					c.vy += -Math.abs((y1-y2)*0.01)*c.vknockback*ballgame.strength
@@ -2114,7 +2238,7 @@ events.addEvent("ballgame",{
 	"strength":1,
 	"difficulty":0,
 	"maxDifficulty":0,
-	"arcView":false,
+	"arcView":200,
 	"amount":0,
 	"maxFloor":1,
 	"difficultyRamper":1,
@@ -2126,12 +2250,15 @@ events.addEvent("ballgame",{
 	"damageMultiplier":1,
 	"damageComboMultiplier":2,
 	"energyGen":8,
+	"reverseKB":true,
 	"gamemode":"waves",
 	"balltypes":{},
 	"balltypesMax":{"normal":8,"boss1":3,"boss2":3,"scout1":4,"wallBouncer1":4,"necromancer1":1,"necromancer2":1},
 	"waveTable":[
 		{"type":"normal","chance":0,"limit":Infinity,"difficultyThreshold":0},
 		{"type":"TAG","tag":"bomb","chance":0.9,"limit":1,"difficultyThreshold":0},
+		{"type":"TAG","tag":"arcview","chance":0.8,"limit":1,"difficultyThreshold":0},
+		{"type":"TAG","tag":"recharger","chance":0.98,"limit":2,"difficultyThreshold":0},
 		{"type":"grunt1","chance":0.85,"limit":Infinity,"difficultyThreshold":3},
 		{"type":"boss1","chance":0.8,"limit":2,"difficultyThreshold":11},
 		{"type":"TAG","tag":"freezebomb","chance":0.9,"limit":2,"difficultyThreshold":0},
@@ -2163,12 +2290,13 @@ events.addEvent("ballgame",{
 
 		if(e.damageComboMultiplier<1){e.damageComboMultiplier = 1}
 
-		if(e.arcView){
+		if(e.arcView > 0){
 			ctx.strokeStyle = "red"
 			ctx.lineWidth = 1
 			ctx.beginPath()
 			ctx.arc(mouseX,mouseY,Math.max(e.energy,0),0,Math.PI*2)
 			ctx.stroke()
+			e.arcView -= 1
 		}
 
 
@@ -2284,6 +2412,7 @@ events.addEvent("ballgame",{
 		let sound = direction.sound===undefined?true:direction.sound
 		let leng = direction.leng
 		let ballgame = events.happening.ballgame
+		c.lastHit = Date.now()
 		c.hp -= dmg
 		if(direction.stun){
 			c.stun += c.stunTime
@@ -2628,6 +2757,7 @@ function command(cmd){
 		} else if(cmdsplit[0] == "skip"){
 			if(!isNaN(parseFloat(cmdsplit[1]))){
 				events.happening.ballgame.maxDifficulty += parseFloat(cmdsplit[1])
+				events.happening.ballgame.damageComboMultiplier = 10
 			}
 		} else if(cmdsplit[0] == "tester"){
 			let bg = events.happening.ballgame
