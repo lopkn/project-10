@@ -2258,7 +2258,7 @@ events.addEvent("ballgame",{
 	"damageComboMultiplier":2,
 	"energyGen":8,
 	"reverseKB":true,
-	"gamemode":"endless waves",
+	"gamemode":"waves",
 	"balltypes":{},
 	"balltypesMax":{"normal":8,"boss1":3,"boss2":3,"scout1":4,"wallBouncer1":4,"necromancer1":1,"necromancer2":1},
 	"waveTable":[
@@ -2413,7 +2413,7 @@ events.addEvent("ballgame",{
 				if(saturated[i] == undefined){saturated[i] = 0}
 				saturated[i] += 1
 				if(saturated[i] >= dex.limit){saturated[i]=true;continue}
-				if(dex.skipper){i = -20} // so the deck reshuffles to top
+				if(dex.skipper || true){i = -20} // so the deck reshuffles to top
 			}
 		}
 	},
