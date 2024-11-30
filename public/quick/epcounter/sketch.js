@@ -1195,6 +1195,7 @@ class rollingBall{
 					ctx.fillStyle = "white"
 					size = 0.34
 				}
+				size *= mainLineMultiplier
 				ctx.strokeStyle = "transparent"
 				// ctx.lineWidth = 4* mainLineMultiplier
 				ctx.arc(this.x,this.y,this.size*size,0,2*Math.PI)
@@ -1671,7 +1672,7 @@ document.addEventListener("keydown",(e)=>{
 	} else if(k == "\\"){
 
 		// summonItem()
-		let summoned = events.instantaneous["knocker ball"](mouseX,mouseY,"wallBouncer2",["arcview","dingus"])
+		let summoned = events.instantaneous["knocker ball"](mouseX,mouseY,"wallBouncer2",["warner","dingus"])
 		summoned.phasePower = 8
 
 	} else{
@@ -1900,7 +1901,17 @@ class events{
 					music.playBell(note)
 					music.playBell(note+3)
 				}
-			}  else if(type==="necromancer1"){
+			}  else if(type === "boss3"){
+				c.maxhp = 800
+				c.vknockback = 1.4
+				c.hknockback = 1.4
+				c.baseFriction = 0.95
+				c.difficulty = 20
+				c.gravityMultiplier = 2.7
+				c.speedLimx = 2
+				c.hue = 325
+				c.light = 26
+			} else if(type==="necromancer1"){
 				c.maxhp = 1800
 				c.vknockback = 0.4
 				c.hknockback = 0.2
@@ -1962,6 +1973,16 @@ class events{
 				c.speedLimx = 2
 				c.hue = 335
 				c.light = 70
+			} else if(type === "scout2"){
+				c.maxhp = 125
+				c.vknockback = 1
+				c.hknockback = 1.2
+				c.baseFriction = 0.95
+				c.difficulty = 17
+				c.gravityMultiplier = 3.1
+				c.speedLimx = 2
+				c.hue = 325
+				c.light = 60
 			} else if(type === "wallBouncer1"){
 				c.maxhp = 800
 				c.vknockback = 2.3
@@ -2204,6 +2225,16 @@ class events{
 			if(tag.includes("horizontalPortal")){
 				c.horizontalPortal = true
 			}
+			if(tag.includes("warner")){
+				c.hitNoteSignature=()=>{
+					events.interactions.cutInteraction.forEach((e)=>{
+					if(e===c||e.dead){return}
+					let d = Math.max(distance(e.x,e.y,c.x,c.y),20)
+					e.vy += (e.y-c.y)/(d**3)*5400
+					e.vx += (e.x-c.x)/(d**3)*5400
+				})//tomorrow: try if aligned, flip
+				}
+			}
 
 			c.type = type
 			c.tags = tag
@@ -2250,7 +2281,7 @@ class events{
 						if(c.colorff !== undefined){
 							c.colorf = c.colorff()
 						}
-						let dmg = leng/3 * ballgame.strength * ballgame.damageMultiplier * ballgame.damageComboMultiplier * Math.sin(mouseY/Height*Math.PI)
+						let dmg = leng/3 * ballgame.strength * ballgame.damageMultiplier * ballgame.damageComboMultiplier * (0.5+Math.sin(mouseY/Height*Math.PI)*0.5)
 						if(ballgame.strength===1){ballgame.damageComboMultiplier += 0.05}
 						ballgame.damageBall(c,dmg,{"vx":(x1-x2),"vy":(y1-y2),leng,"stun":ballgame.strength===1})
 
@@ -2318,26 +2349,60 @@ events.addEvent("ballgame",{
 		{"type":"TAG","tag":"freezebomb","chance":0.9,"limit":2,"difficultyThreshold":0},
 		{"type":"boss2","chance":0.9,"limit":2,"difficultyThreshold":18},
 		{"type":"necromancer1","chance":0.98,"limit":1,"difficultyThreshold":28},
-		{"type":"TAG","tag":"bomb","chance":0.4,"limit":1,"difficultyThreshold":28},
+		{"type":"TAG","tag":"bomb","chance":0.99,"limit":1,"difficultyThreshold":28},
 		{"type":"boss1","chance":0.9,"limit":1,"difficultyThreshold":30},
 		{"type":"wallBouncer1","chance":0.8,"limit":5,"difficultyThreshold":33},
 		{"type":"necromancer2","chance":0.99,"limit":1,"difficultyThreshold":65},
 		{"type":"TAG","tag":"reverser","chance":0.95,"limit":1,"difficultyThreshold":65},
 		{"type":"TAG","tag":"motivator","chance":0.95,"limit":1,"difficultyThreshold":70},
 		{"type":"scout1","chance":0.6,"limit":8,"difficultyThreshold":70,"skipper":true},
-		{"type":"TAG","tag":"bomb","chance":0.9,"limit":1,"difficultyThreshold":71},
+		{"type":"TAG","tag":"bomb","chance":0.96,"limit":1,"difficultyThreshold":71},
 		{"type":"TAG","tag":"freezebomb","chance":0.9,"limit":1,"difficultyThreshold":71},
 		{"type":"grunt1","chance":0.6,"limit":28,"difficultyThreshold":73,"skipper":true},
-		{"type":"assassin1","chance":0.98,"limit":1,"difficultyThreshold":75,
+		{"type":"assassin1","chance":0.95,"limit":2,"difficultyThreshold":75},
+		{"type":"assassin1","chance":0.98,"limit":1,"difficultyThreshold":80,
 			"wavefunction":(c)=>{
-				for(let i = 0; i < 5; i++){
+				let n = 4 + Math.random()*5
+				let p = 4
+				while(Math.random()>0.7){
+					p *= 1.3
+				}
+				for(let i = 0; i < n; i++){
 					let a = events.instantaneous["knocker ball"](Width*Math.random(),10,"assassin1",["horizontalPortal"])
-					a.phasePower = 4
+					a.phasePower = p
 				}
 			}
 		},
-		{"type":"wallBouncer2","chance":0.86,"limit":5,"difficultyThreshold":80,"skipper":true},
+		{"type":"ninja1","chance":0.95,"limit":2,"difficultyThreshold":85},
+		{"type":"ninja1","chance":0.99,"limit":1,"difficultyThreshold":90,
+			"wavefunction":(c)=>{
+				let n = 3 + Math.random()*3
+				for(let i = 0; i < n; i++){
+					let a = events.instantaneous["knocker ball"](Width*Math.random(),10,"ninja1",["horizontalPortal"])
+				}
+			}
+		},
+		{"type":"scout2","chance":0.95,"limit":3,"difficultyThreshold":92,"skipper":true},
 
+		{"type":"wallBouncer2","chance":0.86,"limit":5,"difficultyThreshold":95,"skipper":true},
+		{"type":"boss3","chance":0.997,"limit":1,"difficultyThreshold":96,"skipper":true,
+			"wavefunction":(c)=>{
+				let a = events.instantaneous["knocker ball"](Width*Math.random(),10,"boss3",[])
+			}
+		},
+		{"type":"boss3","chance":0.9997,"limit":1,"difficultyThreshold":100,"skipper":true,
+			"wavefunction":(c)=>{
+				c.hp = 3800
+				c.light = 20
+				c.difficulty = 40
+				c.hbaseFriction = 0.7
+			let a = events.instantaneous["knocker ball"](Width*Math.random(),10,"boss3",[])
+				a.hp = 3800
+				a.light = 20
+				a.difficulty = 40
+				a.hbaseFriction = 0.7
+			}
+		},
 
 		{"type":"ENDER OF TIME BOSS","chance":0,"limit":1,"difficultyThreshold":Infinity},
 		],
@@ -2858,7 +2923,7 @@ function command(cmd){
 			let bg = events.happening.ballgame
 			bg.damageComboMultiplier = 12
 			bg.damageMultiplier = 2000
-			bg.maxDifficulty = 79
+			bg.maxDifficulty = 74
 			bg.energyGen *= 2
 			bg.arcView = true
 		}
@@ -2928,7 +2993,6 @@ command("scene.sounds=false")
 
 
 music.mainDel = music.GD1()
-
 
 
 
