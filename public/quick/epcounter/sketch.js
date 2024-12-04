@@ -30,8 +30,12 @@ function rint(x){
 
 function init(){
 	initSounds([])
-	events.happening["ballgame"].maxDifficulty = 1
-	events.happening["ballgame"].summonWave(1)
+	if(events.happening.ballgame){
+		events.happening["ballgame"].maxDifficulty = 1
+		events.happening["ballgame"].summonWave(1)
+		command("scene.sounds=false")
+	}
+
 }
 
 document.addEventListener("contextmenu",(e)=>{e.preventDefault()})
@@ -1647,6 +1651,38 @@ document.addEventListener("keydown",(e)=>{
 	if(e.code == "ShiftLeft"){events.varbs.octave--}
 	if(e.code == "ShiftRight"){events.varbs.octave++}
 	if(k == " "){
+
+		if(events.happening.ballgame && e.repeat == false){
+			if(events.happening.ballgame.paused){
+				let n = 2000
+				let tn = Tone.now()
+				for(let i = 19; i >-1; i--){
+					n/=1.08
+					music.bell.triggerAttack(n,tn+i**1.5*0.05)
+					music.bell.triggerAttack(n/1.3,tn+i**1.5*0.05)
+				}
+				for(let i = 0; i < 100; i++){
+						setTimeout(()=>{
+							events.happening.ballgame.universalDT = (Math.sin(i*Math.PI/200))
+						},i*40)
+					}
+			} else {
+				let n = 2000
+				let tn = Tone.now()
+				for(let i = 0; i < 20; i++){
+					n/=1.08
+					music.bell.triggerAttack(n,tn+i**1.5*0.05)
+					music.bell.triggerAttack(n/1.3,tn+i**1.5*0.05)
+				}
+				for(let i = 0; i < 100; i++){
+					setTimeout(()=>{
+						events.happening.ballgame.universalDT = (Math.cos(i*Math.PI/200))
+					},i*40)
+				}
+			}
+			
+				events.happening.ballgame.paused = !events.happening.ballgame.paused
+		}
 		parr.forEach((e)=>{
 			if(e.nonPlayerControllable){return}
 			let d = distance(e.x,e.y,mouseX,mouseY)
@@ -1727,7 +1763,8 @@ class events{
 			e.life -= 1
 		})
 
-		if(COUNTER%4===0){
+		if(events.happening.ballgame){
+			if(COUNTER%4===0){
 			if(events.varbs.handOnScreen){
 				mouseTrail.splice(0,0,[mouseX,mouseY])
 			} else {
@@ -1739,8 +1776,10 @@ class events{
 		let d = l.distance2(mouseTrail[0][0],mouseTrail[0][1],mouseTrail[1][0],mouseTrail[1][1])
 		events.happening["ballgame"].strength = Math.min(events.happening["ballgame"].energy/d,1)
 		events.happening["ballgame"].energy -= d
-
 		mouseTrail[0][2] = events.happening.ballgame.mouseColor(d)
+		}
+
+		
 
 
 		}
@@ -2041,6 +2080,27 @@ class events{
 				c.signature = Math.random()*Math.PI*2
 				c.colorf = ()=>{return("HSLA("+c.hue+","+(c.hp/c.maxhp*100)+"%,"+c.light+"%,"+(0.5+Math.sin(COUNTER/c.timeframe+c.signature)*0.5)**c.phasePower+")")}
 			}
+			if(tag.includes("arcview")){
+				c.deathNoteSignature = (c)=>{
+					let n = 100*(Math.random()+1)
+					let tn = Tone.now()
+					for(let i = 0; i < 6; i++){
+						n*=1.25
+						music.bell.triggerAttack(n,tn+i*0.05)
+					}
+					n /= 2.3
+					for(let i = 0; i < 6; i++){
+						n*=1.25
+						music.bell.triggerAttack(n,tn+i*0.05+0.3)
+					}
+
+				}
+				c.onDeath.push((c)=>{
+
+					ballgame.arcView += 1300
+				})
+
+			}
 			if(tag.includes("bomb") || type === "bomb"){
 				c.deathNoteSignature = (c)=>{
 					music.bomb.triggerAttack("C4")
@@ -2201,27 +2261,7 @@ class events{
 				})
 
 			}
-			if(tag.includes("arcview")){
-				c.deathNoteSignature = (c)=>{
-					let n = 100*(Math.random()+1)
-					let tn = Tone.now()
-					for(let i = 0; i < 6; i++){
-						n*=1.25
-						music.bell.triggerAttack(n,tn+i*0.05)
-					}
-					n /= 2.3
-					for(let i = 0; i < 6; i++){
-						n*=1.25
-						music.bell.triggerAttack(n,tn+i*0.05+0.3)
-					}
-
-				}
-				c.onDeath.push((c)=>{
-
-					ballgame.arcView += 1300
-				})
-
-			}
+			
 			if(tag.includes("horizontalPortal")){
 				c.horizontalPortal = true
 			}
@@ -2336,6 +2376,7 @@ events.addEvent("ballgame",{
 	"damageComboMultiplier":2,
 	"energyGen":8,
 	"reverseKB":true,
+	"paused":false,
 	"gamemode":"waves",
 	"balltypes":{},
 	"balltypesMax":{"normal":8,"boss1":3,"boss2":3,"scout1":4,"wallBouncer1":4,"necromancer1":1,"necromancer2":1},
@@ -2989,7 +3030,6 @@ mobileInit()
 
 // command("/reverb off")	
 command("/echo off")
-command("scene.sounds=false")
 
 
 music.mainDel = music.GD1()
