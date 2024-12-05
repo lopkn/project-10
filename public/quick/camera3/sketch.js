@@ -14,8 +14,8 @@ var Width = canvas.width = renderingCanvas.width = 125
 var Height = canvas.height = renderingCanvas.height = 100
 
 camera_button.addEventListener('click', async function() {
-    let stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-    // let stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });
+    // let stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+    let stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });
   video.srcObject = stream;
 });
 
@@ -202,7 +202,7 @@ function gpuscan(){
 // setTimeout(()=>{CP.clear()},500)
 
 
-setInterval(()=>{ctx.drawImage(video,0,0,video.width-0,video.height, 0, 0, canvas.width, canvas.height);
+setInterval(()=>{ctx.drawImage(video,0,0,video.width*MULTIPLIER,video.height*MULTIPLIER, 0, 0, canvas.width, canvas.height);
 })
 
 
@@ -228,6 +228,7 @@ function renderer(){
                         let opac = (stuff[j][i]-THRESHOLD)/50
                         ctx2.fillStyle = "rgba(0,150,0,"+opac+")"
                         ctx2.fillRect((canvas.width-i)*MULTIPLIER,j*MULTIPLIER,MULTIPLIER,MULTIPLIER)
+                        ctx2.fillRect((i)*MULTIPLIER,j*MULTIPLIER,MULTIPLIER,MULTIPLIER)
                         if(RECORDING){
                          frame.push([i,j,opac.toPrecision(3)])
                          COUNT ++
