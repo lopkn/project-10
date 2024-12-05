@@ -4,7 +4,7 @@ let click_button = document.querySelector("#click-photo");
 let canvas = document.querySelector("#canvas");
 let image = document.querySelector("#image")
 
-let ctx2 = document.getElementById("canvas2").getContext("2d")
+let ctx2 = document.getElementById("canvas22").getContext("2d")
 let ctx = document.getElementById("canvas").getContext("2d", {"willReadFrequently":true})
 // Access-Control-Allow-Origin "*"
 image.crossOrigin = "Anonymous";
@@ -20,17 +20,18 @@ camera_button.addEventListener('click', async function() {
 click_button.addEventListener('click', function() {
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     CP.scan()
-    // let image_data_url = canvas.toDataURL('image/jpeg');
+    let image_data_url = canvas.toDataURL('image/jpeg');
 
-    // canvas.getContext('2d').drawImage(image,0,0,canvas.width,canvas.height)
+    canvas.getContext('2d').drawImage(image,0,0,canvas.width,canvas.height)
 
     // data url of the image
-    // setTimeout(()=>{
-    // let a = canvas.getContext('2d').getImageData(mouseX,mouseY,1,1).data
+    setTimeout(()=>{
+    let a = canvas.getContext('2d').getImageData(mouseX,mouseY,1,1).data
     // PARR(a[0],a[1],a[2],mouseX,mouseY)
-    // console.log(a);
+    CP.scan()
+    console.log(a);
     
-    // },1000)
+    },1000)
 
     
 });
