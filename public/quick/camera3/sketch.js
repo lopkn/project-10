@@ -9,13 +9,13 @@ let ctx = document.getElementById("canvas").getContext("2d", {"willReadFrequentl
 // Access-Control-Allow-Origin "*"
 image.crossOrigin = "Anonymous";
 
-var MULTIPLIER = 5/2
-var Width = canvas.width = renderingCanvas.width = 125*3
-var Height = canvas.height = renderingCanvas.height = 100*3
+var MULTIPLIER = 3
+var Width = canvas.width = renderingCanvas.width = 125*10
+var Height = canvas.height = renderingCanvas.height = 100*10
 
 camera_button.addEventListener('click', async function() {
-    // let stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-    let stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });
+    let stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+    // let stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });
   video.srcObject = stream;
 });
 
@@ -81,7 +81,7 @@ class CP{
     }
     static clear(){
         // ctx2.clearRect(0,0,canvas.width,canvas.height)
-        ctx2.fillStyle = "rgba(0,0,0,1)"
+        ctx2.fillStyle = "rgba(0,0,0,"+Math.sqrt((mouseY-20)/500)+")"
         ctx2.fillRect(0,0,renderingCanvas.width,renderingCanvas.height)
     }
 }
@@ -169,11 +169,11 @@ function distance(x1,y1,x2,y2) {
  GPUGradientScan = gpu.createKernel(function(raw,lastRaw,info) {
     let pos = (this.thread.x + this.thread.y * info[0])* 4 //4 because 4 color channels!
     
-    if(this.thread.x !== 0 && this.thread.y !== 0){
+    // if(this.thread.x !== 0 && this.thread.y !== 0){
 
         let coldiff = Math.abs(raw[pos] - lastRaw[pos])+Math.abs(raw[pos+1] - lastRaw[pos+1])+Math.abs(raw[pos+2] - lastRaw[pos+2])
         return(coldiff)
-    }
+    // }
 
     return(0)
 
@@ -212,8 +212,8 @@ var store = []
 var RECORDING = false
 var COUNT = 0
 var mouseIsPressed = false
-renderingCanvas.width = Width * MULTIPLIER
-renderingCanvas.height = Height * MULTIPLIER
+renderingCanvas.width = window.innerWidth
+renderingCanvas.height = window.innerHeight
 function renderer(){
     CP.scan()
     let stuff = []
@@ -250,10 +250,53 @@ document.addEventListener("keydown",(e)=>{if(e.key=="r"){RECORDING = !RECORDING}
 function start(){
     CP.scan()
     CP.scan()
-    setInterval(()=>{let d = Date.now();renderer();THRESHOLD=mouseX/10},1000/25)
+    setInterval(()=>{let d = Date.now();renderer();THRESHOLD=mouseX/10},1000/15)
     setInterval(()=>{console.log(COUNT)},1000)
 }
 start()
+
+
+
+
+
+
+///imager
+let imgCanvas = document.createElement("canvas")
+let ctx3 = imgCanvas.getContext("2d",{"willReadFrequently":true})
+imgCanvas.width = 250
+imgCanvas.height = 200
+var images = []
+var max_stored_images = 5
+function capImage(){
+    ctx3.drawImage(video,0,0,video.width*5,video.height*5, 0, 0, imgCanvas.width, imgCanvas.height);
+    images.splice(0,0,ctx3.getImageData(0,0,imgCanvas.width,imgCanvas.height).data)
+    if(images.length>max_stored_images){images.pop()}
+}
+
+
+function drawScan(){
+    let MULTIPLIER = 15
+    let stuff = GPUGradientScan(images[0],images[1],[imgCanvas.width,imgCanvas.height])
+    CP.clear()
+    for(let j = 1; j < imgCanvas.height; j+=1){
+        for(let i = 1; i < imgCanvas.width; i+=1){
+                try{
+                    if(stuff[j][i] > THRESHOLD){
+                        let opac = (stuff[j][i]-THRESHOLD)/50
+                        ctx2.fillStyle = "rgba(150,0,0,"+opac+")"
+                        ctx2.fillRect((i)*MULTIPLIER,j*MULTIPLIER,MULTIPLIER,MULTIPLIER)
+                        if(RECORDING){
+                         frame.push([i,j,opac.toPrecision(3)])
+                         COUNT ++
+                        }
+                    }   
+                } catch(err){}
+                
+        }
+    }
+}
+
+
 
 
 
