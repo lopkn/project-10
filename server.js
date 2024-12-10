@@ -1484,6 +1484,8 @@ var server = app.listen(3000);
 app.use(cors()) //jan7-2024
 
 app.use(express.static('public'));
+
+
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json())
 app.post('/responder', (req, res) => {
