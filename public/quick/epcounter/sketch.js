@@ -932,8 +932,8 @@ class explosionR{
 	}
 
 	update(){
-		this.size += this.speed
-		this.actLife -= this.s2
+		this.size += this.speed*RDT
+		this.actLife -= this.s2*RDT
 	}
 	draw(){
 		if(this.colf){
@@ -978,24 +978,33 @@ class rollingBall{
 
 	update(){
 		if(this.ballgame){
-			if(this.stun>0){this.stun-=1;return}
-			this.x += this.vx*this.speed*events.happening.ballgame.universalDT
-			this.y += this.vy*this.speed*events.happening.ballgame.universalDT
+			if(this.stun>0){this.stun-=1*RDT;return}
+			this.x += this.vx*this.speed*events.happening.ballgame.universalDT*RDT
+			this.y += this.vy*this.speed*events.happening.ballgame.universalDT*RDT
 		} else {
-			this.x += this.vx
-			this.y += this.vy
+			this.x += this.vx*RDT
+			this.y += this.vy*RDT
 		}
 
 		
 
 		if(this.mover && COUNTER % 2 == 0){
-			this.vx += Math.random()*this.mover-this.mover/2
-			this.vy += Math.random()*this.mover-this.mover/2
+
+			if(this.movingType){
+				if(this.movingType == "fractional"){
+					this.vx *= (1+Math.random()*this.mover-this.mover/2)
+					this.vy *= (1+Math.random()*this.mover-this.mover/2)
+				}
+			}else{
+				this.vx += (Math.random()*this.mover-this.mover/2)*RDT
+				this.vy += (Math.random()*this.mover-this.mover/2)*RDT
+			}
+			
 			// this.vx *= 0.99
 			// this.vy *= 0.99
 		}
-		this.vx *= this.friction
-		this.vy *= this.friction
+		this.vx *= this.friction**RDT
+		this.vy *= this.friction**RDT
 
 		let hit = false
 		if(this.x < 0){
@@ -1708,7 +1717,7 @@ document.addEventListener("keydown",(e)=>{
 	} else if(k == "\\"){
 
 		// summonItem()
-		let summoned = events.instantaneous["knocker ball"](mouseX,mouseY,"delusionary",["dingus"])
+		let summoned = events.instantaneous["knocker ball"](mouseX,mouseY,"delusionary2",["dingus"])
 		// summoned.phasePower = 8
 
 	} else{
@@ -1746,7 +1755,7 @@ class events{
 	static happening = {}
 	static interactions = {"cutInteraction":[]}
 	static varbs = {handOnScreen:true,boltrate:0.99,rippleStrength:1,trip:1,noteCeiling:85,noteFloor:45,octave:0,conjureStrength:0}
-	static updateAll(){
+	static updateAll(dt){
 		let objk = Object.keys(this.happening)
 		objk.forEach((E)=>{
 			let e = this.happening[E]
@@ -1758,13 +1767,15 @@ class events{
 				return
 			}
 			if(e.update){
-				e.update(e)
+				e.update(e,dt)
 			}
 			e.life -= 1
 		})
 
 		if(events.happening.ballgame){
 			if(COUNTER%4===0){
+			
+		}
 			if(events.varbs.handOnScreen){
 				mouseTrail.splice(0,0,[mouseX,mouseY])
 			} else {
@@ -1773,12 +1784,10 @@ class events{
 			while(mouseTrail.length > 50){
 				mouseTrail.pop()
 			}
-		let d = l.distance2(mouseTrail[0][0],mouseTrail[0][1],mouseTrail[1][0],mouseTrail[1][1])
-		events.happening["ballgame"].strength = Math.min(events.happening["ballgame"].energy/d,1)
-		events.happening["ballgame"].energy -= d
-		mouseTrail[0][2] = events.happening.ballgame.mouseColor(d)
-		}
-
+			let d = l.distance2(mouseTrail[0][0],mouseTrail[0][1],mouseTrail[1][0],mouseTrail[1][1])
+			events.happening["ballgame"].strength = Math.min(events.happening["ballgame"].energy/d,1)
+			events.happening["ballgame"].energy -= d
+			mouseTrail[0][2] = events.happening.ballgame.mouseColor(d)
 		
 
 
@@ -1787,13 +1796,13 @@ class events{
 		let d = l.distance2(mouseTrail[0][0],mouseTrail[0][1],mouseTrail[1][0],mouseTrail[1][1])
 		if(mouseTrail[1] !== mouseTrail[2]){
 		for(let i = this.interactions.cutInteraction.length-1; i > -1; i--){
-			let e = this.interactions.cutInteraction[i]
-			if(e.DEL){/*if(e.onDeath){e.onDeath(e)}*/;this.interactions.cutInteraction.splice(i,1);continue}
-			e.cutInteraction(mouseTrail[0][0],mouseTrail[0][1],mouseTrail[1][0],mouseTrail[1][1],d)
+				let e = this.interactions.cutInteraction[i]
+				if(e.DEL){this.interactions.cutInteraction.splice(i,1);continue}
+				e.cutInteraction(mouseTrail[0][0],mouseTrail[0][1],mouseTrail[1][0],mouseTrail[1][1],d,dt)
+			}
+		}
 
-		}
-		}
-		//theyre giving uses of "enzymes" not "enzyme kinetics"
+		//theyre giving uses of "enzymes" not "enzyme kinetics" SCIE001 2024 haha
 		// this.interactions.cutInteraction.forEach((e)=>{
 			
 		// })	
@@ -1834,12 +1843,14 @@ class events{
 			let c = new rollingBall(x,y,Math.random()*d-d/2+vx,Math.random()*d-d/2+vy)
 			c.colorf = (a)=>{return("rgba(125,0,0,"+(1.3*a)+")")}
 			c.strokef = (a)=>{return("rgba("+(100*Math.sin(COUNTER/30+Math.PI)+100)+",0,0,"+(1.3*a)+")")}
-			c.mover = 0.1
+			c.mover = 0.05
 			c.friction = 0.98
 			c.size *= 2
 			c.actLife *= (1+Math.random())
 			c.actLife *= (1+Math.abs(normalRandom(0,2)))
 			c.dissapearLife = c.actLife
+			// c.movingType = "fractional"
+			// c.mover = 0.5
 			parr.splice(0,0,c)
 			return(c)
 		},
@@ -2409,9 +2420,9 @@ class events{
 				c.hitNoteSignature=()=>{
 					events.interactions.cutInteraction.forEach((e)=>{
 					if(e===c||e.dead){return}
-					let d = Math.max(distance(e.x,e.y,c.x,c.y),20)
-					e.vy += (e.y-c.y)/(d**3)*5400
-					e.vx += (e.x-c.x)/(d**3)*5400
+					let d = Math.max(distance(e.x,e.y,c.x,c.y),220)
+					e.vy += (e.y-c.y)/(d**3)*185400
+					e.vx += (e.x-c.x)/(d**3)*185400
 				})//tomorrow: try if aligned, flip
 				}
 			}
@@ -2435,10 +2446,10 @@ class events{
 
 			events.interactions.cutInteraction.push(c)
 			ballgame.difficulty += c.difficulty
-			c.cutInteraction = (x1,y1,x2,y2,leng)=>{
+			c.cutInteraction = (x1,y1,x2,y2,aleng)=>{
 
 				if(c.stun<=0){
-					c.vy += 0.006*c.gravityMultiplier*ballgame.universalDT
+					c.vy += 0.006*c.gravityMultiplier*ballgame.universalDT*RDT
 					if(Math.abs(c.vx)>c.speedLimx){
 						c.vx *= 0.997
 					}
@@ -2448,14 +2459,16 @@ class events{
 				}
 
 
-				if(l.lineCircleCollision(c.x,c.y,c.size,x1,y1,x2,y2,leng)){
+				if(l.lineCircleCollision(c.x,c.y,c.size,x1,y1,x2,y2,aleng)){
+					let leng = aleng/RDT*3
 					if(c.stableIgnore!==undefined){if(c.stableIgnore>leng){return}}
 					if(ballgame.reverseKB &&leng>10&& Math.sign(-c.vx) === Math.sign(x1-x2)){
 						c.vx -= 2*c.vx*Math.min((Date.now()-c.lastHit)/500*c.hknockback**2,1) //think of kbility
 					}
-					c.vx += (x1-x2)*0.01*c.hknockback
+					c.vx += (x1-x2)*0.01*c.hknockback/RDT*8
 					if(c.vy > 0 && ballgame.strength == 1){c.vy = -c.baseKnockUp*ballgame.strength}
-					c.vy += -Math.abs((y1-y2)*0.01)*c.vknockback*ballgame.strength
+						
+					c.vy += -Math.abs((y1-y2)*0.01)*c.vknockback*ballgame.strength/RDT*8
 					if(!c.hit){
 						let r = Math.random()*360
 						if(c.colorff !== undefined){
@@ -2463,7 +2476,7 @@ class events{
 						}
 						let dmg = leng/3 * ballgame.strength * ballgame.damageMultiplier * ballgame.damageComboMultiplier * (0.5+Math.sin(mouseY/Height*Math.PI)*0.5)
 						if(ballgame.strength===1){ballgame.damageComboMultiplier += 0.05}
-						ballgame.damageBall(c,dmg,{"vx":(x1-x2),"vy":(y1-y2),leng,"stun":ballgame.strength===1})
+						ballgame.damageBall(c,dmg,{"vx":(x1-x2)/RDT*3,"vy":(y1-y2)/RDT*3,leng,"stun":ballgame.strength===1})
 
 					} // end hit
 					c.hit = true
@@ -2592,9 +2605,9 @@ events.addEvent("ballgame",{
 		let dm = l.distance2(mouseTrail[0][0],mouseTrail[0][1],mouseTrail[1][0],mouseTrail[1][1])
 		if(e.energy < e.maxEnergy){
 			if(e.energy < 0){e.energy = 0}
-			e.energy += e.energyGen / (1+dm/5)
+			e.energy += e.energyGen / (1+dm/5/RDT) *RDT/1.5
 		} else if(dm<1){
-			e.energy += e.energyGen/(1+(e.energy-e.maxEnergy)/10)
+			e.energy += e.energyGen/(1+(e.energy-e.maxEnergy)/10) *RDT/1.5
 		}
 
 		e.damageComboMultiplier = 1 + (e.damageComboMultiplier-1)*0.99997
@@ -2633,9 +2646,10 @@ events.addEvent("ballgame",{
 
 			}
 		} else if(e.gamemode === "waves"){
-			if(COUNTER%400 === 0 && e.amount === 0){
+			if(COUNTER%200 === 0 && e.amount === 0){
 				e.maxDifficulty += 1
 				setTimeout(()=>{
+					e.spawning.saturation = {}
 					e.summonWaveTable(e.maxDifficulty)
 				},3000)
 			}
@@ -2651,7 +2665,7 @@ events.addEvent("ballgame",{
 		
 		
 		if(events.varbs.trip < 1){
-			events.varbs.trip += 0.00002
+			events.varbs.trip += 0.00002*RDT
 		}
 
 	},"summonWave":(difficulty)=>{
@@ -2701,12 +2715,12 @@ events.addEvent("ballgame",{
 			ballgame.dospawn(ballgame.waveTableIndex)
 			ballgame.waveTableIndex += 1
 		}
-		let saturated = {}
+		// let saturated = {}
 		let tags = []
 		while(ballgame.difficulty < ballgame.maxDifficulty){
 			for(let i = ballgame.waveTableIndex-1; i > -1 ; i--){
 				
-				if(saturated[i]===true){continue}
+				if(ballgame.spawning.saturation[i]===true){continue}
 				let dex = ballgame.waveTable[i]
 				if(Math.random() < dex.chance){continue}
 				let result = ballgame.dospawn(i)
@@ -2980,22 +2994,33 @@ let COUNTER = 0
 time_fill_color = "#B00000"
 time_fill_color = "rgba(0,0,0,0)"
 time_outline_color = "#900000"
-setInterval(()=>{
+
+let lastTime = 0
+var RDT = 1
+
+
+function mainLoop(currentTime){
+
+	let dt = currentTime - lastTime
+	lastTime = currentTime
+	RDT = dt/5
+
 	COUNTER ++
-	if(COUNTER %2 ===0){
+	// if(COUNTER %2 ===0){
 		ctx2.clearRect(0,0,Width,Height)
 		ctx.fillStyle = "rgba(0,0,0,"+events.varbs.trip+")"
 		ctx.fillRect(0,0,Width,Height)
-	events.updateAll()
+	events.updateAll(dt)
 	events.loop()
-	}
+	// }
 	for(let i = parr.length-1; i > -1; i--){
 		let e = parr[i]
 		e.update()
-		if(COUNTER%2 === 0){
+		// if(COUNTER%2 === 0){
 		if(e.draw() === "del"){
 			parr.splice(i,1)
-		}}
+		}
+		// }
 	}
 
 
@@ -3019,7 +3044,7 @@ setInterval(()=>{
 	let d = "" + (Date.now()+date_disruptor)
 	if(events.happening.ballgame){
 		let ballgame = events.happening.ballgame
-		d = ballgame.display?ballgame.display:Math.floor(ballgame.score)+"-=-"+ballgame.damageComboMultiplier.toFixed(2)
+		d = ballgame.display?ballgame.display:"Score: "+Math.floor( (mouseTrail[1][1]-mouseTrail[0][1])/RDT )+", Damage multiplier: "+ballgame.damageComboMultiplier.toFixed(2)
 	}
 	ctx2.fillText(d,Width/2,Height/2)
 	ctx2.lineWidth = 2
@@ -3049,10 +3074,12 @@ setInterval(()=>{
 
 
 
-})
+	requestAnimationFrame(mainLoop)
+}
 
-
-
+requestAnimationFrame(mainLoop)
+// setInterval(()=>{mainLoop(Date.now())},10)
+// lastTime = Date.now()
 
 
 
@@ -3179,7 +3206,20 @@ music.mainDel = music.GD1()
 
 
 
+// (copy pasted horrible documentation)
+// its a ball cutting game kind of like fruit ninja
+// point of the game is to not let the ball hit the floor too many times
+// -- balls have a central point that increase in brightness when they hit the floor
+// -- balls pass through the floor once when they get to max brightness, denoted by a sound and some colored sparkles
+// --- the second time they get to max, you lose, denoted by every other ball immediately dying, a string of shitty notes playing, and blue sparkles
 
+// Unlike fruit ninja, you dont just touch the balls, you want to gut them hard, so you swing your sword fast
+// but you also lose energy while swinging your sword, it can only move a set distance and needs to recharge
+// Sword with no energy deals almost no damage (denoted by a transparent swing), let your mouse stand still to recharge energy
+// the faster you swing, the more damage you deal
+// the rightmost number denotes your damage multiplier, which increases 5% each time you hit something while the sword has any energy
+
+// levels get really hard
 
 
 
