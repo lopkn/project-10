@@ -1152,7 +1152,7 @@ class rollingBall{
 
 
 		// if(this.invincible){this.invincible-=1}
-		this.actLife -= 1
+		this.actLife -= RDT
 		this.counter += 1
 
 		if(distance(this.vx,this.vy,0,0) < 0.1){
