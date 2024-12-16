@@ -1255,6 +1255,7 @@ class rollingBall{
 		}
 		if(this.actLife < 0){
 			this.DEL = true
+			this.HEYTHERE = {"WHAT":"IS UP "}
 			return('del')
 		}
 	}
@@ -1717,7 +1718,7 @@ document.addEventListener("keydown",(e)=>{
 	} else if(k == "\\"){
 
 		// summonItem()
-		let summoned = events.instantaneous["knocker ball"](mouseX,mouseY,"delusionary2",["dingus"])
+		let summoned = events.instantaneous["knocker ball"](mouseX,mouseY,"debugger",["dingus"])
 		// summoned.phasePower = 8
 
 	} else{
@@ -2029,7 +2030,7 @@ class events{
 				c.colorf = ()=>{return("HSLA("+c.hue+","+(c.hp/c.maxhp*100)+"%,"+c.light+"%,"+(0.5+Math.sin(COUNTER/c.timeframe+c.signature)*0.5)**c.phasePower+")")}
 			
 				c.updater = ()=>{
-					if(Math.random()>0.996){
+					if(Math.random()>0.996 && !c.dead){
 						let z = events.instantaneous["knocker ball"](c.x,c.y,"normal",["horizontalPortal"])
 						z.vknockback = 0
 						z.hknockback = 0
@@ -2144,6 +2145,63 @@ class events{
 				}
 
 
+				
+			}else if(type==="debugger"){
+				c.maxhp = 200
+				// c.vknockback = 0.3
+				c.hknockback = 0.4
+				c.baseFriction = 0.97
+				c.difficulty = 25
+				c.size *= 1.6
+				c.hue = 280
+				c.light = 80
+				c.speedLimx = 1
+				c.bloodMultiplier = 4
+				c.stableIgnore = 5
+				c.stealthLevel = 5
+				c.timeframe = 50
+				c.phasePower = 0.5
+				c.signature = 0
+				c.hitNoteSignature=()=>{
+					let note = Math.random()*12+42
+					music.playBell(note)
+					music.playBell(note+3)
+				}
+				c.colorf = ()=>{return("HSLA("+c.hue+","+(c.hp/c.maxhp*100)+"%,"+c.light+"%,"+(0.5+Math.sin(COUNTER/c.timeframe+c.signature)*0.5)**c.phasePower+")")}
+			
+				c.updater = ()=>{
+					if(Math.random()>0.95){
+						if(Math.random()>0.5){
+							let z = new rollingBall(c.x,c.y,Math.random()*10-5,Math.random()*10-5)
+							Object.assign(z,c)
+							z.actLife = 2500
+							parr.push(z)
+							if(Math.random()>0.6){
+								z.vx += Math.random()-0.5
+								z.vy += Math.random()-0.5
+							}
+						} else {
+							let z = events.instantaneous["knocker ball"](c.x,c.y,"normal",["horizontalPortal"])
+							z.vknockback = 0
+							z.hknockback = 0
+							z.hue = c.hue + Math.random()*10-5
+							z.signature = Math.random()*Math.PI*2
+							z.phasePower = 0.5+Math.random()*2
+							z.timeframe = Math.floor(30+Math.random()*40)
+							z.stealthLevel = 5
+							z.vx = c.vx + Math.random()*2-1
+							z.vy = c.vy + Math.random()*2-1
+							if(z.size > c.size){z.size = c.size}
+							z.colorf = ()=>{return("HSLA("+z.hue+","+(z.hp/z.maxhp*100)+"%,"+z.light+"%,"+(0.5+Math.sin(COUNTER/z.timeframe+z.signature)*0.5)**z.phasePower+")")}
+						}
+						
+						
+						
+					}
+				}
+
+
+				c.gravityMultiplier = 25.1
 				
 			}else if(type === "grunt1"){
 				c.maxhp = 100
@@ -2586,17 +2644,18 @@ events.addEvent("ballgame",{
 		},
 		{"type":"boss3","chance":0.9997,"limit":1,"difficultyThreshold":100,"skipper":true,
 			"wavefunction":(c)=>{
-				c.hp = 3800
+				c.hp = 2300
 				c.light = 20
 				c.difficulty = 40
 				c.hbaseFriction = 0.7
 			let a = events.instantaneous["knocker ball"](Width*Math.random(),10,"boss3",[])
-				a.hp = 3800
+				a.hp = 2800
 				a.light = 20
 				a.difficulty = 40
 				a.hbaseFriction = 0.7
 			}
-		},
+		},{"type":"delusionary","chance":0.997,"limit":2,"difficultyThreshold":103,"skipper":true,},
+
 
 		{"type":"ENDER OF TIME BOSS","chance":0,"limit":1,"difficultyThreshold":Infinity},
 		],
@@ -3221,8 +3280,14 @@ music.mainDel = music.GD1()
 
 // levels get really hard
 
-
-
+/*'{"x":921.6793740462208,"y":172.8245038662147,"vx":3.4910127101271726,"trailer":false,"vy":244.74642788440002,
+"size":43.29876574308311,"actLife":9996462.82,"dissapearLife":999999.9,"counter":884,"following":false,"mover":0,
+"basename":"ball","mass":1,"friction":1,"color":"white","stroke":"transparent","maxhp":125,"captureCounter":1,
+"maxCaptureCounter":3,"vknockback":0.9,"hknockback":1,"lastHit":1734318746338,"baseFriction":0.97,"hbaseFriction":1,
+"floor":1,"gravityMultiplier":1,"onDeath":[],"difficulty":3.75,"stun":-1.0072702100024813,"stunTime":15,"speedLimx":3.5,
+"speed":1,"stunMax":12,"baseKnockUp":0.2,"ballgame":true,"phase":1.7998787479564133,"hue":10,"light":30,
+"capturePhase":5.528099517431435,"bloodMultiplier":1,"type":"grunt1","tags":[],"hp":120.78421244232511,"hit":false,"passThrough":0}'
+*/
 
 
 
