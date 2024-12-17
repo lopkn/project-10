@@ -1059,7 +1059,7 @@ class rollingBall{
 				if(this.passThrough){
 					this.captureCounter = 0		
 					if(this.y > Height + this.size){
-					events.instantaneous["splatter"](this.x,this.y,6)
+					events.instantaneous["yellow splatter"](this.x,this.y,6)
 					let b = 66
 					this.y = -this.size
 					this.passThrough -= 1
@@ -1718,7 +1718,7 @@ document.addEventListener("keydown",(e)=>{
 	} else if(k == "\\"){
 
 		// summonItem()
-		let summoned = events.instantaneous["knocker ball"](mouseX,mouseY,"debugger",["dingus"])
+		let summoned = events.instantaneous["knocker ball"](mouseX,mouseY,"mothership1",["dingus"])
 		// summoned.phasePower = 8
 
 	} else{
@@ -1840,6 +1840,17 @@ class events{
 			c.actLife *= (1+Math.abs(normalRandom(0,2)))
 			parr.push(c)
 		},
+		"yellow splatter ball":(x,y)=>{
+			let c = new rollingBall(x,y,Math.random()*10-5,Math.random()*10-5)
+			c.colorf = (a)=>{return("rgba(255,255,0,"+(a)+")")}
+			c.strokef = (a)=>{return("rgba(255,155,0,"+(a)+")")}
+			c.mover = 0.2
+			c.friction = 0.99
+			c.size *= 2
+			c.actLife *= (1+Math.random())
+			c.actLife *= (1+Math.abs(normalRandom(0,2)))
+			parr.push(c)
+		},
 		"blood splatter ball":(x,y,vx=0,vy=0,d=10)=>{
 			let c = new rollingBall(x,y,Math.random()*d-d/2+vx,Math.random()*d-d/2+vy)
 			c.colorf = (a)=>{return("rgba(125,0,0,"+(1.3*a)+")")}
@@ -1874,7 +1885,7 @@ class events{
 			c.phase = Math.random()*2*Math.PI
 			parr.push(c)
 		},
-		"knocker ball":(x,y,type="normal",tag=[])=>{
+		"knocker ball":(x,y,type="normal",tag=[],options={})=>{
 			let ballgame = events.happening["ballgame"]
 			let c = new rollingBall(x,y,Math.random()*10-5,Math.random()*10-5)
 			let phaseColorR = Math.random()*255
@@ -1906,6 +1917,7 @@ class events{
 			c.gravityMultiplier = 1
 			c.onDeath = []
 			c.difficulty = 1
+			c.kbility = 1
 			c.stun = 0
 			c.stunTime = 15
 			c.speedLimx = 3.5
@@ -2113,7 +2125,7 @@ class events{
 
 				
 			}  else if(type==="delusionary"){
-				c.maxhp = 200
+				c.maxhp = 1200
 				c.baseFriction = 0.97
 				c.difficulty = 25
 				c.hue = 280
@@ -2146,7 +2158,98 @@ class events{
 
 
 				
-			}else if(type==="debugger"){
+			}else if(type==="mothership1"){
+				c.maxhp = 800
+				c.baseFriction = 0.97
+				c.difficulty = 35
+				c.hue = 140
+				c.light = 80
+				c.speedLimx = 1
+				c.stableIgnore = 5
+				c.stunTime *= 2
+				c.bloodMultiplier = 0
+				c.timeframe = 50
+				c.kbility = 0
+				c.phasePower = 0.5
+				c.signature = 0
+				c.size += 10
+				c.size *= 2.5
+				c.gravityMultiplier = 0.6
+				c.hitNoteSignature=()=>{
+					let note = Math.random()*24+42
+					music.playBell(note)
+					music.playBell(note+3)
+					music.playBell(note+8)
+				}
+
+				c.passengers = []
+				for(let i = 0; i < 5; i++){
+					let summoned = events.instantaneous["knocker ball"](mouseX,mouseY,"grunt1",["dingus"],{"noPush":true})
+					c.passengers.push(summoned)
+					summoned = events.instantaneous["knocker ball"](mouseX,mouseY,"scout1",["dingus"],{"noPush":true})
+					c.passengers.push(summoned)
+				}
+				c.onDeath.push((c)=>{
+					c.passengers.forEach((e)=>{
+						e.x = c.x
+						e.y = c.y
+						e.vx = c.vx * Math.random()
+						e.vy = c.vy * Math.random()
+						parr.push(e)
+						events.interactions.cutInteraction.push(e)
+					})
+				})
+				
+			} else if(type==="mothership2"){
+				c.maxhp = 800
+				c.baseFriction = 0.97
+				c.difficulty = 35
+				c.hue = 140
+				c.light = 80
+				c.speedLimx = 1
+				c.stableIgnore = 5
+				c.stunTime *= 2
+				c.timeframe = 50
+				c.phasePower = 0.5
+				c.signature = 0
+				c.size += 10
+				c.size *= 2.5
+				c.gravityMultiplier = 0.6
+				c.hitNoteSignature=()=>{
+					let note = Math.random()*24+42
+					music.playBell(note)
+					music.playBell(note+3)
+					music.playBell(note+8)
+				}
+
+				c.passengers = []
+			
+				c.updater = ()=>{
+					if(Math.random()>0.4){
+						events.interactions.cutInteraction.forEach((e)=>{
+							if(e===c||e.dead){return}
+							if(e.size<c.size && distance(c.x,c.y,e.x,e.y) < (c.size-e.size)){
+								c.passengers.push(e)
+								parr = parr.filter((A)=>{return(A!==e)})
+								events.interactions.cutInteraction = events.interactions.cutInteraction.filter((A)=>{return(A!==e)})
+							}
+						})
+					}
+				}
+
+				c.onDeath.push((c)=>{
+					c.passengers.forEach((e)=>{
+						e.x = c.x
+						e.y = c.y
+						e.vx = c.vx * Math.random()
+						e.vy = c.vy * Math.random()
+						parr.push(e)
+						events.interactions.cutInteraction.push(e)
+					})
+				})
+				
+			}
+			else if(type==="debugger"){
 				c.maxhp = 200
 				// c.vknockback = 0.3
 				c.hknockback = 0.4
@@ -2438,7 +2541,7 @@ class events{
 					if(e===c||e.dead){return}
 					let d = Math.max(distance(e.x,e.y,c.x,c.y),c.explosionSize)
 					if(e.mover === undefined){e.mover = 0}
-					e.mover += c.explosionSize*0.3/d
+					e.mover += c.explosionSize*0.2/d
 				})
 				})
 
@@ -2502,7 +2605,9 @@ class events{
 			}
 			c.hp = c.maxhp
 
-			events.interactions.cutInteraction.push(c)
+			if(!options.noPush){
+				events.interactions.cutInteraction.push(c)
+			}
 			ballgame.difficulty += c.difficulty
 			c.cutInteraction = (x1,y1,x2,y2,aleng)=>{
 
@@ -2521,7 +2626,7 @@ class events{
 					let leng = aleng/RDT*3
 					if(c.stableIgnore!==undefined){if(c.stableIgnore>leng){return}}
 					if(ballgame.reverseKB &&leng>10&& Math.sign(-c.vx) === Math.sign(x1-x2)){
-						c.vx -= 2*c.vx*Math.min((Date.now()-c.lastHit)/500*c.hknockback**2,1) //think of kbility
+						c.vx -= 2*c.vx*Math.min((Date.now()-c.lastHit)/500*c.hknockback**2,1)*c.kbility //think of kbility
 					}
 					c.vx += (x1-x2)*0.01*c.hknockback/RDT*8
 					if(c.vy > 0 && ballgame.strength == 1){c.vy = -c.baseKnockUp*ballgame.strength}
@@ -2540,12 +2645,18 @@ class events{
 					c.hit = true
 				} else {c.hit = false}
 			}
-			parr.push(c)
+			if(!options.noPush){
+				parr.push(c)
+			}
 			return(c)
 		},
 		"blue splatter":(x,y,n=15)=>{
 			for(let i = 0; i < n; i++){
 				this.instantaneous["blue splatter ball"](x,y)
+			}
+		},"yellow splatter":(x,y,n=15)=>{
+			for(let i = 0; i < n; i++){
+				this.instantaneous["yellow splatter ball"](x,y)
 			}
 		},"blood splatter":(x,y,n=4,vx=0,vy=0,d=5)=>{
 			let arr = []
@@ -2594,11 +2705,14 @@ events.addEvent("ballgame",{
 	"waveTable":[
 		{"type":"normal","chance":0,"limit":Infinity,"difficultyThreshold":0},
 		{"type":"TAG","tag":"bomb","chance":0.9,"limit":1,"difficultyThreshold":0},
-		{"type":"TAG","tag":"arcview","chance":0.8,"limit":1,"difficultyThreshold":0},
+		{"type":"TAG","tag":"arcview","chance":1,"limit":1,"difficultyThreshold":0},
 		{"type":"TAG","tag":"recharger","chance":0.98,"limit":2,"difficultyThreshold":0},
 		{"type":"grunt1","chance":0.85,"limit":Infinity,"difficultyThreshold":3},
+		{"type":"TAG","tag":"arcview","chance":1,"limit":1,"difficultyThreshold":5},
+		{"type":"TAG","tag":"arcview","chance":1,"limit":1,"difficultyThreshold":10},
 		{"type":"boss1","chance":0.8,"limit":2,"difficultyThreshold":11},
 		{"type":"TAG","tag":"freezebomb","chance":0.9,"limit":2,"difficultyThreshold":0},
+		{"type":"TAG","tag":"arcview","chance":1,"limit":1,"difficultyThreshold":15},
 		{"type":"boss2","chance":0.9,"limit":2,"difficultyThreshold":18},
 		{"type":"necromancer1","chance":0.98,"limit":1,"difficultyThreshold":28},
 		{"type":"TAG","tag":"bomb","chance":0.99,"limit":1,"difficultyThreshold":28},
@@ -2654,7 +2768,9 @@ events.addEvent("ballgame",{
 				a.difficulty = 40
 				a.hbaseFriction = 0.7
 			}
-		},{"type":"delusionary","chance":0.997,"limit":2,"difficultyThreshold":103,"skipper":true,},
+		},{"type":"delusionary","chance":0.97,"limit":2,"difficultyThreshold":103,"skipper":true},
+		{"type":"delusionary1","chance":0.9997,"limit":1,"difficultyThreshold":107,"skipper":true},
+		{"type":"mothership1","chance":0.99,"limit":1,"difficultyThreshold":120,"skipper":true},
 
 
 		{"type":"ENDER OF TIME BOSS","chance":0,"limit":1,"difficultyThreshold":Infinity},
@@ -2669,8 +2785,8 @@ events.addEvent("ballgame",{
 			e.energy += e.energyGen/(1+(e.energy-e.maxEnergy)/10) *RDT/1.5
 		}
 
-		e.damageComboMultiplier = 1 + (e.damageComboMultiplier-1)*0.99997
-		e.damageComboMultiplier -= 0.0001
+		e.damageComboMultiplier = 1 + (e.damageComboMultiplier-1)*0.99997**(RDT/2)
+		e.damageComboMultiplier -= 0.00005*RDT
 
 		if(e.damageComboMultiplier<1){e.damageComboMultiplier = 1}
 
@@ -2705,8 +2821,9 @@ events.addEvent("ballgame",{
 
 			}
 		} else if(e.gamemode === "waves"){
-			if(COUNTER%200 === 0 && e.amount === 0){
+			if(COUNTER%100 === 0 && e.amount === 0){
 				e.maxDifficulty += 1
+				e.difficulty = 0
 				setTimeout(()=>{
 					e.spawning.saturation = {}
 					e.summonWaveTable(e.maxDifficulty)
@@ -2881,6 +2998,11 @@ events.addEvent("ballgame",{
 		} else {
 			return("hsla("+(10+l/6)+",100%,50%,"+events.happening.ballgame.strength+")")
 		}
+	},
+	"backgrounds":[],
+	"background":()=>{
+		let b = {"r":0,"g":0,"b":0}
+		return("rgba("+b.r+","+b.g+","+b.b+","+events.varbs.trip+")")
 	}
 })
 
@@ -2907,6 +3029,7 @@ function randomEvents(){
 					let E = e.parr[i]
 					if(E.DEL){
 						e.parr.splice(i,1)
+						console.log("bug causer")
 						continue;
 					}
 					E.nvx += e.vect[0] * 5 * (1+e.strength/5)
@@ -3068,6 +3191,9 @@ function mainLoop(currentTime){
 	// if(COUNTER %2 ===0){
 		ctx2.clearRect(0,0,Width,Height)
 		ctx.fillStyle = "rgba(0,0,0,"+events.varbs.trip+")"
+		if(events.happening.ballgame){
+			ctx.fillStyle = events.happening.ballgame.background()
+		}
 		ctx.fillRect(0,0,Width,Height)
 	events.updateAll(dt)
 	events.loop()
@@ -3077,7 +3203,12 @@ function mainLoop(currentTime){
 		e.update()
 		// if(COUNTER%2 === 0){
 		if(e.draw() === "del"){
-			parr.splice(i,1)
+			let g = i
+			if(parr[i] !== e){ //jank
+				parr.forEach((E,j)=>{if(E===e){g=j}})
+			}
+			let x = parr.splice(g,1)
+			if(x[0] !== e){console.log("CATCHED BUG")}
 		}
 		// }
 	}
@@ -3103,7 +3234,7 @@ function mainLoop(currentTime){
 	let d = "" + (Date.now()+date_disruptor)
 	if(events.happening.ballgame){
 		let ballgame = events.happening.ballgame
-		d = ballgame.display?ballgame.display:"Score: "+Math.floor( (mouseTrail[1][1]-mouseTrail[0][1])/RDT )+", Damage multiplier: "+ballgame.damageComboMultiplier.toFixed(2)
+		d = ballgame.display?ballgame.display:"lvl: "+Math.floor( ballgame.maxDifficulty )+", Damage multiplier: "+ballgame.damageComboMultiplier.toFixed(2)
 	}
 	ctx2.fillText(d,Width/2,Height/2)
 	ctx2.lineWidth = 2
