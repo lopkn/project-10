@@ -21,6 +21,7 @@
     "crypto": "^1.0.1",
     "express": "^4.17.1",
     "instagram-web-api": "^2.2.2",
+    "jimp": "^1.6.0",
     "openai": "^3.2.1",
     "readline-sync": "^1.4.10",
     "simplex-noise": "^3.0.1",
