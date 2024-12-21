@@ -22,10 +22,13 @@
     "express": "^4.17.1",
     "instagram-web-api": "^2.2.2",
     "jimp": "^1.6.0",
+    "node-mouse": "^0.0.2",
     "openai": "^3.2.1",
     "readline-sync": "^1.4.10",
+    "robotjs": "^0.6.0",
     "simplex-noise": "^3.0.1",
     "socket.io": "^4.6.1",
+    "sound-play": "^1.1.0",
     "uuid": "^8.3.2",
     "yeast": "^0.1.2"
   }

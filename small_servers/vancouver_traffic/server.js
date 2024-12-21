@@ -1,5 +1,6 @@
 const axios = require('axios');
 const Jimp = require('jimp');
+const sound = require('sound-play')
 
 async function getPixelColor(x=10,y=10,url='https://www.th.gov.bc.ca/ATIS/lgcws/images/lions_gate/queue_map.gif') {
     try {
@@ -73,6 +74,23 @@ async function getPixelColor(x=10,y=10,url='https://www.th.gov.bc.ca/ATIS/lgcws/
   '138,273': [ 0, 0, 0 ],
   '138,272': [ 0, 0, 0 ],
   '138,271': [ 0, 0, 0 ],
+
+  [ 211, 64, 64 ]
+[ 211, 64, 64 ]
+[ 222, 112, 112 ]
+[ 226, 128, 128 ]
+[ 196, 0, 0 ]
+[ 196, 0, 0 ]
+[ 196, 0, 0 ]
+[ 196, 0, 0 ]
+[ 226, 128, 128 ]
+[ 226, 128, 128 ]
+[ 218, 96, 96 ]
+[ 200, 58, 52 ]
+[ 252, 252, 251 ]
+[ 252, 252, 251 ]
+[ 252, 252, 251 ]
+[ 229, 144, 144 ]
 }
 */
 var data = {}
@@ -91,17 +109,55 @@ for(let i = 135; i < 139; i++){
 }
 },1000)
 
+
+var pathCleans={
+    "taylor way":[120,90],
+    "marine drive":[143,155],
+    "bridge":[141,183],
+    "after bridge":[79,287],
+    "after! bridge":[91,405],
+    "after! bridge back":[112,410],
+    "after bridge back":[67,332],
+    "bridge back":[115,238],
+}
+var pathCleansArr = [
+    ["taylor way", 120, 90],
+    ["marine drive", 143, 155],
+    ["bridge", 141, 183],
+    ["after bridge", 77, 287],
+    ["after! bridge", 60, 347],
+    ["after! bridge right", 65, 345],
+    ["after bridge right", 82, 287],
+    ["bridge right", 123, 223]
+]
+
+
 function getDir(x=135,y=272){
     getPixelColor(x,y).then((e)=>{
         if(e[0] > 50){
             if(e[1] < 200){
                 console.log("switching")
+                sound.play("../../public/soundEffects/sinC4.mp3")
             } else {console.log("right")}
         } else {
             console.log("left")
         }
     })
 }
+
+function getPaths(){
+    pathCleansArr.forEach((e)=>{
+        getPixelColor(e[1],e[2]).then((E)=>{
+            console.log(e[0]+": "+(E[0]>E[1]?"backed up":"fine"))
+        })
+    })
+}
+
+sound.play("../../public/soundEffects/sinC4.mp3")
+setInterval((e)=>{
+    getDir()
+
+},3000)
 
 
 // getPixelColor(10,10);

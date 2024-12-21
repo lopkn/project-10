@@ -46,6 +46,42 @@ class LCanvas{ //lopkns template canvas
 
 }
 
+function oneTimeTrustedButton(f){
+  let button = document.createElement("button")
+  button.style.position = "absolute"
+  button.style.backgroundColor = "purple"
+  button.innerText = "one time verifier"
+  button.style.top = button.style.left = "0px"
+
+  button.style.zIndex = 5000
+  button.addEventListener("click",(e)=>{f(e);button.remove()},{once:true})
+  document.body.appendChild(button)
+}
+
+
+function Lvideo(type="screen",append=false){
+    let video = document.createElement('video')
+    video.id = "Lvideo-"+Math.random()
+    if(type=="screen"){
+      oneTimeTrustedButton(async function() {let stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false })})
+    } else {
+      oneTimeTrustedButton(async function() {let stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false })})
+    }
+    return(video)
+  }
+
+function setDefaultAbsolute(elm){
+  elm.style.position = "absolute"
+  elm.style.top = elm.style.left = "0px"
+}
+
+
+camera_button.addEventListener('click', async function() {
+    let stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+    // let stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });
+  video.srcObject = stream;
+})
+
 class Lcolorf{ //lopkn's color functions
   static dictify(arr){ //turns arrays of numbers into arrays of dicts
     let outarr = []
@@ -80,6 +116,14 @@ class Lperceptron{ //it should have input name, input value. each input should h
       result += this.input[inputting] * item[inputting]
     }
     return(result)
+  }
+  learn(item,expected){
+    item = this.outputInputpair[item]
+    let objk = Object.keys(item)
+    for(let i = 0; i < objk.length; i++){
+      let inputting = objk[i]
+      this.input[inputting] += item[inputting] * (expected?1:-1)
+    }
   }
 }
 
