@@ -128,7 +128,19 @@ function distance(x1,y1,x2,y2) {
 }
 
 
+function inRect(x1,y1,x2,y2,x,y){
+    let lx = x1
+    let ly = y1
+    let bx = x2
+    let by = y2
+    if(x1>x2){lx=x2;by=x1}
+    if(y1>y2){ly=y2;by=y1}
 
+    if(x >= lx && y >= ly && x <= bx && y <= by){
+        return(true)
+    }
+    return(false)
+}
 
 
 

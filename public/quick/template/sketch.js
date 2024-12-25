@@ -2,16 +2,21 @@
 let Width = window.innerWidth
 let Height = window.innerHeight
 
-let myCanvas = document.getElementById("myCanvas")
+// let myCanvas = document.getElementById("myCanvas")
 
-  myCanvas.width = Math.floor(Width)
-  myCanvas.height = Math.floor(Height)
-  myCanvas.style.width = Math.floor(Width)+"px"
-  myCanvas.style.height = Math.floor(Height)+"px"
-  myCanvas.style.top = "0px"
-  myCanvas.style.left = "0px"
+//   myCanvas.width = Math.floor(Width)
+//   myCanvas.height = Math.floor(Height)
+//   myCanvas.style.width = Math.floor(Width)+"px"
+//   myCanvas.style.height = Math.floor(Height)+"px"
+//   myCanvas.style.top = "0px"
+//   myCanvas.style.left = "0px"
 
-let ctx = document.getElementById("myCanvas").getContext("2d")
+// let ctx = document.getElementById("myCanvas").getContext("2d")
+
+
+
+
+
 let mouseX = 0
 let mouseY = 0
 onmousemove = (e)=>{mouseX = (e.clientX); mouseY = (e.clientY)}
@@ -27,12 +32,22 @@ class LCanvas{ //lopkns template canvas
     this.canvas.style.position = "absolute"
     this.canvas.style.top = "0px"
     this.canvas.style.left = "0px"
-    this.canvas.zIndex = "100"
+    this.canvas.zIndex = "1500"
     this.canvas.width = w
     this.canvas.height = h
     this.ctx.fillStyle = "black"
     this.ctx.fillRect(0,0,this.canvas.width,this.canvas.height)
     document.body.appendChild(this.canvas)
+    return(this)
+  }
+
+  fitScreenSize(){
+    this.canvas.width = window.innerWidth
+    this.canvas.height = window.innerHeight
+  }
+
+  clear(){
+    this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height)
   }
 
   oneTimeDown(f){ // pass in a function for what to do with one click
@@ -44,6 +59,24 @@ class LCanvas{ //lopkns template canvas
     return(d)
   }
 
+
+}
+
+
+function distance(x1,y1,x2,y2) {
+    let a = x2-x1
+    let b = y2-y1
+  return(Math.sqrt(a*a+b*b))
+}
+
+
+var frameFuncs = []
+
+function mainLoop(time){
+  frameFuncs.forEach((e)=>{
+    e(time)
+  })
+  requestAnimationFrame(mainLoop)
 }
 
 function oneTimeTrustedButton(f){
@@ -62,13 +95,19 @@ function oneTimeTrustedButton(f){
 function Lvideo(type="screen",append=false){
     let video = document.createElement('video')
     video.id = "Lvideo-"+Math.random()
+    video.setAttribute("autoplay","autoplay")
+    // document.body.append(video)
     if(type=="screen"){
-      oneTimeTrustedButton(async function() {let stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false })})
+      oneTimeTrustedButton(async function() {let stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });video.srcObject = stream;})
     } else {
-      oneTimeTrustedButton(async function() {let stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false })})
+      oneTimeTrustedButton(async function() {let stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });video.srcObject = stream;})
     }
     return(video)
   }
+
+function copyToCanvas(img,Lcan){
+  Lcan.ctx.drawImage(img, 0, 0, Lcan.canvas.width, Lcan.canvas.height);
+}
 
 function setDefaultAbsolute(elm){
   elm.style.position = "absolute"
@@ -76,11 +115,7 @@ function setDefaultAbsolute(elm){
 }
 
 
-camera_button.addEventListener('click', async function() {
-    let stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-    // let stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });
-  video.srcObject = stream;
-})
+
 
 class Lcolorf{ //lopkn's color functions
   static dictify(arr){ //turns arrays of numbers into arrays of dicts
@@ -99,7 +134,7 @@ class Lcolorf{ //lopkn's color functions
   }
 }
 
-class Lperceptron{ //it should have input name, input value. each input should have a multiplier towards a result
+class LPerceptron{ //it should have input name, input value. each input should have a multiplier towards a result
   constructor(){
     this.outputInputpair = {"testOutput":{"testInput":2}}
     this.inputs = {}
@@ -130,24 +165,47 @@ class Lperceptron{ //it should have input name, input value. each input should h
 
 /// ======== NOT TEMPLATE ANYMORE. BUILDING AREA ============
 
-var can = new LCanvas(300,300)
-can.ctx.rotate(1.03)
-can.oneTimeDown((e)=>{console.log(e.offsetX,e.offsetY);let col = can.getPixelRGB(e.offsetX,e.offsetY);
-  console.log(Lcolorf.colorDistA(col,[0,0,0]))
+
+ctx = document.querySelector("canvas").getContext("2d")
+
+function mouseXaim(ctx){
+  let x = mouseX*document.querySelector("canvas").width/window.innerWidth
+  let y = mouseY*document.querySelector("canvas").height/window.innerHeight
+    let d = ctx.getImageData(x-50, y-50, 100, 100).data
+    for(let i = 0; i < d.length; i+=4){
+      if(i%12!==0){continue}
+      let dist = Lcolorf.colorDistA([d[i],d[i+1],d[i+2]],[255,0,255])
+      if(dist < 30){
+        ctx.fillStyle = "red"
+        ctx.fillRect(mouseX,mouseY,50,50)
+        console.log("hey")
+      }
+        if(Math.random()>0.9999){console.log(d.length)}
+      can.ctx.fillStyle = "rgb("+d[i]+","+d[i+1]+","+d[i+2]+")"
+      can.ctx.fillRect(i%200/4*5,Math.floor(i/200)*5,5,5)
+    }
+}
+
+document.addEventListener("keydown",(e)=>{
+  if(e.key=="x"){
+    mouseXaim(ctx)
+  }
 })
 
+can = new Lcanvas()
+can.clear()
+can.fitScreenSize()
+can.canvas.style.pointerEvents = "none"
 
-can.ctx.scale(5,5)
-can.ctx.drawImage($0,-100,-280)
-function getDir(){
-  let col = can.getPixelRGB(123,127)
-  let d = Lcolorf.colorDistA(col,[0])
-  if(d>40){
-    return("right")
-  } else {
-    return("left")
-  }
-}
+
+
+
+
+
+
+
+
+
 
 
 
