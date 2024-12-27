@@ -171,9 +171,9 @@ ctx = document.querySelector("canvas").getContext("2d")
 function mouseXaim(ctx){
   let x = mouseX*document.querySelector("canvas").width/window.innerWidth
   let y = mouseY*document.querySelector("canvas").height/window.innerHeight
-    let d = ctx.getImageData(x-50, y-50, 100, 100).data
+    let d = ctx.getImageData(x-100, y-100, 200, 200).data
     for(let i = 0; i < d.length; i+=4){
-      if(i%12!==0){continue}
+      if(i%48!==0){continue}
       let dist = Lcolorf.colorDistA([d[i],d[i+1],d[i+2]],[255,0,255])
       if(dist < 30){
         ctx.fillStyle = "red"
@@ -182,7 +182,7 @@ function mouseXaim(ctx){
       }
         if(Math.random()>0.9999){console.log(d.length)}
       can.ctx.fillStyle = "rgb("+d[i]+","+d[i+1]+","+d[i+2]+")"
-      can.ctx.fillRect(i%200/4*5,Math.floor(i/200)*5,5,5)
+      can.ctx.fillRect(i%800/4*4,Math.floor(i/800)*4,5,5)
     }
 }
 
