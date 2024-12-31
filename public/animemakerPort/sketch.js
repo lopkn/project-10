@@ -77,6 +77,7 @@ function renderFrame(f){
             
 function renderFrame2(f){
     f.layers.forEach((y)=>{
+      if(y.hidden){return}
       y.lines.forEach((e)=>{
         if(e.type === 0){
         if(e.parr.length<2){return}
