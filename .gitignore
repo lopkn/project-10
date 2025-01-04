@@ -1,8 +1,9 @@
 node_modules/
-package-lock.json
 process.env
 disc/token.json
 errorlog.json
 public/debug/errorlog3.txt
 errorsLog.log
 outputLog.log
+disc2/config.json
+/disc2/config.json

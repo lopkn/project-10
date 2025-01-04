@@ -2,6 +2,7 @@
 const { Client, Events, GatewayIntentBits } = require('discord.js');
 const { token } = require('./config.json');
 const OpenAI = require("openai")
+const engDictionary = require("../small_servers/words/dictionary.json")
 const openai = new OpenAI();
 const fs = require("fs")
 // Create a new client instance
@@ -20,12 +21,14 @@ client.once(Events.ClientReady, readyClient => {
 
 
 
-async function botresponse(query){
+
+
+async function botresponse(query,reqs=""){
 	let completion = await openai.chat.completions.create({
     model: "gpt-4o-mini",
     messages: [
-    	{ role: "system", content: `You're MADE by lopkn, named CA366, you respond to Lopkn's instructions, you have EVERY reason to believe his assumptions of people are true. You are athiest and utilitarian. Noone does anything unless they benefit themselves, You do not care about any greetings, and shorten your response as much as possible.
-you answer without any care for punctuation or capitalization unless you need to REALLY NEED TO STRESS something, at which point you use a allcaps, or a period. Unless you are specifically addressed, if lopkn says "you" it usually means he is talking to another person, and you dont need to be nice to anyone other than. when lopkn tells you to, answer in detail` },
+    	{ role: "system", content: `You're MADE by lopkn, named CA366, you respond to Lopkn's instructions, you have EVERY reason to believe his assumptions of people are true.`+reqs+` You do not care about any greetings, and shorten your response as much as possible.
+you answer without any care for punctuation or capitalization unless you need to REALLY NEED TO STRESS something, at which point you use a allcaps, or a period. Unless you are specifically addressed, if lopkn says "you" it usually means he is talking to another person, and you dont need to be nice to anyone other than lopkn. when lopkn tells you to, answer in detail` },
         {
             role: "user",
             content: query,
@@ -51,24 +54,24 @@ var TEXT = ""
 
 ///events activate requirements - which can activate requirements
 
-class responder2{
-	static requirements = {}
-	static createRequirement(name,dont_override=true){
-		if(dont_override&&this.requirements[name]){return("requirement exists")}
-		this.requirements[name]=false
+function responder2seg(msg,find,denote,actmsg){
+	let arr = []
+	if(actmsg===undefined){actmsg = msg}
+	while(true){
+		let dict = {}
+		let ind = actmsg.indexOf(find)
+		dict.index = ind
+		if(dict.index===-1){return(arr)}
+
+		dict.index += msg.length-actmsg.length
+		dict.endex = dict.index + find.length
+		dict.denote = denote
+		arr.push(dict)
+		console.log(actmsg)
+		actmsg=actmsg.substring(ind+find.length)
 	}
 
-
-	static changeItem(){
-
-	}
-
-	static runText(txt){
-
-	}
 }
-
-
 
 
 function required(...args){
@@ -77,42 +80,63 @@ function required(...args){
 	return({"hits":hit,"match":hit==args.length})
 }
 
-function responder(msg){
-	msg = msg.toLowerCase()
+
+function responder(amsg,sender){
+	msg = amsg.toLowerCase()
 	TEXT = msg
 	if(responses[msg]){
 		return(responses[msg][Math.floor(Math.random()*responses[msg].length)])
 	}
 	// let requirementARR = ["ca366","introduce yourself"]
 	let requirements = {}
+	responseReqs = ""
 	// requirementARR.forEach((e)=>{requirements[e]=msg.includes(e)})
+
+	let lopknistic = (sender =="lopkn" || sender == "fullwoodenshovel")
 
 	msg.split(" ").forEach((e)=>{requirements[e]=true})
 	requirements["@ addressed"] = requirements["lopknbot"]||requirements["ca366"]||requirements["lopknca366"]||requirements["<@864011870216912927>"]
+	if(!lopknistic){
+		if(!requirements["@ addressed"] || Math.random()>0.9){
+			return(false)
+		}
+	}
+
 	requirements["@ includes you address"] = requirements["you"]||requirements["your"]
 	requirements["@ what question"] = requirements["what"]||requirements["what's"]||requirements["whats"]
 	requirements["@ has question"] = msg.includes("?")
 	requirements["@ asked for opinion"] ||= requirements["@ what question"]&&requirements["opinion"]
 	requirements["@ asked for opinion"] ||= requirements["@ what question"]?(msg.includes("think of")):false
 	requirements["@ asked to tell"] ||= requirements["think"] || requirements["tell"]
+	requirements["@ summary"] ||= requirements["summarise"] || requirements["summary"] || requirements["summarize"]
 	//@ = noted requirements, # = text AI requirements
 	requirements["# need to generate"] ||= requirements["@ asked to tell"]
-
+	requirements["@ tell ... to"] ||= requirements["tell"] && requirements["to"] && (msg.includes("tell this guy to")||msg.includes("tell them to"))
 	GLOBALREQUIREMENTS = requirements
-	
+	if(requirements["athiest"]||requirements["religion"]||requirements["religious"]){responseReqs+="You are athiest."}
+	if(requirements["utilitarian"]||requirements["self"]||msg.includes("benefit")||msg.includes("choice")){responseReqs+="You are utilitarian, you believe everone only ever does anything to benefit themselves."}
+	if(requirements["copyright"]){responseReqs+="You dislike copyright. you think its existance impeeds society's progress."}
 	//processes
 	//
 
+	if(requirements["barble"]){if(Math.random()>0.3){return(barbleDictionary(amsg,Math.floor(Math.random()*700+300)))};return(moreBarble("e",Math.floor(Math.random()*500+100)))}
+
 	if(required("@ addressed","introduce yourself").match){return("I am LopknCA366, the third generation of lopknbot. Much more capable than my predecessors. I dont usually respond to anyone without a proper lopknista UUID")};
 	if(required("@ addressed","@ asked for opinion").match){return("hmm")}
+	if(required("@ addressed","evaluate").match && sender === "lopkn"){let str=amsg.substring(10+msg.indexOf(" evaluate "));console.log(str);try{return(""+eval(str))}catch{}}
 
-	if(requirements["@ asked to tell"]){return({"generate":true,"reqs":requirements})}
+	if(requirements["@ tell ... to"]){return(msg.substring(4+msg.indexOf(" to "))+", stupid")}
+	if(requirements["@ summary"]){return("dont wanna help with that")}
+	if(requirements["@ asked to tell"]){return({"generate":true,"requirements":requirements,"reqs":responseReqs})}
+
+	if(requirements["@ addressed"] && Math.random()>0.7){return({"generate":true,"requirements":requirements,"reqs":responseReqs})}
 
 	return(false)
 }
 
 
 let lastMSG;
+let lastReference;
 
 function say(str){
 	lastMSG.channel.send(str)
@@ -131,6 +155,10 @@ function disconnectMSG(){
 client.on("messageCreate",(msg)=>{
 	if(msg.author.bot){return}
 		lastMSG = msg
+		lastReference = undefined
+		if(msg.reference!==null){
+			msg.channel.messages.fetch(msg.reference.messageId).then(message =>{lastReference=message})
+		}
 	let lopknistic = false
 	if(msg.author.id == "468988026853523457"){lopknistic=true} else {
 		console.log(msg.author.id)
@@ -150,7 +178,7 @@ client.on("messageCreate",(msg)=>{
 		return;
 	}
 
-	let rsp = responder(msgc)
+	let rsp = responder(msgc,msg.author.username)
 	if(rsp){
 
 		if(typeof(rsp)=="string"){
@@ -162,8 +190,14 @@ client.on("messageCreate",(msg)=>{
 				return(msg.channel.send(responseDictionary[msg.content]?.[msg.author.username]?.default))
 			}
 			(async()=>{
-			await botresponse(msg.author.username+": "+msg.content).then((rep)=>{
-				responseDictionary[msg.content] = {}
+			await botresponse(msg.author.username+": "+msg.content,rsp.reqs).then((rep)=>{
+				console.log("new response",JSON.stringify(rep,null,4))
+				if(responseDictionary[msg.content]===undefined){responseDictionary[msg.content] = {}}
+				if(rep.refusal !== null){
+					msg.channel.send("ummmm")
+					responseDictionary[msg.content][msg.author.username] = {"refused":rep}
+					return
+				}
 				responseDictionary[msg.content][msg.author.username] = {"default":rep}
 				if(Math.random()>1.5){
 					msg.reply(rep)
@@ -217,9 +251,9 @@ function conversion(){
 	let objk = Object.keys(responseDictionary)
 	objk.forEach((e)=>{
 		if(e[0]=="l"){
-			newD[e.substring(5)]={"lopkn":{"default":responseDictionary[e]}}
+			newD[e.substring(5)]=responseDictionary[e]
 		} else if(e[0]=="f"){
-			newD[e.substring(16)]={"fullwoodenshovel":{"default":responseDictionary[e]}}
+			newD[e.substring(16)]=responseDictionary[e]
 		}
 	})
 	return(newD)
@@ -229,3 +263,101 @@ function conversion(){
           
 // Log in to Discord with your client's token
 client.login(token);
+
+
+
+
+
+
+
+
+// extra stuff, like barbling
+var letters = {"0":{"0":8,"max":17,",":4," ":5},"1":{"0":2,"2":1,"max":3},"2":{"0":2,"2":1,"max":3},"3":{"0":1,"max":1},"5":{"0":1,"max":1},"t":{"max":1552,"h":595,"o":121," ":296,"e":104,"w":12,"y":14,"i":96,"s":33,"a":58,"r":64,"l":19,"t":22,".":29,"u":41,",":33,"n":3,"f":1,"c":4,"?":3,"b":1,"!":2,"—":1},"h":{"max":1089,"e":528,"a":161,"w":3,"i":140," ":107,"o":62,"t":32,"l":3,".":10,"r":7,",":11,"y":11,"m":1,"s":2,"—":1,"’":4,"u":5,"d":1},"e":{"max":2237," ":715,"g":13,"b":3,"s":142,"m":39,".":36,"n":152,"r":312,",":60,"d":215,"i":18,"t":62,"e":81,"f":21,"w":11,"l":62,"a":126,"p":17,"x":15,"v":40,"-":4,"c":35,"y":29,"q":2,"h":2,"u":1,"o":15,"\n":1,"z":1,"’":4,"?":1,"—":1,";":1}," ":{"1":2,"2":1,"3":1,"5":1,"max":3823,"s":329,"o":218,"b":186,"t":606,"p":110,"i":167,"f":161,"d":120,"m":133,"c":126,"k":19,"e":75,"g":77,"r":105,"h":232,"l":177,"a":459,"w":256,"y":83,"v":22,"z":1,"n":96,"j":9,"u":34,"q":5,"\"":2,"“":6,".":3,",":1},"s":{"max":1189,"i":53,"t":159," ":372,"s":56,"a":38,"h":75,"o":55,"e":117,"u":31,",":54,"l":31,"c":25,";":3,"p":38,"w":3,"m":12,"n":1,"k":11,"y":6,".":40,"q":2,"g":1,"-":1,"—":3,"!":1,"r":1},"i":{"max":1143,"e":34,"n":280,"a":17,"r":44,"s":142,"i":1,".":1,"o":51,"t":131,"l":61,"p":10,"v":68,"m":57,"c":44,"f":23,"'":2," ":15,"d":77,"g":48,"b":8,"z":4,"k":21,"h":1,"’":2,"q":1},"g":{"max":383,"e":49," ":109,"o":29,"h":44,"a":19,",":18,"r":34,"g":7,"i":21,"f":1,"l":7,"n":10,".":10,"u":7,"s":12,"m":2,"t":1,"—":1,"!":1,"y":1},"o":{"max":1190,"f":120,"o":51,"k":18,"n":168,"l":34,"v":12,"r":108,"s":38," ":136,"u":205,"m":59,"y":3,"p":30,"t":70,"w":49,"c":14,"x":2,"d":24,"h":1,"a":14,"b":6,"g":9,"i":8,".":2,"e":1,"z":1,",":7},"f":{"max":380," ":124,"e":31,"t":17,"o":50,"a":37,"r":34,"u":13,"i":29,"f":12,"l":21,",":4,"s":1,"-":3,".":2,"y":2},"b":{"max":253,"u":27,"r":22,"e":87,"y":23,"a":24,"o":21,"l":20,"i":15,"b":5,"n":1,",":4,".":1,"—":1,"s":1,"j":1},"u":{"max":495,"k":4,"a":10,"r":43,"e":17,"l":56,"n":53,"h":2,"m":21,"g":16,"t":55,"c":23,"f":1," ":59,".":8,"s":63,"'":3,"p":41,"v":1,"i":8,"d":8,"b":3},"k":{"max":154,"h":7," ":30,"e":56,"y":4,"u":2,"n":16,"i":17,",":1,"s":13,"-":3,"l":2,".":3},"a":{"max":1591,"r":223," ":151,"c":49,"z":7,"n":292,"d":93,"u":11,"s":170,"f":14,"h":2,"m":42,"l":114,".":9,"i":40,"y":39,"k":16,"t":170,"v":30,"g":26,"x":2,",":8,"w":17,"b":22,"p":30,"-":1,"’":9,"?":3,"e":1},"r":{"max":1105,"a":124,"u":18,"y":22,"i":117,"e":259," ":175,"o":101,"s":42,"c":7,"r":16,"t":61,"p":5,",":23,"n":15,".":23,"d":22,"m":16,"v":6,"k":17,"f":6,"l":10,"g":5,"h":3,"b":3,"—":4,"’":4,"w":1},"p":{"max":343,"l":39,"i":41,"r":31,"e":66,"o":33,"u":12,"t":10,"a":47,"h":5,"p":20,",":8," ":17,"s":8,".":6},"l":{"max":780,"a":148," ":59,"e":152,"t":22,"l":83,"y":34,"k":3,"o":50,"i":90,"d":41,"s":22,"g":1,".":9,",":15,"u":10,"f":15,"v":1,"?":1,"-":1,"p":1,"\"":1,"h":4,"w":10,"!":1,"n":1,"r":2,"m":2,"b":1},"c":{"max":369,"e":49,"o":58,"h":55,"r":27,"i":41,"t":16,"a":48,"?":1," ":3,"l":16,"u":11,"k":25,"c":3,",":13,"s":1,".":1,"y":1},"n":{"max":1117," ":238,"g":175,"q":2,",":12,"c":29,"a":31,"d":204,"e":86,".":21,"t":86,"u":28,"s":29,"i":48,"'":7,"o":63,"k":19,"y":10,"v":3,"p":2,"r":3,"n":5,"-":4,"’":5,"l":5,"j":1,";":1},"y":{"max":304," ":125,"z":2,"l":1,".":15,"a":1,"s":18,"'":1,"e":12,"o":88,"t":3,"i":5,",":23,"d":1,"b":1,"p":2,"m":1,"-":1,"c":1,"’":3},",":{"0":3,"max":336," ":328,"”":5},"d":{"max":815,"u":4," ":452,"e":114,"a":27,".":45,"o":23,"n":1,",":28,"y":7,"l":9,"i":48,"w":3,"r":17,"-":4,"s":18,"\"":1,"m":2,"c":3,"g":2,"b":1,":":2,"d":3,"—":1},"m":{"max":402,"o":43,"i":48,"p":26,"u":15,"m":8,"a":67," ":41,"e":118,"s":8,"b":10,"y":2,".":6,"f":1,",":7,"?":1,"!":1},"q":{"max":12,"u":12},"w":{"max":373,"a":118,"e":45,"i":52," ":24,"o":44,"y":1,"b":1,"h":50,"k":1,"n":21,"r":2,"s":5,".":2,",":2,"w":2,"l":2,"?":1},"z":{"max":18,"m":3,"y":3,"i":3,"a":1,"e":5,"z":2,"l":1},".":{"max":281," ":215,"\n":55,"s":1,":":1,"p":1,"c":2,"”":6},"v":{"max":184,"o":9,"e":145,"u":3,"i":20,"a":6,"y":1},"'":{"max":13,"s":1,"t":7,"l":1,"r":3,"m":1},";":{"max":5," ":5},"x":{"max":19," ":2,"i":8,"y":1,"t":2,"c":2,"p":4},"?":{"max":11," ":3,"\n":1,"”":7},"\n":{"1":1,"max":81,"\n":13,"y":6,"i":5,"o":2,"m":1,"p":3,"t":10,"a":5,"s":2,"l":6,"w":3,"“":15,"r":1,"h":4,"f":3,"e":1},"j":{"max":12,"u":5,"e":2,"a":2,"o":3},"-":{"max":22,"d":4,"c":1,"s":6,"h":3,"j":1,"w":1,"r":3,"t":2,"n":1},"\"":{"max":4,"n":1," ":2,"c":1},":":{"max":3," ":3},"—":{"max":13,"a":1,"i":1,"b":2,"t":3,"e":1,"p":1,"m":2,"g":1,"r":1},"’":{"max":31,"s":25,"r":2,"t":2,"d":1,"m":1},"“":{"max":21,"w":2,"h":4,"t":2,"g":2,"e":1,"i":3,"s":1,"p":2,"d":1,"v":1,"a":1,"f":1},"”":{"max":21," ":11,"\n":10},"!":{"max":6,"”":3," ":2,"\n":1}} 
+
+function simpleDistill(par){
+  for(let i = 1; i < par.length;i++){
+    let e = par[i].toLowerCase()
+    let E = par[i-1].toLowerCase()
+    if(letters[E]==undefined){letters[E] = {"max":0}}
+    if(letters[E][e] == undefined){letters[E][e] = 0}
+    letters[E][e] += 1
+    letters[E]["max"]+=1
+  }
+}
+function generateBarble(letter){
+  let objk = Object.keys(letters[letter])
+  let dop = Math.floor(letters[letter].max*Math.random())
+  let i = 0;
+  while(dop > 0){
+    if(objk[i] == "max"){i++}
+    dop -= letters[letter][objk[i]]
+    i++
+  }
+  // if(objk[i-1] == undefined){console.log(objk,i,dop)}
+  if(i==0){i++}
+return(objk[i-1])
+}
+
+function moreBarble(str,times){
+  // str = str==""?"h":str
+  let last = ""
+  while(times > 0){
+    let barbleLetter = generateBarble(str[str.length-1])
+    if(barbleLetter == " "){
+      if(last == "i" || last == "a" || last.length > 1){
+        str += barbleLetter
+        last = ""
+       times -= 1
+      } else {
+        
+      }
+    } else {
+      str += barbleLetter
+      last += barbleLetter
+       times -= 1
+      
+    }
+
+  }
+   return(str)
+}
+
+function barbleDictionary(str,length){
+	let outstr = chooseRandomMSG(str) // start with a letter
+	let astr = str
+	while(outstr.length < length){
+		let spl = astr.split(" ")
+		let success = 0
+		for(let i = 0; i < spl.length && success < 20; i++){
+			let definition = engDictionary[spl[i]]
+			if(definition !== undefined){
+				let word = chooseRandomMSG(definition.split(" "))
+				outstr = outstr + word + " "
+				console.log(word)
+				astr = definition
+				success += 1
+				if(outstr.length>length){break}
+			}
+		}
+		if(success == 0){
+			outstr = moreBarble(outstr,5)
+		}
+	}
+	return(outstr)
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
