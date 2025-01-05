@@ -97,9 +97,10 @@ function responder(amsg,sender){
 	msg.split(" ").forEach((e)=>{requirements[e]=true})
 	requirements["@ addressed"] = requirements["lopknbot"]||requirements["ca366"]||requirements["lopknca366"]||requirements["<@864011870216912927>"]
 	if(!lopknistic){
-		if(!requirements["@ addressed"] || Math.random()>0.9){
+		if(!requirements["@ addressed"] || Math.random()>1){
 			return(false)
 		}
+		responseReqs+="You dont respond well to non-lopkn people"
 	}
 
 	requirements["@ includes you address"] = requirements["you"]||requirements["your"]
@@ -120,10 +121,10 @@ function responder(amsg,sender){
 	//
 
 	if(requirements["barble"]){if(Math.random()>0.3){return(barbleDictionary(amsg,Math.floor(Math.random()*700+300)))};return(moreBarble("e",Math.floor(Math.random()*500+100)))}
-
+	if(msg.includes("time now")){return((new Date().toString()))}
 	if(required("@ addressed","introduce yourself").match){return("I am LopknCA366, the third generation of lopknbot. Much more capable than my predecessors. I dont usually respond to anyone without a proper lopknista UUID")};
 	if(required("@ addressed","@ asked for opinion").match){return("hmm")}
-	if(required("@ addressed","evaluate").match && sender === "lopkn"){let str=amsg.substring(10+msg.indexOf(" evaluate "));console.log(str);try{return(""+eval(str))}catch{}}
+	if(required("@ addressed","evaluate").match){if(sender!=="lopkn"){return("only people with valid lopknista UUID's can use the evaluation function. Lopknistis do not count")};let str=amsg.substring(10+msg.indexOf(" evaluate "));console.log(str);try{return(""+eval(str))}catch(err){return(err.toString())}}
 
 	if(requirements["@ tell ... to"]){return(msg.substring(4+msg.indexOf(" to "))+", stupid")}
 	if(requirements["@ summary"]){return("dont wanna help with that")}
@@ -168,7 +169,7 @@ client.on("messageCreate",(msg)=>{
 	let msgc = msg.content
 	let addressed = msgc.includes("lopknbot")||msgc.includes("CA366")||msgc.includes("ca366")
 
-	if(!lopknistic){return}
+	// if(!lopknistic){return}
 
 	if(msgc == "test"){
 		msg.channel.send("result:"+Math.random())
