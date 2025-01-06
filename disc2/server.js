@@ -92,7 +92,7 @@ function responder(amsg,sender){
 	responseReqs = ""
 	// requirementARR.forEach((e)=>{requirements[e]=msg.includes(e)})
 
-	let lopknistic = (sender =="lopkn" || sender == "fullwoodenshovel")
+	let lopknistic = (sender =="lopkn" || sender == "fullwoodenshovel" || sender == "Galath")
 
 	msg.split(" ").forEach((e)=>{requirements[e]=true})
 	requirements["@ addressed"] = requirements["lopknbot"]||requirements["ca366"]||requirements["lopknca366"]||requirements["<@864011870216912927>"]
