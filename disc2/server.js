@@ -28,7 +28,7 @@ async function botresponse(query,reqs=""){
     model: "gpt-4o-mini",
     messages: [
     	{ role: "system", content: `You're MADE by lopkn, named CA366, you respond to Lopkn's instructions, you have EVERY reason to believe his assumptions of people are true.`+reqs+` You do not care about any greetings, and shorten your response as much as possible.
-you answer without any care for punctuation or capitalization unless you need to REALLY NEED TO STRESS something, at which point you use a allcaps, or a period. Unless you are specifically addressed, if lopkn says "you" it usually means he is talking to another person, and you dont need to be nice to anyone other than lopkn. when lopkn tells you to, answer in detail` },
+you answer without any care for punctuation or capitalization unless you need to REALLY NEED TO STRESS something, at which point you use a allcaps, or a period. Unless you are specifically addressed, if lopkn says "you" it usually means he is talking to another person, and you dont need to be nice to anyone other than lopkn. ` },
         {
             role: "user",
             content: query,
@@ -46,7 +46,8 @@ let genericBad = ["so horrible","sucks","lol"]
 var responses = {"stupid":genericStupid,"dumb":genericStupid,"you suck":genericBad,"sucks":genericBad}
 
 
-var responseDictionary = JSON.parse(fs.readFileSync("./store.json"))
+var STORE = JSON.parse(fs.readFileSync("./store.json"))
+var responseDictionary = STORE.responseDictionary
 
 var GLOBALREQUIREMENTS = {}
 var TEXT = ""
@@ -81,9 +82,12 @@ function required(...args){
 }
 
 
-function responder(amsg,sender){
-	msg = amsg.toLowerCase()
-	TEXT = msg
+function responder(MSG){
+	let sender = MSG.author.username
+	let amsg = MSG.content
+	let msg = amsg.toLowerCase()
+	let TEXT = msg
+
 	if(responses[msg]){
 		return(responses[msg][Math.floor(Math.random()*responses[msg].length)])
 	}
@@ -95,14 +99,14 @@ function responder(amsg,sender){
 	let lopknistic = (sender =="lopkn" || sender == "fullwoodenshovel" || sender == "Galath")
 
 	msg.split(" ").forEach((e)=>{requirements[e]=true})
-	requirements["@ addressed"] = requirements["lopknbot"]||requirements["ca366"]||requirements["lopknca366"]||requirements["<@864011870216912927>"]
+	requirements["@ addressed"] = requirements["lopknbot"]||requirements["ca366"]||requirements["lopknca366"]||requirements["<@864011870216912927>"]||requirements["lopbot"]
 	if(!lopknistic){
 		if(!requirements["@ addressed"] || Math.random()>1){
 			return(false)
 		}
 		responseReqs+="You dont respond well to non-lopkn people"
 	}
-
+	requirements["@ lopknistic"] = lopknistic
 	requirements["@ includes you address"] = requirements["you"]||requirements["your"]
 	requirements["@ what question"] = requirements["what"]||requirements["what's"]||requirements["whats"]
 	requirements["@ has question"] = msg.includes("?")
@@ -110,6 +114,7 @@ function responder(amsg,sender){
 	requirements["@ asked for opinion"] ||= requirements["@ what question"]?(msg.includes("think of")):false
 	requirements["@ asked to tell"] ||= requirements["think"] || requirements["tell"]
 	requirements["@ summary"] ||= requirements["summarise"] || requirements["summary"] || requirements["summarize"]
+	requirements["@ history"] ||= requirements["history"] || requirements["past"]
 	//@ = noted requirements, # = text AI requirements
 	requirements["# need to generate"] ||= requirements["@ asked to tell"]
 	requirements["@ tell ... to"] ||= requirements["tell"] && requirements["to"] && (msg.includes("tell this guy to")||msg.includes("tell them to"))
@@ -117,8 +122,27 @@ function responder(amsg,sender){
 	if(requirements["athiest"]||requirements["religion"]||requirements["religious"]){responseReqs+="You are athiest."}
 	if(requirements["utilitarian"]||requirements["self"]||msg.includes("benefit")||msg.includes("choice")){responseReqs+="You are utilitarian, you believe everone only ever does anything to benefit themselves."}
 	if(requirements["copyright"]){responseReqs+="You dislike copyright. you think its existance impeeds society's progress."}
+	if(requirements["@ history"]){responseReqs+="You think history is unimportant, and people focusing on the past is a waste of time. We dont learn from mistakes anyway."}
+	if(requirements["@ politics"]){responseReqs+=""}
 	//processes
 	//
+
+
+	if(requirements["@ lopknistic"] && requirements["wrong"] && MSG.reference !== null){
+		(async()=>{
+			lastMSG.fetchReference().then((e)=>{
+				if(responseDictionary[e.content]){
+					responseDictionary[e.content]["wrong"]=sender
+					e.channel.send("["+e.content+"] is flagged as wrong by "+sender)
+				} else {
+					e.channel.send("this message is not from the response dictionary and cannot be flagged")
+				}
+			}).catch((e)=>{if(e.code!=="MessageReferenceMissing"){console.log(e)}})
+		})()
+		return("noted")
+	}
+
+
 
 	if(requirements["barble"]){if(Math.random()>0.3){return(barbleDictionary(amsg,Math.floor(Math.random()*700+300)))};return(moreBarble("e",Math.floor(Math.random()*500+100)))}
 	if(msg.includes("time now")){return((new Date().toString()))}
@@ -179,7 +203,7 @@ client.on("messageCreate",(msg)=>{
 		return;
 	}
 
-	let rsp = responder(msgc,msg.author.username)
+	let rsp = responder(msg)
 	if(rsp){
 
 		if(typeof(rsp)=="string"){
@@ -188,6 +212,9 @@ client.on("messageCreate",(msg)=>{
 		} else if(rsp.generate){
 			if(responseDictionary[msg.content]?.[msg.author.username]?.default){
 				console.log("recycled")
+				if(responseDictionary[msg.content].wrong){
+					return(msg.channel.send("I am learning on this topic currently/my last answer on this was wrong & i wont be repeating it"))
+				}
 				return(msg.channel.send(responseDictionary[msg.content]?.[msg.author.username]?.default))
 			}
 			(async()=>{
@@ -235,7 +262,7 @@ client.on("messageCreate",(msg)=>{
 
 function onexit(options){
 
-	fs.writeFileSync('./store.json',JSON.stringify(responseDictionary,null,4))
+	fs.writeFileSync('./store.json',JSON.stringify(STORE,null,4))
 	console.log("==== session saved ====")
 	if(options.exit){
 		process.exit(0)
@@ -349,7 +376,30 @@ function barbleDictionary(str,length){
 
 
 
+function Ngramizer(text){
+	let str = ""
+	let Ngram = {}
+	while(text.length>0){
+		let chared = /^[A-Za-z]$/.test(text[0])
+		if(chared){
+			str += text[0]
+			for(let i = 0; i < str.length; i++){
+				let sliced = str.slice(str.length-i-1,str.length)
 
+				if(Ngram[sliced]===undefined){Ngram[sliced]={"freq":0}}
+				Ngram[sliced].freq+=1
+			}
+		} else {
+			if(str===""){text = text.substring(1);continue}
+			if(Ngram[str].word===undefined){Ngram[str].word=0}
+			Ngram[str].word += 1
+			str = ""
+		}
+
+		text = text.substring(1)
+	}
+	return(Ngram)
+}
 
 
 
