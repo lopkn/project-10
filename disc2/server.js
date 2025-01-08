@@ -52,17 +52,71 @@ var responseDictionary = STORE.responseDictionary
 var GLOBALREQUIREMENTS = {}
 var TEXT = ""
 
+class sentence{
+	constructor(msg,requirements){
+		this.req = requirements
+		this.msg = msg
+		this.lookingat = 0
+		this.searchRangeEnd = Infinity
+	}
+	reset(){
+		this.lookingat = 0
+		this.searchRangeEnd = Infinity
+		this.returnItem = undefined
+	}
+	next(item,move=true){
+		if(this.req[item]==undefined){return(false)}	
+		let dst = Infinity
+		this.returnItem = undefined
+		for(let i = 0; i < this.req[item].length; i++){
+			let tdst = this.req[item][i].index - this.lookingat
+			if(tdst<0){continue}
+			if(tdst<dst){
+				dst=tdst
+				this.returnItem = this.req[item][i]
+			}
+		}
+		if(this.returnItem===undefined){return(false)}
+		this.lookingat += dst+this.returnItem.endex-this.returnItem.index
+		return({"item":this.returnItem,"sentence":this,"dist":dst,"out":this.msg.substring(this.returnItem.index,this.returnItem.endex)})
+	}
+	inRange(item){
+		return(inrange(item.index,item.endex,this.lookingat,this.searchRangeEnd))
+	}
+	// nextTouching(item,move=true){
+	// 	if(this.returnItem==undefined){return(false)}//needs a next
+	// 	let lastSearch = this.returnItem
+	// 	let rst = this.next(item,move=true)
+	// 	if(rst===false){return(false)}
+
+	// }
+}
+
+function inrange(x1,x2,y1,y2){ //x1 x2 is range 1, and the first number must be smaller in both ranges
+	return(x1 <= y2 && x1 <= x2)
+}
+
 
 ///events activate requirements - which can activate requirements
 
-function responder2seg(msg,find,denote,actmsg){
+function refseg(find,denote,msg,requirements,options={}){
 	let arr = []
-	if(actmsg===undefined){actmsg = msg}
+	let actmsg = msg
+	if(options.actmsg!==undefined){actmsg = options.actmsg}
 	while(true){
 		let dict = {}
 		let ind = actmsg.indexOf(find)
 		dict.index = ind
-		if(dict.index===-1){return(arr)}
+		if(dict.index===-1){
+		//# function ends here
+			if(requirements!==undefined){
+				if(arr.length===0){return(requirements[denote])}
+				if(requirements[denote]===undefined){requirements[denote]=[]}
+				requirements[denote]=requirements[denote].concat(arr)
+			}
+
+			return(arr)
+		}
 
 		dict.index += msg.length-actmsg.length
 		dict.endex = dict.index + find.length
@@ -74,6 +128,13 @@ function responder2seg(msg,find,denote,actmsg){
 
 }
 
+function refsegarr(finds,denote,msg,requirements,options={}){
+	for(let i = 0; i < finds.length; i++){
+		let find = finds[i]
+		refseg(find,denote,msg,requirements,options)
+	}
+}
+
 
 function required(...args){
 	let hit = 0
@@ -82,11 +143,13 @@ function required(...args){
 }
 
 
+var SENTENCE = undefined
+
 function responder(MSG){
 	let sender = MSG.author.username
 	let amsg = MSG.content
 	let msg = amsg.toLowerCase()
-	let TEXT = msg
+	TEXT = msg
 
 	if(responses[msg]){
 		return(responses[msg][Math.floor(Math.random()*responses[msg].length)])
@@ -95,17 +158,27 @@ function responder(MSG){
 	let requirements = {}
 	responseReqs = ""
 	// requirementARR.forEach((e)=>{requirements[e]=msg.includes(e)})
-
+	let rs;
 	let lopknistic = (sender =="lopkn" || sender == "fullwoodenshovel" || sender == "Galath")
 
-	msg.split(" ").forEach((e)=>{requirements[e]=true})
-	requirements["@ addressed"] = requirements["lopknbot"]||requirements["ca366"]||requirements["lopknca366"]||requirements["<@864011870216912927>"]||requirements["lopbot"]
+	let msgindex = -1
+	requirements["@ word"] = []
+	msg.split(" ").forEach((e)=>{msgindex+=1+e.length;if(requirements[e]===undefined){requirements[e]=[]};requirements["@ word"].push({"index":msgindex-e.length,"endex":msgindex});requirements[e]=requirements[e].concat([{"index":msgindex-e.length,"endex":msgindex}]);})
+	console.log(requirements)
+
+
+	requirements["@ addressed"] = requirements["lopknbot"]||requirements["ca366"]||requirements["lopknca366"]||requirements["<@864011870216912927>"]||requirements["lopbot"]||requirements["lb"]
 	if(!lopknistic){
-		if(!requirements["@ addressed"] || Math.random()>1){
+		if(!requirements["@ addressed"] || Math.random()>0.7){
 			return(false)
-		}
+		} 
 		responseReqs+="You dont respond well to non-lopkn people"
 	}
+
+
+
+	SENTENCE = new sentence(msg,requirements)
+
 	requirements["@ lopknistic"] = lopknistic
 	requirements["@ includes you address"] = requirements["you"]||requirements["your"]
 	requirements["@ what question"] = requirements["what"]||requirements["what's"]||requirements["whats"]
@@ -117,12 +190,15 @@ function responder(MSG){
 	requirements["@ history"] ||= requirements["history"] || requirements["past"]
 	//@ = noted requirements, # = text AI requirements
 	requirements["# need to generate"] ||= requirements["@ asked to tell"]
-	requirements["@ tell ... to"] ||= requirements["tell"] && requirements["to"] && (msg.includes("tell this guy to")||msg.includes("tell them to"))
+	requirements["@ tell ... to"] ||= requirements["tell"] && requirements["to"] && (msg.includes("tell this guy to")||msg.includes("tell them to")||msg.includes("tell him to")||msg.includes("tell her to"))
 	GLOBALREQUIREMENTS = requirements
 	if(requirements["athiest"]||requirements["religion"]||requirements["religious"]){responseReqs+="You are athiest."}
 	if(requirements["utilitarian"]||requirements["self"]||msg.includes("benefit")||msg.includes("choice")){responseReqs+="You are utilitarian, you believe everone only ever does anything to benefit themselves."}
 	if(requirements["copyright"]){responseReqs+="You dislike copyright. you think its existance impeeds society's progress."}
 	if(requirements["@ history"]){responseReqs+="You think history is unimportant, and people focusing on the past is a waste of time. We dont learn from mistakes anyway."}
+	
+	rs=refsegarr(["lopbot","lopknbot","lb","ca366","lopknca366","<@864011870216912927>"],"@ addressed",msg,requirements)
+
 	if(requirements["@ politics"]){responseReqs+=""}
 	//processes
 	//
@@ -145,15 +221,29 @@ function responder(MSG){
 
 
 	if(requirements["barble"]){if(Math.random()>0.3){return(barbleDictionary(amsg,Math.floor(Math.random()*700+300)))};return(moreBarble("e",Math.floor(Math.random()*500+100)))}
+	if(requirements["define"]){return(engDictionary[msg.substring(7+msg.indexOf("define "))].substring(0,1900))}
+	if(requirements["ngramize"]){return(engDictionary[msg.substring(7+msg.indexOf("ngramize "))].substring(0,1900))}
+	
 	if(msg.includes("time now")){return((new Date().toString()))}
+
 	if(required("@ addressed","introduce yourself").match){return("I am LopknCA366, the third generation of lopknbot. Much more capable than my predecessors. I dont usually respond to anyone without a proper lopknista UUID")};
 	if(required("@ addressed","@ asked for opinion").match){return("hmm")}
 	if(required("@ addressed","evaluate").match){if(sender!=="lopkn"){return("only people with valid lopknista UUID's can use the evaluation function. Lopknistis do not count")};let str=amsg.substring(10+msg.indexOf(" evaluate "));console.log(str);try{return(""+eval(str))}catch(err){return(err.toString())}}
 
 	if(requirements["@ tell ... to"]){return(msg.substring(4+msg.indexOf(" to "))+", stupid")}
 	if(requirements["@ summary"]){return("dont wanna help with that")}
-	if(requirements["@ asked to tell"]){return({"generate":true,"requirements":requirements,"reqs":responseReqs})}
 
+
+	rs=refsegarr(["shut up","stupid","dumb","ca366","gay","retard"],"@ insults",msg,requirements)
+	rs=refsegarr(["great","amazing","the best","ca366","gay","retard"],"@ compliments",msg,requirements)
+	rs=refsegarr(["you","i","they","she","he","her","his","their"],"@ pronoun",msg,requirements)
+	rs=refsegarr(["is","are"],"@ equate",msg,requirements)
+	rs=refsegarr(["hi","hey","hello","salutations"],"@ greetings",msg,requirements)
+
+
+
+
+	if(requirements["@ asked to tell"]){return({"generate":true,"requirements":requirements,"reqs":responseReqs})}
 	if(requirements["@ addressed"] && Math.random()>0.7){return({"generate":true,"requirements":requirements,"reqs":responseReqs})}
 
 	return(false)
@@ -177,6 +267,8 @@ function disconnectMSG(){
 		]))
 }
 
+var HALTED = false
+
 client.on("messageCreate",(msg)=>{
 	if(msg.author.bot){return}
 		lastMSG = msg
@@ -184,6 +276,10 @@ client.on("messageCreate",(msg)=>{
 		if(msg.reference!==null){
 			msg.channel.messages.fetch(msg.reference.messageId).then(message =>{lastReference=message})
 		}
+
+	if(msg.author.id == "468988026853523457" && msg.content == "halt"){
+		HALTED = !HALTED
+	}
 	let lopknistic = false
 	if(msg.author.id == "468988026853523457"){lopknistic=true} else {
 		console.log(msg.author.id)
@@ -217,6 +313,7 @@ client.on("messageCreate",(msg)=>{
 				}
 				return(msg.channel.send(responseDictionary[msg.content]?.[msg.author.username]?.default))
 			}
+			if(HALTED){return}
 			(async()=>{
 			await botresponse(msg.author.username+": "+msg.content,rsp.reqs).then((rep)=>{
 				console.log("new response",JSON.stringify(rep,null,4))
@@ -400,6 +497,150 @@ function Ngramizer(text){
 	}
 	return(Ngram)
 }
+
+
+
+
+
+
+
+// In an argument
+
+
+// 1. list all the INTRINSIC factors
+// 2. list all the LOGIC statements
+// 3. dispute the logical VALIDITY of the statent
+// 4. dispute the logical SOUNDNESS of the statent
+
+
+// step 1: person building
+//  you cant assume anything about this person
+//  you need to KNOW for a fact thier intrinsic feelings of anything
+//  so you can probe ALL their intrinsic feelings towards anything
+// step 2: dispute LOGIC
+// step 3: after disputing logic, does the new result effect the person in a way that changes their perception
+// step 4: accept they didnt change their opinion, or they changed their opinion.
+
+
+// so answer me right now
+// DONT ASSUME ANYTHING ABOUT ME
+// "why should i think is murder bad?"
+
+// "you go jail" (failed LOGIC): I dont think jail is so bad. they serve good food
+// inference: intrinsic feeling towards food
+
+// PROBE FIRST. "so you like prison food?" -> "yes"
+// "have you ever actually TRIED prison food?" -> "yes" -> (nothing you can do about it)
+// "have you ever actually TRIED prison food?" -> "no" -> means he DERIVED/LEARNT the feeling about prison food
+
+// anything LEARNT can be disputed logically
+
+// response: you made a logically UNSOUND statement: they dont serve good food
+// argument takes place: Do prisons actually have food that buddy enjoys?
+// argument resolution: "yes" -> cant do anything about it
+// "no" -> he changes his opinion
+
+
+
+
+// lets say "how much i like something" is denoted by a number
+
+
+// PRISON = "how good food is" * intrinsic feeling of food + "how unfree prison is" * intrinsic feeling of prison
+
+
+// do you get that if a statement cant be tested it should never be used?
+// dont use religion as an example for now because ur biased towards that
+// lets say my statement is "this table didnt exist in a way that is not testable"
+// how can you argue with me?
+
+// Im wrong for even claiming that statement, because i should KNOW you cant change your view based on that
+// because I KNEW that there is no way for you to test it, there is no point of saying intents
+
+// You cant convince me im lying (because theres a possibility im not)
+// I cant convince you im not lying (because there is no evidence to suggest im not lying)
+
+// SO, actually neither me or you can conclude anything other than the fact that this statement will never make any sense to anyone
+
+// its why philosophers dont go around claiming there are things outside the universe
+// there is no unless. once it is accepted that we cant see out of the universe
+
+
+
+
+// theories are testable
+// its pseudoscience it doesnt make sense
+
+// its wrong to say because just based on the claim alone, you KNOW you cant convince anyone
+// therefore its a waste of peoples time to claim it at all.
+
+// thats the statement that "words/beliefs bring happiness" which is testable
+// in the same way that the candy for the kid is NEGATIVE because he believes it is
+// it doesnt make that belief logical to anyone else
+// it could make sense to HIMSELF, but he cannot convince anyone else of that same belief using that argument
+
+// the claim that "the universe is one cell out of millions of cells we cant see"
+// is the same as "theres a flying table outside of the observable universe"
+
+// then believing in a flat earth + flying torus COULD be equally right/wrong
+
+
+
+
+
+// the premise of human logic is that it needs to be "LOGICALLY FOLLOWABLE"
+// for example the negative candy kid (NCK)
+// he thinks negatively of candy because "parent yelling" ( logically bullshit )
+
+// but maybe the entire world also thinks negatively of candy because "unhealthy" (logically sound)
+
+// NCKs belief is still wrong
+
+// the RESULT that came out is WRONG because the LOGIC is wrong. just because its also negative doesnt mean its right
+
+// ITS NOT WRONG for the kid to think that the candy is bad for wrong logic
+// its not wrong FOR THE PERSON who believes anything
+// but its wrong for EVERYONE ELSE
+// and its not wrong for ANYONE ELSE to dispute it
+
+
+// for example:
+
+// 	a side effect of this logical structure that i use is "all tradition is useless and wrong"
+	
+// 	i think that people are wrong in terms of tradition
+// 	they are only RIGHT if they actually do feel an intrinsic happiness towards tradition
+
+
+// 	KID: intrinsic (candy good), experience(yelling bad) CONCLUSION: candy bad = KID is wrong
+// 	feeling: correct to kid
+// 	logic: wrong to anyone else
+// 	disputing: everyone would argue with the kid
+
+
+
+// 	KID: intrinsic (tradition good), whatever = KID is right
+// 	feeling: correct to kid
+// 	logic: correct to me
+// 	disputing: noone would argue with the kid
+
+
+// ^ this is what you are saying
+// but i am saying
+
+// 	KID: intrinsic (tradition meh), experience(red packets good) = KID is wrong
+// 	feeling: correct to kid
+// 	logic: wrong to ANYONE ELSE
+// 	disputing: everyone would argue with the kid
+	
+	
+	
+
+
+
+
+
+
 
 
 
