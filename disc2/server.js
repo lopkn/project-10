@@ -20,8 +20,11 @@ client.once(Events.ClientReady, readyClient => {
 
 
 
+var STR = JSON.stringify
 
-
+function clone(x){
+	return(JSON.parse(JSON.stringify(x)))
+}
 
 async function botresponse(query,reqs=""){
 	let completion = await openai.chat.completions.create({
@@ -47,6 +50,7 @@ var responses = {"stupid":genericStupid,"dumb":genericStupid,"you suck":genericB
 
 
 var STORE = JSON.parse(fs.readFileSync("./store.json"))
+var NGRAM = JSON.parse(fs.readFileSync("./freq.json"))
 var responseDictionary = STORE.responseDictionary
 
 var GLOBALREQUIREMENTS = {}
@@ -63,8 +67,9 @@ class sentence{
 		this.lookingat = 0
 		this.searchRangeEnd = Infinity
 		this.returnItem = undefined
+		return(this)
 	}
-	next(item,move=true){
+	next(item){
 		if(this.req[item]==undefined){return(false)}	
 		let dst = Infinity
 		this.returnItem = undefined
@@ -80,22 +85,63 @@ class sentence{
 		this.lookingat += dst+this.returnItem.endex-this.returnItem.index
 		return({"item":this.returnItem,"sentence":this,"dist":dst,"out":this.msg.substring(this.returnItem.index,this.returnItem.endex)})
 	}
+	prev(item){
+		if(this.req[item]==undefined){return(false)}	
+		let dst = Infinity
+		this.returnItem = undefined
+		for(let i = 0; i < this.req[item].length; i++){
+			let tdst = this.lookingat-this.req[item][i].endex
+			if(tdst<0){continue}
+			if(tdst<dst){
+				dst=tdst
+				this.returnItem = this.req[item][i]
+			}
+		}
+		if(this.returnItem===undefined){return(false)}
+		this.lookingat -= dst+this.returnItem.endex-this.returnItem.index
+		return({"item":this.returnItem,"sentence":this,"dist":dst,"out":this.msg.substring(this.returnItem.index,this.returnItem.endex)})
+	}
+
+
 	inRange(item){
 		return(inrange(item.index,item.endex,this.lookingat,this.searchRangeEnd))
 	}
-	// nextTouching(item,move=true){
-	// 	if(this.returnItem==undefined){return(false)}//needs a next
-	// 	let lastSearch = this.returnItem
-	// 	let rst = this.next(item,move=true)
-	// 	if(rst===false){return(false)}
 
-	// }
+	Then(reqname,item){
+		let word = this.msg.substr(item.index,item.endex)
+		item.propegated = true
+		if(reqname == "@ word"){
+			if(word[word.length-1] === "s"){
+				newReq("@ ends with character s",clone(item))
+			}
+			if(word.includes("'")){
+				newReq("@ apostrophe",clone(item))
+			}
+			if(["you","i","they","she","he","her","his","their","your"].includes(word)){
+				newReq("@ pronoun",clone(item))
+			}
+			
+		}
+	}
+
+
 }
 
 function inrange(x1,x2,y1,y2){ //x1 x2 is range 1, and the first number must be smaller in both ranges
 	return(x1 <= y2 && x1 <= x2)
 }
 
+
+function cleanReq(){
+	let objk = Object.keys(GLOBALREQUIREMENTS)
+	objk.forEach((e)=>{
+		if(!GLOBALREQUIREMENTS[e]){
+			GLOBALREQUIREMENTS[e] = undefined
+			delete GLOBALREQUIREMENTS[e]
+		}
+	})
+	return(GLOBALREQUIREMENTS)
+}
 
 ///events activate requirements - which can activate requirements
 
@@ -143,6 +189,13 @@ function required(...args){
 }
 
 
+function newReq(req,item){
+	if(GLOBALREQUIREMENTS[req]===undefined){GLOBALREQUIREMENTS[req]=[]}
+	GLOBALREQUIREMENTS[req].push(item)
+	SENTENCE.Then(req,item)
+	return(GLOBALREQUIREMENTS)
+}
+
 var SENTENCE = undefined
 
 function responder(MSG){
@@ -156,6 +209,8 @@ function responder(MSG){
 	}
 	// let requirementARR = ["ca366","introduce yourself"]
 	let requirements = {}
+	GLOBALREQUIREMENTS = requirements
+	SENTENCE = new sentence(msg,requirements)
 	responseReqs = ""
 	// requirementARR.forEach((e)=>{requirements[e]=msg.includes(e)})
 	let rs;
@@ -163,8 +218,14 @@ function responder(MSG){
 
 	let msgindex = -1
 	requirements["@ word"] = []
-	msg.split(" ").forEach((e)=>{msgindex+=1+e.length;if(requirements[e]===undefined){requirements[e]=[]};requirements["@ word"].push({"index":msgindex-e.length,"endex":msgindex});requirements[e]=requirements[e].concat([{"index":msgindex-e.length,"endex":msgindex}]);})
-	console.log(requirements)
+	msg.split(" ").forEach((e)=>{
+		msgindex+=1+e.length;
+		if(requirements[e]===undefined){requirements[e]=[]};
+		// requirements["@ word"].push({"index":msgindex-e.length,"endex":msgindex});//same as next line
+		newReq("@ word",{"index":msgindex-e.length,"endex":msgindex})
+		// requirements[e]=requirements[e].concat([{"index":msgindex-e.length,"endex":msgindex}]);
+		newReq(e,{"index":msgindex-e.length,"endex":msgindex})
+	})
 
 
 	requirements["@ addressed"] = requirements["lopknbot"]||requirements["ca366"]||requirements["lopknca366"]||requirements["<@864011870216912927>"]||requirements["lopbot"]||requirements["lb"]
@@ -177,8 +238,7 @@ function responder(MSG){
 
 
 
-	SENTENCE = new sentence(msg,requirements)
-
+	requirements["@ reply"] = MSG.reference!==null
 	requirements["@ lopknistic"] = lopknistic
 	requirements["@ includes you address"] = requirements["you"]||requirements["your"]
 	requirements["@ what question"] = requirements["what"]||requirements["what's"]||requirements["whats"]
@@ -190,8 +250,11 @@ function responder(MSG){
 	requirements["@ history"] ||= requirements["history"] || requirements["past"]
 	//@ = noted requirements, # = text AI requirements
 	requirements["# need to generate"] ||= requirements["@ asked to tell"]
-	requirements["@ tell ... to"] ||= requirements["tell"] && requirements["to"] && (msg.includes("tell this guy to")||msg.includes("tell them to")||msg.includes("tell him to")||msg.includes("tell her to"))
-	GLOBALREQUIREMENTS = requirements
+	// requirements["@ tell ... to"] ||= requirements["tell"] && requirements["to"] && (msg.includes("tell this guy to")||msg.includes("tell them to")||msg.includes("tell him to")||msg.includes("tell her to"))
+	
+
+	requirements["@ tell * to"] = requirements["tell"] && SENTENCE.reset().next("tell").sentence.next("@ word").sentence.next("@ word").out === "to" || SENTENCE.next("@ word").out === "to"
+
 	if(requirements["athiest"]||requirements["religion"]||requirements["religious"]){responseReqs+="You are athiest."}
 	if(requirements["utilitarian"]||requirements["self"]||msg.includes("benefit")||msg.includes("choice")){responseReqs+="You are utilitarian, you believe everone only ever does anything to benefit themselves."}
 	if(requirements["copyright"]){responseReqs+="You dislike copyright. you think its existance impeeds society's progress."}
@@ -204,7 +267,7 @@ function responder(MSG){
 	//
 
 
-	if(requirements["@ lopknistic"] && requirements["wrong"] && MSG.reference !== null){
+	if(requirements["@ lopknistic"] && requirements["wrong"] && requirements["@ reply"]){
 		(async()=>{
 			lastMSG.fetchReference().then((e)=>{
 				if(responseDictionary[e.content]){
@@ -230,13 +293,13 @@ function responder(MSG){
 	if(required("@ addressed","@ asked for opinion").match){return("hmm")}
 	if(required("@ addressed","evaluate").match){if(sender!=="lopkn"){return("only people with valid lopknista UUID's can use the evaluation function. Lopknistis do not count")};let str=amsg.substring(10+msg.indexOf(" evaluate "));console.log(str);try{return(""+eval(str))}catch(err){return(err.toString())}}
 
-	if(requirements["@ tell ... to"]){return(msg.substring(4+msg.indexOf(" to "))+", stupid")}
+	if(requirements["@ tell * to"]){return(msg.substring(4+msg.indexOf(" to "))+", stupid")}
 	if(requirements["@ summary"]){return("dont wanna help with that")}
 
 
-	rs=refsegarr(["shut up","stupid","dumb","ca366","gay","retard"],"@ insults",msg,requirements)
+	rs=refsegarr(["shut up","stupid","dumb","gay","retard"],"@ insults",msg,requirements)
 	rs=refsegarr(["great","amazing","the best","ca366","gay","retard"],"@ compliments",msg,requirements)
-	rs=refsegarr(["you","i","they","she","he","her","his","their"],"@ pronoun",msg,requirements)
+	rs=refsegarr(["you","i","they","she","he","her","his","their"],"@D pronoun",msg,requirements)
 	rs=refsegarr(["is","are"],"@ equate",msg,requirements)
 	rs=refsegarr(["hi","hey","hello","salutations"],"@ greetings",msg,requirements)
 
@@ -277,14 +340,22 @@ client.on("messageCreate",(msg)=>{
 			msg.channel.messages.fetch(msg.reference.messageId).then(message =>{lastReference=message})
 		}
 
-	if(msg.author.id == "468988026853523457" && msg.content == "halt"){
-		HALTED = !HALTED
+	if(msg.author.id == "468988026853523457"){
+		if(msg.content == "halt"){
+			HALTED = !HALTED
+		}
+
+
+		if(msg.content[0] === "!"){
+			let str = msg.content.substring(1)
+			try{return(msg.reply((""+eval(str)).substr(0,1999)))}catch(err){return(msg.reply(err.toString()))}
+			return;
+		}
 	}
 	let lopknistic = false
 	if(msg.author.id == "468988026853523457"){lopknistic=true} else {
 		console.log(msg.author.id)
 	}
-	if(msg.author.id == "898967271735717888"&&Math.random()>0.3){lopknistic=true}
 
 	let msgc = msg.content
 	let addressed = msgc.includes("lopknbot")||msgc.includes("CA366")||msgc.includes("ca366")
@@ -298,6 +369,11 @@ client.on("messageCreate",(msg)=>{
 		setTimeout(()=>{process.exit(0);},1000)
 		return;
 	}
+
+
+
+	
+
 
 	let rsp = responder(msg)
 	if(rsp){
@@ -360,6 +436,7 @@ client.on("messageCreate",(msg)=>{
 function onexit(options){
 
 	fs.writeFileSync('./store.json',JSON.stringify(STORE,null,4))
+	fs.writeFileSync('./freq.json',JSON.stringify(NGRAM,null,4))
 	console.log("==== session saved ====")
 	if(options.exit){
 		process.exit(0)
@@ -472,14 +549,13 @@ function barbleDictionary(str,length){
 }
 
 
-
 function Ngramizer(text){
 	let str = ""
 	let Ngram = {}
 	while(text.length>0){
 		let chared = /^[A-Za-z]$/.test(text[0])
 		if(chared){
-			str += text[0]
+			str += text[0].toLowerCase()
 			for(let i = 0; i < str.length; i++){
 				let sliced = str.slice(str.length-i-1,str.length)
 
@@ -495,9 +571,33 @@ function Ngramizer(text){
 
 		text = text.substring(1)
 	}
+	if(str!==""){
+			if(Ngram[str].word===undefined){Ngram[str].word=0}
+			Ngram[str].word += 1
+	}
+
 	return(Ngram)
 }
 
+
+function Ng(text){
+	let n2 = Ngramizer(text)
+	mergeNgrams(NGRAM,n2)
+	return(n2)
+}
+
+function mergeNgrams(n1,n2){
+	let objk = Object.keys(n2)
+	objk.forEach((e)=>{
+		if(n1[e]===undefined){n1[e]=n2[e]}
+		if(n2[e].word!==undefined){
+			if(n1[e].word===undefined){n1[e].word=0}
+			n1[e].word += n2[e].word
+		}
+		n1[e].freq += n2[e].freq
+	})
+	return(n1)
+}
 
 
 

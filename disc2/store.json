@@ -1010,6 +1010,15 @@
                     "refusal": null
                 }
             }
+        },
+        "tell oewi to": {
+            "lopkn": {
+                "default": {
+                    "role": "assistant",
+                    "content": "not my place to say.",
+                    "refusal": null
+                }
+            }
         }
     }
 }
