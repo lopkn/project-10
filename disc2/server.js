@@ -43,7 +43,7 @@ return(completion.choices[0].message);
 	// return(completion)
 } 
 
-let genericStupid = ["stupid","real stupid","horribly stupid","dumbass","actually dumb"]
+let genericStupid = ["stupid","real stupid","horribly stupid","dumbass","actually dumb","mongrel","moron","idiot","bleeding idiot"]
 let genericBad = ["so horrible","sucks","lol"]
 
 var responses = {"stupid":genericStupid,"dumb":genericStupid,"you suck":genericBad,"sucks":genericBad}
@@ -253,7 +253,7 @@ function responder(MSG){
 	// requirements["@ tell ... to"] ||= requirements["tell"] && requirements["to"] && (msg.includes("tell this guy to")||msg.includes("tell them to")||msg.includes("tell him to")||msg.includes("tell her to"))
 	
 
-	requirements["@ tell * to"] = requirements["tell"] && SENTENCE.reset().next("tell").sentence.next("@ word").sentence.next("@ word").out === "to" || SENTENCE.next("@ word").out === "to"
+	requirements["@ tell * to"] = requirements["tell"] && (SENTENCE.reset().next("tell").sentence?.next("@ word").sentence?.next("@ word").out === "to" || SENTENCE?.next("@ word").out === "to")
 
 	if(requirements["athiest"]||requirements["religion"]||requirements["religious"]){responseReqs+="You are athiest."}
 	if(requirements["utilitarian"]||requirements["self"]||msg.includes("benefit")||msg.includes("choice")){responseReqs+="You are utilitarian, you believe everone only ever does anything to benefit themselves."}
@@ -284,16 +284,17 @@ function responder(MSG){
 
 
 	if(requirements["barble"]){if(Math.random()>0.3){return(barbleDictionary(amsg,Math.floor(Math.random()*700+300)))};return(moreBarble("e",Math.floor(Math.random()*500+100)))}
-	if(requirements["define"]){return(engDictionary[msg.substring(7+msg.indexOf("define "))].substring(0,1900))}
+	if(requirements["define"]){if(engDictionary[msg.substring(7+msg.indexOf("define "))]==undefined){return("idk")};return(engDictionary[msg.substring(7+msg.indexOf("define "))].substring(0,1900))}
+	if(requirements["coherence"]){return(""+NgramScore(msg.substring(10+msg.indexOf("coherence "))))}
 	if(requirements["ngramize"]){return(engDictionary[msg.substring(7+msg.indexOf("ngramize "))].substring(0,1900))}
 	
 	if(msg.includes("time now")){return((new Date().toString()))}
 
 	if(required("@ addressed","introduce yourself").match){return("I am LopknCA366, the third generation of lopknbot. Much more capable than my predecessors. I dont usually respond to anyone without a proper lopknista UUID")};
 	if(required("@ addressed","@ asked for opinion").match){return("hmm")}
-	if(required("@ addressed","evaluate").match){if(sender!=="lopkn"){return("only people with valid lopknista UUID's can use the evaluation function. Lopknistis do not count")};let str=amsg.substring(10+msg.indexOf(" evaluate "));console.log(str);try{return(""+eval(str))}catch(err){return(err.toString())}}
+	if(required("@ addressed","evaluate").match){if(sender!=="lopkn"){return("only people with valid lopknista UUID's can use the evaluation function. Lopknistis do not count")};let str=amsg.substring(10+msg.indexOf(" evaluate "));console.log(str);try{return( (""+eval(str)).substr(0,1999) )}catch(err){return(err.toString())}}
 
-	if(requirements["@ tell * to"]){return(msg.substring(4+msg.indexOf(" to "))+", stupid")}
+	if(requirements["@ tell * to"]&&requirements["@ lopknistic"]){return(msg.substring(4+msg.indexOf(" to "))+", stupid")}
 	if(requirements["@ summary"]){return("dont wanna help with that")}
 
 
@@ -331,8 +332,7 @@ function disconnectMSG(){
 }
 
 var HALTED = false
-
-client.on("messageCreate",(msg)=>{
+var msgRespond = (msg)=>{
 	if(msg.author.bot){return}
 		lastMSG = msg
 		lastReference = undefined
@@ -411,26 +411,10 @@ client.on("messageCreate",(msg)=>{
 		
 	}
 
-	// if(msgc.includes("tell") || msgc.includes("think")|| (addressed&&msgc.includes("what")) ){
-	// 	if(responseDictionary[msg.author.username+" "+msg.content]){
-	// 		console.log("recycled")
-	// 		return(msg.channel.send(responseDictionary[msg.author.username+msg.content]))
-	// 	}
-	// 	(async()=>{
-	// 		await botresponse(msg.author.username+": "+msg.content).then((rep)=>{
-	// 			responseDictionary[msg.author.username+msg.content] = rep
-	// 			if(Math.random()>1.5){
-	// 				msg.reply(rep)
-	// 			} else {
-	// 				msg.channel.send(rep)
-	// 			}
-	// 		})
-	// 	})()
-	// }
-	
+}
+client.on("messageCreate",msgRespond)
 
-	// return(msg.reply("shush"))
-})
+
 
 
 function onexit(options){
@@ -584,6 +568,22 @@ function Ng(text){
 	let n2 = Ngramizer(text)
 	mergeNgrams(NGRAM,n2)
 	return(n2)
+}
+
+function NgramScore(text){
+	if(text===""){return(0)}
+	let ng = Ngramizer(text)
+	let objk = Object.keys(ng)
+	let score = 0
+	objk.forEach((e)=>{
+		if(e.length === 1){return}
+		let freq = NGRAM[e]?.freq?NGRAM[e].freq:0
+		score += freq * ng[e].freq
+		if(NGRAM[e]?.word && ng[e].word){
+			score += 5*NGRAM[e].word*ng[e].word
+		}
+	})
+	return("analyzing "+text+" -> "+Math.floor(score/text.length*10))
 }
 
 function mergeNgrams(n1,n2){

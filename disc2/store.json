@@ -1019,6 +1019,34 @@
                     "refusal": null
                 }
             }
+        },
+        "tell me": {
+            "fullwoodenshovel": {
+                "default": {
+                    "role": "assistant",
+                    "content": "who cares what they think ask better questions",
+                    "refusal": null
+                }
+            }
+        },
+        "<@864011870216912927> tell us, do you use contraception or just raw": {
+            "pingveryscary": {
+                "default": {
+                    "role": "assistant",
+                    "content": "not relevant to you shut up",
+                    "refusal": null
+                }
+            }
+        },
+        "i think you are missing the point of this thing": {
+            "lopkn": {
+                "default": {
+                    "role": "assistant",
+                    "content": "no point missed. just following your lead.",
+                    "refusal": null
+                }
+            },
+            "wrong": "lopkn"
         }
     }
 }

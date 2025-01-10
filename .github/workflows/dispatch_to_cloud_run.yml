@@ -1,0 +1,20 @@
+name: 'Send build request to gcloud run'
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/dispatch_to_cloud_run.yml'
+      - 'small_servers/**'
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Repository Dispatch
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.PAT_LOPKN_SMALL_SERVERS }}
+          repository: laseryuan/gcloud-run-apps
+          event-type: build-request-for-lions
+          client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
