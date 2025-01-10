@@ -2,6 +2,9 @@ name: 'Send build request to Laser'
 on:
   workflow_dispatch:
   push:
+    paths:
+      - '**'
+      - '!small_servers/vancouver_traffic/**'
 
 jobs:
   dispatch:

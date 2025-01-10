@@ -1047,6 +1047,15 @@
                 }
             },
             "wrong": "lopkn"
+        },
+        "tell me what you think about apples": {
+            "lopkn": {
+                "default": {
+                    "role": "assistant",
+                    "content": "apples are average fruit nothing special just another food option",
+                    "refusal": null
+                }
+            }
         }
     }
 }

@@ -4,7 +4,7 @@ on:
   push:
     paths:
       - '.github/workflows/dispatch_to_cloud_run.yml'
-      - 'small_servers/**'
+      - 'small_servers/vancouver_traffic/**'
 
 jobs:
   dispatch:
