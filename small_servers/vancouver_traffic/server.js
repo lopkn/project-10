@@ -15,7 +15,7 @@ app.use(cors()) //jan7-2024
 app.use(express.static('public'));
 // app.use(express.json())
 
-app.post('/res', (req, res) => {
+app.post('/', (req, res) => {
     console.log('Got body:', req.body);
     // responder.process1(req.body,res)
     everything().then((e)=>{
@@ -24,7 +24,7 @@ app.post('/res', (req, res) => {
     // res.sendStatus(200);
 })
 
-app.get('/res', (req, res) => {
+app.get('/', (req, res) => {
     console.log('Got body:', req.body);
     // responder.process1(req.body,res)
     everything().then((e)=>{
