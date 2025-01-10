@@ -13,7 +13,7 @@ var server = app.listen(3010);
 
 app.use(cors()) //jan7-2024
 app.use(express.static('public'));
-app.use(express.json())
+// app.use(express.json())
 
 app.post('/res', (req, res) => {
     console.log('Got body:', req.body);
