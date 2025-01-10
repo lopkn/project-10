@@ -24,6 +24,15 @@ app.post('/res', (req, res) => {
     // res.sendStatus(200);
 })
 
+app.get('/res', (req, res) => {
+    console.log('Got body:', req.body);
+    // responder.process1(req.body,res)
+    everything().then((e)=>{
+        res.send(e)
+    })
+    // res.sendStatus(200);
+})
+
 async function getPixelColor(x=10,y=10,url='https://www.th.gov.bc.ca/ATIS/lgcws/images/lions_gate/queue_map.gif') {
     try {
         // Fetch the image from the URL
