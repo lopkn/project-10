@@ -8,11 +8,14 @@ const Jimp = require('jimp');
 var express = require('express');
 var app = express();
 var cors = require('cors')//jan7-2024
+
+var server = app.listen(3010);
+
 app.use(cors()) //jan7-2024
 app.use(express.static('public'));
 app.use(express.json())
-var server = app.listen(3000);
-app.post('/responder', (req, res) => {
+
+app.post('/res', (req, res) => {
     console.log('Got body:', req.body);
     // responder.process1(req.body,res)
     everything().then((e)=>{
