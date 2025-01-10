@@ -1,6 +1,25 @@
 const axios = require('axios');
 const Jimp = require('jimp');
-const sound = require('sound-play')
+// const sound = require('sound-play')
+
+
+
+
+var express = require('express');
+var app = express();
+var cors = require('cors')//jan7-2024
+app.use(cors()) //jan7-2024
+app.use(express.static('public'));
+app.use(express.json())
+var server = app.listen(3000);
+app.post('/responder', (req, res) => {
+    console.log('Got body:', req.body);
+    // responder.process1(req.body,res)
+    everything().then((e)=>{
+        res.send(e)
+    })
+    // res.sendStatus(200);
+})
 
 async function getPixelColor(x=10,y=10,url='https://www.th.gov.bc.ca/ATIS/lgcws/images/lions_gate/queue_map.gif') {
     try {
@@ -100,14 +119,14 @@ for(let i = 135; i < 139; i++){
     }
 }
 
-setTimeout(()=>{
+// setTimeout(()=>{
 
-for(let i = 135; i < 139; i++){
-    for(let j = 271; j < 275; j++){
-       console.log(data[i+","+j])
-    }
-}
-},1000)
+// for(let i = 135; i < 139; i++){
+//     for(let j = 271; j < 275; j++){
+//        console.log(data[i+","+j])
+//     }
+// }
+// },1000)
 
 
 var pathCleans={
@@ -136,28 +155,55 @@ function getDir(x=135,y=272){
     getPixelColor(x,y).then((e)=>{
         if(e[0] > 50){
             if(e[1] < 200){
-                console.log("switching")
-                sound.play("../../public/soundEffects/sinC4.mp3")
-            } else {console.log("right")}
+                return("switching")
+                // sound.play("../../public/soundEffects/sinC4.mp3")
+            } else {return("right")}
         } else {
-            console.log("left")
+            return("left")
         }
     })
 }
+async function getDir2(x = 135, y = 272) {
+    const e = await getPixelColor(x, y);
+    if (e[0] > 50) {
+        if (e[1] < 200) {
+            // sound.play("../../public/soundEffects/sinC4.mp3");
+            return "switching";
+        } else {
+            return "right";
+        }
+    } else {
+        return "left";
+    }
+}
+async function getPaths(){
 
-function getPaths(){
-    pathCleansArr.forEach((e)=>{
-        getPixelColor(e[1],e[2]).then((E)=>{
-            console.log(e[0]+": "+(E[0]>E[1]?"backed up":"fine"))
-        })
-    })
+    let arr = [];
+
+        for(let i = 0; i < pathCleansArr.length; i++){
+            e = pathCleansArr[i]
+        // pathCleansArr.forEach((e,i)=>{
+            // getPixelColor(e[1],e[2]).then((E)=>{
+                // (e[0]+": "+(E[0]>E[1]?"backed up":"fine"))
+            // })
+            let E = await getPixelColor(e[1],e[2])
+            arr[i] = (e[0]+": "+(E[0]>E[1]?"backed up":"fine"))
+        }
+    
+    return(arr)
 }
 
-sound.play("../../public/soundEffects/sinC4.mp3")
-setInterval((e)=>{
-    getDir()
+async function everything(){
+    let x = await getDir2()
+    let z = await getPaths()
+    return({"direction":x,"paths":z})
+}
 
-},3000)
+// sound.play("../../public/soundEffects/sinC4.mp3")
+// setInterval((e)=>{
+//     getDir()
+
+// },3000)
 
 
 // getPixelColor(10,10);
