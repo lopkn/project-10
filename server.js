@@ -1496,7 +1496,7 @@ app.post('/responder', (req, res) => {
 })
 app.post('/eval', (req, res) => {
     console.log('Got body:', req.body);
-    res.send({"res":""+eval(req.body.data)})
+    // res.send({"res":""+eval(req.body.data)})
     // res.sendStatus(200);
 })
 console.log("server is opened: "+Date.now())
