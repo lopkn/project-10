@@ -50,7 +50,9 @@ var responses = {"stupid":genericStupid,"dumb":genericStupid,"you suck":genericB
 
 
 var STORE = JSON.parse(fs.readFileSync("./store.json"))
-var NGRAM = JSON.parse(fs.readFileSync("./freq.json"))
+let freqStore = JSON.parse(fs.readFileSync("./freq.json"))
+var NGRAM = freqStore.freq
+var SAMPLETEXTS = freqStore.txt
 var responseDictionary = STORE.responseDictionary
 
 var GLOBALREQUIREMENTS = {}
@@ -332,9 +334,11 @@ function disconnectMSG(){
 }
 
 var HALTED = false
+var msglog = []
 var msgRespond = (msg)=>{
 	if(msg.author.bot){return}
 		lastMSG = msg
+		msglog.push(msg.content)
 		lastReference = undefined
 		if(msg.reference!==null){
 			msg.channel.messages.fetch(msg.reference.messageId).then(message =>{lastReference=message})
@@ -420,7 +424,7 @@ client.on("messageCreate",msgRespond)
 function onexit(options){
 
 	fs.writeFileSync('./store.json',JSON.stringify(STORE,null,4))
-	fs.writeFileSync('./freq.json',JSON.stringify(NGRAM,null,4))
+	fs.writeFileSync('./freq.json',JSON.stringify({"freq":NGRAM,"txt":SAMPLETEXTS},null,4))
 	console.log("==== session saved ====")
 	if(options.exit){
 		process.exit(0)
