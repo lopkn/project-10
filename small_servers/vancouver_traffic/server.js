@@ -12,7 +12,7 @@ var cors = require('cors')//jan7-2024
 var server = app.listen(3010);
 
 app.use(cors()) //jan7-2024
-// app.use(express.static('public'));
+app.use(express.static('public'));
 // app.use(express.json())
 
 app.post('/', (req, res) => {
