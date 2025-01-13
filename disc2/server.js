@@ -51,6 +51,8 @@ var responses = {"stupid":genericStupid,"dumb":genericStupid,"you suck":genericB
 
 var STORE = JSON.parse(fs.readFileSync("./store.json"))
 let freqStore = JSON.parse(fs.readFileSync("./freq.json"))
+var FREQTOTAL = freqStore.freqTotal
+var WORDTOTAL = freqStore.wordTotal
 var NGRAM = freqStore.freq
 var SAMPLETEXTS = freqStore.txt
 var responseDictionary = STORE.responseDictionary
@@ -101,7 +103,7 @@ class sentence{
 		}
 		if(this.returnItem===undefined){return(false)}
 		this.lookingat -= dst+this.returnItem.endex-this.returnItem.index
-		return({"item":this.returnItem,"sentence":this,"dist":dst,"out":this.msg.substring(this.returnItem.index,this.returnItem.endex)})
+		return({"item":this.returnItem,"sentence":this,"dist":dst,"out":this.msg.substring(this.returnItem.index,this.returnItem.endex-this.returnItem.index)})
 	}
 
 
@@ -110,7 +112,7 @@ class sentence{
 	}
 
 	Then(reqname,item){
-		let word = this.msg.substr(item.index,item.endex)
+		let word = this.msg.substr(item.index,item.endex-item.index)
 		item.propegated = true
 		if(reqname == "@ word"){
 			if(word[word.length-1] === "s"){
@@ -122,12 +124,35 @@ class sentence{
 			if(["you","i","they","she","he","her","his","their","your"].includes(word)){
 				newReq("@ pronoun",clone(item))
 			}
-			
+			if(engDictionary[word] || NGRAM[word]){
+				newReq("@ known word",clone(item))
+			} else {
+				newReq("@ unknown word",clone(item))
+			}
+		} else if(reqname === "@ prompt"){
+			let coherence = NgramScore(word)
+			if(coherence < 100){
+				newReq("@ incoherent",clone(item))
+			}
+		} else if(reqname === "@ unknown word"){
+			let coherence = NgramScore(word)
+			console.log(" unknown " + word + coherence)
+			if(coherence < 100){
+				newReq("@ incoherent",clone(item))
+			}
 		}
 	}
 
 
 }
+// makes up!
+// ["starting word"+"word"+"when"] -> next "condition release" -> "condition"
+// ["starting word"+"word"+"when"] -> next "statement" = condition
+
+function getRange(req){
+	return(SENTENCE.msg.substr(req.index,req.endex-req.index))
+}
+
 
 function inrange(x1,x2,y1,y2){ //x1 x2 is range 1, and the first number must be smaller in both ranges
 	return(x1 <= y2 && x1 <= x2)
@@ -219,6 +244,7 @@ function responder(MSG){
 	let lopknistic = (sender =="lopkn" || sender == "fullwoodenshovel" || sender == "Galath")
 
 	let msgindex = -1
+	newReq("@ prompt",{"index":0,"endex":msg.length})
 	requirements["@ word"] = []
 	msg.split(" ").forEach((e)=>{
 		msgindex+=1+e.length;
@@ -257,6 +283,12 @@ function responder(MSG){
 
 	requirements["@ tell * to"] = requirements["tell"] && (SENTENCE.reset().next("tell").sentence?.next("@ word").sentence?.next("@ word").out === "to" || SENTENCE?.next("@ word").out === "to")
 
+	//non blocking requirements
+	if(requirements["@ incoherent"]){MSG.channel.send("seems incoherent > "+SENTENCE.reset().next("@ incoherent").out)}
+	if(requirements["@ unknown word"]){console.log("> "+getRange(requirements["@ unknown word"][0]))}
+
+
+
 	if(requirements["athiest"]||requirements["religion"]||requirements["religious"]){responseReqs+="You are athiest."}
 	if(requirements["utilitarian"]||requirements["self"]||msg.includes("benefit")||msg.includes("choice")){responseReqs+="You are utilitarian, you believe everone only ever does anything to benefit themselves."}
 	if(requirements["copyright"]){responseReqs+="You dislike copyright. you think its existance impeeds society's progress."}
@@ -287,7 +319,8 @@ function responder(MSG){
 
 	if(requirements["barble"]){if(Math.random()>0.3){return(barbleDictionary(amsg,Math.floor(Math.random()*700+300)))};return(moreBarble("e",Math.floor(Math.random()*500+100)))}
 	if(requirements["define"]){if(engDictionary[msg.substring(7+msg.indexOf("define "))]==undefined){return("idk")};return(engDictionary[msg.substring(7+msg.indexOf("define "))].substring(0,1900))}
-	if(requirements["coherence"]){return(""+NgramScore(msg.substring(10+msg.indexOf("coherence "))))}
+	if(requirements["coherence"]){return("coherence score -> "+NgramScore(msg.substring(10+msg.indexOf("coherence "))))}
+	if(requirements["construct"]){return(""+NgramBuild(msg.substring(10+msg.indexOf("construct "))))}
 	if(requirements["ngramize"]){return(engDictionary[msg.substring(7+msg.indexOf("ngramize "))].substring(0,1900))}
 	
 	if(msg.includes("time now")){return((new Date().toString()))}
@@ -307,7 +340,7 @@ function responder(MSG){
 	rs=refsegarr(["hi","hey","hello","salutations"],"@ greetings",msg,requirements)
 
 
-
+	if(requirements["@ unknown word"]){return("i dont know the word > "+SENTENCE.reset().next("@ unknown word").out)}
 
 	if(requirements["@ asked to tell"]){return({"generate":true,"requirements":requirements,"reqs":responseReqs})}
 	if(requirements["@ addressed"] && Math.random()>0.7){return({"generate":true,"requirements":requirements,"reqs":responseReqs})}
@@ -424,7 +457,7 @@ client.on("messageCreate",msgRespond)
 function onexit(options){
 
 	fs.writeFileSync('./store.json',JSON.stringify(STORE,null,4))
-	fs.writeFileSync('./freq.json',JSON.stringify({"freq":NGRAM,"txt":SAMPLETEXTS},null,4))
+	fs.writeFileSync('./freq.json',JSON.stringify({"freq":NGRAM,"txt":SAMPLETEXTS,"wordTotal":WORDTOTAL,"freqTotal":FREQTOTAL},null,4))
 	console.log("==== session saved ====")
 	if(options.exit){
 		process.exit(0)
@@ -538,33 +571,44 @@ function barbleDictionary(str,length){
 
 
 function Ngramizer(text){
-	let str = ""
-	let Ngram = {}
-	while(text.length>0){
-		let chared = /^[A-Za-z]$/.test(text[0])
-		if(chared){
-			str += text[0].toLowerCase()
-			for(let i = 0; i < str.length; i++){
-				let sliced = str.slice(str.length-i-1,str.length)
+	let bg = betterNgramizer(text)
 
-				if(Ngram[sliced]===undefined){Ngram[sliced]={"freq":0}}
-				Ngram[sliced].freq+=1
+	return(bg.Ngram)
+}
+
+function betterNgramizer(text){
+	let str = ""
+	let wt = 0 //word total
+	let ft = 0 //freq total
+		let Ngram = {}
+		while(text.length>0){
+			let chared = /^[A-Za-z]$/.test(text[0])
+			if(chared){
+				str += text[0].toLowerCase()
+				for(let i = 0; i < str.length; i++){
+					let sliced = str.slice(str.length-i-1,str.length)
+
+					if(Ngram[sliced]===undefined){Ngram[sliced]={"freq":0}}
+					Ngram[sliced].freq+=1
+					ft += 1
+				}
+			} else {
+				if(str===""){text = text.substring(1);continue}
+				if(Ngram[str].word===undefined){Ngram[str].word=0}
+				Ngram[str].word += 1
+				wt += 1
+				str = ""
 			}
-		} else {
-			if(str===""){text = text.substring(1);continue}
-			if(Ngram[str].word===undefined){Ngram[str].word=0}
-			Ngram[str].word += 1
-			str = ""
+
+			text = text.substring(1)
+		}
+		if(str!==""){
+				if(Ngram[str].word===undefined){Ngram[str].word=0}
+				Ngram[str].word += 1
+				wt += 1
 		}
 
-		text = text.substring(1)
-	}
-	if(str!==""){
-			if(Ngram[str].word===undefined){Ngram[str].word=0}
-			Ngram[str].word += 1
-	}
-
-	return(Ngram)
+		return({"Ngram":Ngram,"freqTotal":ft,"wordTotal":wt})
 }
 
 
@@ -582,12 +626,13 @@ function NgramScore(text){
 	objk.forEach((e)=>{
 		if(e.length === 1){return}
 		let freq = NGRAM[e]?.freq?NGRAM[e].freq:0
-		score += freq * ng[e].freq
+		score += freq * ng[e].freq / FREQTOTAL
 		if(NGRAM[e]?.word && ng[e].word){
-			score += 5*NGRAM[e].word*ng[e].word
+			score += 5*NGRAM[e].word*ng[e].word / WORDTOTAL
 		}
 	})
-	return("analyzing "+text+" -> "+Math.floor(score/text.length*10))
+	return(score/text.length*100000)
+	// return("analyzing "+text+" -> "+Math.floor(score/text.length*100000))
 }
 
 function mergeNgrams(n1,n2){
@@ -603,7 +648,47 @@ function mergeNgrams(n1,n2){
 	return(n1)
 }
 
+function NgramBuild(word){
+	let letterarr = "abcdefghijklmnopqrstuvwxyz".split("")
+	let limit = 500
+	while(limit>0){
+		limit--
+		let wordarr = []
+		let ft = 0
+		letterarr.forEach((e)=>{
+			let ng = NGRAM[word+e]
+			let ng2 = NGRAM[e+word]
+			if(ng!==undefined){
+				wordarr.push(word+e)
+				ft+=ng.freq
+			}
+			if(ng2 !==undefined){
+				wordarr.push(e+word)
+				ft+=ng2.freq
+			}
+			
+		})
+		//
+		if(wordarr.length===0){
+			return(word)
+		}
+		//choose actual word
+		let wordOut;
+		let mr = Math.random()*ft
+		while(mr>0){
+			wordOut = wordarr.pop()
+			mr-=NGRAM[wordOut].freq
+		}
+		if(NGRAM[wordOut].word){
+			if(Math.random()<NGRAM[wordOut].word/NGRAM[wordOut].freq){
+				return(wordOut)
+			}
+		}
+		word = wordOut
+	}
+	return("ERROR NOTHING FOUND: "+word)
 
+}
 
 
 
