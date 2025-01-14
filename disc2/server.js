@@ -60,6 +60,31 @@ var responseDictionary = STORE.responseDictionary
 var GLOBALREQUIREMENTS = {}
 var TEXT = ""
 
+
+
+
+var worddolist = {
+	"gave":["@ verb","@ happened"],
+	"went":["@ verb","@ happened"],
+	"ate":["@ verb","@ happened"],
+	"eat":["@ verb","@ present"],
+	"did":["@ verb","@ happened"],
+	"you":["@ pronoun"],
+	"i":["@ pronoun"],
+	"they":["@ pronoun"],
+	"she":["@ pronoun"],
+	"he":["@ pronoun"],
+	"her":["@ pronoun"],
+	"his":["@ pronoun"],
+	"their":["@ pronoun"],
+	"this":["@ pronoun"],
+	"that":["@ pronoun"],
+	"your":["@ pronoun"]
+
+}
+
+
+
 class sentence{
 	constructor(msg,requirements){
 		this.req = requirements
@@ -103,7 +128,7 @@ class sentence{
 		}
 		if(this.returnItem===undefined){return(false)}
 		this.lookingat -= dst+this.returnItem.endex-this.returnItem.index
-		return({"item":this.returnItem,"sentence":this,"dist":dst,"out":this.msg.substring(this.returnItem.index,this.returnItem.endex-this.returnItem.index)})
+		return({"item":this.returnItem,"sentence":this,"dist":dst,"out":this.msg.substring(this.returnItem.index,this.returnItem.endex)})
 	}
 
 
@@ -121,14 +146,49 @@ class sentence{
 			if(word.includes("'")){
 				newReq("@ apostrophe",clone(item))
 			}
-			if(["you","i","they","she","he","her","his","their","your"].includes(word)){
-				newReq("@ pronoun",clone(item))
-			}
-			if(engDictionary[word] || NGRAM[word]){
+			// if(["you","i","they","she","he","her","his","their","your"].includes(word)){
+				// newReq("@ pronoun",clone(item))
+			// }
+			if(engDictionary[word] || NGRAM[word] || worddolist[word]){
 				newReq("@ known word",clone(item))
 			} else {
 				newReq("@ unknown word",clone(item))
 			}
+
+			if(worddolist[word]){
+				worddolist.forEach((e)=>{
+					newReq(e,clone(item))
+				})
+			}else{
+				let last4 = word.substr(-4)
+				let last3 = word.substr(-3)
+				let last2 = word.substr(-2)
+				if(last3==="ing"){
+					newReq("@ verb",clone(item))
+					newReq("@ happening",{"index":item.endex-3,"endex":item.endex})
+				}
+				if(last2==="ed"){
+					newReq("@ verb",clone(item))
+					newReq("@ happened",{"index":item.endex-3,"endex":item.endex})
+				}
+				if(last3==="ate" || last3 === "ize" || last3 === "ise"){
+					newReq("@ verb",clone(item))
+				}
+
+
+				if(last4==="tion" || last4==="sion" || last4 === "ment" || last4 === "ness" || last4 === "ship" || last3==="ity"){
+					newReq("@ noun",clone(item))
+				}
+				if(word.substr(-1)==="y"){
+					if(last2==="ly"){
+						newReq("@ adverb",clone(item))
+					} else {
+						newReq("@ adjective",clone(item))
+					}
+				}
+			}
+			
+
 		} else if(reqname === "@ prompt"){
 			let coherence = NgramScore(word)
 			if(coherence < 100){
@@ -143,14 +203,14 @@ class sentence{
 		}
 	}
 
-
+// what part of speech is "redemption"
 }
 // makes up!
 // ["starting word"+"word"+"when"] -> next "condition release" -> "condition"
 // ["starting word"+"word"+"when"] -> next "statement" = condition
 
 function getRange(req){
-	return(SENTENCE.msg.substr(req.index,req.endex-req.index))
+	return(SENTENCE.msg.substring(req.index,req.endex))
 }
 
 
@@ -209,6 +269,7 @@ function refsegarr(finds,denote,msg,requirements,options={}){
 }
 
 
+
 function required(...args){
 	let hit = 0
 	args.forEach((e)=>{if(GLOBALREQUIREMENTS[e]||(TEXT[0]!=="@"&&TEXT.includes(e))){hit+=1}})
@@ -216,10 +277,16 @@ function required(...args){
 }
 
 
-function newReq(req,item){
+function newReq(req,item){ //if .then returns a correction for what the tag should be, it would be tagged that
 	if(GLOBALREQUIREMENTS[req]===undefined){GLOBALREQUIREMENTS[req]=[]}
-	GLOBALREQUIREMENTS[req].push(item)
-	SENTENCE.Then(req,item)
+	let a = SENTENCE.Then(req,item)
+	if(a!==false){
+		if(a === undefined){
+			GLOBALREQUIREMENTS[req].push(item)
+		} else {
+			GLOBALREQUIREMENTS[a].push(item)
+		}
+	}
 	return(GLOBALREQUIREMENTS)
 }
 
@@ -257,12 +324,7 @@ function responder(MSG){
 
 
 	requirements["@ addressed"] = requirements["lopknbot"]||requirements["ca366"]||requirements["lopknca366"]||requirements["<@864011870216912927>"]||requirements["lopbot"]||requirements["lb"]
-	if(!lopknistic){
-		if(!requirements["@ addressed"] || Math.random()>0.7){
-			return(false)
-		} 
-		responseReqs+="You dont respond well to non-lopkn people"
-	}
+	
 
 
 
@@ -341,6 +403,14 @@ function responder(MSG){
 
 
 	if(requirements["@ unknown word"]){return("i dont know the word > "+SENTENCE.reset().next("@ unknown word").out)}
+
+
+	if(!lopknistic){
+		if(!requirements["@ addressed"] || Math.random()>0.7){
+			return(false)
+		} 
+		responseReqs+="You dont respond well to non-lopkn people"
+	}
 
 	if(requirements["@ asked to tell"]){return({"generate":true,"requirements":requirements,"reqs":responseReqs})}
 	if(requirements["@ addressed"] && Math.random()>0.7){return({"generate":true,"requirements":requirements,"reqs":responseReqs})}
