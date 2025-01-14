@@ -3,7 +3,10 @@ process.env
 disc/token.json
 errorlog.json
 public/debug/errorlog3.txt
+dynamics/errorlog3.txt
 errorsLog.log
+dynamics/errorsLog.log
 outputLog.log
+dynamics/outputLog.log
 disc2/config.json
 /disc2/config.json

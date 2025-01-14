@@ -30,8 +30,8 @@ const concol = {"Black" : "\x1b[30m" ,"Red" : "\x1b[31m" ,"Green" : "\x1b[32m" ,
 "BBlue" : "\x1b[44m" ,"BMagenta" : "\x1b[45m" ,"BCyan" : "\x1b[46m" ,"BWhite" : "\x1b[47m"}
 
 
-	const outputLog = fs.createWriteStream('./outputLog.log');
-	const errorsLog = fs.createWriteStream('./errorsLog.log');
+	const outputLog = fs.createWriteStream('./dynamics/outputLog.log');
+	const errorsLog = fs.createWriteStream('./dynamics/errorsLog.log');
 	const consoler = new console.Console(outputLog, errorsLog);
 
 process.on('uncaughtException',(err)=>{
@@ -43,7 +43,7 @@ process.on('uncaughtException',(err)=>{
 	consoler.log(err)
 	consoler.error(newerr)
 	consoler.log(err.stack)
-	fs.writeFileSync('./errorlog.json',JSON.stringify({error:err.toString()+"\n"+err.stack+"\n"+Date.now()}), function writeJSON(err){if(err)return console.log(err)})
+	fs.writeFileSync('./dynamics/errorlog.json',JSON.stringify({error:err.toString()+"\n"+err.stack+"\n"+Date.now()}), function writeJSON(err){if(err)return console.log(err)})
 	console.log(concol.Red + "%s" + "\x1b[1m" ,"ERROR")
 	throw err
 })
@@ -59,7 +59,7 @@ var SERVERCOUNTERS = {"ticks":0}
 // fs.writeFile('./memory.json',inp, function writeJSON(err){if(err)return console.log(err)})
 
 var CURRENTCONFIGS = require("./config")
-var changingConfig = require("./changingConfig")
+var changingConfig = require("./dynamics/changingConfig")
 var playerList = require("./playerList")
 
 var cmdc = {"success":"#00C000","error":"#FF0000","small_error":"#FFCFCF","item":"#FFFF00","combat":"#FF8800"}
@@ -1521,7 +1521,7 @@ shooter2C.setio(io,myMath,vectorNormalize,vectorFuncs)
 io.sockets.on('connection', newConnection)
 changingConfig.Build += 1
 function updateChangingConfigFile(){
-	fs.writeFile('./changingConfig.json',JSON.stringify(changingConfig), function writeJSON(err){if(err)return console.log(err)})
+	fs.writeFile('./dynamics/changingConfig.json',JSON.stringify(changingConfig), function writeJSON(err){if(err)return console.log(err)})
 }
 updateChangingConfigFile()
 
@@ -1696,7 +1696,7 @@ function joinGame(game,socket){
 		let clientIp = socket.request.connection.remoteAddress
 		socket.onAny((e,n)=>{quantum.handle(Date.now(),e,n,socket)})
 	} else if(game == "debug"){
-		io.to(socket.id).emit("debugReturn",{"sid":socket.id,"str":fs.readFileSync("./errorlog.json","utf8"),"str2":fs.readFileSync("./public/debug/errorlog3.txt","utf8")})
+		io.to(socket.id).emit("debugReturn",{"sid":socket.id,"str":fs.readFileSync("./dynamics/errorlog.json","utf8"),"str2":fs.readFileSync("./dynamics/errorlog3.txt","utf8")})
 	}
 }
 
