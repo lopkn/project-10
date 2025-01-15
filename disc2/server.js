@@ -156,7 +156,7 @@ class sentence{
 			}
 
 			if(worddolist[word]){
-				worddolist.forEach((e)=>{
+				worddolist[word].forEach((e)=>{
 					newReq(e,clone(item))
 				})
 			}else{
@@ -397,7 +397,7 @@ function responder(MSG){
 
 	rs=refsegarr(["shut up","stupid","dumb","gay","retard"],"@ insults",msg,requirements)
 	rs=refsegarr(["great","amazing","the best","ca366","gay","retard"],"@ compliments",msg,requirements)
-	rs=refsegarr(["you","i","they","she","he","her","his","their"],"@D pronoun",msg,requirements)
+	// rs=refsegarr(["you","i","they","she","he","her","his","their"],"@D pronoun",msg,requirements)
 	rs=refsegarr(["is","are"],"@ equate",msg,requirements)
 	rs=refsegarr(["hi","hey","hello","salutations"],"@ greetings",msg,requirements)
 

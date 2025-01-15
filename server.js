@@ -2099,7 +2099,7 @@ setInterval(()=>{
 }, serverTickWait);
 
 
-setInterval(function(){if(startPing == 1){pping++}},1)
+// setInterval(function(){if(startPing == 1){pping++}},1)
 
 
 function TicklimUpdate(e){

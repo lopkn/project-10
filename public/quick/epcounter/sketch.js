@@ -2679,7 +2679,7 @@ function push(particle,dx,dy){
 		particle.vy += dy / particle.mass
 	}
 }
-/*
+if(true){
 events.addEvent("ballgame",{
 	"energy":300,
 	"strength":1,
@@ -3004,7 +3004,8 @@ events.addEvent("ballgame",{
 		let b = {"r":0,"g":0,"b":0}
 		return("rgba("+b.r+","+b.g+","+b.b+","+events.varbs.trip+")")
 	}
-})*/
+})
+}
 
 function randomEvents(){
 	if(events.happening["ballgame"]!==undefined){return}
