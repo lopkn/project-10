@@ -1056,6 +1056,24 @@
                     "refusal": null
                 }
             }
+        },
+        "lopbot tell me about apples": {
+            "lopkn": {
+                "default": {
+                    "role": "assistant",
+                    "content": "apples are fruits from apple trees they come in various colors and flavors commonly red green or yellow rich in fiber and vitamin c can be eaten raw or cooked they are popular in pies and sauces.",
+                    "refusal": null
+                }
+            }
+        },
+        "hey lopknbot": {
+            "lopkn": {
+                "default": {
+                    "role": "assistant",
+                    "content": "ready to assist",
+                    "refusal": null
+                }
+            }
         }
     }
 }
