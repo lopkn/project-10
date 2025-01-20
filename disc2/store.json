@@ -1074,6 +1074,51 @@
                     "refusal": null
                 }
             }
+        },
+        "hey lopknbot what do you think about zombies": {
+            "lopkn": {
+                "default": {
+                    "role": "assistant",
+                    "content": "zombies are a tired trope and mostly unrealistic. worthless in discussion.",
+                    "refusal": null
+                }
+            }
+        },
+        "hey lopknbot explain the fermi paradox": {
+            "lopkn": {
+                "default": {
+                    "role": "assistant",
+                    "content": "the fermi paradox questions why we haven't found aliens despite the high probability of their existence given the vastness of the universe. many planets could support life, yet we see no evidence of it. reasons include the rarity of intelligent life, self-destruction of civilizations, or they are avoiding us.",
+                    "refusal": null
+                }
+            }
+        },
+        "hey lopknbot what do you think about apples": {
+            "lopkn": {
+                "default": {
+                    "role": "assistant",
+                    "content": "apples are overrated people only like them because they’re popular",
+                    "refusal": null
+                }
+            }
+        },
+        "what do you think of the word sacrifice": {
+            "lopkn": {
+                "default": {
+                    "role": "assistant",
+                    "content": "sacrifice often implies giving up something valuable for a greater cause or benefit. it's often seen as noble but can also be exploited by selfish individuals.",
+                    "refusal": null
+                }
+            }
+        },
+        "what do you think about tangerines": {
+            "lopkn": {
+                "default": {
+                    "role": "assistant",
+                    "content": "tangerines are just small oranges basically nothing special about them",
+                    "refusal": null
+                }
+            }
         }
     }
 }
