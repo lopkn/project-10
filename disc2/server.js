@@ -490,7 +490,7 @@ function responder(MSG){
 	// rs=refsegarr(["hi","hey","hello","salutations"],"@ greetings",msg,requirements)
 
 
-	if(requirements["@ unknown word"]){return("i dont know the word > "+SENTENCE.reset().next("@ unknown word").out)}
+	if(requirements["@ unknown word"] && requirements["@ incoherent"]){return("i dont know the word > "+SENTENCE.reset().next("@ unknown word").out)}
 
 
 	if(!lopknistic){
