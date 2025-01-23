@@ -5,7 +5,7 @@
             "word": 29
         },
         "o": {
-            "freq": 443
+            "freq": 445
         },
         "k": {
             "freq": 107
@@ -15,13 +15,13 @@
             "word": 3
         },
         "l": {
-            "freq": 341
+            "freq": 342
         },
         "lo": {
             "freq": 42
         },
         "p": {
-            "freq": 104
+            "freq": 105
         },
         "op": {
             "freq": 49
@@ -39,7 +39,7 @@
             "freq": 36
         },
         "n": {
-            "freq": 282,
+            "freq": 285,
             "word": 2
         },
         "kn": {
@@ -92,11 +92,11 @@
             "freq": 26
         },
         "t": {
-            "freq": 469,
+            "freq": 477,
             "word": 3
         },
         "ot": {
-            "freq": 32
+            "freq": 33
         },
         "bot": {
             "freq": 27
@@ -118,18 +118,18 @@
             "word": 26
         },
         "h": {
-            "freq": 200
+            "freq": 204
         },
         "th": {
-            "freq": 96,
+            "freq": 97,
             "word": 1
         },
         "i": {
-            "freq": 290,
+            "freq": 292,
             "word": 17
         },
         "hi": {
-            "freq": 66,
+            "freq": 67,
             "word": 1
         },
         "thi": {
@@ -155,18 +155,18 @@
             "freq": 30
         },
         "f": {
-            "freq": 88
+            "freq": 89
         },
         "of": {
             "freq": 28,
             "word": 20
         },
         "a": {
-            "freq": 329,
+            "freq": 337,
             "word": 28
         },
         "an": {
-            "freq": 57,
+            "freq": 58,
             "word": 6
         },
         "nt": {
@@ -176,7 +176,7 @@
             "freq": 8
         },
         "e": {
-            "freq": 474
+            "freq": 478
         },
         "te": {
             "freq": 113
@@ -188,7 +188,7 @@
             "freq": 4
         },
         "g": {
-            "freq": 75
+            "freq": 76
         },
         "eg": {
             "freq": 4
@@ -203,7 +203,7 @@
             "freq": 4
         },
         "r": {
-            "freq": 195
+            "freq": 197
         },
         "gr": {
             "freq": 5
@@ -261,18 +261,18 @@
             "word": 4
         },
         "d": {
-            "freq": 118,
+            "freq": 120,
             "word": 1
         },
         "nd": {
-            "freq": 18
+            "freq": 20
         },
         "and": {
-            "freq": 14,
+            "freq": 15,
             "word": 13
         },
         "s": {
-            "freq": 230,
+            "freq": 236,
             "word": 3
         },
         "so": {
@@ -286,7 +286,7 @@
             "freq": 4
         },
         "v": {
-            "freq": 31
+            "freq": 32
         },
         "lv": {
             "freq": 4
@@ -311,17 +311,17 @@
             "word": 4
         },
         "it": {
-            "freq": 30,
+            "freq": 31,
             "word": 9
         },
         "y": {
-            "freq": 142
+            "freq": 143
         },
         "yo": {
             "freq": 73
         },
         "u": {
-            "freq": 222,
+            "freq": 223,
             "word": 1
         },
         "ou": {
@@ -344,7 +344,7 @@
             "word": 13
         },
         "rs": {
-            "freq": 16
+            "freq": 17
         },
         "urs": {
             "freq": 8
@@ -356,7 +356,7 @@
             "freq": 6
         },
         "se": {
-            "freq": 23
+            "freq": 24
         },
         "rse": {
             "freq": 9
@@ -412,7 +412,7 @@
             "word": 6
         },
         "ha": {
-            "freq": 44
+            "freq": 45
         },
         "ar": {
             "freq": 29
@@ -430,7 +430,7 @@
             "freq": 2
         },
         "de": {
-            "freq": 13
+            "freq": 14
         },
         "rde": {
             "freq": 4
@@ -442,10 +442,10 @@
             "freq": 2
         },
         "er": {
-            "freq": 47
+            "freq": 48
         },
         "der": {
-            "freq": 3
+            "freq": 4
         },
         "rder": {
             "freq": 3
@@ -499,7 +499,7 @@
             "freq": 4
         },
         "c": {
-            "freq": 91
+            "freq": 92
         },
         "ec": {
             "freq": 7
@@ -582,7 +582,7 @@
             "freq": 10
         },
         "ri": {
-            "freq": 15
+            "freq": 16
         },
         "tri": {
             "freq": 3
@@ -640,7 +640,7 @@
             "word": 2
         },
         "w": {
-            "freq": 98
+            "freq": 99
         },
         "wo": {
             "freq": 15
@@ -704,10 +704,10 @@
             "word": 4
         },
         "na": {
-            "freq": 10
+            "freq": 11
         },
         "m": {
-            "freq": 143,
+            "freq": 145,
             "word": 2
         },
         "am": {
@@ -800,17 +800,17 @@
             "word": 2
         },
         "tha": {
-            "freq": 10
+            "freq": 11
         },
         "at": {
-            "freq": 62,
+            "freq": 63,
             "word": 1
         },
         "hat": {
-            "freq": 37
+            "freq": 38
         },
         "that": {
-            "freq": 8,
+            "freq": 9,
             "word": 8
         },
         "om": {
@@ -1188,7 +1188,7 @@
             "word": 2
         },
         "ye": {
-            "freq": 2
+            "freq": 3
         },
         "yes": {
             "freq": 2,
@@ -1245,7 +1245,7 @@
             "freq": 2
         },
         "ma": {
-            "freq": 15
+            "freq": 16
         },
         "uma": {
             "freq": 2
@@ -1446,7 +1446,7 @@
             "word": 2
         },
         "ea": {
-            "freq": 22
+            "freq": 23
         },
         "rea": {
             "freq": 7
@@ -1741,10 +1741,10 @@
             "word": 6
         },
         "ip": {
-            "freq": 5
+            "freq": 6
         },
         "rip": {
-            "freq": 2
+            "freq": 3
         },
         "trip": {
             "freq": 2
@@ -1803,7 +1803,7 @@
             "word": 3
         },
         "j": {
-            "freq": 13
+            "freq": 14
         },
         "ju": {
             "freq": 7
@@ -1962,7 +1962,7 @@
             "freq": 4
         },
         "ts": {
-            "freq": 11
+            "freq": 12
         },
         "hts": {
             "freq": 4
@@ -1984,13 +1984,13 @@
             "word": 4
         },
         "st": {
-            "freq": 21
+            "freq": 22
         },
         "ta": {
-            "freq": 14
+            "freq": 16
         },
         "sta": {
-            "freq": 2
+            "freq": 3
         },
         "tat": {
             "freq": 2
@@ -2121,7 +2121,7 @@
             "freq": 2
         },
         "em": {
-            "freq": 5
+            "freq": 6
         },
         "tem": {
             "freq": 2
@@ -2534,7 +2534,7 @@
             "word": 2
         },
         "sh": {
-            "freq": 15
+            "freq": 16
         },
         "sho": {
             "freq": 9
@@ -2677,7 +2677,7 @@
             "freq": 14
         },
         "as": {
-            "freq": 17,
+            "freq": 18,
             "word": 3
         },
         "las": {
@@ -2759,7 +2759,7 @@
             "word": 3
         },
         "ers": {
-            "freq": 8
+            "freq": 9
         },
         "sers": {
             "freq": 2
@@ -3323,7 +3323,7 @@
             "freq": 2
         },
         "av": {
-            "freq": 3
+            "freq": 4
         },
         "tav": {
             "freq": 2
@@ -3447,7 +3447,7 @@
             "freq": 2
         },
         "un": {
-            "freq": 7
+            "freq": 8
         },
         "oun": {
             "freq": 2
@@ -3459,7 +3459,7 @@
             "freq": 2
         },
         "und": {
-            "freq": 2
+            "freq": 3
         },
         "ound": {
             "freq": 2
@@ -3965,7 +3965,7 @@
             "freq": 2
         },
         "pt": {
-            "freq": 5
+            "freq": 6
         },
         "ept": {
             "freq": 3
@@ -4142,7 +4142,7 @@
             "word": 2
         },
         "ee": {
-            "freq": 8
+            "freq": 9
         },
         "kee": {
             "freq": 2
@@ -4368,7 +4368,7 @@
             "word": 2
         },
         "cr": {
-            "freq": 4
+            "freq": 5
         },
         "cre": {
             "freq": 2
@@ -4717,7 +4717,7 @@
             "word": 2
         },
         "va": {
-            "freq": 6
+            "freq": 7
         },
         "eva": {
             "freq": 4
@@ -4902,7 +4902,7 @@
             "word": 2
         },
         "wt": {
-            "freq": 2
+            "freq": 3
         },
         "tl": {
             "freq": 2
@@ -6500,7 +6500,7 @@
             "word": 2
         },
         "tt": {
-            "freq": 7
+            "freq": 8
         },
         "att": {
             "freq": 2
@@ -6613,7 +6613,7 @@
             "word": 2
         },
         "ott": {
-            "freq": 2
+            "freq": 3
         },
         "bott": {
             "freq": 2
@@ -6683,7 +6683,7 @@
             "freq": 2
         },
         "tan": {
-            "freq": 3
+            "freq": 4
         },
         "rtan": {
             "freq": 2
@@ -7056,7 +7056,7 @@
             "word": 2
         },
         "go": {
-            "freq": 5,
+            "freq": 6,
             "word": 3
         },
         "ffl": {
@@ -7788,7 +7788,7 @@
             "freq": 2
         },
         "shi": {
-            "freq": 4
+            "freq": 5
         },
         "ashi": {
             "freq": 2
@@ -8444,7 +8444,7 @@
             "word": 3
         },
         "ja": {
-            "freq": 3
+            "freq": 4
         },
         "jan": {
             "freq": 3
@@ -10219,10 +10219,10 @@
             "word": 2
         },
         "ats": {
-            "freq": 2
+            "freq": 3
         },
         "hats": {
-            "freq": 2
+            "freq": 3
         },
         "whats": {
             "freq": 2,
@@ -10386,7 +10386,7 @@
             "freq": 2
         },
         "cri": {
-            "freq": 2
+            "freq": 3
         },
         "acri": {
             "freq": 2
@@ -10537,6 +10537,292 @@
             "freq": 2
         },
         "tangerines": {
+            "freq": 2,
+            "word": 2
+        },
+        "jav": {
+            "freq": 2
+        },
+        "ava": {
+            "freq": 2
+        },
+        "java": {
+            "freq": 2
+        },
+        "vas": {
+            "freq": 2
+        },
+        "avas": {
+            "freq": 2
+        },
+        "javas": {
+            "freq": 2
+        },
+        "sc": {
+            "freq": 2
+        },
+        "asc": {
+            "freq": 2
+        },
+        "vasc": {
+            "freq": 2
+        },
+        "avasc": {
+            "freq": 2
+        },
+        "javasc": {
+            "freq": 2
+        },
+        "scr": {
+            "freq": 2
+        },
+        "ascr": {
+            "freq": 2
+        },
+        "vascr": {
+            "freq": 2
+        },
+        "avascr": {
+            "freq": 2
+        },
+        "javascr": {
+            "freq": 2
+        },
+        "scri": {
+            "freq": 2
+        },
+        "ascri": {
+            "freq": 2
+        },
+        "vascri": {
+            "freq": 2
+        },
+        "avascri": {
+            "freq": 2
+        },
+        "javascri": {
+            "freq": 2
+        },
+        "crip": {
+            "freq": 2
+        },
+        "scrip": {
+            "freq": 2
+        },
+        "ascrip": {
+            "freq": 2
+        },
+        "vascrip": {
+            "freq": 2
+        },
+        "avascrip": {
+            "freq": 2
+        },
+        "javascrip": {
+            "freq": 2
+        },
+        "ipt": {
+            "freq": 2
+        },
+        "ript": {
+            "freq": 2
+        },
+        "cript": {
+            "freq": 2
+        },
+        "script": {
+            "freq": 2
+        },
+        "ascript": {
+            "freq": 2
+        },
+        "vascript": {
+            "freq": 2
+        },
+        "avascript": {
+            "freq": 2
+        },
+        "javascript": {
+            "freq": 2,
+            "word": 2
+        },
+        "lm": {
+            "freq": 2
+        },
+        "lma": {
+            "freq": 2
+        },
+        "ao": {
+            "freq": 2
+        },
+        "mao": {
+            "freq": 2
+        },
+        "lmao": {
+            "freq": 2,
+            "word": 2
+        },
+        "see": {
+            "freq": 2
+        },
+        "eem": {
+            "freq": 2
+        },
+        "seem": {
+            "freq": 2
+        },
+        "ms": {
+            "freq": 2
+        },
+        "ems": {
+            "freq": 2
+        },
+        "eems": {
+            "freq": 2
+        },
+        "seems": {
+            "freq": 2,
+            "word": 2
+        },
+        "ah": {
+            "freq": 3
+        },
+        "nah": {
+            "freq": 2,
+            "word": 2
+        },
+        "got": {
+            "freq": 2
+        },
+        "gott": {
+            "freq": 2
+        },
+        "tta": {
+            "freq": 2
+        },
+        "otta": {
+            "freq": 2
+        },
+        "gotta": {
+            "freq": 2,
+            "word": 2
+        },
+        "nde": {
+            "freq": 2
+        },
+        "unde": {
+            "freq": 2
+        },
+        "nder": {
+            "freq": 2
+        },
+        "under": {
+            "freq": 2
+        },
+        "ders": {
+            "freq": 2
+        },
+        "nders": {
+            "freq": 2
+        },
+        "unders": {
+            "freq": 2
+        },
+        "rst": {
+            "freq": 2
+        },
+        "erst": {
+            "freq": 2
+        },
+        "derst": {
+            "freq": 2
+        },
+        "nderst": {
+            "freq": 2
+        },
+        "underst": {
+            "freq": 2
+        },
+        "rsta": {
+            "freq": 2
+        },
+        "ersta": {
+            "freq": 2
+        },
+        "dersta": {
+            "freq": 2
+        },
+        "ndersta": {
+            "freq": 2
+        },
+        "understa": {
+            "freq": 2
+        },
+        "stan": {
+            "freq": 2
+        },
+        "rstan": {
+            "freq": 2
+        },
+        "erstan": {
+            "freq": 2
+        },
+        "derstan": {
+            "freq": 2
+        },
+        "nderstan": {
+            "freq": 2
+        },
+        "understan": {
+            "freq": 2
+        },
+        "tand": {
+            "freq": 2
+        },
+        "stand": {
+            "freq": 2
+        },
+        "rstand": {
+            "freq": 2
+        },
+        "erstand": {
+            "freq": 2
+        },
+        "derstand": {
+            "freq": 2
+        },
+        "nderstand": {
+            "freq": 2
+        },
+        "understand": {
+            "freq": 2,
+            "word": 2
+        },
+        "hit": {
+            "freq": 2
+        },
+        "shit": {
+            "freq": 2,
+            "word": 2
+        },
+        "yea": {
+            "freq": 2
+        },
+        "eah": {
+            "freq": 2
+        },
+        "yeah": {
+            "freq": 2,
+            "word": 2
+        },
+        "tf": {
+            "freq": 2
+        },
+        "wtf": {
+            "freq": 2,
+            "word": 2
+        },
+        "thats": {
             "freq": 2,
             "word": 2
         }

@@ -1119,6 +1119,15 @@
                     "refusal": null
                 }
             }
+        },
+        "tell james why he is dumb": {
+            "lopkn": {
+                "default": {
+                    "role": "assistant",
+                    "content": "james is dumb because he keeps making the same mistakes and doesn’t learn from them. it’s a choice.",
+                    "refusal": null
+                }
+            }
         }
     }
 }

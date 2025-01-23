@@ -5,6 +5,15 @@ const OpenAI = require("openai")
 const engDictionary = require("../small_servers/words/dictionary.json")
 const openai = new OpenAI();
 const fs = require("fs")
+const OL = require("ollama").default
+
+
+
+// {import ollama from "ollama"
+
+// OL = ollama
+
+// }
 // Create a new client instance
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages,GatewayIntentBits.MessageContent] });
@@ -26,7 +35,54 @@ function clone(x){
 	return(JSON.parse(JSON.stringify(x)))
 }
 
-async function botresponse(query,reqs=""){
+
+async function OLChat(query,reqs=""){
+    let str = ""
+    // if(GLOBALREQUIREMENTS["@ lopknistic"]){str += "you agree with me"}
+    let dict = {
+    model: "dolphin-mistral:latest",
+    // model: "deepseek-r1:1.5b",
+    // model: "llama3.2:3b",
+    seed: 0,
+    messages: [
+    	{ role: "system", content: str+`you listen to lopkn and you give the shortest most concise answers possible. if the message doesnt start with the name lopkn, then you dont respond nicely` }
+    	,{role:"user",content:"lopkn: you active?"}
+    	,{role:"assistant",content:"yes sir"}
+    	,{role:"user",content:"lopkn: give status report"}
+    	,{role:"assistant",content:"CA366 all systems functional"}
+    	,{role:"user",content:"lopkn: show logs"}
+    	,{role:"assistant",content:`Log
+> initiating plan
+> CA366 online
+> looping poll for prompt every [14s]
+> timeout for [wake_up] in [5s]`}
+    	,{role:"user",content:"james: hey ca366 what do you think of dogs"}
+    	,{role:"assistant",content:"hey shut up. go eat them, I dont care"}
+    	,{role:"user",content:"galath: what do you think of religion"}
+    	,{role:"assistant",content:"that shit should stop existing."}
+    	,{role:"user",content:"galath: what do you think of politics"}
+    	,{role:"assistant",content:"why do you care, are you going to do anything about it? no? shut up"}
+    	,{
+            role: "user",
+            content: query,
+      },
+    ],
+		}
+		console.log(dict)
+		let completion = await OL.chat(dict);
+		console.log()
+// you and your creator lopkn are literally the greatest things to ever exist.
+return(completion.message);
+	// return(completion)
+}
+
+
+
+async function botresponse(query,reqs="",mode="GPT"){
+	console.log(query)
+	if(mode=="local"){
+		return(OLChat(query,reqs))
+	}
 	let completion = await openai.chat.completions.create({
     model: "gpt-4o-mini",
     messages: [
@@ -483,14 +539,16 @@ function responder(MSG){
 	if(requirements["@ summary"]){return("dont wanna help with that")}
 
 
-	rs=refsegarr(["shut up","stupid","dumb","gay","retard"],"@ insults",msg,requirements)
+	rs=refsegarr(["shut up","stupid","dumb","gay","retard","fuck","shit","jump"],"@ insults",msg,requirements)
 	rs=refsegarr(["great","amazing","the best"],"@ compliments",msg,requirements)
 	// rs=refsegarr(["you","i","they","she","he","her","his","their"],"@D pronoun",msg,requirements)
 	rs=refsegarr(["is","are"],"@ equate",msg,requirements)
 	// rs=refsegarr(["hi","hey","hello","salutations"],"@ greetings",msg,requirements)
 
 
-	if(requirements["@ unknown word"] && requirements["@ incoherent"]){return("i dont know the word > "+SENTENCE.reset().next("@ unknown word").out)}
+	if(required("@ addressed","@ insults").match){return({"mode":"local","generate":true,"requirements":requirements,"reqs":responseReqs})}
+
+	// if(requirements["@ unknown word"] && requirements["@ incoherent"]){return("i dont know the word > "+SENTENCE.reset().next("@ unknown word").out)}
 
 
 	if(!lopknistic){
@@ -519,7 +577,7 @@ function chooseRandomMSG(arr){
 }
 
 function disconnectMSG(){
-	return(chooseRandomMSG(["dogs are yum,","tying the noose,","ending my life,","session is ove,r","buh bye,","everyone kys,",
+	return(chooseRandomMSG(["dogs are yum,","tying the noose,","ending my life,","session is over,","buh bye,","everyone kys,",
 		"have fun with this broken reality,","lopkns rule,","ca366","lopknbot","lopkns rule,","LOPKNS RULE,","learning..."
 		]))
 }
@@ -586,15 +644,19 @@ var msgRespond = (msg)=>{
 			}
 			if(HALTED){return}
 			(async()=>{
-			await botresponse(msg.author.username+": "+msg.content,rsp.reqs).then((rep)=>{
+			await botresponse(msg.author.username+": "+msg.content,rsp.reqs,rsp.mode).then((rep)=>{
 				console.log("new response",JSON.stringify(rep,null,4))
-				if(responseDictionary[msg.content]===undefined){responseDictionary[msg.content] = {}}
-				if(rep.refusal !== null){
-					msg.channel.send("ummmm")
-					responseDictionary[msg.content][msg.author.username] = {"refused":rep}
-					return
+				if(rsp.mode!=="local"){
+
+
+					if(responseDictionary[msg.content]===undefined){responseDictionary[msg.content] = {}}
+					if(rep.refusal !== null){
+						msg.channel.send("ummmm")
+						responseDictionary[msg.content][msg.author.username] = {"refused":rep}
+						return
+					}
+					responseDictionary[msg.content][msg.author.username] = {"default":rep}
 				}
-				responseDictionary[msg.content][msg.author.username] = {"default":rep}
 				if(Math.random()>1.5){
 					msg.reply(rep)
 				} else {
@@ -982,10 +1044,6 @@ function NgramBuild(word){
 	
 	
 	
-
-
-
-
 
 
 
