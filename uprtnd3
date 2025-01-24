@@ -927,7 +927,21 @@ switching both of the center = enatiomer
 
 
 
+// activation needs 2 inputs (and), 1 input (or)
+// loop prevention: the output can not be part of the input that created the output
 
+//wrong: it activated when it shouldn't have: add an AND gate
+//but the activation complex have only values that are activated
+
+
+//try: make sure the activation complex only ever outputs wrong as "i didnt activate"
+
+
+//start: should activate -> connect OR to activation complex
+
+
+//Wrong: should activate -> connect OR to activation complex
+//Wrong: should not activate -> turn OR into AND (find one on one off nodes)
 
 
 
