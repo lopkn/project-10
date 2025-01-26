@@ -945,6 +945,142 @@ switching both of the center = enatiomer
 
 
 
+function setup() {
+  createCanvas(400, 400);
+}
+
+function draw() {
+  background(220);
+  Object.keys(nodes).forEach((e,i)=>{
+    if(isActivated(e)){fill("red")}else{fill("white")}
+    circle( (i%10)*40+20,20 + 40*Math.floor(i/10),20)
+  })
+}
+
+var nodes = {}
+var activationComplex = new Set()
+var thisActivation = Date.now()
+
+
+function isActivated(n){
+  return(nodes[n].activated===thisActivation)
+}
+
+genUUIDr=0
+function genUUID(){
+  return(genUUIDr++)
+}
+activationLog = false
+class node{
+  constructor(id=genUUID()){
+    this.activated = false
+    this.type = "or"
+    this.id = id
+    this.outs = new Set() //set of ID's to propegate to
+  }
+  activate(time=thisActivation){
+    if(activationLog){console.log(this.id + " was activated")}
+    this.activated = time
+    activationComplex.add(this.id)
+    this.outs.forEach((e)=>{
+      nodes[e].consider()
+    })
+    // activation(this.id)
+  }
+  consider(){
+    if(this.activated === thisActivation){return(false)}
+    if(this.type === "or"){
+      if(isActivated(this.child1)){this.activate();return(true)}
+      if(isActivated(this.child2)){this.activate();return(true)}
+    } else if(this.type==="and"){
+      if(isActivated(this.child1)&&isActivated(this.child2)){this.activate();return(true)}
+    }
+  }
+}
+
+
+
+
+function connect(n,child1,child2){
+  nd = nodes[n]
+  nd.child1 = child1
+  nd.child2 = child2
+  nodes[child1].outs.add(n)
+  nodes[child2].outs.add(n)
+}
+
+function getRandomFromSet(s){
+  let arr = Array.from(s)
+  return(arr[Math.floor(Math.random()*arr.length)])
+}
+
+function newNode(id){
+  let n = new node()
+  nodes[n.id] = n
+  return(n)
+}
+
+let inputArr = []
+for(let i = 0; i < 5; i++){
+  inputArr.push(newNode())
+}
+
+let outputPin = newNode().id
+
+//test
+// connect(1,2,3)
+// thisActivation = 2
+// nodes[3].activate(2)
+// nodes[2].activate(2)
+
+function propegateAll(arr){
+  thisActivation = Date.now()
+  activationComplex = new Set()
+  arr.forEach((e)=>{nodes[e].activate(thisActivation)})
+  console.log(isActivated(outputPin))
+}
+
+
+function connectOrToActivationComplex(OP=outputPin){//outputpin
+  outputPin = newNode().id
+  let otherNode = getRandomFromSet(activationComplex)
+  connect(outputPin,OP,otherNode)
+  console.log("connected "+OP+" OR "+otherNode+" to "+outputPin)
+}
+
+function Andize(){
+  let r = getRandomFromSet(activationComplex)
+  nodes[r].type = "and"
+  console.log("node "+r+" ANDized ")
+}
+
+function wrong(){
+  if(!isActivated(outputPin)){
+    connectOrToActivationComplex()
+  } else {
+    Andize()
+  }
+}
+
+PA = propegateAll
+
+
+
+
+PA([2,3])
+wrong()
+
+function tt(){
+  if(!PA([2,3])){wrong()}
+  if(!PA([3])){wrong()}
+  let h = Math.floor(Math.random()*4+1)
+  if(h!=3 && PA([h])){wrong()}
+}
+
+
+  for(let i = 0; i < 100; i++){tt()}
+
+
 
 
 
