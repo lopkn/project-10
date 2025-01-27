@@ -946,7 +946,7 @@ switching both of the center = enatiomer
 
 
 function setup() {
-  createCanvas(400, 400);
+  createCanvas(400, 1200);
 }
 
 function draw() {
@@ -963,7 +963,14 @@ var thisActivation = Date.now()
 
 
 function isActivated(n){
-  return(nodes[n].activated===thisActivation)
+  return(nodes[n].activated===thisActivation && nodes[n].activationType === "definitive true")
+}
+
+function atype(n){
+  if(isActivated(n)){
+    return(nodes[n].activationType)
+  }
+  return("pending")
 }
 
 genUUIDr=0
@@ -977,36 +984,97 @@ class node{
     this.type = "or"
     this.id = id
     this.outs = new Set() //set of ID's to propegate to
+    this.activationType = "pending"
   }
-  activate(time=thisActivation){
+  activate(type=true,time=thisActivation){
     if(activationLog){console.log(this.id + " was activated")}
     this.activated = time
+    if(type===true){
+      this.activationType = "definitive true"
     activationComplex.add(this.id)
+    } else if(type === false){
+      this.activationType = "definitive false"
+    }
     this.outs.forEach((e)=>{
       nodes[e].consider()
+      console.log("considering: "+e)
     })
     // activation(this.id)
   }
-  consider(){
+  consider1(){
     if(this.activated === thisActivation){return(false)}
     if(this.type === "or"){
       if(isActivated(this.child1)){this.activate();return(true)}
       if(isActivated(this.child2)){this.activate();return(true)}
     } else if(this.type==="and"){
       if(isActivated(this.child1)&&isActivated(this.child2)){this.activate();return(true)}
+    } else if(this.type === "not"){
+      if(isActivated(this.child1)){this.activate(false);return(true)}
     }
   }
+  consider(force=false){
+    if(this.activated === thisActivation){return(false)}
+    if(this.type === "or"){
+      if(isActivated(this.child1)){this.activate();return(true)}
+      if(isActivated(this.child2)){this.activate();return(true)}
+    } else if(this.type==="and"){
+      if(isActivated(this.child1)&&isActivated(this.child2)){this.activate();return(true)}
+    } else if(this.type === "not"){
+      // if(isActivated(this.child1)){this.activate(false);return(true)}
+      if(force){
+        if(!isActivated(this.child1)){this.activate();return(true)}
+      }
+    }
+    if(force!==true && this.type !== "not"){
+      if(nodes[this.child1].type === "not"){waitlist(this.child1)}
+      if(nodes[this.child1].type === "not"){waitlist(this.child2)}
+    }
+  }
+  // consider2(){
+  //   if(this.activated === thisActivation){return(false)}
+  //   if(this.type === "or"){
+  //     if(atype(this.child1)==="definitive true"){this.activate();return(true)}
+  //     if(atype(this.child2)==="definitive true"){this.activate();return(true)}
+  //     if(atype(this.child1)==="definitive false"&&atype(this.child2)==="definitive false"){this.activate(false);return(true)}
+  //   } else if(this.type==="and"){
+  //     if(atype(this.child1)==="definitive true"&&atype(this.child2)==="definitive true"){this.activate();return(true)}
+  //     if(atype(this.child1)==="definitive false"){this.activate(false);return(true)}
+  //     if(atype(this.child2)==="definitive false"){this.activate(false);return(true)}
+  //   } else if(this.type === "not"){
+  //     if(isActivated(this.child1)){this.activate();return(true)}
+  //   }    
+  // }
 }
 
 
+var waitlistarr = []
+
+function waitlist(id){
+  let index = waitlistarr.findIndex(element => element > id);
+  if (index === -1) {
+        waitlistarr.push(id);  // Append to the end if value is the largest
+    } else {
+        waitlistarr.splice(index, 0, id);  // Insert at the correct index
+    }
+}
+
+function processWaitlist(){
+  let n = nodes[waitlistarr[0]]
+  
+  n.consider(true)
+  
+  waitlistarr.splice(0,1)
+}
 
 
 function connect(n,child1,child2){
   nd = nodes[n]
   nd.child1 = child1
-  nd.child2 = child2
   nodes[child1].outs.add(n)
-  nodes[child2].outs.add(n)
+  if(child2!==undefined){
+    nd.child2 = child2
+    nodes[child2].outs.add(n)
+  }
 }
 
 function getRandomFromSet(s){
@@ -1021,23 +1089,32 @@ function newNode(id){
 }
 
 let inputArr = []
-for(let i = 0; i < 5; i++){
+for(let i = 0; i < 2; i++){
   inputArr.push(newNode())
 }
 
 let outputPin = newNode().id
-
+nodes[outputPin].type = "and"
+connect(outputPin,0,1)
 //test
 // connect(1,2,3)
 // thisActivation = 2
 // nodes[3].activate(2)
 // nodes[2].activate(2)
 
-function propegateAll(arr){
-  thisActivation = Date.now()
+function propegateAll(...arr){
+  thisActivation = Date.now() + "" + Math.random()
   activationComplex = new Set()
-  arr.forEach((e)=>{nodes[e].activate(thisActivation)})
+  arr.forEach((e)=>{nodes[e].activate(true,thisActivation)})
+  let counter = 0
+  while(waitlistarr.length>0 && counter<600){
+    counter++
+    console.log("unpending:" + waitlistarr[0])
+    processWaitlist()
+  }
+  if(counter > 599){console.log("WARNING, WAITLIST EXCEEDED")}
   console.log(isActivated(outputPin))
+  return(isActivated(outputPin))
 }
 
 
@@ -1054,7 +1131,7 @@ function Andize(){
   console.log("node "+r+" ANDized ")
 }
 
-function wrong(){
+function wrong1(){
   if(!isActivated(outputPin)){
     connectOrToActivationComplex()
   } else {
@@ -1062,30 +1139,60 @@ function wrong(){
   }
 }
 
+function wrong(){
+    if(!isActivated(outputPin)){
+    // connectAnndToActivationComplex()
+      connectAndsToActivationComplex()
+  } else {
+    connectNot()
+  }
+}
+
+function connectAnndToActivationComplex(OP=outputPin){//outputpin
+  let unOP = newNode()
+  outputPin = newNode().id
+  unOP.type = "not"
+  nodes[outputPin].type = "and"
+  connect(unOP.id,OP)
+  let otherNode = getRandomFromSet(activationComplex)
+  connect(outputPin,unOP.id,otherNode)
+  console.log("connected !"+OP+" => "+unOP.id+" AND "+otherNode+" to "+outputPin)
+}
+function connectAndsToActivationComplex(OP=outputPin){//outputpin
+  outputPin = newNode().id
+  nodes[outputPin].type = "and"
+  let otherNode = getRandomFromSet(activationComplex)
+  let otherNode2 = getRandomFromSet(activationComplex)
+  connect(outputPin,otherNode2,otherNode)
+  console.log("connected "+otherNode2+" AND "+otherNode+" to "+outputPin)
+}
+
+function connectNot(OP=outputPin){
+  let newOp = newNode()
+  newOp.type = "not"
+  outputPin = newOp.id
+  connect(newOp.id,OP)
+}
+
 PA = propegateAll
 
 
-
-
-PA([2,3])
-wrong()
+// function tt(){
+//   if(!PA([2,3])){wrong()}
+//   if(!PA([3])){wrong()}
+//   let h = Math.floor(Math.random()*4+1)
+//   if(h!=3 && PA([h])){wrong()}
+// }
 
 function tt(){
-  if(!PA([2,3])){wrong()}
-  if(!PA([3])){wrong()}
-  let h = Math.floor(Math.random()*4+1)
-  if(h!=3 && PA([h])){wrong()}
+  if(!PA(0,1)){wrong()}
+  if(PA()){wrong()}
+  if(!PA(1)){wrong()}
+  if(!PA(0)){wrong()}
+
 }
 
-
-  for(let i = 0; i < 100; i++){tt()}
-
-
-
-
-
-
-
+  for(let i = 0; i < 10; i++){tt()}
 
 
 
