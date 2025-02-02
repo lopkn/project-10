@@ -18,3 +18,10 @@ jobs:
           repository: laseryuan/provision
           event-type: build-request-from-lopkn
           client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
+      - name: Deploy to google cloud run
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.PAT_LOPKN_SMALL_SERVERS }}
+          repository: laseryuan/gcloud-run-apps
+          event-type: build-request-for-10
+          client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
