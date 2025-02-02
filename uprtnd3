@@ -1195,6 +1195,29 @@ function tt(){
   for(let i = 0; i < 10; i++){tt()}
 
 
+///
+```
+New potential Architecture
+
+Initialize all input nodes <IN = []>
+Initialize NOT input nodes <NI = []> (not required)
+Initialize single output node OUT
+Connect two non-output nodes to the output with an "OR" gate
+
+Processing:
+propegate to the output by activating the array
+IN = [T,F,T,T,F...]
+NI = [F,T,F,F,T...] (or [,T,,F,T...] or any combination)
+OUT = T / F
+if out was F when it should be T:
+- connect a new "OR" gate from the current OUT node to a random activated node, and make it the new OUT node
+if out was T when it should be F:
+- connect a new "AND" gate from the current OUT node to any deactivated NON-thinking nodes
+
+
+Implications:
+Only when a node is Activated does its parent consider its state
+```
 
 
 
