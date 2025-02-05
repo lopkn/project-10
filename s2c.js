@@ -1,6 +1,9 @@
 let io;
 let myMath
 let crypto = require("crypto")
+let INFUNCS = require("./infuncs.js")
+
+
 let fs = require("fs")
 function distance(x1,y1,x2,y2) {
 	let a = x2-x1
