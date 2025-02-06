@@ -1,7 +1,7 @@
 let io;
 let myMath
 let crypto = require("crypto")
-let INFUNCS = require("./infuncs.js")
+let INFUNCS = require("./funcs.js")
 
 
 let fs = require("fs")
