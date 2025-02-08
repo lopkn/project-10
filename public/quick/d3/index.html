@@ -1,55 +1,165 @@
 <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D3 Visualization</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+    <div id="chart"></div>
+    <script>
 
-<!-- Add a svg area, empty -->
-<div id="scatter_area"></div>
+      function inflateTrainingProcess(str){
+  str = str.replaceAll("n",',"and"],[')
+  str = str.replaceAll('a,"and"],[d','and')
+  str = str.replaceAll('u',',"or"],[')
+  console.log(str)
+  arr = JSON.parse(str)
+  return(arr)
+}
 
-<!-- Load d3.js -->
-<script src="https://d3js.org/d3.v4.js"></script>
-<script>
+        let imp = inflateTrainingProcess(`[[4,0,2u5,4,3n6,5,1n7,6,0u8,7,4u9,8,2n10,9,1n11,10,7u12,11,3n13,12,4u14,13,3n15,14,0n16,15,10,"or"]]`)
 
-// set the dimensions and margins of the graph
-var margin = {top: 10, right: 40, bottom: 30, left: 30},
-    width = 450 - margin.left - margin.right,
-    height = 400 - margin.top - margin.bottom;
-
-// append the svg object to the body of the page
-var svG = d3.select("#scatter_area")
-  .append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-  .append("g")
-    .attr("transform",
-          "translate(" + margin.left + "," + margin.top + ")");
-
-// Create data
-var data = [ {x:10, y:20}, {x:40, y:90}, {x:80, y:50} ]
-
-// X scale and Axis
-var x = d3.scaleLinear()
-    .domain([0, 100])         // This is the min and the max of the data: 0 to 100 if percentages
-    .range([0, width]);       // This is the corresponding value I want in Pixel
-svG
-  .append('g')
-  .attr("transform", "translate(0," + height + ")")
-  .call(d3.axisBottom(x));
-
-// X scale and Axis
-var y = d3.scaleLinear()
-    .domain([0, 100])         // This is the min and the max of the data: 0 to 100 if percentages
-    .range([height, 0]);       // This is the corresponding value I want in Pixel
-svG
-  .append('g')
-  .call(d3.axisLeft(y));
-
-// Add 3 dots for 0, 50 and 100%
-svG
-  .selectAll("whatever")
-  .data(data)
-  .enter()
-  .append("circle")
-    .attr("cx", function(d){ return x(d.x) })
-    .attr("cy", function(d){ return y(d.y) })
-    .attr("r", 7)
+        let data = {}
+        data.nodes = []
+        data.links = []
 
 
-</script>
+        // const data = {
+        //     nodes: [
+        //         { id: 'Node1', group: 1 },
+        //         { id: 'Node2', group: 2 },
+        //         { id: 'Node3', group: 2 },
+        //         { id: 'Node4', group: 2 },
+        //         { id: 'Node5', group: 2 },
+        //         { id: 'Node6', group: 2 },
+        //         // Add more nodes
+        //     ],
+        //     links: [
+        //         { source: 'Node1', target: 'Node2', value: 1 },
+        //         { source: 'Node1', target: 'Node3', value: 1 },
+        //         { source: 'Node1', target: 'Node3', value: 1 },
+        //         { source: 'Node4', target: 'Node3', value: 2 },
+        //         { source: 'Node5', target: 'Node3', value: 2 },
+        //         { source: 'Node6', target: 'Node3', value: 12 },
+        //         // Add more links
+        //     ]
+        // };
+
+        const width = 928;
+        const height = 600;
+        const color = d3.scaleOrdinal(d3.schemeCategory10);
+        var links = data.links.map(d => ({...d}));
+        var nodes = data.nodes.map(d => ({...d}));
+
+        var simulation = d3.forceSimulation(nodes)
+            .force("link", d3.forceLink(links).id(d => d.id))
+            .force("charge", d3.forceManyBody())
+            .force("center", d3.forceCenter(width / 2, height / 2))
+            .on("tick", ticked);
+
+        var svg = d3.create("svg")
+            .attr("width", width)
+            .attr("height", height)
+            .attr("viewBox", [0, 0, width, height])
+            .attr("style", "max-width: 100%; height: auto;");
+
+        var link = svg.append("g")
+            .attr("stroke", "#999")
+            .attr("stroke-opacity", 0.6)
+            .selectAll()
+            .data(links)
+            .join("line")
+            .attr("stroke-width", d => Math.sqrt(d.value));
+
+        var node = svg.append("g")
+            .attr("stroke", "#fff")
+            .attr("stroke-width", 1.5)
+            .selectAll()
+            .data(nodes)
+            .join("circle")
+            .attr("r", 5)
+            .attr("fill", d => color(d.group));
+
+        node.append("title").text(d => d.id);
+
+        node.call(d3.drag()
+            .on("start", dragstarted)
+            .on("drag", dragged)
+            .on("end", dragended));
+
+        function ticked() {
+            link.attr("x1", d => d.source.x)
+                .attr("y1", d => d.source.y)
+                .attr("x2", d => d.target.x)
+                .attr("y2", d => d.target.y);
+            node.attr("cx", d => d.x)
+                .attr("cy", d => d.y);
+        }
+
+        function dragstarted(event) {
+            if (!event.active) simulation.alphaTarget(0.3).restart();
+            event.subject.fx = event.subject.x;
+            event.subject.fy = event.subject.y;
+        }
+
+        function dragged(event) {
+            event.subject.fx = event.x;
+            event.subject.fy = event.y;
+        }
+
+        function dragended(event) {
+            if (!event.active) simulation.alphaTarget(0);
+            event.subject.fx = null;
+            event.subject.fy = null;
+        }
+
+        // Append the SVG to the div.
+        document.getElementById('chart').appendChild(svg.node());
+
+
+
+            function addNodeAndLink(newNodeId, newNodeGroup, existingNodeId) {
+        // Create a new node object
+        const newNode = { id: newNodeId, group: newNodeGroup };
+        nodes.push(newNode); // Add new node to nodes array
+
+        // Create a new link object (linking to the existing node)
+        const newLink = { source: existingNodeId, target: newNodeId, value: 1 };
+        links.push(newLink); // Add new link to links array
+
+        // Restart the simulation with the updated nodes and links
+        simulation.nodes(nodes);
+        simulation.force("link").links(links);
+        simulation.alpha(1).restart(); // Restart the simulation
+
+        // Update the SVG elements
+        updateSVG();
+    }
+
+    function updateSVG() {
+        // Update links
+        link = svg.selectAll("line")
+            .data(links)
+            .join("line")
+            .attr("stroke-width", d => Math.sqrt(d.value))
+            .attr("stroke", "#999")
+            .attr("stroke-opacity", 0.6);
+
+        // Update nodes
+        node = svg.selectAll("circle")
+            .data(nodes)
+            .join("circle")
+            .attr("r", 5)
+            .attr("fill", d => color(d.group))
+            .call(d3.drag()
+                .on("start", dragstarted)
+                .on("drag", dragged)
+                .on("end", dragended));
+
+        node.append("title").text(d => d.id);
+    }
+    </script>
+</body>
+</html>
