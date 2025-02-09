@@ -5,8 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>D3 Visualization</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
+
+       <style>
+        .tooltip {
+            position: absolute;
+            text-align: center;
+            width: 60px;
+            padding: 5px;
+            font: 12px sans-serif;
+            background: lightsteelblue;
+            border: 0px;
+            border-radius: 8px;
+            pointer-events: none;
+        }
+    </style>
 </head>
+
+
+
 <body>
+  <div class="tooltip" style="opacity: 0;"></div>
     <div id="chart"></div>
     <script>
 
@@ -19,11 +37,7 @@
   return(arr)
 }
 
-        let imp = inflateTrainingProcess(`[[4,0,2u5,4,3n6,5,1n7,6,0u8,7,4u9,8,2n10,9,1n11,10,7u12,11,3n13,12,4u14,13,3n15,14,0n16,15,10,"or"]]`)
 
-        let data = {}
-        data.nodes = []
-        data.links = []
 
 
         // const data = {
@@ -47,11 +61,35 @@
         //     ]
         // };
 
+        let data = {nodes:[],links:[]}
         const width = 928;
         const height = 600;
         const color = d3.scaleOrdinal(d3.schemeCategory10);
         var links = data.links.map(d => ({...d}));
         var nodes = data.nodes.map(d => ({...d}));
+
+
+        let imp = inflateTrainingProcess(`[[4,0,2u5,4,3n6,5,1n7,6,0u8,7,4u9,8,2n10,9,1n11,10,7u12,11,3n13,12,4u14,13,3n15,14,0n16,15,10,"or"]]`)
+        let inputSpace = 2
+
+        data.nodes = []
+        data.links = []
+        let idLoaded = {}
+        imp.forEach((e,Z)=>{
+          for(let i = 0; i < 3; i ++){
+            let x = i
+            if(idLoaded[e[x]]){continue}else{idLoaded[e[x]]=true;
+
+            let g = 2
+            if(x===0&&e[3]==="and"){g=1}
+            if(parseInt(e[x]) < inputSpace*2){g=0}
+            nodes.push({id:e[x],group:g})}
+          }
+          links.push({source:e[1],target:e[0],value:1})
+          links.push({source:e[2],target:e[0],value:1})
+        })
+
+
 
         var simulation = d3.forceSimulation(nodes)
             .force("link", d3.forceLink(links).id(d => d.id))
@@ -65,14 +103,30 @@
             .attr("viewBox", [0, 0, width, height])
             .attr("style", "max-width: 100%; height: auto;");
 
+        svg.append("defs").append("marker")
+        .attr("id", "arrowhead")
+        .attr("viewBox", "0 0 10 10")
+        .attr("refX", 15) // Position of the arrow
+        .attr("refY", 5)
+        .attr("orient", "auto")
+        .attr("markerWidth", 6)
+        .attr("markerHeight", 6)
+        .append("polygon")
+        .attr("points", "0 0, 10 5, 0 10")
+        .attr("fill", "#999");
+
+
         var link = svg.append("g")
             .attr("stroke", "#999")
             .attr("stroke-opacity", 0.6)
             .selectAll()
             .data(links)
             .join("line")
-            .attr("stroke-width", d => Math.sqrt(d.value));
+            .attr("stroke-width", d => Math.sqrt(d.value))
+            .attr("marker-end", "url(#arrowhead)");;
 
+
+            const tooltip = d3.select(".tooltip");
         var node = svg.append("g")
             .attr("stroke", "#fff")
             .attr("stroke-width", 1.5)
@@ -80,7 +134,16 @@
             .data(nodes)
             .join("circle")
             .attr("r", 5)
-            .attr("fill", d => color(d.group));
+            .attr("fill", d => color(d.group))
+            .on("mouseover", (event, d) => {
+                tooltip.transition().duration(200).style("opacity", .9);
+                tooltip.html(d.id)
+                    .style("left", (event.pageX + 5) + "px")
+                    .style("top", (event.pageY - 28) + "px");
+            })
+            .on("mouseout", () => {
+                tooltip.transition().duration(500).style("opacity", 0);
+            });
 
         node.append("title").text(d => d.id);
 
@@ -130,6 +193,15 @@
         links.push(newLink); // Add new link to links array
 
         // Restart the simulation with the updated nodes and links
+        simulation.nodes(nodes);
+        simulation.force("link").links(links);
+        simulation.alpha(1).restart(); // Restart the simulation
+
+        // Update the SVG elements
+        updateSVG();
+    }
+
+    function RE(){
         simulation.nodes(nodes);
         simulation.force("link").links(links);
         simulation.alpha(1).restart(); // Restart the simulation
