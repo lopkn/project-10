@@ -27,20 +27,20 @@ split.forEach((e,i)=>{
 	main = {"abs":e.split("\nC1 ")[0],"ref":e.split("\nNR ")[1].split("\nTC ")[0]}
 	let d = e.split("\nDA ")[1].split("\n")[0]
 
-	// main.date = d
-	// main.ago = (new Date()-new Date(d))/1000/60/60/24
-	// testData = main.abs
-	// main.tref = parseInt(main.ref)/main.ago
-	// main.smogIndex = readability.smogIndex(main.abs)
-	// main.fleschReadingEase = readability.fleschReadingEase(testData)
-	// main.fleschKincaidGrade = readability.fleschKincaidGrade(testData)
-	// main.colemanLiauIndex = readability.colemanLiauIndex(testData)
-	// main.automatedReadabilityIndex = readability.automatedReadabilityIndex(testData)
-	// main.daleChallReadabilityScore = readability.daleChallReadabilityScore(testData)
-	// main.difficultWords = readability.difficultWords(testData)
-	// main.linsearWriteFormula = readability.linsearWriteFormula(testData)
-	// main.gunningFog = readability.gunningFog(testData)
-	// main.textStandard = readability.textStandard(testData)
+	main.date = d
+	main.ago = (new Date()-new Date(d))/1000/60/60/24
+	testData = main.abs
+	main.tref = parseInt(main.ref)/main.ago
+	main.smogIndex = readability.smogIndex(main.abs)
+	main.fleschReadingEase = readability.fleschReadingEase(testData)
+	main.fleschKincaidGrade = readability.fleschKincaidGrade(testData)
+	main.colemanLiauIndex = readability.colemanLiauIndex(testData)
+	main.automatedReadabilityIndex = readability.automatedReadabilityIndex(testData)
+	main.daleChallReadabilityScore = readability.daleChallReadabilityScore(testData)
+	main.difficultWords = readability.difficultWords(testData)
+	main.linsearWriteFormula = readability.linsearWriteFormula(testData)
+	main.gunningFog = readability.gunningFog(testData)
+	main.textStandard = readability.textStandard(testData)
 	MAINARR.push(main)
 })
 console.log("done")
