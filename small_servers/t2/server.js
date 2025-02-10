@@ -6,6 +6,7 @@ prompt = require('prompt-sync')()
 
 
 
+let MAINARR = []
 
 function start(z){
 
@@ -25,8 +26,7 @@ let txt = fs.readFileSync("./T2/"+z+".txt","utf8")
 let split = txt.split("\nAB ")
 split.splice(0,1)
 
-let MAINARR = []
-
+MAINARR = []
 
 split.forEach((e,i)=>{
 	main = {"abs":e.split("\nC1 ")[0],"ref":e.split("\nNR ")[1].split("\nTC ")[0]}
