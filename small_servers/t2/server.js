@@ -68,6 +68,7 @@ function outing(item,file=(loaded)){
 	})
 
 	file += item
+	file.replaceAll("/","_")
 	fs.writeFileSync("./data/"+file+".txt",JSON.stringify(z,null))
 
 	return(z)
