@@ -6,6 +6,8 @@ prompt = require('prompt-sync')()
 
 
 
+let loaded = ""
+
 let MAINARR = []
 
 function start(z){
@@ -15,6 +17,7 @@ function start(z){
 console.log("loading file: ./T2/"+z+".txt")
 
 
+loaded = z
 
 let txt = fs.readFileSync("./T2/"+z+".txt","utf8")
 
@@ -58,13 +61,14 @@ function wft(x,t){
 
 }
 
-function outing(item,file="out"){
+function outing(item,file=(loaded)){
 	let z = []
 	MAINARR.forEach((e)=>{
 		z.push(e[item])
 	})
 
-	fs.writeFileSync("./data/"+file+".txt",JSON.stringify(x,null,t))
+	file += item
+	fs.writeFileSync("./data/"+file+".txt",JSON.stringify(z,null,t))
 
 	return(z)
 }
