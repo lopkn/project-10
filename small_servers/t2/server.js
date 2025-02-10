@@ -68,7 +68,7 @@ function outing(item,file=(loaded)){
 	})
 
 	file += item
-	fs.writeFileSync("./data/"+file+".txt",JSON.stringify(z,null,t))
+	fs.writeFileSync("./data/"+file+".txt",JSON.stringify(z,null))
 
 	return(z)
 }
