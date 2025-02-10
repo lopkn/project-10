@@ -31,7 +31,17 @@ split.splice(0,1)
 
 MAINARR = []
 
+let progress = 0
+
 split.forEach((e,i)=>{
+
+	let tempProgress = Math.floor(i/split.length*100)
+	if(tempProgress>progress){
+		console.log("progress: "+tempProgress+"%")
+		progress = tempProgress
+	}
+
+
 	main = {"abs":e.split("\nC1 ")[0],"ref":e.split("\nNR ")[1].split("\nTC ")[0]}
 	let d = e.split("\nDA ")[1].split("\n")[0]
 
@@ -69,7 +79,9 @@ function outing(item,file=(loaded)){
 
 	file += item
 	file = file.replaceAll("/","_")
-	fs.writeFileSync("./data/"+file+".txt",JSON.stringify(z,null))
+	let jsn = JSON.stringify(z,null)
+	jsn = jsn.slice(1,-1)
+	fs.writeFileSync("./data/"+file+".txt",jsn)
 
 	return(z)
 }
