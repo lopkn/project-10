@@ -62,15 +62,17 @@
         // };
 
         let data = {nodes:[],links:[]}
-        const width = 928;
-        const height = 600;
+        let ZOOM = 1
+        const width = window.innerWidth;
+        const height = window.innerHeight;
         const color = d3.scaleOrdinal(d3.schemeCategory10);
         var links = data.links.map(d => ({...d}));
         var nodes = data.nodes.map(d => ({...d}));
 
 
-        let imp = inflateTrainingProcess(`[[4,0,2u5,4,3n6,5,1n7,6,0u8,7,4u9,8,2n10,9,1n11,10,7u12,11,3n13,12,4u14,13,3n15,14,0n16,15,10,"or"]]`)
-        let inputSpace = 2
+        let imp = inflateTrainingProcess(`[[200,0,172u201,200,68n202,201,123n203,202,132u204,203,64n205,204,181u206,205,4n207,206,192u208,207,29n209,208,111u210,209,10n211,210,154u212,211,190u213,212,162n214,213,145n215,214,42n216,215,186u217,216,133n218,217,54n219,218,209u220,219,58n221,220,144u222,221,87n223,222,111u224,223,77n225,224,36u226,225,56n227,226,162n228,227,37u229,228,194u230,229,95n231,230,100n232,231,102u233,232,41n234,233,107u235,234,93n236,235,176u237,236,4n238,237,118u239,238,11n240,239,193u241,240,165n242,241,47n243,242,214u244,243,190u245,244,69n246,245,171u247,246,194n248,247,56n249,248,152u250,249,26n251,250,123n252,251,111u253,252,89n254,253,157u255,254,77n256,255,173u257,256,165u258,257,5n259,258,184u260,259,63n261,260,152u262,261,16n263,262,190u264,263,73n265,264,111u266,265,27n267,266,98n268,267,243u269,268,141u270,269,20n271,270,26u272,271,62n273,272,142n274,273,26u275,274,87n276,275,191n277,276,169u278,277,18n279,278,105u280,279,93n281,280,24u282,281,66n283,282,160n284,283,193u285,284,48n286,285,161u287,286,195n288,287,88n289,288,198u290,289,79n291,290,211u292,291,171u293,292,73n294,293,268u295,294,8n296,295,249u297,296,61n298,297,152u299,298,19n300,299,118u301,300,16n302,301,118u303,302,10n304,303,228u305,304,169u306,305,195n307,306,15n308,307,214u309,308,132u310,309,61n311,310,187u312,311,52n313,312,257u314,313,14n315,314,91n316,315,26u317,316,36n318,317,100,"and"]] `)
+        // imp = inflateTrainingProcess(`[[200,0,192u201,200,155n202,201,48n203,202,167u204,203,7n205,204,26u206,205,40n207,206,162n208,207,144u209,208,47n210,209,65u211,210,195u212,211,164n213,212,14n214,213,23u215,214,29n216,215,135n217,216,205u218,217,37n219,218,102n220,219,197u221,220,66n222,221,170u223,222,85n224,223,199u225,224,7n226,225,185u227,226,68n228,227,101u229,228,49n230,229,120u231,230,56n232,231,218u233,232,73u234,233,112,"and"]] `)
+        let inputSpace = 100
 
         data.nodes = []
         data.links = []
@@ -83,6 +85,7 @@
             let g = 2
             if(x===0&&e[3]==="and"){g=1}
             if(parseInt(e[x]) < inputSpace*2){g=0}
+            if(Z === imp.length-1 && x===0){g=3}
             nodes.push({id:e[x],group:g})}
           }
           links.push({source:e[1],target:e[0],value:1})
@@ -101,7 +104,19 @@
             .attr("width", width)
             .attr("height", height)
             .attr("viewBox", [0, 0, width, height])
-            .attr("style", "max-width: 100%; height: auto;");
+            .attr("style", "max-width: 100%; height: auto;")
+            .call(d3.zoom()
+                .scaleExtent([0.01, 8]) // Set zoom limits
+                .on("zoom", (event) => {
+                    node.attr("transform", event.transform); // Apply zoom transformation
+                    link.attr("transform", event.transform); // Apply zoom transformation
+                    ZOOM = event.transform.k
+                    if(event.transform.k<1){
+                      node.attr("r",Math.max(5/event.transform.k))
+                      link.attr("stroke-width", d => Math.sqrt(d.value)/event.transform.k)
+                    }
+                }));
+;
 
         svg.append("defs").append("marker")
         .attr("id", "arrowhead")
@@ -148,6 +163,7 @@
         node.append("title").text(d => d.id);
 
         node.call(d3.drag()
+            // .subject(d => ({x: x(d[0]), y: y(d[1])}))
             .on("start", dragstarted)
             .on("drag", dragged)
             .on("end", dragended));
@@ -162,14 +178,25 @@
         }
 
         function dragstarted(event) {
-            if (!event.active) simulation.alphaTarget(0.3).restart();
+            if (!event.active) simulation.alphaTarget(0.9).restart();
             event.subject.fx = event.subject.x;
             event.subject.fy = event.subject.y;
         }
 
+
+  function distance(x1,y1,x2,y2) {
+  let a = x2-x1
+  let b = y2-y1
+  return(Math.sqrt(a*a+b*b))
+}
+
         function dragged(event) {
-            event.subject.fx = event.x;
-            event.subject.fy = event.y;
+          fm = distance(event.subject.x,event.subject.y,event.x,event.y)/100
+            event.subject.fx = event.subject.x+(event.x-event.subject.x)*fm;
+            event.subject.fy = event.subject.y+(event.y-event.subject.y)*fm;
+            // event.subject.fx = event.sourceEvent.pageX
+            // event.subject.fy= event.sourceEvent.pageY
+
         }
 
         function dragended(event) {

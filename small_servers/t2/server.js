@@ -5,7 +5,12 @@ const readability = require('readability-score');
 prompt = require('prompt-sync')()
 
 
-z = prompt("what file idiot\n")
+
+
+function start(z){
+
+
+// z = prompt("what file idiot\n")
 console.log("loading file: ./T2/"+z+".txt")
 
 
@@ -45,18 +50,22 @@ split.forEach((e,i)=>{
 })
 console.log("done")
 
+}
+
 
 function wft(x,t){
 	fs.writeFileSync("./data/out.txt",JSON.stringify(x,null,t))
 
 }
 
-function outing(item){
+function outing(item,file="out"){
 	let z = []
 	MAINARR.forEach((e)=>{
 		z.push(e[item])
 	})
-	wft(z)
+
+	fs.writeFileSync("./data/"+file+".txt",JSON.stringify(x,null,t))
+
 	return(z)
 }
 
