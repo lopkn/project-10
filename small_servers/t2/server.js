@@ -100,3 +100,54 @@ function outing(item,file=(loaded)){
 
 // hypothesis: it only censors IF the place name is mentioned
 // experiment: try to get it to say something WITHOUT mentioning the place
+
+
+
+
+
+
+
+
+
+// i have 2 new ideas for a project for the rest of the WebSocket
+
+// 1. a game
+
+// have you ever played bonk.io?
+
+// its pretty fun right
+
+// but now think of a multiplayer game like that, except i want to add gear shifting
+
+// so think of your row of numbers as your gearbox
+// you can accelerate at that rate, and spend that amount of fuel
+
+// AND, i want there to be a bigger arena, and ball abilities
+// one fun ability i just thought of is temporarily turning off collision
+// so you can fake being at the edge, press ability, and people run through you
+
+// and the balls can be different mass
+
+// can also make gravity
+
+
+
+
+2. a temporal ad-less voice call app
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
