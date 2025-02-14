@@ -16,7 +16,6 @@ let ctx = document.getElementById("myCanvas").getContext("2d")
 
 
 
-
 let mouseX = 0
 let mouseY = 0
 onmousemove = (e)=>{mouseX = (e.clientX); mouseY = (e.clientY)}
@@ -34,13 +33,89 @@ requestAnimationFrame(mainLoop)
 })
 
 var jp
+var updateSignal = Date.now()
+var updateTime = updateSignal
+let timeError = 0
+let thisTimeError = 0
 socket.on("update",(e)=>{
-  jp = JSON.parse(e)
-  ballArr = Object.values(jp)
+  updateTime = e.time
   // console.log(e)
+  updateSignal = Date.now()
+  thisTimeError = updateSignal - updateTime
+  timeError =  dampen(thisTimeError,timeError,0.1)
+  if(Math.abs(thisTimeError - timeError) < 5){
+    // console.log(timeError)
+    jp = JSON.parse(e.balls)
+    ballArr = Object.values(jp)
+    ballArr.forEach((e)=>{
+      e.x = parseFloat(e.x)
+      e.vx = parseFloat(e.vx)
+      e.y = parseFloat(e.y)
+      e.vy = parseFloat(e.vy)
+      e.hp = parseFloat(e.hp)
+    })
+  } else {
+    console.log(thisTimeError)
+  }
 })
 
 
+function dampen(n,o,factor){
+  return(n*factor + o*(1-factor))
+}
+
+
+class explosionR2{
+  constructor(x,y,color,life=600,lineRelation,radiusRelation,fillcolor="rgba(0,0,0,0)"){
+    this.x = x
+    this.y = y
+    this.color = color
+    this.fillcolor = fillcolor
+    if(typeof(color) !== "string"){this.colorf = color; this.color = "#FF00FF"}
+    if(typeof(fillcolor) !== "string"){this.fillcolorf = fillcolor; this.fillcolor = "#FF00FF"}
+    this.lineRelation = lineRelation?lineRelation:((x)=>{return(15*x/life)})
+    this.radiusRelation = radiusRelation?radiusRelation:((x)=>{return((life-x)*300/life)})
+    this.actLife = life
+    this.maxlife = life
+    this.lastTime = Date.now()    
+  }
+
+  update(t){
+    this.actLife -= t-this.lastTime
+    this.frameLineWidth = this.lineRelation(this.actLife)
+    this.frameRadius = this.radiusRelation(this.actLife)
+    this.lastTime = t
+    if(this.colorf !== undefined){
+      this.color = this.colorf(this.actLife/this.maxlife)
+    }
+    if(this.fillcolorf !== undefined){
+      this.fillcolor = this.fillcolorf(this.actLife/this.maxlife)
+    }
+
+    // if(this.tracking){
+    //   if(map.players[this.tracking]){
+    //    this.coords = getFPlayerRot(this.tx,this.ty,this.tracking)
+      
+    // } 
+    // this.x = this.coords[0]
+    // this.y = this.coords[1]
+    // }
+  }
+  draw(){
+    if(this.actLife < 0){
+      return('del')
+    }
+    ctx.strokeStyle = this.color
+    ctx.fillStyle = this.fillcolor
+    ctx.lineWidth = this.frameLineWidth*SCALE
+    ctx.beginPath()
+    let bts = [this.x,this.y]
+    ctx.arc(bts[0],bts[1], this.frameRadius*SCALE, 0, 2 * Math.PI);
+    ctx.stroke()
+    ctx.fill()
+    
+  }
+}
 
 class LCanvas{ //lopkns template canvas
   constructor(w=100,h=100,id=("LCanvas-"+Math.random())){
@@ -185,6 +260,7 @@ class LPerceptron{ //it should have input name, input value. each input should h
 
 
 
+let SCALE = 1
 
 let ballArr = [{x:100,y:100,color:"red",r:50}]
 
@@ -194,19 +270,42 @@ let camx = camy = 0
 let lastx = 0
 let lasty = 0
 
+var PARR = []
+
 ctx.textAlign = "center"
+
+
+let lastFrame = Date.now()
 
 function draw(){
 
   if(ID === 0 || jp === undefined){return}
-  ctx.setTransform(1, 0, 0, 1, 0, 0)
+
+
+
+        let now = Date.now()
+  DT = now - lastFrame
+  // if(DT > 9){console.log("HEY")}
+  dt = now - updateSignal
+  updateSignal = now
+  lastFrame = now
+    ballArr.forEach((e)=>{
+      e.x += e.vx * dt / 35
+      e.y += e.vy * dt / 35
+    })   
+  // if(dt > 10){console.log("skipped frame")}
+  ctx.setTransform(SCALE, 0, 0, SCALE, 0, 0)
+
 
 
   camx = -jp[ID].x
   camy = -jp[ID].y
 
+  // SCALE = 1 - 1/(distance(jp[ID].vx,jp[ID].vy,0,0)/20+2) // trip
+  // SCALE = 1-Math.min((distance(jp[ID].vx,jp[ID].vy,0,0)/220),0.8)
+
   ctx.globalCompositeOperation = "copy";
-  ctx.drawImage(ctx.canvas,(camx-lastx), (camy-lasty));
+  ctx.drawImage(ctx.canvas,(camx-lastx), (camy-lasty),Width/SCALE,Height/SCALE);
 
   lastx = camx
   lasty = camy
@@ -214,24 +313,42 @@ function draw(){
   // reset back to normal for subsequent operations.
   ctx.globalCompositeOperation = "source-over"
 
-  ctx.fillStyle = "rgba(0,0,0,0.01)"
-  ctx.fillRect(0,0,Width,Height)
+  ctx.fillStyle = "rgba(0,0,0,0.02)"
+  ctx.fillRect(0,0,Width/SCALE,Height/SCALE)
 
 
 
+    ctx.fillStyle = "rgb(255,255,0)"
+    // ctx.fillRect(camx,Height-20,Math.abs(thisTimeError),20)
+  // ctx.fillRect(0,Height-40,Math.abs(timeError),20)
 
 
 
   
 
-  ctx.translate(camx+Width/2,camy+Height/2)
+  ctx.translate(camx+Width/2/SCALE,camy+Height/2/SCALE)
     ctx.lineWidth = 1
     ctx.strokeStyle = "green"
   for(let i = 1; i < 20; i++){
     ctx.beginPath()
-    ctx.arc(0,0,i*120,0,2*Math.PI)
+    ctx.arc(0,0,i**1.3*80,0,2*Math.PI)
     ctx.stroke()
   }
+
+
+
+  // updateSignal += 1
+
+ 
+  for(let i = PARR.length-1; i > -1; i--){
+    let p = PARR[i]
+    p.update(now)
+    if(p.draw()=="del"){
+      PARR.splice(i,1)
+    }
+  } 
+
+
   ballArr.forEach((e)=>{
     ctx.strokeStyle = e.holding?"white":"green"
     ctx.lineWidth = (e.holding?3:1)
@@ -245,8 +362,11 @@ function draw(){
     // ctx.font = "bold 18px Arial";
     // ctx.fillStyle = "red"
     // ctx.fillText(e.hp,e.x,e.y+5)
-    ctx.fillStyle = "rgb("+Math.floor((100-e.hp)*2.5)+","+Math.floor(e.hp*2.5)+",0)"
-    ctx.fillRect(e.x-e.r,e.y-5,e.r*2,10)
+    ctx.strokeStyle = "rgb("+Math.floor((100-e.hp)*2.5)+","+Math.floor(e.hp*2.5)+",0)"
+    ctx.lineWidth = 3
+    ctx.beginPath()
+    ctx.arc(e.x,e.y,e.r/2.4,0,2*Math.PI)
+    ctx.stroke()
   })
 }
 

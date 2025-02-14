@@ -77,10 +77,15 @@ class baller{
 	}
 
 	static disconnect(s){
-		delete this.balls[s.id]
+		if(Object.keys(this.balls).length>10){
+			delete this.balls[s.id]
+		}
 	}
 	static join(s){
-		this.balls[s.id] = {"x":0,"y":0,"r":25,"color":"blue","vx":0,"vy":0,"cax":0,"cay":0,"mass":1,"hp":100}
+		let r= 25
+		let m = 1
+		if(Object.keys(this.balls).length===0){r=50;m=3}
+		this.balls[s.id] = {"x":0,"y":0,"r":r,"color":"blue","vx":0,"vy":0,"cax":0,"cay":0,"mass":3,"hp":100}
 	}
 
 	static started = false;
@@ -91,7 +96,19 @@ class baller{
 		this.interval = setInterval(()=>{this.loop()},35)
 	}
 	static loop(){
-		io.to("G10.9").emit("update",JSON.stringify(this.balls))
+		let now = Date.now()
+		// if(Math.random()>0.3){
+			let ballIST = {}
+			Object.keys(this.balls).forEach((e)=>{
+				let b = this.balls[e]
+				ballIST[e] = {"x":b.x.toPrecision(4),"y":b.y.toPrecision(4),
+					"vx":b.vx.toPrecision(4),"vy":b.vy.toPrecision(4),
+					"color":b.color,"r":b.r,"hp":b.hp.toPrecision(3)
+
+				}
+			})
+			io.to("G10.9").emit("update",{"time":now+100,"balls":JSON.stringify(this.balls)})
+		// }
 
 		let ballArr = Object.values(this.balls)
 
