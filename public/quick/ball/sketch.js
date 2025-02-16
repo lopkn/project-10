@@ -43,7 +43,7 @@ socket.on("update",(e)=>{
   updateSignal = Date.now()
   thisTimeError = updateSignal - updateTime
   timeError =  dampen(thisTimeError,timeError,0.1)
-  if(Math.abs(thisTimeError - timeError) < 5){
+  if(thisTimeError - timeError < 15){
     // console.log(timeError)
     jp = JSON.parse(e.balls)
     ballArr = Object.values(jp)
@@ -313,14 +313,14 @@ function draw(){
   // reset back to normal for subsequent operations.
   ctx.globalCompositeOperation = "source-over"
 
-  ctx.fillStyle = "rgba(0,0,0,0.02)"
+  ctx.fillStyle = "rgba(0,0,0,2)"
   ctx.fillRect(0,0,Width/SCALE,Height/SCALE)
 
 
 
     ctx.fillStyle = "rgb(255,255,0)"
-    // ctx.fillRect(camx,Height-20,Math.abs(thisTimeError),20)
-  // ctx.fillRect(0,Height-40,Math.abs(timeError),20)
+    ctx.fillRect(0,Height-20,Math.abs(thisTimeError),20)
+  ctx.fillRect(0,Height-40,Math.abs(timeError),20)
 
 
 
