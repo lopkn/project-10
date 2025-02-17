@@ -1,0 +1,19 @@
+{
+  "short_name": "LopknS102",
+  "permissions": ["scripting","clipboardRead", "clipboardWrite","storage", "tabs"],
+  "action": {
+    "default_popup": "popup.html"
+  },
+
+  "manifest_version": 3,
+  "name": "lopkn summarizer",
+  "version": "1.0.2",
+  "content_scripts": [
+    {
+      // "matches": ["https://www.youtube.com/*","https://en.wikipedia.org/*","https://www.cell.com/*"],
+      "matches":["https://*/*"],
+      "js": ["script.js"]
+    }
+  ]
+
+}
