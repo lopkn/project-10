@@ -1,3 +1,4 @@
+{
 var apiKey;
 const endpoint = "https://api.openai.com/v1/chat/completions";
 
@@ -141,6 +142,7 @@ function readText(){
 
     txt = window.getSelection().toString()
     if(txt.length < 10){return}
+    div.style.display = "block"
     navigator.clipboard.writeText(txt).then(() => {
         console.log("Text copied to clipboard");
     });
@@ -168,7 +170,6 @@ document.body.addEventListener("keydown",async (e)=>{
 })
 
 function doThing(){
-    div.style.display = "block"
     readText()
 }
 
@@ -180,8 +181,9 @@ document.body.appendChild(div)
 
 
 
-
-
+console.log("lopkn S102 loaded")
+div.style.zIndex = 999999999999
+}
 
 
 
