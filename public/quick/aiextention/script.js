@@ -106,7 +106,7 @@ divTopic.style.backgroundColor = "purple"
 divTopic.style.color = "#F0F"
 divTopic.style.width = "100%"
 divTopic.style.height = "20%"
-divTopic.innerHTML = "Hey"
+divTopic.innerHTML = "starting"
 divTopic.style.fontSize = "30px"
 
 let divResponse = document.createElement("div")
@@ -160,10 +160,10 @@ document.body.addEventListener("keydown",async (e)=>{
 
         doThing()
     }
-    if(e.key == "X" ){
+    if(e.key == "X"){
         if(div.style.display !== "none"){
             div.style.display = "none"
-        } else {
+        } else if(divTopic.innerHTML != "starting"){
             div.style.display = "block"
         }
     }
