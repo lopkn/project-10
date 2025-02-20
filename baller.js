@@ -85,7 +85,7 @@ class baller{
 		let r= 25
 		let m = 1
 		if(Object.keys(this.balls).length===0){r=50;m=3}
-		this.balls[s.id] = {"x":0,"y":0,"r":r,"color":"blue","vx":0,"vy":0,"cax":0,"cay":0,"mass":3,"hp":100}
+		this.balls[s.id] = {"id":s.id,"x":0,"y":0,"r":r,"color":"blue","vx":0,"vy":0,"cax":0,"cay":0,"mass":3,"hp":100}
 	}
 
 	static started = false;
@@ -116,6 +116,7 @@ class baller{
 
 
 		ballArr.forEach((e)=>{
+			if(!e.dead){e.color="blue"}
 			e.vx += e.cax
 	    	e.vy += e.cay
 	    
@@ -150,6 +151,13 @@ function dead(b){
 	b.dead = true
 	b.color = "red"
 }
+
+
+function forceX(b,x,y){
+	b.vx += x
+	b.vy += y
+}
+
 
 function collided(b1,b2,d){
   if(d===undefined){d = distance(b1.x,b1.y,b2.x,b2.y)}
@@ -195,12 +203,11 @@ function collided(b1,b2,d){
 
 
     if(distance(b2.vx,b2.vy,0,0) > distance(b1.vx,b1.vy,0,0)){
-    	let b3 = b2
-    	b2 = b1
-    	b1 = b3
+    	attack(b2,b1)
+    } else {
+    	attack(b1,b2)
     }
     
-    attack(b1,b2)
     
     
   }
@@ -217,6 +224,10 @@ function dot(x1, y1, x2, y2) {
     
     // b1.vx = 0
     // b1.vy = 0
+
+  	b2.color = "yellow"
+  	console.log(b2.id)
+
     let massratio = b1.mass / b2.mass
 	b2.vx -= (b1.cvx-b2.cvx) * massratio//attackee push
     b2.vy -= (b1.cvy-b2.cvy) * massratio
