@@ -33,6 +33,9 @@ MAINARR = []
 
 let progress = 0
 
+let MAIND = "2025-02-06"
+
+
 split.forEach((e,i)=>{
 
 	let tempProgress = Math.floor(i/split.length*100)
@@ -43,10 +46,10 @@ split.forEach((e,i)=>{
 
 
 	main = {"abs":e.split("\nC1 ")[0],"ref":e.split("\nNR ")[1].split("\nTC ")[0]}
-	let d = e.split("\nDA ")[1].split("\n")[0]
+	let d = e.split("\nPY ")[1].split("\n")[0]
 
 	main.date = d
-	main.ago = (new Date()-new Date(d))/1000/60/60/24
+	main.ago = (new Date(MAIND)-new Date(d))/1000/60/60/24
 	testData = main.abs
 	main.tref = parseInt(main.ref)/main.ago
 	main.smogIndex = readability.smogIndex(main.abs)
@@ -133,7 +136,7 @@ function outing(item,file=(loaded)){
 
 
 
-2. a temporal ad-less voice call app
+// 2. a temporal ad-less voice call app
 
 
 
