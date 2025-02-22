@@ -137,7 +137,7 @@ divResponse.innerHTML = "Loading"
 }
 
 div.style.display = "none"
-
+var UNIPROMPT;
 function readText(){
 
     txt = window.getSelection().toString()
@@ -146,7 +146,11 @@ function readText(){
     navigator.clipboard.writeText(txt).then(() => {
         console.log("Text copied to clipboard");
     });
-    processInput(txt)
+    processInput(txt,UNIPROMPT)
+}
+
+function changePrompt(str){
+    UNIPROMPT = str
 }
 
 document.body.addEventListener("keydown",async (e)=>{
