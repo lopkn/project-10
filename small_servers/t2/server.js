@@ -33,7 +33,7 @@ MAINARR = []
 
 let progress = 0
 
-let MAIND = "2025-02-06"
+let MAIND = "2025-02-26"
 
 
 split.forEach((e,i)=>{
@@ -51,21 +51,26 @@ split.forEach((e,i)=>{
 	main.date = d
 	main.ago = (new Date(MAIND)-new Date(d))/1000/60/60/24
 	testData = main.abs
-	main.tref = parseInt(main.ref)/main.ago
-	main.smogIndex = readability.smogIndex(main.abs)
-	main.fleschReadingEase = readability.fleschReadingEase(testData)
-	main.fleschKincaidGrade = readability.fleschKincaidGrade(testData)
-	main.colemanLiauIndex = readability.colemanLiauIndex(testData)
-	main.automatedReadabilityIndex = readability.automatedReadabilityIndex(testData)
-	main.daleChallReadabilityScore = readability.daleChallReadabilityScore(testData)
-	main.difficultWords = readability.difficultWords(testData)
-	main.linsearWriteFormula = readability.linsearWriteFormula(testData)
-	main.gunningFog = readability.gunningFog(testData)
-	main.textStandard = readability.textStandard(testData)
+	// main.tref = parseInt(main.ref)/main.ago
+	// main.smogIndex = readability.smogIndex(main.abs)
+	// main.fleschReadingEase = readability.fleschReadingEase(testData)
+	// main.fleschKincaidGrade = readability.fleschKincaidGrade(testData)
+	// main.colemanLiauIndex = readability.colemanLiauIndex(testData)
+	// main.automatedReadabilityIndex = readability.automatedReadabilityIndex(testData)
+	// main.daleChallReadabilityScore = readability.daleChallReadabilityScore(testData)
+	// main.difficultWords = readability.difficultWords(testData)
+	// main.linsearWriteFormula = readability.linsearWriteFormula(testData)
+	// main.gunningFog = readability.gunningFog(testData)
+	// main.textStandard = readability.textStandard(testData)
 	MAINARR.push(main)
 })
 console.log("done")
 
+}
+
+
+function saveAll(){
+	fs.appendFileSync("./data/ALL_"+(new Date().toLocaleString())+".txt",JSON.stringify(MAINARR,null,t))
 }
 
 
