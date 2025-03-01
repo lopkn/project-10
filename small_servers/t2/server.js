@@ -65,7 +65,6 @@ split.forEach((e,i)=>{
 	MAINARR.push(main)
 })
 console.log("done")
-
 }
 
 
@@ -142,6 +141,36 @@ function outing(item,file=(loaded)){
 
 
 // 2. a temporal ad-less voice call app
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
