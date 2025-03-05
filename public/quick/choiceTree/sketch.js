@@ -571,7 +571,12 @@ function processAuto(arr){
 
 
 
-
+window.addEventListener('beforeunload', function (event) {
+            // Customize the message (not all browsers show this message)
+            const message = "Are you sure you want to leave?";
+            event.returnValue = message; // Standard way to show the dialog
+            return message; // For some older browsers
+        });
 
 
 
