@@ -306,6 +306,7 @@ class music{
 		let shuffledNotes = notes.sort((a,b)=>{return(0.5-trand())})
 		let delran = 0
 		let delrans = []
+		let notelog=[]
 		notes.forEach((e,i)=>{
 			// if(Math.random() > 0.9){delran += adel*1}
 			// if(Math.random() > 0.8){delran += adel*0.25;delrans.push(0.25)}
@@ -319,12 +320,12 @@ class music{
 			// }
 
 			this.playBell(e,avel*0.9**(i-1),i*adel+delran)
-			// notes[i] = Tone.Frequency(e, "midi").toNote();
+			notelog[i] = Tone.Frequency(e, "midi").toNote();
 		})
 
 		this.noteProcessing(notes)
 
-		console.log(JSON.stringify(notes))
+		console.log(JSON.stringify(notelog))
 		return(notes)
 	}
 
@@ -681,17 +682,29 @@ ctx2.textAlign = 'center'
 class comparer{
 
 
+	// static disabled = {
+	// 	"0":100000,
+	// 	"1":100000,
+	// 	"2":100000,
+	// 	"3":100000,
+	// 	"4":100000,
+	// 	"5":100000,
+	// 	"6":100000,
+	// 	"7":100000,
+	// 	"8":100000,
+	// 	"9":100000
+	// }
 	static disabled = {
-		"0":100000,
-		"1":100000,
-		"2":100000,
-		"3":100000,
-		"4":100000,
-		"5":100000,
-		"6":100000,
-		"7":100000,
-		"8":100000,
-		"9":100000
+		0:0,
+		1:0,
+		2:0,
+		3:0,
+		4:0,
+		5:0,
+		6:0,
+		7:0,
+		8:0,
+		9:0
 	}
 	static last = "" + (Date.now()+date_disruptor)
 
@@ -1585,7 +1598,7 @@ onmousemove = (e)=>{mouseX = (e.clientX); mouseY = (e.clientY);
 
 	let dd = distance(0,0,e.movementX,e.movementY)
 if(Math.random()>1-dd*0.005*events.varbs.conjureStrength){
-		let a = new liner(mouseX+Math.random()-0.5,mouseY+Math.random()-0.5,Math.floor(Math.random()*3),4+Math.floor(Math.random()*2))
+		let a = new liner(mouseX+Math.random()-0.5,mouseY+Math.random()-0.5,Math.floor(Math.random()*1/*turned from 3 to 2 ,march 2025*/),4+Math.floor(Math.random()*2))
 		a.following = true
 		parr.push(a)
 	}
@@ -1755,7 +1768,7 @@ let parr = []
 class events{
 	static happening = {}
 	static interactions = {"cutInteraction":[]}
-	static varbs = {handOnScreen:true,boltrate:0.99,rippleStrength:1,trip:1,noteCeiling:85,noteFloor:45,octave:0,conjureStrength:0}
+	static varbs = {handOnScreen:true,boltrate:0.99,rippleStrength:1,trip:1,noteCeiling:85,noteFloor:45,octave:0,conjureStrength:25}
 	static updateAll(dt){
 		let objk = Object.keys(this.happening)
 		objk.forEach((E)=>{
@@ -2681,7 +2694,7 @@ function push(particle,dx,dy){
 		particle.vy += dy / particle.mass
 	}
 }
-if(true){
+if(false){ // ADD BALLGAME ballgame = false
 events.addEvent("ballgame",{
 	"energy":300,
 	"strength":1,
@@ -3389,7 +3402,7 @@ mobileInit()
 
 
 // command("/reverb off")	
-command("/echo off")
+// command("/echo off")
 
 
 music.mainDel = music.GD1()

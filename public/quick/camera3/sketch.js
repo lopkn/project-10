@@ -14,8 +14,8 @@ var Width = canvas.width = renderingCanvas.width = 125*10
 var Height = canvas.height = renderingCanvas.height = 100*10
 
 camera_button.addEventListener('click', async function() {
-    let stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-    // let stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });
+    // let stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+    let stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });
   video.srcObject = stream;
 });
 
@@ -313,7 +313,7 @@ function drawScan(){
 
 
 
-
+console.log("heyßß")
 
 
 
