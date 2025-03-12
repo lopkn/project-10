@@ -171,15 +171,41 @@ function outing(item,file=(loaded)){
 
 
 
+/*
 
 
 
+g = Array.from(document.querySelectorAll('span')).find(span => span.innerText === 'Export expand_more').click()
+
+b = Array.from(document.querySelectorAll('button')).find(span => span.innerText === 'Plain text file').click()
+document.querySelectorAll("span.mat-radio-outer-circle")[1].click()
+
+let i = 1
+
+let X = (i-1)*1000 + 1
+let Y = i*1000
+
+function updateInputValue(inputElement,newValue) {
+            inputElement.value = newValue;
+
+            // Create and dispatch an input event
+            const inputEvent = new Event('input', { bubbles: true });
+            inputElement.dispatchEvent(inputEvent);
+
+            // Optionally, create and dispatch a change event
+            const changeEvent = new Event('change', { bubbles: true });
+            inputElement.dispatchEvent(changeEvent);
+        }
+updateInputValue(document.querySelector('input[name="markFrom"]'),X)
+updateInputValue(document.querySelector('input[name="markTo"]'),Y)
+document.querySelector("button.mat-tooltip-trigger.dropdown").click()
+ful = Array.from(document.querySelectorAll('span')).find(span => span.innerText === 'Full Record').click()
+
+exp = Array.from(document.querySelectorAll('span')).find(span => span.innerText === 'Export').click()
 
 
 
-
-
-
+*/
 
 
 
