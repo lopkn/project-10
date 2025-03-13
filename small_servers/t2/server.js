@@ -212,5 +212,99 @@ exp = Array.from(document.querySelectorAll('span')).find(span => span.innerText 
 
 
 
+/*
+
+
+charges = []
+/// shit starts here
+// to place down a new charge: (charge in units nC)
+/// newCharge(charge,x,y)
+// to ask for the electric field at a coordinate:
+/// prope(x,y)
+
+// newCharge(1,-6,-3)
+
+newCharge(1,0,0)
+// probe(0.2,0)
+// probe(0.05,0)
+// probe(0.15,0)
+
+
+console.log(probeP(0.01,0)-probeP(0.03))
+
+/// shit ends here
+
+
+function newCharge(q,x,y=0,uq="nC",ud="m"){
+  charges.push({"q":q,"x":x,"y":y,"uq":"nC",ud:"m"})
+}
+
+function dot(x1, y1, x2, y2) {
+    return (x1 * x2) + (y1 * y2);
+}
+function distance(x1,y1,x2,y2){
+  let a = x2-x1
+  let b = y2-y1
+  return(Math.sqrt(a*a+b*b))
+}
+
+function probe(x,y=0,ud="m"){
+  let Ex = 0
+  let Ey = 0
+  let k = 8.99e9
+  charges.forEach((e)=>{
+    let d = distance(e.x,e.y,x,y)
+    let m = k*e.q/(d**2)
+    if(e.uq == "nC"){
+      m*=1e-9
+    }
+    
+    Ex += dot(e.x-x,e.y-y,1,0)/d*m;
+    Ey += dot(e.x-x,e.y-y,0,1)/d*m;
+    
+  })
+  let res = {x_component:Ex,y_componet:Ey,magnitude:distance(Ex,Ey,0,0)}
+  console.log(res)
+  return(res)
+}
+
+
+function probeP(x,y=0,ud="m"){
+  let Ex = 0
+  let Ey = 0
+  let k = 8.99e9
+  let summ = 0
+  charges.forEach((e)=>{
+    let d = distance(e.x,e.y,x,y)
+    let m = k*e.q/(d)
+    if(e.uq == "nC"){
+      m*=1e-9
+    }
+    summ += m
+    
+  })
+  console.log("volts:"+summ)
+  return(summ)
+}
+
+
+function solvepq(a,b,c) {
+    let sum = a+b+c
+
+    p = (a*2 + b)/sum/2
+    q = (c*2 + b)/sum/2
+    console.log(p,q) // p and q
+    console.log(p**2 * sum) // expected a
+    console.log(2*p*q * sum) // expected b
+    console.log(q**2 * sum) // expected c
+    console.log(p**2+2*p*q+q**2) // check (should be = 1 always)
+}
+
+
+
+*/
+
+
+
 
 
