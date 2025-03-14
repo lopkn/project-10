@@ -272,7 +272,8 @@ class player{
 	static zoom = 1
 	static zoomR = 410*(1-this.zoom)
 
-	static levelTrip = 1
+	static levelTrip = 0.5
+	static levelTrips = [0.5,0.7,2,4,6]
 
 	static rezoom(x){
 		this.zoom = x
@@ -413,7 +414,7 @@ let tripVel = 0
 let cttr = 0
 function tick(){
 	let tickTimeTracker = Date.now()
-	cttr++
+	// cttr++
 	// if(cttr%2===0){
 	// tripVel += (Math.random()-0.5)/20
 	// }
@@ -486,30 +487,43 @@ function tick(){
 	let CYR = player.gridSize-(cameraY2%player.gridSize)
 
 
-// 	mainCTX.strokeStyle = "#101040"
-// 	mainCTX.lineWidth = 3/player.levelTrip
+
+	///tripstart
+
+// 	player.levelTrips.forEach((lvlt)=>{
+
+
+// 	mainCTX.strokeStyle = "#00F"
+// 	mainCTX.lineWidth = 3/lvlt
 // 	mainCTX.beginPath()
 
-// 	player.rezoom(player.zoom/player.levelTrip)
+// 	player.rezoom(player.zoom/lvlt)
 
-// for(let i = -player.gridSize-player.gridSize*Math.floor(1+player.zoomR/player.gridSize/player.zoom); i < 900/player.zoom+player.gridSize/player.levelTrip; i+= player.gridSize){
+// for(let i = -player.gridSize-player.gridSize*Math.floor(1+player.zoomR/player.gridSize/player.zoom); i < 900/player.zoom+player.gridSize/lvlt; i+= player.gridSize){
 // 		mainCTX.moveTo( (i + CXR)*player.zoom+player.zoomR,0)
 // 		mainCTX.lineTo( (i + CXR)*player.zoom+player.zoomR,840)
 // 	}
-// 	for(let i = -player.gridSize-player.gridSize*Math.floor(1+player.zoomR/player.gridSize/player.zoom); i < 900/player.zoom+player.gridSize/player.levelTrip; i+= player.gridSize){
+// 	for(let i = -player.gridSize-player.gridSize*Math.floor(1+player.zoomR/player.gridSize/player.zoom); i < 900/player.zoom+player.gridSize/lvlt; i+= player.gridSize){
 // 		mainCTX.moveTo(0,(i + CYR)*player.zoom+player.zoomR)
 // 		mainCTX.lineTo(840,(i + CYR)*player.zoom+player.zoomR)
 // 	}
 
-// 	player.rezoom(player.zoom*player.levelTrip)
-	// mainCTX.stroke()
+// 	player.rezoom(player.zoom*lvlt)
+// 	mainCTX.stroke()
 
-	let bloodk = Object.values(bloodTiles)
-	bloodk.forEach((e)=>{
-		mainCTX.fillStyle = "rgba(255,0,0,"+e.amt+")"
-		mainCTX.fillRect((e.x*player.gridSize-cameraX+10)*player.zoom+player.zoomR,(e.y*player.gridSize-cameraY+10)*player.zoom+player.zoomR,player.gridSize*player.zoom,player.gridSize*player.zoom)
-		e.amt *= 0.98
-	})
+// 	let bloodk = Object.values(bloodTiles)
+// 	bloodk.forEach((e)=>{
+// 		mainCTX.fillStyle = "rgba(255,0,0,"+e.amt+")"
+// 		mainCTX.fillRect((e.x*player.gridSize-cameraX+10)*player.zoom+player.zoomR,(e.y*player.gridSize-cameraY+10)*player.zoom+player.zoomR,player.gridSize*player.zoom,player.gridSize*player.zoom)
+// 		e.amt *= 0.98
+// 	})
+
+
+// 	})
+
+
+
+	///tripend
 
 
 	mainCTX.strokeStyle = "#404040"
