@@ -162,6 +162,130 @@ class LPerceptron{ //it should have input name, input value. each input should h
   }
 }
 
+function normalRandom(mean, stderr) {
+    const u1 = Math.random();
+    const u2 = Math.random();
+
+    const z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
+    return z0 * stderr + mean;
+}
+
+/* MUSIC/TONE
+
+var scene = {
+  "sounds":true,
+  "interval":0.3,
+  "beatsPerBar":4
+}
+
+function soundInit(){
+    Tone.Transport.start();
+    Tone.Transport.scheduleRepeat((time) => {
+        music.runbar(time)
+    }, scene.interval*scene.beatsPerBar)
+
+    { let audio = new Tone.Sampler({
+      urls: {
+        "C4":"./../../soundEffects/sinC4.mp3",
+        "F3":"./../../soundEffects/sinF3.mp3",
+      },
+    }).toDestination();
+        SOUND["sinC4"] = audio
+
+    }
+      arr.forEach((E,i)=>{
+        let e = "./../../soundEffects/"+E+".mp3"
+        let audio = new Tone.Sampler({
+      urls: {
+        "C4":e,
+      },
+    }).toDestination();
+        SOUND[E] = audio
+      })
+}
+
+function mtn(midiNumber) {
+    return Tone.Frequency(midiNumber, "midi");
+}
+
+class music{
+  static counter = 0
+  static synth = new Tone.PolySynth(Tone.Synth,8).toDestination(); // Connect to audio output
+  static eq = new Tone.EQ3(-10, 3, 0);
+  static reverb = new Tone.Reverb({
+    decay: 20, // Duration of the reverb tail
+    preDelay: 0.3,
+    wet: 0.95,
+    input:1,
+    output:1
+}).toDestination();
+  static bell = new Tone.Sampler({
+  urls: {
+    "C4":"../epcounter/untitled.mp3",
+  },
+}).toDestination();
+  static kick = new Tone.Sampler({
+  urls: {
+    "C4":"../epcounter/kick.mp3",
+  },
+}).toDestination();
+  static click = new Tone.Sampler({
+  urls: {
+    "C4":"../epcounter/test.mp3",
+  },
+}).toDestination();
+  static drumSynth = new Tone.MembraneSynth().toDestination();
+  static echo = new Tone.PingPongDelay(scene.interval*2, scene.interval*2).toDestination();
+  static playBell(note,vel=1,delay=0){
+      this.bell.triggerAttackRelease(mtn(note),1.7,Tone.now()+delay,vel);
+  }
+  static playFile(file,note,vel=1,delay=0){
+    this.sounds[file].triggerAttackRelease(mtn(note),1.7,Tone.now()+delay,vel);
+  }
+
+  static checkCollide(note,arr,dist=1){
+
+    let mod = note%12
+    for(let i = 0; i < arr.length; i++){
+      let resd = Math.abs(arr[i]-mod)%12
+      if(resd == dist || resd == 12-dist){
+        return(true)
+      }
+    }
+    return(false)
+  }
+
+  static checkCollider(note,dict,dist=1,oct=1){
+    for(let i = 0; i < oct+1; i++){
+      if(dict[note+dist+i*12] === true){return(true)}
+      if(dict[note-dist+i*12] === true){return(true)}
+      if(dict[note+dist-i*12] === true){return(true)}
+      if(dict[note-dist-i*12] === true){return(true)}
+    }
+    return(false)
+  }
+
+
+
+}
+
+music.bell.connect(music.reverb)
+music.bell.connect(music.echo)
+music.bell.connect(music.eq)
+music.bell.set({volume:-20})
+music.synth.set({
+    oscillator: {
+        type: 'sine4' 
+    },
+    envelope: {
+        attack: 0.005,
+        decay: 0.5,
+        sustain:1,
+        release:2
+    },
+    volume:-60
+})
+*/
 
 /// ======== NOT TEMPLATE ANYMORE. BUILDING AREA ============
 
