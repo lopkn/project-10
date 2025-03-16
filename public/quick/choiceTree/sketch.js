@@ -15,7 +15,7 @@ let Height = window.innerHeight
 
 
 
-let EDITOR = false
+let EDITOR = window.location.href.includes("localhost")
 
 let mouseX = 0
 let mouseY = 0
@@ -404,9 +404,20 @@ function removeAllChildren(elm) {
 var context = {}
 
 
-function editorOption(type="div"){
+function editorOption(type="div",text="",optionName="option"){
+
+    if(type==="exec"){return;}
+    let wrapperDiv = document.createElement("div")
+    let wrapperSpan = document.createElement("span")
+    wrapperSpan.innerText = optionName
+    wrapperSpan.style.font = "18px Monaco"
+    wrapperSpan.style.color = "white"
+    wrapperSpan.style.minWidth = "10%"
+    wrapperSpan.style.display = "inline-block"
+    wrapperSpan.style.margin = "3px"
+
     let elm = document.createElement(type)
-    elm.innerText = "TEST"
+    elm.innerText = text
     elm.style.margin = "5px"
     // elm.style.backgroundColor = "white"
     elm.style.color = "black"
@@ -414,6 +425,8 @@ function editorOption(type="div"){
     elm.style.padding = "4px"
     elm.style.width = "auto"
     elm.style.height = "auto"
+    elm.style.fontSize = "18px"
+    elm.style.fontFamily = "Monaco"
     if(type==="div"){
         elm.contentEditable = true
         elm.style.backgroundColor = "white"
@@ -422,36 +435,107 @@ function editorOption(type="div"){
     }
     elm.style.display = "inline-block"
 
-    mainEditor.appendChild(elm)
+    wrapperDiv.appendChild(wrapperSpan)
+    wrapperDiv.appendChild(elm)
+    mainEditor.appendChild(wrapperDiv)
+
+
+
     return(elm)
 }
 function closeEditor(save=false){
     mainEditor.style.visibility = "hidden"
 }
 
+function extractEditor(l){
+  Object.keys(l).forEach((e)=>{
+
+      if(l[e].type==="div"){
+        l[e].val = l[e].ELM.innerText
+        intermediate[e] = l[e].val
+      }
+    })  
+  return(l)
+}
+
+
+var editorLoaded = {}
+
 function loadEditor(l){
+  editorLoaded = l
     Object.keys(l).forEach((e)=>{
-        l[e].ELM = editorOption(l[e].type)
+        l[e].ELM = editorOption(l[e].type,l[e].default?l[e].default:intermediate[e],l[e].name?l[e].name:e+":") // if it doesnt have a name, make it the element name
     })   
 }
 
-function openEditor(l={}){
+function openEditor(l){
+  if(l!== undefined){
     removeAllChildren(mainEditor)
     mainEditor.style.visibility = "visible"
-
-
     loadEditor(l)
 
-    let exit = editorOption("button")
-    exit.innerText = "CLOSE"
+    let exit = editorOption("button","CLOSE","")
     exit.onclick = ()=>{closeEditor()}
+
+    let done = editorOption("button","DONE","")
+    done.onclick = ()=>{extractEditor(editorLoaded);if(editorLoaded.done?.func){editorLoaded.done.func()}else{closeEditor()}}
+  } else {
+    mainEditor.style.visibility = "visible"
+  }
+    
+
 }
 
 
 
 
-mainEditor.style.visibility = "visible"
-openEditor()
+// mainEditor.style.visibility = "visible"
+
+function editorMenu(s,carry=true){
+  if(carry===false){
+    intermediate = {}
+  }
+  openEditor(editorDict[s])
+}
+
+
+// openEditor({"CHOICE":{"type":"span"},"name:":{"type":"div"},"to:":{"type":"div"}})
+
+var editorDict = {
+  "choice":{
+    "title":{"type":"span","name":"CHOICE"},
+    "name":{"type":"div"},
+    "to":{"type":"div"},
+    "done":{"type":"exec","func":(l)=>{
+
+        intermediate.to = (intermediate.to===''||intermediate.to==="\n")?getCUUID():intermediate.to
+
+        V1[path].buttons.push(JSON.parse(JSON.stringify(intermediate)))
+        load(path)
+
+        if(V1[intermediate.to]===undefined){
+            intermediate = {to:intermediate.to}
+            log("the stated path is empty.")
+            editorMenu("new")
+        }
+
+      }
+    }
+  },
+  "new":{
+    "choice":{"type":"span","name":"NEW CELL"},
+    "to":{"type":"div"},
+    "text":{"type":"div"},
+    "subtext":{"type":"div"},
+    "done":{"type":"exec","func":(l)=>{
+        log("V1["+intermediate.to+"]={buttons:[],text:`"+intermediate.text+"`,subtext:`"+intermediate.subtext+"`}");
+        V1[intermediate.to]={buttons:[],text:intermediate.text,subtext:intermediate.subtext}
+        closeEditor()
+      }
+    }
+  }
+}
+
 
 function pressedButton(btn){
     log(btn.name + " §")
@@ -529,7 +613,8 @@ function load(p=path,dict=V1){
     }
 
     if(EDITOR){
-
+      let button = addButton("+")
+      button.onclick = ()=>{editorMenu("choice")}
     }
 
 }
@@ -676,7 +761,8 @@ var choiceINQ = [
 
 var pathINQ = [
     (txt)=>{intermediate.text=txt; plog("subtext?")},
-    (txt)=>{intermediate.subtext=txt; log("V1["+intermediate.to+"]={buttons:[],text:`"+intermediate.text+"`,subtext:`"+intermediate.subtext+"`}");
+    (txt)=>{intermediate.subtext=txt; 
+    log("V1["+intermediate.to+"]={buttons:[],text:`"+intermediate.text+"`,subtext:`"+intermediate.subtext+"`}");
         V1[intermediate.to]={buttons:[],text:intermediate.text,subtext:intermediate.subtext}
     },
 ]
