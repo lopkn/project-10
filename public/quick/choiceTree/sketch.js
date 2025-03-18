@@ -2,16 +2,16 @@
 let Width = window.innerWidth
 let Height = window.innerHeight
 
-// let myCanvas = document.getElementById("myCanvas")
+let myCanvas = document.getElementById("myCanvas")
 
-//   myCanvas.width = Math.floor(Width)
-//   myCanvas.height = Math.floor(Height)
-//   myCanvas.style.width = Math.floor(Width)+"px"
-//   myCanvas.style.height = Math.floor(Height)+"px"
-//   myCanvas.style.top = "0px"
-//   myCanvas.style.left = "0px"
+  myCanvas.width = Math.floor(Width)
+  myCanvas.height = Math.floor(Height)
+  myCanvas.style.width = Math.floor(Width)+"px"
+  myCanvas.style.height = Math.floor(Height)+"px"
+  myCanvas.style.top = "0px"
+  myCanvas.style.left = "0px"
 
-// let ctx = document.getElementById("myCanvas").getContext("2d")
+let ctx = document.getElementById("myCanvas").getContext("2d")
 
 
 
@@ -19,7 +19,8 @@ let EDITOR = window.location.href.includes("localhost")
 
 let mouseX = 0
 let mouseY = 0
-onmousemove = (e)=>{mouseX = (e.clientX); mouseY = (e.clientY)}
+lastMouseMove = Date.now()
+onmousemove = (e)=>{mouseX = (e.clientX); mouseY = (e.clientY);lastMouseMove = Date.now()}
 
 
 // const socket = io.connect('/')
@@ -937,6 +938,40 @@ document.addEventListener("contextmenu",(e)=>{e.preventDefault()})
 
 
 
+
+///// JS SHIT
+
+let dcirc = (Width+Height)*2.6
+
+function dampen(n,o,f){
+  return(n*f+o*(1-f))
+}
+
+let t = 0
+
+function mainLoop(){
+  ctx.clearRect(0,0,Width,Height)
+
+  let dt = Date.now()-lastMouseMove
+  if(dt < t){
+    t = dampen(dt,t,0.015)
+    lastMouseMove = Date.now()-t/0.99
+  } else {
+    t = dt
+  }
+  let darkGrad = ctx.createRadialGradient(mouseX, mouseY, 0, mouseX,mouseY, Math.max(dcirc-t/10,1))
+  darkGrad.addColorStop(0,"rgba(0,0,0,0)")
+  darkGrad.addColorStop(0.15,"rgba(0,0,0,0.1)")
+  darkGrad.addColorStop(0.5,"rgba(0,0,0,0.8)")
+  darkGrad.addColorStop(1,"rgba(0,0,0,1)")
+  ctx.fillStyle = darkGrad
+  ctx.fillRect(0,0,Width,Height)
+
+
+  requestAnimationFrame(mainLoop)
+}
+
+requestAnimationFrame(mainLoop)
 
 
 
