@@ -959,13 +959,62 @@ function mainLoop(){
   } else {
     t = dt
   }
-  let darkGrad = ctx.createRadialGradient(mouseX, mouseY, 0, mouseX,mouseY, Math.max(dcirc-t/10,1))
-  darkGrad.addColorStop(0,"rgba(0,0,0,0)")
-  darkGrad.addColorStop(0.15,"rgba(0,0,0,0.1)")
-  darkGrad.addColorStop(0.5,"rgba(0,0,0,0.8)")
-  darkGrad.addColorStop(1,"rgba(0,0,0,1)")
-  ctx.fillStyle = darkGrad
-  ctx.fillRect(0,0,Width,Height)
+
+  if(t/10>dcirc){
+    ctx.fillStyle = "black"
+    ctx.fillRect(0,0,Width,Height)
+    let hallucinationProgress = t-dcirc
+
+
+    if(Math.random()>0.97){
+        let div = document.createElement("div")
+        div.style.color = "#0F0"
+
+        let letter
+        {
+
+            lowercaseAsciiStart = 97;
+            letterIndex = Math.floor(Math.random() * 26);
+            letter = String.fromCharCode(lowercaseAsciiStart + letterIndex)
+        }
+
+        div.innerText = letter
+        div.style.left = Math.floor(Math.random()*Width)+"px"
+        div.style.position = "absolute"
+        let siz = (Math.floor(Math.random()*120+10))
+        div.style.fontSize = siz + "px"
+        div.style.textShadow = "0px 0px "+Math.floor(siz/2)+"px #0F0"
+        div.style.textShadow = div.style.textShadow+","+div.style.textShadow+","+div.style.textShadow
+        div.classList.add("dstart")
+        div.style.animation = "trans "+(Math.floor(Math.random()*100+50)/10)+"s linear forwards"
+        document.getElementById("myTopDiv").appendChild(div)
+    }
+    let children = document.getElementById("myTopDiv").children
+    for(let i = 0; i < children.length; i++){
+
+        e=children[i]
+
+        e.style.top = parseFloat(e.style.top.slice(0, -1)) + 1 + "%"
+        if(e.getBoundingClientRect().y >= Height){
+            e.remove()
+        }
+    }
+
+
+
+
+  } else{
+    let darkGrad = ctx.createRadialGradient(mouseX, mouseY, 0, mouseX,mouseY, Math.max(dcirc-t/10,1))
+      darkGrad.addColorStop(0,"rgba(0,0,0,0)")
+      darkGrad.addColorStop(0.15,"rgba(0,0,0,0.1)")
+      darkGrad.addColorStop(0.5,"rgba(0,0,0,0.8)")
+      darkGrad.addColorStop(1,"rgba(0,0,0,1)")
+      ctx.fillStyle = darkGrad
+      ctx.fillRect(0,0,Width,Height)
+  }
+
+
+  
 
 
   requestAnimationFrame(mainLoop)
