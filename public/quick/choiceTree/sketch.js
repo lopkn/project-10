@@ -941,6 +941,24 @@ document.addEventListener("contextmenu",(e)=>{e.preventDefault()})
 
 ///// JS SHIT
 
+
+function repeater(f,t,...stuff){
+  for(let i = 0; i < t; i++){
+    f(t,...stuff)
+  }
+}
+
+function rgba(r=255,g=0,b=255,a=1){
+  return("rgba("+r+","+g+","+b+","+a+")")
+}
+function hsla(r=255,g=60,b=50,a=1){
+  return("hsla("+r+","+g+"%,"+b+"%,"+a+")")
+}
+function ran255(x=255){
+  return(Math.random()*x)
+}
+
+
 let dcirc = (Width+Height)*2.6
 
 function dampen(n,o,f){
@@ -948,7 +966,7 @@ function dampen(n,o,f){
 }
 
 let t = 0
-
+let sleepingFactor = 1
 function mainLoop(){
   ctx.clearRect(0,0,Width,Height)
 
@@ -960,57 +978,42 @@ function mainLoop(){
     t = dt
   }
 
-  if(t/10>dcirc){
+  if(t/sleepingFactor>dcirc){
     ctx.fillStyle = "black"
     ctx.fillRect(0,0,Width,Height)
     let hallucinationProgress = t-dcirc
 
 
-    if(Math.random()>0.97){
-        let div = document.createElement("div")
-        div.style.color = "#0F0"
-
-        let letter
-        {
-
-            lowercaseAsciiStart = 97;
-            letterIndex = Math.floor(Math.random() * 26);
-            letter = String.fromCharCode(lowercaseAsciiStart + letterIndex)
+    if(Math.random()>0.93){
+      floatingLetter()
+      if(Math.random()>0.93){
+        for(let i = 0; i < 20; i++){
+          floatingLetter()
         }
+      }
 
-        div.innerText = letter
-        div.style.left = Math.floor(Math.random()*Width)+"px"
-        div.style.position = "absolute"
-        let siz = (Math.floor(Math.random()*120+10))
-        div.style.fontSize = siz + "px"
-        div.style.textShadow = "0px 0px "+Math.floor(siz/2)+"px #0F0"
-        div.style.textShadow = div.style.textShadow+","+div.style.textShadow+","+div.style.textShadow
-        div.classList.add("dstart")
-        div.style.animation = "trans "+(Math.floor(Math.random()*100+50)/10)+"s linear forwards"
-        document.getElementById("myTopDiv").appendChild(div)
+
+        
     }
-    let children = document.getElementById("myTopDiv").children
-    for(let i = 0; i < children.length; i++){
-
-        e=children[i]
-
-        e.style.top = parseFloat(e.style.top.slice(0, -1)) + 1 + "%"
-        if(e.getBoundingClientRect().y >= Height){
-            e.remove()
-        }
-    }
-
-
+    // let children = document.getElementById("myTopDiv").children
+    // for(let i = 0; i < children.length; i++){
+    //     e=children[i]
+    //     e.style.top = parseFloat(e.style.top.slice(0, -1)) + 1 + "%"
+    //     if(e.getBoundingClientRect().y >= Height){
+    //         e.remove()
+    //     }
+    // }
 
 
   } else{
-    let darkGrad = ctx.createRadialGradient(mouseX, mouseY, 0, mouseX,mouseY, Math.max(dcirc-t/10,1))
+    let darkGrad = ctx.createRadialGradient(mouseX, mouseY, 0, mouseX,mouseY, Math.max(dcirc-t/sleepingFactor,1))
       darkGrad.addColorStop(0,"rgba(0,0,0,0)")
       darkGrad.addColorStop(0.15,"rgba(0,0,0,0.1)")
       darkGrad.addColorStop(0.5,"rgba(0,0,0,0.8)")
       darkGrad.addColorStop(1,"rgba(0,0,0,1)")
       ctx.fillStyle = darkGrad
       ctx.fillRect(0,0,Width,Height)
+      document.getElementById("myTopDiv").style.opacity = t*1.3/sleepingFactor/dcirc-0.3
   }
 
 
@@ -1022,7 +1025,44 @@ function mainLoop(){
 
 requestAnimationFrame(mainLoop)
 
+function floatingLetter(){
+  let div = document.createElement("div")
+        let col = hsla(ran255(360),100)
+        div.style.color = col
 
+        let letter
+        {
+
+            lowercaseAsciiStart = 97;
+            letterIndex = Math.floor(Math.random() * 26 * 3);
+            letter = String.fromCharCode(lowercaseAsciiStart + letterIndex)
+        }
+
+        div.innerText = letter
+        div.style.position = "absolute"
+        let siz = (Math.floor(Math.random()*120+10))
+        let spd = Math.floor(Math.random()*100+50)/10
+        if(ran255(1)>0.9){
+          siz = Math.floor(siz*(2+Math.abs(normalRandom(0,4))))
+          spd = Math.floor(spd*(2+Math.abs(normalRandom(0,4))))
+        }
+        div.style.zIndex = 1000-siz
+        div.style.font = siz + "px Monaco"
+
+        div.style.left = Math.floor(Math.random()*(siz+Width)-siz)+"px"
+
+
+
+        // div.style.textShadow = "0px 0px "+Math.floor(siz/2)+"px "+col
+        // div.style.textShadow = div.style.textShadow+","+div.style.textShadow+","+div.style.textShadow
+        div.classList.add("dstart")
+        div.style.animation = "trans "+(spd)+"s linear forwards"
+        document.getElementById("myTopDiv").appendChild(div)
+        div.addEventListener("animationend",(e)=>{
+          div.remove()
+        })
+    return(div)
+}
 
 
 

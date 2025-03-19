@@ -62,10 +62,12 @@
 
 @keyframes trans{
         0% {
-        top: -50%;
+        top: 0%;
+        transform: translateY(-100%)
     }
     100% {
-        top: 150%;
+        top: 100%;
+        transform: translateY(0%);
     }
 }
 
@@ -162,7 +164,7 @@ input:checked + .slider:before {
 </style>
 
 
-<body style="padding:0;margin:0;background-color: black; overflow-y:hidden">
+<body style="padding:0;margin:0;background-color: black; overflow-y:hidden; overflow-x:hidden;">
   
 <!--     <script src="/socket.io/socket.io.js"></script>
  <script src="https://cdn.socket.io/3.1.3/socket.io.min.js" integrity="sha384-cPwlPLvBTa3sKAgddT6krw0cJat7egBga3DJepJyrLl4Q9/5WLra3rrnMcyTyOnh" crossorigin="anonymous"></script> -->
