@@ -966,7 +966,7 @@ function dampen(n,o,f){
 }
 
 let t = 0
-let sleepingFactor = 1
+let sleepingFactor = 10
 function mainLoop(){
   ctx.clearRect(0,0,Width,Height)
 
