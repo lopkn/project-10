@@ -16,6 +16,7 @@ let ctx = document.getElementById("myCanvas").getContext("2d")
 
 
 let EDITOR = window.location.href.includes("localhost")
+let TRUSTED = window.location.href.includes("localhost")
 
 let mouseX = 0
 let mouseY = 0
@@ -166,11 +167,12 @@ class LPerceptron{ //it should have input name, input value. each input should h
 
 
 
-function normalRandom(mean, stderr) {
+function normalRandom(mean, stderr, abs=false) {
     const u1 = Math.random();
     const u2 = Math.random();
 
-    const z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
+    let z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
+    if(abs){z0=Math.abs(z0)}
     return z0 * stderr + mean;
 }
 
@@ -405,7 +407,7 @@ function removeAllChildren(elm) {
 var context = {}
 
 
-function editorOption(type="div",text="",optionName="option"){
+function editorOption(type="div",text="",optionName="option",options){
 
     if(type==="exec"){return;}
 
@@ -445,8 +447,13 @@ function editorOption(type="div",text="",optionName="option"){
       // </label>
 
     }
+    if(type === "select"){
+        console.log(options)
+        elm = newSelector(options.selections)
+    } else {
+        elm.innerText = text
+    }
 
-    elm.innerText = text
     elm.style.margin = "5px"
     // elm.style.backgroundColor = "white"
     elm.style.color = "black"
@@ -477,16 +484,40 @@ function closeEditor(save=false){
     mainEditor.style.visibility = "hidden"
 }
 
+function req1(arr){
+    let d = {}
+    arr.forEach((e)=>{
+        d[e] = {}
+    })
+    return(openEditor(d))
+}
+
 function extractEditor(l=editorLoaded){
   Object.keys(l).forEach((e)=>{
 
-      if(l[e].type==="div"){
+      if(l[e].type==="div" || l[e].type === undefined){
         l[e].val = l[e].ELM.innerText
         intermediate[e] = l[e].val
       } else if(l[e].type === "switch"){
         l[e].val = l[e].ELM.checked
         intermediate[e] = l[e].val
+      } else if(l[e].type === "select"){
+        l[e].val = l[e].ELM.value
+        intermediate[e] = l[e].val
       }
+
+      if(l[e].verify){
+        if(l[e].verify === "num"){
+            intermediate[e] = parseFloat(l[e].val)
+            if(isNaN(intermediate[e])){
+                console.error(e+" was not verified as num")
+                l[e].failed = true
+            }
+        }
+
+
+      }
+
     })  
   return(l)
 }
@@ -494,10 +525,21 @@ function extractEditor(l=editorLoaded){
 
 var editorLoaded = {}
 
+function newSelector(arr){
+    let sel = document.createElement("select")
+    arr.forEach((e)=>{
+        let option = document.createElement("option")
+        option.innerText = e
+        option.value = e
+        sel.appendChild(option)
+    })
+    return(sel)
+}
+
 function loadEditor(l){
   editorLoaded = l
     Object.keys(l).forEach((e)=>{
-        l[e].ELM = editorOption(l[e].type,l[e].default?l[e].default:intermediate[e],l[e].name?l[e].name:e+":") // if it doesnt have a name, make it the element name
+        l[e].ELM = editorOption(l[e].type,l[e].default?l[e].default:intermediate[e],l[e].name?l[e].name:e+":",l[e]) // if it doesnt have a name, make it the element name
     })   
 }
 
@@ -515,7 +557,6 @@ function openEditor(l){
   } else {
     mainEditor.style.visibility = "visible"
   }
-    
 
 }
 
@@ -984,9 +1025,9 @@ function mainLoop(){
     let hallucinationProgress = t-dcirc
 
 
-    if(Math.random()>0.93){
+    if(Math.random()>0.97){
       floatingLetter()
-      if(Math.random()>0.93){
+      if(Math.random()>0.97){
         for(let i = 0; i < 20; i++){
           floatingLetter()
         }
@@ -1023,7 +1064,7 @@ function mainLoop(){
   requestAnimationFrame(mainLoop)
 }
 
-requestAnimationFrame(mainLoop)
+// requestAnimationFrame(mainLoop)
 
 function floatingLetter(){
   let div = document.createElement("div")
