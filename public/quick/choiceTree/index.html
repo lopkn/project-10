@@ -122,9 +122,9 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: #ccc;
-  -webkit-transition: .4s;
-  transition: .4s;
+  background-color: #FEC;
+  -webkit-transition: all .4s ease, visibility 0s;
+  transition:  all .4s ease, visibility 0s;
 }
 
 .slider:before {
@@ -134,17 +134,17 @@
   width: 26px;
   left: 4px;
   bottom: 4px;
-  background-color: white;
-  -webkit-transition: .4s;
-  transition: .4s;
+  background-color: #157;
+  -webkit-transition:  all .4s ease, visibility 0s;
+  transition:  all .4s ease, visibility 0s;
 }
 
 input:checked + .slider {
-  background-color: #2196F3;
+  background-color: #9000F0;
 }
 
 input:focus + .slider {
-  box-shadow: 0 0 10px #00FF00;
+  box-shadow: 0 0 10px #FF8000;
 }
 
 input:checked + .slider:before {

@@ -440,6 +440,10 @@ function editorOption(type="div",text="",optionName="option",options){
       wrapperDiv.append(wrapperSpan)
       wrapperDiv.append(lab)
       mainEditor.appendChild(wrapperDiv)
+        if(text===true){
+            elm.checked = true
+        }
+
       return(elm);
       // <label class="switch">
       //   <input class = "switch" type="checkbox">
@@ -448,8 +452,8 @@ function editorOption(type="div",text="",optionName="option",options){
 
     }
     if(type === "select"){
-        console.log(options)
         elm = newSelector(options.selections)
+        elm.value = text
     } else {
         elm.innerText = text
     }
@@ -542,6 +546,9 @@ function loadEditor(l){
         l[e].ELM = editorOption(l[e].type,l[e].default?l[e].default:intermediate[e],l[e].name?l[e].name:e+":",l[e]) // if it doesnt have a name, make it the element name
     })   
 }
+
+
+//openEditor({"hey":{"type":"select","selections":[1,2,3,"test"],"verify":"num"}})
 
 function openEditor(l){
   if(l!== undefined){
