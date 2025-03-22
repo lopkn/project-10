@@ -256,6 +256,13 @@ class music{
       setTimeout(()=>{this.playBell(e)},i*time*1000)
     })
   }
+  static arpeggiateRel(arr,time=scene.interval){
+    let z;
+    arr.forEach((e,i)=>{
+      if(i===0){z=e}else{z+=e;e=z}
+      setTimeout(()=>{this.playBell(e)},i*time*1000)
+    })
+  }
 
   static runbar(){
     let arr = []
@@ -435,11 +442,20 @@ function editorOption(type="div",text="",optionName="option",options){
       spa.classList.add("slider")
       elm.classList.add("switch")
 
+      if(options.trigger !== undefined){
+        elm.addEventListener('change', (e)=>{
+          let checked = e.target.checked
+          options.trigger(checked)
+        })
+      }
+
       lab.appendChild(elm)
       lab.appendChild(spa)
-      wrapperDiv.append(wrapperSpan)
       wrapperDiv.append(lab)
+      wrapperDiv.append(wrapperSpan)
       mainEditor.appendChild(wrapperDiv)
+
+      wrapperSpan.style.marginLeft = "3%"
         if(text===true){
             elm.checked = true
         }
@@ -484,11 +500,17 @@ function editorOption(type="div",text="",optionName="option",options){
 
     return(elm)
 }
+
+
+/// button -> open 1 or multiple buttons
+///
+
+
 function closeEditor(save=false){
     mainEditor.style.visibility = "hidden"
 }
 
-function req1(arr){
+function req1(...arr){
     let d = {}
     arr.forEach((e)=>{
         d[e] = {}
@@ -540,11 +562,38 @@ function newSelector(arr){
     return(sel)
 }
 
-function loadEditor(l){
-  editorLoaded = l
-    Object.keys(l).forEach((e)=>{
+function loadEditor(l,sort){
+
+    if(sort===undefined){
+      sort = Object.keys(l)
+    }
+    editorLoaded = l
+    sort.forEach((e)=>{
+        loadEditorItem(e,l)
+        })   
+}
+function loadEditorItem(e,l){
+    if(l[e] === 0){
+          l[e] = {}
+        } else if(l[e] === 1){
+          l[e] = {"type":"switch"}
+        } else if(l[e] === 2){
+          l[e] = {"type":"select"}
+        }
+
+
+        //menu {"1":{"loadingOption":"switchlist","array":[1,2,3,4]}}
+        if(l[e].loadingOption){
+          if(l[e].loadingOption === "switchlist"){
+            let dict = {}
+            l[e].array.forEach((e)=>{
+              dict[e] = {"name":e,"type":"switch"}
+            })
+            loadEditor(dict,l[e].array)
+            return;
+          }
+        }
         l[e].ELM = editorOption(l[e].type,l[e].default?l[e].default:intermediate[e],l[e].name?l[e].name:e+":",l[e]) // if it doesnt have a name, make it the element name
-    })   
 }
 
 
@@ -677,8 +726,8 @@ function pressedButton(btn){
     }
 
         load(btn.to)
-        // music.arpeggiate([40+Math.random()*30,40+Math.random()*30,40+Math.random()*30])
-        music.playBell(40+Math.random()*30)
+        music.arpeggiateRel([40+Math.random()*30,Math.random()*5,Math.random()*5,Math.random()*5],0.1)
+        // music.playBell(40+Math.random()*30)
 }
 
 function plog(str){
@@ -820,6 +869,7 @@ function processInput(txt){
 
 function defaultInputQueue(txt){
     log("defaulted")
+    let split = txt.split(" ")
     if(txt==="choice"){
         plog("name?")
         inputQueueAdd(choiceINQ)
@@ -857,6 +907,10 @@ function defaultInputQueue(txt){
     else if(txt === "editor"){
         EDITOR = !EDITOR
         plog("editing: "+EDITOR)
+    } else if(split[0] === "menu"){
+      openEditor(JSON.parse(txt.substring(5)))
+    } else if(split[0] === "switchlist"){
+      openEditor({"1":{"loadingOption":"switchlist","array":JSON.parse(txt.substring(11))}})
     }
 }
 
