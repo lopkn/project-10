@@ -18,6 +18,8 @@ let mainarr =
 
 # whether or not a statement is Objective DOES change the validity of the statement
 
+# "I see yellow" when looking at a white canvas is wrong, and wrong in a way inherently different from "i see yellow", when your brain's signal is tampered with externally
+
 `.split("# ")
 mainarr.splice(0,1)
 
