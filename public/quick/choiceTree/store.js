@@ -1,5 +1,4 @@
-
-var V1 = {
+V1 = {
     "0": {
         "type": "v1",
         "buttons": [
@@ -51,6 +50,10 @@ var V1 = {
             {
                 "name": "history",
                 "to": "history"
+            },
+            {
+                "name": "objectivity",
+                "to": "79"
             },
             {
                 "name": "Revising",
@@ -749,6 +752,30 @@ var V1 = {
         "text": "What made you think its a good idea to \"not focus in school\" but then revise back at home?",
         "subtext": ""
     },
+    "79": {
+        "buttons": [
+            {
+                "name": "Yes",
+                "to": 80
+            },
+            {
+                "name": "No, all statements are subjective",
+                "to": 81
+            }
+        ],
+        "text": "There exists two types of statements, Objective and Subjective",
+        "subtext": ""
+    },
+    "80": {
+        "buttons": [],
+        "text": "Objectiveness/Subjectiveness is not continuous",
+        "subtext": "i.e. its not a continuous range\nunlike happiness and sadness\n\n\n"
+    },
+    "81": {
+        "buttons": [],
+        "text": "cool",
+        "subtext": ""
+    },
     "care": {
         "seg": 1,
         "buttons": [
@@ -945,4 +972,3 @@ var V1 = {
         "subtext": ""
     }
 }
-

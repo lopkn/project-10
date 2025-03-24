@@ -20,6 +20,9 @@ let mainarr =
 
 # "I see yellow" when looking at a white canvas is wrong, and wrong in a way inherently different from "i see yellow", when your brain's signal is tampered with externally
 
+# in those situations, the "subjective" color holds less strength in argument
+
+
 `.split("# ")
 mainarr.splice(0,1)
 
