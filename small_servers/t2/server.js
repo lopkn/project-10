@@ -306,5 +306,11 @@ function solvepq(a,b,c) {
 
 
 
-
+/*
+let sum = 0
+for(let n = 1; n < 200; n++){
+    sum += 7**(n-(n+4))
+}
+sum
+*/
 
