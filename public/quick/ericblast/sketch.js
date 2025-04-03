@@ -22,7 +22,61 @@ let mouseY = 0
 onmousemove = (e)=>{mouseX = (e.clientX); mouseY = (e.clientY)}
 
 
-// const socket = io.connect('/')
+var words = {}
+var wordlist = []
+var ID;
+var prompt = "";
+const socket = io.connect('/')
+let GAMESESSION = "G10.10"
+socket.emit("JOINGAME",GAMESESSION)
+socket.on("acknowledge G10.10",acknowledge)
+socket.on("accepted",(e)=>{console.log("accepted");words[e.word]=e.id;wordlist.splice(0,0,e.word)
+
+addScore(e.id)
+document.getElementById("divout").innerText = JSON.stringify({"already":wordlist},null,4).substring(18)
+
+
+})
+socket.on("prompt",(e)=>{console.log("prompt:"+e);prompt=e[0]
+document.getElementById("divout2").innerText = prompt + "\n\n\n" + JSON.stringify(scores)
+
+
+if(ID == e[1] || e[1] == "FFA"){
+  document.getElementById("divout2").style.backgroundColor = "#FFA0A0"
+  document.getElementById("divout").style.backgroundColor = "#FFA0A0"
+
+  timer = Date.now()+10000
+} else {
+  timer = 0
+    document.getElementById("divout2").style.backgroundColor = "lightblue"
+  document.getElementById("divout").style.backgroundColor = "lightblue"
+}
+})
+function acknowledge(e){
+  ID = e
+  console.log(e)
+}
+
+var scores = {}
+function addScore(id){
+  if(scores[id]===undefined){scores[id]=0}
+  scores[id] += 1
+}
+
+var timer = 0
+
+let _MainInterval_ = setInterval(()=>{
+  let timeLeft = timer-Date.now()
+  if(timeLeft>0){
+    let tl = timeLeft/10000*255
+    document.body.style.backgroundColor = "rgb("+tl+","+tl*0.2+","+0+")"
+  } else {
+    document.body.style.backgroundColor = "black"
+  }
+})
+
+
+
 
 class LCanvas{ //lopkns template canvas
   constructor(w=100,h=100,id=("LCanvas-"+Math.random())){
@@ -296,42 +350,23 @@ music.synth.set({
 /// ======== NOT TEMPLATE ANYMORE. BUILDING AREA ============
 
 
-ctx = document.querySelector("canvas").getContext("2d")
 
-function mouseXaim(ctx){
-  let x = mouseX*document.querySelector("canvas").width/window.innerWidth
-  let y = mouseY*document.querySelector("canvas").height/window.innerHeight
-    let d = ctx.getImageData(x-100, y-100, 200, 200).data
-    for(let i = 0; i < d.length; i+=4){
-      if(i%48!==0){continue}
-      let dist = Lcolorf.colorDistA([d[i],d[i+1],d[i+2]],[255,0,255])
-      if(dist < 30){
-        ctx.fillStyle = "red"
-        ctx.fillRect(mouseX,mouseY,50,50)
-        console.log("hey")
-      }
-        if(Math.random()>0.9999){console.log(d.length)}
-      can.ctx.fillStyle = "rgb("+d[i]+","+d[i+1]+","+d[i+2]+")"
-      can.ctx.fillRect(i%800/4*4,Math.floor(i/800)*4,5,5)
-    }
-}
+let divin = document.getElementById("divin")
 
-document.addEventListener("keydown",(e)=>{
-  if(e.key=="x"){
-    mouseXaim(ctx)
+
+divin.addEventListener("keydown",(e)=>{
+  if(e.key=="Enter"){
+    e.preventDefault()
+    sendWord(divin.innerText.replaceAll("\n",""))
+  divin.innerText = ""
   }
 })
 
-can = new Lcanvas()
-can.clear()
-can.fitScreenSize()
-can.canvas.style.pointerEvents = "none"
 
 
-
-
-
-
+function sendWord(str){
+  socket.emit("word",str)
+}
 
 
 

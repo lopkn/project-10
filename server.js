@@ -176,9 +176,11 @@ let quant = require("./quantum.js")
 let compact = require("./compact.js")
 let s2cc = require("./s2c.js")
 let balll = require("./baller.js")
+let ericc = require("./ericBlast.js")
 
 let shooter2C = s2cc.shooter2C	
 let baller = balll.baller
+let ericBlast = ericc.ericBlast
 let flightSim = compact.flightSim
 let responder = compact.responder
 let ten = serTen.ten
@@ -1518,6 +1520,7 @@ quantum.setio(io)
 re8.setio(io)
 shooter2C.setio(io,myMath,vectorNormalize,vectorFuncs)
 baller.setio(io,myMath,vectorNormalize,vectorFuncs)
+ericBlast.setio(io,myMath,vectorNormalize,vectorFuncs)
 
 // socket = io("https://home.unsown.top")
 
@@ -1706,6 +1709,14 @@ function joinGame(game,socket){
 		let clientIp = socket.request.connection.remoteAddress
 		socket.onAny((e,n)=>{baller.handle(Date.now(),e,n,socket)})
 		socket.on('disconnect',()=>{baller.disconnect(socket)})
+	}else if(game == "G10.10"){
+		socket.join("G10.10")
+		io.to(socket.id).emit("acknowledge G10.10",socket.id)
+		ericBlast.join(socket)
+		ericBlast.start()
+		let clientIp = socket.request.connection.remoteAddress
+		socket.onAny((e,n)=>{ericBlast.handle(Date.now(),e,n,socket)})
+		socket.on('disconnect',()=>{ericBlast.disconnect(socket)})
 	} else if(game == "debug"){
 		io.to(socket.id).emit("debugReturn",{"sid":socket.id,"str":fs.readFileSync("./dynamics/errorlog.json","utf8"),"str2":fs.readFileSync("./dynamics/errorlog3.txt","utf8")})
 	}

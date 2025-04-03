@@ -33,10 +33,23 @@ function crackarr(str){
 		}
 	}
 
+}
 
+let jk = Object.keys(json2)
 
+function inc(str){
 
+	arr = []
 
+	jk.forEach((e)=>{
+		if(e.includes(str)){
+			arr.push(e)
+		}
+	})
+	arr.sort((a,b)=>{return(b.length-a.length)})
+	arr.forEach((e)=>{
+		console.log(e)
+	})
 }
 
 
