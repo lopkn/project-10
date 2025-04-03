@@ -48,7 +48,7 @@ class ericBlast{
 	static prompt = ""
 	static wrong = 0;
 	static turnPlayer;
-	static gamemode = "ff"
+	static gamemode = "ffa"
 	static corrects = 0;
 
 	static setio(i,m,v,v2){

@@ -69,7 +69,7 @@ let _MainInterval_ = setInterval(()=>{
   let timeLeft = timer-Date.now()
   if(timeLeft>0){
     let tl = timeLeft/10000*255
-    document.body.style.backgroundColor = "rgb("+tl+","+tl*0.2+","+0+")"
+    // document.body.style.backgroundColor = "rgb("+tl+","+tl*0.2+","+0+")"
   } else {
     document.body.style.backgroundColor = "black"
   }
