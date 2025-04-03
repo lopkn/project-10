@@ -176,7 +176,7 @@ let quant = require("./quantum.js")
 let compact = require("./compact.js")
 let s2cc = require("./s2c.js")
 let balll = require("./baller.js")
-let ericc = require("./ericBlast.js")
+let ericc = require("./ericblast.js")
 
 let shooter2C = s2cc.shooter2C	
 let baller = balll.baller
