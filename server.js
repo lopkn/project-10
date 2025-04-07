@@ -1481,6 +1481,7 @@ var bodyParser = require('body-parser');
 var app = express();
 var cors = require('cors')//jan7-2024
 // var http = require('http')
+var https = require('https')
 
 var server = app.listen(3000);
 // var server = http.createServer(app);
@@ -1490,6 +1491,13 @@ app.use(cors()) //jan7-2024
 
 app.use(express.static('public'));
 
+
+var httpsoptions = {
+  key: fs.readFileSync('../key.pem'),
+  cert: fs.readFileSync('../cert.pem')
+};
+
+https.createServer(httpsoptions, app).listen(3001);
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json())
