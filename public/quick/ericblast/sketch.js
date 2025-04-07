@@ -38,7 +38,14 @@ document.getElementById("divout").innerText = JSON.stringify({"already":wordlist
 
 })
 socket.on("prompt",(e)=>{console.log("prompt:"+e);prompt=e[0]
-document.getElementById("divout2").innerText = "prompt: "+prompt + "\n\n\n" + JSON.stringify(scores)
+
+
+  str = ""
+  JSON.values(scores).forEach((e,i)=>{
+    scores += "player"+(i+1)+":"+e
+  })
+
+document.getElementById("divout2").innerText = "prompt: "+prompt + "\n\n\n" + str
 
 
 if(ID == e[1] || e[1] == "FFA"){
