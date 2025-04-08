@@ -1493,11 +1493,11 @@ app.use(express.static('public'));
 
 
 var httpsoptions = {
-  key: fs.readFileSync('../key.pem'),
-  cert: fs.readFileSync('../cert.pem')
+  key: fs.readFileSync('keys/key.pem'),
+  cert: fs.readFileSync('keys/cert.pem')
 };
 
-https.createServer(httpsoptions, app).listen(3001);
+https.createServer(httpsoptions, app).listen(443);
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json())

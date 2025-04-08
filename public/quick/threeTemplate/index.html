@@ -39,7 +39,7 @@ var sensors = {
           70,
           window.innerWidth / window.innerHeight,
           1,
-          1000
+          10000
         );
         camera.position.z = 400;
 
@@ -75,17 +75,76 @@ var sensors = {
         renderer.setSize(window.innerWidth, window.innerHeight);
       }
 
+      let div = document.createElement("div")
+div.style.position="absolute"
+div.style.color="white"
+div.style.backgroundColor="rgba(0,255,0,0.1)"
+div.style.zIndex="500"
+div.style.top="0px"
+div.style.left="0px"
+div.id = "debugdiv"
+div.style.width = "50%"
+div.style.height = "50%"
+
+document.body.appendChild(div)
+
       function animate() {
         requestAnimationFrame(animate);
 
-        mesh.rotation.x = sensors.Orientation_b/90*Math.PI
-        mesh.rotation.y = sensors.Orientation_g/90*Math.PI
-        mesh.rotation.z = sensors.Orientation_a/90*Math.PI
+        // mesh.rotation.x = -1*(180+parseFloat(sensors.Orientation_b))/180*Math.PI
+        // mesh.rotation.y = (90+parseFloat(sensors.Orientation_g))/180*Math.PI
+        // mesh.rotation.z = -1*sensors.Orientation_a/180*Math.PI
+
+        // updateRotation(-1*(180+parseFloat(sensors.Orientation_b))/180*Math.PI,(90+parseFloat(sensors.Orientation_g))/180*Math.PI,-1*sensors.Orientation_a/180*Math.PI)
+
+        updateRotation(THREE.MathUtils.degToRad(sensors.Orientation_b),THREE.MathUtils.degToRad(sensors.Orientation_g),THREE.MathUtils.degToRad(sensors.Orientation_a))
+
+        if(document.getElementById("debugdiv")){
+          document.getElementById("debugdiv").innerText = ""
+        }
+        
 
         renderer.render(scene, camera);
       }
 
 
+function updateRotation(pitch, roll, yaw) {
+
+ const quaternionYaw = new THREE.Quaternion().setFromAxisAngle(
+      new THREE.Vector3(0, 1, 0), // Y-axis
+      yaw
+    );
+    const quaternionPitch = new THREE.Quaternion().setFromAxisAngle(
+      new THREE.Vector3(1, 0, 0), // X-axis
+      pitch
+    );
+    const quaternionRoll = new THREE.Quaternion().setFromAxisAngle(
+      new THREE.Vector3(0, 0, 1), // Z-axis
+      -roll
+    );
+  
+    // Combine the quaternions: Yaw * Pitch * Roll
+    const deviceQuaternion = new THREE.Quaternion()
+      .multiply(quaternionYaw)
+      .multiply(quaternionPitch)
+      .multiply(quaternionRoll);
+  
+    // Reference Quaternion: Rotate -90 degrees around X-axis to align device frame with Three.js frame
+    const referenceQuaternion = new THREE.Quaternion().setFromEuler(
+      new THREE.Euler(-Math.PI / 2, 0, 0, 'YXZ') // -90 degrees around X-axis
+    );
+  
+    // Combine Device Quaternion with Reference Quaternion
+    let finalQuaternion = deviceQuaternion.multiply(referenceQuaternion);
+    finalQuaternion = finalQuaternion.invert()
+    mesh.quaternion.copy(finalQuaternion)
+  
+    // Apply the final quaternion to the camera
+    // mesh.quaternion.copy(finalQuaternion);
+    // mesh.rotation.x += 0.02
+    // mesh.rotation.y += 0.02
+    // camera.quaternion.copy(finalQuaternion);
+}
 
 
 
@@ -385,6 +444,11 @@ function incrementEventCount(){
   // counterElement.innerHTML = eventCount + 1;
 }
 
+
+let vx, vy, vz;
+vx = vy = vz = 0
+
+
 function updateFieldIfNotNull(fieldName, value, precision=10){
   if (value != null)
     sensors[fieldName] = value.toFixed(precision);
@@ -394,6 +458,23 @@ function handleMotion(event) {
   updateFieldIfNotNull('Accelerometer_gx', event.accelerationIncludingGravity.x);
   updateFieldIfNotNull('Accelerometer_gy', event.accelerationIncludingGravity.y);
   updateFieldIfNotNull('Accelerometer_gz', event.accelerationIncludingGravity.z);
+
+  // vx += parseFloat(event.acceleration.x)
+  // vy += parseFloat(event.acceleration.y)
+  // vz += parseFloat(event.acceleration.z)
+
+  // vx *= 0.9
+  // vy *= 0.99
+  // vz *= 0.99
+
+
+  // velocity = new THREE.Vector3(0, vy, 0)
+  // localVelocity = velocity.clone().applyQuaternion(camera.quaternion);
+  // camera.position.add(localVelocity.multiplyScalar(1))
+
+  // camera.position.x += -vx
+  // camera.position.y += vy
+  // camera.position.z += vz
 
   updateFieldIfNotNull('Accelerometer_x', event.acceleration.x);
   updateFieldIfNotNull('Accelerometer_y', event.acceleration.y);
