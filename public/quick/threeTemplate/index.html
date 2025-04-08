@@ -78,9 +78,9 @@ var sensors = {
       function animate() {
         requestAnimationFrame(animate);
 
-        mesh.rotation.x = sensors.Orientation_b/20
-        mesh.rotation.y = sensors.Orientation_g/20
-        mesh.rotation.z = sensors.Orientation_a/180*Math.PI
+        mesh.rotation.x = sensors.Orientation_b/90*Math.PI
+        mesh.rotation.y = sensors.Orientation_g/90*Math.PI
+        mesh.rotation.z = sensors.Orientation_a/90*Math.PI
 
         renderer.render(scene, camera);
       }
