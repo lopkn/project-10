@@ -1497,7 +1497,7 @@ var httpsoptions = {
   cert: fs.readFileSync('keys/cert.pem')
 };
 
-https.createServer(httpsoptions, app).listen(443);
+var httpsServer = https.createServer(httpsoptions, app).listen(443);
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json())
@@ -1512,12 +1512,13 @@ app.post('/eval', (req, res) => {
     // res.sendStatus(200);
 })
 console.log("server is opened: "+Date.now())
-// console.log(perSeed.noise2D(0.2,0,0))
-// console.log("seeds: " + JSON.stringify(perSeeds))
 
 
 var socket = require('socket.io');
 var io = socket(server);
+
+var httpsIO = socket(httpsServer)
+
 var ranStrucLists = {"GoldOre":["gold ore vein1",1,"gold ore vein2",1,"gold ore vein3",1,"gold ore vein4",1]}
 
 INFUNCS.io = io
@@ -1531,6 +1532,9 @@ baller.setio(io,myMath,vectorNormalize,vectorFuncs)
 ericBlast.setio(io,myMath,vectorNormalize,vectorFuncs)
 
 // socket = io("https://home.unsown.top")
+
+
+httpsIO.sockets.on("connection",newConnection)
 
 io.sockets.on('connection', newConnection)
 changingConfig.Build += 1
@@ -1580,6 +1584,12 @@ function newConnection(socket){
 	// socket.on('requestMap', sendMap)
 	socket.on("JOINGAME",(e)=>{joinGame(e,socket)})
 }
+
+
+class connectionChannels{
+	static dict = {}
+}
+
 
 function joinGame(game,socket){
 
@@ -1725,7 +1735,24 @@ function joinGame(game,socket){
 		let clientIp = socket.request.connection.remoteAddress
 		socket.onAny((e,n)=>{ericBlast.handle(Date.now(),e,n,socket)})
 		socket.on('disconnect',()=>{ericBlast.disconnect(socket)})
-	} else if(game == "debug"){
+	} else if(game == "connector"){
+		socket.on("connectTo",(e)=>{
+			socket.join(e)
+
+			console.log(socket.rooms)
+			httpsIO.to(socket.id).emit("test",1)
+			socket.onAny((name,message)=>{
+				httpsIO.to(e).emit(name,message)
+				console.log(e,name,message)
+			})
+
+		})
+
+	}
+
+
+
+	else if(game == "debug"){
 		io.to(socket.id).emit("debugReturn",{"sid":socket.id,"str":fs.readFileSync("./dynamics/errorlog.json","utf8"),"str2":fs.readFileSync("./dynamics/errorlog3.txt","utf8")})
 	}
 }
