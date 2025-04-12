@@ -152,7 +152,76 @@ function updateRotation(pitch, roll, yaw) {
 
 
 
+class LRTC{ //lopkn's boilerplate RTC
 
+  static connectee(){
+    this.type = "connectee"
+    this.localConnection = new RTCPeerConnection()
+ 
+
+    this.localConnection.onicecandidate = e =>  {
+    console.log(" NEW ice candidate!! on localconnection reprinting SDP " )
+     this.latestSDP = JSON.stringify(this.localConnection.localDescription)
+     console.log(this.latestSDP)
+    }
+
+
+    this.sendChannel = this.localConnection.createDataChannel("sendChannel");
+    this.sendChannel.onmessage = this.recieve
+      this.sendChannel.onopen = e => console.log("open!!!!");
+      this.sendChannel.onclose =e => console.log("closed!!!!!!");
+
+
+    this.localConnection.createOffer().then(o => this.localConnection.setLocalDescription(o) )
+  }
+
+  static connecteeAnswer(answer){
+    this.localConnection.setRemoteDescription(answer).then(a=>console.log("done"))
+  }
+
+  static async connector(offer){
+    this.remoteConnection = new RTCPeerConnection()
+
+    this.remoteConnection.onicecandidate = e =>  {
+    console.log(" NEW ice candidnat!! on localconnection reprinting SDP ")
+     this.latestSDP = JSON.stringify(this.remoteConnection.localDescription)
+     console.log(this.latestSDP)
+    }
+
+     
+    this.remoteConnection.ondatachannel= e => {
+
+          this.receiveChannel = e.channel;
+          this.receiveChannel.onmessage = this.recieve
+          this.receiveChannel.onopen = e => console.log("open!!!!");
+          this.receiveChannel.onclose =e => console.log("closed!!!!!!");
+          this.remoteConnection.channel = this.receiveChannel;
+
+    }
+
+
+    this.remoteConnection.setRemoteDescription(offer).then(a=>console.log("done"))
+
+    //create answer
+    await this.remoteConnection.createAnswer().then(a => this.remoteConnection.setLocalDescription(a)).then(a=>
+    console.log(JSON.stringify(this.remoteConnection.localDescription)))
+  }
+
+
+  static recieve(e){
+    console.log("recieved: "+e.data)
+    this.lastMessage = e
+  }
+
+  static send(e){
+    if(this.type==="connectee"){
+      this.sendChannel.send(e)
+    } else {
+      this.remoteConnection.channel.send(e)
+    }
+  }
+
+}
 
 
 

@@ -157,6 +157,84 @@ function updateRotation(pitch, roll, yaw) {
 
 
 
+class LRTC{ //lopkn's boilerplate RTC
+
+
+  static connectee(){
+    this.type = "connectee"
+    this.localConnection = new RTCPeerConnection()
+ 
+
+    this.localConnection.onicecandidate = e =>  {
+      // this.localConnection.addIceCandidate(e)
+      
+     this.latestSDP = this.localConnection.localDescription
+     console.log(" NEW ice candidate!! on localconnection reprinting SDP " + JSON.stringify(this.latestSDP))
+    }
+
+
+    this.sendChannel = this.localConnection.createDataChannel("sendChannel");
+    this.sendChannel.onmessage = this.recieve
+      this.sendChannel.onopen = this.connected
+      this.sendChannel.onclose =e => console.log("closed!!!!!!");
+
+
+    this.localConnection.createOffer().then(o => this.localConnection.setLocalDescription(o) )
+  }
+
+  static connecteeAnswer(answer){
+    this.localConnection.setRemoteDescription(answer).then(a=>console.log("done"))
+  }
+
+  static async connector(offer){
+    this.remoteConnection = new RTCPeerConnection()
+
+    this.remoteConnection.onicecandidate = e =>  {
+      // this.remoteConnection.addIceCandidate(e)
+     this.latestSDP = this.remoteConnection.localDescription
+     console.log(" NEW ice candidnat!! on localconnection reprinting SDP "+JSON.stringify(this.latestSDP))
+    }
+
+     
+    this.remoteConnection.ondatachannel= e => {
+
+          this.receiveChannel = e.channel;
+          this.receiveChannel.onmessage = this.recieve
+          this.receiveChannel.onopen = this.connected
+          this.receiveChannel.onclose =e => console.log("closed!!!!!!");
+          this.remoteConnection.channel = this.receiveChannel;
+
+    }
+
+
+    this.remoteConnection.setRemoteDescription(offer).then(a=>console.log("done"))
+
+    //create answer
+    await this.remoteConnection.createAnswer().then(a => this.remoteConnection.setLocalDescription(a)).then(a=>
+    console.log(JSON.stringify(this.remoteConnection.localDescription)))
+  }
+
+  static connected(){}
+
+
+  static recieve(e){
+    console.log("recieved: "+e.data)
+    this.lastMessage = e
+  }
+
+  static send(e){
+    if(this.type==="connectee"){
+      this.sendChannel.send(e)
+    } else {
+      this.remoteConnection.channel.send(e)
+    }
+  }
+
+}
+
+
+
+
 
 
 
@@ -457,6 +535,9 @@ let vx, vy, vz;
 vx = vy = vz = 0
 
 
+  function send(){}
+
+
 function updateFieldIfNotNull(fieldName, value, precision=10){
   if (value != null)
     sensors[fieldName] = value.toFixed(precision);
@@ -494,7 +575,9 @@ function handleMotion(event) {
   updateFieldIfNotNull('Gyroscope_x', event.rotationRate.beta);
   updateFieldIfNotNull('Gyroscope_y', event.rotationRate.gamma);
   incrementEventCount();
-  socket.emit("input", (new Float32Array([sensors.Orientation_a,sensors.Orientation_b,sensors.Orientation_g]) ).buffer)
+
+  send((new Float32Array([sensors.Orientation_a,sensors.Orientation_b,sensors.Orientation_g]) ).buffer)
+
 }
 
 let is_running = false;
@@ -518,18 +601,51 @@ oneTimeTrustedButton(function(e) {
     window.addEventListener("devicemotion", handleMotion);
     window.addEventListener("deviceorientation", handleOrientation);
     is_running = true;
-    socket.off("input",handle)
   }
 });
 
+
+
+
+
+var STATUS = 0
+
 socket.emit("JOINGAME","connector")
 socket.emit("connectTo","443")
+socket.emit("anyoneListening")
+socket.on("anyoneListening",()=>{
+  LRTC.connectee()
+  setTimeout(()=>{    
+    socket.emit("yes",LRTC.latestSDP)
+  },1000)
+  socket.on("next",(e)=>{
+    LRTC.connecteeAnswer(e)
+  })
+})
+socket.on("yes",(e)=>{
+  LRTC.connector(e)
+
+  setTimeout(()=>{    
+    socket.emit("next",LRTC.latestSDP)
+
+  },2000)
+})
 
 function handle(e){
     e = new Float32Array(e)
     sensors = {Orientation_a:e[0],Orientation_b:e[1],Orientation_g:e[2]}
 }
-socket.on("input",handle)
+
+LRTC.recieve = (e)=>{
+  handle(e.data)
+}
+LRTC.connected = ()=>{
+  console.log("new done")
+  send = (e)=>{LRTC.send(e)}
+
+}
+
+
 
     </script>
   </body>

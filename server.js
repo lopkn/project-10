@@ -1742,7 +1742,7 @@ function joinGame(game,socket){
 			console.log(socket.rooms)
 			httpsIO.to(socket.id).emit("test",1)
 			socket.onAny((name,message)=>{
-				httpsIO.to(e).emit(name,message)
+				socket.broadcast.to(e).emit(name,message)
 				console.log(e,name,message)
 			})
 
