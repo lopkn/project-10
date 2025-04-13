@@ -157,84 +157,6 @@ function updateRotation(pitch, roll, yaw) {
 
 
 
-class LRTC{ //lopkn's boilerplate RTC
-
-
-  static connectee(){
-    this.type = "connectee"
-    this.localConnection = new RTCPeerConnection()
- 
-
-    this.localConnection.onicecandidate = e =>  {
-      // this.localConnection.addIceCandidate(e)
-      
-     this.latestSDP = this.localConnection.localDescription
-     console.log(" NEW ice candidate!! on localconnection reprinting SDP " + JSON.stringify(this.latestSDP))
-    }
-
-
-    this.sendChannel = this.localConnection.createDataChannel("sendChannel");
-    this.sendChannel.onmessage = this.recieve
-      this.sendChannel.onopen = this.connected
-      this.sendChannel.onclose =e => console.log("closed!!!!!!");
-
-
-    this.localConnection.createOffer().then(o => this.localConnection.setLocalDescription(o) )
-  }
-
-  static connecteeAnswer(answer){
-    this.localConnection.setRemoteDescription(answer).then(a=>console.log("done"))
-  }
-
-  static async connector(offer){
-    this.remoteConnection = new RTCPeerConnection()
-
-    this.remoteConnection.onicecandidate = e =>  {
-      // this.remoteConnection.addIceCandidate(e)
-     this.latestSDP = this.remoteConnection.localDescription
-     console.log(" NEW ice candidnat!! on localconnection reprinting SDP "+JSON.stringify(this.latestSDP))
-    }
-
-     
-    this.remoteConnection.ondatachannel= e => {
-
-          this.receiveChannel = e.channel;
-          this.receiveChannel.onmessage = this.recieve
-          this.receiveChannel.onopen = this.connected
-          this.receiveChannel.onclose =e => console.log("closed!!!!!!");
-          this.remoteConnection.channel = this.receiveChannel;
-
-    }
-
-
-    this.remoteConnection.setRemoteDescription(offer).then(a=>console.log("done"))
-
-    //create answer
-    await this.remoteConnection.createAnswer().then(a => this.remoteConnection.setLocalDescription(a)).then(a=>
-    console.log(JSON.stringify(this.remoteConnection.localDescription)))
-  }
-
-  static connected(){}
-
-
-  static recieve(e){
-    console.log("recieved: "+e.data)
-    this.lastMessage = e
-  }
-
-  static send(e){
-    if(this.type==="connectee"){
-      this.sendChannel.send(e)
-    } else {
-      this.remoteConnection.channel.send(e)
-    }
-  }
-
-}
-
-
-
-
 
 
 
@@ -535,9 +457,6 @@ let vx, vy, vz;
 vx = vy = vz = 0
 
 
-  function send(){}
-
-
 function updateFieldIfNotNull(fieldName, value, precision=10){
   if (value != null)
     sensors[fieldName] = value.toFixed(precision);
@@ -575,9 +494,7 @@ function handleMotion(event) {
   updateFieldIfNotNull('Gyroscope_x', event.rotationRate.beta);
   updateFieldIfNotNull('Gyroscope_y', event.rotationRate.gamma);
   incrementEventCount();
-
-  send((new Float32Array([sensors.Orientation_a,sensors.Orientation_b,sensors.Orientation_g]) ).buffer)
-
+  socket.emit("input", (new Float32Array([sensors.Orientation_a,sensors.Orientation_b,sensors.Orientation_g]) ).buffer)
 }
 
 let is_running = false;
@@ -601,50 +518,59 @@ oneTimeTrustedButton(function(e) {
     window.addEventListener("devicemotion", handleMotion);
     window.addEventListener("deviceorientation", handleOrientation);
     is_running = true;
+    socket.off("input",handle)
   }
 });
 
-
-
-
-
-var STATUS = 0
-
 socket.emit("JOINGAME","connector")
 socket.emit("connectTo","443")
-socket.emit("anyoneListening")
-socket.on("anyoneListening",()=>{
-  LRTC.connectee()
-  setTimeout(()=>{    
-    socket.emit("yes",LRTC.latestSDP)
-  },1000)
-  socket.on("next",(e)=>{
-    LRTC.connecteeAnswer(e)
-  })
-})
-socket.on("yes",(e)=>{
-  LRTC.connector(e)
-
-  setTimeout(()=>{    
-    socket.emit("next",LRTC.latestSDP)
-
-  },2000)
-})
 
 function handle(e){
     e = new Float32Array(e)
     sensors = {Orientation_a:e[0],Orientation_b:e[1],Orientation_g:e[2]}
 }
+socket.on("input",handle)
 
-LRTC.recieve = (e)=>{
-  handle(e.data)
-}
-LRTC.connected = ()=>{
-  console.log("new done")
-  send = (e)=>{LRTC.send(e)}
 
-}
+// newCharge(+1,-0.1,0.1)
+// newCharge(+1,0.1,-0.1)
+// newCharge(-1,-0.1,-0.1)
+// newCharge(-1,0.1,0.1)
 
+
+// let strr = ""
+// for(let i = 0; i < 50; i+=4){
+//   charges = []
+  
+// newCharge(+1,-0.1,0.1)
+// newCharge(+1,0.1,-0.1)
+// newCharge(-1,-0.1,-0.1)
+// newCharge(-1,0.1,0.1)
+
+  
+//   let x = 0.2 + i*0.02
+//   let y = x
+//   let z = probeP(x,y)
+//   strr += (x*100).toPrecision(3) + ","+(y*100).toPrecision(3)+"," + z.toFixed(3) + "\n"
+// }
+
+// // for(let i = 0; i < 360; i+=16){
+// //   charges = []
+// //   newCharge(-1,-0.05,0)
+// //   newCharge(1,0.05,0)
+
+  
+// //   let x = 2 * Math.cos(i/180*Math.PI)
+// //   let y = 2 * Math.sin(i/180*Math.PI)
+  
+// //   let z = probeP(x,y)
+// //   strr += i + "," + z.toFixed(3) + "\n" 
+// // }
+// console.log(strr)
+
+// // probeP(2,0)
+
+// // console.log(probeP(0.01,0)-probeP(0.03))
 
 
     </script>
