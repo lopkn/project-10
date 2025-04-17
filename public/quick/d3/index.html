@@ -28,6 +28,171 @@
     <div id="chart"></div>
     <script>
 
+        
+    
+class ALG{
+  static learnt = new Set([0]); //{"bit":key,"type":1/0/und(pass)}
+  static dict = {"":{"bit":0,
+                     // "eq":0,"sum":0
+                    }};
+
+
+  //[all zeros, 0..., | 1..., all ones]
+
+  static classify(dict,ans=0){
+      let str = ""
+      let cont = true
+      let bitsUsed = new Set()
+      let keysUsed = new Set()
+      let bit;
+     while(cont){
+       
+       if(this.dict[str].type === undefined){
+         
+         
+        bit = this.dict[str].bit
+         bitsUsed.add(bit)
+         str += dict[bit]
+         keysUsed.add(str)
+         
+         // console.log("going down "+str)
+       } else {
+         
+         if(ans === this.dict[str].type || ans === 2){
+           
+           keysUsed.forEach((e)=>{
+             let d = this.dict[e]
+                // d.sum += 1
+                // d.eq += this.dict[str].type
+                // d.pers = (d.eq + 1) / (d.sum + 2)
+                            })
+           
+           if(this.debug){
+             console.log("ending: "+bit+" - "+str)
+           }
+           
+           return(this.dict[str].type)
+         } else{
+           let newBit = 0
+           let len = Object.keys(dict).length
+           while(bitsUsed.has(newBit)){
+             // newBit = Math.floor(Math.random()*(len-15))
+             if(Math.random()>0.9999){
+               // console.log("stuck")
+               return("stuck"+str)
+             }
+             newBit += 1
+             
+           }
+           console.log("learning: "+newBit+"-"+str)
+           this.dict[str].type = undefined
+           bitsUsed.add(newBit)
+           this.learnt.add(newBit)
+           this.dict[str].bit = newBit
+           
+         }
+       }
+       
+       if(this.dict[str] === undefined){
+         this.dict[str] = {"type":ans,
+                           // "eq":0,"sum":0
+                          }
+       }
+     }
+    
+    return(this.dict[str].type)
+    
+  }
+    
+ 
+  static hierarchicalShift(Akey){
+    //0 : {bit:1,und,bitof0}
+    //00 : {bit:2,und, bitof1}
+    //01 : {bit:3,und, bitof1}
+    
+    let A = this.dict[Akey]
+    let B1 = this.dict[Akey+"1"]
+    let B2 = this.dict[Akey+"0"]
+    
+    let NA1 = JSON.parse(JSON.stringify(A));
+    let NA2 = JSON.parse(JSON.stringify(A));
+    let NB = JSON.parse(JSON.stringify(B1));
+    
+    //we should verify that B1.bit == B2.bit
+    NB.bit = B1.bit
+    NA1.bit = A.bit
+    NA2.bit = A.bit
+    
+    let ax = this.dict[Akey+"10"]
+    let ay = this.dict[Akey+"01"]
+    
+    this.dict[Akey] = NB
+    this.dict[Akey+"1"] = NA1
+    this.dict[Akey+"0"] = NA2
+    
+    this.dict[Akey+"10"] = ay
+    this.dict[Akey+"01"] = ax
+    
+    
+    // NA1 = 
+  }
+    
+    static simShift(Akey){
+      let A = this.dict[Akey]
+      
+      if(A==undefined || A.bit==undefined){return}
+      
+      
+      if(this.dict[Akey+"0"]?.type === this.dict[Akey+"1"]?.type && this.dict[Akey+"1"]?.type !== undefined){
+        let x = this.dict[Akey+"1"].type
+        this.dict[Akey].type = x
+        delete this.dict[Akey].bit
+        delete this.dict[Akey+"0"]
+        delete this.dict[Akey+"1"]
+        console.log("combined")
+        return
+      }
+      
+      if(this.dict[Akey+"0"]?.bit === this.dict[Akey+"1"]?.bit && this.dict[Akey+"0"]?.bit !== undefined){
+        this.hierarchicalShift(Akey)
+        console.log("shifted")
+        return
+      }
+      
+      
+    }
+    static simShiftAll(){
+      Object.keys(this.dict).forEach((e)=>{
+        this.simShift(e)
+      })
+    }
+    
+
+
+    
+
+    
+}
+
+function atd(arr){
+  let dict = {}
+  arr.forEach((e,i)=>{
+    dict[i] = e
+  })
+  return(dict)
+}
+                                     
+function sd(str){
+  let arr = str.split("")
+  arr.forEach((e,i)=>{
+    arr[i] = parseInt(e)
+  })
+  return(atd(arr))
+}                                     
+
+
+
+        
       function inflateTrainingProcess(str){
   str = str.replaceAll("n",',"and"],[')
   str = str.replaceAll('a,"and"],[d','and')
