@@ -144,8 +144,8 @@ class ALG{
     this.dict[Akey+"1"] = NA1
     this.dict[Akey+"0"] = NA2
     
-    this.dict[Akey+"10"] = ay
-    this.dict[Akey+"01"] = ax
+    // this.dict[Akey+"10"] = ay
+    // this.dict[Akey+"01"] = ax
     
     
     this.swapChildren(Akey+"10",Akey+"01")
@@ -158,11 +158,12 @@ class ALG{
     let newBdict = {}
     Object.keys(this.dict).forEach((e)=>{
         if(e.substr(0,Akey.length) === Akey){
-            newBdict[Bkey + e.substr( e.length-Akey.length )] = this.dict[e]
+
+            newBdict[Bkey + e.substr(Akey.length )] = this.dict[e]
             delete this.dict[e]
         }
         if(e.substr(0,Bkey.length) === Bkey){
-            newAdict[Bkey + e.substr(e.length-Bkey.length)] = this.dict[e]
+            newAdict[Akey + e.substr(Bkey.length )] = this.dict[e]
             delete this.dict[e]
         }
     })
