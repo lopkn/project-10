@@ -480,7 +480,10 @@ function inflateTrainingProcess(str){
         }
         start()
 
-        
+        function R(){
+            start();
+            RE();
+        }
 
 
 
@@ -532,7 +535,7 @@ function inflateTrainingProcess(str){
 
 
             const tooltip = d3.select(".tooltip");
-        var node = svg.append("g").attr("stroke", "#f00")
+        var node = svg.append("g").attr("stroke", "#fff")
         
         node = node.attr("stroke-width", 1.5)
             .selectAll("g")
@@ -558,7 +561,7 @@ function inflateTrainingProcess(str){
 
             dog
             .join("text")
-            .text("hey");
+            .text(d => ALG.dict[d.id].bit).attr("stroke","#000");
 
 
         node = svg.selectAll("circle, text")
@@ -652,7 +655,7 @@ function inflateTrainingProcess(str){
 
         // Update nodes
         node = svg.selectAll("circle")
-            .data(nodes)
+            
             .join("circle")
             .attr("r", 5)
             .attr("fill", d => color(d.group))
@@ -662,6 +665,14 @@ function inflateTrainingProcess(str){
                 .on("end", dragended));
 
         node.append("title").text(d => d.id);
+
+        dog = svg.selectAll("text")
+            .join("text")
+            .text(d => ALG.dict[d.id].bit).attr("stroke","#000");
+
+
+        node = svg.selectAll("circle, text")
+
     }
     </script>
 </body>
