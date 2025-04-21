@@ -561,7 +561,8 @@ function inflateTrainingProcess(str){
 
             dog
             .join("text")
-            .text(d => ALG.dict[d.id].bit).attr("stroke","#000");
+            .text(d => ALG.dict[d.id].bit).attr("stroke","#000")
+            .style("pointer-events","none");
 
 
         node = svg.selectAll("circle, text")
@@ -655,7 +656,7 @@ function inflateTrainingProcess(str){
 
         // Update nodes
         node = svg.selectAll("circle")
-            
+            .data(nodes)
             .join("circle")
             .attr("r", 5)
             .attr("fill", d => color(d.group))
@@ -667,8 +668,10 @@ function inflateTrainingProcess(str){
         node.append("title").text(d => d.id);
 
         dog = svg.selectAll("text")
+            .data(nodes)
             .join("text")
-            .text(d => ALG.dict[d.id].bit).attr("stroke","#000");
+            .text(d => ALG.dict[d.id].bit).attr("stroke","#000")
+            .style("pointer-events","none");
 
 
         node = svg.selectAll("circle, text")
