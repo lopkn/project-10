@@ -551,7 +551,7 @@ function inflateTrainingProcess(str){
             .attr("fill", d => color(d.group))
             .on("mouseover", (event, d) => {
                 tooltip.transition().duration(200).style("opacity", .9);
-                tooltip.html(d.id + "-" + 2)
+                tooltip.html(d.id /*+ "-" + 2*/)
                     .style("left", (event.pageX + 5) + "px")
                     .style("top", (event.pageY - 28) + "px");
             })
