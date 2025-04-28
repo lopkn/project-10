@@ -30,6 +30,12 @@
 
         
    
+        document.addEventListener("keydown",(e)=>{
+            if(e.key == "c"){
+                navigator.clipboard.write(JSON.stringify(ALG.dict))
+            }
+        })
+
 class ALG{
   static learnt = new Set([0]); //{"bit":key,"type":1/0/und(pass)}
   static dict = {"":{"bit":0,
@@ -679,6 +685,9 @@ function inflateTrainingProcess(str){
         node = svg.selectAll("circle, text")
 
     }
+
+
+
     </script>
 </body>
 </html>
