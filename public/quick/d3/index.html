@@ -34,6 +34,15 @@
             if(e.key == "c"){
                 navigator.clipboard.writeText(JSON.stringify(ALG.dict))
             }
+            if(e.key == "p"){
+                (async()=>{
+                    let x = await navigator.clipboard.readText()
+                    console.log("loading new items")
+                    ALG.dict = JSON.parse(x)
+                    R();
+                })()
+                
+            }
         })
 
 class ALG{
@@ -368,6 +377,24 @@ class ALG{
             }
         })
     }
+
+    static terminators(){
+        let dict = {}
+        Object.keys(this.dict).forEach((e)=>{
+            if(this.dict[e].bit===undefined){
+                let bt = this.dict[e.slice(0,-1)].bit
+                if(dict[bt]==undefined){dict[bt] = 0}
+                dict[bt] += 1
+            }
+        })
+        return(dict)
+    }
+
+
+    static randomUpLeveling(){
+
+    }
+
 
 
 
