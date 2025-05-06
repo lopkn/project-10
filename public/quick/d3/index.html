@@ -794,6 +794,765 @@ upLevel the useful
 simplify
 
 (repeat)
+
+
+function setup() {
+  createCanvas(800, 1800);
+}
+
+var dataColumn = []
+var learning = true
+
+class pred{
+  constructor(){
+    this.dict = {"":{eq:0,pers:0.5,sum:0}}
+    this.datas = []
+    this.noProp = new Set()
+    
+    this.candidates = {}
+    
+    
+  }
+  addData(x){
+    this.datas.push(x)
+    Object.keys(this.candidates).forEach((e)=>{
+      let c = this.candidates[e]
+      if(c.tag.substring(1) == x){
+        this.dict[e] = c
+      }
+    })
+  }
+  
+  addCandidate(x){ // add a candidate
+    this.candidates["-"+x] = {
+        "sum":0,
+        "eq":0,
+        "pers":0.5,
+        "tag":"-"+x,
+        "set":new Set([x+""])
+      }
+    this.candidates["+"+x] = {
+        "sum":0,
+        "eq":0,
+        "pers":0.5,
+        "tag":"+"+x,
+        "set":new Set([x+""])
+      }
+  }
+  
+  
+  
+  
+  doAdding(dnum){
+    let b = getBiggest2()
+    if(dnum==undefined){ dnum = this.candidates[b[0]].tag.substring(1) }
+    this.addData(dnum)
+    console.log("DOADD: "+dnum)
+    
+    let newCandidates = {}
+    Object.keys(this.candidates).forEach((e)=>{
+      let orgCand = this.candidates[e]
+      let etag = this.candidates[e].tag
+      if(!this.noProp.has("-"+dnum) && !orgCand.set.has(dnum)){
+        orgCand.set.add(dnum)
+        newCandidates[e+"-"+dnum] = {
+          "sum":0,
+          "eq":0,
+          "last":0,
+          "pers":0.5,
+          "tag":etag,
+          "set":orgCand.set
+        }
+      }
+      
+      if(!this.noProp.has("+"+dnum)&& !orgCand.set.has(dnum)){
+        orgCand.set.add(dnum)
+        newCandidates[e+"+"+dnum] = {
+          "sum":0,
+          "eq":0,
+          "last":0,
+          "pers":0.5,
+          "tag":etag,
+          "set":orgCand.set
+        }
+      }
+    })
+    
+    this.candidates = newCandidates
+    
+  }
+  
+  
+  
+  noPropAll(num=0.005){
+    Object.keys(this.candidates).forEach((e)=>{
+      let x = Math.abs(parseFloat(this.candidates[e].pers)-0.5)
+      if(x>0.5-num){
+        this.noProp.add(e)
+        console.log("NOPROP: "+e)
+      }
+    })
+  }
+  
+  learn(arr,ans=0){
+    
+    let appendStr = ""
+      this.datas.forEach((e)=>{
+        appendStr += arr[e] 
+      })
+      
+      // if(this.debug){console.log(arr[13])}
+      if(this.noProp.has(appendStr)){return}
+    
+    arr.forEach((e)=>{
+      
+      
+      
+      e = e+appendStr
+      if(this.candidates[e] == undefined){
+        return
+      }
+      
+      this.candidates[e].sum += 1
+      this.candidates[e].eq += ((e[0]=="+")==ans)
+      this.candidates[e].pers = ((this.candidates[e].eq+1)/(this.candidates[e].sum+2)).toPrecision(3)
+    })
+   return(appendStr)                                 
+  }
+  
+  add(arr,ans=0){
+    let vars = ""
+    for(let i = 0; i < this.datas.length; i++){
+      let e = this.datas[i]
+      vars += arr[e]
+      if(this.noProp.has(vars)){
+        break;
+      }
+      
+    }
+
+    if(this.dict[vars]===undefined){
+      this.dict[vars] = {sum:0,eq:0}
+    }
+    this.dict[vars].sum += 1
+    this.dict[vars].sum += ans
+    this.dict[vars].pers = (this.dict[vars].eq/this.dict[vars].sum).toPrecision(3)
+    
+  }
+  
+  pred(arr){
+    let vars = ""
+    for(let i = 0; i < this.datas.length; i++){
+      let e = this.datas[i]
+      vars += arr[e]
+      
+      if(this.noProp.has(vars)){
+        break;
+      }
+    }
+    try{
+    return(parseFloat(this.dict[vars].pers)>0.5)}
+    catch{
+    }
+  }
+                                     
+  learnItem(item,ans){
+    if(item==undefined){return}
+    item.sum += 1
+    item.eq += ans
+    item.pers = ((item.eq+1)/(item.sum+2)).toPrecision(3)
+  }                      
+                                     
+                                     
+                                     
+                                     
+  predict(arr,op={}){ // op: options
+    // the arr is in the form [+a,-b,+c,+d,...]
+    // datas: the stuff already KNOWN to be related
+    // candidates: finding relations
+    
+    let answer = {}
+    
+    let vars = ""
+    let vars2 = ""
+    let noPropEnded = false
+    for(let i = 0; i < this.datas.length; i++){
+      
+      let e = this.datas[i]
+      vars += arr[e] 
+      vars2 = arr[e] + vars2
+      
+      if(this.noProp.has(vars)){
+        noPropEnded = true
+        break;
+      }
+      
+    }
+    
+    // vars is the endpoint predictor node
+    // noPropEnded: if propegation terminated on a noprop
+    
+    if(noPropEnded){ 
+      let aitem = this.dict[vars] //aitem is the only outing item
+      answer.name = vars
+      answer.bool = aitem.pers > 0.5 // if 1.00, it should answer true
+      answer.item = aitem
+      if(op.learn!==undefined){//acts as the original p.add
+        this.learnItem(aitem,op.learn) //ERROR PRONE. FIX LATER
+      }
+    } else {
+      let maxscore = 0
+      let aitem;
+      let itemarr = []
+      arr.forEach((e)=>{
+        let item = this.candidates[e+vars]
+        
+        itemarr.push({item,name:e+vars})
+      })
+      
+      if(undefined == this.dict[vars2]){
+            console.log("error:" + vars2,this.dict)
+          }
+      itemarr.splice(0,0,{item:this.dict[vars2],name:vars}) //spliced to give the upper hand 
+      
+      itemarr.forEach((e)=>{
+        let item = e.item
+        let name = e.name
+        
+        if(item == undefined){
+          maxscore = Infinity
+          aitem = {"pers":2}
+          answer.name = name
+          return
+        }
+        
+        if(op.learn!==undefined){ //this can be optimized to be in another loop
+
+            this.learnItem(item,op.learn) //acts as the original p.learn
+          }
+      
+        
+          let score = Math.abs(item.pers-0.5)
+          if(score > maxscore){
+            maxscore = score
+            aitem = item
+            answer.name = name
+        }
+      })
+      
+      
+      answer.bool = aitem.pers > 0.5 // if 1.00, it should answer true
+      answer.item = aitem
+
+    }
+
+    return(answer)
+  }          
+                                     
+                                     
+                                     
+                                     
+  
+  report(){
+  }
+}
+
+
+
+function getBiggest(){
+  let x = 0
+  let z = -1
+  for(let i = 0; i < dataColumn.length; i++){
+    let score = Math.abs(parseFloat(dataColumn[i].pers)-0.5)
+    if(score > x){
+      x = score
+      z = i
+    }
+  }
+  return(z)
+}
+
+function getBiggest2(){
+  let arr = Object.keys(p.candidates)
+  arr.forEach((e,i)=>{
+    arr[i] = JSON.parse(JSON.stringify(p.candidates[e]))
+    arr[i].tag = e
+  })
+  // arr.sort((a,b)=>{
+  //   let z = Math.abs(parseFloat(b.pers)-0.5)-Math.abs(parseFloat(a.pers)-0.5)
+  //   if(z == 0){
+  //     return(b.sum-a.sum)
+  //   }
+  //   return(z)
+  // })
+    arr.sort((a,b)=>{
+    let z = Math.abs(parseFloat(b.pers)-0.5)-Math.abs(parseFloat(a.pers)-0.5)
+    return(z)
+  })
+  arr.forEach((e,i)=>{
+    arr[i] = e.tag
+  })
+  return(arr)
+}
+
+var p = new pred()
+
+// function rs(){ //reset
+//   dataColumn.forEach((e)=>{
+//     e.sum = 0
+//     e.eq = 0
+//   })
+// }
+
+// var predictionSet = new Set()
+
+for(let i = 0; i < 32; i++){
+  p.addCandidate(i)
+}
+
+  var constant = 2*Math.PI
+    var DATA;
+    
+    
+    var canv = []
+    for(let i = 0; i < 100; i++){
+      canv[i]= "-"+i
+    }
+    
+    
+    var aset = new Set()
+    
+function draw() {
+  background(220);
+  let data = getBitsInBinary(mouseX*constant)
+  DATA = data
+  let s = ""
+  
+    let aans = (data[11] == "1" && data[12] != "1" || data[11] == "0" && data[12] != "0")
+  aans = aans || data[13] == "1"
+  // p.add(data.split(""),aans)
+  
+  // let ans = p.pred(data.split(""))
+  
+  let arr = data.split("")      
+  arr.forEach((e,i)=>{
+    arr[i] = (e==="1"?"+":"-")+i
+  })
+  
+  let predicted = p.predict(arr,{learn:aans})
+  // let ans = p.pred(arr)
+  let ans = predicted.bool
+  
+  // p.learn(arr,aans)
+  
+  let ans2 = ALG.classify(sd(data),learning?aans:2)
+  
+  
+
+  // p.add(s,aans)
+  
+  
+  
+    let cx = Math.floor(mouseX/10)
+    let cy = Math.floor((mouseY-800)/10)
+  
+    let z = cx + cy*10
+    if(mouseIsPressed && z >= 0 && z < 100){
+      
+      if(!aset.has(z)){
+        
+      aset.add(z)
+      
+      if(canv[z][0] == "-"){
+        canv[z] = "+"+z
+      } else {
+        canv[z] = "-"+z
+      }
+      }
+    } 
+
+    if(p.debugging){
+      console.log(aans)
+    }
+  
+  
+  if(ans==aans){
+    background(200,225,200)
+  } else {
+    background(225,200,200)
+  }
+    canv.forEach((e,i)=>{
+    let x = i%10
+    let y = Math.floor(i/10)
+    fill((e[0]=="+")*155+155)
+    rect(x*10,800+y*10,10,10)
+  })
+    if(ans2==aans){
+    fill(200,225,200)
+  } else {
+    fill(225,200,200)
+  }
+  rect(0,0,200,200)
+  
+
+  
+  fill(0)
+  text(data ,0,20)
+  text(JSON.stringify(p.candidates,null).replaceAll('}',' '),20,40,800,500)
+  text(JSON.stringify(p.dict).replaceAll('}',' '),20,600,600)
+  text(JSON.stringify(predicted),0,660)
+  text(getBiggest2(),0,700)
+  text(Object.keys(p.candidates).length,0,720)
+  
+}
+    
+    
+    function datasep(){
+        let arr = DATA.split("")      
+  arr.forEach((e,i)=>{
+    arr[i] = (e==="1"?"+":"-")+i
+  })
+      return(arr)
+    }
+
+    
+
+function getBitsInBinary(num) {
+//     // For 64-bit (double precision)
+//     const buffer64 = new ArrayBuffer(8);
+//     const float64 = new Float64Array(buffer64);
+//     float64[0] = num;
+//     const uint8Array64 = new Uint8Array(buffer64);
+    
+//     const binary64 = Array.from(uint8Array64)
+//         .map(byte => byte.toString(2).padStart(8, '0')) // Convert to binary and pad to 8 bits
+//         .join(' '); // Join the bytes with a space
+//     console.log('64-bit representation:', binary64);
+
+    // For 32-bit (single precision)
+    const buffer32 = new ArrayBuffer(4);
+    const float32 = new Float32Array(buffer32);
+    float32[0] = num;
+    const uint8Array32 = new Uint8Array(buffer32);
+    
+    const binary32 = Array.from(uint8Array32).map(byte => byte.toString(2).padStart(8, '0')); // Join the bytes with a space
+    binary32.reverse()
+    // console.log('32-bit representation:', binary32.join(" "));
+  return(binary32.join(""))
+}
+
+
+
+
+
+
+document.addEventListener("mouseup",(e)=>{
+    aset = new Set()
+})
+
+    
+function copyStringToClipboard (str) {
+   var el = document.createElement('textarea');
+   el.value = str;
+   el.setAttribute('readonly', '');
+   el.style = {position: 'absolute', left: '-9999px'};
+   document.body.appendChild(el);
+   el.select();
+   document.execCommand('copy');
+   document.body.removeChild(el);
+}
+
+
+
+document.addEventListener("keydown",(e)=>{
+  if(e.key == "c"){
+          canv = []
+      for(let i = 0; i < 100; i++){
+        canv[i]= "-"+i
+      }
+    
+    
+    let str = JSON.stringify(ALG.dict)
+    copyStringToClipboard(str)
+    
+  } else if (e.key == 1){
+    p.learn(canv,1)
+    p.add(canv,1)
+  } else if (e.key == 2){
+    p.learn(canv,0)
+    p.add(canv,0)
+  }
+})
+
+
+//p.doAdding()
+
+
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+class ALG{
+  static learnt = new Set([0]); //{"bit":key,"type":1/0/und(pass)}
+  static dict = {"":{"bit":0,
+                     // "eq":0,"sum":0
+                    }};
+
+
+  //[all zeros, 0..., | 1..., all ones]
+
+  static classify(dict,ans=0){
+      let str = ""
+      let cont = true
+      let bitsUsed = new Set()
+      let keysUsed = new Set()
+      let bit;
+     while(cont){
+       
+       if(this.dict[str].type === undefined){
+         
+         
+        bit = this.dict[str].bit
+         
+         
+         
+         bitsUsed.add(bit+"")
+         
+         let skip = (this.dict[str].skip===undefined?"":this.dict[str].skip)
+         
+         str += skip+dict[bit]
+         keysUsed.add(str)
+         
+         // console.log("going down "+str)
+       } else {
+         
+         if(ans === this.dict[str].type || ans === 2){
+           
+           keysUsed.forEach((e)=>{
+             let d = this.dict[e]
+                // d.sum += 1
+                // d.eq += this.dict[str].type
+                // d.pers = (d.eq + 1) / (d.sum + 2)
+                            })
+           
+           if(this.debug){
+             console.log("ending: "+bit+" - "+str)
+           }
+           
+           return(this.dict[str].type)
+         } else{
+           let len = Object.keys(dict).length
+           
+           let gb = getBiggest2()
+           // gb = ["+13","+11","+12"]
+           let i = 0
+           let newBit = gb[0].substr(1)
+           
+           while(bitsUsed.has(newBit+"")){
+             // newBit = Math.floor(Math.random()*(len-15))
+             if(Math.random()>0.9999){
+               // console.log("stuck")
+               return("stuck"+str)
+             }
+             i += 1
+             newBit = parseInt(gb[i].substr(1))
+
+             
+           }
+           // console.log(bitsUsed,newBit)
+           console.log("learning: "+newBit+"-"+str)
+           this.dict[str].type = undefined
+           bitsUsed.add(newBit)
+           this.learnt.add(newBit)
+           this.dict[str].bit = newBit
+           
+         }
+       }
+       
+       if(this.dict[str] === undefined){
+         this.dict[str] = {"type":ans,
+                           // "eq":0,"sum":0
+                          }
+       }
+     }
+    
+    return(this.dict[str].type)
+    
+  }
+    
+ 
+  static hierarchicalShift(Akey){
+    //0 : {bit:1,und,bitof0}
+    //00 : {bit:2,und, bitof1}
+    //01 : {bit:3,und, bitof1}
+    
+    let A = this.dict[Akey]
+    let B1 = this.dict[Akey+"1"]
+    let B2 = this.dict[Akey+"0"]
+    
+    let NA1 = JSON.parse(JSON.stringify(A));
+    let NA2 = JSON.parse(JSON.stringify(A));
+    let NB = JSON.parse(JSON.stringify(B1));
+    
+    //we should verify that B1.bit == B2.bit
+    NB.bit = B1.bit
+    NA1.bit = A.bit
+    NA2.bit = A.bit
+    
+    let ax = this.dict[Akey+"10"]
+    let ay = this.dict[Akey+"01"]
+    
+    this.dict[Akey] = NB
+    this.dict[Akey+"1"] = NA1
+    this.dict[Akey+"0"] = NA2
+    
+    this.dict[Akey+"10"] = ay
+    this.dict[Akey+"01"] = ax
+    
+    
+    // NA1 = 
+  }
+    
+    static simShift(Akey){
+      let A = this.dict[Akey]
+      
+      if(A==undefined || A.bit==undefined){return}
+      
+      if(this.dict[Akey+"0"]?.type === this.dict[Akey+"1"]?.type && this.dict[Akey+"1"]?.type !== undefined){
+        let x = this.dict[Akey+"1"].type
+        this.dict[Akey].type = x
+        delete this.dict[Akey].bit
+        delete this.dict[Akey+"0"]
+        delete this.dict[Akey+"1"]
+        console.log("combined")
+        return
+      }
+      
+      if(this.dict[Akey+"0"]?.bit === this.dict[Akey+"1"]?.bit && this.dict[Akey+"0"]?.bit !== undefined){
+        this.hierarchicalShift(Akey)
+        console.log("shifted")
+        return
+      }
+      
+      
+    }
+        
+        
+    static simShiftAll(){
+      Object.keys(this.dict).forEach((e)=>{
+        
+        this.simShift(e)
+      })
+    }
+
+        
+    static condShift(Akey){
+      let A = this.dict[Akey]
+      if(A.bit===undefined){return}
+      
+        let askip = (A.skip===undefined?"":A.skip)
+        let AkeySkip = Akey + askip
+      if(this.dict[AkeySkip+ "0"] === undefined || this.dict[AkeySkip+"1"]===undefined){
+
+        let Bkey = (this.dict[AkeySkip+"0"]===undefined?AkeySkip+"1":AkeySkip+"0")
+        // console.log(Akey + " is condable "+Bkey)
+
+        if(this.dict[Bkey]===undefined){
+            console.log(AkeySkip)
+        }
+
+        if(this.dict[Bkey].bit===undefined){
+          A.type = this.dict[Bkey].type
+          delete A.skip
+          delete A.bit
+          delete this.dict[Bkey]
+          return
+        }
+
+        A.bit = this.dict[Bkey].bit
+        
+        this.dict[Bkey].defunct = true
+
+        if(A.skip === undefined){
+          A.skip = ""
+        }
+        
+        let bskip = (this.dict[Bkey].skip===undefined?"":this.dict[Bkey].skip)
+        delete(this.dict[Bkey])
+        
+        A.skip +=  Bkey.substr(-1) + bskip 
+        
+      }
+    }
+                            
+                            
+    static condShiftAll(){
+        Object.keys(this.dict).forEach((e)=>{if(this.dict[e]===undefined){return};this.condShift(e)})
+    }
+    
+    
+    static regrow(){
+      let newDict = {}
+      
+      let unprocessed = [{s:"",k:""}]
+      while(unprocessed.length > 0){
+      let newUnprocessed = []
+      for(let i = 0; i < unprocessed.length; i++){
+
+        let k = unprocessed[i].s
+        if(this.dict[k]==undefined){continue}
+        let skip = (this.dict[k].skip===undefined?"":this.dict[k].skip)
+        
+        let p1 = {s:k + skip + "0",k:unprocessed[i].k+"0"}
+        let p2 = {s:k + skip + "1",k:unprocessed[i].k+"1"}
+        
+        newDict[unprocessed[i].k] = this.dict[k]
+
+        newUnprocessed.push(p1)
+        newUnprocessed.push(p2)
+        
+        
+      }
+        unprocessed = newUnprocessed
+    }
+
+      Object.keys(newDict).forEach((e)=>{
+        delete newDict[e].skip
+      })
+      
+      this.dict = newDict
+      return(newDict)
+      
+    }
+
+
+    
+}
+
+function atd(arr){
+  let dict = {}
+  arr.forEach((e,i)=>{
+    dict[i] = e
+  })
+  return(dict)
+}
+                                     
+function sd(str){
+  let arr = str.split("")
+  arr.forEach((e,i)=>{
+    arr[i] = parseInt(e)
+  })
+  return(atd(arr))
+}                                     
+
+
 */
 
 
