@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>D3 Visualization</title>
-    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="./d3.js"></script>
 
        <style>
         .tooltip {
@@ -43,6 +43,11 @@
                 })()
                 
             }
+            if(e.key == "r"){
+              R();
+            } if(e.key == "s"){
+              ALG.learn();R()
+            }
         })
 
 class ALG{
@@ -54,6 +59,9 @@ class ALG{
 
   //[all zeros, 0..., | 1..., all ones]
 
+
+
+
   static classify(dict,ans=0){
       let str = ""
       let cont = true
@@ -62,7 +70,9 @@ class ALG{
       let bit;
      while(cont){
        
-       if(this.dict[str].type === undefined){
+
+
+       if(this.dict[str].type === undefined){ //its a node
          
          
         bit = this.dict[str].bit
@@ -73,13 +83,25 @@ class ALG{
          
          let skip = (this.dict[str].skip===undefined?"":this.dict[str].skip)
          
-         str += skip+dict[bit]
+         let ansbit = dict[bit]
+
+         if(ansbit===undefined){
+          let randAns = Math.random()>0.5?1:0
+          // console.log("skipping bit "+bit+" at " + str + " as "+randAns) // here this should be bit defaulting
+          ansbit = randAns //it seems like the only bit that is skipped is the one that got upleveled?
+         }
+
+
+         str += skip+ansbit
+
+
+
          keysUsed.add(str)
          
          // console.log("going down "+str)
-       } else {
+       } else { //not a node
          
-         if(ans === this.dict[str].type || ans === 2){
+         if(ans === this.dict[str].type || ans === 2){ //answer is correct
            
            keysUsed.forEach((e)=>{
              let d = this.dict[e]
@@ -93,9 +115,12 @@ class ALG{
            }
            
            return(this.dict[str].type)
-         } else{
+         } else{ //does not exist
            let len = Object.keys(dict).length
            
+           if(ans === 2){
+            return(2)
+           }
            let gb = getBiggest2()
            // gb = ["+13","+11","+12"]
            let i = 0
@@ -391,6 +416,83 @@ class ALG{
     }
 
 
+
+    static allUsedBits(){
+      let bitSet = new Set()
+        Object.keys(this.dict).forEach((e)=>{
+          if(this.dict[e].bit){
+            bitSet.add(this.dict[e].bit)
+          }
+        })
+        return(bitSet)
+    }
+
+
+
+    static terminatorTest(){
+      let bitSet = this.allUsedBits()
+      let dictArr = []
+      Object.keys(this.dict).forEach((e)=>{
+        if(this.dict[e].bit === undefined){
+          let str = e
+          let ansDict = {"ANS":this.dict[e].type}
+          while(str.length>0){
+
+            ansDict[this.dict[str.slice(0,-1)].bit] = str.substr(-1)
+            str = str.slice(0,-1)
+          }
+          dictArr.push(ansDict)
+        }
+      })
+      return(dictArr)
+    }
+
+    static trainsetFrom(dictArr=this.terminatorTest(),count=5){
+      let bitSet = this.allUsedBits()
+      let trainArr = []
+
+      for(let i = 0; i < count; i++){
+        dictArr.forEach((e)=>{
+          // let ans = e.ANS
+          // delete e.ANS
+          let dictOut = {ANS:e.ANS}
+          bitSet.forEach((E)=>{
+            if(e[E]===undefined){
+              dictOut[E] = Math.random()>0.5?1:0
+            } else {dictOut[E] = e[E]}
+          })
+          trainArr.push(dictOut)
+        })
+      }
+      return(trainArr)
+    }
+
+
+    static testCase(){
+      let bitSet = this.allUsedBits()
+      let ansDict = {}
+      bitSet.forEach((e)=>{
+        ansDict[e] = Math.random()>0.5?1:0
+      })
+      let ans = this.classify(ansDict,2)
+      return({key:ansDict,ans:ans})
+    }
+
+    static test(arr){
+      let pass = 0;
+      let fail = 0;
+      for(let i = 0; i < arr.length; i++){
+        let cs = arr[i] //case
+        let correct = this.classify(cs,2)==cs.ANS
+        pass += correct
+        fail += !correct
+      }
+      console.log("passes: "+pass+" fails: "+fail)
+      return(fail===0)
+    }
+
+
+
     static randomUpLeveling(){
 
     }
@@ -539,6 +641,38 @@ function inflateTrainingProcess(str){
         // for(let i = 0; i < 20; i++){ALG.upShiftAll()}
 
 
+        function train(){
+          ALG.learn()
+          let t = topTerminator()
+          console.log("upleveling "+t)
+          ALG.infuseWith("",parseInt(t))
+          for(let i = 0; i < 25; i++){
+            ALG.upLevel(parseInt(t))
+          }
+          ALG.learn()
+        }
+
+
+      // Training
+      // simplify
+
+      // find most useful
+        //find top terminator
+
+        function topTerminator(){
+          let top;
+          let max = 0;
+          let dict = ALG.terminators()
+          Object.keys(dict).forEach((e)=>{
+            if(dict[e] > max){
+              top = e
+              max = dict[e]
+            }
+          })
+          return(top)
+        }
+      // upLevel the useful
+      // simplify
 
 
 
