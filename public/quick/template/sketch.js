@@ -168,6 +168,84 @@ class LPerceptron{ //it should have input name, input value. each input should h
   }
 }
 
+
+class LNgram{
+  static dict = {}
+  static history = []
+  static learn(action,ans,n=10){
+    this.history.splice(0,0,action)
+
+    if(n>this.history.length){n=this.history.length}
+
+    if(ans!==undefined){
+
+      for(let i = 0; i <= n; i++){
+        let tarr = this.history.slice(0,i).reverse()
+        let str = tarr.join("-")
+        this.addEntry(str,ans)
+      }
+
+    }
+
+  }
+
+
+  static predict(arr){
+
+    if(typeof(arr)==="string"){
+      arr=arr.split("")
+    }
+
+    if(arr!==undefined){
+      arr.reverse()
+    } else {
+      arr = this.history
+    }
+
+    let cont = true
+    let chain = ""
+    let out = []
+    let i = 0;
+    let item = this.dict[chain]
+
+      out.push(item.score/item.count)
+
+      chain += arr[i]
+      item = this.dict[chain]
+      if(item===undefined){cont=false}
+      i++
+
+    while(cont){
+      out.push(item.score/item.count)
+
+      chain = arr[i] + "-" + chain
+      item = this.dict[chain]
+      if(item===undefined){console.log(chain);break;}
+      i++
+    }
+
+    return(out)
+
+  }
+
+  static addEntry(entry,ans){
+    if(this.dict[entry]===undefined){
+      this.dict[entry] = {"count":0,"score":0}
+    }
+    this.dict[entry].count+=1
+    this.dict[entry].score+=ans
+  }
+
+
+  static paragraphy(p,letter="y"){
+    for(let i = 0; i < p.length; i++){
+      this.learn(p[i],p[i+1]===letter)
+    }
+  }
+
+}
+
+
 function normalRandom(mean, stderr) {
     const u1 = Math.random();
     const u2 = Math.random();
@@ -322,7 +400,7 @@ document.addEventListener("keydown",(e)=>{
   }
 })
 
-can = new Lcanvas()
+can = new LCanvas()
 can.clear()
 can.fitScreenSize()
 can.canvas.style.pointerEvents = "none"
