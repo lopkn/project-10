@@ -338,9 +338,9 @@ can.canvas.style.pointerEvents = "none"
 class LNgram{
   static dict = {}
 
-  static contextDict = {"":this.dict,"2":{}}
+  static contextDict = {"":this.dict,"2":{"":{score:{" ":1},count:1}}}
   static contexts = [{name:""},{name:"2"}]
-  static learningContext = "2"
+  static learningContext = ""
 
   static generalizations = {}
   static history = []
@@ -382,38 +382,48 @@ class LNgram{
 
   }
 
-  static learnHist(action,n=Infinity){
 
+  static append(action){
     this.history.splice(0,0,action)
+    return(this)
+  }
 
-    if(n>this.history.length){n=this.history.length}
+  static learnHist(){
 
-    let needGeneralize = 0
 
-    let generalizestr = this.history[1] + "-" + this.history[0]
-    if(this.generalizations[generalizestr] !== undefined){needGeneralize = 1
-      console.log("HI, we found a generalized item "+generalizestr)
+    let n=this.history.length
 
-      this.history.splice(0,generalizestr.split("-").length,this.generalizations[generalizestr])
+    let needGeneralize = 1
 
-      break;
-        
+    let generalizing = false
+
+    while(needGeneralize === 1){
+      needGeneralize = 0
+      let generalizestr = this.history[1] + "-" + this.history[0]
+      if(this.generalizations[generalizestr] !== undefined){
+        console.log("HI, we found a generalized item "+generalizestr)
+
+        this.history.splice(0,2,this.generalizations[generalizestr])
+
+        needGeneralize = 1;
+        generalizing = true
+      }
     }
 
 
+    if(this.generalizations[this.history[0]]===true){
+      
+      console.log("no learning done")
+    }else{
 
-
-
-    if(ans!==undefined){
-
-      for(let i = 0; i <= n; i++){
-        let tarr = this.history.slice(0,i).reverse()
+      for(let i = 1; i <= n; i++){
+        let tarr = this.history.slice(1,i).reverse()
         let str = tarr.join("-")
-        // console.log(str)
-        if(this.addEntry(str,ans)){break}
+        console.log(str)
+        if(this.addEntry(str,this.history[0])){break}
       }
 
-    }
+    } 
 
   }
 
@@ -553,7 +563,6 @@ class LNgram{
 
 
 
-
     let tout = []
     AOUT.forEach((j)=>{
       j.forEach((e,i)=>{
@@ -655,7 +664,9 @@ class LNgram{
 
   static paragraphy(p){
     for(let i = 1; i < p.length; i++){
-      this.learn(p[i-1],p[i])
+      // this.learn(p[i-1],p[i])
+      this.append(p[i])
+      this.learnHist()
     }
   }
 
@@ -675,7 +686,8 @@ var PRANS;
 div.addEventListener("input",(e)=>{
   if(div.innerText.length>1){
   STR = div.innerText.replaceAll(` `," ")
-  LNgram.learn(STR[STR.length-2],STR[STR.length-1])
+  // LNgram.learn(STR[STR.length-2],STR[STR.length-1])
+  LNgram.append(STR[STR.length-1]).learnHist()
   update(STR)
   }
 })

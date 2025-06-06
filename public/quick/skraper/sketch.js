@@ -1,17 +1,152 @@
-let element; //clicked on element
+var exposed = []
+{
+//lopkns query briefs
 
-document.addEventListener("mousedown",(e)=>{
-	element = e.target;
-})
+class lquery{
+	constructor(str){
+
+		this.qstring = str
+
+		this.ans = document.querySelectorAll(str)
+	}
+
+	qfem(f){ // query for each match
+		let newans = []
+		this.ans.forEach((e)=>{
+			if(f(e)){newans.push(e)}
+		})
+		if(newans.length === 0){console.log("none found");return(this)}
+
+		console.log("shortened from "+this.ans.length+" to "+newans.length)
+
+		this.ans = newans
+		return(this)
+	}
+
+	qclass(str){
+		this.qfem((e)=>{return(e.classList.includes(str))})
+		return(this)
+	}
+
+	qtext(str=this.text){
+		// if(str === undefined){str = this.text}
+		this.qfem((e)=>{return(e.innerText&&e.innerText.includes(str))})
+	}
+}
+
+function q(...stuff){
+	return(new lquery(...stuff))
+}
+
+
+
+//lopkns query briefs
+
+
+
+
+
+
+
+
+
+
+var lastElement;
+
+document.addEventListener("click",(e)=>{
+
+	e.preventDefault()
+	e.stopPropagation()
+	e.stopImmediatePropagation()
+
+	lastElement = e.target;
+
+	let sqwery = pqueryify(lastElement)
+	console.log(sqwery)
+
+	let qwer = q(sqwery)
+
+	if(qwer.ans.length != 1){
+		console.log("COULDNT QUERY:" + qwer.ans.length)
+		console.log("ATTEMPTING TO QUERY TEXT")
+
+		qwer.text = lastElement.innerText
+		console.log(qwer.text)
+		qwer.qtext()
+		if(qwer.ans.length != 1){
+			console.log("COULDNT QUERY:" + qwer.ans.length)
+			exposed.push(qwer)
+		}
+
+
+	}
+},true)
 
 
 
 // find the "type" of the element
 
 
-let classlist = element.classlist
+// let classlist = element.classList
 
 // function(l){get string query of classlist}
 
 
 
+function queryify(elm){
+	let qstring = elm.tagName.toLowerCase()
+
+	elm.classList.forEach((e)=>{
+		qstring += "."+e
+	})
+	return(qstring)
+}
+
+
+function pqueryify(elm,n=3){ //parent queryify
+
+	let oelm = elm
+	let ostring = queryify(oelm)
+
+	while(elm.parentElement && n>0){
+		n--
+		let telm = elm.parentElement
+		ostring = queryify(telm)+" "+ostring
+		elm = telm
+	}
+	console.log(elm)
+	return(ostring)
+}
+
+
+
+console.log("lopkn PK100 loaded")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+}
+
+console.log(exposed)
