@@ -682,30 +682,30 @@ ctx2.textAlign = 'center'
 class comparer{
 
 
-	static disabled = {
-		"0":100000,
-		"1":100000,
-		"2":100000,
-		"3":100000,
-		"4":100000,
-		"5":100000,
-		"6":100000,
-		"7":100000,
-		"8":100000,
-		"9":100000
-	}
 	// static disabled = {
-	// 	0:0,
-	// 	1:0,
-	// 	2:0,
-	// 	3:0,
-	// 	4:0,
-	// 	5:0,
-	// 	6:0,
-	// 	7:0,
-	// 	8:0,
-	// 	9:0
+	// 	"0":100000,
+	// 	"1":100000,
+	// 	"2":100000,
+	// 	"3":100000,
+	// 	"4":100000,
+	// 	"5":100000,
+	// 	"6":100000,
+	// 	"7":100000,
+	// 	"8":100000,
+	// 	"9":100000
 	// }
+	static disabled = {
+		0:0,
+		1:0,
+		2:0,
+		3:0,
+		4:0,
+		5:0,
+		6:0,
+		7:0,
+		8:0,
+		9:0
+	}
 	static last = "" + (Date.now()+date_disruptor)
 
 	static compare(d){
@@ -2694,7 +2694,7 @@ function push(particle,dx,dy){
 		particle.vy += dy / particle.mass
 	}
 }
-if(true){ // ADD BALLGAME ballgame = false
+if(false){ // ADD BALLGAME ballgame = false
 events.addEvent("ballgame",{
 	"energy":300,
 	"strength":1,
