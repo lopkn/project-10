@@ -8,6 +8,10 @@
   "manifest_version": 3,
   "name": "lopkns autoskraper",
   "version": "1.0.0",
+  "background":{
+    "service_worker":"background.js",
+    "type":"module"
+  },
   "content_scripts": [
     {
       // "matches": ["https://www.youtube.com/*","https://en.wikipedia.org/*","https://www.cell.com/*"],

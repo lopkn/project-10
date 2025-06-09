@@ -1,4 +1,7 @@
 var exposed = []
+
+var blocked = true
+
 {
 //lopkns query briefs
 
@@ -6,8 +9,10 @@ class lquery{
 	constructor(str){
 
 		this.qstring = str
-
 		this.ans = document.querySelectorAll(str)
+
+		// this.store = []
+
 	}
 
 	qfem(f){ // query for each match
@@ -31,7 +36,12 @@ class lquery{
 	qtext(str=this.text){
 		// if(str === undefined){str = this.text}
 		this.qfem((e)=>{return(e.innerText&&e.innerText.includes(str))})
+		return(this)
 	}
+
+
+
+
 }
 
 function q(...stuff){
@@ -55,9 +65,13 @@ var lastElement;
 
 document.addEventListener("click",(e)=>{
 
-	e.preventDefault()
-	e.stopPropagation()
-	e.stopImmediatePropagation()
+	if(e.shiftKey){
+		e.preventDefault()
+		e.stopPropagation()
+		e.stopImmediatePropagation()
+
+	}
+
 
 	lastElement = e.target;
 
@@ -118,6 +132,14 @@ function pqueryify(elm,n=3){ //parent queryify
 	return(ostring)
 }
 
+
+
+
+document.addEventListener("keydown",(e)=>{
+	if(e.key=="x" && e.shiftKey){
+		chrome.runtime.sendMessage({type:'newWindow',msg:str})
+	}
+})
 
 
 console.log("lopkn PK100 loaded")
