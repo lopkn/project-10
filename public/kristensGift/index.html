@@ -1,0 +1,1260 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Page Title</title>
+</head>
+<style>
+.prevent-select {
+  -webkit-user-select: none; /* Safari */
+  -ms-user-select: none; /* IE 10 and IE 11 */
+  user-select: none; /* Standard syntax */
+}
+</style>
+<body style="background-color:grey" class="prevent-select">
+
+<h1 id="tit">click to make virtual Kristen open the gift</h1>
+<div id="giftdiv" style="display:flex">
+<button id="gift" style="font-size:100px; cursor:pointer">   🎁   </button>
+</div>
+
+<div id="datadiv" style="display:flex">
+<div id="clicks" style="visibility:hidden">clicks: 0</div>
+<div id="spent" style="visibility:hidden;margin-left:10px">spent: 0</div>
+<div id="depressed" style="visibility:hidden;margin-left:10px">spent: 0</div>
+</div>
+<div id="texts"></div>
+
+
+</body>
+
+<script>
+
+let clicks = 0
+let spent = 0
+let depression = 0
+
+function gid(x){return(document.getElementById(x))}
+function apc(x){return(document.createElement(x))}
+
+let gift = gid("gift")
+function rand(x){
+  return(Math.random()*x)
+}
+
+gift.addEventListener("click",(e)=>{
+    clicked()
+})
+
+function spend(z){
+  let x = apc("div")
+    x.innerText = "spent $"+z+"!"
+    x.style.fontWeight = "bold"
+    x.style.color = "#AFAF00"
+    let parentDiv=gid("texts")
+    parentDiv.insertBefore(x, parentDiv.firstChild)
+    spent+=z
+    gid("spent").innerText = "spent: $"+spent
+    gid("spent").style.visibility="visible"
+}
+
+function picarr(arr){
+return(arr[Math.floor(Math.random()*arr.length)])
+}
+
+function depress(z){
+  if(z>5){
+  let x = apc("div")
+    x.innerText = "gained depression!"
+    x.style.fontWeight = "bold"
+    x.style.color = "#AF0000"
+    let parentDiv=gid("texts")
+    parentDiv.insertBefore(x, parentDiv.firstChild)
+    gid("depressed").style.visibility="visible"
+    }
+    depression+=z
+    gid("depressed").innerText = "depressed: "+depression+"%"
+}
+
+class vent{
+  constructor(x,f){
+      this.finished = false
+        this.required = x
+        this.show = f
+        
+        events.push(this)
+    }
+}
+
+let events = []
+
+new vent(15,(e)=>{
+  gid("clicks").style.visibility = "visible"
+    return(true)
+})
+
+function text(n,z,f=()=>{}){
+  new vent(n,(e)=>{
+    let x = apc("div")
+    x.innerText = z
+    let parentDiv=gid("texts")
+    parentDiv.insertBefore(x, parentDiv.firstChild)
+    f(x)
+    return(true)
+  })
+}
+
+function rletters(n){
+let str = ""
+for(let i = 0 ; i < n; i++){
+let num = Math.floor(Math.random()*94+32)
+str += String.fromCharCode(num)
+}
+return(str)
+}
+
+function ptext(n,z,f=()=>{}){
+  if(!n){return}
+    let x = apc("div")
+    x.innerText = z
+    let parentDiv=gid("texts")
+    parentDiv.insertBefore(x, parentDiv.firstChild)
+    f(x)
+}
+
+text(30,"looking at the gift box")
+text(38,"untying ribbon..")
+text(48,"unwrapping wraps..")
+text(65,"getting tired...")
+text(73,"maybe i should study...")
+text(85,"ugh this lopkn guy is texting me again...")
+text(105,"people should wish me happy birthday")
+text(123,"are they forgetting me?")
+text(135,"what the fuck is this virtual gift box???")
+
+new vent(136,(e,skip=false)=>{
+  if(skip){return(true)}
+  let z = apc("button")
+  z.innerText="analyze box geometry"
+  z.style.fontSize="50px"
+  z.style.marginLeft="10px"
+  z.style.color = `hsl(${rand(360)}, 100%, 73%)`
+  gid("giftdiv").appendChild(z)
+  eventBlocked=true
+  
+  let tclicks = 0
+  
+  z.onclick=()=>{
+    z.style.color = `hsl(${tclicks*360/15}, 100%, 73%)`
+    z.style.backgroundColor = `hsl(${300-tclicks*360/15}, 100%, 73%)`
+    z.innerText = "analyzing..."
+    tclicks += 1
+    
+    if(tclicks >= 15){
+    eventBlocked=false
+    e.finished=true
+    z.remove()
+    
+    let x = apc("div")
+    x.innerText = "ANALYZED GEOMETRY OF BOX!"
+    x.style.fontWeight = "bold"
+    x.style.color = "#00FF00"
+    let parentDiv=gid("texts")
+    parentDiv.insertBefore(x, parentDiv.firstChild)
+    }
+    
+  
+    
+  }
+})
+text(140,"the gift is very much rectangular")
+text(150,"all angles are 90 degrees, within a 2% error margin")
+text(160,"the geometry of the box is fascinating.")
+text(170,"creating conclusion from analysis...")
+text(185,"conclusion: after removing ribon, apply force to the lid in the direction perpendicular to the floor.")
+text(200,"what the fuck is this box made of???")
+
+new vent(201,(e,skip=false)=>{
+  if(skip){return(true)}
+  let z = apc("button")
+  z.innerText="learn material science."
+  z.style.fontSize="50px"
+  z.style.position = "absolute"
+  z.style.right="10px"
+  z.style.color = `hsl(${rand(360)}, 100%, 73%)`
+  gid("giftdiv").appendChild(z)
+  eventBlocked=true
+  
+  
+  z.onclick=()=>{
+
+    eventBlocked=false
+    e.finished=true
+    z.remove()
+    let x = apc("div")
+    x.innerText = "Trying to learn material science..."
+    x.style.fontWeight = "bold"
+    x.style.color = "#A00000"
+    let parentDiv=gid("texts")
+    parentDiv.insertBefore(x, parentDiv.firstChild)
+  clicked()
+    
+  }
+})
+
+
+new vent(202,(e,skip=false)=>{
+  if(skip){return(true)}
+  let z = apc("button")
+  z.innerText="Start learning process"
+  z.style.fontSize="50px"
+  z.style.marginLeft="10px"
+  z.style.color = `hsl(${rand(360)}, 100%, 73%)`
+  gid("giftdiv").appendChild(z)
+  eventBlocked=true
+  
+  let tclicks = 0
+  
+  z.onclick=()=>{
+    z.style.color = `hsl(${rand(360)}, 100%, 73%)`
+    z.style.backgroundColor = `hsl(${rand(360)}, 80%, 24%)`
+    z.innerText = "buying material science books.."
+    tclicks += 1
+    
+    ptext(tclicks==10,"searching online..")
+    ptext(tclicks==25,"fucking useless internet..")
+    ptext(tclicks==30,"reloading page...")
+    ptext(tclicks==40,"fixing internet...")
+    ptext(tclicks==45,"failing...")
+    ptext(tclicks==50,"throwing phone out window...")
+    ptext(tclicks==55,"destroying routers...")
+    ptext(tclicks==70,"regretting life choices...")
+    ptext(tclicks==80,"walking to book store...")
+    ptext(tclicks==90,"finding selection...")
+    ptext(tclicks==100,"purchasing book...")
+    
+    if(tclicks >= 110){
+    eventBlocked=false
+    e.finished=true
+    z.remove()
+    
+    let x = apc("div")
+    x.innerText = "Purchaced [material science book]!"
+    x.style.fontWeight = "bold"
+    x.style.color = "#00FF00"
+    let parentDiv=gid("texts")
+    parentDiv.insertBefore(x, parentDiv.firstChild)
+    spend(128)
+    
+    }
+    
+  
+    
+  }
+})
+
+text(210,"trying to resist temptations...")
+text(220,"considering roblox...")
+text(230,"reminiscing tiktok...")
+text(240,"wanting to post suggestive instagram pic...")
+text(250,"getting tired...")
+text(255,"ugh fine.. i will read the book..")
+
+
+new vent(260,(e,skip=false)=>{
+  if(skip){return(true)}
+  let z = apc("button")
+  z.innerText="flip open book to read"
+  z.style.fontSize="50px"
+  z.style.marginLeft="10px"
+  z.style.color = `hsl(${rand(360)}, 100%, 73%)`
+  gid("giftdiv").appendChild(z)
+  eventBlocked=true
+  
+  let tclicks = 100
+  
+  z.onclick=()=>{
+
+    
+    z.remove()
+    
+    let x = apc("div")
+    x.innerText = "reading book!!"
+    x.style.fontWeight = "bold"
+    x.style.color = "#00FF00"
+    x.style.fontSize = "50px"
+    gid("giftdiv").appendChild(x)
+    let readDate = Date.now()+20000
+    
+    let int = setInterval(()=>{
+      x.innerText = "reading book!! ["+Math.floor((readDate-Date.now())/1000)+"]"
+        x.style.color = `hsl(${(Date.now()/15)%360}, 100%, 73%)`
+    })
+    
+    setTimeout(()=>{
+    
+    clearInterval(int)
+    
+    x.remove()
+    eventBlocked=false
+    e.finished=true
+    
+    {
+    let x = apc("div")
+    x.innerText = "whoops I got distracted... barely got anything done!"
+    x.style.fontWeight = "bold"
+    x.style.color = "#FF0000"
+    let parentDiv=gid("texts")
+    parentDiv.insertBefore(x, parentDiv.firstChild)
+    }
+    
+    
+    },20000)
+
+  }
+})
+
+text(264,"should i sleep..?")
+
+new vent(265,(e,skip=false)=>{
+  if(skip){return(true)}
+    
+    {
+    let x = apc("div")
+    x.innerText = "im always so darn tired"
+    x.style.fontWeight = "bold"
+    x.style.color = "#6000A0"
+    x.style.fontSize = "35px"
+    let parentDiv=gid("texts")
+    parentDiv.insertBefore(x, parentDiv.firstChild)
+    }
+    
+  let z = apc("button")
+  z.innerText="dont sleep"
+  z.style.fontSize="50px"
+  z.style.marginLeft="10px"
+  z.style.color = `hsl(${220}, 100%, 73%)`
+  gid("giftdiv").appendChild(z)
+  
+  let z2 = apc("button")
+  z2.innerText="sleep"
+  z2.style.fontSize="50px"
+  z2.style.marginLeft="10px"
+  z2.style.color = `hsl(${230}, 100%, 73%)`
+  gid("giftdiv").appendChild(z2)
+  
+  eventBlocked=true
+  
+  let tclicks = 0
+  z2.onclick=()=>{
+
+    
+    z.remove()
+    z2.remove()
+    
+    
+    let x = apc("div")
+    x.innerText = "lazy assing away..."
+    x.style.fontWeight = "bold"
+    x.style.color = "#00FF00"
+    x.style.fontSize = "50px"
+    gid("giftdiv").appendChild(x)
+    let readDate = Date.now()+80000
+    
+    let int = setInterval(()=>{
+      x.innerText = "dreaming... ["+Math.floor((readDate-Date.now())/1000)+"]\n"
+        x.style.color = `hsl(${(Date.now()/150)%360}, 50%, 23%)`
+    })
+    
+    setTimeout(()=>{
+    
+    clearInterval(int)
+    
+    x.remove()
+    eventBlocked=false
+    e.finished=true
+    
+    {
+    let x = apc("div")
+    x.innerText = "slept!!"
+    x.style.fontWeight = "bold"
+    x.style.color = "#00FF00"
+    let parentDiv=gid("texts")
+    parentDiv.insertBefore(x, parentDiv.firstChild)
+    }
+    depress(24)
+  {
+    let x = apc("div")
+    x.innerText = "felt useless"
+    x.style.fontWeight = "bold"
+    x.style.color = "#900000"
+    let parentDiv=gid("texts")
+    parentDiv.insertBefore(x, parentDiv.firstChild)
+    }
+    
+    
+    },80000)
+
+  }
+  
+  z.onclick=()=>{
+    z.style.color = `hsl(${tclicks*360/15}, 10%, 53%)`
+    z.style.backgroundColor = `hsl(${300-tclicks*360/15}, 100%, 13%)`
+    z.innerText = "wake up."
+    z2.remove()
+    tclicks += 1
+    ptext(tclicks==2,"slapping myself.")
+    ptext((tclicks>2&&tclicks%3),"wake. up.",(e)=>{e.style.color=="#800000"})
+    if(tclicks >= 30){
+    eventBlocked=false
+    e.finished=true
+    z.remove()
+    
+    let x = apc("div")
+    depress(4)
+    x.innerText = "managed to not sleep!"
+    x.style.fontWeight = "bold"
+    x.style.color = "#FF8000"
+    let parentDiv=gid("texts")
+    parentDiv.insertBefore(x, parentDiv.firstChild)
+    }
+    
+  }
+})
+
+new vent(270,(e,skip=false)=>{
+  if(skip){return(true)}
+  let z = apc("button")
+  z.innerText="read book again..."
+  z.style.fontSize="50px"
+  z.style.marginLeft="10px"
+  z.style.color = `hsl(${0}, 90%, 13%)`
+  gid("giftdiv").appendChild(z)
+  eventBlocked=true
+  
+  let tclicks = 0
+  
+  z.onclick=()=>{
+
+    
+    z.remove()
+    
+    let x = apc("div")
+    x.innerText = "reading book!!"
+    x.style.fontWeight = "bold"
+    x.style.color = "#00FF00"
+    x.style.fontSize = "50px"
+    gid("giftdiv").appendChild(x)
+    let readDate = Date.now()+30000
+    
+    let int = setInterval(()=>{
+      x.innerText = "reading book... ["+Math.floor((readDate-Date.now())/1000)+"]\n"+rletters(8)
+        x.style.color = `hsl(${(Date.now()/50)%360}, 100%, 73%)`
+    })
+    
+    setTimeout(()=>{
+    
+    clearInterval(int)
+    
+    x.remove()
+    eventBlocked=false
+    e.finished=true
+    
+    {
+    let x = apc("div")
+    x.innerText = "poorly attained a bit of material science knowledge!"
+    x.style.fontWeight = "bold"
+    x.style.color = "#008000"
+    let parentDiv=gid("texts")
+    parentDiv.insertBefore(x, parentDiv.firstChild)
+    }
+    depress(12)
+    
+    
+    },25000)
+
+  }
+})
+
+
+
+text(280,"applying knowledge...")
+
+new vent(284,(e,skip=false)=>{
+  if(skip){return(true)}
+  let z = apc("button")
+  z.innerText="analyze box material"
+  z.style.fontSize="50px"
+  z.style.marginLeft="10px"
+  z.style.color = `hsl(${rand(360)}, 100%, 73%)`
+  gid("giftdiv").appendChild(z)
+  eventBlocked=true
+  
+  let tclicks = 0
+  let arr = ["box..","box...","ribbon..","ribbon...","lid..","lid..."]
+  z.onclick=()=>{
+    z.style.color = `hsl(${tclicks*6}, 100%, 73%)`
+    z.style.backgroundColor = `hsl(${300-tclicks*6}, 100%, 23%)`
+    
+    z.innerText = "analyzing: " + picarr(arr)
+    tclicks += 1
+    
+    if(tclicks >= 55){
+    eventBlocked=false
+    e.finished=true
+    z.remove()
+    
+    let x = apc("div")
+    x.innerText = "ANALYZED MATERIAL OF BOX!"
+    x.style.fontWeight = "bold"
+    x.style.color = "#00FF00"
+    let parentDiv=gid("texts")
+    parentDiv.insertBefore(x, parentDiv.firstChild)
+    }
+    
+  
+    
+  }
+})
+
+
+text(290,"yerning for cake...")
+text(300,"mourning for wallet...")
+text(310,"concluding material anaysis...")
+text(320,"making material report...")
+text(328,"wait a second")
+text(330,"do i even know how to write??")
+
+
+
+
+
+new vent(331,(e,skip=false)=>{
+  if(skip){return(true)}
+  let z = apc("button")
+  z.innerText="learn how to write, you disgrace."
+  z.style.fontSize="50px"
+  z.style.position = "absolute"
+  z.style.right="10px"
+  z.style.color = `hsl(${rand(360)}, 100%, 93%)`
+  gid("giftdiv").appendChild(z)
+  eventBlocked=true
+  
+  
+  z.onclick=()=>{
+
+    eventBlocked=false
+    e.finished=true
+    z.remove()
+    let x = apc("div")
+    x.innerText = "Trying to learn how to write..."
+    x.style.fontWeight = "bold"
+    x.style.color = "#A00000"
+    let parentDiv=gid("texts")
+    parentDiv.insertBefore(x, parentDiv.firstChild)
+  clicked()
+    
+  }
+})
+
+
+new vent(332,(e,skip=false)=>{
+  if(skip){return(true)}
+  let z = apc("button")
+  z.innerText="second learning session.."
+  z.style.fontSize="50px"
+  z.style.marginLeft="10px"
+  z.style.color = `hsl(${rand(360)}, 100%, 73%)`
+  gid("giftdiv").appendChild(z)
+  eventBlocked=true
+  
+  let tclicks = 0
+  
+  z.onclick=()=>{
+    z.style.color = `hsl(${rand(360)}, 100%, 73%)`
+    z.style.backgroundColor = `hsl(${rand(360)}, 80%, 24%)`
+    z.innerText = "L e a r n."
+    tclicks += 1
+    
+    ptext(tclicks==10,"watching videos..")
+    ptext(tclicks==25,"skipping unskippable ads.")
+    ptext(tclicks==30,"roblox break...")
+    ptext(tclicks==40,"5 minute nap...")
+    ptext(tclicks==50,"more like 10 minutes....")
+    ptext(tclicks==55,"looking more like an hour...")
+    ptext(tclicks==70,"waking up")
+    ptext(tclicks==73,"rubbing eyes...")
+    ptext(tclicks==73,"getting dressed")
+    ptext(tclicks==80,"going to book store.. again..")
+    ptext(tclicks==100,"purchasing paper...")
+    
+    if(tclicks >= 110){
+    eventBlocked=false
+    e.finished=true
+    z.remove()
+    
+    let x = apc("div")
+    x.innerText = "Purchaced [paper]!"
+    x.style.fontWeight = "bold"
+    x.style.color = "#00FF00"
+    let parentDiv=gid("texts")
+    parentDiv.insertBefore(x, parentDiv.firstChild)
+    spend(23)
+    depress(8)
+    {
+    let x = apc("div")
+    x.innerText = "poorly learnt how to write!"
+    x.style.fontWeight = "bold"
+    x.style.color = "#008000"
+    let parentDiv=gid("texts")
+    parentDiv.insertBefore(x, parentDiv.firstChild)
+    }
+    
+    }
+    
+  
+    
+  }
+})
+
+
+
+
+text(340,"ok. gonna actually write the report or what")
+text(350,"writing material report...")
+text(360,"wanting to give up...")
+text(380,"=== MATERIAL REPORT (scroll to view) ===\n\n\n    RIBBON: Polyethylene Terephthalate Decorative Filamentary Strapping Composite (P.T.D.F.S.C.)\n\n Tensile Strength: 8.5 (megapascals)\n Sheen Reflectivity: 45 (degrees)\n Flexural Modulus: 1,200 (megapascals)\n Colorfastness Rating: 4.5 (scale of 1 to 5)\n hue: red\n\nBOX BODY: Ultra-Dense Carbon Nanotube-Infused Structural Integrity Composite (U.G.L.Y.F.U.C.K)\n\nCompressive Strength: 150 (gigapascals)\nImpact Resistance: 50 (joules)\nThermal Conductivity: 200 (W/m·K)\nFlexural Strength: 1,500 (megapascals)\nWeight: 0.2 (kilograms per cubic centimeter)\n\n\n === MATERIAL REPORT ===",(e)=>{
+ e.style.font = "20px Monaco"
+ e.style.backgroundColor = "rgba(0,0,0,0.2)"
+})
+text(390,"showing mother...")
+text(400,"mother telling you she does not want to think about such things")
+text(410,"crying in corner.....")
+text(411,"sobbing.....",()=>{depress(3)})
+text(412,"wailing.....",()=>{depress(3)})
+text(413,"panting.....",()=>{depress(3)})
+text(414,"sniffing.....",()=>{depress(3)})
+text(415,"sobbing.....",()=>{depress(3)})
+text(416,"tearing up.....",()=>{depress(3)})
+text(417,"into pillow.....")
+text(418,"emotional overflow.....")
+text(419,"recieving text message from lopkn!!")
+text(420,"lopkn: hyd?",(e)=>{
+ e.style.color = "#A000F0"
+ e.style.font = "18px Monaco"
+ e.style.backgroundColor = "rgba(0,0,0,0.4)"
+})
+text(427,"lopkn: kys!",(e)=>{
+ e.style.color = "#A000F0"
+ e.style.font = "18px Monaco"
+ e.style.backgroundColor = "rgba(0,0,0,0.4)"
+})
+
+text(437,"remembering you have a gift to open..")
+text(450,"reading your own material report..")
+
+new vent(453,(e,skip=false)=>{
+  if(skip){return(true)}
+    
+    {
+    let x = apc("div")
+    x.innerText = "Lopkn has sent you some more messages, will you take 80 seconds to reply?"
+    x.style.fontWeight = "bold"
+    x.style.color = "#6000A0"
+    x.style.fontSize = "35px"
+    let parentDiv=gid("texts")
+    parentDiv.insertBefore(x, parentDiv.firstChild)
+    }
+    
+  let z = apc("button")
+  z.innerText="dont reply to lopkn"
+  z.style.fontSize="50px"
+  z.style.marginLeft="10px"
+  z.style.color = `hsl(${290}, 100%, 73%)`
+  gid("giftdiv").appendChild(z)
+  
+  let z2 = apc("button")
+  z2.innerText="take 80 seconds to reply"
+  z2.style.fontSize="50px"
+  z2.style.marginLeft="10px"
+  z2.style.color = `hsl(${280}, 100%, 73%)`
+  gid("giftdiv").appendChild(z2)
+  
+  eventBlocked=true
+  
+  let tclicks = 0
+  z2.onclick=()=>{
+
+    
+    z.remove()
+    z2.remove()
+    
+    
+    let x = apc("div")
+    x.innerText = "replying to lopkn :D"
+    x.style.fontWeight = "bold"
+    x.style.color = "#00FF00"
+    x.style.fontSize = "50px"
+    gid("giftdiv").appendChild(x)
+    let readDate = Date.now()+80000
+    
+    let int = setInterval(()=>{
+      x.innerText = "replying to lopkn... :D ["+Math.floor((readDate-Date.now())/1000)+"]\n"
+        x.style.color = `hsl(${(Date.now()/50)%360}, 100%, 73%)`
+    })
+    
+    setTimeout(()=>{
+    
+    clearInterval(int)
+    
+    x.remove()
+    eventBlocked=false
+    e.finished=true
+    
+    {
+    let x = apc("div")
+    x.innerText = "replied to lopkn!!"
+    x.style.fontWeight = "bold"
+    x.style.color = "#00FF00"
+    let parentDiv=gid("texts")
+    parentDiv.insertBefore(x, parentDiv.firstChild)
+    }
+    {
+    let x = apc("div")
+    x.innerText = "earnt 1x [freebie]!"
+    x.style.fontWeight = "bold"
+    x.style.color = "#00FF00"
+    let parentDiv=gid("texts")
+    parentDiv.insertBefore(x, parentDiv.firstChild)
+    }
+  {
+    let x = apc("div")
+    x.innerText = "take a screenshot of this page and send it to lopkn to get a freebie"
+    x.style.fontWeight = "bold"
+    x.style.color = "#ffffff"
+    let parentDiv=gid("texts")
+    parentDiv.insertBefore(x, parentDiv.firstChild)
+    }
+    
+    
+    },80000)
+
+  }
+  
+  z.onclick=()=>{
+    z.style.color = `hsl(${tclicks*360/15}, 10%, 53%)`
+    z.style.backgroundColor = `hsl(${300-tclicks*360/15}, 100%, 13%)`
+    z.innerText = "repent."
+    z2.remove()
+    tclicks += 1
+    ptext(tclicks==2,"i chose not to reply.")
+    ptext((tclicks>2&&tclicks%2),"i am a bitch.",(e)=>{e.style.color=="#800000"})
+    if(tclicks >= 30){
+    eventBlocked=false
+    e.finished=true
+    z.remove()
+    
+    let x = apc("div")
+    depress(22)
+    x.innerText = "Earnt title: bitch"
+    x.style.fontWeight = "bold"
+    x.style.color = "#FF0000"
+    let parentDiv=gid("texts")
+    parentDiv.insertBefore(x, parentDiv.firstChild)
+    }
+    
+  }
+})
+
+
+text(454,"back to gift opening")
+text(455,"sudden realization")
+
+new vent(460,(e,skip=false)=>{
+  if(skip){return(true)}
+  let z = apc("button")
+  z.innerText="I need sissors."
+  z.style.fontSize="50px"
+  z.style.marginLeft="10px"
+  z.style.color = `hsl(${rand(360)}, 100%, 73%)`
+  gid("giftdiv").appendChild(z)
+  eventBlocked=true
+  
+  let tclicks = 0
+  
+  z.onclick=()=>{
+    z.style.color = `hsl(${tclicks*360/15}, 100%, 73%)`
+    z.style.backgroundColor = `hsl(${300-tclicks*360/15}, 100%, 73%)`
+    z.innerText = "find sissors..."
+    tclicks += 1
+    
+    if(tclicks >= 15){
+    eventBlocked=false
+    e.finished=true
+    z.remove()
+    
+    let x = apc("div")
+    x.innerText = "I dont know where i have put them. probably in my mess of makeup somewhere"
+    x.style.fontWeight = "bold"
+    x.style.color = "#FF0000"
+    let parentDiv=gid("texts")
+    parentDiv.insertBefore(x, parentDiv.firstChild)
+    }
+    
+  }
+})
+
+text(470,"trying to sort through that pile of makeup shit")
+
+new vent(480,(e,skip=false)=>{
+  if(skip){return(true)}
+  let z = apc("button")
+  z.innerText="find sissors in mess"
+  z.style.fontSize="50px"
+  z.style.marginLeft="10px"
+  z.style.color = `hsl(${0}, 90%, 13%)`
+  gid("giftdiv").appendChild(z)
+  eventBlocked=true
+  
+  let tclicks = 0
+  
+  z.onclick=()=>{
+
+    
+    z.remove()
+    
+    let x = apc("div")
+    x.innerText = "sissoring"
+    x.style.fontWeight = "bold"
+    x.style.color = "#00FF00"
+    x.style.fontSize = "50px"
+    gid("giftdiv").appendChild(x)
+    let readDate = Date.now()+60000
+    
+    let int = setInterval(()=>{
+      x.innerText = "finding sissors in mess... ["+Math.floor((readDate-Date.now())/1000)+"]\n"+rletters(12)
+        x.style.color = `hsl(${(Date.now()/10)%360}, ${(Date.now()/23)%100}%, ${(Date.now()/49)%100}%)`
+    })
+    
+    setTimeout(()=>{
+    
+    clearInterval(int)
+    
+    x.remove()
+    eventBlocked=false
+    e.finished=true
+    
+    {
+    let x = apc("div")
+    x.innerText = "couldnt find jack shit in that pile of fluid containers - which i regularly apply to my body to trick them into thinking i look good"
+    x.style.fontWeight = "bold"
+    x.style.color = "#800000"
+    let parentDiv=gid("texts")
+    parentDiv.insertBefore(x, parentDiv.firstChild)
+    }
+    depress(30)
+    
+    
+    },35000)
+
+  }
+})
+
+text(490,"looking into mirror...")
+text(500,"seeing big fat self...",()=>{depress(5)})
+text(510,"remembering the gift")
+
+new vent(520,(e,skip=false)=>{
+  if(skip){return(true)}
+  let z = apc("button")
+  z.innerText="go buy sissors"
+  z.style.fontSize="50px"
+  z.style.marginLeft="10px"
+  z.style.color = `hsl(${rand(360)}, 100%, 73%)`
+  gid("giftdiv").appendChild(z)
+  eventBlocked=true
+  
+  let tclicks = 0
+  
+  z.onclick=()=>{
+    z.style.color = `hsl(${rand(360)}, 100%, 73%)`
+    z.style.backgroundColor = `hsl(${rand(360)}, 80%, 24%)`
+    z.innerText = "Buy sissors"
+    tclicks += 1
+    
+    ptext(tclicks==10,"taking shower")
+    ptext(tclicks==25,"drying hair")
+    ptext(tclicks==30,"making up")
+    ptext(tclicks==40,"lookin fugly")
+    ptext(tclicks==50,"goin out")
+    ptext(tclicks==55,"narrowly avoiding getting hit by car")
+    ptext(tclicks==70,"gets hit by bike anyway")
+    ptext(tclicks==73,"reaching girlfriends house")
+    ptext(tclicks==78,"sissoring.")
+    ptext(tclicks==79,"sissoring..")
+    ptext(tclicks==80,"sissoring...")
+    ptext(tclicks==81,"finally using that lotion or whatever")
+    ptext(tclicks==82,"sissoring....")
+    ptext(tclicks==83,"saying bye to girlfriend")
+    ptext(tclicks==90,"going to store")
+    ptext(tclicks==100,"purchasing sissors...")
+    
+    if(tclicks >= 110){
+    eventBlocked=false
+    e.finished=true
+    z.remove()
+    
+    let x = apc("div")
+    x.innerText = "Purchaced [sissors]!"
+    x.style.fontWeight = "bold"
+    x.style.color = "#00FF00"
+    let parentDiv=gid("texts")
+    parentDiv.insertBefore(x, parentDiv.firstChild)
+    spend(18)
+    {
+    let x = apc("div")
+    x.innerText = "finally!"
+    x.style.fontWeight = "bold"
+    x.style.color = "#008000"
+    let parentDiv=gid("texts")
+    parentDiv.insertBefore(x, parentDiv.firstChild)
+    }
+    
+    }
+    
+  
+    
+  }
+})
+
+text(530,"goin home!")
+text(540,"so tense!")
+text(541,"very tense!")
+text(542,"extremely tense!")
+text(543,"agonizingly tense!")
+text(544,"holy shit sooo tense!")
+text(545,"omg tense!")
+text(546,"excited!")
+text(547,"so excited!")
+text(548,"very excited!")
+text(549,"too excited!")
+text(550,"ARRIVED HOMEEE!")
+
+new vent(551,(EVT)=>{
+  eventBlocked=true
+  
+  let z2 = apc("div")
+  z2.innerText = "to enter home, input password then press enter:"
+  gid("giftdiv").appendChild(z2)
+  
+  let z = apc("input")
+  z.type = "text"
+//  z.style.position = "absolute"
+  z.style.height = "20px"
+  gid("giftdiv").appendChild(z)
+  
+  z.addEventListener("keydown",(e)=>{
+    if(e.key == "Enter"){
+      if(z.value !== "GayKristen13-06-2009"){
+          {
+    let x = apc("div")
+    x.innerText = "hint: the password is GayKristen13-06-2009"
+    x.style.fontWeight = "bold"
+    x.style.color = "#0000FF"
+    let parentDiv=gid("texts")
+    parentDiv.insertBefore(x, parentDiv.firstChild)
+    }
+        } else {
+        
+        {
+    let x = apc("div")
+    x.innerText = "password recieved:**************:verify you are human"
+    x.style.fontWeight = "bold"
+    x.style.color = "#00A000"
+    let parentDiv=gid("texts")
+    parentDiv.insertBefore(x, parentDiv.firstChild)
+    }
+        
+        z.remove()
+        z2.innerText = "verify you are human, click all the boxes that is true for user GayKristen09:"
+        
+        
+        let padlock = apc("div")
+        let parentDiv=gid("giftdiv")
+      parentDiv.appendChild(padlock)
+        let arr = ["smart","gay","dumb","gay","nice","fat","yapper","nerd","amazing","rude","slim","the best"]
+        arr.forEach((e,i)=>{
+          let elm = apc("button")
+            elm.style.backgroundColor = "rgb(255, 160, 160)"
+            elm.innerText = e
+            arr[i]=elm
+            elm.onclick=(e)=>{
+            console.log(elm.style.backgroundColor)
+              if(elm.style.backgroundColor == "rgb(255, 160, 160)"){
+                  elm.style.backgroundColor = "#A0FFA0"
+                } else {
+                  elm.style.backgroundColor = "#FFA0A0"
+                }
+            }
+            
+            padlock.appendChild(elm)
+        })
+        
+        let ver = apc("button")
+        ver.style.backgroundColor = "#302080"
+        ver.innerText = "verify"
+        ver.style.color = "#00FF00"
+        let wrongTimes = 0
+        
+        ver.onclick = ()=>{
+          let arrv = [0,1,1,1,0,1,1,1,0,1,0,0]
+            let wrong = 0
+            arrv.forEach((e,i)=>{
+              if(arr[i].style.backgroundColor == "rgb(255, 160, 160)" == e){wrong+=1}
+            })
+            if(wrong>=1){
+            wrongTimes += 1
+            {
+              
+              let x = apc("div")
+              x.innerText = "selection is wrong"
+              if(wrongTimes > 5){x.innerText += ", hint: you got "+wrong+" wrong"}
+              x.style.fontWeight = "bold"
+              x.style.color = "#F00000"
+              let parentDiv=gid("texts")
+              parentDiv.insertBefore(x, parentDiv.firstChild)
+              }
+              
+             
+            } else {
+            
+            {
+            ver.remove()
+              let x = apc("div")
+              x.innerText = "verified! door unlocking.."
+              x.style.fontWeight = "bold"
+              x.style.color = "#00F000"
+              let parentDiv=gid("texts")
+              parentDiv.insertBefore(x, parentDiv.firstChild)
+              }
+              
+              setTimeout(()=>{
+              EVT.finished=true
+              eventBlocked = false
+              arr.forEach((e)=>{e.remove()})
+              padlock.remove()
+              z2.remove()
+              
+              {
+              let x = apc("div")
+              x.innerText = "door unlocked! you finally got home.."
+              x.style.fontWeight = "bold"
+              x.style.color = "#007000"
+              let parentDiv=gid("texts")
+              parentDiv.insertBefore(x, parentDiv.firstChild)
+              }
+              },5000)
+            }
+        }
+        
+        padlock.appendChild(ver)
+        
+        
+        }
+    }
+  })
+
+})
+
+new vent(552,(e,skip=false)=>{
+  if(skip){return(true)}
+  let z = apc("button")
+  z.innerText="cut the ribbon!"
+  z.style.fontSize="50px"
+  z.style.marginLeft="10px"
+  z.style.color = `hsl(${rand(360)}, 100%, 73%)`
+  gid("giftdiv").appendChild(z)
+  eventBlocked=true
+  
+  let tclicks = 0
+  
+  z.onclick=()=>{
+    z.style.color = `hsl(${rand(360)}, 100%, 73%)`
+    z.style.backgroundColor = `hsl(${rand(360)}, 80%, 24%)`
+    z.innerText = "Cut! cut! cut!"
+    tclicks += 1
+    
+    ptext(tclicks==10,"remembering you could have just untied the knot")
+    ptext(tclicks==25,"realizing you are too unskilled to do that anyway")
+    ptext(tclicks==30,"cutting ribbons")
+    ptext(tclicks==40,"sissor sissor sissor")
+    ptext(tclicks==45,"cut cut cut")
+    ptext(tclicks==55,"first ribbon down")
+    ptext(tclicks==60,"second ribbon also down!")
+    
+    if(tclicks >= 65){
+    eventBlocked=false
+    e.finished=true
+    z.remove()
+    
+    let x = apc("div")
+    x.innerText = "CUT OPEN THE RIBBON!!"
+    x.style.fontWeight = "bold"
+    x.style.fontSize = "30px"
+    x.style.color = "#00FF00"
+    let parentDiv=gid("texts")
+    parentDiv.insertBefore(x, parentDiv.firstChild)
+    {
+    let x = apc("div")
+    x.innerText = "yippee!"
+    x.style.fontWeight = "bold"
+    x.style.color = "#008000"
+    let parentDiv=gid("texts")
+    parentDiv.insertBefore(x, parentDiv.firstChild)
+    }
+    
+    }
+    
+  
+    
+  }
+})
+
+text(557,"Applying force to box!",(e)=>{
+ e.style.color = "#5060F0"
+ e.style.font = "18px Monaco"
+})
+
+text(577,"Lifting the lid!",(e)=>{
+ e.style.color = "#5060F0"
+ e.style.font = "18px Monaco"
+})
+text(587,"glimpse of light inside!",(e)=>{
+ e.style.color = "#5060F0"
+ e.style.font = "18px Monaco"
+})
+text(590,"almost peaking in!",(e)=>{
+ e.style.color = "#5060F0"
+ e.style.font = "18px Monaco"
+})
+
+new vent(600,(e,skip=false)=>{
+  if(skip){return(true)}
+  let z = apc("button")
+  z.innerText="LOOK INSIDE BOX!!"
+  z.style.fontSize="50px"
+  z.style.marginLeft="10px"
+  z.style.color = `hsl(50, 90%, 13%)`
+  gid("giftdiv").appendChild(z)
+  eventBlocked=true
+  
+  let tclicks = 0
+  
+  z.onclick=()=>{
+
+    
+    z.remove()
+    
+    let x = apc("div")
+    x.innerText = "sissoring"
+    x.style.fontWeight = "bold"
+    x.style.color = "#00FF00"
+    x.style.fontSize = "50px"
+    gid("giftdiv").appendChild(x)
+    let readDate = Date.now()+20000
+    
+    let int = setInterval(()=>{
+    
+      let time = Math.floor(1+(readDate-Date.now())/2000)
+      if(time>0){
+      x.innerText = "LOOKINGGG... ["+time+"]"
+        x.style.color = `hsl(${(Date.now()/10)%360}, 100%, 50%)`} else {x.innerText = "recieved: middle finger!!!";x.style.color = `hsl(${(Date.now()/10)%360}, 100%, 50%)`;
+        document.body.style.backgroundColor = `hsl(${(Date.now()/52)%360}, 40%, 20%)`
+        
+        }
+    })
+    
+    setTimeout(()=>{
+    
+  gid("gift").style.backgroundColor = "#A000F0"
+    
+    eventBlocked=false
+    e.finished=true
+    depress(40)
+    
+    gid("tit").innerText = "Virtual Kristen has opened the gift!"
+    
+    {
+    gid("gift").innerText = "🖕"
+    let x = apc("div")
+    x.innerText = "ACHIEVEMENT GET: OPENED GIFT BOX FROM LOPKN"
+    x.style.fontWeight = "bold"
+    x.style.fontSize = "50px"
+    x.style.color = "#FF00FF"
+    let parentDiv=gid("texts")
+    parentDiv.insertBefore(x, parentDiv.firstChild)
+    }
+    
+    
+    },20000)
+    
+    setTimeout(()=>{
+    {
+    let x = apc("div")
+    x.innerText = "GAME OVER!"
+    x.style.fontWeight = "bold"
+    x.style.fontSize = "40px"
+    x.style.color = "#A00000"
+    let parentDiv=gid("texts")
+    parentDiv.insertBefore(x, parentDiv.firstChild)
+    }},25000)
+    setTimeout(()=>{
+    {
+    let x = apc("div")
+    x.innerText = "(take a screenshot and send it to lopkn for a prize)"
+    x.style.fontWeight = "bold"
+    x.style.fontSize = "30px"
+    x.style.color = "#A00000"
+    let parentDiv=gid("texts")
+    parentDiv.insertBefore(x, parentDiv.firstChild)
+    }},28000)
+
+  }
+})
+
+
+
+var eventBlocked=false
+
+
+function clicked(skip=false){
+
+
+  if(eventBlocked && !skip){
+    
+      return;
+    }
+    
+    
+    if(clicks>551){
+      gift.style.fontSize = (clicks-551+100)+"px"
+    }
+  
+  gift.style.background = `rgb(${rand(255)},${rand(255)},${rand(255)})`
+    clicks += 1
+
+  gid("clicks").innerText = "clicks: "+clicks
+
+  events.forEach((e)=>{
+      if(e.finished){return}
+        if(e.required <= clicks){e.required=Infinity;if(e.show(e,skip)){e.finished=true}}
+    })
+}
+
+for(let i = 0; i < 0; i++){
+  clicked(true)
+}
+
+
+</script>
+
+</html>
