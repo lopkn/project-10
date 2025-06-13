@@ -38,6 +38,15 @@ let clicks = 0
 let spent = 0
 let depression = 0
 
+let ktitleArr = []
+function ktitles(){
+  let str = ""
+  ktitleArr.forEach((e)=>{
+    str += " ("+e+") "
+  })
+  return(str)
+}
+
 function gid(x){return(document.getElementById(x))}
 function apc(x){return(document.createElement(x))}
 
@@ -764,6 +773,8 @@ new vent(453,(e,skip=false)=>{
     let x = apc("div")
     depress(22)
     x.innerText = "Earnt title: bitch"
+    ktitleArr.push("bitch")
+    gid("tit").innerText = "make Virtual Kristen "+ktitles()+" open the fucking gift."
     x.style.fontWeight = "bold"
     x.style.color = "#FF0000"
     let parentDiv=gid("texts")
@@ -947,7 +958,10 @@ text(548,"very excited!")
 text(549,"too excited!")
 text(550,"ARRIVED HOMEEE!")
 
-new vent(551,(EVT)=>{
+new vent(551,(EVT,skip=false)=>{
+  if(skip){return(true)}
+
+
   eventBlocked=true
   
   let z2 = apc("div")
@@ -989,7 +1003,8 @@ new vent(551,(EVT)=>{
         let padlock = apc("div")
         let parentDiv=gid("giftdiv")
       parentDiv.appendChild(padlock)
-        let arr = ["smart","gay","dumb","gay","nice","fat","yapper","nerd","amazing","rude","slim","the best","lazy"]
+        let arr = ["smart","gay","dumb","gay","nice","fat","yapper","nerd","amazing","rude","slim",
+          "the best","lazy","high quality","mid tier","emotional","cool","sinful","luxurious"]
         arr.forEach((e,i)=>{
           let elm = apc("button")
             elm.style.backgroundColor = "rgb(255, 160, 160)"
@@ -1014,7 +1029,7 @@ new vent(551,(EVT)=>{
         let wrongTimes = 0
         
         ver.onclick = ()=>{
-          let arrv = [0,1,1,1,0,1,1,1,0,1,0,0,1]
+          let arrv = [0,1,1,1,0,1,1,1,0,1,0,0,1,0,1,1,0,1,0]
             let wrong = 0
             arrv.forEach((e,i)=>{
               if(arr[i].style.backgroundColor == "rgb(255, 160, 160)" == e){wrong+=1}
@@ -1024,7 +1039,7 @@ new vent(551,(EVT)=>{
             {
               
               let x = apc("div")
-              x.innerText = "selection is wrong"
+              x.innerText = picarr(["selection is wrong","lol, puh-lease.","its wrong you idiot","no. thats wrong.","no bruh."])
               if(wrongTimes > 5){x.innerText += ", hint: you got "+wrong+" wrong"}
               x.style.fontWeight = "bold"
               x.style.color = "#F00000"
@@ -1128,21 +1143,22 @@ new vent(552,(e,skip=false)=>{
 })
 
 text(557,"Applying force to box!",(e)=>{
- e.style.color = "#5060F0"
+  document.body.style.backgroundColor="#303030"
+ e.style.color = "#7080F0"
  e.style.font = "18px Monaco"
 })
 
 text(577,"Lifting the lid!",(e)=>{
- e.style.color = "#5060F0"
- e.style.font = "18px Monaco"
+ e.style.color = "#5A6AF4"
+ e.style.font = "20px Monaco"
 })
 text(587,"glimpse of light inside!",(e)=>{
- e.style.color = "#5060F0"
- e.style.font = "18px Monaco"
+ e.style.color = "#5464FA"
+ e.style.font = "22px Monaco"
 })
 text(590,"almost peaking in!",(e)=>{
  e.style.color = "#5060F0"
- e.style.font = "18px Monaco"
+ e.style.font = "24px Monaco"
 })
 
 new vent(600,(e,skip=false)=>{
@@ -1161,6 +1177,27 @@ new vent(600,(e,skip=false)=>{
 
     
     z.remove()
+    let ending = {}
+    if(Math.random()<0.5){
+      ending.recieved = "middle finger"
+      ending.emoji = "🖕"
+    } else {
+      if(Math.random()<0.1){
+      ending.recieved = "heart-emoticon"
+      ending.emoji = "<3"
+    } else {
+      ending = picarr([
+        {recieved:"hk flag",emoji:"🇭🇰"},
+        {recieved:"medical condition: heartburn",emoji:"❤️‍🔥"},
+        {recieved:"heart emoji",emoji:"🫀"},
+        {recieved:"tonight's main course",emoji:"🐶"},
+        {recieved:"thumbs down",emoji:"👎"},
+        ])
+      }
+    
+
+    }
+
     
     let x = apc("div")
     x.innerText = "scissoring"
@@ -1170,12 +1207,28 @@ new vent(600,(e,skip=false)=>{
     gid("giftdiv").appendChild(x)
     let readDate = Date.now()+20000
     
+    let lastTime = 10
     let int = setInterval(()=>{
     
       let time = Math.floor(1+(readDate-Date.now())/2000)
       if(time>0){
       x.innerText = "LOOKINGGG... ["+time+"]"
-        x.style.color = `hsl(${(Date.now()/10)%360}, 100%, 50%)`} else {x.innerText = "recieved: middle finger!!!";x.style.color = `hsl(${(Date.now()/10)%360}, 100%, 50%)`;
+      if(time!==lastTime){
+        lastTime = time
+        {
+        let x = apc("div")
+        x.innerText =picarr(["wowie!!","omg!!","careful!!","whats it gonna be??","omg","peaking!!","wowie"])
+        x.style.fontWeight = "bold"
+        x.style.fontSize = "20px Monaco"
+        x.style.color = "#4050F0"
+        let parentDiv=gid("texts")
+        parentDiv.insertBefore(x, parentDiv.firstChild)
+        }
+      }
+
+
+
+        x.style.color = `hsl(${(Date.now()/10)%360}, 100%, 50%)`} else {x.innerText = "recieved: "+ending.recieved+"!!!";x.style.color = `hsl(${(Date.now()/10)%360}, 100%, 50%)`;
         document.body.style.backgroundColor = `hsl(${(Date.now()/52)%360}, 40%, 20%)`
         
         }
@@ -1189,10 +1242,10 @@ new vent(600,(e,skip=false)=>{
     e.finished=true
     depress(40)
     
-    gid("tit").innerText = "Virtual Kristen has opened the gift!"
+    gid("tit").innerText = "Virtual Kristen "+ktitles()+" has opened the gift!"
     
     {
-    gid("gift").innerText = "🖕"
+    gid("gift").innerText = ending.emoji
     let x = apc("div")
     x.innerText = "ACHIEVEMENT GET: OPENED GIFT BOX FROM LOPKN"
     x.style.fontWeight = "bold"
@@ -1201,7 +1254,15 @@ new vent(600,(e,skip=false)=>{
     let parentDiv=gid("texts")
     parentDiv.insertBefore(x, parentDiv.firstChild)
     }
-    
+    if(ending.emoji=="<3"){
+      let x = apc("div")
+    x.innerText = "Lopkn appreciates your existance sometimes, and now you know. (never expect me to say this again)"
+    x.style.fontWeight = "bold"
+    x.style.fontSize = "30px"
+    x.style.color = "#FFFFFF"
+    let parentDiv=gid("texts")
+    parentDiv.insertBefore(x, parentDiv.firstChild)
+    }
     
     },20000)
     
@@ -1229,6 +1290,24 @@ new vent(600,(e,skip=false)=>{
   }
 })
 
+text(650,"dumbass, cant you read?? the games bloody over",(e)=>{
+ e.style.color = "#FF0000"
+ e.style.fontSize = "45px"
+})
+text(700,"stop clicking on the precious gift you fucker",(e)=>{
+ e.style.color = "#FF0000"
+ e.style.fontSize = "35px"
+})
+text(800,"achievement get: retarded",(e)=>{
+ e.style.color = "#00FF00"
+ e.style.fontSize = "45px"
+})
+
+text(1069,"ur such a fucking idiot.",(e)=>{
+  alert("You have completed the game. bitch. but for your dedication to the cause of stupidity, i will reward you with two things. \n 1. i formally inform you that i fr hate the shit out of you and ur dumb as fuck. \n 2. you can skip from the start of the game to opening the box by pressing the letter 'c' before you click anything, and type in the cheatcode 'kristenIsAGayDumbLazyFatAssKid'\n\n you better screenshot this before you forget. or else you'll have to click all the way back")
+  alert("press c and enter kristenIsAGayDumbLazyFatAssKid at the start of a game.")
+  alert("last warning: you will not see this message again if you click ok. kristenIsAGayDumbLazyFatAssKid ")
+})
 
 
 var eventBlocked=false
@@ -1252,7 +1331,10 @@ function clicked(skip=false){
     
     if(clicks>551){
       gift.style.fontSize = (clicks-551+100)+"px"
-    }
+      if(clicks > 1000 && Math.random()>0.8){
+        alert(picarr(["ur retarded","kys","jump off a building","i hope your limbs fall off","you are dumb","kill yourself","i hate you","you're a low quality pig","ur a pig"]))
+      }
+    } 
   
   gift.style.background = `rgb(${rand(255)},${rand(255)},${rand(255)})`
     clicks += 1
@@ -1265,9 +1347,18 @@ function clicked(skip=false){
     })
 }
 
-for(let i = 0; i < 0; i++){
-  clicked(true)
-}
+document.addEventListener("keydown",(e)=>{
+  if(e.key=="c" && clicks < 16){
+    let psswd = prompt("skip game cheat code?")
+    if(psswd = "kristenIsAGayDumbLazyFatAssKid"){
+      for(let i = 0; i < 599; i++){
+          clicked(true)
+        }
+    }
+  }
+})
+
+
 
 
 </script>
