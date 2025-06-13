@@ -1502,10 +1502,32 @@ var httpsServer = https.createServer(httpsoptions, app).listen(443);
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json())
 app.post('/responder', (req, res) => {
-    console.log('Got body:', req.body);
+    console.log('Got body1:', req.body);
     responder.process1(req.body,res)
     // res.sendStatus(200);
 })
+
+/* example
+fetch('http://localhost:3000/temporal', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({action:"store","name":"test","data":"3"})
+});
+*/
+
+app.post('/temporal', (req, res) => {
+    console.log('Got body2:', req.body);
+
+    responder.process2(req.body,res)
+})
+
+app.get("/temporal/:id",(req,res)=>{
+	const responseId = req.params.id;
+	console.log(responseId)
+	res.send(responder.temporalStorage[responseId])
+})
+
+
 app.post('/eval', (req, res) => {
     console.log('Got body:', req.body);
     // res.send({"res":""+eval(req.body.data)})

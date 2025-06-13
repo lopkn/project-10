@@ -35,6 +35,9 @@ class flightSim{
 class responder{
 	static info1 = {}
 	static pusher = []
+
+	static temporalStorage = {}
+
 	static process1(d,r){
 		if(d.action == "debug"){
 			// let str = fs.readFileSync("./errorlog.json")
@@ -50,6 +53,13 @@ class responder{
 		}
 		this.info1.pusher = this.pusher
 		r.send(this.info1)
+	}
+
+	static process2(d,r){
+		if(d.action == "store"){
+			this.temporalStorage[d.name] = d.data
+			r.sendStatus(200)
+		}
 	}
 }
 
