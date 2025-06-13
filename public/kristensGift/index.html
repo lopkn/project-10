@@ -525,7 +525,7 @@ new vent(284,(e,skip=false)=>{
 })
 
 
-text(290,"yerning for cake...")
+text(290,"yearning for cake...")
 text(300,"mourning for wallet...")
 text(310,"concluding material anaysis...")
 text(320,"making material report...")
@@ -780,7 +780,7 @@ text(455,"sudden realization")
 new vent(460,(e,skip=false)=>{
   if(skip){return(true)}
   let z = apc("button")
-  z.innerText="I need sissors."
+  z.innerText="I need scissors."
   z.style.fontSize="50px"
   z.style.marginLeft="10px"
   z.style.color = `hsl(${rand(360)}, 100%, 73%)`
@@ -792,7 +792,7 @@ new vent(460,(e,skip=false)=>{
   z.onclick=()=>{
     z.style.color = `hsl(${tclicks*360/15}, 100%, 73%)`
     z.style.backgroundColor = `hsl(${300-tclicks*360/15}, 100%, 73%)`
-    z.innerText = "find sissors..."
+    z.innerText = "find scissors..."
     tclicks += 1
     
     if(tclicks >= 15){
@@ -816,7 +816,7 @@ text(470,"trying to sort through that pile of makeup shit")
 new vent(480,(e,skip=false)=>{
   if(skip){return(true)}
   let z = apc("button")
-  z.innerText="find sissors in mess"
+  z.innerText="find scissors in mess"
   z.style.fontSize="50px"
   z.style.marginLeft="10px"
   z.style.color = `hsl(${0}, 90%, 13%)`
@@ -831,7 +831,7 @@ new vent(480,(e,skip=false)=>{
     z.remove()
     
     let x = apc("div")
-    x.innerText = "sissoring"
+    x.innerText = "scissoring"
     x.style.fontWeight = "bold"
     x.style.color = "#00FF00"
     x.style.fontSize = "50px"
@@ -839,7 +839,7 @@ new vent(480,(e,skip=false)=>{
     let readDate = Date.now()+60000
     
     let int = setInterval(()=>{
-      x.innerText = "finding sissors in mess... ["+Math.floor((readDate-Date.now())/1000)+"]\n"+rletters(12)
+      x.innerText = "finding scissors in mess... ["+Math.floor((readDate-Date.now())/1000)+"]\n"+rletters(12)
         x.style.color = `hsl(${(Date.now()/10)%360}, ${(Date.now()/23)%100}%, ${(Date.now()/49)%100}%)`
     })
     
@@ -874,7 +874,7 @@ text(510,"remembering the gift")
 new vent(520,(e,skip=false)=>{
   if(skip){return(true)}
   let z = apc("button")
-  z.innerText="go buy sissors"
+  z.innerText="go buy scissors"
   z.style.fontSize="50px"
   z.style.marginLeft="10px"
   z.style.color = `hsl(${rand(360)}, 100%, 73%)`
@@ -886,7 +886,7 @@ new vent(520,(e,skip=false)=>{
   z.onclick=()=>{
     z.style.color = `hsl(${rand(360)}, 100%, 73%)`
     z.style.backgroundColor = `hsl(${rand(360)}, 80%, 24%)`
-    z.innerText = "Buy sissors"
+    z.innerText = "Buy scissors"
     tclicks += 1
     
     ptext(tclicks==10,"taking shower")
@@ -897,14 +897,14 @@ new vent(520,(e,skip=false)=>{
     ptext(tclicks==55,"narrowly avoiding getting hit by car")
     ptext(tclicks==70,"gets hit by bike anyway")
     ptext(tclicks==73,"reaching girlfriends house")
-    ptext(tclicks==78,"sissoring.")
-    ptext(tclicks==79,"sissoring..")
-    ptext(tclicks==80,"sissoring...")
+    ptext(tclicks==78,"scissoring.")
+    ptext(tclicks==79,"scissoring..")
+    ptext(tclicks==80,"scissoring...")
     ptext(tclicks==81,"finally using that lotion or whatever")
-    ptext(tclicks==82,"sissoring....")
+    ptext(tclicks==82,"scissoring....")
     ptext(tclicks==83,"saying bye to girlfriend")
     ptext(tclicks==90,"going to store")
-    ptext(tclicks==100,"purchasing sissors...")
+    ptext(tclicks==100,"purchasing scissors...")
     
     if(tclicks >= 110){
     eventBlocked=false
@@ -912,7 +912,7 @@ new vent(520,(e,skip=false)=>{
     z.remove()
     
     let x = apc("div")
-    x.innerText = "Purchaced [sissors]!"
+    x.innerText = "Purchaced [scissors]!"
     x.style.fontWeight = "bold"
     x.style.color = "#00FF00"
     let parentDiv=gid("texts")
@@ -989,7 +989,7 @@ new vent(551,(EVT)=>{
         let padlock = apc("div")
         let parentDiv=gid("giftdiv")
       parentDiv.appendChild(padlock)
-        let arr = ["smart","gay","dumb","gay","nice","fat","yapper","nerd","amazing","rude","slim","the best"]
+        let arr = ["smart","gay","dumb","gay","nice","fat","yapper","nerd","amazing","rude","slim","the best","lazy"]
         arr.forEach((e,i)=>{
           let elm = apc("button")
             elm.style.backgroundColor = "rgb(255, 160, 160)"
@@ -1014,7 +1014,7 @@ new vent(551,(EVT)=>{
         let wrongTimes = 0
         
         ver.onclick = ()=>{
-          let arrv = [0,1,1,1,0,1,1,1,0,1,0,0]
+          let arrv = [0,1,1,1,0,1,1,1,0,1,0,0,1]
             let wrong = 0
             arrv.forEach((e,i)=>{
               if(arr[i].style.backgroundColor == "rgb(255, 160, 160)" == e){wrong+=1}
@@ -1094,7 +1094,7 @@ new vent(552,(e,skip=false)=>{
     ptext(tclicks==10,"remembering you could have just untied the knot")
     ptext(tclicks==25,"realizing you are too unskilled to do that anyway")
     ptext(tclicks==30,"cutting ribbons")
-    ptext(tclicks==40,"sissor sissor sissor")
+    ptext(tclicks==40,"scissor scissor scissor")
     ptext(tclicks==45,"cut cut cut")
     ptext(tclicks==55,"first ribbon down")
     ptext(tclicks==60,"second ribbon also down!")
@@ -1163,7 +1163,7 @@ new vent(600,(e,skip=false)=>{
     z.remove()
     
     let x = apc("div")
-    x.innerText = "sissoring"
+    x.innerText = "scissoring"
     x.style.fontWeight = "bold"
     x.style.color = "#00FF00"
     x.style.fontSize = "50px"
