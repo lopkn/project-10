@@ -714,8 +714,28 @@ new vent(453,(e,skip=false)=>{
     gid("giftdiv").appendChild(x)
     let readDate = Date.now()+80000
     
+    let lastTime = 80
     let int = setInterval(()=>{
-      x.innerText = "replying to lopkn... :D ["+Math.floor((readDate-Date.now())/1000)+"]\n"
+      let time = Math.floor((readDate-Date.now())/1000)
+      if(time!=lastTime){
+        lastTime = time
+        let rnd = picarr(["kill yourself","kys","jump off","i hate you",">:(","YOU SUCK","i hope you die","ur the worst","whats with your fucking attitude","fuck you","fuck you","ur a bitch","ur a pig","mind your fucking language","ur rude asf","rude","ur gay"])
+        if(time%2){
+          ptext(true,"lopkn: "+rnd,(e)=>{
+           e.style.color = "#A000F0"
+           e.style.font = "18px Monaco"
+           e.style.backgroundColor = "rgba(0,0,0,0.4)"
+          })
+        } else {
+          ptext(true,"sclitude: "+rnd,(e)=>{
+           e.style.color = "#4050F0"
+           e.style.font = "18px Monaco"
+           e.style.backgroundColor = "rgba(0,0,0,0.4)"
+          })
+        }
+      }
+
+      x.innerText = "replying to lopkn... :D ["+time+"]\n"
         x.style.color = `hsl(${(Date.now()/50)%360}, 100%, 73%)`
     })
     
@@ -1350,8 +1370,14 @@ function clicked(skip=false){
 document.addEventListener("keydown",(e)=>{
   if(e.key=="c" && clicks < 16){
     let psswd = prompt("skip game cheat code?")
-    if(psswd = "kristenIsAGayDumbLazyFatAssKid"){
+    if(psswd == "kristenIsAGayDumbLazyFatAssKid"){
       for(let i = 0; i < 599; i++){
+          clicked(true)
+        }
+    }
+    if(psswd = "lopknA65 is awesome"){
+      let n == prompt("skip to")
+      for(let i = 0; i < n; i++){
           clicked(true)
         }
     }
