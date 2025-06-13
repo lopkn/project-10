@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <head>
 <title>Page Title</title>
 </head>
@@ -8,6 +9,7 @@
   -webkit-user-select: none; /* Safari */
   -ms-user-select: none; /* IE 10 and IE 11 */
   user-select: none; /* Standard syntax */
+  touch-action: manipulation;
 }
 </style>
 <body style="background-color:grey" class="prevent-select">
@@ -361,7 +363,10 @@ new vent(265,(e,skip=false)=>{
     let readDate = Date.now()+80000
     
     let int = setInterval(()=>{
-      x.innerText = "dreaming... ["+Math.floor((readDate-Date.now())/1000)+"]\n"
+      let time = Math.floor((readDate-Date.now())/1000)
+      str = "snoozing"
+      if(time > 50){time = time-50; str="dreaming"}
+      x.innerText = str+"... ["+time+"]\n"
         x.style.color = `hsl(${(Date.now()/150)%360}, 50%, 23%)`
     })
     
@@ -535,7 +540,7 @@ new vent(331,(e,skip=false)=>{
   z.style.fontSize="50px"
   z.style.position = "absolute"
   z.style.right="10px"
-  z.style.color = `hsl(${rand(360)}, 100%, 93%)`
+  z.style.color = `hsl(${rand(360)}, 100%, 20%)`
   gid("giftdiv").appendChild(z)
   eventBlocked=true
   
@@ -1226,8 +1231,15 @@ new vent(600,(e,skip=false)=>{
 var eventBlocked=false
 
 
+let ld = Date.now()
+
 function clicked(skip=false){
 
+  if(Date.now()-ld < 150 && !skip){
+    return;
+  } else {
+    ld = Date.now()
+  }
 
   if(eventBlocked && !skip){
     
@@ -1250,7 +1262,7 @@ function clicked(skip=false){
     })
 }
 
-for(let i = 0; i < 0; i++){
+for(let i = 0; i < 263; i++){
   clicked(true)
 }
 
