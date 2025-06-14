@@ -185,6 +185,17 @@ class synths{
   static synth2 = new Tone.PolySynth(Tone.Synth,16).toDestination()
   static synth3 = new Tone.PolySynth(Tone.Synth,16).toDestination()
   static synth4 = new Tone.PolySynth(Tone.Synth,16).toDestination()
+  static synth42 = new Tone.PolySynth(Tone.Synth,16).toDestination()
+
+  static synth5p = new Tone.PolySynth(Tone.Synth,16).toDestination()
+
+
+  static pitchShift =  new Tone.PitchShift({
+    pitch:0.9,
+    windowSize: 0.1,
+    delayTime:0,
+    feedback:0,
+}).toDestination();
 }
 synths.synth4.set({
     oscillator: {
@@ -195,6 +206,19 @@ synths.synth4.set({
         decay: 0.1,
         sustain:1,
         release:0.035
+    },
+    volume:-30
+})
+synths.synth42.set({
+    oscillator: {
+        type: 'sawtooth3' ,
+        partials: [1, 2, 4],
+    },
+    envelope: {
+        attack: 0.015,
+        decay: 0.1,
+        sustain:1,
+        release:0.15
     },
     volume:-30
 })
@@ -235,6 +259,21 @@ synths.synth1.set({
     volume:-30
 })
 
+synths.synth5p.set({
+    oscillator: {
+        type: 'sine4' 
+    },
+    envelope: {
+        attack: 0.055,
+        decay: 0.1,
+        sustain:1,
+        release:0.055
+    },
+    volume:-30
+})
+
+synths.synth5p.connect(synths.pitchShift)
+
 function play(name,note,dur){
   synths[name].triggerAttackRelease(note,dur)
 }
@@ -254,6 +293,7 @@ function problem(name,clicks,time=99999,soundf){
 
   let x = apc("button")
   x.innerText = name
+  x.style.fontSize = "40px"
 
   x.style.backgroundColor = `hsl(${0},100%,80%)`
 
@@ -319,6 +359,9 @@ problemize("cook food",20)
 problemize("do work",50)
 problemize("exercise",40)
 problemize("find glasses",40)
+problemize("find wallet",40)
+problemize("beat up a baby",30,1000,(e)=>{play("synth5p",400,1)})
+problemize("ignore the ambulance",30,400,(e)=>{if(e%2){play("synth42",1790,0.4)}else{play("synth42",1400,0.4)}})
 
 function createProblem(prob=picarr(Object.keys(problems))){
   if(problems[prob].active === false){
@@ -366,6 +409,8 @@ function startGameLoop(){
   }
 
   if(FRAMES%200==0){difficulty+=0.001}
+
+  synths.pitchShift.pitch = Math.sin(Date.now()/200)*2
 
 
 
