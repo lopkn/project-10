@@ -83,6 +83,10 @@ function soundInit(arr=[]){
     }).toDestination();
         SOUND[E] = audio
       })
+
+
+        requestAnimationFrame(startGameLoop)
+
 }
 
 function mtn(midiNumber) {
@@ -177,9 +181,12 @@ function rand(x){
 }
 
 class synths{
-  static synth1 = new Tone.PolySynth(Tone.Synth,8).toDestination()
+  static synth1 = new Tone.PolySynth(Tone.Synth,16).toDestination()
+  static synth2 = new Tone.PolySynth(Tone.Synth,16).toDestination()
+  static synth3 = new Tone.PolySynth(Tone.Synth,16).toDestination()
+  static synth4 = new Tone.PolySynth(Tone.Synth,16).toDestination()
 }
-synths.synth1.set({
+synths.synth4.set({
     oscillator: {
         type: 'sine4' 
     },
@@ -191,7 +198,42 @@ synths.synth1.set({
     },
     volume:-30
 })
-
+synths.synth2.set({
+    oscillator: {
+        type: 'sine2' 
+    },
+    envelope: {
+        attack: 0.015,
+        decay: 0.1,
+        sustain:1,
+        release:0.035
+    },
+    volume:-30
+})
+synths.synth3.set({
+    oscillator: {
+        type: 'sine3' 
+    },
+    envelope: {
+        attack: 0.015,
+        decay: 0.1,
+        sustain:1,
+        release:0.035
+    },
+    volume:-30
+})
+synths.synth1.set({
+    oscillator: {
+        type: 'sine1' 
+    },
+    envelope: {
+        attack: 0.015,
+        decay: 0.1,
+        sustain:1,
+        release:0.035
+    },
+    volume:-30
+})
 
 function play(name,note,dur){
   synths[name].triggerAttackRelease(note,dur)
@@ -213,16 +255,26 @@ function problem(name,clicks,time,soundf){
   let x = apc("button")
   x.innerText = name
 
+  x.style.backgroundColor = `hsl(${0},100%,80%)`
+
   gid("gamediv").appendChild(x)
   vnt.button = x
   vnt.clicks = clicks
+  vnt.maxClicks = clicks
 
   vnt.sound = interval(name,time,soundf)
 
   x.onclick = ()=>{vnt.clicks -= 1;
+  x.style.cursor = "pointer"
+
+  x.style.backgroundColor = `hsl(${120-(vnt.clicks/vnt.maxClicks)*120},100%,80%)`
+
+
     if(vnt.clicks <= 0){
       x.remove()
+      actives -= 1
       clearInterval(vnt.sound)
+      problems[name].active = false
       if(vnt.finish){
         vnt.finish()
       }
@@ -233,13 +285,71 @@ function problem(name,clicks,time,soundf){
 
 }
 
+var problems = {}
+var actives = 0
 
-problem("alarm: wake up",20,200,(e)=>{if(!(e%5)){return};play("synth1",800,0.1)})
-problem("alarm: food is done",20,321,(e)=>{if(!(e%3)){return};play("synth1",1800,0.1)})
-problem("microwave: done",20,459,(e)=>{if(!(e%3)){return};play("synth1",1300,0.1)})
+function problemize(...st){
+  let x = st.splice(0,1)
+  problems[x] = {"noise":st,"active":false}
+}
+
+
+
+
+
+problemize("alarm: wake up",20,200,(e)=>{if(!(e%5)){return};play("synth4",800,0.1)})
+problemize("something is low in battery",20,321,(e)=>{if(!(e%3)){return};play("synth2",1800,0.1)})
+problemize("the fridge was left open",10,1022,(e)=>{if(!(e%3)){return};play("synth2",2800,0.4)})
+problemize("microwave: done",20,459,(e)=>{if(!(e%3)){return};play("synth4",1300,0.2)})
+problemize("washing machine: done",20,210,(e)=>{if(!(e%6 && e%5)){return};play("synth3",Math.random()*500+1400,0.2)})
+problemize("phone ringing",20,410,(e)=>{let arr = [undefined,60,58,56,58,60,60,60,undefined,58,58,58,undefined,60,63,63]
+  if(arr[e%arr.length]==undefined){return};
+  ;play("synth3",mtn(arr[e%arr.length]+10),0.2)})
+problemize("telephone ringing",20,210,(e)=>{let arr = [undefined,60,58,56,58,60,60,60,undefined,58,58,58,undefined,60,63,63]
+  if(arr[e%arr.length]==undefined){return};
+  ;play("synth1",mtn(arr[e%arr.length]+14),0.2)})
+
+problemize("telephone ringing",20,210,(e)=>{let arr = [undefined,60,58,56,58,60,60,60,undefined,58,58,58,undefined,60,63,63]
+  if(arr[e%arr.length]==undefined){return};
+  ;play("synth1",mtn(arr[e%arr.length]+14),0.2)})
+
+
+function createProblem(prob=picarr(Object.keys(problems))){
+  if(problems[prob].active === false){
+    actives += 1
+    problems[prob].active = problem(prob,...problems[prob].noise)
+  }
+
+}
 
 function picarr(arr){
 return(arr[Math.floor(Math.random()*arr.length)])
+}
+
+// createProblem("telephone ringing")
+
+
+let FRAMES = 0
+let difficulty = 0.005
+function startGameLoop(){
+  FRAMES++
+
+
+  if(Math.random()>(1-difficulty)){
+    if(actives==0){
+    createProblem()
+    } else if(Math.random()<0.5**actives){
+      createProblem()
+    }
+
+  }
+
+  if(FRAMES%200==0){difficulty+=0.001}
+
+
+
+
+  requestAnimationFrame(startGameLoop)
 }
 
 
