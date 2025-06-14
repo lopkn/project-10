@@ -305,11 +305,11 @@ problemize("washing machine: done",20,210,(e)=>{if(!(e%6 && e%5)){return};play("
 problemize("phone ringing",20,410,(e)=>{let arr = [undefined,60,58,56,58,60,60,60,undefined,58,58,58,undefined,60,63,63]
   if(arr[e%arr.length]==undefined){return};
   ;play("synth3",mtn(arr[e%arr.length]+10),0.2)})
-problemize("telephone ringing",20,210,(e)=>{let arr = [undefined,60,58,56,58,60,60,60,undefined,58,58,58,undefined,60,63,63]
+problemize("telephone ringing",30,210,(e)=>{let arr = [undefined,60,58,56,58,60,60,60,undefined,58,58,58,undefined,60,63,63]
   if(arr[e%arr.length]==undefined){return};
   ;play("synth1",mtn(arr[e%arr.length]+14),0.2)})
 
-problemize("telephone ringing",20,210,(e)=>{let arr = [undefined,60,58,56,58,60,60,60,undefined,58,58,58,undefined,60,63,63]
+problemize("work phone ringing",30,210,(e)=>{let arr = [undefined,60,58,56,58,60,60,60,undefined,58,58,58,undefined,60,63,63]
   if(arr[e%arr.length]==undefined){return};
   ;play("synth1",mtn(arr[e%arr.length]+14),0.2)})
 
