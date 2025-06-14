@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Gift</title>
+</head>
+<style>
+.prevent-select {
+  -webkit-user-select: none; /* Safari */
+  -ms-user-select: none; /* IE 10 and IE 11 */
+  user-select: none; /* Standard syntax */
+}
+</style>
+<body style="background-color:grey" class="prevent-select">
+
+
+    <button id = "wow" top="0px" left = "0px" style = "z-index:20; color: rgba(0,150,255,0.8);background-color: transparent;font-size: 50px;width:100%;height:100%;border-radius: 1px;position:absolute" onclick = "
+      // window.navigator.vibrate(200)
+      const player = new Tone.Player('./start.wav').toDestination();
+    Tone.loaded().then(() => {
+      player.start();
+      player.stop()
+    });
+      
+
+      console.log('tone start');
+
+      soundInit()
+      document.getElementById('wow').remove()
+    ">click to start!</button>
+
+<h1 id="tit">click on problems to make them go away</h1>
+<div id="gamediv" style="display:flex">
+</div>
+
+<div id="datadiv" style="display:flex">
+<div id="clicks" style="visibility:hidden">clicks: 0</div>
+</div>
+<div id="texts"></div>
+
+
+
+
+
+
+    <script src="../../quick/epcounter/tone.js"></script> 
+</body>
+
+
+
+<script>
+
+
+
+var scene = {
+  "sounds":true,
+  "interval":0.3,
+  "beatsPerBar":4
+}
+var SOUND = {}
+var intervalues = {}
+
+function soundInit(arr=[]){
+    Tone.Transport.start();
+    Tone.Transport.scheduleRepeat((time) => {
+        // music.runbar(time)
+    }, scene.interval*scene.beatsPerBar)
+
+    { let audio = new Tone.Sampler({
+      urls: {
+        "C4":"./../../soundEffects/sinC4.mp3",
+        "F3":"./../../soundEffects/sinF3.mp3",
+      },
+    }).toDestination();
+        SOUND["sinC4"] = audio
+
+    }
+      arr.forEach((E,i)=>{
+        let e = "./../../soundEffects/"+E+".mp3"
+        let audio = new Tone.Sampler({
+      urls: {
+        "C4":e,
+      },
+    }).toDestination();
+        SOUND[E] = audio
+      })
+}
+
+function mtn(midiNumber) {
+    return Tone.Frequency(midiNumber, "midi");
+}
+
+class music{
+  static counter = 0
+  static synth = new Tone.PolySynth(Tone.Synth,8).toDestination(); // Connect to audio output
+  static eq = new Tone.EQ3(-10, 3, 0);
+  static reverb = new Tone.Reverb({
+    decay: 20, // Duration of the reverb tail
+    preDelay: 0.3,
+    wet: 0.95,
+    input:1,
+    output:1
+}).toDestination();
+  static bell = new Tone.Sampler({
+  urls: {
+    "C4":"../../quick/epcounter/untitled.mp3",
+  },
+}).toDestination();
+  static kick = new Tone.Sampler({
+  urls: {
+    "C4":"../../quick/epcounter/kick.mp3",
+  },
+}).toDestination();
+  static click = new Tone.Sampler({
+  urls: {
+    "C4":"../../quick/epcounter/test.mp3",
+  },
+}).toDestination();
+  static drumSynth = new Tone.MembraneSynth().toDestination();
+  static echo = new Tone.PingPongDelay(scene.interval*2, scene.interval*2).toDestination();
+  static playBell(note,vel=1,delay=0){
+      this.bell.triggerAttackRelease(mtn(note),1.7,Tone.now()+delay,vel);
+  }
+  static playFile(file,note,vel=1,delay=0){
+    this.sounds[file].triggerAttackRelease(mtn(note),1.7,Tone.now()+delay,vel);
+  }
+
+  static checkCollide(note,arr,dist=1){
+
+    let mod = note%12
+    for(let i = 0; i < arr.length; i++){
+      let resd = Math.abs(arr[i]-mod)%12
+      if(resd == dist || resd == 12-dist){
+        return(true)
+      }
+    }
+    return(false)
+  }
+
+  static checkCollider(note,dict,dist=1,oct=1){
+    for(let i = 0; i < oct+1; i++){
+      if(dict[note+dist+i*12] === true){return(true)}
+      if(dict[note-dist+i*12] === true){return(true)}
+      if(dict[note+dist-i*12] === true){return(true)}
+      if(dict[note-dist-i*12] === true){return(true)}
+    }
+    return(false)
+  }
+
+
+
+}
+
+// music.bell.connect(music.reverb)
+// music.bell.connect(music.echo)
+music.bell.connect(music.eq)
+music.bell.set({volume:-20})
+music.synth.set({
+    oscillator: {
+        type: 'sine4' 
+    },
+    envelope: {
+        attack: 0.015,
+        decay: 0.1,
+        sustain:1,
+        release:0.015
+    },
+    volume:-20
+})
+
+
+function gid(x){return(document.getElementById(x))}
+function apc(x){return(document.createElement(x))}
+
+
+function rand(x){
+	return(Math.random()*x)
+}
+
+class synths{
+  static synth1 = new Tone.PolySynth(Tone.Synth,8).toDestination()
+}
+synths.synth1.set({
+    oscillator: {
+        type: 'sine4' 
+    },
+    envelope: {
+        attack: 0.015,
+        decay: 0.1,
+        sustain:1,
+        release:0.035
+    },
+    volume:-30
+})
+
+
+function play(name,note,dur){
+  synths[name].triggerAttackRelease(note,dur)
+}
+
+function interval(name,time,f){
+  if(intervalues[name]){
+    clearInterval(intervalues[name])
+  }
+  let i = 0;
+  intervalues[name] = setInterval(()=>{i++;f(i)},time)
+  return(intervalues[name])
+}
+
+function problem(name,clicks,time,soundf){
+
+  let vnt = {}
+
+  let x = apc("button")
+  x.innerText = name
+
+  gid("gamediv").appendChild(x)
+  vnt.button = x
+  vnt.clicks = clicks
+
+  vnt.sound = interval(name,time,soundf)
+
+  x.onclick = ()=>{vnt.clicks -= 1;
+    if(vnt.clicks <= 0){
+      x.remove()
+      clearInterval(vnt.sound)
+      if(vnt.finish){
+        vnt.finish()
+      }
+    }
+  }
+
+  return(vnt)
+
+}
+
+
+problem("alarm: wake up",20,200,(e)=>{if(!(e%5)){return};play("synth1",800,0.1)})
+problem("alarm: food is done",20,321,(e)=>{if(!(e%3)){return};play("synth1",1800,0.1)})
+problem("microwave: done",20,459,(e)=>{if(!(e%3)){return};play("synth1",1300,0.1)})
+
+function picarr(arr){
+return(arr[Math.floor(Math.random()*arr.length)])
+}
+
+
+</script>
+
+</html>
