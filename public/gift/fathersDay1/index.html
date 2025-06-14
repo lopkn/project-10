@@ -239,7 +239,7 @@ function play(name,note,dur){
   synths[name].triggerAttackRelease(note,dur)
 }
 
-function interval(name,time,f){
+function interval(name,time,f=()=>{}){
   if(intervalues[name]){
     clearInterval(intervalues[name])
   }
@@ -248,7 +248,7 @@ function interval(name,time,f){
   return(intervalues[name])
 }
 
-function problem(name,clicks,time,soundf){
+function problem(name,clicks,time=99999,soundf){
 
   let vnt = {}
 
@@ -272,7 +272,8 @@ function problem(name,clicks,time,soundf){
 
     if(vnt.clicks <= 0){
       x.remove()
-      actives -= 1
+      if(soundf !== undefined){
+      actives -= 1}
       clearInterval(vnt.sound)
       problems[name].active = false
       if(vnt.finish){
@@ -291,6 +292,7 @@ var actives = 0
 function problemize(...st){
   let x = st.splice(0,1)
   problems[x] = {"noise":st,"active":false}
+  if(st[2]===undefined){problems[x].nonsound=true}else{problems[x].nonsound=false}
 }
 
 
@@ -313,14 +315,31 @@ problemize("work phone ringing",30,210,(e)=>{let arr = [undefined,60,58,56,58,60
   if(arr[e%arr.length]==undefined){return};
   ;play("synth1",mtn(arr[e%arr.length]+14),0.2)})
 
+problemize("cook food",20)
+problemize("do work",50)
+problemize("exercise",40)
+problemize("find glasses",40)
 
 function createProblem(prob=picarr(Object.keys(problems))){
   if(problems[prob].active === false){
+    if(problems[prob].nonsound==false){
     actives += 1
+    }
     problems[prob].active = problem(prob,...problems[prob].noise)
+
   }
 
 }
+
+function createProblems(s=true){
+  let prob = picarr(Object.keys(problems));
+  while(problems[prob].nonsound==s){
+    prob = picarr(Object.keys(problems))
+  }
+  createProblem(prob)
+}
+
+
 
 function picarr(arr){
 return(arr[Math.floor(Math.random()*arr.length)])
@@ -337,9 +356,11 @@ function startGameLoop(){
 
   if(Math.random()>(1-difficulty)){
     if(actives==0){
-    createProblem()
+    createProblems()
     } else if(Math.random()<0.5**actives){
-      createProblem()
+      createProblems()
+    } else {
+      createProblems(false)
     }
 
   }
