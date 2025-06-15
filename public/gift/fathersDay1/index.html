@@ -418,16 +418,17 @@ problemize("blow away tropical cyclone",12,2000,(e)=>{play("synth8",1555,0.2);pl
 
 
 
-problemize("cook food",20)
-problemize("clean table",20)
+problemize("cook food",15)
+problemize("clean table",10)
 problemize("do laundry",20)
+problemize("wash dishes",20)
 problemize("do work",50)
 problemize("exercise",40)
 problemize("find glasses",40)
 problemize("find wallet",40)
 problemize("do chores",30)
 problemize("beat up a baby",30,1000,(e)=>{play("synth5p",400,1)})
-problemize("ignore the ambulance",30,400,(e)=>{if(e%2){play("synth42",1790,0.4)}else{play("synth42",1400,0.4)}})
+problemize("ignore the ambulance",30,405,(e)=>{if(e%2){play("synth42",1790,0.4)}else{play("synth42",1400,0.4)}})
 
 function createProblem(prob=picarr(Object.keys(problems))){
   if(problems[prob].active === false){
@@ -456,12 +457,30 @@ return(arr[Math.floor(Math.random()*arr.length)])
 
 // createProblem("microwave: done")
 
+setTimeout(()=>{
+  for(let i = 0; i < 7; i++){
+    createProblem()
+  }
+
+},20000)
+
+setTimeout(()=>{
+  for(let i = 0; i < 12; i++){
+    createProblem()
+  }
+
+},60000)
+
 
 let FRAMES = 0
-let difficulty = 0.001
+let difficulty = 0.0028
 function startGameLoop(){
   FRAMES++
 
+
+  if(gid("gamediv").children.length===0 && FRAMES%100==0){
+    createProblem()
+  }
 
   if(Math.random()>(1-difficulty)){
     if(actives==0){
