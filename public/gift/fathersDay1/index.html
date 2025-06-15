@@ -29,7 +29,7 @@
     ">click to start!</button>
 
 <h1 id="tit">click on problems to make them go away</h1>
-<div id="gamediv" style="display:flex">
+<div id="gamediv" style="display:flex; max-width: 100%;flex-wrap: wrap;">
 </div>
 
 <div id="datadiv" style="display:flex">
@@ -188,6 +188,11 @@ class synths{
   static synth42 = new Tone.PolySynth(Tone.Synth,16).toDestination()
 
   static synth5p = new Tone.PolySynth(Tone.Synth,16).toDestination()
+  static synth6 = new Tone.PolySynth(Tone.Synth,16).toDestination()
+  static synth7 = new Tone.PolySynth(Tone.Synth,16).toDestination()
+
+  static synth8 = new Tone.PolySynth(Tone.Synth,16).toDestination()
+
 
 
   static pitchShift =  new Tone.PitchShift({
@@ -209,6 +214,31 @@ synths.synth4.set({
     },
     volume:-30
 })
+synths.synth7.set({
+    oscillator: {
+        type: 'sine5' 
+    },
+    envelope: {
+        attack: 0.015,
+        decay: 0.1,
+        sustain:1,
+        release:0.035
+    },
+    volume:-30
+})
+synths.synth8.set({
+    oscillator: {
+        type: 'sine3' 
+    },
+    envelope: {
+        attack: 0.015,
+        decay: 0.1,
+        sustain:1,
+        release:0.035
+    },
+    volume:-30
+})
+synths.synth8.connect(music.reverb)
 synths.synth42.set({
     oscillator: {
         type: 'sawtooth3' ,
@@ -268,6 +298,20 @@ synths.synth5p.set({
         decay: 0.1,
         sustain:1,
         release:0.055
+    },
+    volume:-30
+})
+
+synths.synth6.set({
+    oscillator: {
+        type: 'sawtooth',
+        partials: [2,0,-1,-2] 
+    },
+    envelope: {
+        attack: 0.055,
+        decay: 0.1,
+        sustain:1,
+        release:0.255
     },
     volume:-30
 })
@@ -339,27 +383,49 @@ function problemize(...st){
 
 
 
-problemize("alarm: wake up",20,200,(e)=>{if(!(e%5)){return};play("synth4",800,0.1)})
-problemize("something is low in battery",20,321,(e)=>{if(!(e%3)){return};play("synth2",1800,0.1)})
-problemize("the fridge was left open",10,1022,(e)=>{if(!(e%3)){return};play("synth2",2800,0.4)})
-problemize("microwave: done",20,459,(e)=>{if(!(e%3)){return};play("synth4",1300,0.2)})
-problemize("washing machine: done",20,210,(e)=>{if(!(e%6 && e%5)){return};play("synth3",Math.random()*500+1400,0.2)})
-problemize("phone ringing",20,410,(e)=>{let arr = [undefined,60,58,56,58,60,60,60,undefined,58,58,58,undefined,60,63,63]
+problemize("alarm: wake up",15,200,(e)=>{if(!(e%5)){return};play("synth4",800,0.1)})
+problemize("something is low in battery",5,321,(e)=>{if(!(e%3)){return};play("synth2",1800,0.1)})
+problemize("the fridge was left open",5,1022,(e)=>{if(!(e%3)){return};play("synth2",2800,0.4)})
+problemize("washing machine: done",7,459,(e)=>{if(!(e%3)){return};play("synth4",1300,0.2)})
+problemize("microwave: done",12,2000,(e)=>{;play("synth3",2000,1)})
+// problemize("washing machine: done",12,210,(e)=>{if(!(e%6 && e%5)){return};play("synth3",Math.random()*500+1400,0.2)})
+problemize("phone ringing",10,410,(e)=>{let arr = [undefined,60,58,56,58,60,60,60,undefined,58,58,58,undefined,60,63,63]
   if(arr[e%arr.length]==undefined){return};
   ;play("synth3",mtn(arr[e%arr.length]+10),0.2)})
-problemize("telephone ringing",30,210,(e)=>{let arr = [undefined,60,58,56,58,60,60,60,undefined,58,58,58,undefined,60,63,63]
+problemize("telephone ringing",20,210,(e)=>{let arr = [undefined,60,58,56,58,60,60,60,undefined,58,58,58,undefined,60,63,63]
   if(arr[e%arr.length]==undefined){return};
   ;play("synth1",mtn(arr[e%arr.length]+14),0.2)})
 
-problemize("work phone ringing",30,210,(e)=>{let arr = [undefined,60,58,56,58,60,60,60,undefined,58,58,58,undefined,60,63,63]
+problemize("work phone ringing",30,214,(e)=>{let arr = [undefined,60,58,56,58,60,60,60,undefined,58,58,58,undefined,60,63,63]
   if(arr[e%arr.length]==undefined){return};
-  ;play("synth1",mtn(arr[e%arr.length]+14),0.2)})
+  ;play("synth3",mtn(arr[e%arr.length]+18),0.2)})
+
+problemize("dishwasher: done",30,314,(e)=>{let arr = [undefined,55,53,46,58,46,58,undefined]
+  if(arr[e%arr.length]==undefined){return};
+  ;play("synth42",mtn(arr[e%arr.length]+18),0.2)})
+
+problemize("skip boring holiday celebration",20,111,(e)=>{let arr = [undefined,70,undefined,65,70,undefined,65,70,undefined,65,70,undefined,74,77,undefined,74,77,undefined,74,77,undefined,74,70,undefined,undefined,undefined,undefined,undefined,undefined,undefined]
+  if(arr[e%arr.length]==undefined){return};
+  ;play("synth6",mtn(arr[e%arr.length]+14),0.1);play("synth6",mtn(arr[e%arr.length]+2),0.2)})
+
+problemize("skip christmas celebration",30,131,(e)=>{let arr = [undefined,76,undefined,undefined,74,73,undefined,71,undefined,69,undefined,71,undefined,73,undefined,69,undefined,71,73,74,71,73,undefined,undefined,71,69,undefined,68,undefined,69,undefined,undefined,undefined,undefined,undefined]
+  if(arr[e%arr.length]==undefined){return};
+  ;play("synth7",mtn(arr[e%arr.length]+14),0.3);play("synth7",mtn(arr[e%arr.length]+2),0.3)})
+
+
+problemize("nuclear reactor: warning",15,1022,(e)=>{if(!(e%2)){return};play("synth3",mtn(85),1);play("synth3",mtn(82),1)})
+problemize("blow away tropical cyclone",12,2000,(e)=>{play("synth8",1555,0.2);play("synth8",1555/2,0.3);;play("synth8",1555/3,0.4)})
+
+
 
 problemize("cook food",20)
+problemize("clean table",20)
+problemize("do laundry",20)
 problemize("do work",50)
 problemize("exercise",40)
 problemize("find glasses",40)
 problemize("find wallet",40)
+problemize("do chores",30)
 problemize("beat up a baby",30,1000,(e)=>{play("synth5p",400,1)})
 problemize("ignore the ambulance",30,400,(e)=>{if(e%2){play("synth42",1790,0.4)}else{play("synth42",1400,0.4)}})
 
@@ -388,11 +454,11 @@ function picarr(arr){
 return(arr[Math.floor(Math.random()*arr.length)])
 }
 
-// createProblem("telephone ringing")
+// createProblem("microwave: done")
 
 
 let FRAMES = 0
-let difficulty = 0.005
+let difficulty = 0.001
 function startGameLoop(){
   FRAMES++
 
@@ -408,7 +474,7 @@ function startGameLoop(){
 
   }
 
-  if(FRAMES%200==0){difficulty+=0.001}
+  if(FRAMES%200==0){difficulty+=0.0001}
 
   synths.pitchShift.pitch = Math.sin(Date.now()/200)*2
 
