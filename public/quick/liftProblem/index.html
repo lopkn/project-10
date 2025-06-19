@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Lift Problem</title>
+</head>
+<body>
+
+<div id="inputs">
+
+</div>
+
+<button id="check" onclick="calculate()">calculate</button>
+
+<div id="steps">
+</div>
+
+</body>
+
+<script>
+
+function gid(x){return(document.getElementById(x))}
+function apc(x){return(document.createElement(x))}
+
+var dict = {}
+
+function checkNum(x){
+    x = parseFloat(x)
+    if(isNaN(x)){return(false)}
+    return(x)
+    }
+
+function newInput(name,f=checkNum){
+    let d = apc("div")
+    let n = apc("div")
+    let t = apc("input")
+    d.style.display = "flex"
+    n.style.minWidth = "30%"
+    n.innerText = name+": "
+    t.type = "text"
+    t.onchange = ()=>{let v = f(t.value);
+    if(v!==false){t.style.background = "#AFFFAF";
+    dict[name] = v
+    }else{t.style.background = "#FFAFAF"}}
+    d.appendChild(n)
+    d.appendChild(t)
+    gid("inputs").appendChild(d)
+}
+function newChoice(name,c1,c2,f=()=>{}){
+    let d = apc("div")
+    let n = apc("div")
+    let a = apc("button")
+    let b = apc("button")
+    d.style.display = "flex"
+    n.style.minWidth = "30%"
+    n.innerText = name+": "
+    
+    a.innerText = c1
+    b.innerText = c2
+    
+    a.onclick = ()=>{
+        dict[name] = c1
+        a.style.background = "#AFFFAA"
+        b.style.background = "#FFAFAF"
+    }
+    b.onclick = ()=>{
+        dict[name] = c2
+        b.style.background = "#AFFFAA"
+        a.style.background = "#FFAFAF"
+    }
+    
+    d.appendChild(n)
+    d.appendChild(a)
+    d.appendChild(b)
+    gid("inputs").appendChild(d)
+}
+
+var advancedMode = 0
+    
+newInput("speed of lift (t/floor)")    
+newInput("speed of stairs (t/floor)")    
+newInput("destination floor (floor)")    
+newInput("lift current floor (floor)")    
+newInput("max floor (floor)")    
+newChoice("lift current direction","up","down")   
+
+
+
+
+function calculate(){
+    dict["time it takes to walk"] = dict["speed of stairs (t/floor)"]*dict["destination floor (floor)"]
+    
+    let parentDiv = gid("steps")
+    let x = apc("div")
+    x.innerText = "time it takes to walk = speed of stairs * destination floor = "+dict["speed of stairs (t/floor)"]+" * "+dict["destination floor (floor)"] + "\n = " + dict["time it takes to walk"] + (" (t)")
+    parentDiv.appendChild(x)
+    
+    if(dict["lift current direction"]=="up"){
+    
+    dict["average height the lift needs to go up"] = (dict["max floor (floor)"]-dict["lift current floor (floor)"]) / 2
+    
+    x = apc("div")
+    x.innerText = "\n\nbecause the lift is going up, we need to calculate how far up the lift still needs to go. we will take the average of the amount of floors LEFT, and assume the lift arrives there. \n\n average height the lift needs to go up = (max floor - lift current floor) / 2 = ("+dict["max floor (floor)"]+" - "+dict["lift current floor (floor)"]+") / 2" + "\n = " + dict["average height the lift needs to go up"] + " (floors)"
+    parentDiv.appendChild(x)
+    
+    dict["average height the lift needs to go back down"] = (dict["average height the lift needs to go up"]+dict["lift current floor (floor)"])
+    
+    x = apc("div")
+    x.innerText = "average height the lift needs to go back down = average height the lift needs to go up + lift current floor = "+dict["average height the lift needs to go up"]+" + "+dict["lift current floor (floor)"] + "\n = " + dict["average height the lift needs to go back down"] + " (floors)"
+    parentDiv.appendChild(x)
+    
+    
+    dict["total floors lift needs to travel"] = dict["average height the lift needs to go up"] + dict["average height the lift needs to go back down"] + dict["destination floor (floor)"]
+    x = apc("div")
+    x.innerText = "\n\ntotal floors lift needs to travel = up + down + up to destination = "+ dict["average height the lift needs to go up"] + " + " + dict["average height the lift needs to go back down"] + " + " + dict["destination floor (floor)"] + "\n = " +dict["total floors lift needs to travel"]+ " (floors)"
+    parentDiv.appendChild(x)
+    
+    dict["total time it takes for lift"] = dict["total floors lift needs to travel"] * dict["speed of lift (t/floor)"]
+    x = apc("div")
+    x.innerText = "\n\ntotal time it takes for lift = total floors lift needs to travel * speed of lift = "+ dict["total floors lift needs to travel"] + " * " + dict["speed of lift (t/floor)"] + "\n = " +dict["total time it takes for lift"]+ " (t)"
+    parentDiv.appendChild(x)
+    
+    
+    }else if(dict["lift current direction"]=="down"){
+    
+    dict["average height the lift needs to go down"] = dict["lift current floor (floor)"]
+    
+    x = apc("div")
+    x.innerText = "average height the lift needs to go down = lift current floor = "+dict["lift current floor (floor)"] + " (floor)"
+    parentDiv.appendChild(x)
+    
+    
+    dict["total floors lift needs to travel"] = dict["average height the lift needs to go down"] + dict["destination floor (floor)"]
+    x = apc("div")
+    x.innerText = "\n\ntotal floors lift needs to travel = coming down + going up to destination = "+  dict["average height the lift needs to go down"] + " + " + dict["destination floor (floor)"] + "\n = " +dict["total floors lift needs to travel"]+ " (floor)"
+    parentDiv.appendChild(x)
+    
+    dict["total time it takes for lift"] = dict["total floors lift needs to travel"] * dict["speed of lift (t/floor)"]
+    x = apc("div")
+    x.innerText = "\n\ntotal time it takes for lift = total floors lift needs to travel * speed of lift = "+ dict["total floors lift needs to travel"] + " * " + dict["speed of lift (t/floor)"] + "\n = " +dict["total time it takes for lift"] + " (t)"
+    parentDiv.appendChild(x)
+    
+    
+    }
+    
+    
+    
+
+}
+    
+</script>
+
+</html>
