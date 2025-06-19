@@ -76,8 +76,8 @@ function newChoice(name,c1,c2,f=()=>{}){
 
 var advancedMode = 0
     
-newInput("speed of lift (t/floor)")    
-newInput("speed of stairs (t/floor)")    
+newInput("speed of lift (floor/t)")    
+newInput("speed of stairs (floor/t)")    
 newInput("destination floor (floor)")    
 newInput("lift current floor (floor)")    
 newInput("max floor (floor)")    
@@ -87,11 +87,28 @@ newChoice("lift current direction","up","down")
 
 
 function calculate(){
-    dict["time it takes to walk"] = dict["speed of stairs (t/floor)"]*dict["destination floor (floor)"]
+
+    if(dict["max floor (floor)"]<dict["lift current floor (floor)"]){
+        alert("the current floor of the lift is higher than the max floor")
+        return;
+    }
+    
+    if(dict["max floor (floor)"]<dict["destination floor (floor)"]){
+        alert("the destination floor of the lift is higher than the max floor")
+        return;
+    }
+    
+    if(dict["speed of lift (floor/t)"]<dict["speed of stairs (floor/t)"]){
+        alert("how is the speed of lift is SLOWER than stairs?")
+        return;
+    }
+
+
+    dict["time it takes to walk"] = dict["destination floor (floor)"]/dict["speed of stairs (floor/t)"]
     
     let parentDiv = gid("steps")
     let x = apc("div")
-    x.innerText = "time it takes to walk = speed of stairs * destination floor = "+dict["speed of stairs (t/floor)"]+" * "+dict["destination floor (floor)"] + "\n = " + dict["time it takes to walk"] + (" (t)")
+    x.innerText = "time it takes to walk = destination floor / speed of stairs = "+dict["destination floor (floor)"]+" / "+dict["speed of stairs (floor/t)"] + "\n = " + dict["time it takes to walk"] + (" (t)")
     parentDiv.appendChild(x)
     
     if(dict["lift current direction"]=="up"){
@@ -114,9 +131,9 @@ function calculate(){
     x.innerText = "total floors lift needs to travel = up + down + up to destination = "+ dict["average height the lift needs to go up"] + " + " + dict["average height the lift needs to go back down"] + " + " + dict["destination floor (floor)"] + "\n = " +dict["total floors lift needs to travel"]+ " (floors)"
     parentDiv.appendChild(x)
     
-    dict["total time it takes for lift"] = dict["total floors lift needs to travel"] * dict["speed of lift (t/floor)"]
+    dict["total time it takes for lift"] = dict["total floors lift needs to travel"] / dict["speed of lift (floor/t)"]
     x = apc("div")
-    x.innerText = "\ntotal time it takes for lift = total floors lift needs to travel * speed of lift = "+ dict["total floors lift needs to travel"] + " * " + dict["speed of lift (t/floor)"] + "\n = " +dict["total time it takes for lift"]+ " (t)"
+    x.innerText = "\ntotal time it takes for lift = total floors lift needs to travel / speed of lift = "+ dict["total floors lift needs to travel"] + " * " + dict["speed of lift (floor/t)"] + "\n = " +dict["total time it takes for lift"]+ " (t)"
     parentDiv.appendChild(x)
     
     
@@ -134,11 +151,48 @@ function calculate(){
     x.innerText = "\ntotal floors lift needs to travel = coming down + going up to destination = "+  dict["average height the lift needs to go down"] + " + " + dict["destination floor (floor)"] + "\n = " +dict["total floors lift needs to travel"]+ " (floor)"
     parentDiv.appendChild(x)
     
-    dict["total time it takes for lift"] = dict["total floors lift needs to travel"] * dict["speed of lift (t/floor)"]
+    dict["total time it takes for lift"] = dict["total floors lift needs to travel"] / dict["speed of lift (floor/t)"]
     x = apc("div")
-    x.innerText = "\ntotal time it takes for lift = total floors lift needs to travel * speed of lift = "+ dict["total floors lift needs to travel"] + " * " + dict["speed of lift (t/floor)"] + "\n = " +dict["total time it takes for lift"] + " (t)"
+    x.innerText = "\ntotal time it takes for lift = total floors lift needs to travel / speed of lift = "+ dict["total floors lift needs to travel"] + " * " + dict["speed of lift (floor/t)"] + "\n = " +dict["total time it takes for lift"] + " (t)"
     parentDiv.appendChild(x)
     }
+
+
+    x = apc("div")
+    x.innerText = "\nFINAL ANSWER: \n --Time for LIFT: "+ dict["total time it takes for lift"]+ " (t)\n --Time for WALK: "+dict["time it takes to walk"]+" (t)\n --- ANSWER: "+(dict["total time it takes for lift"]<dict["time it takes to walk"]?"WAITING FOR LIFT":"WALKING") + " is on average FASTER"
+    parentDiv.appendChild(x)
+    
+    
+    let xx = apc("button")
+    xx.innerText = "show additional reading / remarks"
+    xx.onclick = ()=>{
+    let zz = apc("div")
+    zz.innerText = `
+
+    (scroll down to view)
+    
+    the current model has the following assumptions
+    1. the lift instantaneously loads and unloads passengers & accelerates to full speed immediately
+    2. the lift only has 1 person inside it (if it is going up)
+    
+    
+    to further improve the model, it is very easy to fix both of these problems.
+    
+    you can define a "stopping time" for the lift to load and unload passengers. add 2 stopping times when going up (unloading passenger + loading you in the ground floor). add 1 stopping time when going down (loading you in the ground floor)
+    
+    to solve problem 2, it is also trivial.
+    we can assume that every single floor has an equal chance of passengers unloading. the "highest floor" given F floors left and N passengers will be F/(N+1)
+
+    so finally we know how many stops there are, and which floor is the mean highest floor.
+
+    `;
+    
+
+    zz.style.color = "#A000FF"
+    parentDiv.appendChild(zz)
+    xx.remove()
+    };
+    parentDiv.appendChild(xx)
 
 }
     
