@@ -174,6 +174,7 @@ function calculate(){
     the current model has the following assumptions
     1. the lift instantaneously loads and unloads passengers & accelerates to full speed immediately
     2. the lift only has 1 person inside it (if it is going up)
+    3. we are assuming you are the only passenger going up
     
     
     to further improve the model, it is very easy to fix both of these problems.
@@ -184,6 +185,13 @@ function calculate(){
     we can assume that every single floor has an equal chance of passengers unloading. the "highest floor" given F floors left and N passengers will be F/(N+1)
 
     so finally we know how many stops there are, and which floor is the mean highest floor.
+
+
+    problem 3. also trivial.
+
+    the probability someone ELSE will have a stop before your stop is your floor / max floor
+    it is easy to make a model to also adjust for the fact that if there are many people, some may exit at the same floor, by elliminating the probability of the floor entirely
+
 
     `;
     
