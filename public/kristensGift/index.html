@@ -50,6 +50,19 @@ function ktitles(){
 function gid(x){return(document.getElementById(x))}
 function apc(x){return(document.createElement(x))}
 
+var name = "Kristen"
+if(Math.random()>0.5){
+  name = "Charisse"
+  if(Math.random()>0.5){
+    name += " McFat"
+  }
+  if(Math.random()>0.5){
+    name += " St. Lazy"
+  }
+}
+
+gid("tit").innerText = "click to make virtual "+name+" open the gift"
+
 let gift = gid("gift")
 function rand(x){
   return(Math.random()*x)
@@ -794,7 +807,7 @@ new vent(453,(e,skip=false)=>{
     depress(22)
     x.innerText = "Earnt title: bitch"
     ktitleArr.push("bitch")
-    gid("tit").innerText = "make Virtual Kristen "+ktitles()+" open the fucking gift."
+    gid("tit").innerText = "make Virtual "+name+" "+ktitles()+" open the fucking gift."
     x.style.fontWeight = "bold"
     x.style.color = "#FF0000"
     let parentDiv=gid("texts")
@@ -996,10 +1009,10 @@ new vent(551,(EVT,skip=false)=>{
   
   z.addEventListener("keydown",(e)=>{
     if(e.key == "Enter"){
-      if(z.value !== "GayKristen13-06-2009"){
+      if(z.value !== "Gay"+name+"13-06-2009"){
           {
     let x = apc("div")
-    x.innerText = "hint: the password is GayKristen13-06-2009"
+    x.innerText = "hint: the password is Gay"+name+"13-06-2009"
     x.style.fontWeight = "bold"
     x.style.color = "#0000FF"
     let parentDiv=gid("texts")
@@ -1017,7 +1030,7 @@ new vent(551,(EVT,skip=false)=>{
     }
         
         z.remove()
-        z2.innerText = "verify you are human, click all the boxes that is true for user GayKristen09:"
+        z2.innerText = "verify you are human, click all the boxes that is true for user Gay"+name+"09:"
         
         
         let padlock = apc("div")
@@ -1262,7 +1275,7 @@ new vent(600,(e,skip=false)=>{
     e.finished=true
     depress(40)
     
-    gid("tit").innerText = "Virtual Kristen "+ktitles()+" has opened the gift!"
+    gid("tit").innerText = "Virtual "+name+" "+ktitles()+" has opened the gift!"
     
     {
     gid("gift").innerText = ending.emoji
