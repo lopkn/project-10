@@ -2694,7 +2694,7 @@ function push(particle,dx,dy){
 		particle.vy += dy / particle.mass
 	}
 }
-if(false){ // ADD BALLGAME ballgame = false
+if(false){ //////////=============// ADD BALLGAME ballgame = false
 events.addEvent("ballgame",{
 	"energy":300,
 	"strength":1,
@@ -3230,7 +3230,7 @@ function mainLoop(currentTime){
 	}
 
 
-	if(COUNTER%50 == 0){
+	if(COUNTER%10 == 0){
 		randomEvents()
 	}
 
