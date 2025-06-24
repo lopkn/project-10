@@ -8,6 +8,7 @@ document.getElementById('test').addEventListener("click",()=>{
     chrome.runtime.sendMessage({type:'request_password'});
 })
 
+
 console.log("hey")
 
 

@@ -1,9 +1,11 @@
+var tab;
+
 chrome.runtime.onMessage.addListener(function(request) {
 
     console.log("HELLO?")
 
     if (request.type === 'newWindow') {
-        chrome.tabs.create({
+        tab = chrome.tabs.create({
             url: chrome.runtime.getURL('popup.html'),
             active: false
         }, function(tab) {
