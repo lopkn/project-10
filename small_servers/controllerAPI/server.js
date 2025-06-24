@@ -74,6 +74,7 @@ function pmessage(str){
 }
 
 
+
 /*
 function s(str,t=0){
     if(t!==0){setTimeout(()=>{s(str)},t);return;}

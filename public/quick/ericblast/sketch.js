@@ -37,15 +37,16 @@ document.getElementById("divout").innerText = JSON.stringify({"already":wordlist
 
 
 })
+var scores = {}
 socket.on("prompt",(e)=>{console.log("prompt:"+e);prompt=e[0]
 
 
   str = ""
-  JSON.values(scores).forEach((e,i)=>{
-    scores += "player"+(i+1)+":"+e
+  Object.values(scores).forEach((e,i)=>{
+    str += "player"+(i+1)+":"+e
   })
 
-document.getElementById("divout2").innerText = "prompt: "+prompt + "\n\n\n" + str
+document.getElementById("divout2").innerText = "prompt: "+prompt + "\n\n\n" + str 
 
 
 if(ID == e[1] || e[1] == "FFA"){
@@ -64,7 +65,6 @@ function acknowledge(e){
   console.log(e)
 }
 
-var scores = {}
 function addScore(id){
   if(scores[id]===undefined){scores[id]=0}
   scores[id] += 1
