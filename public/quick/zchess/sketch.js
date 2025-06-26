@@ -703,6 +703,15 @@ function drawPiece(l,x,y,team,cd,pc){
 			// }
 		}
 		mrect(x,y,1,cd>1?1:cd)
+		if(cd>1){
+			let CDD = cd-1
+			fill(0,0,0,0.1)
+			while(CDD>1){
+				mrect(x,y,1,1)
+				CDD -= 1
+			}
+		}
+
 	}
 	if(pc.color !== undefined){
 		ctx.fillStyle = pc.color
