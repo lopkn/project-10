@@ -326,7 +326,7 @@ function specialRenderIn(){
 	drawText("Normal",1,0)
 	drawText("King's Raid",1,2)
 	drawText("Knight's Raid",1,4)
-	drawText("Roaming",1,6)
+	drawText("God complex",1,6)
 	drawText("Phantom",1,8)
 	drawText("Universal",1,10)
 	drawText("Campaign (WIP)",1,12)
@@ -351,6 +351,9 @@ function specialRenderIn(){
 	ctx.lineTo(coord3[0],coord3[1]+4*tileSize)
 	ctx.fill()
 	ctx.closePath()
+
+
+
 	// ctx.fillStyle = "#488000"
 	let gradient = ctx.createLinearGradient(0, coord3[1], 0, coord2[1]);
 
@@ -376,6 +379,17 @@ function specialRenderIn(){
 	ctx.moveTo(coord1[0],coord1[1]+12*tileSize)
 	ctx.lineTo(coord2[0],coord2[1]+12*tileSize)
 	ctx.lineTo(coord3[0],coord3[1]+12*tileSize)
+	ctx.fill()
+	ctx.closePath()
+
+		fill(215,0,0,mra)
+	coord1 = board_to_screen(0.1,0.15)
+	coord2 = board_to_screen(0.9,0.15)
+	coord3 = board_to_screen(0.5,1)
+	ctx.beginPath()
+	ctx.moveTo(coord1[0],coord1[1]+6*tileSize)
+	ctx.lineTo(coord2[0],coord2[1]+6*tileSize)
+	ctx.lineTo(coord3[0],coord3[1]+6*tileSize)
 	ctx.fill()
 	ctx.closePath()
 
@@ -604,11 +618,19 @@ document.addEventListener("mouseup",(e)=>{
 						camera.gamemode = "Knight's Raid"
 						gameStart = "started"
 						startGame()
-					} else if(mouseBoardY == 6){
-						camera.gamemode = "Roaming"
+					}
+					//  else if(mouseBoardY == 6){
+					// 	camera.gamemode = "Roaming"
+					// 	gameStart = "started"
+					// 	startGame()
+					// } 
+					else if(mouseBoardY == 6){
+						camera.gamemode = "God complex"
 						gameStart = "started"
 						startGame()
-					} else if(mouseBoardY == 8){
+					} 
+
+					else if(mouseBoardY == 8){
 						camera.gamemode = "Phantom"
 						gameStart = "started"
 						startGame()
@@ -924,8 +946,8 @@ if(camera.gamemode == "Roaming"){
 				}
 			}
 			board.specialIntervals["bombers"] = ()=>{if(board.iterations > 30 &&Math.random()<0.005*relativeEventFrequency){gameEvents["bomber pawn"]()}}
-			board.specialIntervals["elite cannon"] = ()=>{if(board.iterations > 30 &&Math.random()<0.005*relativeEventFrequency){gameEvents["elite cannon"]()}}
-			board.specialIntervals["elite knight"] = ()=>{if(board.iterations > 30 &&Math.random()<0.005*relativeEventFrequency){gameEvents["elite knight"]()}}
+			board.specialIntervals["elite cannon"] = ()=>{if(board.iterations > 30 &&Math.random()<0.008*relativeEventFrequency){gameEvents["elite cannon"]()}}
+			board.specialIntervals["elite knight"] = ()=>{if(board.iterations > 30 &&Math.random()<0.01*relativeEventFrequency){gameEvents["elite knight"]()}}
 			board.specialIntervals["allied knight"] = ()=>{if(board.iterations > 30 && Math.random()<0.005*relativeEventFrequency){gameEvents["white knights"]()}}
 
 			board.tiles[4+","+11].piece = new piece("knight",4,11,"p1")
@@ -971,8 +993,8 @@ if(camera.gamemode == "Roaming"){
 			}
 
 			board.specialIntervals["bombers"] = ()=>{if(board.iterations > 30 &&Math.random()<0.0001*relativeEventFrequency){gameEvents["bomber pawn"]()}}
-			board.specialIntervals["elite cannon"] = ()=>{if(board.iterations > 30 &&Math.random()<0.005*relativeEventFrequency){gameEvents["elite cannon"]()}}
-			board.specialIntervals["elite knight"] = ()=>{if(board.iterations > 30 &&Math.random()<0.005*relativeEventFrequency){gameEvents["elite knight"]()}}
+			board.specialIntervals["elite cannon"] = ()=>{if(board.iterations > 30 &&Math.random()<0.008*relativeEventFrequency){gameEvents["elite cannon"]()}}
+			board.specialIntervals["elite knight"] = ()=>{if(board.iterations > 30 &&Math.random()<0.01*relativeEventFrequency){gameEvents["elite knight"]()}}
 			board.specialIntervals["allied knight"] = ()=>{if(board.iterations > 30 &&Math.random()<0.005*relativeEventFrequency){gameEvents["white knights"]()}}
 
 			board.tiles[4+","+11].piece = new piece("king",4,11,"p1")
@@ -993,7 +1015,56 @@ if(camera.gamemode == "Roaming"){
 				clearInterval(gameInterval)
 				gameStart = "lost"
 			}
-} else if(camera.gamemode == "Phantom"){
+} 
+
+else if(camera.gamemode == "God complex"){
+			camera.pieceFrequency = 1100
+			gameSpecialInterval = ()=>{if(board.iterations%18 == 0 && board.iterations > 30){
+				for(let i = 0; i < 4; i++){
+					board.spawnRates[2*i+1]-=(1-board.spawnRates[2*i+1])*(1-board.spawnRates[2*i+1])*0.2
+					if(board.spawnRates[2*i+1] < (i+1)*0.1){board.spawnRates[2*i+1] = (i+1)*0.1}
+				}
+				}
+				if(board.iterations % 20 == 0 && camera.pieceFrequency > 100){
+					camera.pieceFrequency -= 50
+					startGameInterval(camera.pieceFrequency)
+				}
+			}
+			board.specialIntervals["bombers"] = ()=>{if(board.iterations > 30 &&Math.random()<0.005*relativeEventFrequency){gameEvents["bomber pawn"]()}}
+			board.specialIntervals["elite cannon"] = ()=>{if(board.iterations > 30 &&Math.random()<0.008*relativeEventFrequency){gameEvents["elite cannon"]()}}
+			board.specialIntervals["elite knight"] = ()=>{if(board.iterations > 30 &&Math.random()<0.01*relativeEventFrequency){gameEvents["elite knight"]()}}
+			board.specialIntervals["allied knight"] = ()=>{if(board.iterations > 30 && Math.random()<0.005*relativeEventFrequency){gameEvents["white knights"]()}}
+
+			board.tiles[4+","+11].piece = new piece("wizard",4,11,"p1")
+			let ap = board.tiles["4,11"].piece
+			ap.arrFuncs.onMove.push((px,py)=>{
+
+
+					camera.particles.push(new lineParticle(px+0.5,py+0.5,ap.x+0.5,ap.y+0.5,2,
+						(x)=>{
+							return("rgba(200,200,0,"+(x/2)+")")},0.4))
+
+			})
+			ap.maxCD = 0.2
+			ap.onDeath=()=>{
+				
+				camera.score = ap.kills
+
+				mainPieceDeath(ap)
+				clearInterval(gameInterval)
+				gameStart = "lost"
+
+			}
+
+			if(Math.random()<0.05){
+				gameEvents["flight chamber"](ap)
+			} else if(Math.random()<0.2){
+				gameEvents["piece storm"]()
+			}
+			
+}
+
+else if(camera.gamemode == "Phantom"){
 			camera.pieceFrequency = 1500
 			gameSpecialInterval = ()=>{if(board.iterations%12 == 0 && board.iterations > 40){
 				for(let i = 0; i < 4; i++){

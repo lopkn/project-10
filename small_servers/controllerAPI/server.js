@@ -6,6 +6,10 @@ const pythonProcess = spawn('python3', ['api.py']);
 // Listen for output from the Python script
 pythonProcess.stdout.on('data', (data) => {
     console.log(`Python: ${data.toString()}`);
+    let str = data.toString()
+    if(str.slice(0,6)=="[RES]-"){
+        resolves = str
+    }
 });
 
 pythonProcess.stderr.on('data', (data) => {
@@ -26,6 +30,8 @@ function sendMessage(message,t=0) {
 
 const http = require('http');
 
+var resolves;
+
 const server = http.createServer((req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*'); // Allow all origins
     res.setHeader('Access-Control-Allow-Methods', 'POST')
@@ -36,7 +42,15 @@ const server = http.createServer((req, res) => {
         req.on('end', () => {
             console.log("recieved: " + body);
             pmessage(body)
-            res.end('Received: '+body);
+            setTimeout(()=>{
+                if(resolves === undefined){
+                    res.end('Received: '+body);
+                } else {
+                    res.end(resolves)
+                    delete resolves
+                    resolves = undefined
+                }
+            },100)
         });
     } else {
         res.end('Not Found');
@@ -48,10 +62,18 @@ server.listen(3000, () => {
 });
 
 function picarr(arr){
-return(arr[Math.floor(Math.random()*arr.length)])
+    return(arr[Math.floor(Math.random()*arr.length)])
 }
 
-var defaults = ["gay","fucking fatty","dangle yourself","kill yourself","kys","jump off","i hate you",">:(","YOU SUCK","i hope you die","ur the worst","whats with your fucking attitude","fuck you","fuck you","ur a bitch","ur a pig","mind your fucking language","ur rude asf","rude","ur gay"]
+
+
+
+var defaults = ["gay","fucking fatty","dangle yourself",
+    "kill yourself","kys","jump off",
+    "i hate you",">:(","YOU SUCK","i hope you die",
+    "ur the worst","whats with your fucking attitude","fuck you",
+    "fuck you","ur a bitch","ur a pig",
+    "mind your fucking language","ur rude asf","rude","ur gay"]
 
 var S = sendMessage
 var s = (msg,t)=>{sendMessage(msg+"\n[FLUSH]",t)}

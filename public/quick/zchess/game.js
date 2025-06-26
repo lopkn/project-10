@@ -593,7 +593,9 @@ class piece {
 			// }
 			// console.log(board.tiles[pos].piece.team+" "+board.tiles[pos].piece.id+" has been killed!")
 
-			////legacy murder code
+			////legacy murder code 
+
+			//#COMMENT on27-06-25 LOL THIS IS FUNNY AS SHIT
 			board.tiles[pos].piece=damagePiece(board.tiles[pos].piece,this)
 		} else {
 			board.tiles[pos].piece = this;
@@ -663,26 +665,29 @@ function killPiece(piece,killer){
 		return(killer)
 }
 
-function damagePiece(damagee,damager,options){
+function damagePiece(damagee,damager,options={}){
 	// console.log(damager)
 	// console.log(killPiece(damagee,damager));
 	// return(damager)
-	options = options?options:{}
+
 	let atk = damager.attack==undefined?2:damager.attack
 	let dhp = damager.hp?damager.hp:100
 	let damage = options.damage?options.damage:(atk*dhp)
 	let ehp = damagee.hp?damagee.hp:100
 
+
+	console.log("GHEY "+damage)
 	if(damage >= ehp){killPiece(damagee,damager);return(damager)}
 	if(options.resolve === false){
 		damagee.hp -= damage
 		return(undefined);
-	}
+	} ///# NOTATION 27-06-25: normal attack: deal this damage without getting hurt. Critical attack: trade this much health for damage
 
 	let catk = damager.criticalAttack==undefined?2:damager.criticalAttack
-	if(dhp*atk+dhp*catk > ehp){killPiece(damager,damagee);damager.hp-=Math.round((ehp-dhp*atk)/catk);return(damager)}
+
+	if(dhp*atk+dhp*catk > ehp){killPiece(damagee,damager);damager.hp-=Math.round((ehp-dhp*atk)/catk);return(damager)}
 	if(dhp*atk+dhp*catk == ehp){killPiece(damager,damagee);killPiece(damagee,damager);return(undefined)}
-	damagee.hp-=dhp*atk+dhp*catk;killPiece(damagee,damager);return(damagee);
+	damagee.hp-=dhp*atk+dhp*catk;killPiece(damager,damagee);return(damagee);
 }
 
 
@@ -1291,7 +1296,7 @@ var gameEvents = {
 						}
 						pct.alive = false
 						board.tiles[spos(pc.x+i,pc.y+j)].piece = undefined
-						for(let i = 0; i < 16; i++){
+						for(let i = 0; i < 16; i++){//#27-06-25 particles
 							let dx = Math.random()-0.5
 							let dy = Math.random()-0.5
 							dx += (pct.x - pc.x)*0.3

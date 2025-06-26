@@ -11,38 +11,32 @@ function s(str,t=0){
     .then(response => response.text())
     .then(data => {
         console.log(data);
+        responded(data)
     })
 }
 
 
 var hist = [""]
 var histIndex = -1
+var delaytime = 1000
 
 document.getElementById('send').addEventListener("click",()=>{
 	document.getElementById('send').style.backgroundColor='#AFFFAF'
 
     if(document.getElementById("input").value == ""){
         document.getElementById('send').style.backgroundColor='#FFAFAF'
-        setTimeout(()=>{document.getElementById('send').style.backgroundColor='#AFFFAF'},1000)
+        setTimeout(()=>{document.getElementById('send').style.backgroundColor='#AFFFAF'},delaytime)
     }
-
-    document.getElementById("input").addEventListener("keydown",(e)=>{
-        if(e.key == "ArrowUp"){
-            histIndex += 1
-            document.getElementById("input").value = hist[histIndex]
-        }
-        if(e.key == "ArrowDown"){
-            histIndex -= 1
-            if(histIndex < -1){histIndex=-1}
-            document.getElementById("input").value = hist[histIndex]
-            if(histIndex == -1){document.getElementById("input").value = "E\nfr(20)"}
-        }
-    })
 
 
     hist.splice(0,0,document.getElementById("input").value)
     let str = preprocess(document.getElementById("input").value)
     s(str)
+    let d = document.createElement("div")
+    d.innerText = str
+    d.style.color = "white"
+    let logs = document.getElementById("logs")
+    logs.insertBefore(d,logs.firstChild)
     histIndex = -1
 
 	document.getElementById("input").value = ""
@@ -51,6 +45,41 @@ document.getElementById('send').addEventListener("click",()=>{
 	// if (confirm('confirm?')){}
 
 })
+
+document.getElementById("input").addEventListener("keydown",(e)=>{
+        if(e.key == "ArrowUp"){
+            histIndex += 1
+            console.log(histIndex)
+            document.getElementById("input").value = hist[histIndex]
+        }
+        if(e.key == "ArrowDown"){
+            histIndex -= 1
+            console.log(histIndex)
+            if(histIndex < -1){histIndex=-1}
+            document.getElementById("input").value = hist[histIndex]
+            if(histIndex == -1){document.getElementById("input").value = "E\nfr(20)"}
+        }
+    })
+
+document.getElementById("input2").addEventListener("change",(e)=>{
+    let val = parseInt(document.getElementById("input2").value)
+    if(!isNaN(val)){
+        delaytime = val
+        document.getElementById("input2").style.backgroundColor = "#40A040"
+    }else{
+        document.getElementById("input2").style.backgroundColor = "#A04040"
+    }
+})
+
+
+function responded(str){
+    let d = document.createElement("div")
+    d.innerText = str
+    d.style.color = "#00A000"
+    let logs = document.getElementById("logs")
+    logs.insertBefore(d,logs.firstChild)
+}
+
 function preprocess(str) {
     if(str[0] == "e"&&str[1]=="\n"){
         return(str);

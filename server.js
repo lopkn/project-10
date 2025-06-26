@@ -1521,6 +1521,7 @@ app.post('/temporal', (req, res) => {
     responder.process2(req.body,res)
 })
 
+
 app.get("/temporal/:id",(req,res)=>{
 	const responseId = req.params.id;
 	console.log(responseId)
