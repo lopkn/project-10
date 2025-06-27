@@ -544,11 +544,16 @@ class piece {
 					camera.particles.push(new lineParticle(this.x+0.5,this.y+0.5,x+0.5,y+0.5,10,
 						(x)=>{let mr = Math.random()*255
 							return("rgb(0,"+mr+","+mr+")")},0.6))
+
+					if(this.tags.explosive){
+						gameEvents["explode"](x,y)
+					}
 				}
 				this.cooldown = this.maxCD + 5
 				this.coolUntil = Date.now() + 1000*this.cooldown
 				this.uplim = undefined
 				this.held = false
+				pieceClicked = "none"
 			}
 		}
 
@@ -1312,7 +1317,58 @@ var gameEvents = {
 		pc.AIwait = ()=>{return(10)}
 		pc.AIblockWait = ()=>{return(300)}
 		return(pc)
-	},"ghost pawns":(amt)=>{
+	},"explode":(x,y,radius=1)=>{
+
+		let pc = {x:x,y:y,bombRadius:radius}//dummy piece
+
+		camera.playSound("bomb")
+
+			if(board[spos(x,y)]!=undefined){
+				for(let i = 0; i < 16; i++){
+					let dx = Math.random()-0.5
+					let dy = Math.random()-0.5
+					camera.particles.push(new bloodParticle(pc.x+0.5+0.6*dx,pc.y+0.5+0.6*dy,dx*34,34*dy,Math.random()*0.2,Math.random()*3+3,false))
+					camera.particles[camera.particles.length-1].friction = 0.98
+				}
+			}
+			
+			camera.particles.push(new explosionR(pc.x+0.5,pc.y+0.5,
+					(x)=>{
+						let rr = 250*Math.random()
+						return("rgb("+(rr)+","+(Math.random()*rr)+","+(Math.random()*15)+")")},
+					16,8,2))
+			camera.particles.push(new explosionR(pc.x+0.5,pc.y+0.5,
+					(x)=>{
+						let rr = 250*Math.random()
+						return("rgb("+(rr)+","+(Math.random()*rr)+","+(Math.random()*15)+")")},
+					6,2,1))
+
+			setTimeout(()=>{
+
+
+			for(let i = -radius; i < radius+1; i++){
+				for(let j = -radius ;j < radius+1; j++){
+					if(board.tiles[spos(pc.x+i,pc.y+j)]?.piece != undefined){
+						let pct = board.tiles[spos(pc.x+i,pc.y+j)].piece
+						if(pct.onDeath != undefined && pct != pc){
+							pct.onDeath()
+						}
+						pct.alive = false
+						board.tiles[spos(pc.x+i,pc.y+j)].piece = undefined
+						for(let i = 0; i < 16; i++){//#27-06-25 particles
+							let dx = Math.random()-0.5
+							let dy = Math.random()-0.5
+							dx += (pct.x - pc.x)*0.3
+							dy += (pct.y - pc.y)*0.3
+							camera.particles.push(new bloodParticle(pct.x+0.5+0.6*dx,pct.y+0.5+0.6*dy,dx*24,24*dy,Math.random()*0.03,Math.random()*3+3,false))
+							camera.particles[camera.particles.length-1].friction = 0.94
+						}
+					}
+				}
+			}
+			},200)
+	}
+	,"ghost pawns":(amt)=>{
 
 		camera.particles.push(new expandingText("Ghost pawns",Width/2/tileSize-camera.x,Height/2/tileSize-camera.y,
 		(x)=>{return("rgba(255,255,0,"+x+")")},

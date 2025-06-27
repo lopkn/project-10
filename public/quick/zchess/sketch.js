@@ -1027,15 +1027,15 @@ if(camera.gamemode == "Roaming"){
 } 
 
 else if(camera.gamemode == "God complex"){
-			camera.pieceFrequency = 1100
-			gameSpecialInterval = ()=>{if(board.iterations%18 == 0 && board.iterations > 30){
-				for(let i = 0; i < 4; i++){
-					board.spawnRates[2*i+1]-=(1-board.spawnRates[2*i+1])*(1-board.spawnRates[2*i+1])*0.2
+			camera.pieceFrequency = 1200
+			gameSpecialInterval = ()=>{if(board.iterations%18 == 0 && board.iterations > 3){
+				for(let i = 0; i < 6; i++){
+					board.spawnRates[2*i+1]=(-0.01/board.spawnRates[2*i+1])+board.spawnRates[2*i+1]
 					if(board.spawnRates[2*i+1] < (i+1)*0.1){board.spawnRates[2*i+1] = (i+1)*0.1}
 				}
 				}
-				if(board.iterations % 20 == 0 && camera.pieceFrequency > 100){
-					camera.pieceFrequency -= 50
+				if(board.iterations % 20 == 0 && camera.pieceFrequency > 800){
+					camera.pieceFrequency -= 2
 					startGameInterval(camera.pieceFrequency)
 				}
 			}
@@ -1044,7 +1044,7 @@ else if(camera.gamemode == "God complex"){
 			board.specialIntervals["elite knight"] = ()=>{if(board.iterations > 30 &&Math.random()<0.01*relativeEventFrequency){gameEvents["elite knight"]()}}
 			board.specialIntervals["allied knight"] = ()=>{if(board.iterations > 30 && Math.random()<0.005*relativeEventFrequency){gameEvents["white knights"]()}}
 
-			board.tiles[4+","+11].piece = new piece("wizard",4,11,"p1")
+			board.tiles[4+","+11].piece = new piece("wizard",4,11,"p1",{"explosive":1})
 			let ap = board.tiles["4,11"].piece
 			ap.arrFuncs.onMove.push((px,py)=>{
 
