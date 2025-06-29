@@ -24,7 +24,6 @@
     "express": "^4.17.1",
     "instagram-web-api": "^2.2.2",
     "jimp": "^1.6.0",
-    "keyboard-auto-type": "^0.1.12",
     "node-mouse": "^0.0.2",
     "ollama": "^0.5.12",
     "openai": "^4.76.3",

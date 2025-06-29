@@ -1027,10 +1027,10 @@ if(camera.gamemode == "Roaming"){
 } 
 
 else if(camera.gamemode == "God complex"){
-			camera.pieceFrequency = 1200
+			camera.pieceFrequency = 2200
 			gameSpecialInterval = ()=>{if(board.iterations%18 == 0 && board.iterations > 3){
 				for(let i = 0; i < 6; i++){
-					board.spawnRates[2*i+1]=(-0.01/board.spawnRates[2*i+1])+board.spawnRates[2*i+1]
+					board.spawnRates[2*i+1]=(-0.001/board.spawnRates[2*i+1])+board.spawnRates[2*i+1]
 					if(board.spawnRates[2*i+1] < (i+1)*0.1){board.spawnRates[2*i+1] = (i+1)*0.1}
 				}
 				}
@@ -1044,7 +1044,8 @@ else if(camera.gamemode == "God complex"){
 			board.specialIntervals["elite knight"] = ()=>{if(board.iterations > 30 &&Math.random()<0.01*relativeEventFrequency){gameEvents["elite knight"]()}}
 			board.specialIntervals["allied knight"] = ()=>{if(board.iterations > 30 && Math.random()<0.005*relativeEventFrequency){gameEvents["white knights"]()}}
 
-			board.tiles[4+","+11].piece = new piece("wizard",4,11,"p1",{"explosive":1})
+			board.tiles[4+","+11].piece = new piece("wizard",4,11,"p1",{"godComplex":1})
+			board.extension1 = false //stop board expansion
 			let ap = board.tiles["4,11"].piece
 			ap.arrFuncs.onMove.push((px,py)=>{
 
@@ -1054,7 +1055,9 @@ else if(camera.gamemode == "God complex"){
 							return("rgba(200,200,0,"+(x/2)+")")},0.4))
 
 			})
-			ap.maxCD = 0.2
+			ap.maxCD = 1.2
+			ap.color = "#F0F050"
+			ap.chargeTime = 500
 			ap.onDeath=()=>{
 				
 				camera.score = ap.kills
@@ -1065,7 +1068,7 @@ else if(camera.gamemode == "God complex"){
 
 			}
 
-			if(Math.random()<0.05){
+			if(Math.random()<10.05){
 				gameEvents["flight chamber"](ap)
 			} else if(Math.random()<0.2){
 				gameEvents["piece storm"]()
@@ -1229,7 +1232,7 @@ board.spawnRates = ["pawn",0.65,"king",0.80,"knight",0.95,"bishop",0.98,"rook",0
 		e(board.tiles[x+","+y].piece)
 	})
 
-	if(Math.random()>0.5){
+	if(Math.random()>0.5 && board.extension1){
 		let x = Math.floor(Math.random()*8)
 		let y = board.tileExtensionBoarder-1
 		while(Math.random()>0.4||board.tiles[x+","+y] != undefined){
@@ -1288,6 +1291,7 @@ function stopGame(){
 	board.arrFuncs.pieceModifiers = []
 	board.AIwait = ()=>{return(10)}
 	board.AIblockWait = ()=>{return(300)}
+	board.extension1 = true
 	camera.pieceFrequency = 1300
 	board.specialIntervals = {}
 	board.tileExtensionBoarder = 0

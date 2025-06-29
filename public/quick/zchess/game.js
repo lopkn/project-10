@@ -14,6 +14,7 @@ class board {
 		"pieceModifiers":[]
 	}
 	static spawnRange = [0,8]
+	static extension1 = true
 	static iterations = 0;
 	static topTile = 0;
 	static tileExtensionBoarder = 0
@@ -480,6 +481,9 @@ class piece {
 
 				this.arrFuncs.onMove.push(()=>{if(board.tiles[spos(this.x,this.y-1)] == undefined){
 					board.tiles[spos(this.x,this.y)].piece = new piece("queen",this.x,this.y,this.team)
+					if(this.AI){
+						board.tiles[spos(this.x,this.y)].piece.AI = true
+					}
 				}})
 
 			}
@@ -487,9 +491,12 @@ class piece {
 			this.maxCD = 20
 			this.upLim = Infinity;
 			this.held = false;
-			if(this.team=="zombies"){this.maxCD = 20}
 			this.renderLetter = "W"
 			this.jumps = [[0,1],[0,-1],[-1,1],[1,-1],[1,0],[-1,0],[-1,-1],[1,1]]
+
+			this.chargeTime = 2000
+			this.shootCooldown = 5
+
 			this.legals = ()=>{
 				let legals = []
 				let legalDict = {}
@@ -502,7 +509,7 @@ class piece {
 			}
 
 			this.downed = ()=>{
-				this.upLim = Date.now()+2000;
+				this.upLim = Date.now()+this.chargeTime;
 			}
 			this.hold = (t)=>{
 				if(t > this.upLim){
@@ -511,7 +518,7 @@ class piece {
 						this.held = true
 					}
 				}
-				let progress =1-(this.upLim-t)/2000
+				let progress =1-(this.upLim-t)/this.chargeTime
 				ctx.lineWidth = tileSize/8
 				if(this.held){
 					let mr = Math.random()*255
@@ -525,8 +532,10 @@ class piece {
 				return(progress)
 			}
 			this.unhold = (x,y)=>{
+				let sc = this.shootCooldown
 				if(this.held){
 					let tile = board.tiles[spos(x,y)]
+					if(tile===undefined){return}
 					if(tile.piece !== undefined && damagePiece(tile.piece,this) !== undefined){
 						for(let i = 0; i < 26; i++){
 						let dx = Math.random()-0.5
@@ -539,17 +548,41 @@ class piece {
 							setTimeout(()=>{camera.particles.push(new explosionR(x+0.5+(Math.random()-0.5)*0.7,y+0.5+(Math.random()-0.5)*0.7,
 								"rgba("+(Math.random()*235+20)+","+(Math.random()*15)+","+(Math.random()*15)+","+(Math.random()*0.3+0.3)+")",4,6+Math.random()*2,0.2))},Math.random()*400)
 						}
+
+						if(this.tags.godComplex){
+							gameEvents["explode"](x,y)
+						}
+					} else if(this.tags.godComplex){
+						sc -= 2
+						let apc;
+						if(Math.random()>0.85){
+							apc = new piece("cannon",x,y,"p1")
+							apc.attackBonus = 0.01
+							apc.AI = true
+						}
+						else if(Math.random()>0.0005){
+							apc = new piece("pawn",x,y,"p1",{"direction":"y-"})
+							if(Math.random()>0.5){apc.maxCD = 0.1
+								apc.color = "#FFA0A0"
+								this.cooldown = -3
+							}else{this.cooldown = -5;apc.attackBonus=0.01}
+							apc.AI = true
+						} else {
+							 apc = new piece("knight",x,y,"p1",{"direction":"y-"})
+							 // apc.maxCD = 2
+							apc.AI = true
+						}
+							board.tiles[x+","+y].piece = apc
+
 					}
 					camera.playSound("shot")
 					camera.particles.push(new lineParticle(this.x+0.5,this.y+0.5,x+0.5,y+0.5,10,
 						(x)=>{let mr = Math.random()*255
 							return("rgb(0,"+mr+","+mr+")")},0.6))
 
-					if(this.tags.explosive){
-						gameEvents["explode"](x,y)
-					}
+					
 				}
-				this.cooldown = this.maxCD + 5
+				this.cooldown += this.maxCD + sc //turned from = to += 27-06-25
 				this.coolUntil = Date.now() + 1000*this.cooldown
 				this.uplim = undefined
 				this.held = false
@@ -580,6 +613,7 @@ class piece {
 			this.x = x
 			this.y = y
 
+			let attacked = false
 		if(board.tiles[pos].piece != undefined){
 			// if(board.tiles[pos].piece.onDeath != undefined){
 			// 	board.tiles[pos].piece.onDeath()
@@ -600,14 +634,19 @@ class piece {
 
 			////legacy murder code 
 
-			//#COMMENT on27-06-25 LOL THIS IS FUNNY AS SHIT
+			//#COMMENT on 27-06-25 LOL THIS IS FUNNY AS SHIT
 			board.tiles[pos].piece=damagePiece(board.tiles[pos].piece,this)
+			attacked=true
 		} else {
 			board.tiles[pos].piece = this;
 		}
 
 		this.cooldown = this.maxCD
-		this.coolUntil = Date.now() + 1000*this.maxCD
+		if(attacked && this.attackBonus){
+			this.cooldown *= this.attackBonus
+		}
+
+		this.coolUntil = Date.now() + 1000*this.cooldown
 
 		this.arrFuncs.onMove.forEach((e)=>{
 			e(originalX,originalY,this,legals.dict[pos])
@@ -760,6 +799,10 @@ function AImoveRandom(piece){
 			camera.particles.push(new lineParticle(opx+0.5,opy+0.5,piece.x+0.5,piece.y+0.5,10,
 						(x)=>{let mr = Math.random()*255
 							return("rgb("+(mr<20?255-mr:0)+","+(mr/2)+",0)")},0.1))
+			} else if(ocp?.team == "p1"){
+				camera.particles.push(new lineParticle(opx+0.5,opy+0.5,piece.x+0.5,piece.y+0.5,5,
+						(x)=>{
+							return("rgba(100,0,0,"+x+")")},0.2))
 			} else {
 				camera.particles.push(new lineParticle(opx+0.5,opy+0.5,piece.x+0.5,piece.y+0.5,5,
 						(x)=>{
