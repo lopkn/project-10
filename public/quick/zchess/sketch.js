@@ -91,7 +91,8 @@ let pieceDict = {
 	"W":[[336,27],[135,124],[78,292],[19,332],[384,320],[311,279],[243,156],[335,29]],
 	"C":[[385,80],[332,106],[334,117],[311,128],[304,118],[180,179],[141,115],[132,122],[148,157],[98,180],[97,219],[60,237],[74,269],[83,266],[84,275],[46,275],[33,299],[3,301],[3,308],[38,309],[57,286],[88,288],[105,307],[132,321],[165,317],[192,293],[200,262],[192,234],[179,219],[184,216],[202,243],[213,237],[198,211],[319,150],[317,142],[339,129],[345,135],[400,110],[390,81]],
 	"J":[[200,9],[89,159],[163,137],[137,172],[140,213],[156,232],[109,271],[97,309],[90,358],[200,361],[200,361],[310,358],[303,309],[291,271],[244,232],[260,213],[263,172],[237,137],[311,159],[200,9]],
-	"M":[[200,71],[158,112],[183,141],[136,191],[172,235],[92,357],[200,359],[200,359],[308,357],[228,235],[264,191],[217,141],[242,112],[200,71]] 
+	"M":[[200,71],[158,112],[183,141],[136,191],[172,235],[92,357],[200,359],[200,359],[308,357],[228,235],[264,191],[217,141],[242,112],[200,71]],
+	"A":[[200,24],[150,155],[27,192],[150,244],[200,357],[200,357],[250,244],[373,192],[250,155],[200,24]] 
 
 }
 let pieceDict2 = {
@@ -146,7 +147,7 @@ class camera{
 	static fps = 28
 	// static volume = 0;
 
-	static highScores = {"Normal":[0,0],"King's Raid":[0,0],"Knight's Raid":[0,0],"Phantom":[0,0],"Universal":[0,0]}
+	static highScores = {"Normal":[0,0],"King's Raid":[0,0],"Knight's Raid":[0,0],"Phantom":[0,0],"Universal":[0,0],"Cannonflight":[0,0]}
 	static score = 0;
 
 	// static playSound(url){ dogassass
@@ -316,6 +317,8 @@ function specialRenderIn(){
 		drawText("session high: "+hs["Phantom"][0]+(camera.cookies?" all time high: "+hs["Phantom"][1]:""),1,8.8)
 	} else if(gmpos === 5){
 		drawText("session high: "+hs["Universal"][0]+(camera.cookies?" all time high: "+hs["Universal"][1]:""),1,10.8)
+	} else if(gmpos === 6){
+		drawText("session high: "+hs["Cannonflight"][0]+(camera.cookies?" all time high: "+hs["Cannonflight"][1]:""),1,12.8)
 	}
 
 
@@ -329,7 +332,7 @@ function specialRenderIn(){
 	drawText("God complex",1,6)
 	drawText("Phantom",1,8)
 	drawText("Universal",1,10)
-	drawText("Campaign (WIP)",1,12)
+	drawText("Cannonflight",1,12)
 	
 
 
@@ -639,7 +642,7 @@ document.addEventListener("mouseup",(e)=>{
 						gameStart = "started"
 						startGame()
 					}else if(mouseBoardY == 12){
-						camera.gamemode = "Campaign"
+						camera.gamemode = "Cannonflight"
 						gameStart = "started"
 						startGame()
 					}
@@ -949,8 +952,8 @@ if(camera.gamemode == "Roaming"){
 					if(board.spawnRates[2*i+1] < (i+1)*0.1){board.spawnRates[2*i+1] = (i+1)*0.1}
 				}
 				}
-				if(board.iterations % 20 == 0 && camera.pieceFrequency > 100){
-					camera.pieceFrequency -= 50
+				if(board.iterations % 20 == 0 && camera.pieceFrequency > 900){
+					camera.pieceFrequency -= 5
 					startGameInterval(camera.pieceFrequency)
 				}
 			}
@@ -1126,6 +1129,51 @@ else if(camera.gamemode == "Phantom"){
 				gameEvents["board expansion"](30)
 				gameEvents["flight chamber"](ap)
 			}
+}else if(camera.gamemode == "Cannonflight"){
+			camera.pieceFrequency = 2100
+			gameSpecialInterval = ()=>{if(board.iterations%18 == 0 && board.iterations > 30){
+				for(let i = 0; i < 4; i++){
+					board.spawnRates[2*i+1]-=(1-board.spawnRates[2*i+1])*(1-board.spawnRates[2*i+1])*0.2
+					if(board.spawnRates[2*i+1] < (i+1)*0.1){board.spawnRates[2*i+1] = (i+1)*0.1}
+				}
+				}
+				if(board.iterations % 20 == 0 && camera.pieceFrequency > 1100){
+					camera.pieceFrequency -= 5
+					startGameInterval(camera.pieceFrequency)
+				}
+			}
+			board.specialIntervals["bombers"] = ()=>{if(board.iterations > 30 &&Math.random()<0.005*relativeEventFrequency){gameEvents["bomber pawn"]()}}
+			board.specialIntervals["elite cannon"] = ()=>{if(board.iterations > 30 &&Math.random()<0.008*relativeEventFrequency){gameEvents["elite cannon"]()}}
+			board.specialIntervals["elite knight"] = ()=>{if(board.iterations > 30 &&Math.random()<0.01*relativeEventFrequency){gameEvents["elite knight"]()}}
+			board.specialIntervals["allied knight"] = ()=>{if(board.iterations > 30 && Math.random()<0.005*relativeEventFrequency){gameEvents["white knights"]()}}
+
+			board.tiles[4+","+11].piece = new piece("artillery",4,11,"p1")
+			let ap = board.tiles["4,11"].piece
+			ap.arrFuncs.onMove.push((px,py)=>{
+
+
+					camera.particles.push(new lineParticle(px+0.5,py+0.5,ap.x+0.5,ap.y+0.5,2,
+						(x)=>{
+							return("rgba(200,200,0,"+(x/2)+")")},0.4))
+
+			})
+			ap.maxCD = 0.2
+			ap.onDeath=()=>{
+				
+				camera.score = ap.kills
+
+				mainPieceDeath(ap)
+				clearInterval(gameInterval)
+				gameStart = "lost"
+
+			}
+
+			if(Math.random()<0.05){
+				gameEvents["flight chamber"](ap)
+			} else if(Math.random()<0.2){
+				gameEvents["piece storm"]()
+			}
+			
 } else if(camera.gamemode == "Normal"){
 
 	camera.pieceFrequency = 10000
@@ -1287,6 +1335,7 @@ function startGameInterval(f){
 
 function stopGame(){
 	specialRenderIn()
+	tileSubscription.subscriptions = {}
 	board.spawnRange = [0,8]
 	board.arrFuncs.pieceModifiers = []
 	board.AIwait = ()=>{return(10)}

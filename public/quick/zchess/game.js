@@ -20,6 +20,7 @@ class board {
 	static tileExtensionBoarder = 0
 	static bottomTile = 11;
 	static specialIntervals = {}
+	
 
 	// static eventStack = 
 
@@ -36,6 +37,14 @@ class board {
 			}
 		}
 	}
+	static newTile(pos,tile = {}){
+		this.tiles[pos] = tile
+		tileSubscription.update(pos)
+	}
+	static newPiece(pos,pc){
+		this.tiles[pos].piece = pc
+		tileSubscription.update(pos)
+	}
 }
 
 function pointTile(){
@@ -47,7 +56,7 @@ function pointPiece(){
 
 function getTileTeam(pos,team){
 	let tile = board.tiles[pos]
-	if(tile == undefined){return(false)}
+	if(tile == undefined){return("void")}
 	if(tile.piece == undefined){return("empty")}
 		if(tile.piece.identifyTo !== undefined){
 			return(tile.piece.identifyTo(team))
@@ -68,6 +77,8 @@ class piece {
 		"onMove":[],
 		"onDeath":{},
 		}
+
+		this.subs = new Set(); // new subscription service
 		this.id = id
 		this.tags = tags || {}
 		this.x = x
@@ -83,258 +94,143 @@ class piece {
 			this.range = 5
 			this.maxCD = 15
 			this.renderLetter = "R"
+			this.travelVectors = [[0,1],[0,-1],[1,0],[-1,0]]
 			this.legals = ()=>{
 				let loop = true
 				let legals = []
 				let legalDict = {}
-				for(let i = 1;i<this.range+1;i++){
-					let pos = spos(this.x+i,this.y)
-					let gtt = getTileTeam(pos,this.team)
-					if(gtt === "empty"){legals.push(pos);legalDict[pos]=gtt;continue}
-					if(gtt == false || gtt == "block"){break};
-					if(gtt == "phase"){continue;}
-					if(gtt == "capture"){legals.push(pos);legalDict[pos]=gtt;break}
-					legals.push(pos)
-					legalDict[pos]=gtt
-
+				let all = {}
+				for(let v = 0; v < this.travelVectors.length; v++){
+					let V = this.travelVectors[v]
+					for(let i = 1;i<this.range+1;i++){
+						let pos = spos(this.x+V[0]*i,this.y+V[1]*i)
+						let gtt = getTileTeam(pos,this.team)
+						all[pos] = gtt
+						if(gtt === "empty"){legals.push(pos);legalDict[pos]=gtt;continue}
+						if(gtt === "void" || gtt === "block"){break};
+						if(gtt == "phase"){continue;}
+						if(gtt == "capture"){legals.push(pos);legalDict[pos]=gtt;break}
+						legals.push(pos)
+						legalDict[pos]=gtt
+					}
 				}
-				for(let i = 1;i<this.range+1;i++){
-					let pos = spos(this.x,this.y+i)
-					let gtt = getTileTeam(pos,this.team)
-					if(gtt === "empty"){legals.push(pos);legalDict[pos]=gtt;continue}
-					if(gtt == false || gtt == "block"){break};
-					if(gtt == "phase"){continue;}
-					if(gtt == "capture"){legals.push(pos);legalDict[pos]=gtt;break}
-					legals.push(pos)
-					legalDict[pos]=gtt
-
-				}
-				for(let i = 1;i<this.range+1;i++){
-					let pos = spos(this.x-i,this.y)
-					let gtt = getTileTeam(pos,this.team)
-					if(gtt === "empty"){legals.push(pos);legalDict[pos]=gtt;continue}
-					if(gtt == false || gtt == "block"){break};
-					if(gtt == "phase"){continue;}
-					if(gtt == "capture"){legals.push(pos);legalDict[pos]=gtt;break}
-					legals.push(pos)
-					legalDict[pos]=gtt;
-				}
-				for(let i = 1;i<this.range+1;i++){
-					let pos = spos(this.x,this.y-i)
-					let gtt = getTileTeam(pos,this.team)
-					if(gtt === "empty"){legals.push(pos);legalDict[pos]=gtt;continue}
-					if(gtt == false || gtt == "block"){break};
-					if(gtt == "phase"){continue;}
-					if(gtt == "capture"){legals.push(pos);legalDict[pos]=gtt;break}
-					legals.push(pos)
-					legalDict[pos]=gtt;
-				}
-				return({"arr":legals,"dict":legalDict})
+				return({"arr":legals,"dict":legalDict,"all":all})
 			}
 		} else if(id == "cannon"){
 			this.range = 9
 			this.maxCD = 15
 			this.renderLetter = "C"
+			this.travelVectors = [[0,1],[0,-1],[1,0],[-1,0]]
 			this.legals = ()=>{
 				let loop = true
 				let legals = []
 				let legalDict = {}
-				let jumped = false
-				for(let i = 1;i<this.range+1;i++){
-					let pos = spos(this.x+i,this.y)
-					let gtt = getTileTeam(pos,this.team)
-					if(jumped){
-						if(gtt == false || gtt == "block"){break};
-						if(gtt == "phase"){continue;}
-						if(gtt == "capture"){legals.push(pos);legalDict[pos]=gtt;break}
-					} else {
-						if(gtt == false || gtt == "block" || gtt == "capture"){jumped = true; continue};
-						if(gtt == "phase"){continue;}
-						legals.push(pos)
-						legalDict[pos]=gtt
-					}
-				}
-				jumped = false
-				for(let i = 1;i<this.range+1;i++){
-					let pos = spos(this.x,this.y+i)
-					let gtt = getTileTeam(pos,this.team)
-					if(jumped){
-						if(gtt == false || gtt == "block"){break};
-						if(gtt == "phase"){continue;}
-						if(gtt == "capture"){legals.push(pos);legalDict[pos]=gtt;break}
-					} else {
-						if(gtt == false || gtt == "block" || gtt == "capture"){jumped = true; continue};
-						if(gtt == "phase"){continue;}
-						legals.push(pos)
-						legalDict[pos]=gtt
-					}
+				let all = {}
 
-				}
-				jumped = false
-				for(let i = 1;i<this.range+1;i++){
-					let pos = spos(this.x-i,this.y)
-					let gtt = getTileTeam(pos,this.team)
-					if(jumped){
-						if(gtt == false || gtt == "block"){break};
-						if(gtt == "phase"){continue;}
-						if(gtt == "capture"){legals.push(pos);legalDict[pos]=gtt;break}
-					} else {
-						if(gtt == false || gtt == "block" || gtt == "capture"){jumped = true; continue};
-						if(gtt == "phase"){continue;}
-						legals.push(pos)
-						legalDict[pos]=gtt
+				for(let v = 0; v < this.travelVectors.length; v++){
+					let jumped = false
+					let V = this.travelVectors[v]
+					for(let i = 1;i<this.range+1;i++){
+						let pos = spos(this.x+V[0]*i,this.y+V[1]*i)
+						let gtt = getTileTeam(pos,this.team)
+						all[pos] = gtt
+						if(jumped){
+							if(gtt === "void" || gtt === "block"){break};
+							if(gtt == "phase"){continue;}
+							if(gtt == "capture"){legals.push(pos);legalDict[pos]=gtt;break}
+						} else {
+							if(gtt === "void" || gtt === "block" || gtt == "capture"){jumped = true; continue};
+							if(gtt == "phase"){continue;}
+							legals.push(pos)
+							legalDict[pos]=gtt
+						}
 					}
 				}
-				jumped = false
-				for(let i = 1;i<this.range+1;i++){
-					let pos = spos(this.x,this.y-i)
-					let gtt = getTileTeam(pos,this.team)
-					if(jumped){
-						if(gtt == false || gtt == "block"){break};
-						if(gtt == "phase"){continue;}
-						if(gtt == "capture"){legals.push(pos);legalDict[pos]=gtt;break}
-					} else {
-						if(gtt == false || gtt == "block" || gtt == "capture"){jumped = true; continue};
-						if(gtt == "phase"){continue;}
-						legals.push(pos)
-						legalDict[pos]=gtt
+				return({"arr":legals,"dict":legalDict,"all":all})
+			}
+		} else if(id == "artillery"){
+			this.range = 9
+			this.maxCD = 15
+			this.renderLetter = "A"
+			this.travelVectors = [[0,1],[0,-1],[1,0],[-1,0],[1,1],[-1,-1],[1,-1],[-1,1]]
+			this.legals = ()=>{
+				let loop = true
+				let legals = []
+				let legalDict = {}
+				let all = {}
+
+				for(let v = 0; v < this.travelVectors.length; v++){
+					let jumped = false
+					let V = this.travelVectors[v]
+					for(let i = 1;i<this.range+1;i++){
+						let pos = spos(this.x+V[0]*i,this.y+V[1]*i)
+						let gtt = getTileTeam(pos,this.team)
+						all[pos] = gtt
+						if(jumped){
+							if(gtt === "void" || gtt === "block"){break};
+							if(gtt == "phase"){continue;}
+							if(gtt == "capture"){legals.push(pos);legalDict[pos]=gtt;break}
+						} else {
+							if(gtt === "void" || gtt === "block" || gtt == "capture"){jumped = true; continue};
+							if(gtt == "phase"){continue;}
+							legals.push(pos)
+							legalDict[pos]=gtt
+						}
 					}
 				}
-				return({"arr":legals,"dict":legalDict})
+				return({"arr":legals,"dict":legalDict,"all":all})
 			}
 		}else if(id == "queen"){
 			this.maxCD = 16
 			this.range = 5
 			this.renderLetter = "Q"
+			this.travelVectors = [[0,1],[0,-1],[1,0],[-1,0],[1,1],[-1,-1],[1,-1],[-1,1]]
 			this.legals = ()=>{
 				let loop = true
 				let legals = []
 				let legalDict = {}
-				for(let i = 1;i<this.range+1;i++){
-					let pos = spos(this.x+i,this.y)
-					let gtt = getTileTeam(pos,this.team)
-					if(gtt == false || gtt == "block"){break};
-					if(gtt == "phase"){continue;}
-					if(gtt == "capture"){legals.push(pos);legalDict[pos]=gtt;break}
-					legals.push(pos)
-					legalDict[pos]=gtt
-
+				let all = {}
+				for(let v = 0; v < this.travelVectors.length; v++){
+					let V = this.travelVectors[v]
+					for(let i = 1;i<this.range+1;i++){
+						let pos = spos(this.x+V[0]*i,this.y+V[1]*i)
+						let gtt = getTileTeam(pos,this.team)
+						all[pos] = gtt
+						if(gtt === "empty"){legals.push(pos);legalDict[pos]=gtt;continue}
+						if(gtt === "void" || gtt === "block"){break};
+						if(gtt == "phase"){continue;}
+						if(gtt == "capture"){legals.push(pos);legalDict[pos]=gtt;break}
+						legals.push(pos)
+						legalDict[pos]=gtt
+					}
 				}
-				for(let i = 1;i<this.range+1;i++){
-					let pos = spos(this.x,this.y+i)
-					let gtt = getTileTeam(pos,this.team)
-					if(gtt == false || gtt == "block"){break};
-					if(gtt == "phase"){continue;}
-					if(gtt == "capture"){legals.push(pos);legalDict[pos]=gtt;break}
-					legals.push(pos)
-					legalDict[pos]=gtt
-
-				}
-				for(let i = 1;i<this.range+1;i++){
-					let pos = spos(this.x-i,this.y)
-					let gtt = getTileTeam(pos,this.team)
-					if(gtt == false || gtt == "block"){break};
-					if(gtt == "phase"){continue;}
-					if(gtt == "capture"){legals.push(pos);legalDict[pos]=gtt;break}
-					legals.push(pos)
-					legalDict[pos]=gtt;
-				}
-				for(let i = 1;i<this.range+1;i++){
-					let pos = spos(this.x,this.y-i)
-					let gtt = getTileTeam(pos,this.team)
-					if(gtt == false || gtt == "block"){break};
-					if(gtt == "phase"){continue;}
-					if(gtt == "capture"){legals.push(pos);legalDict[pos]=gtt;break}
-					legals.push(pos)
-					legalDict[pos]=gtt;
-				}
-				for(let i = 1;i<this.range+1;i++){
-					let pos = spos(this.x+i,this.y+i)
-					let gtt = getTileTeam(pos,this.team)
-					if(gtt == false || gtt == "block"){break};
-					if(gtt == "phase"){continue;}
-					if(gtt == "capture"){legals.push(pos);legalDict[pos]=gtt;break}
-					legals.push(pos)
-					legalDict[pos]=gtt;
-				}
-				for(let i = 1;i<this.range+1;i++){
-					let pos = spos(this.x-i,this.y+i)
-					let gtt = getTileTeam(pos,this.team)
-					if(gtt == false || gtt == "block"){break};
-					if(gtt == "phase"){continue;}
-					if(gtt == "capture"){legals.push(pos);legalDict[pos]=gtt;break}
-					legals.push(pos)
-					legalDict[pos]=gtt;
-				}
-				for(let i = 1;i<this.range+1;i++){
-					let pos = spos(this.x-i,this.y-i)
-					let gtt = getTileTeam(pos,this.team)
-					if(gtt == false || gtt == "block"){break};
-					if(gtt == "phase"){continue;}
-					if(gtt == "capture"){legals.push(pos);legalDict[pos]=gtt;break}
-					legals.push(pos)
-					legalDict[pos]=gtt;
-
-				}
-				for(let i = 1;i<this.range+1;i++){
-					let pos = spos(this.x+i,this.y-i)
-					let gtt = getTileTeam(pos,this.team)
-					if(gtt == false || gtt == "block"){break};
-					if(gtt == "phase"){continue;}
-					if(gtt == "capture"){legals.push(pos);legalDict[pos]=gtt;break}
-					legals.push(pos)
-					legalDict[pos]=gtt;
-
-				}
-				return({"arr":legals,"dict":legalDict})
+				return({"arr":legals,"dict":legalDict,"all":all})
 			}
 		} else if(id == "bishop"){
 			this.maxCD = 12
 			this.range = 5
 			this.renderLetter = "B"
+			this.travelVectors = [[1,1],[-1,-1],[1,-1],[-1,1]]
 			this.legals = ()=>{
 				let loop = true
 				let legals = []
 				let legalDict = {}
-				for(let i = 1;i<this.range+1;i++){
-					let pos = spos(this.x+i,this.y+i)
-					let gtt = getTileTeam(pos,this.team)
-					if(gtt == false || gtt == "block"){break};
-					if(gtt == "phase"){continue;}
-					if(gtt == "capture"){legals.push(pos);legalDict[pos]=gtt;break}
-					legals.push(pos)
-					legalDict[pos]=gtt;
+				let all = {}
+				for(let v = 0; v < this.travelVectors.length; v++){
+					let V = this.travelVectors[v]
+					for(let i = 1;i<this.range+1;i++){
+						let pos = spos(this.x+V[0]*i,this.y+V[1]*i)
+						let gtt = getTileTeam(pos,this.team)
+						all[pos] = gtt
+						if(gtt === "empty"){legals.push(pos);legalDict[pos]=gtt;continue}
+						if(gtt === "void" || gtt === "block"){break};
+						if(gtt == "phase"){continue;}
+						if(gtt == "capture"){legals.push(pos);legalDict[pos]=gtt;break}
+						legals.push(pos)
+						legalDict[pos]=gtt
+					}
 				}
-				for(let i = 1;i<this.range+1;i++){
-					let pos = spos(this.x-i,this.y+i)
-					let gtt = getTileTeam(pos,this.team)
-					if(gtt == false || gtt == "block"){break};
-					if(gtt == "phase"){continue;}
-					if(gtt == "capture"){legals.push(pos);legalDict[pos]=gtt;break}
-					legals.push(pos)
-					legalDict[pos]=gtt;
-				}
-				for(let i = 1;i<this.range+1;i++){
-					let pos = spos(this.x-i,this.y-i)
-					let gtt = getTileTeam(pos,this.team)
-					if(gtt == false || gtt == "block"){break};
-					if(gtt == "phase"){continue;}
-					if(gtt == "capture"){legals.push(pos);legalDict[pos]=gtt;break}
-					legals.push(pos)
-					legalDict[pos]=gtt;
-
-				}
-				for(let i = 1;i<this.range+1;i++){
-					let pos = spos(this.x+i,this.y-i)
-					let gtt = getTileTeam(pos,this.team)
-					if(gtt == false || gtt == "block"){break};
-					if(gtt == "phase"){continue;}
-					if(gtt == "capture"){legals.push(pos);legalDict[pos]=gtt;break}
-					legals.push(pos)
-					legalDict[pos]=gtt;
-
-				}
-				return({"arr":legals,"dict":legalDict})
+				return({"arr":legals,"dict":legalDict,"all":all})
 			}
 		} else if(id == "knight"){
 			this.maxCD = 10
@@ -440,6 +336,7 @@ class piece {
 			this.maxCD = 7
 			this.renderLetter = "P"
 			if(this.tags.direction == "y+"){
+				this.jumps = [[0,1],[1,1],[-1,1]]
 				this.legals = ()=>{
 					let legals = []
 					let legalDict = {}
@@ -459,6 +356,7 @@ class piece {
 				}})
 			}
 			if(this.tags.direction == "y-"){
+				this.jumps = [[0,-1],[1,-1],[-1,-1]]
 				this.legals = ()=>{
 					let legals = []
 					let legalDict = {}
@@ -572,7 +470,7 @@ class piece {
 							 // apc.maxCD = 2
 							apc.AI = true
 						}
-							board.tiles[x+","+y].piece = apc
+							board.newPiece(x+","+y,apc)
 
 					}
 					camera.playSound("shot")
@@ -640,6 +538,10 @@ class piece {
 		} else {
 			board.tiles[pos].piece = this;
 		}
+
+		tileSubscription.update(pos)
+		tileSubscription.update(spos(originalX,originalY))
+
 
 		this.cooldown = this.maxCD
 		if(attacked && this.attackBonus){
@@ -720,7 +622,6 @@ function damagePiece(damagee,damager,options={}){
 	let ehp = damagee.hp?damagee.hp:100
 
 
-	console.log("GHEY "+damage)
 	if(damage >= ehp){killPiece(damagee,damager);return(damager)}
 	if(options.resolve === false){
 		damagee.hp -= damage
@@ -762,6 +663,75 @@ function killBoardPiece(x,y,killerPiece){
 	}
 }
 
+class tileSubscription{
+
+	static subscriptions = {}
+
+	static update(tile){
+		if(this.subscriptions[tile]===undefined){return;}
+		this.subscriptions[tile].forEach((piece)=>{
+			if(piece.subscriptionUpdate){
+				piece.subscriptionUpdate(tile)
+			}
+		})
+	}
+
+	static unsubscribe(piece,tile){
+		if(tile===undefined){
+			piece.subs.forEach((tile)=>{
+				this.subscriptions[tile].delete(piece)
+				piece.subs.delete(tile)
+			})
+			return;
+		}
+
+		let subs = this.subscriptions[tile]
+		subs.delete(piece)
+		piece.subs.delete(tile)
+	}
+
+	static subscribe(piece,tile){
+
+		if(tile === undefined){
+			let tilearr = []
+			if(piece.jumps!==undefined){
+				piece.jumps.forEach((j)=>{
+					tilearr.push(spos(piece.x+j[0],piece.y+j[1]))
+				})
+			} else {
+				tilearr = Object.keys(piece.legals().all)
+			}
+			tilearr.forEach((e)=>{
+				this.subscribe(piece,e)
+			})
+			return;
+		}
+
+
+		if(this.subscriptions[tile]===undefined){
+			this.subscriptions[tile] = new Set()
+		}
+		let subs = this.subscriptions[tile]
+
+		subs.add(piece)
+		piece.subs.add(tile)
+
+	}
+}
+
+function aiBlocked(piece){
+	tileSubscription.subscribe(piece) // subscribe
+	piece.subscriptionUpdate = (tile)=>{
+
+		let legals = piece.legals().arr
+		if(legals.length == 0){return;}
+
+		tileSubscription.unsubscribe(piece)
+		AImoveRandom(piece)
+	}
+
+}
+
 function AImoveRandom(piece){
 
 	if(piece.AImoveRandom !== undefined){
@@ -771,10 +741,13 @@ function AImoveRandom(piece){
 	let legals = piece.legals()
 	let legal = legals.arr
 	if(legal.length == 0){
-		setTimeout(()=>{
-				AImoveRandom(piece)
-			// },Math.random()*4000+3000)
-			},piece.AIblockWait == undefined?board.AIblockWait():piece.AIblockWait())
+		// setTimeout(()=>{
+		// 		AImoveRandom(piece)
+		// 	// },Math.random()*4000+3000)
+		// 	},piece.AIblockWait == undefined?board.AIblockWait():piece.AIblockWait())
+
+		aiBlocked(piece)		
+
 		return
 	}
 
@@ -1429,9 +1402,10 @@ var gameEvents = {
 	let legals = piece.legals()
 	let legal = legals.arr
 	if(legal.length == 0){
-		setTimeout(()=>{
-				pc.AImoveRandom(piece)
-			},piece.AIblockWait == undefined?board.AIblockWait():piece.AIblockWait())
+		// setTimeout(()=>{
+		// 		pc.AImoveRandom(piece)
+		// 	},piece.AIblockWait == undefined?board.AIblockWait():piece.AIblockWait())
+		aiBlocked(piece)
 		return
 	}
 
@@ -1441,9 +1415,10 @@ var gameEvents = {
 	let result;
 	while(piece.cooldown == 0 && piece == board.tiles[spos(piece.x,piece.y)].piece){
 		if(legal.length == 0){
-			setTimeout(()=>{
-				pc.AImoveRandom(piece)
-			},piece.AIblockWait == undefined?board.AIblockWait():piece.AIblockWait())
+			// setTimeout(()=>{
+			// 	pc.AImoveRandom(piece)
+			// },piece.AIblockWait == undefined?board.AIblockWait():piece.AIblockWait())
+			aiBlocked(piece)
 		return
 		}
 
@@ -1486,7 +1461,9 @@ var gameEvents = {
 					for(let i = 0; i < 8; i++){
 						for(let j = ap.bottom; j > ap.y; j--){
 							if(board.tiles[i+","+j]?.piece != undefined){
-								return;
+								if(board.tiles[i+","+j].piece.team != ap.team){
+									return;
+								}
 							}
 						}
 					}
@@ -1494,6 +1471,11 @@ var gameEvents = {
 					for(let i = 0; i < 8; i++){
 						for(let j = ap.bottom+15; j > ap.y; j--){
 							if(board.tiles[i+","+j] != undefined){
+
+								if(board.tiles[i+","+j].piece!=undefined){
+									killPiece(board.tiles[i+","+j].piece,ap)
+								}
+
 								board.tiles[i+","+j] = undefined
 								blocksdisplaced += 1
 							}
