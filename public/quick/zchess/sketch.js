@@ -125,6 +125,8 @@ class DBG{
 	}
 }
 
+var dummyPiece = new piece("dummy",undefined,undefined,"zombies")
+
 class camera{
 	static cookies = false
 	static gamemode = "none"
@@ -147,7 +149,7 @@ class camera{
 	static fps = 28
 	// static volume = 0;
 
-	static highScores = {"Normal":[0,0],"King's Raid":[0,0],"Knight's Raid":[0,0],"Phantom":[0,0],"Universal":[0,0],"Cannonflight":[0,0]}
+	static highScores = {"Normal":[0,0],"King's Raid":[0,0],"Knight's Raid":[0,0],"Knight's Rush":[0,0],"Phantom":[0,0],"Universal":[0,0],"Cannonflight":[0,0]}
 	static score = 0;
 
 	// static playSound(url){ dogassass
@@ -307,18 +309,26 @@ function specialRenderIn(){
 	fill(180,180,255)
 	let hs = camera.highScores
 	let gmpos = Math.floor(mouseBoardY/2)
-	if(gmpos === 0){
-		drawText("session high: "+hs["Normal"][0]+(camera.cookies?" all time high: "+hs["Normal"][1]:""),1,0.8)
-	} else if(gmpos === 1){
-		drawText("session high: "+hs["King's Raid"][0]+(camera.cookies?" all time high: "+hs["King's Raid"][1]:""),1,2.8)
-	} else if(gmpos === 2){
-		drawText("session high: "+hs["Knight's Raid"][0]+(camera.cookies?" all time high: "+hs["Knight's Raid"][1]:""),1,4.8)
-	} else if(gmpos === 4){
-		drawText("session high: "+hs["Phantom"][0]+(camera.cookies?" all time high: "+hs["Phantom"][1]:""),1,8.8)
-	} else if(gmpos === 5){
-		drawText("session high: "+hs["Universal"][0]+(camera.cookies?" all time high: "+hs["Universal"][1]:""),1,10.8)
-	} else if(gmpos === 6){
-		drawText("session high: "+hs["Cannonflight"][0]+(camera.cookies?" all time high: "+hs["Cannonflight"][1]:""),1,12.8)
+
+	if(mouseBoardX < 9){
+
+		if(gmpos === 0){
+			drawText("session high: "+hs["Normal"][0]+(camera.cookies?" all time high: "+hs["Normal"][1]:""),1,0.8)
+		} else if(gmpos === 1){
+			drawText("session high: "+hs["King's Raid"][0]+(camera.cookies?" all time high: "+hs["King's Raid"][1]:""),1,2.8)
+		} else if(gmpos === 2){
+			drawText("session high: "+hs["Knight's Raid"][0]+(camera.cookies?" all time high: "+hs["Knight's Raid"][1]:""),1,4.8)
+		} else if(gmpos === 4){
+			drawText("session high: "+hs["Phantom"][0]+(camera.cookies?" all time high: "+hs["Phantom"][1]:""),1,8.8)
+		} else if(gmpos === 5){
+			drawText("session high: "+hs["Universal"][0]+(camera.cookies?" all time high: "+hs["Universal"][1]:""),1,10.8)
+		} else if(gmpos === 6){
+			drawText("session high: "+hs["Cannonflight"][0]+(camera.cookies?" all time high: "+hs["Cannonflight"][1]:""),1,12.8)
+		}
+	} else {
+		if(gmpos === 2){
+			drawText("session high: "+hs["Knight's Rush"][0]+(camera.cookies?" all time high: "+hs["Knight's Rush"][1]:""),10,4.8)
+		}
 	}
 
 
@@ -329,6 +339,7 @@ function specialRenderIn(){
 	drawText("Normal",1,0)
 	drawText("King's Raid",1,2)
 	drawText("Knight's Raid",1,4)
+	drawText("Knight's Rush",10,4)
 	drawText("God complex",1,6)
 	drawText("Phantom",1,8)
 	drawText("Universal",1,10)
@@ -352,6 +363,12 @@ function specialRenderIn(){
 	ctx.moveTo(coord1[0],coord1[1]+4*tileSize)
 	ctx.lineTo(coord2[0],coord2[1]+4*tileSize)
 	ctx.lineTo(coord3[0],coord3[1]+4*tileSize)
+	ctx.fill()
+	ctx.closePath()
+	ctx.beginPath()
+	ctx.moveTo(coord1[0]+9*tileSize,coord1[1]+4*tileSize)
+	ctx.lineTo(coord2[0]+9*tileSize,coord2[1]+4*tileSize)
+	ctx.lineTo(coord3[0]+9*tileSize,coord3[1]+4*tileSize)
 	ctx.fill()
 	ctx.closePath()
 
@@ -398,8 +415,10 @@ function specialRenderIn(){
 
 	ctx.fillStyle = "#F9F900"
 	drawText("K",0,2)
+	drawText("N",9,4)
 	drawText("N",0,4)
 	drawText("&",0,6)
+	drawText("A",0,12)
 
 
 }
@@ -643,6 +662,12 @@ document.addEventListener("mouseup",(e)=>{
 						startGame()
 					}else if(mouseBoardY == 12){
 						camera.gamemode = "Cannonflight"
+						gameStart = "started"
+						startGame()
+					}
+				} else if(mouseBoardX == 9) {
+					if(mouseBoardY == 4){
+						camera.gamemode = "Knight's Rush"
 						gameStart = "started"
 						startGame()
 					}
@@ -985,6 +1010,7 @@ if(camera.gamemode == "Roaming"){
 
 			if(Math.random()<0.05){
 				gameEvents["flight chamber"](ap)
+			board.extension1 = false //stop board expansion
 			} else if(Math.random()<0.2){
 				gameEvents["piece storm"]()
 			}
@@ -1027,7 +1053,49 @@ if(camera.gamemode == "Roaming"){
 				clearInterval(gameInterval)
 				gameStart = "lost"
 			}
-} 
+} else if(camera.gamemode == "Knight's Rush"){
+			camera.pieceFrequency = 1200
+			gameSpecialInterval = ()=>{if(board.iterations%18 == 0 && board.iterations > 30){
+				for(let i = 0; i < 4; i++){
+					board.spawnRates[2*i+1]-=(1-board.spawnRates[2*i+1])*(1-board.spawnRates[2*i+1])*0.2
+					if(board.spawnRates[2*i+1] < (i+1)*0.1){board.spawnRates[2*i+1] = (i+1)*0.1}
+				}
+				}
+				if(board.iterations % 20 == 0 && camera.pieceFrequency > 900){
+					camera.pieceFrequency -= 5
+					startGameInterval(camera.pieceFrequency)
+				}
+			}
+			board.specialIntervals["bombers"] = ()=>{if(board.iterations > 30 &&Math.random()<0.015*relativeEventFrequency){gameEvents["bomber pawn"]()}}
+			board.specialIntervals["elite cannon"] = ()=>{if(board.iterations > 30 &&Math.random()<0.024*relativeEventFrequency){gameEvents["elite cannon"]()}}
+			board.specialIntervals["elite knight"] = ()=>{if(board.iterations > 30 &&Math.random()<0.03*relativeEventFrequency){gameEvents["elite knight"]()}}
+			board.specialIntervals["allied knight"] = ()=>{if(board.iterations > 30 && Math.random()<0.005*relativeEventFrequency){gameEvents["white knights"]()}}
+
+			board.tiles[4+","+11].piece = new piece("knight",4,11,"p1")
+			let ap = board.tiles["4,11"].piece
+			ap.arrFuncs.onMove.push((px,py)=>{
+
+
+					camera.particles.push(new lineParticle(px+0.5,py+0.5,ap.x+0.5,ap.y+0.5,2,
+						(x)=>{
+							return("rgba(200,200,0,"+(x/2)+")")},0.4))
+
+			})
+			ap.maxCD = 0.2
+			ap.onDeath=()=>{
+				
+				camera.score = ap.kills
+				mainPieceDeath(ap)
+				clearInterval(gameInterval)
+				gameStart = "lost"
+
+			}
+
+			gameEvents["flight chamber"](ap)
+			board.extension1 = false //stop board expansion
+
+			
+}
 
 else if(camera.gamemode == "God complex"){
 			camera.pieceFrequency = 2200
@@ -1149,6 +1217,7 @@ else if(camera.gamemode == "Phantom"){
 
 			board.tiles[4+","+11].piece = new piece("artillery",4,11,"p1")
 			let ap = board.tiles["4,11"].piece
+			ap.range = 30
 			ap.arrFuncs.onMove.push((px,py)=>{
 
 
@@ -1286,7 +1355,9 @@ board.spawnRates = ["pawn",0.65,"king",0.80,"knight",0.95,"bishop",0.98,"rook",0
 		while(Math.random()>0.4||board.tiles[x+","+y] != undefined){
 			y-=1
 		}
-		if(board.tiles[x+","+y] == undefined){board.tiles[x+","+y] = {}; if(y < board.topTile){board.topTile=y}
+		if(board.tiles[x+","+y] == undefined){board.tiles[x+","+y] = {}
+			tileSubscription.update(x+","+y)
+			if(y < board.topTile){board.topTile=y}
 			let tilePut = 0;
 			for(let i = board.spawnRange[0]; i < board.spawnRange[1]; i++){
 				if(board.tiles[i+","+y] != undefined){tilePut += 1}

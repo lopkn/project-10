@@ -1219,7 +1219,9 @@ var gameEvents = {
 				while(Math.random()>0.4||board.tiles[x+","+y] != undefined){
 					y -= 1
 				}
-				if(board.tiles[x+","+y] == undefined){board.tiles[x+","+y] = {}; if(y < board.topTile){board.topTile=y}} else {
+				if(board.tiles[x+","+y] == undefined){board.tiles[x+","+y] = {}
+					tileSubscription.update(x+","+y)
+					if(y < board.topTile){board.topTile=y}} else {
 				}
 			},i*200)
 			
@@ -1447,8 +1449,17 @@ var gameEvents = {
 		board.tiles[6+","+y]= {"piece": new piece("knight",6,y,"p1")}
 		board.tiles[7+","+y]= {"piece": new piece("rook",7,y,"p1")}
 	},"flight chamber":(ap)=>{
+
+		let flightChamperPlus;
+		if(camera.gamemode == "Knight's Rush"){
+			if(Math.random()>0.9){
+				flightChamperPlus = true
+				camera.pieceFrequency = 500
+			}
+		}
+
 		camera.pieceFrequency -= 200
-		camera.particles.push(new expandingText("Flight chamber mode!",Width/2/tileSize-camera.x,Height/2/tileSize-camera.y,
+		camera.particles.push(new expandingText("Flight chamber " + (flightChamperPlus?"Plus!":"mode!"),Width/2/tileSize-camera.x,Height/2/tileSize-camera.y,
 		(x)=>{return("rgba(255,255,0,"+x+")")},
 		0.2,0.2))
 		camera.particles[camera.particles.length-1].size = tileSize/2
@@ -1461,7 +1472,7 @@ var gameEvents = {
 					for(let i = 0; i < 8; i++){
 						for(let j = ap.bottom; j > ap.y; j--){
 							if(board.tiles[i+","+j]?.piece != undefined){
-								if(board.tiles[i+","+j].piece.team != ap.team){
+								if(board.tiles[i+","+j].piece.team != ap.team && flightChamperPlus === undefined){
 									return;
 								}
 							}
@@ -1473,7 +1484,7 @@ var gameEvents = {
 							if(board.tiles[i+","+j] != undefined){
 
 								if(board.tiles[i+","+j].piece!=undefined){
-									killPiece(board.tiles[i+","+j].piece,ap)
+									killPiece(board.tiles[i+","+j].piece,dummyPiece)
 								}
 
 								board.tiles[i+","+j] = undefined
@@ -1482,12 +1493,16 @@ var gameEvents = {
 						}
 					}
 					ap.bottom = ap.y
+					board.bottomTile = ap.bottom
 					gameEvents["board expansion"](blocksdisplaced,-ap.y+8)
 
 				}
 			})
 			board.spawnRates = ["pawn",0.65,"king",0.80,"knight",0.95,"bishop",0.98,"rook",0.998,"cannon",0.9995,"queen",1]
-		gameEvents["piece storm"](8)
+			
+			if(!flightChamperPlus){
+				gameEvents["piece storm"](8)
+			}
 	}
 }
 
