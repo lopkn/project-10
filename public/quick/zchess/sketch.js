@@ -132,6 +132,7 @@ class camera{
 	static gamemode = "none"
 	static team = "p1";
 	static pieceRender = "image";
+	static cooldownRender = "exponential";
 	static increaseMargin = 1;
 	static menuButtonSize = 40;
 	static pieceFrequency = 1300;
@@ -451,21 +452,23 @@ function menuRender(){
 	}
 
 	ctx.fillStyle = "#FFFFFF"
-	drawText("Quit",1,-2)
-	drawText("Send to origin",1,-4)
-	drawText("Buttons & Switches:",0,0)
-	drawText("Piece render mode ["+camera.pieceRender+"]",2,1)
-	drawText("Sounds ["+(camera.soundOn?"on":"off")+"]",2,3)
-	drawText("Play random sound",2,5)
-	drawText("Increase margin ["+camera.increaseMargin+"]",2,7)
-	drawText("Menu button size ["+camera.menuButtonSize+"]",2,9)
-	drawText("Tilesize ["+tileSize.toPrecision(3)+"]",2,11)
-	drawText("Volume (requires sound) ["+Math.round(Tone.Master.volume.value)+"]",2,13)
-	drawText("["+volumeSlide+"]"+(Tone.Master.volume.value>10?" you are liable for any damage":""),2,13.8)
-	drawText("Save state/cookies ["+(camera.cookies===false?'off':'on')+"]",2,15)
-	drawText("saved last ["+(camera.cookies===false?'/':camera.cookies)+"]",2,15.8);
-	drawText("DELETE CACHE (if you are not updating)",2,17)
-	drawText("cache quota ["+cacheQuota+"]",2,17.8);
+	let y = -4
+	drawText("Send to origin",1,y); y+=2
+	drawText("Quit",1,y);y+=2
+	drawText("Buttons & Switches:",0,y);y+=1
+	drawText("Piece cooldown mode ["+camera.cooldownRender+"]",17,y);
+	drawText("Piece render mode ["+camera.pieceRender+"]",2,y);y+=2
+	drawText("Sounds ["+(camera.soundOn?"on":"off")+"]",2,y);y+=2
+	drawText("Play random sound",2,y);y+=2
+	drawText("Increase margin ["+camera.increaseMargin+"]",2,y);y+=2
+	drawText("Menu button size ["+camera.menuButtonSize+"]",2,y);y+=2
+	drawText("Tilesize ["+tileSize.toPrecision(3)+"]",2,y);y+=2
+	drawText("Volume (requires sound) ["+Math.round(Tone.Master.volume.value)+"]",2,y);y+=0.8
+	drawText("["+volumeSlide+"]"+(Tone.Master.volume.value>10?" you are liable for any damage":""),2,y);y+=1.2
+	drawText("Save state/cookies ["+(camera.cookies===false?'off':'on')+"]",2,15);y+=0.8
+	drawText("saved last ["+(camera.cookies===false?'/':camera.cookies)+"]",2,15.8);y+=1.2;
+	drawText("DELETE CACHE (if you are not updating)",2,17);y+=0.8
+	drawText("cache quota ["+cacheQuota+"]",2,17.8);y+=1.2
 	drawText("Debugging info ["+(DBG.debugging?"on":"off")+"]",2,19)
 
 	if(camera.pieceRender == "image"){
@@ -475,6 +478,9 @@ function menuRender(){
 	}
 	((camera.pieceRender=="image")?(()=>{fill(255,255,0)}):(()=>{fill(255,255,255)}))();
 	mrect(0.2,1.2,0.6,0.6);
+	((camera.cooldownRender=="exponential")?(()=>{fill(255,255,0)}):(()=>{fill(255,255,255)}))();
+	mrect(16.2,1.2,0.6,0.6);
+
 
 	((camera.soundOn)?(()=>{fill(0,255,0)}):(()=>{fill(255,0,0)}))();
 	mrect(0.2,3.2,0.6,0.6);//sound
@@ -619,6 +625,15 @@ document.addEventListener("mouseup",(e)=>{
 				} else if(Y === 13){
 					Tone.Master.volume.value += camera.increaseMargin
 				}
+			} else if(X === 16){
+				if(Y === 1){
+					if(camera.cooldownRender == "exponential"){
+						camera.cooldownRender = "linear"
+					} else {
+						camera.cooldownRender = "exponential"
+					}
+					camera.playSound("select")
+				}
 			}
 
 			return;
@@ -730,7 +745,13 @@ function drawPiece(l,x,y,team,cd,pc){
 			// 	fill(150,150,0,0.3)
 			// }
 		}
-		mrect(x,y,1,cd>1?1:cd)
+
+		if(camera.cooldownRender === "exponential"){
+			// mrect(x,y,1,Math.sqrt(cd>1?1:cd))
+			mrect(x,y,1,(cd>1?1:cd)**(1/2.71828182846))
+		} else {
+			mrect(x,y,1,cd>1?1:cd)
+		}
 		if(cd>1){
 			let CDD = cd-1
 			fill(0,0,0,0.1)
@@ -1349,7 +1370,7 @@ board.spawnRates = ["pawn",0.65,"king",0.80,"knight",0.95,"bishop",0.98,"rook",0
 		e(board.tiles[x+","+y].piece)
 	})
 
-	if(Math.random()>0.5 && board.extension1){
+	if(Math.random()>0.005 && board.extension1){
 		let x = Math.floor(Math.random()*8)
 		let y = board.tileExtensionBoarder-1
 		while(Math.random()>0.4||board.tiles[x+","+y] != undefined){
@@ -1362,7 +1383,11 @@ board.spawnRates = ["pawn",0.65,"king",0.80,"knight",0.95,"bishop",0.98,"rook",0
 			for(let i = board.spawnRange[0]; i < board.spawnRange[1]; i++){
 				if(board.tiles[i+","+y] != undefined){tilePut += 1}
 			}
-		if(tilePut > 6){board.tileExtensionBoarder -= 1}
+		if(tilePut > 6){board.tileExtensionBoarder -= 1;
+			for(let i = 0; i < 8; i++){
+				if(board.tiles[i+","+(board.tileExtensionBoarder+1)] == undefined){board.tiles[i+","+(board.tileExtensionBoarder+1)] = {"color":()=>{return("#404050")}}}
+			}
+		}
 		}
 	}
 	gameSpecialInterval()
