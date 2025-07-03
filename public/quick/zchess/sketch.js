@@ -132,7 +132,7 @@ class camera{
 	static gamemode = "none"
 	static team = "p1";
 	static pieceRender = "image";
-	static cooldownRender = "exponential";
+	static cooldownRender = "linear";
 	static increaseMargin = 1;
 	static menuButtonSize = 40;
 	static pieceFrequency = 1300;
@@ -269,6 +269,7 @@ let mouseDeltaMovement = [0,0]
 let pieceSelected = "none"
 let pieceDowned = "none"
 let pieceClicked = "none"
+let pieceLocked = "none"
 let mouseDown = false
 
 document.addEventListener("contextmenu",(e)=>{e.preventDefault()})
@@ -286,9 +287,12 @@ document.addEventListener("mousedown",(e)=>{
     	pieceClicked = tile.piece
     	if(tile.piece.cooldown == 0){
     	pieceDowned = tile.piece
-    	if(tile.piece.downed !== undefined){
-    		tile.piece.downed()
-    	}
+	    	if(tile.piece.downed !== undefined){
+	    		tile.piece.downed()
+	    	}
+    	} 
+    	if(tile.piece.lock){
+    		pieceLocked = tile.piece
     	}
     }
 })
@@ -534,6 +538,8 @@ document.addEventListener("mouseup",(e)=>{
 		return;
 	}
 
+
+
 	if(mouseDownPlace[0] == mouseBoardX && mouseDownPlace[1] == mouseBoardY){
 		let mbx = mouseBoardX;
 		let mby = mouseBoardY;
@@ -691,6 +697,24 @@ document.addEventListener("mouseup",(e)=>{
 
 			return;
 		}
+		if(pieceLocked !== "none"){
+			if(pieceLocked.cooldown == 0){
+				let mv = attemptMove(pieceLocked.x,pieceLocked.y,mouseBoardX,mouseBoardY,camera.team)
+				friendlyMoved(mv)
+				if(mv!==false){
+					pieceSelected = "none"
+					pieceClicked = "none"
+					return
+				}
+			} else {
+				pieceLocked.premoves.push([mouseBoardX,mouseBoardY])
+				pieceSelected = "none"
+				pieceClicked = "none"
+				return;
+			}
+			
+		}
+
 		let t = board.tiles[mouseBoardX+","+mouseBoardY]
 		if(t != undefined && t.piece != undefined && t.piece.team == camera.team){
 			t.piece.temporaryLegals = t.piece.legals().arr
@@ -774,7 +798,7 @@ function drawPiece(l,x,y,team,cd,pc){
 	}
 	if(camera.pieceRender === "image" && pieceDict[l] != undefined){
 		let arr = pieceDict[l]  
-		pieceImage(x,y,arr)
+		pieceImage(x,y,arr,pc)
 	} else {
 		ctx.fillText(l,(x+camera.x+0.5)*tileSize,(y+camera.y+0.56)*tileSize)
 	}
@@ -797,7 +821,7 @@ function drawPiece(l,x,y,team,cd,pc){
 	
 }
 
-function pieceImage(x,y,arr){
+function pieceImage(x,y,arr,piece){
 	ctx.beginPath()
 	ctx.moveTo(arr[0][0]/(400/tileSize)+(x+camera.x)*tileSize,arr[0][1]/(400/tileSize)+(y+camera.y)*tileSize)
 	for(let i = 1; i < arr.length; i++){
@@ -805,6 +829,11 @@ function pieceImage(x,y,arr){
 	}
 	ctx.fill()
 	ctx.closePath()
+	if(piece.stroke){
+		ctx.strokeStyle = piece.stroke.color
+		ctx.lineWidth = piece.stroke.width
+		ctx.stroke()
+	}
 }
 
 function normalShopRender(){
@@ -1010,6 +1039,7 @@ if(camera.gamemode == "Roaming"){
 
 			board.tiles[4+","+11].piece = new piece("knight",4,11,"p1")
 			let ap = board.tiles["4,11"].piece
+			ap.lock = true
 			ap.arrFuncs.onMove.push((px,py)=>{
 
 
@@ -1045,8 +1075,8 @@ if(camera.gamemode == "Roaming"){
 					if(board.spawnRates[2*i+1] < (i+1)*0.1){board.spawnRates[2*i+1] = (i+1)*0.1}
 				}
 					console.log(board.spawnRates)
-				} if(board.iterations % 20 == 0 && camera.pieceFrequency > 850){
-					camera.pieceFrequency -= 50
+				} if(board.iterations % 20 == 0 && camera.pieceFrequency > 550){
+					camera.pieceFrequency -= 25
 					startGameInterval(camera.pieceFrequency)
 				}
 			}
@@ -1058,6 +1088,7 @@ if(camera.gamemode == "Roaming"){
 
 			board.tiles[4+","+11].piece = new piece("king",4,11,"p1")
 			let ap = board.tiles["4,11"].piece
+			ap.lock = true
 			ap.arrFuncs.onMove.push((px,py)=>{
 
 
@@ -1094,6 +1125,7 @@ if(camera.gamemode == "Roaming"){
 
 			board.tiles[4+","+11].piece = new piece("knight",4,11,"p1")
 			let ap = board.tiles["4,11"].piece
+			ap.lock = true
 			ap.arrFuncs.onMove.push((px,py)=>{
 
 
@@ -1238,6 +1270,7 @@ else if(camera.gamemode == "Phantom"){
 
 			board.tiles[4+","+11].piece = new piece("artillery",4,11,"p1")
 			let ap = board.tiles["4,11"].piece
+			ap.lock = true
 			ap.range = 30
 			ap.arrFuncs.onMove.push((px,py)=>{
 
@@ -1370,7 +1403,7 @@ board.spawnRates = ["pawn",0.65,"king",0.80,"knight",0.95,"bishop",0.98,"rook",0
 		e(board.tiles[x+","+y].piece)
 	})
 
-	if(Math.random()>0.005 && board.extension1){
+	if(Math.random()>0.45 && board.extension1){
 		let x = Math.floor(Math.random()*8)
 		let y = board.tileExtensionBoarder-1
 		while(Math.random()>0.4||board.tiles[x+","+y] != undefined){
