@@ -6,8 +6,36 @@ let cacheName = [
         './sketch.js',
         './tone.js',
         './game.js',
-        './manifest.json'
+        './manifest.json',
+
+        // './sounds/capture.wav',
+        // './sounds/captureF.wav',
+        // './sounds/move.wav',
+        // './sounds/shot.wav',
+        // './sounds/start.wav',
+        // './soundsM/capture.mp3',
+        // './soundsM/captureF.mp3',
+        // './soundsM/move.mp3',
+        // './soundsM/shot.mp3',
+        // './soundsM/start.mp3',
       ]
+
+let initSounds = ["start4","start3","start2","start","bomb","shot","escape","select","move","captureF","capture","captureS1","captureS2","captureS3","captureS4","captureS5","captureS6","captureS7","captureS8"]
+
+initSounds.forEach((e)=>{
+  cacheName.push("./soundsM/"+e+".mp3")
+  cacheName.push("./sounds/"+e+".wav")
+})
+
+// for(let i = 1; i <9; i++){
+//   // cacheName.push("./sounds/captureS"+i+".wav")
+//   cacheName.push("./soundsM/captureS"+i+".mp3")
+//   if(5>i>1){
+//     // cacheName.push("./sounds/start"+i+".wav")
+//     cacheName.push("./soundsM/start"+i+".mp3")
+//   }
+// }
+
 const version = Date.now()
 self.addEventListener('install', function(event) {
   console.log("INSTALL")
