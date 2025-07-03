@@ -773,6 +773,13 @@ function drawPiece(l,x,y,team,cd,pc){
 		if(camera.cooldownRender === "exponential"){
 			// mrect(x,y,1,Math.sqrt(cd>1?1:cd))
 			mrect(x,y,1,(cd>1?1:cd)**(1/2.71828182846))
+
+			if(pc.cooldown < 0.5){
+				pc.stroke = {color:`rgb(${pc.cooldown*512},0,${pc.cooldown*512})`,width:2}
+			} else {
+				pc.stroke = undefined
+			}
+
 		} else {
 			mrect(x,y,1,cd>1?1:cd)
 		}

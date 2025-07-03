@@ -89,7 +89,6 @@ class piece {
 		this.kills = 0;
 		this.alive = true
 
-		// this.stroke = {color:"#FF00FF",width:2}
 		
 
 		if(id == "rook"){
