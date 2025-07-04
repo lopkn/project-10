@@ -115,14 +115,15 @@ let pieceDict2 = {
 class DBG{
 	static debugging = false;
 	static tickTime = 0;
-
+	static frameCounter = 0;
+	static lastFrameCount = 0;
 	static render(){
 		ctx.font = "bold 15px Courier New"
 		ctx.textAlign = "right"
 		ctx.fillStyle = "white"
 
 		ctx.fillText(Math.floor(this.tickTime)+"/"+Math.floor(camera.fps*this.tickTime/10)+"%",Width,15)
-		ctx.fillText(frameCounter,Width,30)
+		ctx.fillText(this.frameCounter+"/"+this.lastFrameCount,Width,30)
 	}
 }
 
@@ -861,7 +862,6 @@ function normalShopRender(){
 	}
 }
 
-var frameCounter = 0;
 var seconds = 0;
 
 function render(){
@@ -869,11 +869,16 @@ function render(){
 
 	let renderStartTime = Date.now()
 
-	if(Math.floor(renderStartTime/1000) != seconds){
-		seconds = Math.floor(renderStartTime/1000)
-		frameCounter = 0;
+	if(DBG.debugging){
+		if(Math.floor(renderStartTime/1000) != seconds){
+			seconds = Math.floor(renderStartTime/1000)
+			DBG.lastFrameCount = DBG.frameCounter
+			DBG.frameCounter = 0;
+		}
+		DBG.frameCounter++
 	}
-	frameCounter++
+
+	
 
 	fill(0,0,0)
 	rect(0,0,Width,Height)
