@@ -133,6 +133,7 @@ class camera{
 	static team = "p1";
 	static pieceRender = "image";
 	static cooldownRender = "linear";
+	static flashpiece = true;
 	static increaseMargin = 1;
 	static menuButtonSize = 40;
 	static pieceFrequency = 1300;
@@ -462,6 +463,7 @@ function menuRender(){
 	drawText("Buttons & Switches:",0,y);y+=1
 	drawText("Piece cooldown mode ["+camera.cooldownRender+"]",17,y);
 	drawText("Piece render mode ["+camera.pieceRender+"]",2,y);y+=2
+	drawText("flashpiece ["+(camera.flashpiece?"on":"off")+"]",17,y);
 	drawText("Sounds ["+(camera.soundOn?"on":"off")+"]",2,y);y+=2
 	drawText("Play random sound",2,y);y+=2
 	drawText("Increase margin ["+camera.increaseMargin+"]",2,y);y+=2
@@ -484,6 +486,9 @@ function menuRender(){
 	mrect(0.2,1.2,0.6,0.6);
 	((camera.cooldownRender=="exponential")?(()=>{fill(255,255,0)}):(()=>{fill(255,255,255)}))();
 	mrect(16.2,1.2,0.6,0.6);
+
+	camera.flashpiece?fill(0,255,0):fill(255,0,0);
+	mrect(16.2,3.2,0.6,0.6);
 
 
 	((camera.soundOn)?(()=>{fill(0,255,0)}):(()=>{fill(255,0,0)}))();
@@ -639,6 +644,9 @@ document.addEventListener("mouseup",(e)=>{
 						camera.cooldownRender = "exponential"
 					}
 					camera.playSound("select")
+				} else if(Y===3){
+					camera.flashpiece = !camera.flashpiece
+					camera.playSound("select")
 				}
 			}
 
@@ -770,15 +778,17 @@ function drawPiece(l,x,y,team,cd,pc){
 			// }
 		}
 
-		if(camera.cooldownRender === "exponential"){
-			// mrect(x,y,1,Math.sqrt(cd>1?1:cd))
-			mrect(x,y,1,(cd>1?1:cd)**(1/2.71828182846))
-
+		if(camera.flashpiece){
 			if(pc.cooldown < 0.5){
 				pc.stroke = {color:`rgb(${pc.cooldown*512},0,${pc.cooldown*512})`,width:2}
 			} else {
 				pc.stroke = undefined
 			}
+		}
+
+		if(camera.cooldownRender === "exponential"){
+			// mrect(x,y,1,Math.sqrt(cd>1?1:cd))
+			mrect(x,y,1,(cd>1?1:cd)**(1/2.71828182846))
 
 		} else {
 			mrect(x,y,1,cd>1?1:cd)
