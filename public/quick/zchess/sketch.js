@@ -122,6 +122,7 @@ class DBG{
 		ctx.fillStyle = "white"
 
 		ctx.fillText(Math.floor(this.tickTime)+"/"+Math.floor(camera.fps*this.tickTime/10)+"%",Width,15)
+		ctx.fillText(frameCounter,Width,30)
 	}
 }
 
@@ -860,8 +861,20 @@ function normalShopRender(){
 	}
 }
 
+var frameCounter = 0;
+var seconds = 0;
+
 function render(){
+
+
 	let renderStartTime = Date.now()
+
+	if(Math.floor(renderStartTime/1000) != seconds){
+		seconds = Math.floor(renderStartTime/1000)
+		frameCounter = 0;
+	}
+	frameCounter++
+
 	fill(0,0,0)
 	rect(0,0,Width,Height)
 
