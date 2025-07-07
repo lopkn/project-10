@@ -141,6 +141,133 @@ class Lcolorf{ //lopkn's color functions
 
 
 
+class ALG2{
+  static history = {};
+  static keys = [] //cannot be set because order matters
+
+  static robustLearn(str,ans){
+    let split = str.split("")
+    let dict = {}
+    split.forEach((e,i)=>{dict[i]=e})
+    this.learn(dict,ans)
+  }
+
+  static learn(dict,ans){
+    let str = ""
+    this.keys.forEach((e)=>{
+      str += dict[e]
+    })
+    this.history[str] = ans
+  }
+
+  static strRemove(str,posarr){
+    let outstr1 = ""
+    let outstr2 = ""
+    let i = 0;
+    while(str.length>0){
+      if(!posarr.includes(i)){
+        outstr1 += str[0]
+      } else {
+        outstr2 += str[0]
+      }
+      i++;
+      str = str.substring(1)
+    }
+    return([outstr1,outstr2])
+  }
+
+  static prune(posarr){
+    // let pkeys = []
+    // this.keys.forEach((e,i)=>{if(keys.includes(e)){p.push(i)}})
+
+    let result = {"corr":0,"wrong":0}
+    let newHistory = {}
+    let newCutHistory = {}
+    Object.keys(this.history).forEach((e)=>{
+      let cut = this.strRemove(e,posarr)
+      let newStr = cut[0]
+      let newStr2 = cut[1]
+      
+      // if(newHistory[newStr]===undefined){
+      //   newHistory[newStr] = this.history[e]
+      // } else {
+      //   if(newHistory[newStr] == this.history[e]){
+      //     results.corr += 1
+      //   } else {
+      //     results.wrong += 1
+      //   }
+      // }
+      if(newHistory[newStr]===undefined){
+        newHistory[newStr] = {"t":0,"f":0,"c":0}
+      }
+        newHistory[newStr].c += 1
+      if(this.history[e]===true){
+        newHistory[newStr].t += 1
+      } else {
+        newHistory[newStr].f += 1
+      }
+
+      if(newCutHistory[newStr2]===undefined){
+        newCutHistory[newStr2] = {"t":0,"f":0,"c":0}
+      }
+        newCutHistory[newStr2].c += 1
+      if(this.history[e]===true){
+        newCutHistory[newStr2].t += 1
+      } else {
+        newCutHistory[newStr2].f += 1
+      }
+
+
+
+    })
+    // let results = []
+    let results = {"ratio":0,"c":0}
+    Object.values(newHistory).forEach((e)=>{
+        let small, big;
+        if(e.t>e.f){small=e.f;big=e.t}else{small=e.t;big=e.f}
+        results.ratio+=small/e.c
+        results.c+=e.c
+    })
+    let results2 = {"ratio":0,"c":0}
+    Object.values(newCutHistory).forEach((e)=>{
+        let small, big;
+        if(e.t>e.f){small=e.f;big=e.t}else{small=e.t;big=e.f}
+        results2.ratio+=small/e.c
+        results2.c+=e.c
+    })
+
+      return({"r1":results,"r2":results2})
+  }
+
+  static kill(pos){
+    let newHistory = {}
+    Object.keys(this.history).forEach((e)=>{
+      let newStr = e.slice(0,pos) + e.slice(pos+1) 
+      newHistory[newStr] = this.history[e]
+    })
+    this.keys.splice(pos,1)
+    this.history = newHistory
+  }
+
+  static pruneAll(amt){
+    let results = []
+    let prunearr = []
+    this.keys.forEach((e,i)=>{
+      prunearr.push(i)
+      if((1+i)%amt===0){
+        results.push(this.prune(prunearr))
+        prunearr = []
+      }
+    })
+    if(prunearr.length>0){
+      results.push(this.prune(prunearr))
+    }
+    return results
+  }
+}
+
+for(let i = 0; i < 32; i++){ALG2.keys.push(i)}
+
 
 
 

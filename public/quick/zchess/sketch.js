@@ -717,7 +717,7 @@ document.addEventListener("mouseup",(e)=>{
 					pieceClicked = "none"
 					return
 				}
-			} else {
+			} else if(mouseBoardY!=pieceLocked.y || mouseBoardX != pieceLocked.x){
 				pieceLocked.premoves.push([mouseBoardX,mouseBoardY])
 				pieceSelected = "none"
 				pieceClicked = "none"
@@ -783,7 +783,11 @@ function drawPiece(l,x,y,team,cd,pc){
 
 		if(camera.flashpiece){
 			if(pc.cooldown < 0.5){
-				pc.stroke = {color:`rgb(${pc.cooldown*512},0,${pc.cooldown*512})`,width:2}
+				if(pc.travelVectors){
+					pc.stroke = {color:`rgb(${pc.cooldown*512},0,0)`,width:2}
+				}else {
+					pc.stroke = {color:`rgb(${pc.cooldown*512},0,${pc.cooldown*512})`,width:2}
+				}
 			} else {
 				pc.stroke = undefined
 			}
@@ -1076,14 +1080,19 @@ if(camera.gamemode == "Roaming"){
 			board.tiles[4+","+11].piece = new piece("knight",4,11,"p1")
 			let ap = board.tiles["4,11"].piece
 			ap.lock = true
-			ap.arrFuncs.onMove.push((px,py)=>{
+			ap.arrFuncs.onMove.push((px,py,pc,type)=>{
+				let time = 0.4
+				f = (x)=>{return("rgba(200,200,0,"+(x/Math.max(1,2-camera.captureStreak*0.1))+")")}
 
+				if(type=="capture"){
+					f = (x)=>{let r = Math.random();return("rgba(0,"+(r*200)+",200,"+(x/Math.max(1,1.8-camera.captureStreak*0.1))+")")}
+					// time = time/(camera.captureStreak*0.2+1)
+				}
 
-					camera.particles.push(new lineParticle(px+0.5,py+0.5,ap.x+0.5,ap.y+0.5,2,
-						(x)=>{
-							return("rgba(200,200,0,"+(x/2)+")")},0.4))
-
-			})
+					camera.particles.push(new lineParticle(px+0.5,py+0.5,ap.x+0.5,ap.y+0.5,Math.min(2+camera.captureStreak,20),
+						f,time))
+						}
+					)
 			ap.maxCD = 0.2
 			ap.onDeath=()=>{
 				
@@ -1125,14 +1134,15 @@ if(camera.gamemode == "Roaming"){
 			board.tiles[4+","+11].piece = new piece("king",4,11,"p1")
 			let ap = board.tiles["4,11"].piece
 			ap.lock = true
-			ap.arrFuncs.onMove.push((px,py)=>{
-
-
+			ap.arrFuncs.onMove.push((px,py,type)=>{
+				let f = (x)=>{return("rgba(200,200,0,"+(x/Math.max(1,2-camera.captureStreak*0.1))+")")}
+				if(type=="capture"){
+					f = (x)=>{let r = Math.random();return("rgba("+(200-r*200)+",200,"+(r*200)+","+(x/Math.max(1,2-camera.captureStreak*0.1))+")")}
+				}
 					camera.particles.push(new lineParticle(px+0.5,py+0.5,ap.x+0.5,ap.y+0.5,2,
-						(x)=>{
-							return("rgba(200,200,0,"+(x/2)+")")},0.4))
-
-			})
+						f,0.4))
+						}
+					)
 			ap.maxCD = 0.2
 			ap.onDeath=()=>{
 				
