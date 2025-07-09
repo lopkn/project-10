@@ -12,12 +12,12 @@ for line in sys.stdin:
     if message[0:7]=="[CLICK]":
         pos = message[7:].split(",")
         pyautogui.click(x=int(pos[0]), y=int(pos[1]))
-        return;
+        continue;
     if message[0:6]=="[GPOS]":
         pos = pyautogui.position()
         signature = message[6:]
         print(f'[RES]-{pos.x},{pos.y}',flush=True)
-        return;
+        continue;
 
     if message == "[FLUSH]":
         if len(str) > 0 and str[-1]=="\n":

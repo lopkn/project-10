@@ -1080,6 +1080,7 @@ if(camera.gamemode == "Roaming"){
 			board.tiles[4+","+11].piece = new piece("knight",4,11,"p1")
 			let ap = board.tiles["4,11"].piece
 			ap.lock = true
+			pieceLocked = ap
 			ap.arrFuncs.onMove.push((px,py,pc,type)=>{
 				let time = 0.4
 				f = (x)=>{return("rgba(200,200,0,"+(x/Math.max(1,2-camera.captureStreak*0.1))+")")}
@@ -1134,6 +1135,7 @@ if(camera.gamemode == "Roaming"){
 			board.tiles[4+","+11].piece = new piece("king",4,11,"p1")
 			let ap = board.tiles["4,11"].piece
 			ap.lock = true
+			pieceLocked = ap
 			ap.arrFuncs.onMove.push((px,py,pc,type)=>{
 				let time = 0.4
 				f = (x)=>{return("rgba(200,200,0,"+(x/Math.max(1,2-camera.captureStreak*0.1))+")")}
@@ -1176,6 +1178,7 @@ if(camera.gamemode == "Roaming"){
 			board.tiles[4+","+11].piece = new piece("knight",4,11,"p1")
 			let ap = board.tiles["4,11"].piece
 			ap.lock = true
+			pieceLocked = ap
 			ap.arrFuncs.onMove.push((px,py,pc,type)=>{
 				let time = 0.4
 				f = (x)=>{return("rgba(200,200,0,"+(x/Math.max(1,2-camera.captureStreak*0.1))+")")}
@@ -1327,6 +1330,7 @@ else if(camera.gamemode == "Phantom"){
 			let ap = board.tiles["4,11"].piece
 			ap.lock = true
 			ap.range = 30
+			pieceLocked = ap
 			ap.arrFuncs.onMove.push((px,py,pc,type)=>{
 				let time = 0.4
 				f = (x)=>{return("rgba(200,200,0,"+(x/Math.max(1,2-camera.captureStreak*0.1))+")")}
@@ -1340,7 +1344,7 @@ else if(camera.gamemode == "Phantom"){
 						f,time))
 						}
 					)
-						ap.maxCD = 0.2
+								ap.maxCD = 0.2
 			ap.onDeath=()=>{
 				
 				camera.score = ap.kills
