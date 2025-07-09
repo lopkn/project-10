@@ -1105,7 +1105,7 @@ if(camera.gamemode == "Roaming"){
 
 			}
 
-			if(Math.random()<0.05){
+			if(Math.random()<0.05 && false){ // flight chamber is disabled from 09-07-25
 				gameEvents["flight chamber"](ap)
 			board.extension1 = false //stop board expansion
 			} else if(Math.random()<0.2){
@@ -1156,6 +1156,13 @@ if(camera.gamemode == "Roaming"){
 				mainPieceDeath(ap)
 				clearInterval(gameInterval)
 				gameStart = "lost"
+			}
+
+			if(Math.random()<0.05){ // flight chamber is introduced to kings raid from 09-07-25
+				gameEvents["flight chamber"](ap)
+			board.extension1 = false //stop board expansion
+			} else if(Math.random()<0.2){
+				gameEvents["piece storm"]()
 			}
 } else if(camera.gamemode == "Knight's Rush"){
 			camera.pieceFrequency = 1200
