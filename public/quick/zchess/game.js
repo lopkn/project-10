@@ -89,7 +89,7 @@ class piece {
 		this.kills = 0;
 		this.alive = true
 
-		this.frontTendency = 0.6
+		this.frontTendency = 0.2
 
 
 
@@ -796,11 +796,10 @@ function AImoveRandom(piece){
 
 		
 		//move front
-		if(ipos.y < piece.y && Math.random()>piece.frontTendency){
+		if(ip.y < piece.y && Math.random()<piece.frontTendency){
 			continue;
 		}
 		//move front
-
 
 		result = attemptMove(piece.x,piece.y,ip.x,ip.y,piece.team)
 	}
