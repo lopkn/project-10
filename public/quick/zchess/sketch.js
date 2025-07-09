@@ -55,6 +55,16 @@ document.getElementById("help").style.left = 0
 document.getElementById("help").style.top = 0
 document.getElementById("help").innerHTML = `help menu unfinished`
 
+
+function canvasResize(){
+	Height = window.innerHeight /*>window.innerHeight?window.innerHeight:window.innerWidth*/
+	Width = window.innerWidth /*>window.innerHeight?window.innerWidth:window.innerHeight*/
+	myCanvas.width = Width
+	myCanvas.height = Height
+}
+
+window.addEventListener("resize",canvasResize)
+
 let CTX = {"main":myCanvas.getContext("2d")}
 let ctx = CTX.main
 ctx.textAlign = "center"
@@ -1063,7 +1073,7 @@ if(camera.gamemode == "Roaming"){
 			camera.pieceFrequency = 1100
 			gameSpecialInterval = ()=>{if(board.iterations%18 == 0 && board.iterations > 30){
 				for(let i = 0; i < 4; i++){
-					board.spawnRates[2*i+1]-=(1-board.spawnRates[2*i+1])*(1-board.spawnRates[2*i+1])*0.2
+					board.spawnRates[2*i+1]-=(1-board.spawnRates[2*i+1])*(1-board.spawnRates[2*i+1])*0.4
 					if(board.spawnRates[2*i+1] < (i+1)*0.1){board.spawnRates[2*i+1] = (i+1)*0.1}
 				}
 				}
@@ -1117,7 +1127,7 @@ if(camera.gamemode == "Roaming"){
 			camera.pieceFrequency = 1200
 			gameSpecialInterval = ()=>{if(board.iterations%12 == 0 && board.iterations > 120){
 				for(let i = 0; i < 4; i++){
-					board.spawnRates[2*i+1]-=(1-board.spawnRates[2*i+1])*(1-board.spawnRates[2*i+1])*0.2
+					board.spawnRates[2*i+1]-=(1-board.spawnRates[2*i+1])*(1-board.spawnRates[2*i+1])*0.4
 					if(board.spawnRates[2*i+1] < (i+1)*0.1){board.spawnRates[2*i+1] = (i+1)*0.1}
 				}
 					console.log(board.spawnRates)

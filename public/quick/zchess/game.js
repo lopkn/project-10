@@ -89,7 +89,9 @@ class piece {
 		this.kills = 0;
 		this.alive = true
 
-		
+		this.frontTendency = 0.6
+
+
 
 		if(id == "rook"){
 			this.range = 5
@@ -794,7 +796,7 @@ function AImoveRandom(piece){
 
 		
 		//move front
-		if(ipos.y < piece.y && Math.random()>0.6){
+		if(ipos.y < piece.y && Math.random()>piece.frontTendency){
 			continue;
 		}
 		//move front
