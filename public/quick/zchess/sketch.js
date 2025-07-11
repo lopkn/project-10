@@ -142,7 +142,7 @@ var dummyPiece = new piece("dummy",undefined,undefined,"zombies")
 
 class camera{
 
-	static shapeBlind = true
+	static shapeBlind = false
 
 	static cookies = false
 	static gamemode = "none"
