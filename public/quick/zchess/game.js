@@ -6,6 +6,12 @@ function ipos(str){
 	let a = str.split(",")
 	return({"x":parseInt(a[0]),"y":parseInt(a[1])})
 }
+function distance(x,y,x2,y2){
+  let a = x-x2
+  let b = y-y2
+  return(Math.sqrt(a*a+b*b))
+}
+
 
 class board {
 	// undefined: empty,{} empty movable, {"piece"}
@@ -21,6 +27,7 @@ class board {
 	static tileExtensionBoarder = 0
 	static bottomTile = 11;
 	static specialIntervals = {}
+	static happening = new Set()
 	
 
 	// static eventStack = 
@@ -366,6 +373,7 @@ class piece {
 				}
 				this.arrFuncs.onMove.push(()=>{if(this.y == 11){
 					board.tiles[spos(this.x,this.y)].piece = new piece("queen",this.x,this.y,this.team)
+					removePiece(this)
 				}})
 			}
 			if(this.tags.direction == "y-"){
@@ -395,6 +403,7 @@ class piece {
 					if(this.AI){
 						board.tiles[spos(this.x,this.y)].piece.AI = true
 					}
+					removePiece(this)
 				}})
 
 			}
@@ -554,7 +563,7 @@ class piece {
 			board.tiles[pos].piece = this;
 		}
 
-		tileSubscription.update(pos)
+		tileSubscription.update(pos,"instant")
 		tileSubscription.update(spos(originalX,originalY))
 
 
@@ -691,13 +700,27 @@ class tileSubscription{
 
 	static subscriptions = {}
 
-	static update(tile){
-		if(this.subscriptions[tile]===undefined){return;}
-		this.subscriptions[tile].forEach((piece)=>{
-			if(piece.subscriptionUpdate){
-				piece.subscriptionUpdate(tile)
-			}
-		})
+	static update(tile,type="normal"){
+		if(type=="normal"){
+			if(this.subscriptions[tile]===undefined){return;}
+			setTimeout(()=>{
+				this.subscriptions[tile].forEach((piece)=>{
+					if(piece.subscriptionUpdate){
+						piece.subscriptionUpdate(tile)
+					}
+				})
+
+			},40)
+					} else if(type == "instant"){
+			if(this.subscriptions[tile]===undefined){return;}
+			this.subscriptions[tile].forEach((piece)=>{
+				if(piece.subscriptionUpdate){
+					piece.subscriptionUpdate(tile)
+				}
+			})
+		}
+		
+
 	}
 
 	static unsubscribe(piece,tile){
@@ -1550,17 +1573,23 @@ var gameEvents = {
 			}
 	},
 	"zombie wizard":()=>{
+
+
 		for(let i = 0; i < 3; i++){
 			for(let x = 0; x < 8; x++){
-				let pct = board.tiles[spos(x,board.topTile+i+2)]?.piece?.team
+				let pct = board.tiles[spos(x,board.topTile+i)]?.piece?.team
 				if(pct=="zombies"){
 
-					killPiece(board.tiles[spos(x,board.topTile+i+2)].piece,dummyPiece)
+					killPiece(board.tiles[spos(x,board.topTile+i)].piece,dummyPiece)
 				}
 			}
 		} // murder
 		let pc = spawnZombie(new piece("wizard",4,0,"zombies",{"direction":"y+"}),board.topTile+3)
-		if(pc === false){return}
+		if(pc === false){return(false)}
+
+		camera.particles.push(new expandingText("Zombie Wizard has spawned",Width/2/tileSize-camera.x,Height/2/tileSize-camera.y,
+		(x)=>{return("rgba(255,0,0,"+x+")")},
+		0.5,0.9))
 			pc.maxCD = 2
 			pc.shootCooldown = 1
 			pc.color = "rgba(0,20,0,0.9)"
@@ -1568,14 +1597,21 @@ var gameEvents = {
 			let objk = Object.keys(board.tiles)
 
 			let tile = objk[Math.floor(Math.random()*objk.length)]
-			while(board.tiles[tile].piece==undefined && Math.random()>0.1){
-				tile = objk[Math.floor(Math.random()*objk.length)]
+			// while(board.tiles[tile].piece==undefined && Math.random()>0.1){
+			// 	tile = objk[Math.floor(Math.random()*objk.length)]
+			// }
+
+			if(pieceLocked){
+				tile = spos(Math.round(pieceLocked.x+Math.random()*4-2),Math.round(pieceLocked.y+Math.random()*4-3))
 			}
+
+
 			let ip = ipos(tile)
-			if(board.tiles[tile].piece?.team == "zombies"){
+			let atile = board.tiles[tile]
+			if(atile?.piece?.team == "zombies"/* && distance(atile.piece.x,atile.piece.y,pc.x,pc.y)<3*/){
 
 				let tpc = board.tiles[tile].piece
-				if(tpc===pc){return(false)}
+				if(tpc===pc){setPieceCooldown(pc,0.5);return(true)}
 				tpc.color = "rgb(0,40,0)"
 				tpc.fronty = 3
 				tpc.range = 60
@@ -1603,7 +1639,7 @@ var gameEvents = {
 					gameEvents["explode"](ip.x,ip.y)
 				},2500)
 
-				setPieceCooldown(pc,5)
+				setPieceCooldown(pc,6)
 				return(true)
 			}
 

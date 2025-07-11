@@ -141,6 +141,9 @@ class DBG{
 var dummyPiece = new piece("dummy",undefined,undefined,"zombies")
 
 class camera{
+
+	static shapeBlind = true
+
 	static cookies = false
 	static gamemode = "none"
 	static team = "p1";
@@ -499,6 +502,7 @@ function menuRender(){
 	drawText("Piece render mode ["+camera.pieceRender+"]",2,y);y+=2
 	drawText("flashpiece ["+(camera.flashpiece?"on":"off")+"]",17,y);
 	drawText("Sounds ["+(camera.soundOn?"on":"off")+"]",2,y);y+=2
+	drawText("Declare to be homosexual ["+(camera.shapeBlind?"on":"off")+"]",17,y);
 	drawText("Play random sound",2,y);y+=2
 	drawText("Increase margin ["+camera.increaseMargin+"]",2,y);y+=2
 	drawText("Menu button size ["+camera.menuButtonSize+"]",2,y);y+=2
@@ -523,6 +527,9 @@ function menuRender(){
 
 	camera.flashpiece?fill(0,255,0):fill(255,0,0);
 	mrect(16.2,3.2,0.6,0.6);
+
+	camera.shapeBlind?fill(0,255,0):fill(255,0,0);
+	mrect(16.2,5.2,0.6,0.6);
 
 
 	((camera.soundOn)?(()=>{fill(0,255,0)}):(()=>{fill(255,0,0)}))();
@@ -681,6 +688,9 @@ document.addEventListener("mouseup",(e)=>{
 				} else if(Y===3){
 					camera.flashpiece = !camera.flashpiece
 					camera.playSound("select")
+				}else if(Y===5){
+					camera.shapeBlind = !camera.shapeBlind
+					camera.playSound("select")
 				}
 			}
 
@@ -801,6 +811,23 @@ function friendlyMoved(move){
 		}
 }
 
+
+var blindDict = {
+pawn     : "hsl(204, 46%,55%)",
+knight   : "hsl(57, 81%,55%)",
+bishop   : "hsl(95, 90%,55%)",
+rook     : "hsl(26, 63%,55%)",
+queen    : "hsl(10, 90%,55%)",
+king     : "hsl(232, 70%,55%)",
+cannon  : "hsl(283, 49%,55%)",
+artillery  : "hsl(283, 26%,55%)"
+}
+// Lightness by default is
+// 55% for dark
+// 40% for light
+// (if adjustable, should be slidable within 25% and 80%)
+
+
 function drawPiece(l,x,y,team,cd,pc){
 
 	if(cd != 0){
@@ -849,7 +876,14 @@ function drawPiece(l,x,y,team,cd,pc){
 			fill(250,180,180)
 		}
 	} else {
+
+
 		fill(0,100,0)
+
+		if(blindDict[pc.id] && camera.shapeBlind){
+			ctx.fillStyle = blindDict[pc.id]
+		}
+
 	}
 	if(camera.pieceRender === "image" && pieceDict[l] != undefined){
 		let arr = pieceDict[l]  
@@ -1106,6 +1140,12 @@ if(camera.gamemode == "Roaming"){
 				})
 
 
+				if(board.pieces.size > 50 && !board.happening.has("zombie wizard")){
+						if(gameEvents["zombie wizard"]()!==false){
+							board.happening.add("zombie wizard")
+						}
+					}
+
 				}
 				if(board.iterations % 20 == 0 && camera.pieceFrequency > 800){
 					camera.pieceFrequency -= 5
@@ -1113,6 +1153,8 @@ if(camera.gamemode == "Roaming"){
 				// board.pieces.forEach((e)=>{
    			// 	 let pos = spos(e.x+Math.floor(Math.random()*3-1),e.y+Math.floor(Math.random()*3-1))
    			//  if(board.tiles[pos]==undefined){board.tiles[pos]={}}})
+
+					
                         
 				}
 			}
@@ -1625,6 +1667,7 @@ function stopGame(){
 	clearInterval(gameInterval);
 	board.tiles = {}
 	board.pieces = new Set()
+	board.happening = new Set()
 	board.iterations = 0;
 	camera.money = 0;
 	camera.specialRenderOn = true

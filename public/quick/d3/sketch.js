@@ -16,7 +16,6 @@ let Height = window.innerHeight
 
 
 
-
 let mouseX = 0
 let mouseY = 0
 onmousemove = (e)=>{mouseX = (e.clientX); mouseY = (e.clientY)}
