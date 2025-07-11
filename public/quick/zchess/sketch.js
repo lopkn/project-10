@@ -1100,7 +1100,7 @@ if(camera.gamemode == "Roaming"){
 				// 	if(board.spawnRates[2*i+1] < 0.1){board.spawnRates[2*i+1] = 0.1}
 				// }
 
-				let interp = board.iterations/800
+				let interp = board.iterations/500
 				board.spawningSequence.forEach((e)=>{
 					e.rate = e.startRate + Math.min((e.maxRate-e.startRate)*interp,1)
 				})
@@ -1110,6 +1110,10 @@ if(camera.gamemode == "Roaming"){
 				if(board.iterations % 20 == 0 && camera.pieceFrequency > 800){
 					camera.pieceFrequency -= 5
 					startGameInterval(camera.pieceFrequency)
+				// board.pieces.forEach((e)=>{
+   			// 	 let pos = spos(e.x+Math.floor(Math.random()*3-1),e.y+Math.floor(Math.random()*3-1))
+   			//  if(board.tiles[pos]==undefined){board.tiles[pos]={}}})
+                        
 				}
 			}
 			board.specialIntervals["bombers"] = ()=>{if(board.iterations > 30 &&Math.random()<0.005*relativeEventFrequency){gameEvents["bomber pawn"]()}}
@@ -1117,6 +1121,9 @@ if(camera.gamemode == "Roaming"){
 			board.specialIntervals["elite knight"] = ()=>{if(board.iterations > 30 &&Math.random()<0.01*relativeEventFrequency){gameEvents["elite knight"]()}}
 			board.specialIntervals["allied knight"] = ()=>{if(board.iterations > 30 && Math.random()<0.005*relativeEventFrequency){gameEvents["white knights"]()}}
 
+			board.arrFuncs.pieceModifiers.push((e)=>{
+				e.maxCD = 8
+			})
 
 			board.spawningSequence = [
 				{"type":"pawn","startRate":1,"maxRate":1},
@@ -1152,7 +1159,7 @@ if(camera.gamemode == "Roaming"){
 						}
 					)
 			ap.maxCD = 0.2
-			ap.hp *= 200
+			// ap.hp *= 200
 			ap.onDeath=()=>{
 				
 				camera.score = ap.kills
