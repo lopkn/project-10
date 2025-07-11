@@ -813,14 +813,14 @@ function friendlyMoved(move){
 
 
 var blindDict = {
-pawn     : "hsl(204, 46%,55%)",
-knight   : "hsl(57, 81%,55%)",
-bishop   : "hsl(95, 90%,55%)",
-rook     : "hsl(26, 63%,55%)",
-queen    : "hsl(10, 90%,55%)",
-king     : "hsl(232, 70%,55%)",
-cannon  : "hsl(283, 49%,55%)",
-artillery  : "hsl(283, 26%,55%)"
+pawn     : "hsl(204, 46%,",
+knight   : "hsl(57, 81%,",
+bishop   : "hsl(95, 90%,",
+rook     : "hsl(26, 63%,",
+queen    : "hsl(10, 90%,",
+king     : "hsl(232, 70%,",
+cannon  : "hsl(283, 49%,",
+artillery  : "hsl(283, 26%,"
 }
 // Lightness by default is
 // 55% for dark
@@ -881,7 +881,7 @@ function drawPiece(l,x,y,team,cd,pc){
 		fill(0,100,0)
 
 		if(blindDict[pc.id] && camera.shapeBlind){
-			ctx.fillStyle = blindDict[pc.id]
+			ctx.fillStyle = blindDict[pc.id] + (pc.cooldown==0?"55%":"45%")
 		}
 
 	}
