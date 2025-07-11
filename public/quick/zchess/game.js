@@ -13,6 +13,7 @@ class board {
 	static arrFuncs = {
 		"pieceModifiers":[]
 	}
+	static pieces = new Set()
 	static spawnRange = [0,8]
 	static extension1 = true
 	static iterations = 0;
@@ -54,14 +55,21 @@ function pointPiece(){
 	return(board.tiles[spos(mouseBoardX,mouseBoardY)]?.piece)
 }
 
-function getTileTeam(pos,team){
+function getTileTeam(pos,pc){
+	let team = pc.team
 	let tile = board.tiles[pos]
 	if(tile == undefined){return("void")}
 	if(tile.piece == undefined){return("empty")}
 		if(tile.piece.identifyTo !== undefined){
 			return(tile.piece.identifyTo(team))
 		}
-		if(tile.piece.team == team){return("block")} else {return("capture")}
+		if(tile.piece.team == team){
+			if(pc.cannibal){
+				return("capture")
+			}
+			return("block")
+		}
+		 else {return("capture")}
 }
 
 function movePiece(x,y,tx,ty,team){
@@ -90,14 +98,16 @@ class piece {
 		this.alive = true
 
 		this.frontTendency = 0.2
+		// this.fronty=3
 
+		board.pieces.add(this)
 
 
 		if(id == "rook"){
 			this.range = 5
 			this.maxCD = 15
 			this.renderLetter = "R"
-			this.travelVectors = [[0,1],[0,-1],[1,0],[-1,0]]
+			this.travelVectors = shuffleArr([[0,1],[0,-1],[1,0],[-1,0]])
 			this.legals = ()=>{
 				let loop = true
 				let legals = []
@@ -107,7 +117,7 @@ class piece {
 					let V = this.travelVectors[v]
 					for(let i = 1;i<this.range+1;i++){
 						let pos = spos(this.x+V[0]*i,this.y+V[1]*i)
-						let gtt = getTileTeam(pos,this.team)
+						let gtt = getTileTeam(pos,this)
 						all[pos] = gtt
 						if(gtt === "empty"){legals.push(pos);legalDict[pos]=gtt;continue}
 						if(gtt === "void" || gtt === "block"){break};
@@ -123,7 +133,7 @@ class piece {
 			this.range = 9
 			this.maxCD = 15
 			this.renderLetter = "C"
-			this.travelVectors = [[0,1],[0,-1],[1,0],[-1,0]]
+			this.travelVectors = shuffleArr([[0,1],[0,-1],[1,0],[-1,0]])
 			this.legals = ()=>{
 				let loop = true
 				let legals = []
@@ -135,7 +145,7 @@ class piece {
 					let V = this.travelVectors[v]
 					for(let i = 1;i<this.range+1;i++){
 						let pos = spos(this.x+V[0]*i,this.y+V[1]*i)
-						let gtt = getTileTeam(pos,this.team)
+						let gtt = getTileTeam(pos,this)
 						all[pos] = gtt
 						if(jumped){
 							if(gtt === "void" || gtt === "block"){break};
@@ -155,7 +165,7 @@ class piece {
 			this.range = 9
 			this.maxCD = 15
 			this.renderLetter = "A"
-			this.travelVectors = [[0,1],[0,-1],[1,0],[-1,0],[1,1],[-1,-1],[1,-1],[-1,1]]
+			this.travelVectors = shuffleArr([[0,1],[0,-1],[1,0],[-1,0],[1,1],[-1,-1],[1,-1],[-1,1]])
 			this.legals = ()=>{
 				let loop = true
 				let legals = []
@@ -167,7 +177,7 @@ class piece {
 					let V = this.travelVectors[v]
 					for(let i = 1;i<this.range+1;i++){
 						let pos = spos(this.x+V[0]*i,this.y+V[1]*i)
-						let gtt = getTileTeam(pos,this.team)
+						let gtt = getTileTeam(pos,this)
 						all[pos] = gtt
 						if(jumped){
 							if(gtt === "void" || gtt === "block"){break};
@@ -187,7 +197,7 @@ class piece {
 			this.maxCD = 16
 			this.range = 5
 			this.renderLetter = "Q"
-			this.travelVectors = [[0,1],[0,-1],[1,0],[-1,0],[1,1],[-1,-1],[1,-1],[-1,1]]
+			this.travelVectors = shuffleArr([[0,1],[0,-1],[1,0],[-1,0],[1,1],[-1,-1],[1,-1],[-1,1]])
 			this.legals = ()=>{
 				let loop = true
 				let legals = []
@@ -197,7 +207,7 @@ class piece {
 					let V = this.travelVectors[v]
 					for(let i = 1;i<this.range+1;i++){
 						let pos = spos(this.x+V[0]*i,this.y+V[1]*i)
-						let gtt = getTileTeam(pos,this.team)
+						let gtt = getTileTeam(pos,this)
 						all[pos] = gtt
 						if(gtt === "empty"){legals.push(pos);legalDict[pos]=gtt;continue}
 						if(gtt === "void" || gtt === "block"){break};
@@ -213,7 +223,7 @@ class piece {
 			this.maxCD = 12
 			this.range = 5
 			this.renderLetter = "B"
-			this.travelVectors = [[1,1],[-1,-1],[1,-1],[-1,1]]
+			this.travelVectors = shuffleArr([[1,1],[-1,-1],[1,-1],[-1,1]])
 			this.legals = ()=>{
 				let loop = true
 				let legals = []
@@ -223,7 +233,7 @@ class piece {
 					let V = this.travelVectors[v]
 					for(let i = 1;i<this.range+1;i++){
 						let pos = spos(this.x+V[0]*i,this.y+V[1]*i)
-						let gtt = getTileTeam(pos,this.team)
+						let gtt = getTileTeam(pos,this)
 						all[pos] = gtt
 						if(gtt === "empty"){legals.push(pos);legalDict[pos]=gtt;continue}
 						if(gtt === "void" || gtt === "block"){break};
@@ -238,13 +248,13 @@ class piece {
 		} else if(id == "knight"){
 			this.maxCD = 10
 			this.renderLetter = "N"
-			this.jumps = [[2,1],[1,2],[-1,2],[-2,1],[1,-2],[-1,-2],[-2,-1],[2,-1]]
+			this.jumps = shuffleArr([[2,1],[1,2],[-1,2],[-2,1],[1,-2],[-1,-2],[-2,-1],[2,-1]])
 			this.legals = ()=>{
 				let legals = []
 				let legalDict = {}
 				this.jumps.forEach((s)=>{
 					let e = spos(s[0]+this.x,s[1]+this.y)
-					let gtt = getTileTeam(e,this.team)
+					let gtt = getTileTeam(e,this)
 					if(gtt == "capture" || gtt == "empty"){legals.push(e);legalDict[e]=gtt;}
 				})
 				return({"arr":legals,"dict":legalDict})
@@ -252,13 +262,13 @@ class piece {
 		} else if(id == "jumper"){
 			this.maxCD = 10
 			this.renderLetter = "J"
-			this.jumps = [[2,0],[-2,0],[0,2],[0,-2]]
+			this.jumps = shuffleArr([[2,0],[-2,0],[0,2],[0,-2]])
 			this.legals = ()=>{
 				let legals = []
 				let legalDict = {}
 				this.jumps.forEach((s)=>{
 					let e = spos(s[0]+this.x,s[1]+this.y)
-					let gtt = getTileTeam(e,this.team)
+					let gtt = getTileTeam(e,this)
 					if(gtt == "capture" || gtt == "empty"){legals.push(e);legalDict[e]=gtt;}
 				})
 				return({"arr":legals,"dict":legalDict})
@@ -266,13 +276,13 @@ class piece {
 		} else if(id == "guardian"){
 			this.maxCD = 10
 			this.renderLetter = "G"
-			this.jumps = [[2,-2],[-2,2],[2,2],[2,-2]]
+			this.jumps = shuffleArr([[2,-2],[-2,2],[2,2],[2,-2]])
 			this.legals = ()=>{
 				let legals = []
 				let legalDict = {}
 				this.jumps.forEach((s)=>{
 					let e = spos(s[0]+this.x,s[1]+this.y)
-					let gtt = getTileTeam(e,this.team)
+					let gtt = getTileTeam(e,this)
 					if(gtt == "capture" || gtt == "empty"){legals.push(e);legalDict[e]=gtt;}
 				})
 				return({"arr":legals,"dict":legalDict})
@@ -281,13 +291,13 @@ class piece {
 			this.maxCD = 20
 			if(this.team=="zombies"){this.maxCD = 20}
 			this.renderLetter = "K"
-			this.jumps = [[0,1],[0,-1],[-1,1],[1,-1],[1,0],[-1,0],[-1,-1],[1,1]]
+			this.jumps = shuffleArr([[0,1],[0,-1],[-1,1],[1,-1],[1,0],[-1,0],[-1,-1],[1,1]])
 			this.legals = ()=>{
 				let legals = []
 				let legalDict = {}
 				this.jumps.forEach((s)=>{
 					let e = spos(s[0]+this.x,s[1]+this.y)
-					let gtt = getTileTeam(e,this.team)
+					let gtt = getTileTeam(e,this)
 					if(gtt == "capture" || gtt == "empty"){legals.push(e);legalDict[e]=gtt;}
 				})
 				return({"arr":legals,"dict":legalDict})
@@ -307,7 +317,7 @@ class piece {
 				this.legals = ()=>{
 					let legals = []
 					let legalDict = {}
-					let frontPos = getTileTeam(spos(this.x,this.y+1),this.team)
+					let frontPos = getTileTeam(spos(this.x,this.y+1),this)
 					if( frontPos == "empty" || frontPos == "capture"){legals.push(spos(this.x,this.y+1))
 						legalDict[spos(this.x,this.y+1)]=frontPos
 					}
@@ -322,7 +332,7 @@ class piece {
 				this.legals = ()=>{
 					let legals = []
 					let legalDict = {}
-					let frontPos = getTileTeam(spos(this.x,this.y-1),this.team)
+					let frontPos = getTileTeam(spos(this.x,this.y-1),this)
 					if( frontPos == "empty" || frontPos == "capture"){legals.push(spos(this.x,this.y-11))
 						legalDict[spos(this.x,this.y-1)]=frontPos
 					}
@@ -339,17 +349,17 @@ class piece {
 			this.maxCD = 7
 			this.renderLetter = "P"
 			if(this.tags.direction == "y+"){
-				this.jumps = [[0,1],[1,1],[-1,1]]
+				this.jumps = shuffleArr([[0,1],[1,1],[-1,1]])
 				this.legals = ()=>{
 					let legals = []
 					let legalDict = {}
-					if(getTileTeam(spos(this.x,this.y+1),this.team) == "empty"){legals.push(spos(this.x,this.y+1))
+					if(getTileTeam(spos(this.x,this.y+1),this) == "empty"){legals.push(spos(this.x,this.y+1))
 						legalDict[spos(this.x,this.y+1)]="empty"
 					}
-					if(getTileTeam(spos(this.x+1,this.y+1),this.team) == "capture"){legals.push(spos(this.x+1,this.y+1))
+					if(getTileTeam(spos(this.x+1,this.y+1),this) == "capture"){legals.push(spos(this.x+1,this.y+1))
 						legalDict[spos(this.x+1,this.y+1)]="capture"
 					}
-					if(getTileTeam(spos(this.x-1,this.y+1),this.team) == "capture"){legals.push(spos(this.x-1,this.y+1))
+					if(getTileTeam(spos(this.x-1,this.y+1),this) == "capture"){legals.push(spos(this.x-1,this.y+1))
 						legalDict[spos(this.x-1,this.y+1)]="capture"
 					}
 					return({"arr":legals,"dict":legalDict})
@@ -359,22 +369,22 @@ class piece {
 				}})
 			}
 			if(this.tags.direction == "y-"){
-				this.jumps = [[0,-1],[1,-1],[-1,-1]]
+				this.jumps = shuffleArr([[0,-1],[1,-1],[-1,-1]])
 				this.legals = ()=>{
 					let legals = []
 					let legalDict = {}
 					if(this.y == 10){
-						if(getTileTeam(spos(this.x,this.y-2),this.team) == "empty"){legals.push(spos(this.x,this.y-2))
+						if(getTileTeam(spos(this.x,this.y-2),this) == "empty"){legals.push(spos(this.x,this.y-2))
 							legalDict[spos(this.x,this.y-2)]="empty"
 						}
 					}
-					if(getTileTeam(spos(this.x,this.y-1),this.team) == "empty"){legals.push(spos(this.x,this.y-1))
+					if(getTileTeam(spos(this.x,this.y-1),this) == "empty"){legals.push(spos(this.x,this.y-1))
 						legalDict[spos(this.x,this.y-1)]="empty"
 					}
-					if(getTileTeam(spos(this.x+1,this.y-1),this.team) == "capture"){legals.push(spos(this.x+1,this.y-1))
+					if(getTileTeam(spos(this.x+1,this.y-1),this) == "capture"){legals.push(spos(this.x+1,this.y-1))
 						legalDict[spos(this.x+1,this.y-1)]="capture"
 					}
-					if(getTileTeam(spos(this.x-1,this.y-1),this.team) == "capture"){legals.push(spos(this.x-1,this.y-1))
+					if(getTileTeam(spos(this.x-1,this.y-1),this) == "capture"){legals.push(spos(this.x-1,this.y-1))
 						legalDict[spos(this.x-1,this.y-1)]="capture"
 					}
 					return({"arr":legals,"dict":legalDict})
@@ -393,7 +403,7 @@ class piece {
 			this.upLim = Infinity;
 			this.held = false;
 			this.renderLetter = "W"
-			this.jumps = [[0,1],[0,-1],[-1,1],[1,-1],[1,0],[-1,0],[-1,-1],[1,1]]
+			this.jumps = shuffleArr([[0,1],[0,-1],[-1,1],[1,-1],[1,0],[-1,0],[-1,-1],[1,1]])
 
 			this.chargeTime = 2000
 			this.shootCooldown = 5
@@ -403,7 +413,7 @@ class piece {
 				let legalDict = {}
 				this.jumps.forEach((s)=>{
 					let e = spos(s[0]+this.x,s[1]+this.y)
-					let gtt = getTileTeam(e,this.team)
+					let gtt = getTileTeam(e,this)
 					if(gtt == "capture" || gtt == "empty"){legals.push(e);legalDict[e]=gtt;}
 				})
 				return({"arr":legals,"dict":legalDict})
@@ -432,7 +442,9 @@ class piece {
 
 				return(progress)
 			}
-			this.unhold = (x,y)=>{
+			this.unhold = (x,y,options)=>{
+				x=parseInt(x)
+				y=parseInt(y)
 				let sc = this.shootCooldown
 				if(this.held){
 					let tile = board.tiles[spos(x,y)]
@@ -536,7 +548,7 @@ class piece {
 			////legacy murder code 
 
 			//#COMMENT on 27-06-25 LOL THIS IS FUNNY AS SHIT
-			board.tiles[pos].piece=damagePiece(board.tiles[pos].piece,this)
+			board.tiles[pos].piece = damagePiece(board.tiles[pos].piece,this)
 			attacked=true
 		} else {
 			board.tiles[pos].piece = this;
@@ -596,6 +608,7 @@ function killPiece(piece,killer){
 			piece.onDeath()
 		}//legacy
 
+
 		Object.values(piece.arrFuncs.onDeath).forEach((f)=>{
 			f(killer)
 		})
@@ -606,7 +619,8 @@ function killPiece(piece,killer){
 		if(piece.noPoints === undefined){
 			killer.kills += 1
 	    }
-	    board.tiles[spos(piece.x,piece.y)].piece = undefined
+	    // board.tiles[spos(piece.x,piece.y)].piece = undefined
+		removePiece(piece)
 		if(killer && killer.team!="zombies"&& killer.AI !== true){
 			displayKills(killer.kills,killer.x,killer.y)
 		}
@@ -660,11 +674,18 @@ function killBoardPiece(x,y,killerPiece){
 				displayKills(killerPiece.kills,killerPiece.x,killerPiece.y)
 			}
 			console.log(board.tiles[pos].piece.team+" "+board.tiles[pos].piece.id+" has been killed!")
-			board.tiles[pos].piece = undefined
+			removePiece(board.tiles[pos].piece)
 			return(true)
 		}
 	}
 }
+
+
+function removePiece(piece){
+	board.pieces.delete(piece)
+	if(board.tiles[spos(piece.x,piece.y)]?.piece === piece){board.tiles[spos(piece.x,piece.y)].piece=undefined}
+}
+
 
 class tileSubscription{
 
@@ -741,6 +762,12 @@ function AImoveRandom(piece){
 		piece.AImoveRandom(piece)
 		return;
 	}
+
+	if(piece.AIability !== undefined){
+		let a = piece.AIability(piece)
+		if(a){return}
+	}
+
 	let legals = piece.legals()
 	let legal = legals.arr
 	if(legal.length == 0){
@@ -769,9 +796,9 @@ function AImoveRandom(piece){
 		let ocp = board.tiles[moveString]?.piece
 		let result = attemptMove(piece.x,piece.y,ip.x,ip.y,piece.team)
 		if(result == "capture"){
-			if(ocp?.team == "p1" && ocp.AI !== true){
+			if(ocp?.team == "p1" && ocp.AI !== true && !ocp.alive){
 			// camera.playSound("./sounds/captureF.wav")
-			camera.playSoundF("0")
+					camera.playSoundF("0")
 			camera.particles.push(new lineParticle(opx+0.5,opy+0.5,piece.x+0.5,piece.y+0.5,10,
 						(x)=>{let mr = Math.random()*255
 							return("rgb("+(mr<20?255-mr:0)+","+(mr/2)+",0)")},0.1))
@@ -799,6 +826,13 @@ function AImoveRandom(piece){
 		if(ip.y < piece.y && Math.random()<piece.frontTendency){
 			continue;
 		}
+
+		if(piece.fronty){
+			legal.sort((a,b)=>{return(ipos(b).y-ipos(a).y)})
+			ip = ipos(legal[Math.floor(Math.random()**piece.fronty*legal.length)])
+		}
+
+
 		//move front
 
 		result = attemptMove(piece.x,piece.y,ip.x,ip.y,piece.team)
@@ -1092,10 +1126,12 @@ var gameEvents = {
 		0.5,0.9))
 		camera.particles[camera.particles.length-1].size = tileSize/2
 
-				let pc = spawnZombie(new piece("knight",4,0,"Dark"))
+				let pc = spawnZombie(new piece("knight",4,0,"zombies"))
 			if(pc === false){return;}
 			pc.AI = true
-			pc.maxCD = 0.6
+			pc.maxCD = 1.6
+			pc.attackBonus = 0.35
+			pc.cannibal = true
 			setPieceCooldown(pc,5)
 			pc.color = "rgb(0,0,0)"
 			pc.draw = (l,x,y)=>{
@@ -1121,13 +1157,18 @@ var gameEvents = {
 			let pc = spawnFriendly(new piece("knight",4,11,"p1",{"direction":"y-"}))
 			if(pc === false){return;}
 			pc.AI = true
+			pc.fronty = undefined
+			pc.frontTendency = 0
 			pc.maxCD = 0.4
 			setPieceCooldown(pc,0.4)
 			pc.color = "rgb(200,200,255)"
 			pc.arrFuncs.onMove.push((px,py)=>{
 
 				if(Math.random()>0.95 && pc.kills > 0){
-					board.tiles[spos(pc.x,pc.y)].piece = undefined
+					removePiece(board.tiles[spos(pc.x,pc.y)].piece)
+
+					// board.tiles[spos(pc.x,pc.y)].piece = undefined
+					// board.pieces.delete(board.tiles[spos(pc.x,pc.y)].pieceboard.tiles[spos(pc.x,pc.y)].piece)
 				} else {
 					camera.particles.push(new lineParticle(px+0.5,py+0.5,pc.x+0.5,pc.y+0.5,3,
 						(x)=>{
@@ -1291,48 +1332,49 @@ var gameEvents = {
 				return
 			}
 			pc.onDeath = undefined
-			camera.playSound("bomb")
-			for(let i = 0; i < 16; i++){
-							let dx = Math.random()-0.5
-							let dy = Math.random()-0.5
-							camera.particles.push(new bloodParticle(pc.x+0.5+0.6*dx,pc.y+0.5+0.6*dy,dx*34,34*dy,Math.random()*0.2,Math.random()*3+3,false))
-							camera.particles[camera.particles.length-1].friction = 0.98
-						}
-			camera.particles.push(new explosionR(pc.x+0.5,pc.y+0.5,
-					(x)=>{
-						let rr = 250*Math.random()
-						return("rgb("+(rr)+","+(Math.random()*rr)+","+(Math.random()*15)+")")},
-					16,8,2))
-			camera.particles.push(new explosionR(pc.x+0.5,pc.y+0.5,
-					(x)=>{
-						let rr = 250*Math.random()
-						return("rgb("+(rr)+","+(Math.random()*rr)+","+(Math.random()*15)+")")},
-					6,2,1))
+			// camera.playSound("bomb")
+			// for(let i = 0; i < 16; i++){
+			// 				let dx = Math.random()-0.5
+			// 				let dy = Math.random()-0.5
+			// 				camera.particles.push(new bloodParticle(pc.x+0.5+0.6*dx,pc.y+0.5+0.6*dy,dx*34,34*dy,Math.random()*0.2,Math.random()*3+3,false))
+			// 				camera.particles[camera.particles.length-1].friction = 0.98
+			// 			}
+			// camera.particles.push(new explosionR(pc.x+0.5,pc.y+0.5,
+			// 		(x)=>{
+			// 			let rr = 250*Math.random()
+			// 			return("rgb("+(rr)+","+(Math.random()*rr)+","+(Math.random()*15)+")")},
+			// 		16,8,2))
+			// camera.particles.push(new explosionR(pc.x+0.5,pc.y+0.5,
+			// 		(x)=>{
+			// 			let rr = 250*Math.random()
+			// 			return("rgb("+(rr)+","+(Math.random()*rr)+","+(Math.random()*15)+")")},
+			// 		6,2,1))
 
-			setTimeout(()=>{
+			// setTimeout(()=>{
 
 
-			for(let i = -pc.bombRadius; i < pc.bombRadius+1; i++){
-				for(let j = -pc.bombRadius ;j < pc.bombRadius+1; j++){
-					if(board.tiles[spos(pc.x+i,pc.y+j)]?.piece != undefined){
-						let pct = board.tiles[spos(pc.x+i,pc.y+j)].piece
-						if(pct.onDeath != undefined && pct != pc){
-							pct.onDeath()
-						}
-						pct.alive = false
-						board.tiles[spos(pc.x+i,pc.y+j)].piece = undefined
-						for(let i = 0; i < 16; i++){//#27-06-25 particles
-							let dx = Math.random()-0.5
-							let dy = Math.random()-0.5
-							dx += (pct.x - pc.x)*0.3
-							dy += (pct.y - pc.y)*0.3
-							camera.particles.push(new bloodParticle(pct.x+0.5+0.6*dx,pct.y+0.5+0.6*dy,dx*24,24*dy,Math.random()*0.03,Math.random()*3+3,false))
-							camera.particles[camera.particles.length-1].friction = 0.94
-						}
-					}
-				}
-			}
-			},200)
+			// for(let i = -pc.bombRadius; i < pc.bombRadius+1; i++){
+			// 	for(let j = -pc.bombRadius ;j < pc.bombRadius+1; j++){
+			// 		if(board.tiles[spos(pc.x+i,pc.y+j)]?.piece != undefined){
+			// 			let pct = board.tiles[spos(pc.x+i,pc.y+j)].piece
+			// 			if(pct.onDeath != undefined && pct != pc){
+			// 				pct.onDeath()
+			// 			}
+			// 			pct.alive = false
+			// 			board.tiles[spos(pc.x+i,pc.y+j)].piece = undefined
+			// 			for(let i = 0; i < 16; i++){//#27-06-25 particles
+			// 				let dx = Math.random()-0.5
+			// 				let dy = Math.random()-0.5
+			// 				dx += (pct.x - pc.x)*0.3
+			// 				dy += (pct.y - pc.y)*0.3
+			// 				camera.particles.push(new bloodParticle(pct.x+0.5+0.6*dx,pct.y+0.5+0.6*dy,dx*24,24*dy,Math.random()*0.03,Math.random()*3+3,false))
+			// 				camera.particles[camera.particles.length-1].friction = 0.94
+			// 			}
+			// 		}
+			// 	}
+			// }
+			// },200)
+			gameEvents["explode"](pc.x,pc.y,pc.bombRadius)
 		}
 		pc.AIwait = ()=>{return(10)}
 		pc.AIblockWait = ()=>{return(300)}
@@ -1374,7 +1416,8 @@ var gameEvents = {
 							pct.onDeath()
 						}
 						pct.alive = false
-						board.tiles[spos(pc.x+i,pc.y+j)].piece = undefined
+						// board.tiles[spos(pc.x+i,pc.y+j)].piece = undefined
+						removePiece(board.tiles[spos(pc.x+i,pc.y+j)].piece)
 						for(let i = 0; i < 16; i++){//#27-06-25 particles
 							let dx = Math.random()-0.5
 							let dy = Math.random()-0.5
@@ -1505,27 +1548,91 @@ var gameEvents = {
 			if(!flightChamperPlus){
 				gameEvents["piece storm"](8)
 			}
+	},
+	"zombie wizard":()=>{
+		for(let i = 0; i < 3; i++){
+			for(let x = 0; x < 8; x++){
+				let pct = board.tiles[spos(x,board.topTile+i+2)]?.piece?.team
+				if(pct=="zombies"){
+
+					killPiece(board.tiles[spos(x,board.topTile+i+2)].piece,dummyPiece)
+				}
+			}
+		} // murder
+		let pc = spawnZombie(new piece("wizard",4,0,"zombies",{"direction":"y+"}),board.topTile+3)
+		if(pc === false){return}
+			pc.maxCD = 2
+			pc.shootCooldown = 1
+			pc.color = "rgba(0,20,0,0.9)"
+		pc.AIability = (pc)=>{
+			let objk = Object.keys(board.tiles)
+
+			let tile = objk[Math.floor(Math.random()*objk.length)]
+			while(board.tiles[tile].piece==undefined && Math.random()>0.1){
+				tile = objk[Math.floor(Math.random()*objk.length)]
+			}
+			let ip = ipos(tile)
+			if(board.tiles[tile].piece?.team == "zombies"){
+
+				let tpc = board.tiles[tile].piece
+				if(tpc===pc){return(false)}
+				tpc.color = "rgb(0,40,0)"
+				tpc.fronty = 3
+				tpc.range = 60
+				tpc.maxCD = Math.max(tpc.maxCD-1,1)
+				camera.playSound("shot","G3",0.6)
+					camera.particles.push(new lineParticle(pc.x+0.5,pc.y+0.5,ip.x+0.5,ip.y+0.5,10,
+						(x)=>{let mr = Math.random()*60
+							return("rgb("+mr+",0,0)")},0.6))
+					camera.particles.push(new explosionR(ip.x+0.5,ip.y+0.5,
+					"rgba("+(Math.random()*10)+",0,0,"+(Math.random()*0.3+0.3)+")",0.8,1+Math.random()*0.2,0.2))
+
+					
+
+					setPieceCooldown(pc,5)
+
+					return(true)
+			} else {
+				camera.playSound("shot","F3",0.6)
+					camera.particles.push(new lineParticle(pc.x+0.5,pc.y+0.5,ip.x+0.5,ip.y+0.5,10,
+						(x)=>{let mr = Math.random()*160
+							return("rgb("+mr+",0,0)")},0.6))
+					camera.particles.push(new explosionR(ip.x+0.5,ip.y+0.5,
+					"rgba("+(Math.random()*120)+",0,0,"+(Math.random()*0.3+0.3)+")",-0.03,1+Math.random()*0.2,2.2))
+				setTimeout(()=>{
+					gameEvents["explode"](ip.x,ip.y)
+				},2500)
+
+				setPieceCooldown(pc,5)
+				return(true)
+			}
+
+			
+		}
+
+
 	}
 }
 
 
 
 
-function spawnZombie(pc){
+function spawnZombie(pc,laneLimit=1){
 	let X = Math.floor(Math.random()*8)
 	for(let i = 0; i < 8; i++){
 		let x = (X+i)%8
 		let y = board.topTile;
 		while(board.tiles[x+","+y] == undefined || board.tiles[x+","+y].piece != undefined){
 			y+=1
-			if(y > 1){break;}
+			if(y > laneLimit){break;}
 		}
-		if(y > 1){continue;}
+		if(y > laneLimit){continue;}
 		board.tiles[x+","+y].piece = pc
 		pc.x = x
 		pc.y = y
 		return(pc)
 	}
+
 	return(false)
 }
 
@@ -1548,6 +1655,23 @@ function spawnFriendly(pc){
 }
 
 
+
+function shuffleArr(array) {
+  let currentIndex = array.length;
+
+  // While there remain elements to shuffle...
+  while (currentIndex != 0) {
+
+    // Pick a remaining element...
+    let randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+
+    // And swap it with the current element.
+    [array[currentIndex], array[randomIndex]] = [
+      array[randomIndex], array[currentIndex]];
+  }
+  return(array)
+}
 
 //bottom lose
 //pawn promotion <-

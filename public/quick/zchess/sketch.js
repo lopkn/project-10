@@ -171,10 +171,9 @@ class camera{
 	// 	let click = this.sounds[url].cloneNode()
 	// 	click.play()
 	// }
-	static playSound(file,note){
+	static playSound(file,note="C4",vel=1){
 		if(this.soundOn === false || soundLoaded === false){return}
-		note = note?note:"C4"
-		this.sounds[file].triggerAttack(note)
+		this.sounds[file].triggerAttack(note,undefined,vel)
 	}
 	static playSoundF(no){
 		if(this.soundOn === false|| soundLoaded === false){return}
@@ -188,6 +187,28 @@ class camera{
 	}
 	static captureStreak = 0;
 }
+
+class music{
+	static Synth1 = new Tone.Synth().toDestination()
+	static Hihat = new Tone.NoiseSynth().toDestination()
+	static Kick = new Tone.MembraneSynth().toDestination()
+	static freeverb = new Tone.Freeverb().toDestination();
+	static reverb = new Tone.Reverb({
+   	decay: 20, // Duration of the reverb tail
+   	preDelay: 0,
+   	wet: 0.95,
+   	input:1,
+   	output:1
+	}).toDestination();
+	static init(){
+		this.Synth1.connect(this.reverb)
+	}
+	static play(num="C4",time=0.2,vel=1,synth=this.Synth1){
+		synth.triggerAttackRelease(num,time,undefined,vel)
+	}
+}
+music.init()
+
 let initSoundsArr = ["start4","start3","start2","start","bomb","shot","escape","select","move","captureF","capture","captureS1","captureS2","captureS3","captureS4","captureS5","captureS6","captureS7","captureS8"]
 initSounds(initSoundsArr)
 
@@ -863,7 +884,7 @@ function pieceImage(x,y,arr,piece){
 	}
 	ctx.fill()
 	ctx.closePath()
-	if(piece.stroke){
+	if(piece?.stroke){
 		ctx.strokeStyle = piece.stroke.color
 		ctx.lineWidth = piece.stroke.width
 		ctx.stroke()
@@ -1038,6 +1059,7 @@ let gameSpecialInterval = ()=>{}
 function startGame(){
 camera.specialRenderOn = false
 board.emptyNew()
+board.spawnRates = ["pawn",0.65,"king",0.80,"knight",0.95,"bishop",0.98,"rook",0.998,"cannon",0.9995,"queen",1]
 if(Math.random()>0.1){
 	camera.playSound("start4")
 } else if(Math.random()>0.5){
@@ -1072,12 +1094,20 @@ if(camera.gamemode == "Roaming"){
 }else if(camera.gamemode == "Knight's Raid"){
 			camera.pieceFrequency = 1100
 			gameSpecialInterval = ()=>{if(board.iterations%18 == 0 && board.iterations > 30){
-				for(let i = 0; i < 4; i++){
-					board.spawnRates[2*i+1]-=(1-board.spawnRates[2*i+1])*(1-board.spawnRates[2*i+1])*0.4
-					if(board.spawnRates[2*i+1] < (i+1)*0.1){board.spawnRates[2*i+1] = (i+1)*0.1}
+				// for(let i = 0; i < 6; i++){
+				// 	board.spawnRates[2*i+1]-=(1-board.spawnRates[2*i+1])*(1-board.spawnRates[2*i+1])*0.8
+				// 	// if(board.spawnRates[2*i+1] < (i+1)*0.1){board.spawnRates[2*i+1] = (i+1)*0.1}
+				// 	if(board.spawnRates[2*i+1] < 0.1){board.spawnRates[2*i+1] = 0.1}
+				// }
+
+				let interp = board.iterations/800
+				board.spawningSequence.forEach((e)=>{
+					e.rate = e.startRate + Math.min((e.maxRate-e.startRate)*interp,1)
+				})
+
+
 				}
-				}
-				if(board.iterations % 20 == 0 && camera.pieceFrequency > 900){
+				if(board.iterations % 20 == 0 && camera.pieceFrequency > 800){
 					camera.pieceFrequency -= 5
 					startGameInterval(camera.pieceFrequency)
 				}
@@ -1086,6 +1116,23 @@ if(camera.gamemode == "Roaming"){
 			board.specialIntervals["elite cannon"] = ()=>{if(board.iterations > 30 &&Math.random()<0.008*relativeEventFrequency){gameEvents["elite cannon"]()}}
 			board.specialIntervals["elite knight"] = ()=>{if(board.iterations > 30 &&Math.random()<0.01*relativeEventFrequency){gameEvents["elite knight"]()}}
 			board.specialIntervals["allied knight"] = ()=>{if(board.iterations > 30 && Math.random()<0.005*relativeEventFrequency){gameEvents["white knights"]()}}
+
+
+			board.spawningSequence = [
+				{"type":"pawn","startRate":1,"maxRate":1},
+				{"type":"king","startRate":0.3,"maxRate":0.5},
+				{"type":"knight","startRate":0.05,"maxRate":0.1},
+				{"type":"bishop","startRate":0.04,"maxRate":0.2},
+				{"type":"rook","startRate":0.02,"maxRate":0.09},
+				{"type":"cannon","startRate":0.002,"maxRate":0.08},
+				{"type":"queen","startRate":0.001,"maxRate":0.1}
+			]
+				board.spawningSequence.forEach((e)=>{e.rate=e.startRate})
+
+
+			// board.spawnRates[5] = 0.2
+			// board.spawnRates[7] = 0.9
+			// board.spawnRates[9] = 0.95
 
 			board.tiles[4+","+11].piece = new piece("knight",4,11,"p1")
 			let ap = board.tiles["4,11"].piece
@@ -1105,6 +1152,7 @@ if(camera.gamemode == "Roaming"){
 						}
 					)
 			ap.maxCD = 0.2
+			ap.hp *= 200
 			ap.onDeath=()=>{
 				
 				camera.score = ap.kills
@@ -1454,7 +1502,6 @@ else if(camera.gamemode == "Phantom"){
 	board.AIwait = ()=>{return(Math.random()*4000)}
 	board.AIblockWait = ()=>{return(Math.random()*4000+3000)}
 }
-board.spawnRates = ["pawn",0.65,"king",0.80,"knight",0.95,"bishop",0.98,"rook",0.998,"cannon",0.9995,"queen",1]
 
 
 	board.tiles[3+",0"].piece = new piece("pawn",3,0,"zombies",{"direction":"y+"})
@@ -1473,10 +1520,23 @@ board.spawnRates = ["pawn",0.65,"king",0.80,"knight",0.95,"bishop",0.98,"rook",0
 	}
 
 	let name = board.spawnRates[0]
-	let rng = Math.random()
-	for(let i = 0; i < board.spawnRates.length/2;i++){
-		if(rng < board.spawnRates[i*2+1]){name = board.spawnRates[i*2];break;}
+
+	if(board.spawningSequence){
+		for(let i = board.spawningSequence.length-1; i>-1; i--){
+			let spawn = board.spawningSequence[i]
+			let rng = Math.random()
+			if(rng< spawn.rate){
+				name = spawn.type
+				break;
+			}
+		}
+	} else {
+		let rng = Math.random()
+		for(let i = 0; i < board.spawnRates.length/2;i++){
+			if(rng < board.spawnRates[i*2+1]){name = board.spawnRates[i*2];break;}
+		}
 	}
+	
 
 	board.tiles[x+","+y].piece = new piece(name,x,y,"zombies",{"direction":"y+"})
 
@@ -1546,6 +1606,7 @@ function startGameInterval(f){
 function stopGame(){
 	specialRenderIn()
 	tileSubscription.subscriptions = {}
+	board.spawningSequence = undefined
 	board.spawnRange = [0,8]
 	board.arrFuncs.pieceModifiers = []
 	board.AIwait = ()=>{return(10)}
@@ -1556,6 +1617,7 @@ function stopGame(){
 	board.tileExtensionBoarder = 0
 	clearInterval(gameInterval);
 	board.tiles = {}
+	board.pieces = new Set()
 	board.iterations = 0;
 	camera.money = 0;
 	camera.specialRenderOn = true
