@@ -138,7 +138,6 @@ class DBG{
 	}
 }
 
-var dummyPiece = new piece("dummy",undefined,undefined,"zombies")
 
 class camera{
 
@@ -190,6 +189,8 @@ class camera{
 	}
 	static captureStreak = 0;
 }
+var dummyPiece = new piece("dummy",undefined,undefined,"zombies")
+
 
 class music{
 	static Synth1 = new Tone.Synth().toDestination()

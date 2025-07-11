@@ -108,6 +108,8 @@ class piece {
 		// this.fronty=3
 
 		board.pieces.add(this)
+		// camera.particles.push(new explosionR(this.x+0.5,this.y+0.5,
+					// "rgba(120,0,255,0.2)",2.8,9,1))
 
 
 		if(id == "rook"){
@@ -710,7 +712,7 @@ class tileSubscription{
 					}
 				})
 
-			},40)
+			},120)
 					} else if(type == "instant"){
 			if(this.subscriptions[tile]===undefined){return;}
 			this.subscriptions[tile].forEach((piece)=>{
