@@ -1,0 +1,23 @@
+{
+  "short_name": "LopknSK110",
+  "permissions": ["scripting","clipboardRead", "clipboardWrite","storage", "tabs"],
+  "action": {
+    // "default_popup": "popup.html"
+  },
+
+  "manifest_version": 3,
+  "name": "lopkns autoskraper",
+  "version": "1.1.0",
+  "background":{
+    "service_worker":"background.js",
+    "type":"module"
+  },
+  "content_scripts": [
+    {
+      // "matches": ["https://www.youtube.com/*","https://en.wikipedia.org/*","https://www.cell.com/*"],
+      "matches":["https://*/*"],
+      "js": ["sketch.js"]
+    }
+  ]
+
+}
