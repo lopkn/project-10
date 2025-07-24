@@ -19,8 +19,9 @@ document.querySelectorAll("input[type='text']").forEach((e)=>{
 document.addEventListener("keydown",(e)=>{
     if(e.key=="Enter" && enabled){
         f(e)
-    } else {
+    } else if(e.key==="F2"){
         // checkAns()
+        toggle()
     }
 })
 
@@ -38,6 +39,13 @@ var f=(e)=>{
 
 
 console.log("LopknMOBext100 loaded")
+
+
+function toggle(){
+    enabled=!enabled
+    alert("extension now "+enabled?"enabled":"disabled")
+}
+
 }
 
 
