@@ -1497,7 +1497,7 @@ var httpsoptions = {
   cert: fs.readFileSync('keys/cert.pem')
 };
 
-var httpsServer = https.createServer(httpsoptions, app).listen(443);
+var httpsServer = https.createServer(httpsoptions, app).listen(1443); // changed 25-07-25 
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json())

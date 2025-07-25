@@ -18,16 +18,34 @@
 
 var exposed = []
 
+
+var loc = window.location.href
+
+var clickList = []
+
 {
 //lopkns query briefs
 
 class lquery{
     constructor(str){
 
+        if(typeof(str) == "Object"){
+            Object.assign(this,str)
+            this.ans = document.querySelectorAll(str.qstring)
+            return;
+        }
+
         this.qstring = str
-        this.ans = document.querySelectorAll(str)
+
+        try{
+            this.ans = document.querySelectorAll(str)
+        }catch(err){
+            console.log("bull: "+str)
+        }
 
         // this.store = []
+
+        // this.text is used when text is used
 
     }
 
@@ -41,6 +59,13 @@ class lquery{
         console.log("shortened from "+this.ans.length+" to "+newans.length)
 
         this.ans = newans
+
+        if(this.ans.length === 1){
+            console.log("Final query found: "+this.export())
+            this.ans[0].style.backgroundColor = "rgba(125,0,255,0.3)"
+
+        }
+
         return(this)
     }
 
@@ -53,6 +78,15 @@ class lquery{
         // if(str === undefined){str = this.text}
         this.qfem((e)=>{return(e.innerText&&e.innerText.includes(str))})
         return(this)
+    }
+
+
+
+    export(){
+        let obj = {}
+        obj.qstring = this.qstring
+        if(this.text){obj.text = this.text}
+        return(JSON.stringify(obj))
     }
 
 
@@ -85,13 +119,12 @@ document.addEventListener("click",(e)=>{
         e.preventDefault()
         e.stopPropagation()
         e.stopImmediatePropagation()
-
     }
 
 
     lastElement = e.target;
 
-    let sqwery = pqueryify(lastElement)
+    let sqwery = pqueryify(lastElement,Infinity)
     console.log(sqwery)
 
     let qwer = q(sqwery)
@@ -105,11 +138,11 @@ document.addEventListener("click",(e)=>{
         qwer.qtext()
         if(qwer.ans.length != 1){
             console.log("COULDNT QUERY:" + qwer.ans.length)
-            exposed.push(qwer)
         }
 
 
     }
+    clickList.push(qwer.export())
 },true)
 
 
@@ -125,8 +158,9 @@ document.addEventListener("click",(e)=>{
 
 function queryify(elm){
     let qstring = elm.tagName.toLowerCase()
-
+    let reg = /[:.,{}()\[\]@#%^&]/g;
     elm.classList.forEach((e)=>{
+        e = e.replaceAll(reg,(match)=>{return("\\"+match)})
         qstring += "."+e
     })
     return(qstring)

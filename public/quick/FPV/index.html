@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>three.js webgl - geometry - cube</title>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
+    />
+    <!-- <script src="https://threejs.org/build/three.min.js"></script> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r126/three.min.js" integrity="sha512-n8IpKWzDnBOcBhRlHirMZOUvEq2bLRMuJGjuVqbzUJwtTsgwOgK5aS0c1JA647XWYfqvXve8k3PtZdzpipFjgg==" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/three@0.126.0/examples/js/loaders/GLTFLoader.js"></script>
+<!--     <script src="/socket.io/socket.io.js"></script>
+ <script src="https://cdn.socket.io/3.1.3/socket.io.min.js" integrity="sha384-cPwlPLvBTa3sKAgddT6krw0cJat7egBga3DJepJyrLl4Q9/5WLra3rrnMcyTyOnh" crossorigin="anonymous"></script> -->
+
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+  </head>
+
+  <body>
+    <script>
+
+
+let Height = window.innerWidth >window.innerHeight?window.innerHeight:window.innerWidth
+let Width = window.innerWidth >window.innerHeight?window.innerWidth:window.innerHeight
+
+let mouseX = 0
+let mouseY = 0
+
+// onmousemove = (e)=>{mouseX = (e.clientX); mouseY = (e.clientY)}
+document.addEventListener("mousemove",(e)=>{
+  mouseX = e.clientX
+  mouseY = e.clientY
+
+
+})
+
+class ENV{
+  static targetFPS = 60
+  static airFriction = 0.995
+  static grav = 9.81/this.targetFPS/15
+}
+    var downs = {}
+
+class DRONE{
+  static vel = new THREE.Vector3(0,0,0)
+
+  static forces = {
+    "up":0,
+    "pitch":0,
+    "roll":0,
+    "yaw":0
+  }
+
+  static controlSpeed = 0.001
+
+
+  static updatePos(){
+
+
+      if(downs.w){
+        DRONE.forces.pitch += this.controlSpeed
+      } else if(downs.s){
+        DRONE.forces.pitch -= this.controlSpeed
+      } else if(downs.a){
+        DRONE.forces.yaw += this.controlSpeed
+      } else if(downs.d){
+        DRONE.forces.yaw -= this.controlSpeed
+      } else if(downs.e){
+        DRONE.forces.roll -= this.controlSpeed
+      } else if(downs.q){
+        DRONE.forces.roll += this.controlSpeed
+      }
+
+    this.forces.up = (Height/2-mouseY)*0.0001
+    // this.forces.roll = Math.sqrt(Math.abs((Width/2-mouseX)*0.000001))*((Width/2-mouseX)<0?-1:1)
+    this.forces.roll = ((Width/2-mouseX)*0.0001)
+
+    camera.rotateY(this.forces.yaw)
+    camera.rotateZ(this.forces.roll)
+    camera.rotateX(this.forces.pitch)
+
+
+    // const currentQuaternion = camera.quaternion.clone();
+
+    // // Create a quaternion for the pitch rotation around the X-axis
+    // const pitchQuaternion = new THREE.Quaternion();
+    // pitchQuaternion.setFromAxisAngle(new THREE.Vector3(1, 0, 0), this.forces.pitch); 
+
+    // const yawQuaternion = new THREE.Quaternion();
+    // yawQuaternion.setFromAxisAngle(new THREE.Vector3(0, 1, 0), this.forces.yaw); 
+
+    // const rollQuaternion = new THREE.Quaternion();
+    // rollQuaternion.setFromAxisAngle(new THREE.Vector3(0, 0, 1), this.forces.roll); 
+    // currentQuaternion.multiply(yawQuaternion); // Combine the current quaternion with the pitch quaternion
+    // currentQuaternion.multiply(pitchQuaternion); // Combine the current quaternion with the pitch quaternion
+    // currentQuaternion.multiply(rollQuaternion); // Combine the current quaternion with the pitch quaternion
+    // camera.quaternion.copy(currentQuaternion);
+
+
+
+
+    this.vel.add(new THREE.Vector3(0, this.forces.up, 0).applyQuaternion(camera.quaternion))
+
+    this.vel.y -= ENV.grav
+
+
+    this.vel.multiplyScalar(ENV.airFriction)
+    camera.position.add(this.vel)
+  }
+
+}
+
+
+var sensors = {
+  Orientation_a:0,
+  Orientation_b:0,
+  Orientation_g:0
+}
+      var camera, scene, renderer;
+      var mesh;
+
+      init();
+      animate();
+
+      function init() {
+        camera = new THREE.PerspectiveCamera(
+          70,
+          window.innerWidth / window.innerHeight,
+          1,
+          1000000,
+        );
+        camera.position.z = 400;
+
+        scene = new THREE.Scene();
+
+        var geometry = new THREE.BoxGeometry(200, 200, 200);
+        var materials = [
+          new THREE.MeshBasicMaterial({ color: "red" }),
+          new THREE.MeshBasicMaterial({ color: "green" }),
+          new THREE.MeshBasicMaterial({ color: "blue" }),
+          new THREE.MeshBasicMaterial({ color: "cyan" }),
+          new THREE.MeshBasicMaterial({ color: "magenta" }),
+          new THREE.MeshBasicMaterial({ color: "yellow" })
+        ];
+
+        // mesh = new THREE.Mesh(geometry, materials);
+
+        let count = 400
+
+        mesh = new THREE.InstancedMesh( geometry, materials, count );
+        mesh.instanceMatrix.setUsage( THREE.DynamicDrawUsage ); // will be updated every frame
+        scene.add( mesh );
+
+        let dummy = new THREE.Object3D()
+        for ( let x = 0; x < count; x ++ ) {
+            dummy.position.set( Math.random()*20000-10000,Math.random()*20000-10000,Math.random()*20000-10000);
+            dummy.scale.set( 1, 1, 1 );
+            dummy.updateMatrix();
+
+            mesh.setMatrixAt( x, dummy.matrix );
+        }
+
+        scene.add(mesh);
+
+        renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+
+        document.body.appendChild(renderer.domElement);
+
+        window.addEventListener("resize", onWindowResize, false);
+      }
+
+      function onWindowResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      }
+
+      let div = document.createElement("div")
+div.style.position="absolute"
+div.style.color="white"
+div.style.backgroundColor="rgba(0,255,0,0.1)"
+div.style.zIndex="500"
+div.style.top="0px"
+div.style.left="0px"
+div.id = "debugdiv"
+div.style.width = "50%"
+div.style.height = "50%"
+
+document.body.appendChild(div)
+
+
+
+function animate(){
+  requestAnimationFrame(animate)
+
+  if(DRONE){
+    DRONE.updatePos()
+  }
+  renderer.render(scene, camera);
+}
+
+
+function updateRotation(pitch, roll, yaw) {
+
+ const quaternionYaw = new THREE.Quaternion().setFromAxisAngle(
+      new THREE.Vector3(0, 1, 0), // Y-axis
+      yaw
+    );
+    const quaternionPitch = new THREE.Quaternion().setFromAxisAngle(
+      new THREE.Vector3(1, 0, 0), // X-axis
+      pitch
+    );
+    const quaternionRoll = new THREE.Quaternion().setFromAxisAngle(
+      new THREE.Vector3(0, 0, 1), // Z-axis
+      -roll
+    );
+  
+    // Combine the quaternions: Yaw * Pitch * Roll
+    const deviceQuaternion = new THREE.Quaternion()
+      .multiply(quaternionYaw)
+      .multiply(quaternionPitch)
+      .multiply(quaternionRoll);
+  
+    // Reference Quaternion: Rotate -90 degrees around X-axis to align device frame with Three.js frame
+    const referenceQuaternion = new THREE.Quaternion().setFromEuler(
+      new THREE.Euler(-Math.PI / 2, 0, 0, 'YXZ') // -90 degrees around X-axis
+    );
+  
+    // Combine Device Quaternion with Reference Quaternion
+    let finalQuaternion = deviceQuaternion.multiply(referenceQuaternion);
+    finalQuaternion = finalQuaternion.invert()
+    mesh.quaternion.copy(finalQuaternion)
+  
+    // Apply the final quaternion to the camera
+    // mesh.quaternion.copy(finalQuaternion);
+    // mesh.rotation.x += 0.02
+    // mesh.rotation.y += 0.02
+    // camera.quaternion.copy(finalQuaternion);
+}
+
+
+
+
+class LRTC{ //lopkn's boilerplate RTC
+
+  static connectee(){
+    this.type = "connectee"
+    this.localConnection = new RTCPeerConnection()
+ 
+
+    this.localConnection.onicecandidate = e =>  {
+    console.log(" NEW ice candidate!! on localconnection reprinting SDP " )
+     this.latestSDP = JSON.stringify(this.localConnection.localDescription)
+     console.log(this.latestSDP)
+    }
+
+
+    this.sendChannel = this.localConnection.createDataChannel("sendChannel");
+    this.sendChannel.onmessage = this.recieve
+      this.sendChannel.onopen = e => console.log("open!!!!");
+      this.sendChannel.onclose =e => console.log("closed!!!!!!");
+
+
+    this.localConnection.createOffer().then(o => this.localConnection.setLocalDescription(o) )
+  }
+
+  static connecteeAnswer(answer){
+    this.localConnection.setRemoteDescription(answer).then(a=>console.log("done"))
+  }
+
+  static async connector(offer){
+    this.remoteConnection = new RTCPeerConnection()
+
+    this.remoteConnection.onicecandidate = e =>  {
+    console.log(" NEW ice candidnat!! on localconnection reprinting SDP ")
+     this.latestSDP = JSON.stringify(this.remoteConnection.localDescription)
+     console.log(this.latestSDP)
+    }
+
+     
+    this.remoteConnection.ondatachannel= e => {
+
+          this.receiveChannel = e.channel;
+          this.receiveChannel.onmessage = this.recieve
+          this.receiveChannel.onopen = e => console.log("open!!!!");
+          this.receiveChannel.onclose =e => console.log("closed!!!!!!");
+          this.remoteConnection.channel = this.receiveChannel;
+
+    }
+
+
+    this.remoteConnection.setRemoteDescription(offer).then(a=>console.log("done"))
+
+    //create answer
+    await this.remoteConnection.createAnswer().then(a => this.remoteConnection.setLocalDescription(a)).then(a=>
+    console.log(JSON.stringify(this.remoteConnection.localDescription)))
+  }
+
+
+  static recieve(e){
+    console.log("recieved: "+e.data)
+    this.lastMessage = e
+  }
+
+  static send(e){
+    if(this.type==="connectee"){
+      this.sendChannel.send(e)
+    } else {
+      this.remoteConnection.channel.send(e)
+    }
+  }
+
+}
+
+
+
+
+
+class LCanvas{ //lopkns template canvas
+  constructor(w=100,h=100,id=("LCanvas-"+Math.random())){
+    this.canvas = document.createElement("canvas")
+    this.canvas.id = id
+    this.ctx = this.canvas.getContext("2d")
+    this.canvas.style.position = "absolute"
+    this.canvas.style.top = "0px"
+    this.canvas.style.left = "0px"
+    this.canvas.zIndex = "1500"
+    this.canvas.width = w
+    this.canvas.height = h
+    this.ctx.fillStyle = "black"
+    this.ctx.fillRect(0,0,this.canvas.width,this.canvas.height)
+    document.body.appendChild(this.canvas)
+    return(this)
+  }
+
+  fitScreenSize(){
+    this.canvas.width = window.innerWidth
+    this.canvas.height = window.innerHeight
+  }
+
+  clear(){
+    this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height)
+  }
+
+  oneTimeDown(f){ // pass in a function for what to do with one click
+    this.canvas.addEventListener("mousedown",f,{once:true})
+  }
+
+  getPixelRGB(x,y){
+    let d = this.ctx.getImageData(x, y, 1, 1).data
+    return(d)
+  }
+
+
+}
+
+
+function distance(x1,y1,x2,y2) {
+    let a = x2-x1
+    let b = y2-y1
+  return(Math.sqrt(a*a+b*b))
+}
+
+
+var frameFuncs = []
+
+function mainLoop(time){
+  frameFuncs.forEach((e)=>{
+    e(time)
+  })
+  requestAnimationFrame(mainLoop)
+}
+
+function oneTimeTrustedButton(f){
+  let button = document.createElement("button")
+  button.style.position = "absolute"
+  button.style.backgroundColor = "purple"
+  button.innerText = "one time verifier"
+  button.style.top = button.style.left = "0px"
+
+  button.style.zIndex = 5000
+  button.addEventListener("click",(e)=>{f(e);button.remove()},{once:true})
+  document.body.appendChild(button)
+}
+
+
+function Lvideo(type="screen",append=false){
+    let video = document.createElement('video')
+    video.id = "Lvideo-"+Math.random()
+    video.setAttribute("autoplay","autoplay")
+    if(append){
+      document.body.append(video)
+    }
+    if(type=="screen"){
+      oneTimeTrustedButton(async function() {let stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });video.srcObject = stream;})
+    } else {
+      oneTimeTrustedButton(async function() {let stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });video.srcObject = stream;})
+    }
+    return(video)
+  }
+
+
+//oneTimeTrustedButton(Lvideo)
+
+
+function copyToCanvas(img,Lcan){
+  Lcan.ctx.drawImage(img, 0, 0, Lcan.canvas.width, Lcan.canvas.height);
+}
+
+function setDefaultAbsolute(elm){
+  elm.style.position = "absolute"
+  elm.style.top = elm.style.left = "0px"
+}
+
+
+
+
+class Lcolorf{ //lopkn's color functions
+  static dictify(arr){ //turns arrays of numbers into arrays of dicts
+    let outarr = []
+    for(let i = 0; i < arr.length; i+=4){
+      outarr.push({"r":arr[0],"g":arr[1],"b":arr[2],"a":arr[3]})
+    }
+    return(outarr)
+  }
+  static colorDistA(arr1,arr2){//only works on Arrays of numbers //arr2 should be same length or shorter
+    let dst = 0
+    for(let i = 0; i < arr2.length; i++){
+      dst += Math.abs(arr1[i]-arr2[i])
+    }
+    return(dst)
+  }
+}
+
+class LPerceptron{ //it should have input name, input value. each input should have a multiplier towards a result
+  constructor(){
+    this.outputInputpair = {"testOutput":{"testInput":2}}
+    this.inputs = {}
+  }
+  input(dict){
+    this.inputs = dict
+  }
+  generateOutput(item){
+    let result = 0
+    item = this.outputInputpair[item]
+    let objk = Object.keys(item)
+    for(let i = 0; i < objk.length; i++){
+      let inputting = objk[i]
+      result += this.input[inputting] * item[inputting]
+    }
+    return(result)
+  }
+  learn(item,expected){
+    item = this.outputInputpair[item]
+    let objk = Object.keys(item)
+    for(let i = 0; i < objk.length; i++){
+      let inputting = objk[i]
+      this.input[inputting] += item[inputting] * (expected?1:-1)
+    }
+  }
+}
+
+function normalRandom(mean, stderr) {
+    const u1 = Math.random();
+    const u2 = Math.random();
+
+    const z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
+    return z0 * stderr + mean;
+}
+
+/* MUSIC/TONE
+
+var scene = {
+  "sounds":true,
+  "interval":0.3,
+  "beatsPerBar":4
+}
+
+function soundInit(){
+    Tone.Transport.start();
+    Tone.Transport.scheduleRepeat((time) => {
+        music.runbar(time)
+    }, scene.interval*scene.beatsPerBar)
+
+    { let audio = new Tone.Sampler({
+      urls: {
+        "C4":"./../../soundEffects/sinC4.mp3",
+        "F3":"./../../soundEffects/sinF3.mp3",
+      },
+    }).toDestination();
+        SOUND["sinC4"] = audio
+
+    }
+      arr.forEach((E,i)=>{
+        let e = "./../../soundEffects/"+E+".mp3"
+        let audio = new Tone.Sampler({
+      urls: {
+        "C4":e,
+      },
+    }).toDestination();
+        SOUND[E] = audio
+      })
+}
+
+function mtn(midiNumber) {
+    return Tone.Frequency(midiNumber, "midi");
+}
+
+class music{
+  static counter = 0
+  static synth = new Tone.PolySynth(Tone.Synth,8).toDestination(); // Connect to audio output
+  static eq = new Tone.EQ3(-10, 3, 0);
+  static reverb = new Tone.Reverb({
+    decay: 20, // Duration of the reverb tail
+    preDelay: 0.3,
+    wet: 0.95,
+    input:1,
+    output:1
+}).toDestination();
+  static bell = new Tone.Sampler({
+  urls: {
+    "C4":"../epcounter/untitled.mp3",
+  },
+}).toDestination();
+  static kick = new Tone.Sampler({
+  urls: {
+    "C4":"../epcounter/kick.mp3",
+  },
+}).toDestination();
+  static click = new Tone.Sampler({
+  urls: {
+    "C4":"../epcounter/test.mp3",
+  },
+}).toDestination();
+  static drumSynth = new Tone.MembraneSynth().toDestination();
+  static echo = new Tone.PingPongDelay(scene.interval*2, scene.interval*2).toDestination();
+  static playBell(note,vel=1,delay=0){
+      this.bell.triggerAttackRelease(mtn(note),1.7,Tone.now()+delay,vel);
+  }
+  static playFile(file,note,vel=1,delay=0){
+    this.sounds[file].triggerAttackRelease(mtn(note),1.7,Tone.now()+delay,vel);
+  }
+
+  static checkCollide(note,arr,dist=1){
+
+    let mod = note%12
+    for(let i = 0; i < arr.length; i++){
+      let resd = Math.abs(arr[i]-mod)%12
+      if(resd == dist || resd == 12-dist){
+        return(true)
+      }
+    }
+    return(false)
+  }
+
+  static checkCollider(note,dict,dist=1,oct=1){
+    for(let i = 0; i < oct+1; i++){
+      if(dict[note+dist+i*12] === true){return(true)}
+      if(dict[note-dist+i*12] === true){return(true)}
+      if(dict[note+dist-i*12] === true){return(true)}
+      if(dict[note-dist-i*12] === true){return(true)}
+    }
+    return(false)
+  }
+
+
+
+}
+
+music.bell.connect(music.reverb)
+music.bell.connect(music.echo)
+music.bell.connect(music.eq)
+music.bell.set({volume:-20})
+music.synth.set({
+    oscillator: {
+        type: 'sine4' 
+    },
+    envelope: {
+        attack: 0.005,
+        decay: 0.5,
+        sustain:1,
+        release:2
+    },
+    volume:-60
+})
+*/
+
+
+
+
+
+
+
+
+function handleOrientation(event) {
+  updateFieldIfNotNull('Orientation_a', event.alpha);
+  updateFieldIfNotNull('Orientation_b', event.beta);
+  updateFieldIfNotNull('Orientation_g', event.gamma);
+  incrementEventCount();
+}
+
+function incrementEventCount(){
+  // let counterElement = document.getElementById("num-observed-events")
+  // let eventCount = parseInt(counterElement.innerHTML)
+  // counterElement.innerHTML = eventCount + 1;
+}
+
+
+let vx, vy, vz;
+vx = vy = vz = 0
+
+
+function updateFieldIfNotNull(fieldName, value, precision=10){
+  if (value != null)
+    sensors[fieldName] = value.toFixed(precision);
+}
+
+function handleMotion(event) {
+  updateFieldIfNotNull('Accelerometer_gx', event.accelerationIncludingGravity.x);
+  updateFieldIfNotNull('Accelerometer_gy', event.accelerationIncludingGravity.y);
+  updateFieldIfNotNull('Accelerometer_gz', event.accelerationIncludingGravity.z);
+
+  // vx += parseFloat(event.acceleration.x)
+  // vy += parseFloat(event.acceleration.y)
+  // vz += parseFloat(event.acceleration.z)
+
+  // vx *= 0.9
+  // vy *= 0.99
+  // vz *= 0.99
+
+
+  // velocity = new THREE.Vector3(0, vy, 0)
+  // localVelocity = velocity.clone().applyQuaternion(camera.quaternion);
+  // camera.position.add(localVelocity.multiplyScalar(1))
+
+  // camera.position.x += -vx
+  // camera.position.y += vy
+  // camera.position.z += vz
+
+  updateFieldIfNotNull('Accelerometer_x', event.acceleration.x);
+  updateFieldIfNotNull('Accelerometer_y', event.acceleration.y);
+  updateFieldIfNotNull('Accelerometer_z', event.acceleration.z);
+
+  updateFieldIfNotNull('Accelerometer_i', event.interval, 2);
+
+  updateFieldIfNotNull('Gyroscope_z', event.rotationRate.alpha);
+  updateFieldIfNotNull('Gyroscope_x', event.rotationRate.beta);
+  updateFieldIfNotNull('Gyroscope_y', event.rotationRate.gamma);
+  incrementEventCount();
+}
+
+// let is_running = false;
+// let demo_button = document.getElementById("start_demo");
+// oneTimeTrustedButton(function(e) {
+//   e.preventDefault();
+  
+//   // Request permission for iOS 13+ devices
+//   if (
+//     DeviceMotionEvent &&
+//     typeof DeviceMotionEvent.requestPermission === "function"
+//   ) {
+//     DeviceMotionEvent.requestPermission();
+//   }
+  
+//   if (is_running){
+//     window.removeEventListener("devicemotion", handleMotion);
+//     window.removeEventListener("deviceorientation", handleOrientation);
+//     // demo_button.innerHTML = "Start demo";
+//     // demo_button.classList.add('btn-success');
+//     // demo_button.classList.remove('btn-danger');
+//     is_running = false;
+//   }else{
+//     window.addEventListener("devicemotion", handleMotion);
+//     window.addEventListener("deviceorientation", handleOrientation);
+//     // document.getElementById("start_demo").innerHTML = "Stop demo";
+//     // demo_button.classList.remove('btn-success');
+//     // demo_button.classList.add('btn-danger');
+//     is_running = true;
+//   }
+// });
+
+
+
+
+
+
+
+    document.addEventListener("keydown",(e)=>{
+      if(e.repeat){return}
+      // if(e.key == "w"){
+      //   DRONE.forces.pitch += 0.01
+      // } else if(e.key == "s"){
+      //   DRONE.forces.pitch -= 0.01
+      // } else if(e.key == "a"){
+      //   DRONE.forces.yaw += 0.01
+      // } else if(e.key == "d"){
+      //   DRONE.forces.yaw -= 0.01
+      // } else if(e.key == "e"){
+      //   DRONE.forces.roll -= 0.01
+      // } else if(e.key == "q"){
+      //   DRONE.forces.roll += 0.01
+      // }
+      downs[e.key] = true
+    })
+
+    document.addEventListener("keyup",(e)=>{
+      if(e.repeat){return}
+      // if(e.key == "w"){
+      //   DRONE.forces.pitch += -0.01
+      // } else if(e.key == "s"){
+      //   DRONE.forces.pitch -= -0.01
+      // } else if(e.key == "a"){
+      //   DRONE.forces.yaw += -0.01
+      // } else if(e.key == "d"){
+      //   DRONE.forces.yaw -= -0.01
+      // } else if(e.key == "e"){
+      //   DRONE.forces.roll -= -0.01
+      // } else if(e.key == "q"){
+      //   DRONE.forces.roll += -0.01
+      // }
+      downs[e.key] = false
+    })
+
+
+
+
+
+
+    </script>
+  </body>
+</html>
+
