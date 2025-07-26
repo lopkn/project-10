@@ -106,7 +106,7 @@ var light
 class ENV{
   static targetFPS = 60
   static airFriction = 0.9995
-  static grav = 9.81/this.targetFPS*3
+  static grav = 9.81/this.targetFPS*7
 }
     var downs = {}
 
@@ -128,11 +128,11 @@ class DRONE{
 
 
       if(downs.w){
-        // DRONE.forces.pitch += this.controlSpeed * this.invertedControls
-        DRONE.forces.up += this.controlSpeed * 345/4
+        DRONE.forces.pitch += this.controlSpeed * this.invertedControls
+        // DRONE.forces.up += this.controlSpeed * 345/4
       }  if(downs.s){
-        // DRONE.forces.pitch -= this.controlSpeed* this.invertedControls
-        DRONE.forces.up -= this.controlSpeed * 345/4
+        DRONE.forces.pitch -= this.controlSpeed* this.invertedControls
+        // DRONE.forces.up -= this.controlSpeed * 345/4
       } if(downs.a){
         DRONE.forces.yaw += this.controlSpeed
       }  if(downs.d){
@@ -156,9 +156,9 @@ class DRONE{
     // }
       this.forces.up *= 0.95
 
-    // this.forces.up = (Height/2-mouseY)*0.001
+    this.forces.up = (Height/2-mouseY)*0.005
     // this.forces.roll = Math.sqrt(Math.abs((Width/2-mouseX)*0.000001))*((Width/2-mouseX)<0?-1:1)
-    this.forces.pitch = ((Height/2-mouseY)*0.00007)
+    // this.forces.pitch = ((Height/2-mouseY)*0.00007)
     this.forces.roll = ((Width/2-mouseX)*0.00007)
 
     camera.rotateY(this.forces.yaw)
@@ -218,7 +218,8 @@ var sensors = {
           1,
           1000000,
         );
-        camera.position.z = 2400;
+        camera.position.z = 400;
+        camera.position.y = 1200;
 
         scene = new THREE.Scene();
 
@@ -235,7 +236,7 @@ var sensors = {
 
         // mesh = new THREE.Mesh(geometry, materials);
 
-        light = new THREE.PointLight( 0xffffff, 100, 100000 , 0.5 );
+        light = new THREE.PointLight( 0xffffff, 300, 100000 , 0.5 );
         light.position.set( 50, 50, 50 );
         scene.add( light );
 
