@@ -52,6 +52,7 @@
     precision highp float;
 
     uniform float sineTime;
+    uniform float time;
 
     uniform mat4 modelViewMatrix;
     uniform mat4 projectionMatrix;
@@ -65,12 +66,21 @@
     varying vec3 vPosition;
     varying vec4 vColor;
 
+    vec3 quat_transform(vec4 q, vec3 v) {
+      return v + 2.0 * cross(q.xyz, cross(q.xyz, v) + q.w * v);
+    }
+
     void main(){
 
-      vPosition = offset * max( abs( sineTime * 2.0 + 1.0 ), 0.5 ) + position;
-      vec4 orientation = normalize( mix( orientationStart, orientationEnd, sineTime ) );
+      // vPosition = offset * max( abs( sineTime * 2.0 + 1.0 ), 0.5 ) + position;
+      vPosition = offset + quat_transform(orientationStart,position);
+      vec4 orientation = normalize( mix( orientationStart, orientationEnd, 1.0 ) );
       vec3 vcV = cross( orientation.xyz, vPosition );
-      vPosition = vcV * ( 2.0 * orientation.w ) + ( cross( orientation.xyz, vcV ) * 2.0 + vPosition );
+      //vPosition = vcV * ( 1.0 * orientation.w ) + ( cross( orientation.xyz, vcV ) * 1.0 + vPosition );
+      //vPosition = vcV * ( 2.0 * orientation.w ) + ( cross( orientation.xyz, vcV ) * 2.0 + vPosition );
+
+      //vPosition = cross(orientation.xyz,vcV) + vPosition;
+
 
       vColor = color;
 
@@ -92,7 +102,8 @@
     void main() {
 
       vec4 color = vec4( vColor );
-      color.r += sin( vPosition.x * 10.0 + time ) * 0.5;
+      //color.r += sin( 1.0 * time  + 3.14) * 1200.5;
+      color.r = time;
 
       gl_FragColor = color;
 
@@ -278,86 +289,84 @@ var sensors = {
   Orientation_b:0,
   Orientation_g:0
 }
-      var camera, scene, renderer;
-      var mesh;
-
-      init();
-      animate();
-
-      function init() {
-        camera = new THREE.PerspectiveCamera(
-          70,
-          window.innerWidth / window.innerHeight,
-          1,
-          10000000,
-        );
-        camera.position.z = 1400;
-        camera.position.y = 1200;
-        camera.position.x = -21200;
-
-        // camera.position.z = 2
-        // camera.position.x = 0
-        // camera.position.y = 0
-
-        scene = new THREE.Scene();
-
-        renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setPixelRatio(window.devicePixelRatio);
-        renderer.setSize(window.innerWidth, window.innerHeight);
-
-        document.body.appendChild(renderer.domElement);
-
-        var geometry = new THREE.BoxGeometry(200, 200, 200);
-        var materials = [
-          new THREE.MeshStandardMaterial({ color: "#AA5555" }),
-          new THREE.MeshStandardMaterial({ color: "#55AA55" }),
-          new THREE.MeshStandardMaterial({ color: "#AAAAFF" }),
-          new THREE.MeshStandardMaterial({ color: "#AAFFFF" }),
-          new THREE.MeshStandardMaterial({ color: "#FFAAFF" }),
-          new THREE.MeshStandardMaterial({ color: "#FFFFAA" })
-        ];
-        // var materials = new THREE.MeshStandardMaterial({ color: 0xffff00 })
-
-        // mesh = new THREE.Mesh(geometry, materials);
-
-        light = new THREE.PointLight( 0xffffff, 300, 100000 , 0.5 );
-        light.position.set( 50, 50, 50 );
-        scene.add( light );
-
-        camera.rotateY(Math.PI*3/2)
+var camera, scene, renderer;
+var mesh, mesh2;
 
 
 
+function init() {
+  camera = new THREE.PerspectiveCamera(
+    70,
+    window.innerWidth / window.innerHeight,
+    1,
+    10000000,
+  );
+  camera.position.z = 1400;
+  camera.position.y = 1200;
+  camera.position.x = -21200;
 
+  // camera.position.z = 2
+  // camera.position.x = 0
+  // camera.position.y = 0
 
+  scene = new THREE.Scene();
 
-        const edges = new THREE.EdgesGeometry(geometry);
-        const lineMaterial = new THREE.LineBasicMaterial({ color: 0x000000 }); // Material for the outline
+  renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.setSize(window.innerWidth, window.innerHeight);
 
-        let count = 21400
+  document.body.appendChild(renderer.domElement);
 
-        mesh = new THREE.InstancedMesh( geometry, materials, count );
-        mesh.instanceMatrix.setUsage( THREE.DynamicDrawUsage ); // will be updated every frame
-        scene.add(mesh);
+  var geometry = new THREE.BoxGeometry(200, 200, 200);
+  var materials = [
+    new THREE.MeshStandardMaterial({ color: "#AA5555" }),
+    new THREE.MeshStandardMaterial({ color: "#55AA55" }),
+    new THREE.MeshStandardMaterial({ color: "#AAAAFF" }),
+    new THREE.MeshStandardMaterial({ color: "#AAFFFF" }),
+    new THREE.MeshStandardMaterial({ color: "#FFAAFF" }),
+    new THREE.MeshStandardMaterial({ color: "#FFFFAA" })
+  ];
+  // var materials = new THREE.MeshStandardMaterial({ color: 0xffff00 })
+
+  // mesh = new THREE.Mesh(geometry, materials);
+
+  light = new THREE.PointLight( 0xffffff, 300, 100000 , 0.5 );
+  light.position.set( 50, 50, 50 );
+  scene.add( light );
+
+  camera.rotateY(Math.PI*3/2)
 
 
 
 
 
 
-      const vector = new THREE.Vector4();
-      const positions = [];
-      const offsets = [];
-      const colors = [];
-      const orientationsStart = [];
-      const orientationsEnd = [];
+  const edges = new THREE.EdgesGeometry(geometry);
+  const lineMaterial = new THREE.LineBasicMaterial({ color: 0x000000 }); // Material for the outline
 
-      let size = 225
+  let count = 21400
 
-      positions.push( size, -size, 0 );
-      positions.push( -size, size, 0 );
-      positions.push( 0, 0, size );
+  mesh = new THREE.InstancedMesh( geometry, materials, count );
+  mesh.instanceMatrix.setUsage( THREE.DynamicDrawUsage ); // will be updated every frame
+  scene.add(mesh);
 
+
+
+
+
+
+  const vector = new THREE.Vector4();
+  const positions = [];
+  const offsets = [];
+  const colors = [];
+  const orientationsStart = [];
+  const orientationsEnd = [];
+
+  let size = 225
+
+  positions.push( size, -size, 0 );
+  positions.push( -size, size, 0 );
+  positions.push( 0, 0, size );
 
 
 
@@ -365,80 +374,81 @@ var sensors = {
 
 
 
+  let dummy = new THREE.Object3D()
+  for ( let i = 0; i < count; i ++ ) {
+      let [x,y,z] = [16*Math.random()*20000-10000, 2*Math.random()*20000-10000, 2*Math.random()*20000-10000];
+      dummy.position.set(x,y,z);
+      dummy.scale.set( 1 + Math.abs(normalRandom(1,3)), 1 + Math.abs(normalRandom(1,3)), 1 + Math.abs(normalRandom(1,3)) );
+      dummy.updateMatrix();
 
-        let dummy = new THREE.Object3D()
-        for ( let i = 0; i < count; i ++ ) {
-            let [x,y,z] = [16*Math.random()*20000-10000, 2*Math.random()*20000-10000, 2*Math.random()*20000-10000];
-            dummy.position.set(x,y,z);
-            dummy.scale.set( 1 + Math.abs(normalRandom(1,3)), 1 + Math.abs(normalRandom(1,3)), 1 + Math.abs(normalRandom(1,3)) );
-            dummy.updateMatrix();
-
-            mesh.setMatrixAt( i, dummy.matrix );
-
-
-
-            // offsets
-            offsets.push(x,y,z);
-            // offsets.push( Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5 );
-            // colors
-            colors.push( Math.random(), Math.random(), Math.random());
-            // colors.push( Math.random(), Math.random(), Math.random(), Math.random() );
-            // orientation start
-            vector.set( Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1 );
-            vector.normalize();
-            orientationsStart.push( vector.x, vector.y, vector.z, vector.w );
-            // orientation end
-            vector.set( Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1 );
-            vector.normalize();
-            orientationsEnd.push( vector.x, vector.y, vector.z, vector.w );
-        }
-
-
-      const geometry2 = new THREE.InstancedBufferGeometry();
-      
-      geometry2.instanceCount = count; // set so its initialized for dat.GUI, will be set in first draw otherwise
-      geometry2.setAttribute( 'position', new THREE.Float32BufferAttribute( positions, 3 ) );
-      geometry2.setAttribute( 'offset', new THREE.InstancedBufferAttribute( new Float32Array( offsets ), 3 ) );
-      geometry2.setAttribute( 'color', new THREE.InstancedBufferAttribute( new Float32Array( colors ), 4 ) );
-      geometry2.setAttribute( 'orientationStart', new THREE.InstancedBufferAttribute( new Float32Array( orientationsStart ), 4 ) );
-      geometry2.setAttribute( 'orientationEnd', new THREE.InstancedBufferAttribute( new Float32Array( orientationsEnd ), 4 ) );
+      mesh.setMatrixAt( i, dummy.matrix );
 
 
 
-      // const mesh2 = new THREE.Mesh( geometry2, new THREE.MeshStandardMaterial({color : 0xffffff }) );
-      const mesh2 = new THREE.Mesh(geometry2, new THREE.RawShaderMaterial( {
-
-        uniforms: {
-          'time': { value: 1.0 },
-          'sineTime': { value: 1.0 }
-        },
-        vertexShader: document.getElementById( 'vertexShader' ).textContent,
-        fragmentShader: document.getElementById( 'fragmentShader' ).textContent,
-        side: THREE.DoubleSide,
-        forceSinglePass: true,
-        transparent: false
-
-      } ))
-      geometry2.computeBoundingSphere()
-      geometry2.boundingSphere.radius = Infinity
-      window.gem = geometry2
-      scene.add( mesh2 );
+      // offsets
+      [x,y,z] = [16*Math.random()*20000-10000, 2*Math.random()*20000-10000, 2*Math.random()*20000-10000];
+      offsets.push(x,y,z);
+      // offsets.push( Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5 );
+      // colors
+      colors.push( Math.random(), Math.random(), Math.random(),1);
+      // colors.push( Math.random(), Math.random(), Math.random(), Math.random() );
+      // orientation start
+      vector.set( Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1 );
+      vector.normalize();
+      orientationsStart.push( vector.x, vector.y, vector.z, vector.w );
+      // orientation end
+      vector.set( Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1 );
+      vector.normalize();
+      orientationsEnd.push( vector.x, vector.y, vector.z, vector.w );
+  }
 
 
+const geometry2 = new THREE.InstancedBufferGeometry();
+
+geometry2.instanceCount = count; // set so its initialized for dat.GUI, will be set in first draw otherwise
+geometry2.setAttribute( 'position', new THREE.Float32BufferAttribute( positions, 3 ) );
+geometry2.setAttribute( 'offset', new THREE.InstancedBufferAttribute( new Float32Array( offsets ), 3 ) );
+geometry2.setAttribute( 'color', new THREE.InstancedBufferAttribute( new Float32Array( colors ), 4 ) );
+geometry2.setAttribute( 'orientationStart', new THREE.InstancedBufferAttribute( new Float32Array( orientationsStart ), 4 ) );
+geometry2.setAttribute( 'orientationEnd', new THREE.InstancedBufferAttribute( new Float32Array( orientationsEnd ), 4 ) );
+
+
+
+// const mesh2 = new THREE.Mesh( geometry2, new THREE.MeshStandardMaterial({color : 0xffffff }) );
+mesh2 = new THREE.Mesh(geometry2, new THREE.RawShaderMaterial( {
+
+  uniforms: {
+    'time': { value: 1.0 },
+    'sineTime': { value: 1.0 }
+  },
+  vertexShader: document.getElementById( 'vertexShader' ).textContent,
+  fragmentShader: document.getElementById( 'fragmentShader' ).textContent,
+  side: THREE.DoubleSide,
+  forceSinglePass: true,
+  transparent: false
+
+} ))
+geometry2.computeBoundingSphere()
+geometry2.boundingSphere.radius = Infinity
+window.gem = geometry2
+scene.add( mesh2 );
+
+
+window.mesh2 = mesh2
 
 
 
 
 
-        window.addEventListener("resize", onWindowResize, false);
-      }
+  window.addEventListener("resize", onWindowResize, false);
+}
 
-      function onWindowResize() {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
+function onWindowResize() {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
 
-        renderer.setSize(window.innerWidth, window.innerHeight);
-      }
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
 
 
 
@@ -446,6 +456,8 @@ var sensors = {
 
 
 
+
+var startDate = Date.now()
 
 function animate(){
   requestAnimationFrame(animate)
@@ -466,9 +478,12 @@ function animate(){
   }
 
 
+  mesh2.material.uniforms['time'].value = Math.sin((Date.now()-startDate) * 0.0005);
   renderer.render(scene, camera);
 }
 
+init();
+animate();
 
 function updateRotation(pitch, roll, yaw) {
 
