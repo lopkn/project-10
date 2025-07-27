@@ -48,6 +48,58 @@
     }
     </script>
 
+      <script id="vertexShader" type="x-shader/x-vertex">
+    precision highp float;
+
+    uniform float sineTime;
+
+    uniform mat4 modelViewMatrix;
+    uniform mat4 projectionMatrix;
+
+    attribute vec3 position;
+    attribute vec3 offset;
+    attribute vec4 color;
+    attribute vec4 orientationStart;
+    attribute vec4 orientationEnd;
+
+    varying vec3 vPosition;
+    varying vec4 vColor;
+
+    void main(){
+
+      vPosition = offset * max( abs( sineTime * 2.0 + 1.0 ), 0.5 ) + position;
+      vec4 orientation = normalize( mix( orientationStart, orientationEnd, sineTime ) );
+      vec3 vcV = cross( orientation.xyz, vPosition );
+      vPosition = vcV * ( 2.0 * orientation.w ) + ( cross( orientation.xyz, vcV ) * 2.0 + vPosition );
+
+      vColor = color;
+
+      gl_Position = projectionMatrix * modelViewMatrix * vec4( vPosition, 1.0 );
+
+    }
+
+  </script>
+
+  <script id="fragmentShader" type="x-shader/x-fragment">
+
+    precision highp float;
+
+    uniform float time;
+
+    varying vec3 vPosition;
+    varying vec4 vColor;
+
+    void main() {
+
+      vec4 color = vec4( vColor );
+      color.r += sin( vPosition.x * 10.0 + time ) * 0.5;
+
+      gl_FragColor = color;
+
+    }
+
+  </script>
+
     <script type="module">
 
 
@@ -110,8 +162,18 @@ class ENV{
 }
     var downs = {}
 
+const raycaster = new THREE.Raycaster();
+
+
 class DRONE{
   static vel = new THREE.Vector3(0,0,0)
+
+  static controls = {
+    "up":0,
+    "pitch":0,
+    "roll":0,
+    "yaw":0
+  }
 
   static forces = {
     "up":0,
@@ -121,6 +183,7 @@ class DRONE{
   }
 
   static controlSpeed = 0.0008
+  static controlStrength = 0.0016
 
   static invertedControls = 1
 
@@ -128,38 +191,45 @@ class DRONE{
 
 
       if(downs.w){
-        DRONE.forces.pitch += this.controlSpeed * this.invertedControls
+        DRONE.controls.pitch += this.controlSpeed * this.invertedControls
         // DRONE.forces.up += this.controlSpeed * 345/4
       }  if(downs.s){
-        DRONE.forces.pitch -= this.controlSpeed* this.invertedControls
+        DRONE.controls.pitch -= this.controlSpeed* this.invertedControls
         // DRONE.forces.up -= this.controlSpeed * 345/4
       } if(downs.a){
-        DRONE.forces.yaw += this.controlSpeed
+        DRONE.controls.yaw += this.controlSpeed
       }  if(downs.d){
-        DRONE.forces.yaw -= this.controlSpeed
+        DRONE.controls.yaw -= this.controlSpeed
       }  if(downs.e){
-        DRONE.forces.yaw -= this.controlSpeed
+        DRONE.controls.yaw -= this.controlSpeed
       }  if(downs.q){
-        DRONE.forces.yaw += this.controlSpeed
+        DRONE.controls.yaw += this.controlSpeed
       }
 
     div.innerText = JSON.stringify(this.forces)
 
 
-    this.forces.yaw *= 0.995
-    this.forces.pitch *= 0.995
+    this.controls.yaw *= 0.995
+    this.controls.pitch *= 0.995
 
     // if(!downs.s && !downs.w){
     //   this.forces.up *= 0.95
     // } else {
     //   this.forces.up *= 0.99
     // }
-      this.forces.up *= 0.95
+      this.controls.up *= 0.95
 
-    this.forces.up = (Height/2-mouseY)*0.005
+    this.controls.up = (Height/2-mouseY)*0.005
     // this.forces.roll = Math.sqrt(Math.abs((Width/2-mouseX)*0.000001))*((Width/2-mouseX)<0?-1:1)
     // this.forces.pitch = ((Height/2-mouseY)*0.00007)
-    this.forces.roll = ((Width/2-mouseX)*0.00007)
+    this.controls.roll = ((Width/2-mouseX)*0.00007)
+
+
+    Object.keys(this.controls).forEach((e)=>{
+      if(e==="up"){this.forces[e] = this.controls[e];return}
+      let mns = this.controls[e]-this.forces[e]
+      this.forces[e] += Math.min(Math.abs(mns),this.controlStrength) * Math.sign(mns)
+    })
 
     camera.rotateY(this.forces.yaw)
     camera.rotateZ(this.forces.roll)
@@ -193,6 +263,9 @@ class DRONE{
     this.vel.multiplyScalar(ENV.airFriction)
     camera.position.add(this.vel)
     light.position.set(camera.position.x,camera.position.y,camera.position.z)
+    raycaster.set(camera.position,this.vel.clone().normalize())
+    // raycaster.set(camera.position,camera.getWorldDirection(new THREE.Vector3))
+    div.innerText += JSON.stringify(this.vel)
   }
 
 }
@@ -216,12 +289,23 @@ var sensors = {
           70,
           window.innerWidth / window.innerHeight,
           1,
-          1000000,
+          10000000,
         );
-        camera.position.z = 400;
+        camera.position.z = 1400;
         camera.position.y = 1200;
+        camera.position.x = -21200;
+
+        // camera.position.z = 2
+        // camera.position.x = 0
+        // camera.position.y = 0
 
         scene = new THREE.Scene();
+
+        renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+
+        document.body.appendChild(renderer.domElement);
 
         var geometry = new THREE.BoxGeometry(200, 200, 200);
         var materials = [
@@ -240,72 +324,107 @@ var sensors = {
         light.position.set( 50, 50, 50 );
         scene.add( light );
 
+        camera.rotateY(Math.PI*3/2)
+
+
+
+
+
+
+        const edges = new THREE.EdgesGeometry(geometry);
+        const lineMaterial = new THREE.LineBasicMaterial({ color: 0x000000 }); // Material for the outline
+
         let count = 21400
 
         mesh = new THREE.InstancedMesh( geometry, materials, count );
         mesh.instanceMatrix.setUsage( THREE.DynamicDrawUsage ); // will be updated every frame
-        scene.add( mesh );
+        scene.add(mesh);
+
+
+
+
+
+
+      const vector = new THREE.Vector4();
+      const positions = [];
+      const offsets = [];
+      const colors = [];
+      const orientationsStart = [];
+      const orientationsEnd = [];
+
+      let size = 225
+
+      positions.push( size, -size, 0 );
+      positions.push( -size, size, 0 );
+      positions.push( 0, 0, size );
+
+
+
+
+
+
+
+
 
         let dummy = new THREE.Object3D()
-        for ( let x = 0; x < count; x ++ ) {
-            dummy.position.set( 6*Math.random()*20000-10000,2*Math.random()*20000-10000,2*Math.random()*20000-10000);
+        for ( let i = 0; i < count; i ++ ) {
+            let [x,y,z] = [16*Math.random()*20000-10000, 2*Math.random()*20000-10000, 2*Math.random()*20000-10000];
+            dummy.position.set(x,y,z);
             dummy.scale.set( 1 + Math.abs(normalRandom(1,3)), 1 + Math.abs(normalRandom(1,3)), 1 + Math.abs(normalRandom(1,3)) );
             dummy.updateMatrix();
 
-            mesh.setMatrixAt( x, dummy.matrix );
+            mesh.setMatrixAt( i, dummy.matrix );
+
+
+
+            // offsets
+            offsets.push(x,y,z);
+            // offsets.push( Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5 );
+            // colors
+            colors.push( Math.random(), Math.random(), Math.random());
+            // colors.push( Math.random(), Math.random(), Math.random(), Math.random() );
+            // orientation start
+            vector.set( Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1 );
+            vector.normalize();
+            orientationsStart.push( vector.x, vector.y, vector.z, vector.w );
+            // orientation end
+            vector.set( Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1 );
+            vector.normalize();
+            orientationsEnd.push( vector.x, vector.y, vector.z, vector.w );
         }
 
-        scene.add(mesh);
 
-        renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setPixelRatio(window.devicePixelRatio);
-        renderer.setSize(window.innerWidth, window.innerHeight);
-
-        document.body.appendChild(renderer.domElement);
-
-
-
-
-        // composer = new EffectComposer( renderer );
-
-        // const renderPass = new RenderPass( scene, camera );
-        // composer.addPass( renderPass );
-
-        // let outlinePass = new OutlinePass( new THREE.Vector2( window.innerWidth, window.innerHeight ), scene, camera);
-        // composer.addPass( outlinePass );
-        // ////
-
-        // outlinePass.edgeStrength = Number( 5 );//10
-        // outlinePass.edgeGlow = Number( 0 );
-        // outlinePass.edgeThickness = Number( 1 );
-        // // outlinePass.pulsePeriod = Number( 1 );
+      const geometry2 = new THREE.InstancedBufferGeometry();
+      
+      geometry2.instanceCount = count; // set so its initialized for dat.GUI, will be set in first draw otherwise
+      geometry2.setAttribute( 'position', new THREE.Float32BufferAttribute( positions, 3 ) );
+      geometry2.setAttribute( 'offset', new THREE.InstancedBufferAttribute( new Float32Array( offsets ), 3 ) );
+      geometry2.setAttribute( 'color', new THREE.InstancedBufferAttribute( new Float32Array( colors ), 4 ) );
+      geometry2.setAttribute( 'orientationStart', new THREE.InstancedBufferAttribute( new Float32Array( orientationsStart ), 4 ) );
+      geometry2.setAttribute( 'orientationEnd', new THREE.InstancedBufferAttribute( new Float32Array( orientationsEnd ), 4 ) );
 
 
 
+      // const mesh2 = new THREE.Mesh( geometry2, new THREE.MeshStandardMaterial({color : 0xffffff }) );
+      const mesh2 = new THREE.Mesh(geometry2, new THREE.RawShaderMaterial( {
 
-        // outlinePass.selectedObjects.push(mesh)
-        // // scene.traverse((object) => {
-        // //     if (object.isMesh) {
-        // //         outlinePass.selectedObjects.push(object);
-        // //     }
-        // // });
+        uniforms: {
+          'time': { value: 1.0 },
+          'sineTime': { value: 1.0 }
+        },
+        vertexShader: document.getElementById( 'vertexShader' ).textContent,
+        fragmentShader: document.getElementById( 'fragmentShader' ).textContent,
+        side: THREE.DoubleSide,
+        forceSinglePass: true,
+        transparent: false
+
+      } ))
+      geometry2.computeBoundingSphere()
+      geometry2.boundingSphere.radius = Infinity
+      window.gem = geometry2
+      scene.add( mesh2 );
 
 
-
-        // window.outlinePass = outlinePass
-        // outlinePass.visibleEdgeColor.set( "#ffffff" );
-
-
-
-        // outlinePass.hiddenEdgeColor.set( '#190a05' );
-
-
-        // const outputPass = new OutputPass();
-        // composer.addPass( outputPass );
-
-        // let effectFXAA = new ShaderPass( FXAAShader );
-        // effectFXAA.uniforms[ 'resolution' ].value.set( 1 / window.innerWidth, 1 / window.innerHeight );
-        // composer.addPass( effectFXAA );
 
 
 
@@ -323,7 +442,10 @@ var sensors = {
 
 
 
-var composer
+// var composer
+
+
+
 
 function animate(){
   requestAnimationFrame(animate)
@@ -331,8 +453,20 @@ function animate(){
   if(DRONE){
     DRONE.updatePos()
   }
+
+  const intersects = raycaster.intersectObjects( scene.children );
+  if(intersects.length>0){
+    div.innerText += "\n INTERSECTS \n"
+    DRONE.speed = DRONE.vel.length()
+    if(intersects[0].distance < DRONE.speed){
+      // div.style.backgroundColor = "red"
+      DRONE.forces.roll += (Math.random()-0.5)*0.0025*DRONE.speed
+      DRONE.forces.yaw += (Math.random()-0.5)*0.0025*DRONE.speed
+    }
+  }
+
+
   renderer.render(scene, camera);
-  // composer.render()
 }
 
 
@@ -823,37 +957,16 @@ function handleMotion(event) {
 
     document.addEventListener("keydown",(e)=>{
       if(e.repeat){return}
-      // if(e.key == "w"){
-      //   DRONE.forces.pitch += 0.01
-      // } else if(e.key == "s"){
-      //   DRONE.forces.pitch -= 0.01
-      // } else if(e.key == "a"){
-      //   DRONE.forces.yaw += 0.01
-      // } else if(e.key == "d"){
-      //   DRONE.forces.yaw -= 0.01
-      // } else if(e.key == "e"){
-      //   DRONE.forces.roll -= 0.01
-      // } else if(e.key == "q"){
-      //   DRONE.forces.roll += 0.01
-      // }
+
+        if(e.key=="r"){
+          window.location.reload()
+        }
       downs[e.key] = true
     })
 
     document.addEventListener("keyup",(e)=>{
       if(e.repeat){return}
-      // if(e.key == "w"){
-      //   DRONE.forces.pitch += -0.01
-      // } else if(e.key == "s"){
-      //   DRONE.forces.pitch -= -0.01
-      // } else if(e.key == "a"){
-      //   DRONE.forces.yaw += -0.01
-      // } else if(e.key == "d"){
-      //   DRONE.forces.yaw -= -0.01
-      // } else if(e.key == "e"){
-      //   DRONE.forces.roll -= -0.01
-      // } else if(e.key == "q"){
-      //   DRONE.forces.roll += -0.01
-      // }
+
       downs[e.key] = false
     })
 
