@@ -193,58 +193,58 @@ class DRONE{
     "yaw":0
   }
 
-  static controlSpeed = 0.0008/5
-  static controlStrength = 0.0016/5
+  static controlSpeed = 0.0008
+  static controlStrength = 0.0016
 
   static invertedControls = 1
 
-  static updatePos(){
+  static updatePos(dt=1){
 
 
       if(downs.w){
-        DRONE.controls.pitch += this.controlSpeed * this.invertedControls
+        DRONE.controls.pitch += this.controlSpeed * this.invertedControls * dt
         // DRONE.forces.up += this.controlSpeed * 345/4
       }  if(downs.s){
-        DRONE.controls.pitch -= this.controlSpeed* this.invertedControls
+        DRONE.controls.pitch -= this.controlSpeed* this.invertedControls * dt
         // DRONE.forces.up -= this.controlSpeed * 345/4
       } if(downs.a){
-        DRONE.controls.yaw += this.controlSpeed
+        DRONE.controls.yaw += this.controlSpeed* dt
       }  if(downs.d){
-        DRONE.controls.yaw -= this.controlSpeed
+        DRONE.controls.yaw -= this.controlSpeed* dt
       }  if(downs.e){
-        DRONE.controls.yaw -= this.controlSpeed
+        DRONE.controls.yaw -= this.controlSpeed* dt
       }  if(downs.q){
-        DRONE.controls.yaw += this.controlSpeed
+        DRONE.controls.yaw += this.controlSpeed* dt
       }
 
     div.innerText = JSON.stringify(this.forces)
 
 
-    this.controls.yaw *= 0.995
-    this.controls.pitch *= 0.995
+    this.controls.yaw *= 0.995** dt
+    this.controls.pitch *= 0.995** dt
 
     // if(!downs.s && !downs.w){
     //   this.forces.up *= 0.95
     // } else {
     //   this.forces.up *= 0.99
     // }
-      this.controls.up *= 0.95
+      this.controls.up *= 0.95** dt
 
-    this.controls.up = (Height/2-mouseY)*0.005
+    this.controls.up = (Height/2-mouseY)*0.005* dt
     // this.forces.roll = Math.sqrt(Math.abs((Width/2-mouseX)*0.000001))*((Width/2-mouseX)<0?-1:1)
     // this.forces.pitch = ((Height/2-mouseY)*0.00007)
-    this.controls.roll = ((Width/2-mouseX)*0.00007)
+    this.controls.roll = ((Width/2-mouseX)*0.00007)* dt
 
 
     Object.keys(this.controls).forEach((e)=>{
       if(e==="up"){this.forces[e] = this.controls[e];return}
       let mns = this.controls[e]-this.forces[e]
-      this.forces[e] += Math.min(Math.abs(mns),this.controlStrength) * Math.sign(mns)
+      this.forces[e] += Math.min(Math.abs(mns),this.controlStrength) * Math.sign(mns) * dt
     })
 
-    camera.rotateY(this.forces.yaw)
-    camera.rotateZ(this.forces.roll)
-    camera.rotateX(this.forces.pitch)
+    camera.rotateY(this.forces.yaw* dt)
+    camera.rotateZ(this.forces.roll* dt)
+    camera.rotateX(this.forces.pitch* dt)
 
 
     // const currentQuaternion = camera.quaternion.clone();
@@ -266,12 +266,12 @@ class DRONE{
 
 
 
-    this.vel.add(new THREE.Vector3(0, this.forces.up, 0).applyQuaternion(camera.quaternion))
+    this.vel.add(new THREE.Vector3(0, this.forces.up* dt, 0).applyQuaternion(camera.quaternion))
 
     this.vel.y -= ENV.grav
 
 
-    this.vel.multiplyScalar(ENV.airFriction)
+    this.vel.multiplyScalar(ENV.airFriction** dt)
     camera.position.add(this.vel)
     light.position.set(camera.position.x,camera.position.y,camera.position.z)
     raycaster.set(camera.position,this.vel.clone().normalize())
@@ -458,14 +458,16 @@ function onWindowResize() {
 
 
 var startDate = Date.now()
+var lastDate = Date.now()
 
 function animate(){
   requestAnimationFrame(animate)
 
+  let dt = Date.now()-lastDate
+  lastDate = Date.now()
   if(DRONE){
-    DRONE.updatePos()
+    DRONE.updatePos(dt/16)
   }
-
   const intersects = raycaster.intersectObjects( scene.children );
   if(intersects.length>0){
     div.innerText += "\n INTERSECTS \n"
@@ -476,7 +478,6 @@ function animate(){
       DRONE.forces.yaw += (Math.random()-0.5)*0.0025*DRONE.speed
     }
   }
-
 
   mesh2.material.uniforms['time'].value = Math.sin((Date.now()-startDate) * 0.0005);
   renderer.render(scene, camera);
