@@ -413,7 +413,7 @@ function init() {
 
   var geometry = new THREE.BoxGeometry(200, 200, 200);
   var materials = [
-    new THREE.MeshStandardMaterial({ color: "#AA5555" }),
+    new THREE.MeshStandardMaterial({ color: "#AA5555" /*, depthTest:false*/}),
     new THREE.MeshStandardMaterial({ color: "#55AA55" }),
     new THREE.MeshStandardMaterial({ color: "#AAAAFF" }),
     new THREE.MeshStandardMaterial({ color: "#AAFFFF" }),
@@ -437,7 +437,7 @@ function init() {
   const edges = new THREE.EdgesGeometry(geometry);
   const lineMaterial = new THREE.LineBasicMaterial({ color: 0x000000 }); // Material for the outline
 
-  let count = 21400
+  let count = Math.floor(21400)
 
   mesh = new THREE.InstancedMesh( geometry, materials, count );
   mesh.instanceMatrix.setUsage( THREE.DynamicDrawUsage ); // will be updated every frame
@@ -593,8 +593,10 @@ function animate(){
     dst = intersects[0].distance
     if(dst < DRONE.speed){
       // div.style.backgroundColor = "red"
-      DRONE.forces.roll += (Math.random()-0.5)*0.0025*DRONE.speed
-      DRONE.forces.yaw += (Math.random()-0.5)*0.0025*DRONE.speed
+      DRONE.forces.roll += minMax(-5,(Math.random()-0.5)*0.0025*DRONE.speed,5)
+      DRONE.forces.yaw += minMax(-5,(Math.random()-0.5)*0.0025*DRONE.speed,5)
+      DRONE.vel.multiplyScalar(0.8)
+      DRONE.forwardLocked = false
     }
   }
 
@@ -605,18 +607,29 @@ function animate(){
 
   let ctx = canvas.ctx
 
-  if(isNaN(DRONE.speed) || DRONE.speed <= 0 || DRONE.speed > 500){
-    console.log(DRONE.speed)
-  }
+
+  // DRONE.vel.y += 20
 
   ctx.clearRect(0,0,Width,Height)
   ctx.beginPath()
-  let speedMeter = DRONE.speed/300
-  ctx.arc(Width/2,Height/2,Height/3*2,Math.PI/2*3-speedMeter-0.5,Math.PI/2*3+DRONE.speed/300+0.5)
-  let dvy = minMax(0,DRONE.vel.y,255)
-  ctx.strokeStyle = "rgba("+(-dvy)+","+(255+dvy)+","+dvy+","+0.5+")"
+  let speedMeter = Math.min(DRONE.speed/300,3)
+  ctx.arc(Width/2,Height/2,Height/3*2,Math.PI/2*3-speedMeter-0.5,Math.PI/2*3+speedMeter+0.5)
+  let dvy = minMax(-255,DRONE.vel.y,255)
+  ctx.strokeStyle = "rgba("+Math.floor(-dvy)+","+Math.floor(255+dvy)+","+Math.floor(dvy)+","+0.5+")"
   ctx.lineWidth = 25;
   ctx.stroke()
+
+  if(DRONE.speed>400){
+    speedMeter = Math.min((DRONE.speed-400)/400,3)
+    ctx.beginPath()
+    ctx.arc(Width/2,Height/2,Height/3*2+45,Math.PI/2*3-speedMeter-0.5,Math.PI/2*3+speedMeter+0.5)
+    let dvy = minMax(-255,DRONE.vel.y*3,255)
+    ctx.strokeStyle = "rgba("+(-dvy)+","+(255+dvy)+","+dvy+","+0.5+")"
+    ctx.lineWidth = 25;
+    ctx.stroke()
+  }
+
+
 
   if(dst !== Infinity){
   let impactMarker = Math.min(Math.max(dst/DRONE.speed/50,0),0.5)
@@ -635,14 +648,27 @@ function animate(){
 
 
     // Add three color stops
-    gradient.addColorStop(0.4, "rgba(255,0,0,0.5)");
-    gradient.addColorStop(0.5, "rgba(0,255,0,0.5)");
-    gradient.addColorStop(0.6, "rgba(255,0,0,0.5)");
+    // gradient.addColorStop(0.4, "rgba(255,0,0,0.5)");
+    // gradient.addColorStop(0.5, "rgba(0,255,0,0.5)");
+    // gradient.addColorStop(0.6, "rgba(255,0,0,0.5)");
+
+    gradient.addColorStop(0, "rgba(0,255,0,0.5)");
+    gradient.addColorStop(0.1, "rgba(255,0,0,0.5)");
+    gradient.addColorStop(0.9, "rgba(255,0,0,0.5)");
+    gradient.addColorStop(1, "rgba(0,255,0,0.5)");
+
+    let yawDraw = minMax(-Width/4,DRONE.forces.yaw*Width*2,Width/4)
 
   ctx.beginPath()
-  ctx.moveTo(Width/2,Height/2)
-  ctx.lineTo(Width/2 - DRONE.forces.yaw*Width*2 ,Height/2)
-  ctx.lineWidth = 15;
+  ctx.moveTo(Width,Height/2-20)
+  ctx.lineTo(Width - yawDraw ,Height/2-20)
+  ctx.moveTo(0,Height/2-20)
+  ctx.lineTo(0 - yawDraw ,Height/2-20)
+    ctx.moveTo(Width,Height/2+40)
+  ctx.lineTo(Width - yawDraw ,Height/2+40)
+  ctx.moveTo(0,Height/2+40)
+  ctx.lineTo(0 - yawDraw ,Height/2+40)
+  ctx.lineWidth = 25;
   // ctx.strokeStyle = "rgba("+(-DRONE.vel.y)+","+(255+DRONE.vel.y)+","+DRONE.vel.y+","+0.7+")"
   ctx.strokeStyle = gradient
   ctx.stroke()
