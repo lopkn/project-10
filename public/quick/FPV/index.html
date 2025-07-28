@@ -217,7 +217,7 @@ var light
 class ENV{
   static targetFPS = 60
   static airFriction = 0.9995
-  static grav = 9.81/this.targetFPS*7
+  static grav = 9.81/this.targetFPS*7 * 0
 }
     var downs = {}
 
@@ -330,16 +330,14 @@ class DRONE{
 
 
     this.vel.multiplyScalar(ENV.airFriction** dt)
+    DRONE.speed = DRONE.vel.length()
     camera.position.add(this.vel)
-
     if(camera.position.y < -100000){
       this.reset()
     }
-
     light.position.set(camera.position.x,camera.position.y,camera.position.z)
     raycaster.set(camera.position,this.vel.clone().normalize())
     // raycaster.set(camera.position,camera.getWorldDirection(new THREE.Vector3))
-
     this.lookingTowards = camera.getWorldDirection(new THREE.Vector3()).multiplyScalar(1200)
 
 
@@ -364,7 +362,18 @@ class DRONE{
     }
     // this.bottomHemisphere.position?.set(this.topHemisphere.position)
 
+
+    this.scoring(dt)
+
+
     div.innerText += JSON.stringify(this.vel)
+  }
+
+
+  static scoring(dt){
+    if(world.worldbox.y/2 > camera.position.y > -world.worldbox.y/2 && world.worldbox.z/2 > camera.position.z > -world.worldbox.z/2 && this.vel.x > 0){
+      this.score += dt * this.speed * distance(0,0,camera.position.y,camera.position.z) / 2000000
+    }
   }
 
   static reset(){
@@ -383,6 +392,7 @@ class DRONE{
     }
 
     this.vel = new THREE.Vector3(0,30,0)
+    this.score = 0;
     camera.position.z = 0;
     camera.position.y = 0;
     camera.position.x = -21200;
@@ -394,6 +404,10 @@ class DRONE{
 
 }
 window.drone = DRONE
+
+class world{
+  static worldbox = {"y":2*20000,"z":2*20000}
+}
 
 
 
@@ -522,7 +536,7 @@ function init() {
   let galazyBoxSize = 500000
 
   for ( let i = 0; i < count; i ++ ) {
-      let [x,y,z] = [ran(106*20000), ranRange(2*20000), ranRange(2*20000)];
+      let [x,y,z] = [ran(106*20000), ranRange(world.worldbox.y), ranRange(world.worldbox.z)];
       // let [x,y,z] = [ran(106*20000), ranRange(2*20000), ranRange(2*20000)];
       dummy.position.set(x,y,z);
       dummy.rotation.set(Math.random()*Math.PI,Math.random()*Math.PI,Math.random()*Math.PI)
@@ -631,7 +645,6 @@ function animate(){
   lastDate = Date.now()
   if(DRONE){
     DRONE.updatePos(dt/16)
-    DRONE.speed = DRONE.vel.length()
   }
   let dst = Infinity
   const intersects = raycaster.intersectObjects( [mesh] );
@@ -733,8 +746,10 @@ function animate(){
 
 
   ctx.fillStyle = "red"
-  ctx.fontSize = "45px"
+  ctx.font = "30px Arial"
   ctx.fillText(DRONE.forwardLocked?"Cruise mode: hold space to accelerate":"Manual mode: WASD to navigate",0,Height)
+  ctx.font = "50px Arial"
+  ctx.fillText(Math.floor(DRONE.score),0,Height-35)
 
 }
 
