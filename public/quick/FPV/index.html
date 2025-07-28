@@ -681,6 +681,9 @@ function animate(){
   ctx.strokeStyle = "rgba(100,0,0,0.5)"
   ctx.stroke()
 
+  ctx.fillStyle = "pink"
+  ctx.fillRect(mouseX-5,mouseY-5,10,10)
+
 
 }
 
@@ -1142,9 +1145,15 @@ function handleMotion(event) {
           DRONE.reset()
         } if(e.key == "R"){
           window.location.reload()
+        } if(e.key == "1"){
+          DRONE.controlSpeed *= 1.1
+        } if(e.key == "2"){
+          DRONE.controlSpeed *= 0.9
         }
+
         if(e.key == "Shift"){
-          DRONE.vel.add(camera.getWorldDirection(new THREE.Vector3()).multiplyScalar(200))
+          // DRONE.vel.add(camera.getWorldDirection(new THREE.Vector3()).multiplyScalar(200))
+          DRONE.forwardLocked = !DRONE.forwardLocked
         }
       downs[e.key] = true
     })
