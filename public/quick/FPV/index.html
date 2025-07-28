@@ -339,6 +339,31 @@ class DRONE{
     light.position.set(camera.position.x,camera.position.y,camera.position.z)
     raycaster.set(camera.position,this.vel.clone().normalize())
     // raycaster.set(camera.position,camera.getWorldDirection(new THREE.Vector3))
+
+    this.lookingTowards = camera.getWorldDirection(new THREE.Vector3()).multiplyScalar(1200)
+
+
+
+    if(this.topHemisphere.position){
+
+      // let vec = new THREE.Vector3()
+      // vec.project(camera)
+
+      // console.log(vec)
+
+      // return;
+
+      this.topHemisphere.position.set(camera.position.x,camera.position.y,camera.position.z)
+      this.topHemisphere.position.add(this.lookingTowards)
+      this.topHemisphere.position.add(new THREE.Vector3(-0,-600,0).applyQuaternion(camera.quaternion))
+
+      this.bottomHemisphere.position.set(camera.position.x,camera.position.y,camera.position.z)
+      this.bottomHemisphere.position.add(this.lookingTowards)
+      this.bottomHemisphere.position.add(new THREE.Vector3(-0,-600,0).applyQuaternion(camera.quaternion))
+
+    }
+    // this.bottomHemisphere.position?.set(this.topHemisphere.position)
+
     div.innerText += JSON.stringify(this.vel)
   }
 
@@ -391,6 +416,7 @@ function ran(x){
 }
 
 
+
 function init() {
   camera = new THREE.PerspectiveCamera(
     70,
@@ -412,6 +438,25 @@ function init() {
   renderer.setSize(window.innerWidth, window.innerHeight);
 
   document.body.appendChild(renderer.domElement);
+
+
+
+
+
+
+
+  DRONE.topHemisphere = new THREE.Mesh(new THREE.SphereGeometry( 140, 20, 20, 0, Math.PI, 0, Math.PI*2 ),new THREE.MeshStandardMaterial({ color: "#33AAFF" }))
+  scene.add(  DRONE.topHemisphere)
+  DRONE.bottomHemisphere = new THREE.Mesh(new THREE.SphereGeometry( 140, 20, 20, Math.PI, Math.PI,0, Math.PI ),new THREE.MeshStandardMaterial({ color: "#FF3300" }))
+  scene.add(DRONE.bottomHemisphere)
+
+  DRONE.topHemisphere.rotateX(Math.PI*3/2)
+  DRONE.bottomHemisphere.rotateX(Math.PI*3/2)
+
+
+
+
+
 
   var geometry = new THREE.BoxGeometry(200, 200, 200);
   var materials = [
@@ -589,7 +634,7 @@ function animate(){
     DRONE.speed = DRONE.vel.length()
   }
   let dst = Infinity
-  const intersects = raycaster.intersectObjects( scene.children );
+  const intersects = raycaster.intersectObjects( [mesh] );
   if(intersects.length>0){
     div.innerText += "\n INTERSECTS \n"
     dst = intersects[0].distance
@@ -688,6 +733,7 @@ function animate(){
 
 
   ctx.fillStyle = "red"
+  ctx.fontSize = "45px"
   ctx.fillText(DRONE.forwardLocked?"Cruise mode: hold space to accelerate":"Manual mode: WASD to navigate",0,Height)
 
 }
