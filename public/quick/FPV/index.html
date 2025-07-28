@@ -264,13 +264,17 @@ class DRONE{
         }  if(downs.d){
           DRONE.controls.yaw -= this.controlSpeed* dt
         }  if(downs.e){
-          DRONE.controls.yaw -= this.controlSpeed* dt
+          DRONE.controls.roll -= this.controlSpeed* dt
         }  if(downs.q){
-          DRONE.controls.yaw += this.controlSpeed* dt
+          DRONE.controls.roll += this.controlSpeed* dt
+        } if(downs[" "]){
+          DRONE.forces.up += this.controlSpeed * 345/4
+        } if(downs.Control){
+          DRONE.forces.up -= this.controlSpeed * 345/4
         }
       } else {
         if(downs[" "]){
-          DRONE.vel.add(camera.getWorldDirection(new THREE.Vector3()).multiplyScalar(2))
+          DRONE.vel.add(camera.getWorldDirection(new THREE.Vector3()).multiplyScalar(2*dt))
         }
       }
 
@@ -371,9 +375,10 @@ class DRONE{
 
 
   static scoring(dt){
-    if(world.worldbox.y/2 > camera.position.y > -world.worldbox.y/2 && world.worldbox.z/2 > camera.position.z > -world.worldbox.z/2 && this.vel.x > 0){
-      this.score += dt * this.speed * distance(0,0,camera.position.y,camera.position.z) / 2000000
-    }
+    if(world.worldbox.y/2 > camera.position.y && camera.position.y > -world.worldbox.y/2 && world.worldbox.z/2 > camera.position.z && camera.position.z > -world.worldbox.z/2 && camera.position.x > this.furthestOut && this.vel.x > 3 && camera.position.x < 106*20000){
+      this.score += dt * this.speed * Math.min(1/distance(0,0,camera.position.y,camera.position.z),1) * 20
+      this.furthestOut = camera.position.x 
+    } 
   }
 
   static reset(){
@@ -391,6 +396,10 @@ class DRONE{
       "yaw":0
     }
 
+    this.furthestOut = 0
+
+
+    this.forwardLocked = true
     this.vel = new THREE.Vector3(0,30,0)
     this.score = 0;
     camera.position.z = 0;
@@ -466,6 +475,7 @@ function init() {
 
   DRONE.topHemisphere.rotateX(Math.PI*3/2)
   DRONE.bottomHemisphere.rotateX(Math.PI*3/2)
+
 
 
 
@@ -630,6 +640,8 @@ function onWindowResize() {
 
     var canvas = new LCanvas(Width,Height)
 
+    canvas.canvas.style.cursor = "none"
+
 
 var startDate = Date.now()
 var lastDate = Date.now()
@@ -741,11 +753,18 @@ function animate(){
   ctx.strokeStyle = "rgba(100,0,0,0.5)"
   ctx.stroke()
 
+  ctx.beginPath()
+  ctx.moveTo(Width/2-20,Height/2)
+  ctx.lineTo(Width/2+20,Height/2)
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = "rgba(100,0,0,0.5)"
+  ctx.stroke()
+
   ctx.fillStyle = "pink"
   ctx.fillRect(mouseX-5,mouseY-5,10,10)
 
 
-  ctx.fillStyle = "red"
+  ctx.fillStyle = "orange"
   ctx.font = "30px Arial"
   ctx.fillText(DRONE.forwardLocked?"Cruise mode: hold space to accelerate":"Manual mode: WASD to navigate",0,Height)
   ctx.font = "50px Arial"
@@ -1215,6 +1234,8 @@ function handleMotion(event) {
           DRONE.rollControlSpeed *= 1.1
         } if(e.key == "2"){
           DRONE.rollControlSpeed *= 0.9
+        } if(e.key == "i"){
+          DRONE.invertedControls *= -1
         }
 
         if(e.key == "Shift"){
