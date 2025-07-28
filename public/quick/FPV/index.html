@@ -242,6 +242,7 @@ class DRONE{
   }
 
   static controlSpeed = 0.0008
+  static rollControlSpeed = 1
   static controlStrength = 0.0009
 
   static invertedControls = 1
@@ -289,7 +290,8 @@ class DRONE{
     this.controls.up = (Height/2-mouseY)*0.005* dt
     // this.forces.roll = Math.sqrt(Math.abs((Width/2-mouseX)*0.000001))*((Width/2-mouseX)<0?-1:1)
     // this.forces.pitch = ((Height/2-mouseY)*0.00007)
-    this.controls.roll = ((Width/2-mouseX)*0.00007)* dt
+
+    this.controls.roll = ((Width/2-mouseX)*0.00007)* dt * this.rollControlSpeed
 
 
     Object.keys(this.controls).forEach((e)=>{
@@ -684,6 +686,9 @@ function animate(){
   ctx.fillStyle = "pink"
   ctx.fillRect(mouseX-5,mouseY-5,10,10)
 
+
+  ctx.fillStyle = "red"
+  ctx.fillText(DRONE.forwardLocked?"Cruise mode: hold space to accelerate":"Manual mode: WASD to navigate",0,Height)
 
 }
 
@@ -1146,9 +1151,9 @@ function handleMotion(event) {
         } if(e.key == "R"){
           window.location.reload()
         } if(e.key == "1"){
-          DRONE.controlSpeed *= 1.1
+          DRONE.rollControlSpeed *= 1.1
         } if(e.key == "2"){
-          DRONE.controlSpeed *= 0.9
+          DRONE.rollControlSpeed *= 0.9
         }
 
         if(e.key == "Shift"){
