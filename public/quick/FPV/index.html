@@ -75,26 +75,21 @@
     void main(){
 
       float size = 500000.0;
-      // vPosition = offset * max( abs( sineTime * 2.0 + 1.0 ), 0.5 ) + position;
       vPosition = offset;
       vPosition.x += floor((cameraPos.x-vPosition.x)/size + 0.5)*size;
       vPosition.y += floor((cameraPos.y-vPosition.y)/size + 0.5)*size;
       vPosition.z += floor((cameraPos.z-vPosition.z)/size + 0.5)*size;
 
-      vPosition = vPosition + quat_transform(orientationStart,position);
+      //vec4 orientation = normalize( mix( orientationStart, orientationEnd, abs(0.5+(time*0.5)) ) );
+      vec4 orientation = orientationStart;
+      vPosition = vPosition + quat_transform(orientation,position);
       //cool Effect vPosition = offset + quat_transform(orientationStart,position);
-      //vPosition.x += floor((vPosition.x-cameraPos.x)/1800.0)*1800.0;
       // cool effect vPosition.x += vPosition.x-cameraPos.x;
 
 
 
 
-      vec4 orientation = normalize( mix( orientationStart, orientationEnd, 1.0 ) );
       vec3 vcV = cross( orientation.xyz, vPosition );
-      //vPosition = vcV * ( 1.0 * orientation.w ) + ( cross( orientation.xyz, vcV ) * 1.0 + vPosition );
-      //vPosition = vcV * ( 2.0 * orientation.w ) + ( cross( orientation.xyz, vcV ) * 2.0 + vPosition );
-
-      //vPosition = cross(orientation.xyz,vcV) + vPosition;
 
 
       vColor = color;
@@ -179,6 +174,44 @@ div.style.height = "50%"
 
 document.body.appendChild(div)
 
+class LCanvas{ //lopkns template canvas
+  constructor(w=100,h=100,id=("LCanvas-"+Math.random())){
+    this.canvas = document.createElement("canvas")
+    this.canvas.id = id
+    this.ctx = this.canvas.getContext("2d")
+    this.canvas.style.position = "absolute"
+    this.canvas.style.top = "0px"
+    this.canvas.style.left = "0px"
+    this.canvas.zIndex = "1500"
+    this.canvas.width = w
+    this.canvas.height = h
+    this.ctx.fillStyle = "black"
+    this.ctx.fillRect(0,0,this.canvas.width,this.canvas.height)
+    document.body.appendChild(this.canvas)
+    return(this)
+  }
+
+  fitScreenSize(){
+    this.canvas.width = window.innerWidth
+    this.canvas.height = window.innerHeight
+  }
+
+  clear(){
+    this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height)
+  }
+
+  oneTimeDown(f){ // pass in a function for what to do with one click
+    this.canvas.addEventListener("mousedown",f,{once:true})
+  }
+
+  getPixelRGB(x,y){
+    let d = this.ctx.getImageData(x, y, 1, 1).data
+    return(d)
+  }
+
+
+}
+
 var light
 
 class ENV{
@@ -213,23 +246,31 @@ class DRONE{
 
   static invertedControls = 1
 
+  static forwardLocked = true
+
   static updatePos(dt=1){
 
 
-      if(downs.w){
-        DRONE.controls.pitch += this.controlSpeed * this.invertedControls * dt
-        // DRONE.forces.up += this.controlSpeed * 345/4
-      }  if(downs.s){
-        DRONE.controls.pitch -= this.controlSpeed* this.invertedControls * dt
-        // DRONE.forces.up -= this.controlSpeed * 345/4
-      } if(downs.a){
-        DRONE.controls.yaw += this.controlSpeed* dt
-      }  if(downs.d){
-        DRONE.controls.yaw -= this.controlSpeed* dt
-      }  if(downs.e){
-        DRONE.controls.yaw -= this.controlSpeed* dt
-      }  if(downs.q){
-        DRONE.controls.yaw += this.controlSpeed* dt
+      if(!this.forwardLocked){
+        if(downs.w){
+          DRONE.controls.pitch += this.controlSpeed * this.invertedControls * dt
+          // DRONE.forces.up += this.controlSpeed * 345/4
+        }  if(downs.s){
+          DRONE.controls.pitch -= this.controlSpeed* this.invertedControls * dt
+          // DRONE.forces.up -= this.controlSpeed * 345/4
+        } if(downs.a){
+          DRONE.controls.yaw += this.controlSpeed* dt
+        }  if(downs.d){
+          DRONE.controls.yaw -= this.controlSpeed* dt
+        }  if(downs.e){
+          DRONE.controls.yaw -= this.controlSpeed* dt
+        }  if(downs.q){
+          DRONE.controls.yaw += this.controlSpeed* dt
+        }
+      } else {
+        if(downs[" "]){
+          DRONE.vel.add(camera.getWorldDirection(new THREE.Vector3()).multiplyScalar(2))
+        }
       }
 
     div.innerText = JSON.stringify(this.forces)
@@ -289,7 +330,7 @@ class DRONE{
     this.vel.multiplyScalar(ENV.airFriction** dt)
     camera.position.add(this.vel)
 
-    if(camera.position.y < -200000){
+    if(camera.position.y < -100000){
       this.reset()
     }
 
@@ -315,9 +356,10 @@ class DRONE{
     }
 
     this.vel = new THREE.Vector3(0,30,0)
-    camera.position.z = 11400;
-    camera.position.y = 14200;
+    camera.position.z = 0;
+    camera.position.y = 0;
     camera.position.x = -21200;
+    // camera.position.x = 0
 
     camera.rotation.set(0,Math.PI*3/2,0)
 
@@ -336,6 +378,15 @@ var sensors = {
 var camera, scene, renderer;
 var mesh, mesh2;
 
+
+
+function ranRange(x){
+  return(Math.random()*x-x*0.5)
+}
+
+function ran(x){
+  return(Math.random()*x)
+}
 
 
 function init() {
@@ -424,8 +475,10 @@ function init() {
   let galazyBoxSize = 500000
 
   for ( let i = 0; i < count; i ++ ) {
-      let [x,y,z] = [136*Math.random()*20000, 2*Math.random()*20000, 2*Math.random()*20000];
+      let [x,y,z] = [ran(106*20000), ranRange(2*20000), ranRange(2*20000)];
+      // let [x,y,z] = [ran(106*20000), ranRange(2*20000), ranRange(2*20000)];
       dummy.position.set(x,y,z);
+      dummy.rotation.set(Math.random()*Math.PI,Math.random()*Math.PI,Math.random()*Math.PI)
       dummy.scale.set( 1 + Math.abs(normalRandom(1,3)), 1 + Math.abs(normalRandom(1,3)), 1 + Math.abs(normalRandom(1,3)) );
       dummy.updateMatrix();
 
@@ -450,6 +503,8 @@ function init() {
       vector.normalize();
       orientationsEnd.push( vector.x, vector.y, vector.z, vector.w );
   }
+
+  // mesh.instanceMatrix.needsUpdate = true
 
 
 const geometry2 = new THREE.InstancedBufferGeometry();
@@ -496,6 +551,10 @@ window.mesh2 = mesh2
 function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
+  canvas.fitScreenSize()
+
+  Height = window.innerWidth >window.innerHeight?window.innerHeight:window.innerWidth
+  Width = window.innerWidth >window.innerHeight?window.innerWidth:window.innerHeight
 
   renderer.setSize(window.innerWidth, window.innerHeight);
 }
@@ -507,8 +566,16 @@ function onWindowResize() {
 
 
 
+
+    var canvas = new LCanvas(Width,Height)
+
+
 var startDate = Date.now()
 var lastDate = Date.now()
+
+function minMax(a,b,c){
+  return(Math.min(Math.max(a,b),c))
+}
 
 function animate(){
   requestAnimationFrame(animate)
@@ -517,20 +584,78 @@ function animate(){
   lastDate = Date.now()
   if(DRONE){
     DRONE.updatePos(dt/16)
+    DRONE.speed = DRONE.vel.length()
   }
+  let dst = Infinity
   const intersects = raycaster.intersectObjects( scene.children );
   if(intersects.length>0){
     div.innerText += "\n INTERSECTS \n"
-    DRONE.speed = DRONE.vel.length()
-    if(intersects[0].distance < DRONE.speed){
+    dst = intersects[0].distance
+    if(dst < DRONE.speed){
       // div.style.backgroundColor = "red"
       DRONE.forces.roll += (Math.random()-0.5)*0.0025*DRONE.speed
       DRONE.forces.yaw += (Math.random()-0.5)*0.0025*DRONE.speed
     }
   }
 
+  // mesh.rotation.y = Date.now()/1000
+
   mesh2.material.uniforms['time'].value = Math.sin((Date.now()-startDate) * 0.0005);
   renderer.render(scene, camera);
+
+  let ctx = canvas.ctx
+
+  if(isNaN(DRONE.speed) || DRONE.speed <= 0 || DRONE.speed > 500){
+    console.log(DRONE.speed)
+  }
+
+  ctx.clearRect(0,0,Width,Height)
+  ctx.beginPath()
+  let speedMeter = DRONE.speed/300
+  ctx.arc(Width/2,Height/2,Height/3*2,Math.PI/2*3-speedMeter-0.5,Math.PI/2*3+DRONE.speed/300+0.5)
+  let dvy = minMax(0,DRONE.vel.y,255)
+  ctx.strokeStyle = "rgba("+(-dvy)+","+(255+dvy)+","+dvy+","+0.5+")"
+  ctx.lineWidth = 25;
+  ctx.stroke()
+
+  if(dst !== Infinity){
+  let impactMarker = Math.min(Math.max(dst/DRONE.speed/50,0),0.5)
+  const impactGradient = ctx.createLinearGradient(0, 0, Width, 0);
+    impactGradient.addColorStop(0, "rgba(255,0,0,0.5)");
+    impactGradient.addColorStop(0.5-impactMarker, "rgba(255,0,0,0)");
+    impactGradient.addColorStop(0.5+impactMarker, "rgba(255,0,0,0)");
+    impactGradient.addColorStop(1, "rgba(255,0,0,0.5)");
+    ctx.fillStyle = impactGradient
+    ctx.fillRect(0,0,Width,Height)
+  }
+
+
+  const gradient = ctx.createLinearGradient(0, 0, Width, 0);
+
+
+
+    // Add three color stops
+    gradient.addColorStop(0.4, "rgba(255,0,0,0.5)");
+    gradient.addColorStop(0.5, "rgba(0,255,0,0.5)");
+    gradient.addColorStop(0.6, "rgba(255,0,0,0.5)");
+
+  ctx.beginPath()
+  ctx.moveTo(Width/2,Height/2)
+  ctx.lineTo(Width/2 - DRONE.forces.yaw*Width*2 ,Height/2)
+  ctx.lineWidth = 15;
+  // ctx.strokeStyle = "rgba("+(-DRONE.vel.y)+","+(255+DRONE.vel.y)+","+DRONE.vel.y+","+0.7+")"
+  ctx.strokeStyle = gradient
+  ctx.stroke()
+
+  ctx.beginPath()
+  ctx.moveTo(Width/2,Height/4)
+  ctx.lineTo(Width/2,Height/1.8)
+  ctx.lineWidth = 2;
+  // ctx.strokeStyle = "rgba("+(-DRONE.vel.y)+","+(255+DRONE.vel.y)+","+DRONE.vel.y+","+0.7+")"
+  ctx.strokeStyle = "rgba(100,0,0,0.5)"
+  ctx.stroke()
+
+
 }
 
 init();
@@ -651,44 +776,6 @@ class LRTC{ //lopkn's boilerplate RTC
 
 
 
-
-class LCanvas{ //lopkns template canvas
-  constructor(w=100,h=100,id=("LCanvas-"+Math.random())){
-    this.canvas = document.createElement("canvas")
-    this.canvas.id = id
-    this.ctx = this.canvas.getContext("2d")
-    this.canvas.style.position = "absolute"
-    this.canvas.style.top = "0px"
-    this.canvas.style.left = "0px"
-    this.canvas.zIndex = "1500"
-    this.canvas.width = w
-    this.canvas.height = h
-    this.ctx.fillStyle = "black"
-    this.ctx.fillRect(0,0,this.canvas.width,this.canvas.height)
-    document.body.appendChild(this.canvas)
-    return(this)
-  }
-
-  fitScreenSize(){
-    this.canvas.width = window.innerWidth
-    this.canvas.height = window.innerHeight
-  }
-
-  clear(){
-    this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height)
-  }
-
-  oneTimeDown(f){ // pass in a function for what to do with one click
-    this.canvas.addEventListener("mousedown",f,{once:true})
-  }
-
-  getPixelRGB(x,y){
-    let d = this.ctx.getImageData(x, y, 1, 1).data
-    return(d)
-  }
-
-
-}
 
 
 function distance(x1,y1,x2,y2) {
@@ -1025,7 +1112,13 @@ function handleMotion(event) {
       if(e.repeat){return}
 
         if(e.key=="r"){
+          // window.location.reload()
+          DRONE.reset()
+        } if(e.key == "R"){
           window.location.reload()
+        }
+        if(e.key == "Shift"){
+          DRONE.vel.add(camera.getWorldDirection(new THREE.Vector3()).multiplyScalar(200))
         }
       downs[e.key] = true
     })
@@ -1041,6 +1134,12 @@ function handleMotion(event) {
 
 
 
+
+
+
+
+
+    div.style.visibility = "hidden"
     </script>
   </body>
 </html>
