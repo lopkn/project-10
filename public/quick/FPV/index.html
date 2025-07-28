@@ -217,7 +217,7 @@ var light
 class ENV{
   static targetFPS = 60
   static airFriction = 0.9995
-  static grav = 9.81/this.targetFPS*7 * 0
+  static grav = 9.81/this.targetFPS*7
 }
     var downs = {}
 
@@ -274,7 +274,7 @@ class DRONE{
         }
       } else {
         if(downs[" "]){
-          DRONE.vel.add(camera.getWorldDirection(new THREE.Vector3()).multiplyScalar(2*dt))
+          DRONE.vel.add(camera.getWorldDirection(new THREE.Vector3()).multiplyScalar(1*dt))
         }
       }
 
@@ -376,7 +376,7 @@ class DRONE{
 
   static scoring(dt){
     if(world.worldbox.y/2 > camera.position.y && camera.position.y > -world.worldbox.y/2 && world.worldbox.z/2 > camera.position.z && camera.position.z > -world.worldbox.z/2 && camera.position.x > this.furthestOut && this.vel.x > 3 && camera.position.x < 106*20000){
-      this.score += dt * this.speed * Math.min(1/distance(0,0,camera.position.y,camera.position.z),1) * 20
+      this.score += dt * this.speed /* Math.min(1/distance(0,0,camera.position.y,camera.position.z),1) */ /200
       this.furthestOut = camera.position.x 
     } 
   }
@@ -546,10 +546,11 @@ function init() {
   let galazyBoxSize = 500000
 
   for ( let i = 0; i < count; i ++ ) {
-      let [x,y,z] = [ran(106*20000), ranRange(world.worldbox.y), ranRange(world.worldbox.z)];
+      let mr = Math.random()
+      let [x,y,z] = [mr*106*20000, ranRange(world.worldbox.y), ranRange(world.worldbox.z)];
       // let [x,y,z] = [ran(106*20000), ranRange(2*20000), ranRange(2*20000)];
       dummy.position.set(x,y,z);
-      dummy.rotation.set(Math.random()*Math.PI,Math.random()*Math.PI,Math.random()*Math.PI)
+      dummy.rotation.set(Math.random()*Math.PI*mr,Math.random()*Math.PI*mr,Math.random()*Math.PI*mr)
       dummy.scale.set( 1 + Math.abs(normalRandom(1,3)), 1 + Math.abs(normalRandom(1,3)), 1 + Math.abs(normalRandom(1,3)) );
       dummy.updateMatrix();
 
@@ -665,8 +666,8 @@ function animate(){
     dst = intersects[0].distance
     if(dst < DRONE.speed){
       // div.style.backgroundColor = "red"
-      DRONE.forces.roll += minMax(-5,(Math.random()-0.5)*0.0025*DRONE.speed,5)
-      DRONE.forces.yaw += minMax(-5,(Math.random()-0.5)*0.0025*DRONE.speed,5)
+      DRONE.forces.roll += minMax(-2,(Math.random()-0.5)*0.0025*DRONE.speed,2)
+      DRONE.forces.yaw += minMax(-2,(Math.random()-0.5)*0.0025*DRONE.speed,2)
       DRONE.vel.multiplyScalar(0.8)
       DRONE.forwardLocked = false
     }
