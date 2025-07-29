@@ -278,7 +278,7 @@ class DRONE{
           DRONE.vel.add(camera.getWorldDirection(new THREE.Vector3()).multiplyScalar(2*dt))
         }
         if(downs["`"]){
-          // DRONE.vel.add(camera.getWorldDirection(new THREE.Vector3()).multiplyScalar(10*dt))
+          DRONE.vel.add(camera.getWorldDirection(new THREE.Vector3()).multiplyScalar(20*dt))
         }
         if(downs["M0"]){
           DRONE.vel.add(camera.getWorldDirection(new THREE.Vector3()).multiplyScalar(1*dt))
@@ -422,6 +422,7 @@ class DRONE{
     camera.rotation.set(0,Math.PI*3/2,0)
 
     this.getInfo()
+    world.recalculate()
 
   }
 
@@ -451,12 +452,17 @@ class world{
       //delete meshes first
       this.removeBehind(pStart)
 
-      let i = 50
+      let i = 15
       while(pEnd > this.end){
         i--
+        if(i<1){
+          console.log("BOMBBBBBBBB!!!")
+          this.activeMeshes.sort((a,b)=>{return(a.userData.id - b.userData.id)})
+          this.recalculate()
+        }
         if(i < 0){debugger}
         console.log("jhey1")
-        this.loadChunk({id: this.endMesh.userData.id+1, startPos:this.end})
+        this.loadChunk({id: this.endMesh.userData.id+1})
       }
 
 
@@ -465,11 +471,16 @@ class world{
 
       while(pStart < this.start){
         console.log("jhey")
-        this.loadChunk({id: this.startMesh.userData.id-1, startPos:this.start, reverse:true})
+        this.loadChunk({id: this.startMesh.userData.id-1, reverse:true})
       }
 
     // }
 
+  }
+
+  static preloadChunk(dict){
+    if(this.levelDesign[dict.id]){return}
+    this.levelDesign[dict.id] = dict
   }
 
   static loadChunk(dict){
@@ -479,6 +490,7 @@ class world{
     } else {
       this.generate(dict)
       this.levelDesign[dict.id] = dict
+      dict.fullyLoaded = true
     }
   }
 
@@ -488,8 +500,9 @@ class world{
     if(this.activeMeshes.length === 0){
       this.startMesh = {userData:{id:0}}
       this.endMesh = {userData:{id:0}}
-      this.start = camera.position.x
-      this.end = camera.position.x
+      this.start = camera.position.x+21200
+      this.end = camera.position.x+21200
+      console.log("DEFAULTED RECALC:" + camera.position.x)
       return
     }
 
@@ -501,12 +514,14 @@ class world{
 
 
   // static generate(level,length=2000000,count=20000){
-  static generate({level=0,length=200000,count=20000,id=1,startPos=0,reverse=false} = {}){
+  static generate({level=0,length=200000,count=20000,id=1,reverse=false} = {}){
 
     let rng = new Math.seedrandom(this.seed+id)
-
+    let startPos;
     if(reverse){
-      startPos -= length
+      startPos = this.start - length
+    } else {
+      startPos = this.end
     }
 
     console.log("GENERATE")
@@ -540,6 +555,11 @@ class world{
     }
 
     if(level === 1){
+
+      this.preloadChunk({id:id+1,level:0,startPos})
+      this.preloadChunk({id:id+2,level:2,length:2000000})
+
+
       var geometry = new THREE.BoxGeometry(200, 200, 200);
       var materials = [
         new THREE.MeshStandardMaterial({ color: "#AA5555" /*, depthTest:false*/}),
@@ -598,10 +618,14 @@ class world{
     }
 
     let midpt = startPos + length/2
-    if(midpt > this.end){
+    console.log(this.end,this.start,startPos,reverse)
+    if(id==1){debugger}
+    if(id > this.endMesh.userData.id || this.activeMeshes.length===0){
       this.activeMeshes.push(mesh)
-    } else if(midpt < this.start){
+      console.log("PUSHED: "+id)
+    } else if(id < this.startMesh.userData.id){
       this.activeMeshes.splice(0,0,mesh)
+      console.log("SPLICED: "+id)
     } else {
       console.log("dont know what to do");
       debugger;
@@ -748,10 +772,9 @@ function init() {
 
   DRONE.topHemisphere = new THREE.Mesh(new THREE.SphereGeometry( 140, 20, 20, 0, Math.PI, 0, Math.PI ),new THREE.MeshStandardMaterial({ color: "#33AAFF" }))
   DRONE.topHemisphere.name = "topHem"
-  scene.add(DRONE.topHemisphere)
   DRONE.bottomHemisphere = new THREE.Mesh(new THREE.SphereGeometry( 140, 20, 20, Math.PI, Math.PI,0, Math.PI ),new THREE.MeshStandardMaterial({ color: "#FF3300" }))
   DRONE.bottomHemisphere.name = "bottomHem"
-  scene.add(DRONE.bottomHemisphere)
+
 
 
   DRONE.topHemisphere.rotateX(Math.PI*3/2)
@@ -941,6 +964,21 @@ function animate(){
     ctx.strokeStyle = "rgba("+(-dvy)+","+(255+dvy)+","+dvy+","+0.5+")"
     ctx.lineWidth = 25;
     ctx.stroke()
+
+    let Wspd = DRONE.speed-900
+    let i = 2
+    while(Wspd>0){
+    speedMeter = Math.min((Wspd)/400,3)
+    ctx.beginPath()
+    ctx.arc(Width/2,Height/2,Height/3*2+45*i,Math.PI/2*3-speedMeter-0.5,Math.PI/2*3+speedMeter+0.5)
+    let dvy = minMax(-255,DRONE.vel.y*(3+i),255)
+    ctx.strokeStyle = "rgba("+(-dvy)+","+(255+dvy)+","+dvy+","+0.5+")"
+    ctx.lineWidth = 25;
+    ctx.stroke()
+    i++
+      Wspd -= 400
+    }
+
   }
 
 
@@ -1498,12 +1536,16 @@ function handleMotion(event) {
           DRONE.invertedControls *= -1
         }
         if(e.key == "g"){
-             DRONE.topHemisphere.rotateY(Math.atan(1/2))
-             DRONE.bottomHemisphere.rotateY(Math.atan(1/2))
+            scene.add(DRONE.topHemisphere)
+            scene.add(DRONE.bottomHemisphere)
+             // DRONE.topHemisphere.rotateY(Math.atan(1/2))
+             // DRONE.bottomHemisphere.rotateY(Math.atan(1/2))
         }
         if(e.key == "G"){
-             DRONE.topHemisphere.rotateY(-Math.atan(1/2))
-             DRONE.bottomHemisphere.rotateY(-Math.atan(1/2))
+          scene.remove(DRONE.topHemisphere)
+            scene.remove(DRONE.bottomHemisphere)
+             // DRONE.topHemisphere.rotateY(-Math.atan(1/2))
+             // DRONE.bottomHemisphere.rotateY(-Math.atan(1/2))
         }
 
 
