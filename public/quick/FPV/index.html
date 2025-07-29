@@ -275,6 +275,12 @@ class DRONE{
         }
       } else {
         if(downs[" "]){
+          DRONE.vel.add(camera.getWorldDirection(new THREE.Vector3()).multiplyScalar(2*dt))
+        }
+        if(downs["`"]){
+          // DRONE.vel.add(camera.getWorldDirection(new THREE.Vector3()).multiplyScalar(10*dt))
+        }
+        if(downs["M0"]){
           DRONE.vel.add(camera.getWorldDirection(new THREE.Vector3()).multiplyScalar(1*dt))
         }
       }
@@ -316,6 +322,22 @@ class DRONE{
     this.vel.multiplyScalar(ENV.airFriction** dt)
     this.speed = DRONE.vel.length()
     this.dPos = this.vel.clone().multiplyScalar(dt)
+
+    this.dst = Infinity
+    const intersects = raycaster.intersectObjects( world.activeMeshes );
+    if(intersects.length>0){
+      div.innerText += "\n INTERSECTS \n"
+      this.dst = intersects[0].distance
+      if(this.dst < DRONE.dPos.length()){
+        // div.style.backgroundColor = "red"
+        DRONE.forces.roll += minMax(-2,(Math.random()-0.5)*0.0025*DRONE.speed,2)
+        DRONE.forces.yaw += minMax(-2,(Math.random()-0.5)*0.0025*DRONE.speed,2)
+        DRONE.vel.multiplyScalar(0.8)
+        DRONE.forwardLocked = false
+        console.log("HIT")
+      }
+    }
+
     camera.position.add(this.dPos)
     if(camera.position.y < -100000){
       this.reset()
@@ -339,6 +361,7 @@ class DRONE{
 
     }
 
+    world.autogen()
     this.scoring(dt)
 
 
@@ -353,11 +376,11 @@ class DRONE{
   static scoring(dt){
     if(world.worldbox.y/2 > camera.position.y && camera.position.y > -world.worldbox.y/2 && world.worldbox.z/2 > camera.position.z && camera.position.z > -world.worldbox.z/2 && camera.position.x > this.furthestOut && this.vel.x > 3){
 
-      if(camera.position.x > world.totalX){
-        world.remove(1)
-        world.generate(1,200000)
-      }
-
+      // if(camera.position.x > world.totalX - this.light.distance*2){
+      //   world.checkpointX = camera.position.x + this.light.distance*2 - 20000
+      //   world.removeBehind()
+      //   // world.generate(1)
+      // }
 
 
       this.score += dt * this.speed /* Math.min(1/distance(0,0,camera.position.y,camera.position.z),1) */ /200
@@ -367,6 +390,10 @@ class DRONE{
 
   static reset(){
     console.log("reset")
+
+
+    this.worldPos = 0
+
     this.controls = {
       "up":0,
       "pitch":0,
@@ -389,7 +416,7 @@ class DRONE{
     this.score = 0;
     camera.position.z = 0;
     camera.position.y = 0;
-    camera.position.x = -21200;
+    camera.position.x = world.checkpointX-21200;
     // camera.position.x = 0
 
     camera.rotation.set(0,Math.PI*3/2,0)
@@ -403,21 +430,114 @@ window.drone = DRONE
 
 class world{
   static worldbox = {"y":2*20000,"z":2*20000}
-
   static activeMeshes = []
-
+  static loadeds = {}
   static totalX = 0;
-
+  static checkpointX = 0;
   static seed = "welcome"
 
   static rng = new Math.seedrandom(this.seed)
 
-  static generate(level,length=2000000,count=20000){
+  static levelDesign = {}
+
+
+  static autogen(){
+    // this.recalculate()
+
+    let pStart = camera.position.x - DRONE.light.distance*2 
+    let pEnd = camera.position.x + DRONE.light.distance*2 
+
+    // if(DRONE.vel.x >= 0){
+      //delete meshes first
+      this.removeBehind(pStart)
+
+      let i = 50
+      while(pEnd > this.end){
+        i--
+        if(i < 0){debugger}
+        console.log("jhey1")
+        this.loadChunk({id: this.endMesh.userData.id+1, startPos:this.end})
+      }
+
+
+    // } else {
+      this.removeForward(pEnd)
+
+      while(pStart < this.start){
+        console.log("jhey")
+        this.loadChunk({id: this.startMesh.userData.id-1, startPos:this.start, reverse:true})
+      }
+
+    // }
+
+  }
+
+  static loadChunk(dict){
+    if(this.loadeds[dict.id]){console.log(dict.id);return}
+    if(this.levelDesign[dict.id]){
+      this.generate(this.levelDesign[dict.id])
+    } else {
+      this.generate(dict)
+      this.levelDesign[dict.id] = dict
+    }
+  }
+
+
+  static recalculate(){
+
+    if(this.activeMeshes.length === 0){
+      this.startMesh = {userData:{id:0}}
+      this.endMesh = {userData:{id:0}}
+      this.start = camera.position.x
+      this.end = camera.position.x
+      return
+    }
+
+    this.startMesh = this.activeMeshes[0]
+    this.endMesh = this.activeMeshes[this.activeMeshes.length-1]
+    this.start = this.startMesh.userData.start
+    this.end = this.endMesh.userData.end
+  }
+
+
+  // static generate(level,length=2000000,count=20000){
+  static generate({level=0,length=200000,count=20000,id=1,startPos=0,reverse=false} = {}){
+
+    let rng = new Math.seedrandom(this.seed+id)
+
+    if(reverse){
+      startPos -= length
+    }
 
     console.log("GENERATE")
 
-    count = Math.floor(count)
 
+    count = Math.floor(count)
+    let mesh;
+    if(level === 0){
+      let per = 10000
+      let count = Math.floor(length/10000)*4
+
+      var geometry = new THREE.BoxGeometry(4200, 1200, 1200);
+      var materials = new THREE.MeshStandardMaterial({ color: "#FF3030", roughness:0, metalness: 0.8})
+
+      mesh = new THREE.InstancedMesh( geometry, materials, count );
+      mesh.instanceMatrix.setUsage( THREE.DynamicDrawUsage ); // will be updated every frame
+      scene.add(mesh);
+
+      let dummy = new THREE.Object3D()
+      for ( let i = 0; i < count; i ++) {
+          let [x,y,z] = [Math.floor(i/4)*per+startPos, world.worldbox.y*0.8 * (i%2-0.5), world.worldbox.z*0.8 * (Math.floor(i%4/2)-0.5)];
+          dummy.rotation.set(Math.PI/4,0,0)
+          dummy.position.set(x,y,z);
+          dummy.updateMatrix();
+          mesh.setMatrixAt( i, dummy.matrix );
+      }
+      mesh.name = "spaceRail"
+
+      mesh.userData.decorations = [this.border(startPos,length)] 
+
+    }
 
     if(level === 1){
       var geometry = new THREE.BoxGeometry(200, 200, 200);
@@ -429,38 +549,148 @@ class world{
         new THREE.MeshStandardMaterial({ color: "#FFAAFF" }),
         new THREE.MeshStandardMaterial({ color: "#FFFFAA" })
       ];
-      let mesh = new THREE.InstancedMesh( geometry, materials, count );
+      mesh = new THREE.InstancedMesh( geometry, materials, count );
       mesh.instanceMatrix.setUsage( THREE.DynamicDrawUsage ); // will be updated every frame
       scene.add(mesh);
-      this.activeMeshes.push(mesh)
 
       let dummy = new THREE.Object3D()
 
       for ( let i = 0; i < count; i ++ ) {
-        let mr = this.rng()
-          let [x,y,z] = [mr*length+this.totalX, ranRange(world.worldbox.y), ranRange(world.worldbox.z)];
+        let mr = rng()
+          let [x,y,z] = [mr*length+startPos, ranRange(world.worldbox.y), ranRange(world.worldbox.z)];
           dummy.position.set(x,y,z);
-          dummy.rotation.set(this.rng()*Math.PI*mr,this.rng()*Math.PI*mr,this.rng()*Math.PI*mr)
+          dummy.rotation.set(rng()*Math.PI*mr,rng()*Math.PI*mr,rng()*Math.PI*mr)
           dummy.scale.set( 1 + Math.abs(normalRandom(1,3)), 1 + Math.abs(normalRandom(1,3)), 1 + Math.abs(normalRandom(1,3)) );
           dummy.updateMatrix();
           mesh.setMatrixAt( i, dummy.matrix );
       }
+
+      mesh.name = "level1"
+      mesh.userData.decorations = [this.border(startPos,length)] 
     }
+    if(level === 2){
+      var geometry = new THREE.BoxGeometry(800, 200, 200);
+      var materials = [
+        new THREE.MeshStandardMaterial({ color: "#55AA55" /*, depthTest:false*/}),
+        new THREE.MeshStandardMaterial({ color: "#55AA55" }),
+        new THREE.MeshStandardMaterial({ color: "#AAAAFF" }),
+        new THREE.MeshStandardMaterial({ color: "#AAFFFF" }),
+        new THREE.MeshStandardMaterial({ color: "#55AA55" }),
+        new THREE.MeshStandardMaterial({ color: "#55AA55" })
+      ];
+      mesh = new THREE.InstancedMesh( geometry, materials, count );
+      mesh.instanceMatrix.setUsage( THREE.DynamicDrawUsage ); // will be updated every frame
+      scene.add(mesh);
+
+      let dummy = new THREE.Object3D()
+
+      for ( let i = 0; i < count; i ++ ) {
+        let mr = rng()
+          let [x,y,z] = [mr*length+startPos, ranRange(world.worldbox.y), ranRange(world.worldbox.z)];
+          dummy.position.set(x,y,z);
+          dummy.rotation.set((rng()-0.5)*Math.PI*mr,(rng()-0.5)*Math.PI*mr,(rng()-0.5)*Math.PI*mr)
+          dummy.scale.set( 1 + Math.abs(normalRandom(1,6)), 1 + Math.abs(normalRandom(1,3)), 1 + Math.abs(normalRandom(1,3)) );
+          dummy.updateMatrix();
+          mesh.setMatrixAt( i, dummy.matrix );
+      }
+
+      mesh.userData.decorations = [this.border(startPos,length)] // NEED TO CLEAR THIS SHIT AFTER
+    }
+
+    let midpt = startPos + length/2
+    if(midpt > this.end){
+      this.activeMeshes.push(mesh)
+    } else if(midpt < this.start){
+      this.activeMeshes.splice(0,0,mesh)
+    } else {
+      console.log("dont know what to do");
+      debugger;
+    }
+
 
     console.log("GENERATE DONE")
 
-    this.totalX += length
+      mesh.userData.start = startPos
+      mesh.userData.end = startPos + length
+
+    mesh.userData.id = id
+    console.log("ID "+id)
+
+    this.loadeds[id] = true
+
+    this.recalculate()
+
+    return(mesh)
   }
 
 
-  static remove(levels=1){
-    let meshes = this.activeMeshes.splice(0,levels)
-    meshes.forEach((mesh)=>{
+  static border(startPos,length,per=4000){
+      let material = new THREE.MeshPhysicalMaterial({color:"#00FFFF",metalness:0.7,roughness:1,reflectivity:1})
+      var geometry = new THREE.BoxGeometry(2000, 150, 150);
+
+      let count = Math.floor(length/per)*4
+
+      let mesh = new THREE.InstancedMesh( geometry, material, count)
+      mesh.instanceMatrix.setUsage( THREE.StaticDrawUsage ); // will be updated every frame
+      scene.add(mesh);
+
+      let dummy = new THREE.Object3D()
+      for ( let i = 0; i < count; i ++ ) {
+          let [x,y,z] = [Math.floor(i/4)*per+startPos, world.worldbox.y * (i%2-0.5), world.worldbox.z * (Math.floor(i%4/2)-0.5)];
+          dummy.position.set(x,y,z);
+          dummy.updateMatrix();
+          mesh.setMatrixAt( i, dummy.matrix );
+      }
+      mesh.name = "border1"
+      return(mesh)
+  }
+
+
+  static removeBehind(start){
+    let meshes = []
+    while(this.activeMeshes.length > 0){
+      if(start > this.activeMeshes[0].userData.end){
+        let msh = this.activeMeshes.splice(0,1)[0]
+        meshes.push(msh)
+        console.log("removed behind:" + msh.userData.id)
+        continue;
+      }
+      break;
+    }
+    if(meshes.length===0){return}
+    this.remove(meshes)
+  }
+  static removeForward(end){
+    let meshes = []
+    while(this.activeMeshes.length > 0){
+      if(end < this.activeMeshes[this.activeMeshes.length-1].userData.start){
+        meshes.push(this.activeMeshes.pop())
+        console.log("removed forward")
+        continue;
+      }
+      break;
+    }
+    if(meshes.length===0){return}
+    this.remove(meshes)
+  }
+
+  static remove(meshes){
+    console.log("removing:"+meshes)
+    while(meshes.length>0){
+      let mesh = meshes.splice(0,1)[0];
+      if(mesh.userData.id!==undefined){
+        this.loadeds[mesh.userData.id] = false
+        console.log(mesh.name,mesh.userData.id,JSON.stringify(this.loadeds))
+      } else {
+        console.log("not found ",mesh.name,JSON.stringify(mesh.userData))
+      }
       scene.remove(mesh)
+      if(mesh.userData.decorations){
+        meshes.push(...mesh.userData.decorations)
+      }
       mesh.geometry.dispose();
-      // mesh.material.dispose();
-    })
-    
+    }
+    this.recalculate()
   }
 
 }
@@ -529,6 +759,8 @@ function init() {
   DRONE.topHemisphere.material.depthTest = false;
   DRONE.bottomHemisphere.renderOrder = 999
   DRONE.bottomHemisphere.rotateX(Math.PI*3/2)
+  // DRONE.topHemisphere.rotateY(Math.atan(1/2))
+  // DRONE.bottomHemisphere.rotateY(Math.atan(1/2))
   DRONE.bottomHemisphere.material.depthTest = false;
 
 
@@ -542,11 +774,12 @@ function init() {
 
   // mesh = new THREE.Mesh(geometry, materials);
 
-  light = new THREE.PointLight( 0xffffff, 300, 100000 , 0.5 );
+  DRONE.light = light = new THREE.PointLight( 0xffffff, 300, 100000 , 0.5 );
   light.position.set( 50, 50, 50 );
   scene.add( light );
 
-  world.generate(1)
+  world.recalculate()
+  world.loadChunk({id:1,level:1,length:2000000})
 
 
 
@@ -674,20 +907,7 @@ function animate(){
   if(DRONE){
     DRONE.updatePos(dt/16)
   }
-  let dst = Infinity
-  const intersects = raycaster.intersectObjects( world.activeMeshes );
-  if(intersects.length>0){
-    div.innerText += "\n INTERSECTS \n"
-    dst = intersects[0].distance
-    if(dst < DRONE.dPos.length()){
-      // div.style.backgroundColor = "red"
-      DRONE.forces.roll += minMax(-2,(Math.random()-0.5)*0.0025*DRONE.speed,2)
-      DRONE.forces.yaw += minMax(-2,(Math.random()-0.5)*0.0025*DRONE.speed,2)
-      DRONE.vel.multiplyScalar(0.8)
-      DRONE.forwardLocked = false
-      console.log("HIT")
-    }
-  }
+
 
   // mesh.rotation.y = Date.now()/1000
 
@@ -725,8 +945,8 @@ function animate(){
 
 
 
-  if(dst !== Infinity){
-  let impactMarker = Math.min(Math.max(dst/DRONE.speed/50,0),0.5)
+  if(DRONE.dst !== Infinity){
+  let impactMarker = Math.min(Math.max(DRONE.dst/DRONE.speed/50,0),0.5)
   const impactGradient = ctx.createLinearGradient(0, 0, Width, 0);
     impactGradient.addColorStop(0, "rgba(255,0,0,0.5)");
     impactGradient.addColorStop(0.5-impactMarker, "rgba(255,0,0,0)");
@@ -1277,13 +1497,31 @@ function handleMotion(event) {
         } if(e.key == "i"){
           DRONE.invertedControls *= -1
         }
+        if(e.key == "g"){
+             DRONE.topHemisphere.rotateY(Math.atan(1/2))
+             DRONE.bottomHemisphere.rotateY(Math.atan(1/2))
+        }
+        if(e.key == "G"){
+             DRONE.topHemisphere.rotateY(-Math.atan(1/2))
+             DRONE.bottomHemisphere.rotateY(-Math.atan(1/2))
+        }
 
-        if(e.key == "Shift"){
+
+        if(e.key == "Tab"){
+          e.preventDefault()
           // DRONE.vel.add(camera.getWorldDirection(new THREE.Vector3()).multiplyScalar(200))
           DRONE.forwardLocked = !DRONE.forwardLocked
         }
       downs[e.key] = true
     })
+
+    document.addEventListener("mousedown",(e)=>{
+      downs["M"+e.button] = true
+    })
+    document.addEventListener("mouseup",(e)=>{
+      downs["M"+e.button] = false
+    })
+
 
     document.addEventListener("keyup",(e)=>{
       if(e.repeat){return}
@@ -1295,8 +1533,11 @@ function handleMotion(event) {
 
 
 
-
-
+    function test(){
+      console.log("tri: " + renderer.info.render.triangles)
+      console.log("drawcalls: " + renderer.info.render.calls)
+    }
+    window.test = test
 
 
 
