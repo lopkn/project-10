@@ -602,7 +602,7 @@ class world{
 
 
       this.preloadChunk({id:id+1,level:0})
-      this.preloadChunk({id:id+2,level:4,length:2000000})
+      this.preloadChunk({id:id+2,level:2,length:2000000})
 
 
       var geometry = new THREE.BoxGeometry(200, 200, 200);
@@ -672,6 +672,9 @@ class world{
 
 
     if(level === 3){
+
+      this.preloadChunk({id:id+1,level:0})
+      this.preloadChunk({id:id+2,level:4,length:2000000})
 
       count = Math.floor(count*2/3)
 
