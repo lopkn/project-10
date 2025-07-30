@@ -219,6 +219,16 @@ class ENV{
   static targetFPS = 60
   static airFriction = 0.9995
   static grav = 9.81/this.targetFPS*7
+
+  static timeWarp = 1
+
+
+  static update(dt){
+    this.timeWarp = this.timeWarp ** (0.99**dt)
+    DRONE.light.color.r = this.timeWarp
+    DRONE.light.color.g = this.timeWarp
+  }
+
 }
     var downs = {}
 
@@ -269,7 +279,8 @@ class DRONE{
         }  if(downs.q){
           DRONE.controls.roll += this.controlSpeed* dt
         } if(downs[" "]){
-          DRONE.forces.up += this.controlSpeed * 345/4
+        ENV.timeWarp *= 0.97
+          // DRONE.forces.up += this.controlSpeed * 345/4
         } if(downs.Control){
           DRONE.forces.up -= this.controlSpeed * 345/4
         }
@@ -277,12 +288,14 @@ class DRONE{
         if(downs[" "]){
           DRONE.vel.add(camera.getWorldDirection(new THREE.Vector3()).multiplyScalar(2*dt))
         }
-        if(downs["`"]){
-          DRONE.vel.add(camera.getWorldDirection(new THREE.Vector3()).multiplyScalar(20*dt))
-        }
+        
         if(downs["M0"]){
           DRONE.vel.add(camera.getWorldDirection(new THREE.Vector3()).multiplyScalar(1*dt))
         }
+      }
+
+      if(downs["`"]){
+        // ENV.timeWarp *= 0.97
       }
 
     div.innerText = JSON.stringify(this.forces)
@@ -362,6 +375,9 @@ class DRONE{
     }
 
     world.autogen()
+
+    this.calcWorldPos()
+
     this.scoring(dt)
 
 
@@ -376,23 +392,38 @@ class DRONE{
   static scoring(dt){
     if(world.worldbox.y/2 > camera.position.y && camera.position.y > -world.worldbox.y/2 && world.worldbox.z/2 > camera.position.z && camera.position.z > -world.worldbox.z/2 && camera.position.x > this.furthestOut && this.vel.x > 3){
 
-      // if(camera.position.x > world.totalX - this.light.distance*2){
-      //   world.checkpointX = camera.position.x + this.light.distance*2 - 20000
-      //   world.removeBehind()
-      //   // world.generate(1)
-      // }
-
-
-      this.score += dt * this.speed /* Math.min(1/distance(0,0,camera.position.y,camera.position.z),1) */ /200
+      this.score += dt * this.speed**2 /* Math.min(1/distance(0,0,camera.position.y,camera.position.z),1) */ /400000
       this.furthestOut = camera.position.x 
     } 
   }
+  static calcWorldPos(){
+
+    while(camera.position.x > world.loadeds[this.worldPos].userData.end){
+      this.worldPos += 1
+
+      if(!world.loadeds[this.worldPos].userData.noCheckpoint){
+        this.checkpointId = this.worldPos
+        console.log("CHECKPOINT")
+      }
+    }
+    while(camera.position.x < world.loadeds[this.worldPos].userData.start){
+      this.worldPos -= 1
+      if(!world.loadeds[this.worldPos].userData.noCheckpoint){
+        this.checkpointId = this.worldPos
+      }
+    }
+
+    this.start = world.loadeds[this.worldPos].userData.start
+    this.end = world.loadeds[this.worldPos].userData.end
+  }
+    
+  static checkpointId = 1
 
   static reset(){
     console.log("reset")
 
 
-    this.worldPos = 0
+    this.worldPos = this.checkpointId
 
     this.controls = {
       "up":0,
@@ -410,19 +441,26 @@ class DRONE{
 
     this.furthestOut = 0
 
-
     this.forwardLocked = true
     this.vel = new THREE.Vector3(0,0,0)
     this.score = 0;
     camera.position.z = 0;
     camera.position.y = 0;
-    camera.position.x = world.checkpointX-21200;
+    camera.position.x = -21200;
     // camera.position.x = 0
 
     camera.rotation.set(0,Math.PI*3/2,0)
 
-    this.getInfo()
     world.recalculate()
+    world.loadChunk({id:this.checkpointId})
+    world.recalculate()
+    camera.position.x = world.loadeds[this.checkpointId].userData.start - 21200
+    world.autogen()
+
+    this.calcWorldPos()
+
+
+    this.getInfo()
 
   }
 
@@ -433,8 +471,6 @@ class world{
   static worldbox = {"y":2*20000,"z":2*20000}
   static activeMeshes = []
   static loadeds = {}
-  static totalX = 0;
-  static checkpointX = 0;
   static seed = "welcome"
 
   static rng = new Math.seedrandom(this.seed)
@@ -451,30 +487,25 @@ class world{
     // if(DRONE.vel.x >= 0){
       //delete meshes first
       this.removeBehind(pStart)
+      this.removeForward(pEnd)
 
       let i = 15
       while(pEnd > this.end){
         i--
-        if(i<1){
-          console.log("BOMBBBBBBBB!!!")
-          this.activeMeshes.sort((a,b)=>{return(a.userData.id - b.userData.id)})
-          this.recalculate()
-        }
+        // if(i<1){
+        //   console.log("BOMBBBBBBBB!!!")
+        //   this.activeMeshes.sort((a,b)=>{return(a.userData.id - b.userData.id)})
+        //   this.recalculate()
+        // }
         if(i < 0){debugger}
-        console.log("jhey1")
+        console.log("jhey1"+ pEnd + "," + this.end)
         this.loadChunk({id: this.endMesh.userData.id+1})
       }
-
-
-    // } else {
-      this.removeForward(pEnd)
-
       while(pStart < this.start){
         console.log("jhey")
         this.loadChunk({id: this.startMesh.userData.id-1, reverse:true})
       }
 
-    // }
 
   }
 
@@ -484,12 +515,12 @@ class world{
   }
 
   static loadChunk(dict){
-    if(this.loadeds[dict.id]){console.log(dict.id);return}
+    if(this.loadeds[dict.id]){console.log("already loaded: "+dict.id);return}
     if(this.levelDesign[dict.id]){
       this.generate(this.levelDesign[dict.id])
     } else {
-      this.generate(dict)
       this.levelDesign[dict.id] = dict
+      this.generate(dict)
       dict.fullyLoaded = true
     }
   }
@@ -514,17 +545,24 @@ class world{
 
 
   // static generate(level,length=2000000,count=20000){
-  static generate({level=0,length=200000,count=20000,id=1,reverse=false} = {}){
+  static generate({level=0,length=200000,count=20000,id=1,reverse=false,startPos=undefined} = {}){
+
+
+
 
     let rng = new Math.seedrandom(this.seed+id)
-    let startPos;
-    if(reverse){
-      startPos = this.start - length
-    } else {
-      startPos = this.end
+    if(startPos === undefined){
+      if(reverse){
+        startPos = this.start - length
+      } else {
+        startPos = this.end
+      }
+    this.levelDesign[id].startPos = startPos
     }
 
-    console.log("GENERATE")
+
+
+    // console.log("GENERATE")
 
 
     count = Math.floor(count)
@@ -551,12 +589,13 @@ class world{
       mesh.name = "spaceRail"
 
       mesh.userData.decorations = [this.border(startPos,length)] 
+      mesh.userData.noCheckpoint = true
 
     }
 
     if(level === 1){
 
-      this.preloadChunk({id:id+1,level:0,startPos})
+      this.preloadChunk({id:id+1,level:0})
       this.preloadChunk({id:id+2,level:2,length:2000000})
 
 
@@ -618,21 +657,19 @@ class world{
     }
 
     let midpt = startPos + length/2
-    console.log(this.end,this.start,startPos,reverse)
-    if(id==1){debugger}
     if(id > this.endMesh.userData.id || this.activeMeshes.length===0){
       this.activeMeshes.push(mesh)
-      console.log("PUSHED: "+id)
+      console.log("PUSHED: "+id+ " at "+startPos+" with world: "+ this.start + "-"+this.end + ", camera at:"+camera.position.x+", reverse: "+reverse)
     } else if(id < this.startMesh.userData.id){
       this.activeMeshes.splice(0,0,mesh)
-      console.log("SPLICED: "+id)
+      console.log("SPLICED: "+id+ " at "+startPos+" with world: "+ this.start + "-"+this.end + ", camera at:"+camera.position.x+ ", reverse: "+reverse)
     } else {
       console.log("dont know what to do");
       debugger;
     }
 
 
-    console.log("GENERATE DONE")
+    // console.log("GENERATE DONE")
 
       mesh.userData.start = startPos
       mesh.userData.end = startPos + length
@@ -640,7 +677,7 @@ class world{
     mesh.userData.id = id
     console.log("ID "+id)
 
-    this.loadeds[id] = true
+    this.loadeds[id] = mesh
 
     this.recalculate()
 
@@ -699,14 +736,14 @@ class world{
   }
 
   static remove(meshes){
-    console.log("removing:"+meshes)
+    // console.log("removing:"+meshes)
     while(meshes.length>0){
       let mesh = meshes.splice(0,1)[0];
       if(mesh.userData.id!==undefined){
         this.loadeds[mesh.userData.id] = false
-        console.log(mesh.name,mesh.userData.id,JSON.stringify(this.loadeds))
+        // console.log(mesh.name,mesh.userData.id)
       } else {
-        console.log("not found ",mesh.name,JSON.stringify(mesh.userData))
+        // console.log("not found ",mesh.name,JSON.stringify(mesh.userData))
       }
       scene.remove(mesh)
       if(mesh.userData.decorations){
@@ -750,7 +787,6 @@ function init() {
     10000000,
   );
     
-  DRONE.reset()
 
   // camera.position.z = 2
   // camera.position.x = 0
@@ -803,6 +839,7 @@ function init() {
 
   world.recalculate()
   world.loadChunk({id:1,level:1,length:2000000})
+  DRONE.reset()
 
 
 
@@ -928,7 +965,8 @@ function animate(){
   let dt = Date.now()-lastDate
   lastDate = Date.now()
   if(DRONE){
-    DRONE.updatePos(dt/16)
+    DRONE.updatePos(dt/16 * ENV.timeWarp)
+    ENV.update(dt/16)  
   }
 
 
