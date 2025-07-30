@@ -227,7 +227,7 @@ class ENV{
   static paused = false
 
   static update(dt){
-    this.timeWarp = this.timeWarp ** (0.99**dt)
+    this.timeWarp = this.timeWarp ** (0.99**dt) + 0.0001
     if(this.paused){this.timeWarp = 0;}
     DRONE.light.color.r = this.timeWarp
     DRONE.light.color.g = this.timeWarp
