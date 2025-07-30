@@ -224,9 +224,11 @@ class ENV{
 
   static timeWarp = 1
 
+  static paused = false
 
   static update(dt){
     this.timeWarp = this.timeWarp ** (0.99**dt)
+    if(this.paused){this.timeWarp = 0;}
     DRONE.light.color.r = this.timeWarp
     DRONE.light.color.g = this.timeWarp
   }
@@ -1733,6 +1735,10 @@ function handleMotion(event) {
 
         if(e.key == "Enter"){
           camera.position.x += (world.loadeds[DRONE.worldPos].userData.end - camera.position.x) * 0.9
+        }
+
+        if(e.key == "p"){
+          ENV.paused = !ENV.paused
         }
 
 
