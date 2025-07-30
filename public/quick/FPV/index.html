@@ -426,12 +426,7 @@ class DRONE{
     
   static checkpointId = 1
 
-  static reset(){
-    console.log("reset")
-
-
-    this.worldPos = this.checkpointId
-
+  static softReset(){
     this.controls = {
       "up":0,
       "pitch":0,
@@ -446,18 +441,27 @@ class DRONE{
       "yaw":0
     }
 
+    this.vel = new THREE.Vector3(0,0,0)
+    camera.rotation.set(0,Math.PI*3/2,0)
+  }
+
+  static reset(){
+    console.log("reset")
+
+
+
+    this.softReset()
+
     this.furthestOut = 0
 
     this.forwardLocked = true
-    this.vel = new THREE.Vector3(0,0,0)
     this.score = 0;
     camera.position.z = 0;
     camera.position.y = 0;
     camera.position.x = -21200;
     // camera.position.x = 0
 
-    camera.rotation.set(0,Math.PI*3/2,0)
-
+    this.worldPos = this.checkpointId
     world.recalculate()
     world.loadChunk({id:this.checkpointId})
     world.recalculate()
@@ -1232,7 +1236,7 @@ function animate(){
   ctx.strokeStyle = "rgba(0,160,160,0.8)"
   ctx.stroke()
 
-  let dynamicStableYlevel = Height/2 - (ENV.grav / 1287 * Height / 0.005) / Math.cos(DRONE.angleUp)
+  let dynamicStableYlevel = Height/2 - (ENV.grav / 1500 * Height / 0.005) / Math.cos(DRONE.angleUp)
   if(isFinite(dynamicStableYlevel)){
     ctx.beginPath() // level cross dynamic
     ctx.moveTo(Width/2-40,dynamicStableYlevel)
@@ -1452,33 +1456,6 @@ class Lcolorf{ //lopkn's color functions
   }
 }
 
-class LPerceptron{ //it should have input name, input value. each input should have a multiplier towards a result
-  constructor(){
-    this.outputInputpair = {"testOutput":{"testInput":2}}
-    this.inputs = {}
-  }
-  input(dict){
-    this.inputs = dict
-  }
-  generateOutput(item){
-    let result = 0
-    item = this.outputInputpair[item]
-    let objk = Object.keys(item)
-    for(let i = 0; i < objk.length; i++){
-      let inputting = objk[i]
-      result += this.input[inputting] * item[inputting]
-    }
-    return(result)
-  }
-  learn(item,expected){
-    item = this.outputInputpair[item]
-    let objk = Object.keys(item)
-    for(let i = 0; i < objk.length; i++){
-      let inputting = objk[i]
-      this.input[inputting] += item[inputting] * (expected?1:-1)
-    }
-  }
-}
 
 function normalRandom(mean, stderr, rng=world.rng) {
     const u1 = rng();
@@ -1700,6 +1677,15 @@ function handleMotion(event) {
 // });
 
 
+  function tutorial1(){
+
+    DRONE.softReset()
+
+    camera.position.z = 300000
+    camera.position.y = 0
+    let x = camera.position.x
+
+  }
 
 
 
@@ -1717,7 +1703,15 @@ function handleMotion(event) {
           DRONE.rollControlSpeed *= 1.1
         } if(e.key == "2"){
           DRONE.rollControlSpeed *= 0.9
-        } if(e.key == "i"){
+        } 
+
+        if(e.key == "3"){
+
+          tutorial1()
+
+        }
+
+        if(e.key == "i"){
           DRONE.invertedControls *= -1
         }
         if(e.key == "g"){
