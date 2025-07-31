@@ -7,7 +7,7 @@
       name="viewport"
       content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
     />
-    <!-- <script src="https://threejs.org/build/three.min.js"></script> -->
+    <script src="https://mrdoob.github.io/stats.js/build/stats.min.js"></script>
     <!-- <script src="https://cdn.skypack.dev/three@0.129.0/build/three.module.js"></script> -->
 
     <!-- <script src="https://unpkg.com/three@0.178.0/build/three.cjs"></script> -->
@@ -149,6 +149,8 @@
 
 
 
+var COUNTER = 0
+
 
 let Height = window.innerWidth >window.innerHeight?window.innerHeight:window.innerWidth
 let Width = window.innerWidth >window.innerHeight?window.innerWidth:window.innerHeight
@@ -158,10 +160,11 @@ let mouseY = Height/2
 
 // onmousemove = (e)=>{mouseX = (e.clientX); mouseY = (e.clientY)}
 document.addEventListener("mousemove",(e)=>{
-  mouseX = e.clientX
-  mouseY = e.clientY
 
-
+  if(!Mobile.initialized){
+    mouseX = e.clientX
+    mouseY = e.clientY
+  }
 })
 
 let div = document.createElement("div")
@@ -176,6 +179,7 @@ div.style.width = "50%"
 div.style.height = "50%"
 
 document.body.appendChild(div)
+
 
 class LCanvas{ //lopkns template canvas
   constructor(w=100,h=100,id=("LCanvas-"+Math.random())){
@@ -215,6 +219,141 @@ class LCanvas{ //lopkns template canvas
 
 }
 
+class Mobile {
+  // static joystick_move = {"mx":185,"my":821,"x":100,"y":100,"r":100,"vect":[0,0]}
+  // static joystick_fire = {"mx":600,"my":100,"x":600,"y":100,"r":100,"vect":[0,0]}
+  // static scroller_weapon = {"x":40,"y":60,"w":170,"h":40,"val":0}
+  // static scroller_wall = {"x":(window.innerWidth-10-170),"y":60,"w":170,"h":40,"val":0}
+  // static button_chat = {"x":(window.innerWidth-10-170),"y":110,"w":170,"h":40,"val":"chat"}
+
+  static UI = {}
+
+  static activeTouches = {}
+  static canvas;
+  static canvasFingers = 0
+  static canvasGesture = "none"
+  static initialized = false
+  static init(){
+  this.initialized = true
+
+    document.body.style.touchAction = 'none';
+    let mobileCanvas = document.createElement("canvas")
+    mobileCanvas.width = window.innerWidth
+    mobileCanvas.height = window.innerHeight
+    mobileCanvas.style.position = "absolute"
+    mobileCanvas.style.top = "0px"
+    mobileCanvas.style.left = "0px"
+    mobileCanvas.style.zIndex = "5"
+    mobileCanvas.id = "mcanvas"
+    mobileCanvas.style.userSelect = "none" //gay
+    mobileCanvas.style.touchAction = "none"
+    mobileCanvas.addEventListener("contextmenu",(e)=>{e.preventDefault()})
+    // myCanvas.addEventListener("contextmenu",(e)=>{e.preventDefault()})
+    // myCanvas.style.touchAction = "none"
+    // myCanvas.style.userSelect = "none" //gay
+    // myCanvas.classList.add("mobile")
+    mobileCanvas.classList.add("mobile")
+    this.ctx = mobileCanvas.getContext("2d")
+    this.canvas = mobileCanvas
+    document.body.insertBefore(mobileCanvas,canvas.canvas)
+    mobileCanvas.addEventListener("touchstart",(e)=>{})
+    let r = canvas.canvas.getBoundingClientRect()
+    // this.joystick_move.my = r.bottom - this.joystick_move.r-75
+    // this.joystick_move.mx = r.left - this.joystick_move.r-25
+    // this.joystick_fire.my = r.bottom - this.joystick_move.r-75
+    // this.joystick_fire.mx = r.left + r.width + this.joystick_move.r + 25
+
+    this.radius = Height/8
+    this.padding = 25
+
+    this.UI.leftJoystick = {x:this.padding + this.radius,y: Height - this.padding - this.radius,r :this.radius, update:(id,x,y,e)=>{
+      let ui = this.UI[this.activeTouches[id].type]
+      let dx = minMax(-1,(x - ui.x)/ui.r,1)
+      let dy = minMax(-1,(y - ui.y)/ui.r,1)
+
+      DRONE.controls.yaw = (-dx)*0.00017 * 88
+      DRONE.controls.pitch = (-dy)*0.00017 * 88
+
+    }, end:()=>{
+        // DRONE.controls.yaw = 0
+        // DRONE.controls.pitch = 0
+      }
+    }
+    this.UI.rightJoystick = {x:Width - this.padding - this.radius,y:Height - this.padding - this.radius,r :this.radius, update:(id,x,y,e)=>{
+        let ui = this.UI[this.activeTouches[id].type]
+        let dx = minMax(-1,(x - ui.x)/ui.r,1)
+        let dy = minMax(-1,(y - ui.y)/ui.r,1)
+
+        DRONE.controls.roll = ((-dx)*0.00007) * DRONE.rollControlSpeed * 500
+        DRONE.controls.up = (-dy)*0.005 * 1500 / 2
+      }, end:()=>{
+        // DRONE.controls.up = 0
+        // DRONE.controls.roll = 0
+      }
+    }
+
+
+    console.log(r)
+    // init()
+
+  }
+  static draw(){
+    this.ctx.clearRect(0,0,Width,Height)
+    // this.ctx.fillStyle = "#FF00FF"
+    // this.ctx.fillRect(0,0,Width,Height)
+
+    if(!this.initialized){return}
+      this.ctx.beginPath()
+      this.ctx.strokeStyle="white"
+      this.ctx.lineWidth = 5
+      
+
+      
+
+      this.ctx.arc(this.UI.leftJoystick.x,this.UI.leftJoystick.y, this.radius, 0, 2*Math.PI)
+      this.ctx.stroke()
+      this.ctx.beginPath()
+      this.ctx.arc(this.UI.rightJoystick.x,this.UI.rightJoystick.y, this.radius, 0, 2*Math.PI)
+      this.ctx.stroke()
+    
+
+  }
+
+  static touchTyper(x,y){
+    if(distance(x,y,this.UI.leftJoystick.x,this.UI.leftJoystick.y) < this.radius){
+      return("leftJoystick")
+    }
+    if(distance(x,y,this.UI.rightJoystick.x,this.UI.rightJoystick.y) < this.radius){
+      return("rightJoystick")
+    }
+
+    return("unidentified")
+  }
+
+  static touchUpdate(id,x,y,E){
+    if(this.activeTouches[id].type !== "unidentified"){
+      if(this.UI[this.activeTouches[id].type].update){
+        this.UI[this.activeTouches[id].type].update(id,x,y,E)
+      }
+    }
+  }
+  static touchStart(id,x,y,E){
+    if(this.activeTouches[id].type !== "unidentified"){
+      if(this.UI[this.activeTouches[id].type].start){
+        this.UI[this.activeTouches[id].type].start(id,x,y,E)
+      }
+    }
+  }
+  static touchEnd(id,x,y,E){
+    if(this.activeTouches[id].type !== "unidentified"){
+      if(this.UI[this.activeTouches[id].type].end){
+        this.UI[this.activeTouches[id].type].end(id,x,y,E)
+      }
+    }
+  }
+}
+
+
 var light
 
 class ENV{
@@ -223,6 +362,7 @@ class ENV{
   static grav = 9.81/this.targetFPS*7 
 
   static timeWarp = 1
+  static otherWarp = 1
 
   static paused = false
 
@@ -234,12 +374,16 @@ class ENV{
   }
 
 }
+window.ENV = ENV
     var downs = {}
 
 const raycaster = new THREE.Raycaster();
 
 
 class DRONE{
+
+  static raycaster = new THREE.Raycaster()
+
   static vel = new THREE.Vector3(0,0,0)
 
   static controls = {
@@ -266,6 +410,8 @@ class DRONE{
 
   static updatePos(dt=1){
 
+      let adt = Math.abs(dt)
+
 
       if(!this.forwardLocked){
         if(downs.w){
@@ -283,7 +429,7 @@ class DRONE{
         }  if(downs.q){
           DRONE.controls.roll += this.controlSpeed* dt
         } if(downs[" "]){
-        ENV.timeWarp *= 0.97
+        ENV.timeWarp *= 0.97**(dt/ENV.timeWarp)
           // DRONE.forces.up += this.controlSpeed * 345/4
         } if(downs.Control){
           DRONE.forces.up -= this.controlSpeed * 345/4
@@ -299,29 +445,34 @@ class DRONE{
       }
 
       if(downs["`"]){
-        // ENV.timeWarp *= 0.97
+        ENV.timeWarp *= 1.02
+      }
+      if(downs["["]){
+        if(COUNTER%4<2){
+          camera.rotateY(0.01)
+        } else {
+          camera.rotateY(-0.01)
+        }
       }
 
     div.innerText = JSON.stringify(this.forces)
 
 
-    this.controls.yaw *= 0.995** dt
-    this.controls.pitch *= 0.995** dt
+    this.controls.yaw *= 0.995** adt
+    this.controls.pitch *= 0.995** adt
     this.controls.up *= 0.95** dt
 
-    this.controls.up = (Height/2-mouseY)*0.005 / Height * 1500
-
-
-    // this.forces.roll = Math.sqrt(Math.abs((Width/2-mouseX)*0.000001))*((Width/2-mouseX)<0?-1:1)
-    // this.forces.pitch = ((Height/2-mouseY)*0.00007)
-
-    this.controls.roll = ((Width/2-mouseX)*0.00007) * this.rollControlSpeed / Width * 2000
+    if(!Mobile.initialized){
+      this.controls.up = (Height/2-mouseY)*0.005 / Height * 1500
+      this.controls.roll = ((Width/2-mouseX)*0.00007) * this.rollControlSpeed / Width * 2000
+    }
+    
 
 
     Object.keys(this.controls).forEach((e)=>{
       if(e==="up"){this.forces[e] = this.controls[e];return}
       let mns = this.controls[e]-this.forces[e]
-      this.forces[e] += Math.min(Math.abs(mns),this.controlStrength+Math.abs(mns/100)) * Math.sign(mns) * dt
+      this.forces[e] += Math.min(Math.abs(mns),this.controlStrength+Math.abs(mns/100)) * Math.sign(mns) * adt
     })
 
     camera.rotateY(this.forces.yaw* dt)
@@ -342,26 +493,39 @@ class DRONE{
 
     this.dst = Infinity
     const intersects = raycaster.intersectObjects( world.activeMeshes );
+    this.raycaster.set(camera.position,camera.getWorldDirection(new THREE.Vector3))
+    const lookIntersects = DRONE.raycaster.intersectObjects( world.activeMeshes );
+
     if(intersects.length>0){
       div.innerText += "\n INTERSECTS \n"
       this.dst = intersects[0].distance
       if(this.dst < DRONE.dPos.length()){
         // div.style.backgroundColor = "red"
-        DRONE.forces.roll += minMax(-2,(Math.random()-0.5)*0.0025*DRONE.speed,2)
-        DRONE.forces.yaw += minMax(-2,(Math.random()-0.5)*0.0025*DRONE.speed,2)
+        DRONE.forces.roll += minMax(-2,(Math.random()-0.5)*0.0015*DRONE.speed,2)
+        DRONE.forces.yaw += minMax(-2,(Math.random()-0.5)*0.0015*DRONE.speed,2)
         DRONE.vel.multiplyScalar(0.8)
         DRONE.forwardLocked = false
         console.log("HIT")
+
+        if(intersects[0].instanceId!==undefined){
+          intersects[0].object.setColorAt(intersects[0].instanceId,new THREE.Color( 0xff0000 ))
+          intersects[0].object.instanceColor.needsUpdate = true
+        }
+      }
+    }
+    if(lookIntersects.length>0){
+      if(lookIntersects[0].instanceId!==undefined){
+        // lookIntersects[0].object.setColorAt(lookIntersects[0].instanceId,new THREE.Color( 0xff0000 ))
+        // lookIntersects[0].object.instanceColor.needsUpdate = true
       }
     }
 
     camera.position.add(this.dPos)
     if(camera.position.y < -100000){
-      this.reset()
+      // this.reset()
     }
     light.position.set(camera.position.x,camera.position.y,camera.position.z)
     raycaster.set(camera.position,this.vel.clone().normalize())
-    // raycaster.set(camera.position,camera.getWorldDirection(new THREE.Vector3))
     this.lookingTowards = camera.getWorldDirection(new THREE.Vector3()).multiplyScalar(1200)
 
 
@@ -735,7 +899,7 @@ class world{
           let [x,y] = [mr*length+startPos, -world.worldbox.y/1.5];
           let z = Math.abs(ranRange(world.worldbox.z**2))**0.5 * Math.sign(rng()-0.5)
           dummy.position.set(x,y,z);
-          dummy.rotation.set((rng()-0.5)*Math.PI*mr /5,(rng()-0.5)*Math.PI*mr /5,(rng()-0.5)*Math.PI*mr /5)
+          dummy.rotation.set((rng()-0.5)*Math.PI*mr /15,(rng()-0.5)*Math.PI*mr /15,(rng()-0.5)*Math.PI*mr /15)
           // dummy.scale.set( 1 + Math.abs(normalRandom(1,6,rng)), 1 + Math.abs(normalRandom(1,3,rng)), 1 + Math.abs(normalRandom(1,3,rng)) );
           dummy.scale.set(1000 + Math.abs(normalRandom(0,600,rng)),Math.abs(z) + 2000 * Math.abs(normalRandom(1,10*mr,rng)) ,1000 + Math.abs(normalRandom(0,600,rng)));
           dummy.updateMatrix();
@@ -888,7 +1052,7 @@ function init() {
     70,
     window.innerWidth / window.innerHeight,
     1,
-    10000000,
+    502000,
   );
     
 
@@ -1110,13 +1274,27 @@ function minMax(a,b,c){
   return(Math.min(Math.max(a,b),c))
 }
 
+var stats = new Stats();
+var statsFPS = new Stats();
+statsFPS.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
+stats.showPanel(1); // 0: fps, 1: ms, 2: mb, 3+: custom
+// document.body.appendChild( stats.dom );
+stats.domElement.style.cssText = 'position:absolute;top:0px;left:80px;'
+// document.body.appendChild( statsFPS.dom );
+
+
+requestAnimationFrame( animate );
+
 function animate(){
-  requestAnimationFrame(animate)
+  stats.begin();
+  statsFPS.begin();
+
+  COUNTER++
 
   let dt = Date.now()-lastDate
   lastDate = Date.now()
   if(DRONE){
-    DRONE.updatePos(dt/16 * ENV.timeWarp)
+    DRONE.updatePos(dt/16 * ENV.timeWarp * ENV.otherWarp)
     ENV.update(dt/16)  
   }
 
@@ -1172,8 +1350,10 @@ function animate(){
 
 
 
+  try{
   if(DRONE.dst !== Infinity){
   let impactMarker = Math.min(Math.max(DRONE.dst/DRONE.speed/50,0),0.5)
+
   const impactGradient = ctx.createLinearGradient(0, 0, Width, 0);
     impactGradient.addColorStop(0, "rgba(255,0,0,0.5)");
     impactGradient.addColorStop(0.5-impactMarker, "rgba(255,0,0,0)");
@@ -1256,7 +1436,17 @@ function animate(){
   ctx.fillText(DRONE.forwardLocked?"Cruise mode: hold space to accelerate":"Manual mode: WASD to navigate",0,Height)
   ctx.font = "50px Arial"
   ctx.fillText(Math.floor(DRONE.score),0,Height-35)
+  }catch(err){debugger}
 
+
+  if(Mobile.initialized){
+    Mobile.draw()
+  }
+
+  statsFPS.end();
+  stats.end();
+
+  requestAnimationFrame(animate)
 }
 
 init();
@@ -1704,13 +1894,9 @@ function handleMotion(event) {
         } if(e.key == "2"){
           DRONE.rollControlSpeed *= 0.9
         } 
-
         if(e.key == "3"){
-
           tutorial1()
-
         }
-
         if(e.key == "i"){
           DRONE.invertedControls *= -1
         }
@@ -1750,15 +1936,11 @@ function handleMotion(event) {
     document.addEventListener("mouseup",(e)=>{
       downs["M"+e.button] = false
     })
-
-
     document.addEventListener("keyup",(e)=>{
       if(e.repeat){return}
 
       downs[e.key] = false
     })
-
-
 
 
 
@@ -1769,9 +1951,85 @@ function handleMotion(event) {
     window.test = test
 
 
-
-
     div.style.visibility = "hidden"
+
+
+document.body.addEventListener('touchstart', function() {
+  Mobile.init()
+  // Mobile.draw()
+}, { once: true })
+
+
+function touchHandler(e){
+  e.preventDefault()
+  let touches = e.changedTouches,
+        first = touches[0]
+
+
+        for(let i = 0; i < touches.length; i++){
+            let E = touches[i]
+            if(!Mobile.activeTouches[E.identifier]){
+              Mobile.activeTouches[E.identifier] = {"type":"unidentified"}
+            }
+        }
+
+      if(e.type == "touchstart"){
+          let E = touches[touches.length-1]
+          let x = E.pageX
+          let y = E.pageY
+          let EUID = E.identifier
+          Mobile.activeTouches[E.identifier].type = Mobile.touchTyper(x,y)
+          Mobile.touchStart(E.identifier,x,y,E)
+      }
+
+    if(e.type !== "touchend"){ // touch moving
+        for(let i = 0; i < touches.length; i++){
+          let E = touches[i]
+          let EUID = Mobile.activeTouches[E.identifier]
+        Mobile.ctx.fillStyle = EUID.color?EUID.color:"cyan"
+
+        let x = E.pageX, y = E.pageY
+
+        Mobile.touchUpdate(E.identifier,x,y,E)
+
+        Mobile.ctx.fillRect(x,y,10,10)
+      }
+
+  } else { // touch ended
+        for(let i = 0; i < touches.length; i++){
+          let E = touches[i]
+          let x = E.pageX, y = E.pageY
+          let EUID = Mobile.activeTouches[E.identifier]
+
+        
+          //stuff
+
+          Mobile.touchEnd(E.identifier,x,y,E)
+        delete Mobile.activeTouches[E.identifier]
+      }
+
+  }
+
+    
+  e.preventDefault()
+}
+function mobileInit(){
+
+    document.addEventListener("touchstart", (e)=>{touchHandler(e)},  { passive: false });
+    document.addEventListener("touchmove", (e)=>{e.preventDefault();touchHandler(e)}, { passive: false });
+    document.addEventListener("touchend", (e)=>{touchHandler(e)}, { passive: false });
+    document.addEventListener("touchcancel", (e)=>{touchHandler(e)}, { passive: false });    
+}
+mobileInit()
+
+
+
+
+
+
+
+
+
     </script>
   </body>
 </html>
