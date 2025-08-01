@@ -146,8 +146,12 @@
         import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
         import { FXAAShader } from 'three/examples/jsm/shaders/FXAAShader.js';
         import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-
-
+        import { Line2 } from 'https://unpkg.com/three@0.178.0/examples/jsm/lines/Line2.js';
+import { LineGeometry } from 'https://unpkg.com/three@0.178.0/examples/jsm/lines/LineGeometry.js';
+// import { GeometryUtils } from 'https://unpkg.com/three@0.178.0/examples/jsm/utils/GeometryUtils.js';
+import { LineMaterial } from 'https://unpkg.com/three@0.178.0/examples/jsm/lines/LineMaterial.js';
+import { LineSegments2 } from 'https://unpkg.com/three@0.178.0/examples/jsm/lines/LineSegments2.js';
+import { LineSegmentsGeometry } from 'https://unpkg.com/three@0.178.0/examples/jsm/lines/LineSegmentsGeometry.js';
 
 var COUNTER = 0
 
@@ -513,10 +517,10 @@ class DRONE{
         }
       }
     }
-    if(lookIntersects.length>0){
+    if(lookIntersects.length>0 && downs["M0"]){
       if(lookIntersects[0].instanceId!==undefined){
-        // lookIntersects[0].object.setColorAt(lookIntersects[0].instanceId,new THREE.Color( 0xff0000 ))
-        // lookIntersects[0].object.instanceColor.needsUpdate = true
+        lookIntersects[0].object.setColorAt(lookIntersects[0].instanceId,new THREE.Color( 0xffff00 ))
+        lookIntersects[0].object.instanceColor.needsUpdate = true
       }
     }
 
@@ -720,8 +724,10 @@ class world{
 
 
   // static generate(level,length=2000000,count=20000){
-  static generate({level=0,length=200000,count=20000,id=1,reverse=false,startPos=undefined} = {}){
 
+
+
+  static generate({level=0,length=200000,count=20000,id=1,reverse=false,startPos=undefined} = {}){
 
 
 
@@ -776,9 +782,6 @@ class world{
 
 
       var geometry = new THREE.BoxGeometry(200, 200, 200);
-
-
-
       var materials = [
         new THREE.MeshStandardMaterial({ color: "#AA5555" /*, depthTest:false*/}),
         new THREE.MeshStandardMaterial({ color: "#55AA55" }),
@@ -790,9 +793,12 @@ class world{
       mesh = new THREE.InstancedMesh( geometry, materials, count );
       mesh.instanceMatrix.setUsage( THREE.DynamicDrawUsage ); // will be updated every frame
       scene.add(mesh);
-
       let dummy = new THREE.Object3D()
 
+
+      let pos = [];
+      let rot = [];
+      let scl = [];
       for ( let i = 0; i < count; i ++ ) {
         let mr = rng()
           let [x,y,z] = [mr*length+startPos, ranRange(world.worldbox.y), ranRange(world.worldbox.z)];
@@ -800,11 +806,92 @@ class world{
           dummy.rotation.set(rng()*Math.PI*mr,rng()*Math.PI*mr,rng()*Math.PI*mr)
           dummy.scale.set( 1 + Math.abs(normalRandom(1,3,rng)), 1 + Math.abs(normalRandom(1,3,rng)), 1 + Math.abs(normalRandom(1,3,rng)) );
           dummy.updateMatrix();
+          pos.push(dummy.position.x, dummy.position.y, dummy.position.z);
+          rot.push(dummy.quaternion.x, dummy.quaternion.y, dummy.quaternion.z, dummy.quaternion.w);
+          scl.push(dummy.scale.x, dummy.scale.y, dummy.scale.z);
           mesh.setMatrixAt( i, dummy.matrix );
       }
+    //   let lineGeom = new THREE.EdgesGeometry(geometry);
+
+    //   // lineGeom = new THREE.InstancedBufferGeometry().copy(lineGeom);
+    //   // lineGeom = new LineSegmentsGeometry().fromMesh(mesh);
+    //   lineGeom = new LineSegmentsGeometry().copy(lineGeom);
+    //   // lineGeom = new LineGeometry().copy(lineGeom);
+    //   lineGeom.instanceCount = Infinity;
+    //   lineGeom.setAttribute("instT", new THREE.InstancedBufferAttribute(new Float32Array(pos), 3));
+    //   lineGeom.setAttribute("instR", new THREE.InstancedBufferAttribute(new Float32Array(rot), 4));
+    //   lineGeom.setAttribute("instS", new THREE.InstancedBufferAttribute(new Float32Array(scl), 3));
+    //   // let lineMat = new THREE.LineBasicMaterial({
+    //   let lineMat = new LineMaterial({
+    //     color: "yellow",
+    //     width:2
+    //   //   ,onBeforeCompile: shader => {
+    //   //     shader.vertexShader = `
+    //   //     attribute vec3 instT;
+    //   //     attribute vec4 instR;
+    //   //     attribute vec3 instS;
+          
+    //   //     // http://barradeau.com/blog/?p=1109
+    //   //     vec3 trs( inout vec3 position, vec3 T, vec4 R, vec3 S ) {
+    //   //         position *= S;
+    //   //         position += 2.0 * cross( R.xyz, cross( R.xyz, position ) + R.w * position );
+    //   //         position += T;
+    //   //         return position;
+    //   //     }
+    //   //     ${shader.vertexShader}
+    //   // `.replace(
+    //   //       `#include <begin_vertex>`,
+    //   //       `#include <begin_vertex>
+    //   //       transformed = trs(transformed, instT, instR, instS);
+    //   // `
+    //   //     );
+    //   //     console.log(shader.vertexShader);
+    //   //   }
+    //     ,vertexShader:`
+    //       attribute vec3 instT;
+    //       attribute vec4 instR;
+    //       attribute vec3 instS;
+    //       // attribute vec3 position;
+
+    //       // http://barradeau.com/blog/?p=1109
+    //       vec3 trs(vec3 T, vec4 R, vec3 S ) {
+    //           vec3 pos = S * position;
+    //           pos += 2.0 * cross( R.xyz, cross( R.xyz, pos ) + R.w * pos );
+    //           pos += T;
+    //           // pos.x += 500.0;
+    //           return pos;
+    //       }
+    //     void main(){
+    //     gl_Position = projectionMatrix * modelViewMatrix * vec4( trs(instT,instR,instS), 1.0 );
+    //       }
+    //       `
+
+
+    //     ,fragmentShader: `
+    //     //varying vec3 vPosition; // Varying for vertex position
+    //     uniform vec3 camPos; // Camera position passed from JavaScript
+    //     varying float vAlpha;
+
+    //     void main() {
+    //         // Calculate distance from the vertex to the camera
+    //         // float distance = length(vPosition - camPos);
+    //         //vAlpha = 1.0 - distance / 500.0; // Adjust based on your scene scale
+    //         //vAlpha = clamp(vAlpha, 0.0, 1.0); // Ensure alpha is in [0, 1]
+
+    //         gl_FragColor = vec4(1.0, 1.0, 0.0, 0.5); // Yellow color with varying alpha
+    //     }
+    // `,
+    //     uniforms: {
+    //       camPos: { value: camera.position }
+    //     }
+    //   });
+    //   // let lines = new THREE.LineSegments(lineGeom, lineMat);
+    //   let lines = new LineSegments2(lineGeom, lineMat);
+    //   lines.frustumCulled = false
+    //   scene.add(lines);
 
       mesh.name = "level1"
-      mesh.userData.decorations = [this.border(startPos,length)] 
+      mesh.userData.decorations = [this.border(startPos,length)] // remember to add lines back if done 
     }
 
     if(level === 2){
@@ -1267,8 +1354,8 @@ function onWindowResize() {
     canvas.canvas.style.cursor = "none"
 
 
-var startDate = Date.now()
-var lastDate = Date.now()
+var startDate = performance.now()
+var lastDate = performance.now()
 
 function minMax(a,b,c){
   return(Math.min(Math.max(a,b),c))
@@ -1291,8 +1378,8 @@ function animate(){
 
   COUNTER++
 
-  let dt = Date.now()-lastDate
-  lastDate = Date.now()
+  let dt = performance.now()-lastDate
+  lastDate = performance.now()
   if(DRONE){
     DRONE.updatePos(dt/16 * ENV.timeWarp * ENV.otherWarp)
     ENV.update(dt/16)  
