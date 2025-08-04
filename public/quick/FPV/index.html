@@ -45,7 +45,18 @@
             "three/examples/jsm/postprocessing/OutlinePass.js": "https://unpkg.com/three@0.178.0/examples/jsm/postprocessing/OutlinePass.js",
             "three/examples/jsm/postprocessing/OutputPass.js": "https://unpkg.com/three@0.178.0/examples/jsm/postprocessing/OutputPass.js",
             "three/examples/jsm/shaders/FXAAShader.js":"https://unpkg.com/three@0.178.0/examples/jsm/shaders/FXAAShader.js",
-            "three/examples/jsm/loaders/GLTFLoader.js":"https://unpkg.com/three@0.178.0/examples/jsm/loaders/GLTFLoader.js"
+            "three/examples/jsm/loaders/GLTFLoader.js":"https://unpkg.com/three@0.178.0/examples/jsm/loaders/GLTFLoader.js",
+
+
+            "three/addons/": "https://unpkg.com/three@0.178.0/examples/jsm/",
+
+            "three-mesh-bvh": "https://cdn.jsdelivr.net/npm/three-mesh-bvh@0.9.0/build/index.module.js",
+
+            "@three.ez/instanced-mesh": "https://cdn.jsdelivr.net/npm/@three.ez/instanced-mesh/build/index.js",
+            "bvh.js": "https://cdn.jsdelivr.net/npm/bvh.js/build/index.js",
+
+            "@three.ez/simplify-geometry": "https://cdn.jsdelivr.net/npm/@three.ez/simplify-geometry@0.0.1/build/index.js",
+            "meshoptimizer": "https://cdn.jsdelivr.net/npm/meshoptimizer@0.23.0/+esm"
         }
     }
     </script>
@@ -152,6 +163,11 @@ import { LineGeometry } from 'https://unpkg.com/three@0.178.0/examples/jsm/lines
 import { LineMaterial } from 'https://unpkg.com/three@0.178.0/examples/jsm/lines/LineMaterial.js';
 import { LineSegments2 } from 'https://unpkg.com/three@0.178.0/examples/jsm/lines/LineSegments2.js';
 import { LineSegmentsGeometry } from 'https://unpkg.com/three@0.178.0/examples/jsm/lines/LineSegmentsGeometry.js';
+import { acceleratedRaycast, computeBatchedBoundsTree } from 'three-mesh-bvh';
+
+import { InstancedMesh2 } from '@three.ez/instanced-mesh';
+import { createRadixSort} from '@three.ez/instanced-mesh';
+
 
 var COUNTER = 0
 
@@ -513,20 +529,20 @@ class DRONE{
 
         if(intersects[0].instanceId!==undefined){
           intersects[0].object.setColorAt(intersects[0].instanceId,new THREE.Color( 0xff0000 ))
-          intersects[0].object.instanceColor.needsUpdate = true
+          // intersects[0].object.instanceColor.needsUpdate = true
         }
       }
     }
     if(lookIntersects.length>0 && downs["M0"]){
       if(lookIntersects[0].instanceId!==undefined){
         lookIntersects[0].object.setColorAt(lookIntersects[0].instanceId,new THREE.Color( 0xffff00 ))
-        lookIntersects[0].object.instanceColor.needsUpdate = true
+        // lookIntersects[0].object.instanceColor.needsUpdate = true
       }
     }
 
     camera.position.add(this.dPos)
-    if(camera.position.y < -100000){
-      // this.reset()
+    if(camera.position.y < -100000 && Mobile.initialized){
+      this.reset()
     }
     light.position.set(camera.position.x,camera.position.y,camera.position.z)
     raycaster.set(camera.position,this.vel.clone().normalize())
@@ -755,9 +771,10 @@ class world{
       var geometry = new THREE.BoxGeometry(4200, 1200, 1200);
       var materials = new THREE.MeshStandardMaterial({ color: "#FF3030", roughness:0, metalness: 0.8})
 
-      mesh = new THREE.InstancedMesh( geometry, materials, count );
+      mesh = new InstancedMesh2( geometry, materials, count );
       mesh.instanceMatrix.setUsage( THREE.DynamicDrawUsage ); // will be updated every frame
       scene.add(mesh);
+      mesh.addInstances(count);
 
       let dummy = new THREE.Object3D()
       for ( let i = 0; i < count; i ++) {
@@ -780,6 +797,7 @@ class world{
       this.preloadChunk({id:id+1,level:0})
       this.preloadChunk({id:id+2,level:2,length:2000000})
 
+      // count *= 20
 
       var geometry = new THREE.BoxGeometry(200, 200, 200);
       var materials = [
@@ -790,15 +808,21 @@ class world{
         new THREE.MeshStandardMaterial({ color: "#FFAAFF" }),
         new THREE.MeshStandardMaterial({ color: "#FFFFAA" })
       ];
-      mesh = new THREE.InstancedMesh( geometry, materials, count );
+      mesh = new InstancedMesh2( geometry, materials, { capacity: count } );
       mesh.instanceMatrix.setUsage( THREE.DynamicDrawUsage ); // will be updated every frame
       scene.add(mesh);
+      window.mesh = mesh
       let dummy = new THREE.Object3D()
 
 
       let pos = [];
       let rot = [];
       let scl = [];
+
+
+      mesh.addInstances(count);
+
+
       for ( let i = 0; i < count; i ++ ) {
         let mr = rng()
           let [x,y,z] = [mr*length+startPos, ranRange(world.worldbox.y), ranRange(world.worldbox.z)];
@@ -811,6 +835,12 @@ class world{
           scl.push(dummy.scale.x, dummy.scale.y, dummy.scale.z);
           mesh.setMatrixAt( i, dummy.matrix );
       }
+
+
+
+
+
+
     //   let lineGeom = new THREE.EdgesGeometry(geometry);
 
     //   // lineGeom = new THREE.InstancedBufferGeometry().copy(lineGeom);
@@ -908,9 +938,10 @@ class world{
         new THREE.MeshStandardMaterial({ color: "#55AA55" }),
         new THREE.MeshStandardMaterial({ color: "#55AA55" })
       ];
-      mesh = new THREE.InstancedMesh( geometry, materials, count );
+      mesh = new InstancedMesh2( geometry, materials, count );
       mesh.instanceMatrix.setUsage( THREE.DynamicDrawUsage ); // will be updated every frame
       scene.add(mesh);
+      mesh.addInstances(count);
 
       let dummy = new THREE.Object3D()
 
@@ -938,9 +969,10 @@ class world{
 
       var geometry = new THREE.TetrahedronGeometry(300);
       var materials = new THREE.MeshStandardMaterial({ color: "#F5BE27" /*, depthTest:false*/})
-      mesh = new THREE.InstancedMesh( geometry, materials, count );
+      mesh = new InstancedMesh2( geometry, materials, count );
       mesh.instanceMatrix.setUsage( THREE.DynamicDrawUsage ); // will be updated every frame
       scene.add(mesh);
+      mesh.addInstances(count);
 
       let dummy = new THREE.Object3D()
 
@@ -975,7 +1007,9 @@ class world{
       ];
       geometry = window.loadedGeom.geometry
       materials = window.loadedGeom.material
-      mesh = new THREE.InstancedMesh( geometry, materials, count );
+      mesh = new InstancedMesh2( geometry, materials, count );
+      mesh.addInstances(count);
+
       mesh.instanceMatrix.setUsage( THREE.DynamicDrawUsage ); // will be updated every frame
       scene.add(mesh);
 
@@ -1001,7 +1035,11 @@ class world{
 
 
 
-
+    if(mesh.isInstancedMesh2){
+      // mesh.sortObjects = true;
+      // mesh.customSort = createRadixSort(mesh);
+      mesh.computeBVH(THREE.WebGLCoordinateSystem)
+    }
 
 
 

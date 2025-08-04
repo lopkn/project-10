@@ -1491,6 +1491,8 @@ app.use(cors()) //jan7-2024
 
 app.use(express.static('public'));
 
+app.use('/node_modules', express.static('node_modules'));
+
 
 var httpsoptions = {
   key: fs.readFileSync('keys/key.pem'),

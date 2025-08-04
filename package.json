@@ -22,7 +22,6 @@
     "crypto": "^1.0.1",
     "discord.js": "^14.17.2",
     "express": "^4.17.1",
-    "instagram-web-api": "^2.2.2",
     "jimp": "^1.6.0",
     "node-mouse": "^0.0.2",
     "ollama": "^0.5.12",
@@ -33,6 +32,7 @@
     "simplex-noise": "^3.0.1",
     "socket.io": "^4.6.1",
     "sound-play": "^1.1.0",
+    "three": "^0.179.1",
     "uuid": "^8.3.2",
     "yeast": "^0.1.2"
   }
