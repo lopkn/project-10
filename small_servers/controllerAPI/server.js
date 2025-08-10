@@ -88,6 +88,11 @@ function pmessage(str){
     if(str[0] == "E" && str[1]=="\n")
     {
     str=str.substring(2)
+
+    if(str == "help"){
+        /// stuff
+    }
+
     str = eval(str)
     if(str===undefined){return}
     str = JSON.stringify(str)

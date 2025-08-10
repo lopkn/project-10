@@ -841,84 +841,101 @@ class world{
 
 
 
-    //   let lineGeom = new THREE.EdgesGeometry(geometry);
+      let lineGeom = new THREE.EdgesGeometry(geometry);
 
-    //   // lineGeom = new THREE.InstancedBufferGeometry().copy(lineGeom);
-    //   // lineGeom = new LineSegmentsGeometry().fromMesh(mesh);
-    //   lineGeom = new LineSegmentsGeometry().copy(lineGeom);
-    //   // lineGeom = new LineGeometry().copy(lineGeom);
-    //   lineGeom.instanceCount = Infinity;
-    //   lineGeom.setAttribute("instT", new THREE.InstancedBufferAttribute(new Float32Array(pos), 3));
-    //   lineGeom.setAttribute("instR", new THREE.InstancedBufferAttribute(new Float32Array(rot), 4));
-    //   lineGeom.setAttribute("instS", new THREE.InstancedBufferAttribute(new Float32Array(scl), 3));
-    //   // let lineMat = new THREE.LineBasicMaterial({
-    //   let lineMat = new LineMaterial({
-    //     color: "yellow",
-    //     width:2
-    //   //   ,onBeforeCompile: shader => {
-    //   //     shader.vertexShader = `
-    //   //     attribute vec3 instT;
-    //   //     attribute vec4 instR;
-    //   //     attribute vec3 instS;
+      // lineGeom = new THREE.InstancedBufferGeometry().copy(lineGeom);
+      // lineGeom = new LineSegmentsGeometry().fromMesh(mesh);
+
+      // lineGeom = new LineSegmentsGeometry().fromEdgesGeometry(lineGeom);
+      lineGeom = new LineSegmentsGeometry().copy(lineGeom);
+      // lineGeom = new LineGeometry().copy(lineGeom);
+      
+      lineGeom.instanceCount = Infinity;
+      lineGeom.setAttribute("instT", new THREE.InstancedBufferAttribute(new Float32Array(pos), 3));
+      lineGeom.setAttribute("instR", new THREE.InstancedBufferAttribute(new Float32Array(rot), 4));
+      lineGeom.setAttribute("instS", new THREE.InstancedBufferAttribute(new Float32Array(scl), 3));
+      // let lineMat = new THREE.LineBasicMaterial({
+
+      // let lineMat = new LineMaterial({
+      //   color: 0xff0000,
+      //   dashed:false,
+      //   lineWidth:5
+      // })
+      let lineMat = new LineMaterial({
+        color: "yellow"
+        // ,linewidth:20
+      //   ,onBeforeCompile: shader => {
+      //     shader.vertexShader = `
+      //     attribute vec3 instT;
+      //     attribute vec4 instR;
+      //     attribute vec3 instS;
           
-    //   //     // http://barradeau.com/blog/?p=1109
-    //   //     vec3 trs( inout vec3 position, vec3 T, vec4 R, vec3 S ) {
-    //   //         position *= S;
-    //   //         position += 2.0 * cross( R.xyz, cross( R.xyz, position ) + R.w * position );
-    //   //         position += T;
-    //   //         return position;
-    //   //     }
-    //   //     ${shader.vertexShader}
-    //   // `.replace(
-    //   //       `#include <begin_vertex>`,
-    //   //       `#include <begin_vertex>
-    //   //       transformed = trs(transformed, instT, instR, instS);
-    //   // `
-    //   //     );
-    //   //     console.log(shader.vertexShader);
-    //   //   }
-    //     ,vertexShader:`
-    //       attribute vec3 instT;
-    //       attribute vec4 instR;
-    //       attribute vec3 instS;
-    //       // attribute vec3 position;
+      //     // http://barradeau.com/blog/?p=1109
+      //     vec3 trs( inout vec3 position, vec3 T, vec4 R, vec3 S ) {
+      //         position *= S;
+      //         position += 2.0 * cross( R.xyz, cross( R.xyz, position ) + R.w * position );
+      //         position += T;
+      //         return position;
+      //     }
+      //     ${shader.vertexShader}
+      // `.replace(
+      //       `#include <begin_vertex>`,
+      //       `#include <begin_vertex>
+      //       transformed = trs(transformed, instT, instR, instS);
+      // `
+      //     );
+      //     console.log(shader.vertexShader);
+      //   }
+        ,vertexShader:`
+          attribute vec3 instT;
+          attribute vec4 instR;
+          attribute vec3 instS;
+          varying vec3 vPosition2;
+          // attribute vec3 position;
 
-    //       // http://barradeau.com/blog/?p=1109
-    //       vec3 trs(vec3 T, vec4 R, vec3 S ) {
-    //           vec3 pos = S * position;
-    //           pos += 2.0 * cross( R.xyz, cross( R.xyz, pos ) + R.w * pos );
-    //           pos += T;
-    //           // pos.x += 500.0;
-    //           return pos;
-    //       }
-    //     void main(){
-    //     gl_Position = projectionMatrix * modelViewMatrix * vec4( trs(instT,instR,instS), 1.0 );
-    //       }
-    //       `
+          // http://barradeau.com/blog/?p=1109
+          vec3 trs(vec3 T, vec4 R, vec3 S ) {
+              vec3 pos = S * position;
+              pos += 2.0 * cross( R.xyz, cross( R.xyz, pos ) + R.w * pos );
+              pos += T;
+              // pos.x += 500.0;
+              return pos;
+          }
+        void main(){
+          vPosition2 = trs(instT,instR,instS);
+        gl_Position = projectionMatrix * modelViewMatrix * vec4( vPosition2, 1.0 );
+          }
+          `
 
 
-    //     ,fragmentShader: `
-    //     //varying vec3 vPosition; // Varying for vertex position
-    //     uniform vec3 camPos; // Camera position passed from JavaScript
-    //     varying float vAlpha;
+        ,fragmentShader: `
+        varying vec3 vPosition2; // Varying for vertex position
+        uniform vec3 camPos; // Camera position passed from JavaScript
+        //varying float vAlpha;
 
-    //     void main() {
-    //         // Calculate distance from the vertex to the camera
-    //         // float distance = length(vPosition - camPos);
-    //         //vAlpha = 1.0 - distance / 500.0; // Adjust based on your scene scale
-    //         //vAlpha = clamp(vAlpha, 0.0, 1.0); // Ensure alpha is in [0, 1]
+        void main() {
+            // Calculate distance from the vertex to the camera
+            float distance = length(vPosition2 - camPos);
+            float vAlpha = 1.0 - distance / 25000.0; // Adjust based on your scene scale
+            vAlpha = clamp(vAlpha, 0.0, 1.0); // Ensure alpha is in [0, 1]
 
-    //         gl_FragColor = vec4(1.0, 1.0, 0.0, 0.5); // Yellow color with varying alpha
-    //     }
-    // `,
-    //     uniforms: {
-    //       camPos: { value: camera.position }
-    //     }
-    //   });
-    //   // let lines = new THREE.LineSegments(lineGeom, lineMat);
-    //   let lines = new LineSegments2(lineGeom, lineMat);
-    //   lines.frustumCulled = false
-    //   scene.add(lines);
+            gl_FragColor = vec4(1.0, 0.0, 0.0, vAlpha); // Yellow color with varying alpha
+
+        }
+    `
+        ,uniforms: {
+          camPos: { value: camera.position },
+          linewidth: {value: 4}
+        }
+        ,transparent: true
+      });
+      let lines = new THREE.LineSegments(lineGeom, lineMat);
+      // let lines = new LineSegments2(lineGeom, lineMat);
+      // let lines = new Line2(lineGeom, lineMat);
+      lines.computeLineDistances();
+      lines.scale.set( 1, 1, 1 );
+      lines.frustumCulled = false
+      scene.add(lines);
 
       mesh.name = "level1"
       mesh.userData.decorations = [this.border(startPos,length)] // remember to add lines back if done 
@@ -1403,9 +1420,9 @@ var stats = new Stats();
 var statsFPS = new Stats();
 statsFPS.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
 stats.showPanel(1); // 0: fps, 1: ms, 2: mb, 3+: custom
-// document.body.appendChild( stats.dom );
+document.body.appendChild( stats.dom );
 stats.domElement.style.cssText = 'position:absolute;top:0px;left:80px;'
-// document.body.appendChild( statsFPS.dom );
+document.body.appendChild( statsFPS.dom );
 
 
 requestAnimationFrame( animate );

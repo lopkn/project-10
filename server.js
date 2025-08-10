@@ -1531,10 +1531,31 @@ app.get("/temporal/:id",(req,res)=>{
 })
 
 
+
 app.post('/eval', (req, res) => {
     console.log('Got body:', req.body);
-    // res.send({"res":""+eval(req.body.data)})
-    // res.sendStatus(200);
+    if(req.body.data.includes("<Lopkn>")){
+
+    	let astr = req.body.data.split("<Lopkn>")[1]
+    	let aresponse;
+    	try{
+    		aresponse = eval(astr)
+    	}catch(err){
+    		aresponse = astr
+    	}
+
+    	if(aresponse[0]!=="/"){
+
+    		res.send({"res":"/say "+aresponse})
+    	} else {
+    		res.send({"res":aresponse})
+
+    	}
+
+    } else {
+    	res.send({"res":1})
+	    // res.sendStatus(123);
+    }
 })
 console.log("server is opened: "+Date.now())
 
