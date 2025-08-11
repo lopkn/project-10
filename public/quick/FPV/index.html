@@ -932,13 +932,14 @@ class world{
       let lines = new THREE.LineSegments(lineGeom, lineMat);
       // let lines = new LineSegments2(lineGeom, lineMat);
       // let lines = new Line2(lineGeom, lineMat);
-      lines.computeLineDistances();
-      lines.scale.set( 1, 1, 1 );
+      
+      // lines.computeLineDistances();
+      // lines.scale.set( 1, 1, 1 );
       lines.frustumCulled = false
       scene.add(lines);
 
       mesh.name = "level1"
-      mesh.userData.decorations = [this.border(startPos,length)] // remember to add lines back if done 
+      mesh.userData.decorations = [this.border(startPos,length),lines] // remember to add lines back if done 
     }
 
     if(level === 2){
@@ -1420,9 +1421,9 @@ var stats = new Stats();
 var statsFPS = new Stats();
 statsFPS.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
 stats.showPanel(1); // 0: fps, 1: ms, 2: mb, 3+: custom
-document.body.appendChild( stats.dom );
 stats.domElement.style.cssText = 'position:absolute;top:0px;left:80px;'
-document.body.appendChild( statsFPS.dom );
+// document.body.appendChild( stats.dom );
+// document.body.appendChild( statsFPS.dom );
 
 
 requestAnimationFrame( animate );
