@@ -1037,7 +1037,7 @@ new vent(551,(EVT,skip=false)=>{
         let parentDiv=gid("giftdiv")
       parentDiv.appendChild(padlock)
         let arr = ["smart","gay","dumb","gay","nice","fat","yapper","nerd","amazing","rude","slim",
-          "the best","lazy","high quality","mid tier","emotional","cool","sinful","luxurious"]
+          "the best","lazy","high quality","mid tier","emotional","cool","sinful","pouty","luxurious","piggy"]
         arr.forEach((e,i)=>{
           let elm = apc("button")
             elm.style.backgroundColor = "rgb(255, 160, 160)"
@@ -1062,7 +1062,7 @@ new vent(551,(EVT,skip=false)=>{
         let wrongTimes = 0
         
         ver.onclick = ()=>{
-          let arrv = [0,1,1,1,0,1,1,1,0,1,0,0,1,0,1,1,0,1,0]
+          let arrv = [0,1,1,1,0,1,1,1,0,1,0,0,1,0,1,1,0,1,1,0,1]
             let wrong = 0
             arrv.forEach((e,i)=>{
               if(arr[i].style.backgroundColor == "rgb(255, 160, 160)" == e){wrong+=1}
@@ -1226,6 +1226,7 @@ new vent(600,(e,skip=false)=>{
         {recieved:"tonight's main course",emoji:"🐶"},
         {recieved:"thumbs down",emoji:"👎"},
         {recieved:"your flag",emoji:"🏳️‍🌈"},
+        {recieved:"Kristen's self portrait",emoji:"🐷"},
         ])
       }
     
