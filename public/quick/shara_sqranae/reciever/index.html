@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receiver</title>
+
+    <script src="/socket.io/socket.io.js"></script>
+ <script src="https://cdn.socket.io/3.1.3/socket.io.min.js" integrity="sha384-cPwlPLvBTa3sKAgddT6krw0cJat7egBga3DJepJyrLl4Q9/5WLra3rrnMcyTyOnh" crossorigin="anonymous"></script>
+
+</head>
+<body>
+    <video id="video2" width="100%" height="100%" autoplay></video>
+    <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
+    <script>
+
+        const socket = io.connect('/')
+        socket.emit("JOINGAME","RTCconnector")
+
+        var pc2 = new RTCPeerConnection();
+
+        pc2.ontrack = e => video2.srcObject = e.streams[0];
+
+        let arr = []
+
+        pc2.onicecandidate = e => {
+            if (e.candidate) {
+                arr.push(e.candidate)
+                socket.emit('ice-candidate', e.candidate);
+                // Send the candidate to the sharer via signaling server (not implemented here)
+            }
+        };
+
+        setTimeout(()=>{
+            if(pc2.connectionState !== "connected"){
+                socket.emit("gimmie",1)
+            }
+        },5000)
+
+        function ema(){
+            arr.forEach((e)=>{socket.emit("ice-candidate", e)})
+        }//emitall
+
+        pc2.oniceconnectionstatechange = () => {
+            console.log(pc2.iceConnectionState )
+        };
+
+        socket.on('offer', offer => {
+            pc2.setRemoteDescription(new RTCSessionDescription(offer))
+                .then(() => pc2.createAnswer())
+                .then(d => pc2.setLocalDescription(d))
+                .then(() => {
+                    socket.emit('answer', pc2.localDescription);
+                });
+        });
+        socket.onAny((a,b)=>{console.log(a,b)})
+
+        socket.on('ice-candidate', candidate => {
+            pc2.addIceCandidate(new RTCIceCandidate(candidate));
+        });
+    </script>
+</body>
+</html>

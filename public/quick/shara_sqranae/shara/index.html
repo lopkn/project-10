@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sharer</title>
+        <script src="/socket.io/socket.io.js"></script>
+ <script src="https://cdn.socket.io/3.1.3/socket.io.min.js" integrity="sha384-cPwlPLvBTa3sKAgddT6krw0cJat7egBga3DJepJyrLl4Q9/5WLra3rrnMcyTyOnh" crossorigin="anonymous"></script>
+
+</head>
+<body>
+    <video id="video1" width="320" height="240" autoplay muted></video>
+    <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
+    <script>
+
+        const socket = io.connect('/')
+        socket.emit("JOINGAME","RTCconnector")
+
+
+        async function captureScreen() {
+            const displayMediaOptions = {
+                video: {
+                    cursor: "always"
+                },
+                audio: false
+            };
+            return await navigator.mediaDevices.getDisplayMedia(displayMediaOptions);
+        }
+
+        var pc1 = new RTCPeerConnection();
+
+        async function start(){
+            const stream = await captureScreen();
+            stream.getTracks().forEach(track => {
+                pc1.addTrack(track, stream);
+            });
+        }
+
+        start()
+        
+
+        // navigator.mediaDevices.getDisplayMedia({ video: true })
+            // .then(stream => pc1.addStream(video1.srcObject = stream));
+
+        let arr = []
+        pc1.onicecandidate = e => {
+            if (e.candidate) {
+                arr.push(e.candidate)
+                socket.emit('ice-candidate', e.candidate);
+                // Send the candidate to the receiver via signaling server (not implemented here)
+            }
+        };
+
+        function ema(){
+            arr.forEach((e)=>{socket.emit("ice-candidate", e)})
+        }//emitall
+
+        pc1.onnegotiationneeded = e => {
+            console.log(22)
+            negotiate()
+        };
+
+        function negotiate(){
+            pc1.createOffer()
+                .then(d => pc1.setLocalDescription(d))
+                .then(() => {
+                    socket.emit('offer', pc1.localDescription);
+                    // Send the offer to the receiver via signaling server (not implemented here)
+                });
+        }
+
+        pc1.oniceconnectionstatechange = () => {
+            console.log(pc1.iceConnectionState )
+        };
+
+        socket.onAny((a,b)=>{console.log(a,b)})
+
+        socket.on("gimmie", ()=>{
+            if(pc1.connectionState !== "connected"){
+                negotiate()
+            }
+        })
+
+        socket.on('answer', answer => {
+            pc1.setRemoteDescription(new RTCSessionDescription(answer));
+        });
+
+        socket.on('ice-candidate', candidate => {
+            pc1.addIceCandidate(new RTCIceCandidate(candidate));
+        });
+    </script>
+</body>
+</html>

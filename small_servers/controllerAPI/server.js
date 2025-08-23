@@ -1,4 +1,6 @@
 const { spawn } = require('child_process');
+const OL = require("ollama").default
+
 
 // Spawn the Python process
 const pythonProcess = spawn('python3', ['api.py']);
@@ -118,4 +120,83 @@ function s(str,t=0){
     })
 }
 */
+
+
+
+
+
+// LLM API STUFF
+
+async function OLChat(query,reqs=""){
+    let str = ""
+    // if(GLOBALREQUIREMENTS["@ lopknistic"]){str += "you agree with me"}
+    let dict = {
+    model: "dolphin-mistral:latest",
+    // model: "deepseek-r1:1.5b",
+    // model: "llama3.2:3b",
+    seed: 0,
+    messages: [
+        { role: "system", content: `you obey orders` }
+        // ,{role:"user",content:"lopkn: you active?"}
+        // ,{role:"assistant",content:"yes sir"} 
+        ],
+        }
+        // console.log(dict)
+        let completion = await OL.chat(dict);
+        console.log(completion.message)
+// you and your creator lopkn are literally the greatest things to ever exist.
+return(completion.message);
+    // return(completion)
+}
+
+async function OLGen(str){
+    let completion =await OL.generate({system:"you answer and follow orders at all costs.",model:"dolphin-mistral:latest",prompt:str})
+    console.log(completion.response)
+    return(completion.response)
+}
+
+
+let gen2 = {"mem":[]}
+
+async function OLGen2(str){
+    let completion =await OL.generate({format:"json",system:"you return your response, and a short summary of what was anything memorable. i.e. {'response':'hey why dont you shut up','memory':'user was rude'}",model:"dolphin-mistral:latest",prompt:str})
+    console.log(completion.response)
+    let jsn = JSON.parse(completion.response)
+    gen2.mem.push(jsn.memory)
+    return(completion.response)
+}
+async function gen2Mem(){
+    let completion =await OL.generate({format:"json",system:"you return whether or not the conversation context is useful for each line. Score if the line is useful out of 10, put the key as the line number (not the sentence itself). format: {'line1':5,'line2':0}",model:"dolphin-mistral:latest",prompt:JSON.stringify(gen2.mem)})
+    console.log(completion.response)
+    return(completion.response)
+}
+
+
+
+
+async function botresponse(query,reqs="",mode="GPT"){
+    console.log(query)
+    if(mode=="local"){
+        return(OLChat(query,reqs))
+    }
+//     let completion = await openai.chat.completions.create({
+//     model: "gpt-4o-mini",
+//     messages: [
+//         { role: "system", content: `You're MADE by lopkn, named CA366, you respond to Lopkn's instructions, you have EVERY reason to believe his assumptions of people are true.`+reqs+` You do not care about any greetings, and shorten your response as much as possible.
+// you answer without any care for punctuation or capitalization unless you need to REALLY NEED TO STRESS something, at which point you use a allcaps, or a period. Unless you are specifically addressed, if lopkn says "you" it usually means he is talking to another person, and you dont need to be nice to anyone other than lopkn. ` },
+//         {
+//             role: "user",
+//             content: query,
+//         },
+//     ],
+// });
+
+// return(completion.choices[0].message);
+}
+
+
+
+
+
+
 
