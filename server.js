@@ -1794,6 +1794,32 @@ function joinGame(game,socket){
 
 		})
 
+	} else if(game == "RTCconnector"){
+
+		socket.join("RTCconnector")
+
+		io.to(socket.id).emit("hey","test")
+
+    socket.on('offer', (offer) => {
+        socket.to("RTCconnector").emit('offer', offer);
+    });
+
+    socket.on('answer', (answer) => {
+        socket.to("RTCconnector").emit('answer', answer);
+    });
+
+    socket.on('ice-candidate', (candidate) => {
+        socket.to("RTCconnector").emit('ice-candidate', candidate);
+    });
+
+    socket.on('disconnect', () => {
+        console.log('User disconnected:', socket.id);
+    });
+
+    socket.on('gimmie', () => {
+        socket.to("RTCconnector").emit('gimmie', 2);
+    });
+
 	}
 
 
