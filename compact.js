@@ -36,7 +36,34 @@ class responder{
 	static info1 = {}
 	static pusher = []
 
-	static temporalStorage = {}
+	static temporalStorage = {"submit":`
+			<!DOCTYPE html>
+		<html>
+		<head>
+		  <meta charset="utf-8">
+		  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable = no, maximum-scale=1, minimum-scale=1">
+		  <title>LTMP</title>
+
+		</head>
+		<body style="padding:0;margin:0;background-color: #050010;">
+
+		<script>
+			
+		</script>
+
+		 <div style="color: #70FF80">
+		  <label for="name">Name:</label><br>
+		  <input type="text" id="name" name="name"><br>
+			<label for="content">content:</label><br>
+		  <textarea type="text" id="content" name="content"></textarea>
+		<button onclick="(async function submit(){let title = document.getElementById('name').value;let content = document.getElementById('content').value;await fetch('https://game.lopkn.dev/temporal',{method: 'POST',headers: { 'Content-Type': 'application/json'},body: JSON.stringify({action:'store','name':title,'data':content})});})()">submit</button>
+		</div>
+
+
+
+		</body>
+		</html>
+	`}
 
 	static process1(d,r){
 		if(d.action == "debug"){
