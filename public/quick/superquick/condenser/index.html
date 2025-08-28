@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="icon" href="../../images/psim2.png">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable = no, maximum-scale=1, minimum-scale=1">
+  <title>LTPT</title>
+
+</head>
+<style>
+  .expandable {
+    color: #FF0000;
+    cursor: pointer;
+  }
+</style>
+
+<body style="padding:0;margin:0;background-color: #050010;">
+
+<!-- 
+<div style="color: #70FF80">
+ main text
+</div> -->
+
+<script>
+
+  let m = new Map()
+
+
+  function create(str){
+    let div = document.createElement("div")
+    div.innerText = str
+    div.classList.add("expandable")
+    div.dataset.expand = str
+    div.onclick = expand
+    return(div)
+  }
+
+  function expand(e){
+    console.log(e.currentTarget.dataset.expand)
+  }
+
+  document.body.appendChild(create("test"))
+
+</script>
+
+</body>
+</html>
