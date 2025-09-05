@@ -1068,7 +1068,7 @@ function dampen(n,o,f){
 }
 
 let t = 0
-let sleepingFactor = 10
+let sleepingFactor = 3
 function mainLoop(){
   ctx.clearRect(0,0,Width,Height)
 
@@ -1125,7 +1125,7 @@ function mainLoop(){
   requestAnimationFrame(mainLoop)
 }
 
-// requestAnimationFrame(mainLoop)
+requestAnimationFrame(mainLoop)
 
 function floatingLetter(){
   let div = document.createElement("div")
@@ -1155,8 +1155,8 @@ function floatingLetter(){
 
 
 
-        // div.style.textShadow = "0px 0px "+Math.floor(siz/2)+"px "+col
-        // div.style.textShadow = div.style.textShadow+","+div.style.textShadow+","+div.style.textShadow
+        div.style.textShadow = "0px 0px "+Math.floor(siz/2)+"px "+col
+        div.style.textShadow = div.style.textShadow+","+div.style.textShadow+","+div.style.textShadow
         div.classList.add("dstart")
         div.style.animation = "trans "+(spd)+"s linear forwards"
         document.getElementById("myTopDiv").appendChild(div)

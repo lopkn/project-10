@@ -2694,7 +2694,20 @@ function push(particle,dx,dy){
 		particle.vy += dy / particle.mass
 	}
 }
-if(false){ //////////=============// ADD BALLGAME ballgame = false
+if(true){ //////////=============// ADD BALLGAME ballgame = false
+	comparer.disabled = {
+		"0":100000,
+		"1":100000,
+		"2":100000,
+		"3":100000,
+		"4":100000,
+		"5":100000,
+		"6":100000,
+		"7":100000,
+		"8":100000,
+		"9":100000
+	}
+
 events.addEvent("ballgame",{
 	"energy":300,
 	"strength":1,

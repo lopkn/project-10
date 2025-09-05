@@ -520,11 +520,21 @@ class DRONE{
       div.innerText += "\n INTERSECTS \n"
       this.dst = intersects[0].distance
       if(this.dst < DRONE.dPos.length()){
-        // div.style.backgroundColor = "red"
-        DRONE.forces.roll += minMax(-2,(Math.random()-0.5)*0.0015*DRONE.speed,2)
-        DRONE.forces.yaw += minMax(-2,(Math.random()-0.5)*0.0015*DRONE.speed,2)
+        div.style.backgroundColor = "red"
+        DRONE.forces.roll += minMax(-1,(Math.random()-0.5)*0.0005*DRONE.speed,1) //formerly 0.0015 and 2 before reflection
+        DRONE.forces.yaw += minMax(-1,(Math.random()-0.5)*0.0005*DRONE.speed,1)
+
         DRONE.vel.multiplyScalar(0.8)
+        let faceNormal = intersects[0].face.normal.clone()
+        let im = new THREE.Matrix4()
+        intersects[0].object.getMatrixAt(intersects[0].instanceId,im)
+        faceNormal.applyMatrix3( new THREE.Matrix3().getNormalMatrix( im ) );
+        faceNormal.normalize();
+        DRONE.vel.reflect(faceNormal)
+        this.dPos = this.vel.clone().multiplyScalar(dt)
+        
         DRONE.forwardLocked = false
+        console.log(faceNormal)
         console.log("HIT")
 
         if(intersects[0].instanceId!==undefined){
@@ -770,6 +780,8 @@ class world{
 
       var geometry = new THREE.BoxGeometry(4200, 1200, 1200);
       var materials = new THREE.MeshStandardMaterial({ color: "#FF3030", roughness:0, metalness: 0.8})
+
+      // geometry.computeVertexNormals() // delete if not found useful
 
       mesh = new InstancedMesh2( geometry, materials, count );
       mesh.instanceMatrix.setUsage( THREE.DynamicDrawUsage ); // will be updated every frame
