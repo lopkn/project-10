@@ -911,10 +911,10 @@ void myDo(int x,std::string s1){
 			system("xdotool mousedown 3 &");
 		}
 		if(x == 23){
-			myMouseMoveRelative(-200,0);
+			myMouseMoveRelative(-600,0);
 		}
 		if(x == 25){
-			myMouseMoveRelative(200,0);
+			myMouseMoveRelative(600,0);
 		}
 	}
 
