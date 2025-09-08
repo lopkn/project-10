@@ -38,8 +38,10 @@
 //STUFF
 
 
-int keyboardEventX = 1;
+int keyboardEventX = 9;
 int mouseEventX = 4;
+
+bool POLYGLOT = true;
 
 
 
@@ -47,8 +49,8 @@ int mouseEventX = 4;
 std::string s1;
 cairo_t* cr;
 
-int Width = 1920*2;
-int Height = 1080*2;
+int Width = 3440;
+int Height = 1440;
 
 struct myDrawConst{
 	std::string id = "NONE";
@@ -81,6 +83,10 @@ std::map<int, char> keyMap = {
 
 
 };
+
+std::map<int, bool> downs;
+
+
 //79 80 81
 //75 76 77
 //71 72 73
@@ -300,6 +306,13 @@ int * myGetMousePos(){
 	pos[1] = rootY;
 	return(pos);
 }
+
+void myMouseMoveRelative(int x, int y){
+    XTestFakeRelativeMotionEvent(dpy, x, y, 0);
+    XSync(dpy, false);
+    XFlush(dpy);
+}
+
 void myMouseMove(int x, int y){
 	int * pos = myGetMousePos();
     // XWarpPointer(dpy,None,root_window,0,0,0,0,x,y);
@@ -888,6 +901,24 @@ int keysounds = 0;
 void myDo(int x,std::string s1){
 
 
+	downs[x] = true;
+	if(POLYGLOT){
+		if(x == 36){
+			system("xdotool click 1 & ");
+		}
+		if(x == 40){
+			std::cout << "TEST\n";
+			system("xdotool mousedown 3 &");
+		}
+		if(x == 23){
+			myMouseMoveRelative(-200,0);
+		}
+		if(x == 25){
+			myMouseMoveRelative(200,0);
+		}
+	}
+
+
 	if(x == 98){ 
 		std::cout << "returning to mouse speed 0\n";
 		system("xinput --set-prop \"PixArt Microsoft USB Optical Mouse\" \"libinput Accel Speed\" 0");
@@ -1142,6 +1173,12 @@ void myDo(int x,std::string s1){
 }
 
 void myDoU(int x){
+	downs[x] = false;
+	if(POLYGLOT){
+		if(x == 40){
+			system("xdotool mouseup 3 &");
+		}
+	}
 	if(keysounds == 1){
 		if(x == 20 && mast.Rjump){
 			
@@ -1525,6 +1562,21 @@ void myScreenThread(){
     	// usleep(1);//50
     	// // return;
 
+
+    	if(downs[24]){
+	    	myMouseMoveRelative(0,-33);
+    	}
+    	if(downs[37]){
+	    	myMouseMoveRelative(-33,0);
+    	}
+    	if(downs[38]){
+	    	myMouseMoveRelative(0,33);
+    	}
+    	if(downs[39]){
+	    	myMouseMoveRelative(33,0);
+    	} // POLYGLOT KB
+
+
     	usleep(10);
     	cairo_pop_group_to_source(cr);
     	cairo_save(cr);
@@ -1626,6 +1678,8 @@ int main()
                     // {
                     	// std::cout << "Other: code:"<< ev.code << " State: " << ev.value << std::endl;
                     // }
+                } else {
+                	// std::cout << ev.type << " < othertype " << ev.value << std::endl;
                 }
 
 
