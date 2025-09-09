@@ -903,6 +903,10 @@ void myDo(int x,std::string s1){
 
 	downs[x] = true;
 	if(POLYGLOT){
+		if(x == 14){
+			std::cout << "tset" << std::endl;
+			system("tail /home/lopkn/.minecraft/logs/latest.log -n 1 | grep -P \"[^:]*$\" -o | ollama run lopknbot3 | tr \"\n\" \" \" | head -c 256 > OUT.txt && VAR=$(cat OUT.txt) && xdotool type \"$VAR\"");
+		}
 		if(x == 36){
 			system("xdotool click 1 & ");
 		}
