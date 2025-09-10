@@ -26,11 +26,11 @@
   let m = new Map()
 
 
-  function create(str){
+  function create(str,xpd){
     let div = document.createElement("div")
     div.innerText = str
     div.classList.add("expandable")
-    div.dataset.expand = str
+    div.dataset.expand = xpd
     div.onclick = expand
     return(div)
   }
