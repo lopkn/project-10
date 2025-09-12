@@ -121,6 +121,17 @@ function setDefaultAbsolute(elm){
 }
 
 
+class LrandVel{
+  constructor(mult=1,friction=0.999){
+    this.val = 0
+  }
+  update(){
+    this.val += (Math.random()-0.5)*mult
+    this.val *= friction
+    return(this.val)
+  }
+}
+
 
 
 class Lcolorf{ //lopkn's color functions
