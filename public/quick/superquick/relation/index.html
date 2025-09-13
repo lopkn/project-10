@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D3 Visualization</title>
+    <script src="./d3.js"></script>
+
+       <style>
+        .tooltip {
+            position: absolute;
+            text-align: center;
+            width: 60px;
+            padding: 5px;
+            font: 12px sans-serif;
+            background: lightsteelblue;
+            border: 0px;
+            border-radius: 8px;
+            pointer-events: none;
+        }
+    </style>
+</head>
+
+
+<div id="sqript" contenteditable=true style="background-color: rgba(0,125,0,0.2); position:absolute; top:0px; left:0px; width: 35%; height: 50%; color:organge; padding:2px"></div>
+
+
+<body>
+  <div class="tooltip" style="opacity: 0;"></div>
+    <div id="chart"></div>
+
+<script>
+
+items = {}
+linkers = []
+vars = {}
+
+function test1(){
+  let s = `node uno
+a:: testballs fattest
+b:: causes nathan
+a -> b
+`
+}
+
+function test2(){
+  let s = `
+a ::testing test
+b:: boys
+d :: dogs
+
+b -> dogs -> because
+a -> b
+boys -> a
+
+a::b
+
+`
+  processStr(s)
+}
+
+
+function processStr(s){
+  let spl = s.split("\n")
+  spl.forEach((e)=>{
+    processLine(e)
+  })
+}
+
+function processLine(e){
+    if(e.match(/^\s*$/)!==null){return}
+    
+    let causality = e.split("->")
+    if(causality.length>1){
+      causality.forEach((segment,i)=>{
+        causality[i] = removeWhiteSpace(segment)
+      })
+    return(createLink(...causality))
+    } // then there is only one word
+    
+   
+    if(e.includes("::")){
+       e = defineSyntax(e)
+    } else {
+      e = removeWhiteSpace(e)
+    }
+    return(declareNode(e))
+}
+  
+
+function defineSyntax(e){
+  let definition = e.match(/::(.+)$/)
+  //make definition
+  let def = removeWhiteSpace(e.substring(0,e.length-definition[1].length-2))
+  let fdef = removeWhiteSpace(definition[1])
+  vars[def] = getNode(fdef)
+  return(fdef)
+}
+  
+function createLink(a,b,reason){
+  a = getNode(a)
+  b = getNode(b)
+  let dict = {"f":a,"t":b} // from, to, reason
+  linkers.push(dict)
+  if(reason!==undefined){dict.r = reason}
+  return(dict)
+}
+function getNode(x){
+  if(vars[x]!==undefined){return(vars[x])}
+  return(x)
+}
+function declareNode(e,display=true){
+  if(items[e]===undefined){
+    items[e] = {display}
+    if(vars[e]!==undefined){
+      console.warn(`"${e}" was declared already declared as temp var`)
+    }
+  }
+  return(items[e])
+}
+
+function removeWhiteSpace(str) {
+    return str.replace(/^\s+|\s+$/g, '');
+}
+
+    </script>
+
+
+    <script>
+
+
+
+        
+   
+        document.addEventListener("keydown",(e)=>{
+            if(e.key == "c"){
+                // navigator.clipboard.writeText(JSON.stringify(ALG.dict))
+            }
+            if(e.key == "p"){
+                (async()=>{
+                    // let x = await navigator.clipboard.readText()
+                    // console.log("loading new items")
+                    // ALG.dict = JSON.parse(x)
+                    // R();
+                })()
+                
+            }
+
+        })
+
+
+
+
+
+        const data = {
+            nodes: [
+                { id: 'Node1', group: 1 },
+                { id: 'Node2', group: 2 },
+                { id: 'Node3', group: 2 },
+                { id: 'Node4', group: 2 },
+                { id: 'Node5', group: 2 },
+                { id: 'Node6', group: 2 },
+                // Add more nodes
+            ],
+            links: [
+                // { source: 'Node1', target: 'Node2', value: 1 },
+                { source: 'Node1', target: 'Node3', value: 1 },
+                { source: 'Node1', target: 'Node3', value: 1 },
+                { source: 'Node4', target: 'Node3', value: 2 },
+                { source: 'Node5', target: 'Node3', value: 2 },
+                { source: 'Node6', target: 'Node3', value: 4 },
+                // Add more links
+            ]
+        };
+
+        // let data = {nodes:[],links:[]}
+        let ZOOM = 1
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        const color = d3.scaleOrdinal(d3.schemeCategory10);
+        var links = data.links.map(d => ({...d}));
+        var nodes = data.nodes.map(d => ({...d}));
+
+
+        let inputSpace = 100
+
+        let idLoaded = {}
+
+        document.getElementById("sqript").addEventListener("keydown",(e)=>{
+          if(e.key === "Enter" && e.shiftKey){
+            let val = sqript.innerText
+            items = {}
+            linkers = []
+            vars = {}
+            processStr(val)
+
+            data.nodes = []
+            data.links = []
+
+            Object.keys(items).forEach((e)=>{data.nodes.push({id:e,group:1})})
+            linkers.forEach((e)=>{
+              data.links.push({source:e.f,target:e.t,value:4})
+            })
+            console.log("HEY")
+            e.preventDefault()
+            RE()
+          }
+        })
+
+
+
+
+
+
+
+        var ANIMATE = true
+
+        function start(){
+          if(!ANIMATE){return}
+            nodes = []
+            links = []
+            // RE()
+        }
+        // start()
+
+        function R(){
+            start();
+            RE();
+        }
+
+        // function zm(){
+        var stupidWorkaround;
+
+        var zmev = (event) => {
+            stupidWorkaround = event
+                    node.attr("transform", event.transform); // Apply zoom transformation
+                    link.attr("transform", event.transform); // Apply zoom transformation
+                    ZOOM = event.transform.k
+                    if(event.transform.k<1){
+                      node.attr("r",Math.max(5/event.transform.k))
+                      link.attr("stroke-width", d => Math.sqrt(d.value)/event.transform.k)
+                    }
+                }
+
+        var zm = d3.zoom()
+                .scaleExtent([0.01, 8]) // Set zoom limits
+                .on("zoom", zmev)
+
+
+        var simulation = d3.forceSimulation(data.nodes)
+            .force("link", d3.forceLink(data.links).id(d => d.id).strength(0.1))
+            .force("charge", d3.forceManyBody())
+            // .force("center", d3.forceCenter(width / 2, height / 2))
+            .on("tick", ticked);
+
+        var svg = d3.create("svg")
+            .attr("width", width)
+            .attr("height", height)
+            .attr("viewBox", [0, 0, width, height])
+            .attr("style", "max-width: 100%; height: auto;")
+            .call(zm
+            );
+;
+
+        svg.append("defs").append("marker")
+        .attr("id", "arrowhead")
+        .attr("viewBox", "0 0 10 10")
+        .attr("refX", 15) // Position of the arrow
+        .attr("refY", 5)
+        .attr("orient", "auto")
+        .attr("markerWidth", 6)
+        .attr("markerHeight", 6)
+        .append("polygon")
+        .attr("points", "0 0, 10 5, 0 10")
+        .attr("fill", "#999");
+
+
+        var link = svg.append("g")
+            .attr("stroke", "#999")
+            .attr("stroke-opacity", 0.6)
+            .selectAll()
+            .data(data.links)
+            .join("line")
+            .attr("stroke-width", d => Math.sqrt(d.value))
+            .attr("marker-end", "url(#arrowhead)");;
+
+
+            const tooltip = d3.select(".tooltip");
+        var node = svg.append("g").attr("stroke", "#fff")
+        
+        node = node.attr("stroke-width", 1.5)
+            .selectAll("g")
+            .data(data.nodes)
+            .attr("class","dog")
+            // .join("g")
+            
+
+
+        let dog = node
+        node = node.join("circle")
+            .attr("r", 5)
+            .attr("fill", d => color(d.group))
+            .on("mouseover", (event, d) => {
+                tooltip.transition().duration(200).style("opacity", .9);
+                tooltip.html(d.id /*+ "-" + 2*/)
+                    .style("left", (event.pageX + 5) + "px")
+                    .style("top", (event.pageY - 28) + "px");
+            })
+            .on("mouseout", () => {
+                tooltip.transition().duration(500).style("opacity", 0);
+            })
+
+            dog
+            .join("text")
+            // .text(d => "TESTTT").attr("stroke","#000")
+            .style("pointer-events","none");
+
+
+        node = svg.selectAll("circle, text")
+
+
+        node.call(d3.drag()
+            // .subject(d => ({x: x(d[0]), y: y(d[1])}))
+            .on("start", dragstarted)
+            .on("drag", dragged)
+            .on("end", dragended));
+
+        function ticked() {
+            link.attr("x1", d => d.source.x)
+                .attr("y1", d => d.source.y)
+                .attr("x2", d => d.target.x)
+                .attr("y2", d => d.target.y);
+            node.attr("cx", d => d.x)
+                .attr("cy", d => d.y);
+            node.attr("x", d => d.x)
+                .attr("y", d => d.y);
+        }
+
+        function dragstarted(event) {
+            if (!event.active) simulation.alphaTarget(0.3).restart();
+            event.subject.fx = event.subject.x;
+            event.subject.fy = event.subject.y;
+        }
+
+
+  function distance(x1,y1,x2,y2) {
+  let a = x2-x1
+  let b = y2-y1
+  return(Math.sqrt(a*a+b*b))
+}
+
+        function dragged(event) {
+          fm = distance(event.subject.x,event.subject.y,event.x,event.y)/100
+            event.subject.fx = event.subject.x+(event.x-event.subject.x)*fm;
+            event.subject.fy = event.subject.y+(event.y-event.subject.y)*fm;
+            // event.subject.fx = event.sourceEvent.pageX
+            // event.subject.fy= event.sourceEvent.pageY
+
+        }
+
+        function dragended(event) {
+            if (!event.active) simulation.alphaTarget(0);
+            event.subject.fx = null;
+            event.subject.fy = null;
+        }
+
+        // Append the SVG to the div.
+        document.getElementById('chart').appendChild(svg.node());
+
+
+
+      function addNodeAndLink(newNodeId, newNodeGroup, existingNodeId) {
+        // Create a new node object
+        const newNode = { id: newNodeId, group: newNodeGroup };
+        data.nodes.push(newNode); // Add new node to nodes array
+
+        // Create a new link object (linking to the existing node)
+        const newLink = { source: existingNodeId, target: newNodeId, value: 1 };
+        data.links.push(newLink); // Add new link to links array
+
+        // Restart the simulation with the updated nodes and links
+        simulation.nodes(data.nodes);
+        simulation.force("link").links(data.links);
+        simulation.alpha(1).restart(); // Restart the simulation
+
+        // Update the SVG elements
+        updateSVG();
+    }
+
+    function RE(){
+      if(!ANIMATE){return}
+        simulation.nodes(data.nodes);
+        simulation.force("link").links(data.links);
+        simulation.alpha(1).restart(); // Restart the simulation
+
+        // Update the SVG elements
+        updateSVG();
+    }
+
+    function updateSVG() {
+
+      // Update links
+        link = svg.selectAll("line")
+            .data(data.links)
+            .join("line")
+            .attr("stroke-width", d => Math.sqrt(d.value))
+            .attr("stroke", "#999")
+            .attr("stroke-opacity", 0.6)
+
+            .attr("marker-end", "url(#arrowhead)");;
+
+              // Update nodes
+        node = svg.selectAll("circle")
+            .data(data.nodes)
+            .join("circle")
+            .attr("r", 5)
+            .attr("fill", d => color(d.group))
+            .call(d3.drag()
+                .on("start", dragstarted)
+                .on("drag", dragged)
+                .on("end", dragended));
+
+        node.append("title").text(d => d.id+" INFO HERE MAY BE ADDED");
+
+        
+
+
+
+
+        dog = svg.selectAll("text")
+            .data(data.nodes)
+            .join("text")
+            .text(d => d.id).attr("stroke","#000")
+            .style("pointer-events","none");
+
+
+        node = svg.selectAll("circle, text")
+
+        zmev(stupidWorkaround)
+
+
+    }
+
+
+
+
+
+    </script>
+</body>
+</html>
