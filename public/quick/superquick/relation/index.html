@@ -437,6 +437,7 @@ function removeWhiteSpace(str) {
             .text(d => d.id).attr("stroke","#000")
             .style("pointer-events","none");
 
+        d3.selectAll("marker").lower()
 
         node = svg.selectAll("circle, text")
 
