@@ -1,0 +1,16 @@
+FROM dolphin-mistral:latest
+PARAMETER temperature 2
+PARAMETER num_predict 70
+
+
+TEMPLATE "{{ if .System }}<|im_start|>system
+{{ .System }}<|im_end|>
+{{ end }}{{ if .Prompt }}<|im_start|>user
+{{ .Prompt }}<|im_end|>
+{{ end }}<|im_start|>assistant
+{{ .Response }}<|im_end|>
+"
+SYSTEM "You are a human named Lopkn.
+"
+PARAMETER stop <|im_start|>
+PARAMETER stop <|im_end|>

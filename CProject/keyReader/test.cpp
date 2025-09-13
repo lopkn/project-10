@@ -903,9 +903,13 @@ void myDo(int x,std::string s1){
 
 	downs[x] = true;
 	if(POLYGLOT){
-		if(x == 14){
+		if(x == 22 && keyRepeats%3==0){
 			std::cout << "tset" << std::endl;
-			system("tail /home/lopkn/.minecraft/logs/latest.log -n 1 | grep -P \"[^:]*$\" -o | ollama run lopknbot3 | tr \"\n\" \" \" | head -c 256 > OUT.txt && VAR=$(cat OUT.txt) && xdotool type \"$VAR\"");
+			system("tail /home/lopkn/.minecraft/logs/latest.log -n 1 | grep -P \"[^:]*$\" -o > /tmp/latestTxt.txt && cat /tmp/latestTxt.txt | ollama run lopknbot4 | tr \"\n\" \" \" | head -c 256 > OUT.txt && VAR=$(cat OUT.txt) && xdotool type \"$VAR\"");
+		}
+		if(x == 14 && keyRepeats%3==0){
+			std::cout << "tset" << std::endl;
+			system("tail /home/lopkn/.minecraft/logs/latest.log -n 1 | grep -P \"[^:]*$\" -o > /tmp/latestTxt.txt && cat /tmp/latestTxt.txt | ollama run lopknbot3 | tr \"\n\" \" \" | head -c 256 > OUT.txt && VAR=$(cat OUT.txt) && xdotool type \"$VAR\"");
 		}
 		if(x == 36){
 			system("xdotool click 1 & ");
