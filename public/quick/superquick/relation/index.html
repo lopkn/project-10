@@ -22,7 +22,7 @@
 </head>
 
 
-<div id="sqript" contenteditable=true style="overflow-y: scroll; background-color: rgba(0,125,0,0.2); position:absolute; top:0px; left:0px; width: 35%; height: 50%; color:organge; padding:2px"></div>
+<textarea id="sqript" contenteditable=true style="overflow-y: scroll; background-color: rgba(0,125,0,0.2); position:absolute; top:0px; left:0px; width: 35%; height: 50%; color:organge; padding:2px"></textarea>
 
 
 <body>
@@ -58,6 +58,44 @@ a::b
 `
   processStr(s)
 }
+function test3(){
+  let s = `qrs
+C1
+C4
+qrs -> C1
+C1 -> cleaves -> C4
+C4 -> into -> C4a
+C4 -> into -> C4b
+C4b -> binds -> C2a
+C2a -> C2convertase
+convertase cuts C3 -> C3a, C3b
+C3b binds Convertase -> C5 convertase
+C5convertase cuts C5 into a,b
+C5b binds C6,78,9 -> membrane attack map`
+let s2 = `qrs -> C1
+C1 -> cleaves -> C4.
+C4 -> into -> C4a.
+C4 -> into -> C4b.
+C4b -> binds -> C2a.
+C2a -> C2 convertase
+C2 convertase -> cuts -> C3.
+C3 -> C3a
+C3 -> C3b
+C3b -> binds Convertase -> C5 convertase.
+C5 convertase -> cuts -> C5.
+C5 -> into ->  C5a.
+C5 -> into -> C5b.
+C5b -> binds -> C6,7,8,9.
+C6,7,8,9 -> membrane attack map
+`
+}
+
+class envs{
+  static causality = "->"
+  static definer = "::"
+  static seperator = ","
+  static declareGrammar = "."
+}
 
 
 function processStr(s){
@@ -70,7 +108,7 @@ function processStr(s){
 function processLine(e){
     if(e.match(/^\s*$/)!==null){return}
     
-    let causality = e.split("->")
+    let causality = e.split(envs.causality)
     if(causality.length>1){
       causality.forEach((segment,i)=>{
         causality[i] = removeWhiteSpace(segment)
@@ -79,17 +117,18 @@ function processLine(e){
     } // then there is only one word
     
    
-    if(e.includes("::")){
+    if(e.includes(envs.definer)){
        e = defineSyntax(e)
     } else {
       e = removeWhiteSpace(e)
+      declareNode(e)
     }
-    return(declareNode(e))
+    // return(declareNode(e))
 }
   
 
 function defineSyntax(e){
-  let definition = e.match(/::(.+)$/)
+  let definition = e.match(/::(.+)$/) // fix?
   //make definition
   let def = removeWhiteSpace(e.substring(0,e.length-definition[1].length-2))
   let fdef = removeWhiteSpace(definition[1])
@@ -98,23 +137,69 @@ function defineSyntax(e){
 }
   
 function createLink(a,b,reason){
-  a = getNode(a)
-  b = getNode(b)
+
+  if(reason!== undefined && reason[reason.length-1] === envs.declareGrammar){
+    let r = b
+    b = reason.slice(0,-1)
+    reason = r
+  }
+
+  if(b.split(envs.seperator).length>1){
+    b.split(envs.seperator).forEach((e)=>{
+      createLink(a,e,reason)
+    })
+    return;
+  }
+
+  if(a.split(envs.seperator).length>1){
+    a.split(envs.seperator).forEach((e)=>{
+      createLink(e,b,reason)
+    })
+    return;
+  }
+
+  if(a.includes(envs.definer)){
+    a = defineSyntax(a)
+  }
+  if(b.includes(envs.definer)){
+    b = defineSyntax(b)
+  }
+
+  c = getNode(a)
+  d = getNode(b)
+  if(c !== a || d !== b){createLink(c,d,reason);return}
+
+
   let dict = {"f":a,"t":b} // from, to, reason
   linkers.push(dict)
   if(reason!==undefined){dict.r = reason}
   return(dict)
 }
 function getNode(x){
-  if(vars[x]!==undefined){return(vars[x])}
+  if(vars[x]!==undefined){x = vars[x]}
+    if(items[x]===undefined){
+      declareNode(x)
+    }
   return(x)
 }
 function declareNode(e,display=true){
+  // console.log(`${e} declared`)
+
+  if(e.includes(envs.seperator)){
+    items[e] = {display:false,group:true}
+    e.split(",").forEach((e)=>{
+      declareNode(e,display)
+    })
+    return
+  }
+
   if(items[e]===undefined){
     items[e] = {display}
     if(vars[e]!==undefined){
       console.warn(`"${e}" was declared already declared as temp var`)
     }
+  } else {
+    console.warn(`"${e}" was already declared. Doing nothing.`)
   }
   return(items[e])
 }
@@ -188,7 +273,7 @@ function removeWhiteSpace(str) {
 
         document.getElementById("sqript").addEventListener("keydown",(e)=>{
           if(e.key === "Enter"){
-            let val = sqript.innerText
+            let val = sqript.value
             items = {}
             linkers = []
             vars = {}
@@ -197,16 +282,34 @@ function removeWhiteSpace(str) {
             data.nodes = []
             data.links = []
 
-            Object.keys(items).forEach((e)=>{data.nodes.push({id:e,group:1})})
+            Object.keys(items).forEach((e)=>{if(!items[e].display){return};data.nodes.push({id:e,group:1})})
             linkers.forEach((e)=>{
-              data.links.push({source:e.f,target:e.t,value:4})
+              data.links.push({source:e.f,target:e.t,value:4,text:e.r})
             })
-            console.log("HEY")
             if(e.shiftKey){
               e.preventDefault()
             }
             RE()
-          }
+          }if (event.key === 'Tab') {
+                e.preventDefault(); // Prevent the default tab behavior
+                let stringToInsert;
+                if(e.shiftKey){
+                  stringToInsert = ":: "
+                } else {
+                  stringToInsert = " -> "
+                }
+                let textArea = document.getElementById("sqript")
+                // Get the current cursor position
+                const start = textArea.selectionStart;
+                const end = textArea.selectionEnd;
+                
+                const textBefore = textArea.value.substring(0, start);
+                const textAfter = textArea.value.substring(end);
+                textArea.value = textBefore + stringToInsert + textAfter;
+                
+                // Move the cursor to the end of the inserted string
+                textArea.selectionStart = textArea.selectionEnd = start + stringToInsert.length;
+            }
         })
 
 
@@ -233,10 +336,13 @@ function removeWhiteSpace(str) {
         // function zm(){
         var stupidWorkaround;
 
+
         var zmev = (event) => {
+          if(!event){return}
             stupidWorkaround = event
                     node.attr("transform", event.transform); // Apply zoom transformation
                     link.attr("transform", event.transform); // Apply zoom transformation
+                    LINKTEXTS.attr("transform", event.transform); // Apply zoom transformation
                     ZOOM = event.transform.k
                     if(event.transform.k<1){
                       node.attr("r",Math.max(5/event.transform.k))
@@ -244,13 +350,14 @@ function removeWhiteSpace(str) {
                     }
                 }
 
+
         var zm = d3.zoom()
                 .scaleExtent([0.01, 8]) // Set zoom limits
                 .on("zoom", zmev)
 
 
         var simulation = d3.forceSimulation(data.nodes)
-            .force("link", d3.forceLink(data.links).id(d => d.id).strength(0.1))
+            .force("link", d3.forceLink(data.links).distance(d=>d.text?d.text.length*10+50:50).id(d => d.id).strength(1.5))
             .force("charge", d3.forceManyBody())
             // .force("center", d3.forceCenter(width / 2, height / 2))
             .on("tick", ticked);
@@ -312,8 +419,7 @@ function removeWhiteSpace(str) {
                 tooltip.transition().duration(500).style("opacity", 0);
             })
 
-            dog
-            .join("text")
+            dog.join("text")
             // .text(d => "TESTTT").attr("stroke","#000")
             .style("pointer-events","none");
 
@@ -327,22 +433,24 @@ function removeWhiteSpace(str) {
             .on("drag", dragged)
             .on("end", dragended));
 
+
+        var LINKTEXTS = svg.selectAll("text.link")
+
         function ticked() {
             link.attr("x1", d => d.source.x)
                 .attr("y1", d => d.source.y)
                 .attr("x2", d => d.target.x)
                 .attr("y2", d => d.target.y);
+       LINKTEXTS.attr("x", d => (d.source.x + d.target.x) / 2) // Position text in the middle
+                .attr("y", d => (d.source.y + d.target.y) / 2)
+                .attr("cx", d => (d.source.x + d.target.x) / 2) // Position text in the middle
+                .attr("cy", d => (d.source.y + d.target.y) / 2);
             node.attr("cx", d => d.x)
                 .attr("cy", d => d.y);
             node.attr("x", d => d.x)
                 .attr("y", d => d.y);
         }
 
-        // function dragstarted(event) {
-        //     if (!event.active) simulation.alphaTarget(0.3).restart();
-        //     event.subject.fx = event.subject.x;
-        //     event.subject.fy = event.subject.y;
-        // }
 
 
   function distance(x1,y1,x2,y2) {
@@ -351,24 +459,7 @@ function removeWhiteSpace(str) {
   return(Math.sqrt(a*a+b*b))
 }
 
-        // function dragged(event) {
-        //     // console.log(event)
-        //   fm = distance(event.subject.x,event.subject.y,event.x,event.y)/100
-        //   console.log(fm)
-        //     event.subject.fx = event.subject.x+(event.x-event.subject.x)*fm;
-        //     event.subject.fy = event.subject.y+(event.y-event.subject.y)*fm;
-        //     // event.subject.fx = event.sourceEvent.pageX
-        //     // event.subject.fy= event.sourceEvent.pageY
 
-        // }
-
-        // function dragended(event) {
-        //     if (!event.active) simulation.alphaTarget(0);
-        //     event.subject.fx = null;
-        //     event.subject.fy = null;
-        // }
-
-        // Append the SVG to the div.
         document.getElementById('chart').appendChild(svg.node());
 
 
@@ -410,8 +501,8 @@ function removeWhiteSpace(str) {
             .attr("stroke-width", d => Math.sqrt(d.value))
             .attr("stroke", "#999")
             .attr("stroke-opacity", 0.6)
-
-            .attr("marker-end", "url(#arrowhead)");;
+            .attr("marker-end", "url(#arrowhead)")
+            .style("pointer-events", "none");;
 
               // Update nodes
         node = svg.selectAll("circle")
@@ -424,22 +515,40 @@ function removeWhiteSpace(str) {
                 .on("drag", dragged)
                 .on("end", dragended));
 
-        node.append("title").text(d => d.id+" INFO HERE MAY BE ADDED");
+        // node.append("title").text(d => d.id+" INFO HERE MAY BE ADDED");
 
         
+        // linkTextGroup = svg.append("g").attr("class", "link-text");
+        LINKTEXTS = svg.selectAll("text.link")
+        .data(data.links)
+        .join("text")
+        .attr("class","link")
+        .attr("dy", ".35em") // Adjust vertical alignment
+        .attr("text-anchor", "middle") // Center the text
+        .text(d => d.text) // Set the text to d.text
+        .style("fill", "#80F")
+        .style("pointer-events","none")
+
+        .attr("x", d => (d.source.x + d.target.x) / 2) // Position text in the middle
+        .attr("y", d => {;return((d.source.y + d.target.y) / 2)});; // Position text in the middle
 
 
+        // nodeTextGroup = svg.append("g").attr("class", "node-text")
+        // debugger;
 
-
-        dog = svg.selectAll("text")
+        dog = svg.selectAll("text.node")
             .data(data.nodes)
             .join("text")
+            .attr("class","node")
             .text(d => d.id).attr("stroke","#000")
             .style("pointer-events","none");
 
         d3.selectAll("marker").lower()
+        d3.selectAll("marker").lower()
+        d3.selectAll("text").raise()
+        d3.selectAll("circle").raise()
 
-        node = svg.selectAll("circle, text")
+        node = svg.selectAll("circle, text.node")
 
         zmev(stupidWorkaround)
 
