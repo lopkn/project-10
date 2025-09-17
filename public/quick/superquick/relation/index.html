@@ -128,7 +128,9 @@ function processLine(e){
   
 
 function defineSyntax(e){
-  let definition = e.match(/::(.+)$/) // fix?
+  let regex = new RegExp(`${envs.definer}(.+)$`)
+  // let definition = e.match(/::(.+)$/) // fix?
+  let definition = e.match(regex) // fix?
   //make definition
   let def = removeWhiteSpace(e.substring(0,e.length-definition[1].length-2))
   let fdef = removeWhiteSpace(definition[1])
@@ -187,7 +189,7 @@ function declareNode(e,display=true){
 
   if(e.includes(envs.seperator)){
     items[e] = {display:false,group:true}
-    e.split(",").forEach((e)=>{
+    e.split(envs.seperator).forEach((e)=>{
       declareNode(e,display)
     })
     return
@@ -271,32 +273,21 @@ function removeWhiteSpace(str) {
 
         let idLoaded = {}
 
+        document.getElementById('sqript').value = localStorage.getItem('savedContent') || ''
+        window.onbeforeunload = function (e) {
+          localStorage.setItem('savedContent', document.getElementById('sqript').value);
+        };
+
         document.getElementById("sqript").addEventListener("keydown",(e)=>{
           if(e.key === "Enter"){
-            let val = sqript.value
-            items = {}
-            linkers = []
-            vars = {}
-            processStr(val)
-
-            data.nodes = []
-            data.links = []
-
-            Object.keys(items).forEach((e)=>{if(!items[e].display){return};data.nodes.push({id:e,group:1})})
-            linkers.forEach((e)=>{
-              data.links.push({source:e.f,target:e.t,value:4,text:e.r})
-            })
-            if(e.shiftKey){
-              e.preventDefault()
-            }
-            RE()
+            reload()
           }if (event.key === 'Tab') {
                 e.preventDefault(); // Prevent the default tab behavior
                 let stringToInsert;
                 if(e.shiftKey){
-                  stringToInsert = ":: "
+                  stringToInsert = env.definer+" "
                 } else {
-                  stringToInsert = " -> "
+                  stringToInsert = " "+env.causality+" "
                 }
                 let textArea = document.getElementById("sqript")
                 // Get the current cursor position
@@ -336,7 +327,25 @@ function removeWhiteSpace(str) {
         // function zm(){
         var stupidWorkaround;
 
+        function reload(){
+          let val = document.getElementById("sqript").value
+            items = {}
+            linkers = []
+            vars = {}
+            processStr(val)
 
+            data.nodes = []
+            data.links = []
+
+            Object.keys(items).forEach((e)=>{if(!items[e].display){return};data.nodes.push({id:e,group:1})})
+            linkers.forEach((e)=>{
+              data.links.push({source:e.f,target:e.t,value:4,text:e.r})
+            })
+            if(e.shiftKey){
+              e.preventDefault()
+            }
+            RE()
+        }
         var zmev = (event) => {
           if(!event){return}
             stupidWorkaround = event
@@ -545,8 +554,8 @@ function removeWhiteSpace(str) {
 
         d3.selectAll("marker").lower()
         d3.selectAll("marker").lower()
-        d3.selectAll("text").raise()
         d3.selectAll("circle").raise()
+        d3.selectAll("text").raise()
 
         node = svg.selectAll("circle, text.node")
 
