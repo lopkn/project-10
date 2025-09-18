@@ -81,6 +81,17 @@ function removeWhiteSpace(str) {
 
 
 document.addEventListener("keydown",(e)=>{
+
+    if(e.key == "Escape"){
+        e.preventDefault()
+        if(displayDiv.style.visibility == "hidden"){
+            displayDiv.style.visibility = "visible"
+        }else{
+            displayDiv.style.visibility = "hidden"
+        }
+        return;
+    }
+
     GAME.start=false
 })
 

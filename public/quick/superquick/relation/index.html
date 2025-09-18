@@ -277,10 +277,11 @@ function removeWhiteSpace(str) {
         window.onbeforeunload = function (e) {
           localStorage.setItem('savedContent', document.getElementById('sqript').value);
         };
+        
 
         document.getElementById("sqript").addEventListener("keydown",(e)=>{
           if(e.key === "Enter"){
-            reload()
+            reload(e)
           }if (event.key === 'Tab') {
                 e.preventDefault(); // Prevent the default tab behavior
                 let stringToInsert;
@@ -327,7 +328,7 @@ function removeWhiteSpace(str) {
         // function zm(){
         var stupidWorkaround;
 
-        function reload(){
+        function reload(e){
           let val = document.getElementById("sqript").value
             items = {}
             linkers = []
@@ -341,11 +342,12 @@ function removeWhiteSpace(str) {
             linkers.forEach((e)=>{
               data.links.push({source:e.f,target:e.t,value:4,text:e.r})
             })
-            if(e.shiftKey){
+            if(e?.shiftKey){
               e.preventDefault()
             }
             RE()
         }
+
         var zmev = (event) => {
           if(!event){return}
             stupidWorkaround = event
@@ -591,6 +593,7 @@ function removeWhiteSpace(str) {
     event.subject.fy = null;
   }
 
+        reload()
 
     </script>
 </body>
