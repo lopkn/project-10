@@ -277,7 +277,7 @@ function removeWhiteSpace(str) {
         window.onbeforeunload = function (e) {
           localStorage.setItem('savedContent', document.getElementById('sqript').value);
         };
-        
+
 
         document.getElementById("sqript").addEventListener("keydown",(e)=>{
           if(e.key === "Enter"){
@@ -286,9 +286,9 @@ function removeWhiteSpace(str) {
                 e.preventDefault(); // Prevent the default tab behavior
                 let stringToInsert;
                 if(e.shiftKey){
-                  stringToInsert = env.definer+" "
+                  stringToInsert = envs.definer+" "
                 } else {
-                  stringToInsert = " "+env.causality+" "
+                  stringToInsert = " "+envs.causality+" "
                 }
                 let textArea = document.getElementById("sqript")
                 // Get the current cursor position

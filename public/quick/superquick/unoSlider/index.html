@@ -10,13 +10,139 @@
 <body style="padding:0;margin:0;background-color: #050010;">
 
 
-<div style="color: #70FF80">
- main text
-</div>
+<style>
+  input[type="text"].num{
+    width:30px;
+    background-color: darkgray;
+  }
+  input[type="text"].num:focus{
+    background-color: lightgray;
+  }
 
+
+  .slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 15px;
+  background: #d3d3d3;
+  outline: none;
+  opacity: 0.7;
+  -webkit-transition: .2s;
+  transition: opacity .2s;
+}
+
+.slider:hover {
+  opacity: 1;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 15px;
+  height: 15px;
+  background: #04AA6D;
+  cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+  width: 15px;
+  height: 15px;
+  background: #04AA6D;
+  cursor: pointer;
+}
+.bg{
+  background-color: #152040;
+  transition: background-color .4s;
+}
+.bg:hover{
+  background-color: #304080;
+}
+
+</style>
+
+<div id="sliders"></div>
+<button onclick="createSlider()" style="background-color: darkgray;">+</button>
 
 <script>
-  
+
+  function createSlider(){
+    //name, min, max, val
+
+    let block = document.createElement("div")
+    // block.style.backgroundColor = "#152040"
+    block.style.padding = "3px"
+    block.style.margin = "3px"
+    block.classList.add("bg")
+    block.style.minWidth = "90%"
+    // block.style.display = "inline-flex"
+    block.style.borderRadius = "3px"
+
+    let name = document.createElement("input")
+    name.type = "text"
+    name.value = "Percentage"
+
+    let min = document.createElement("input")
+    min.type = "text"
+    min.classList.add("num")
+    min.value = "0"
+
+    let max = document.createElement("input")
+    max.type = "text"
+    max.classList.add("num")
+    max.value = "100"
+
+    let step = document.createElement("input")
+    step.type = "text"
+    step.classList.add("num")
+    step.value = "1"
+
+    let val = document.createElement("span")
+    val.style.color = "green"
+    val.innerText = "50"
+
+    let slider = document.createElement("input")
+    slider.type = "range"
+    slider.style.width = "60%"
+    slider.classList.add("slider")
+    slider.step = "1"
+
+
+    block.appendChild(name)
+    block.appendChild(min)
+    block.appendChild(slider)
+    block.appendChild(val)
+    block.appendChild(max)
+    block.appendChild(step)
+
+    slider.addEventListener("input",(e)=>{
+      val.innerText = slider.value
+    })
+    min.addEventListener("change",(e)=>{
+      if(!isNaN(parseFloat(min.value))){
+        slider.min = parseFloat(min.value)
+      }
+    })
+    max.addEventListener("change",(e)=>{
+      if(!isNaN(parseFloat(max.value))){
+        slider.max = parseFloat(max.value)
+      }
+    })
+    step.addEventListener("change",(e)=>{
+      if(!isNaN(parseFloat(step.value))){
+        slider.step = parseFloat(step.value)
+      } else {
+        slider.step = "any"
+        step.value = "any"
+      }
+    })
+
+
+    document.getElementById("sliders").appendChild(block)
+
+
+  }
+
+  createSlider()
 </script>
 
 
