@@ -1092,6 +1092,10 @@ let gameInterval;
 let gameSpecialInterval = ()=>{}
 
 function startGame(){
+
+ctx.textAlign = "center"
+ctx.textBaseline="middle"
+
 camera.specialRenderOn = false
 board.emptyNew()
 board.spawnRates = ["pawn",0.65,"king",0.80,"knight",0.95,"bishop",0.98,"rook",0.998,"cannon",0.9995,"queen",1]

@@ -38,7 +38,7 @@
 //STUFF
 
 
-int keyboardEventX = 9;
+int keyboardEventX = 20;
 int mouseEventX = 4;
 
 bool POLYGLOT = true;
