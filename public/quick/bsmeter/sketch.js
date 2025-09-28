@@ -287,7 +287,8 @@ class board{
     "Danger BS intensity":{"on":false,"time":0},
     "BS flux warning":{"on":false,"time":0},
     "High fluctuation":{"on":false,"time":0},
-    "Warp":{"on":false,"onBColor":"#0040FF","time":0}
+    "Warp":{"on":false,"onBColor":"#0040FF","time":0},
+    "Dogshit capitualance":{"on":false,"onBColor":"#FF3333","time":0},
   }
 
   static console = ""
