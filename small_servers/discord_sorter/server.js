@@ -41,17 +41,21 @@ var pointlist = [
         ["project",5]
 ]
 
-var negativityMultiplier = 100
+var negativityMultiplier = 1
 var positivityMultiplier = 1
 
 var userSet = {}
 var repeatPreventer = new Set()
+var upeat = {}
 
 for(let i = pd.length-1; i>-1; i--){
+
 
 	if(pd[i].author.name=="Deleted User"){pd.splice(i,1);continue;}
 	
 	let aids = pd[i].author.id
+	if(upeat[aids]===undefined){upeat[aids]=0};
+	upeat[aids]+=1;
 	let str = pd[i].content
 	let lower = str.toLowerCase()
 	if(repeatPreventer.has(str)){continue}
@@ -62,7 +66,7 @@ for(let i = pd.length-1; i>-1; i--){
 		if(e[1]>0){m=positivityMultiplier}else{m=negativityMultiplier}
 		pd[i].score+=e[1]*spl*m
 	})	
-	if(userSet[aids]===undefined){userSet[aids]=[pd[i].score,i];continue}
+	if(userSet[aids]===undefined){userSet[aids]=[pd[i].score,i];continue;}
 	if(userSet[aids][0]>pd[i].score){pd.splice(i,1);continue}
 	pd.splice(userSet[aids][1],1);
 	userSet[aids] = [pd[i].score,i];
@@ -71,6 +75,16 @@ pd.sort((a,b)=>{return(b.score-a.score)})
 
 
 console.log("done filtering")
+
+
+
+var analysis = {}
+var a = pd.length
+
+function analyze(f,name=Math.random()){
+b=0;pd.forEach((e)=>{s=e.content.toLowerCase();if(f(s,e.content)){b++}});console.log(b/a)
+analysis[name] = b/a
+}
 
 
 
