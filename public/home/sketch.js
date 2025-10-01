@@ -166,6 +166,47 @@ class LPerceptron{ //it should have input name, input value. each input should h
 /// ======== NOT TEMPLATE ANYMORE. BUILDING AREA ============
 
 
+/*
+ * plan:
+ *
+ * Tailwind
+ *
+ * top bar
+ * -------
+ *  About me
+ *
+ *  Showcase of stuff
+ *
+ * QnA (dynamic)
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
