@@ -516,6 +516,8 @@ class DRONE{
     this.raycaster.set(camera.position,camera.getWorldDirection(new THREE.Vector3))
     const lookIntersects = DRONE.raycaster.intersectObjects( world.activeMeshes );
 
+
+
     if(intersects.length>0){
       div.innerText += "\n INTERSECTS \n"
       this.dst = intersects[0].distance
@@ -530,7 +532,11 @@ class DRONE{
         intersects[0].object.getMatrixAt(intersects[0].instanceId,im)
         faceNormal.applyMatrix3( new THREE.Matrix3().getNormalMatrix( im ) );
         faceNormal.normalize();
-        DRONE.vel.reflect(faceNormal)
+        
+        if(DRONE.speed < 300){
+          DRONE.vel.reflect(faceNormal)
+        }
+
         this.dPos = this.vel.clone().multiplyScalar(dt)
         
         DRONE.forwardLocked = false
