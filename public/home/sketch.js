@@ -2,16 +2,19 @@
 let Width = window.innerWidth
 let Height = window.innerHeight
 
-// let myCanvas = document.getElementById("myCanvas")
+let myCanvas = document.getElementById("myCanvas")
 
-//   myCanvas.width = Math.floor(Width)
-//   myCanvas.height = Math.floor(Height)
-//   myCanvas.style.width = Math.floor(Width)+"px"
-//   myCanvas.style.height = Math.floor(Height)+"px"
-//   myCanvas.style.top = "0px"
-//   myCanvas.style.left = "0px"
+  myCanvas.width = Math.floor(Width)
+  myCanvas.height = Math.floor(Height)
+  myCanvas.style.width = "100%"
+  myCanvas.style.height = "100%"
+  myCanvas.style.position = "fixed"
+  myCanvas.style.top = "0px"
+  myCanvas.style.left = "0px"
 
-// let ctx = document.getElementById("myCanvas").getContext("2d")
+let smallerDim = Width<Height?Width:Height
+
+let ctx = document.getElementById("myCanvas").getContext("2d")
 
 
 
@@ -70,14 +73,7 @@ function distance(x1,y1,x2,y2) {
 }
 
 
-var frameFuncs = []
 
-function mainLoop(time){
-  frameFuncs.forEach((e)=>{
-    e(time)
-  })
-  requestAnimationFrame(mainLoop)
-}
 
 function oneTimeTrustedButton(f){
   let button = document.createElement("button")
@@ -164,6 +160,107 @@ class LPerceptron{ //it should have input name, input value. each input should h
 
 
 /// ======== NOT TEMPLATE ANYMORE. BUILDING AREA ============
+
+class startclock{
+
+  static time = 0
+
+  static tick(dt){
+      dt/=1000
+      let t1 = 0.7
+      let t2 = 1
+      if(this.time<t1){
+
+      ctx.clearRect(0,0,Width,Height)
+      ctx.lineCap = "round"
+      ctx.strokeStyle = "#00FF00"
+      ctx.lineWidth = 25
+      ctx.beginPath()
+      ctx.arc(Width/2,Height/2,smallerDim/5,-Math.PI/2,-Math.PI/2+Math.PI*2*(this.time/t1))
+      ctx.stroke()
+
+      ctx.strokeStyle = "#FFFF00"
+      ctx.lineWidth = 15
+      ctx.beginPath()
+      ctx.arc(Width/2,Height/2,smallerDim/(6),0,Math.PI*0.75*(this.time/t1))
+      ctx.stroke()
+      } else if(this.time<1){
+        ctx.clearRect(0,0,Width,Height)
+      ctx.lineCap = "round"
+      ctx.strokeStyle = "#00FF00"
+      ctx.lineWidth = 25
+      ctx.beginPath()
+      ctx.arc(Width/2,Height/2,smallerDim/5,-Math.PI/2,-Math.PI/2+Math.PI*2)
+      ctx.stroke()
+
+      ctx.strokeStyle = "#FFFF00"
+      ctx.lineWidth = 15
+      ctx.beginPath()
+      ctx.arc(Width/2,Height/2,smallerDim/(6),0,Math.PI*0.75)
+      ctx.stroke()
+      } else if(this.time<2){
+        let d = 0.4
+      ctx.fillStyle = "rgba(0,0,0,"+d+")"
+      ctx.fillRect(0,0,Width,Height)
+      ctx.lineCap = "round"
+      ctx.strokeStyle = "#00FF00"
+      ctx.lineWidth = 25*(this.time+(1-t2))*(this.time+(1-t2))
+      ctx.beginPath()
+      ctx.arc(Width/2,Height/2,smallerDim/(5-(this.time-t2)*5),-Math.PI/2,-Math.PI/2+Math.PI*2)
+      ctx.stroke()
+
+      ctx.strokeStyle = "#FFFF00"
+      ctx.lineWidth = 15*(this.time+(1-t2))*(this.time+(1-t2))
+      ctx.beginPath()
+      ctx.arc(Width/2,Height/2,smallerDim/(6-(this.time-t2)*6),0,Math.PI*0.75)
+      ctx.stroke()
+      // } else if(time<3){
+        // let d = 0.4+(time-2)*0.6
+      // ctx.fillStyle = "rgba(0,0,0,"+d+")"
+        // ctx.fillRect(0,0,Width,Height)
+      } else {
+        // ctx.clearRect(0,0,Width,Height)
+        myCanvas.style.zIndex = -1
+        let div = document.createElement("div")
+        let txt = document.createElement("h1")
+        txt.style.zIndex = 1
+        txt.innerText = "Hey"
+        div.classList.add("text")
+        document.body.appendChild(div)
+        div.appendChild(txt)
+
+        return("delete")
+      }
+
+      this.time+=dt
+  }
+}
+
+
+let mainLoop = setInterval(main,30)
+let start = time = Date.now()
+
+let events = [startclock]
+
+function main(t){
+  let dt = Date.now()-time
+  time = Date.now()
+
+
+
+  for(let i = events.length-1; i > -1; i--){
+    if(events[i].tick(dt)=="delete"){events.splice(i,1)}
+  }
+  // ctx.fillStyle = "red"
+  // ctx.fillRect(0,0,Width/2,Height/2)
+
+
+
+}
+
+
+
+
 
 
 /*
