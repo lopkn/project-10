@@ -185,7 +185,7 @@ class startclock{
       ctx.arc(Width/2,Height/2,smallerDim/(6),0,Math.PI*0.75*(this.time/t1))
       ctx.stroke()
       } else if(this.time<1){
-        ctx.clearRect(0,0,Width,Height)
+        // ctx.clearRect(0,0,Width,Height)
       ctx.lineCap = "round"
       ctx.strokeStyle = "#00FF00"
       ctx.lineWidth = 25
@@ -199,9 +199,18 @@ class startclock{
       ctx.arc(Width/2,Height/2,smallerDim/(6),0,Math.PI*0.75)
       ctx.stroke()
       } else if(this.time<2){
-        let d = 0.4
-      ctx.fillStyle = "rgba(0,0,0,"+d+")"
-      ctx.fillRect(0,0,Width,Height)
+
+        let d = 0.2
+        ctx.save();
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.fillStyle = 'rgba(0,0,0,'+d+')'; // smaller = slower fade; larger = faster fade
+      ctx.fillRect(0, 0, Width, Height);
+      ctx.restore();
+            ctx.globalCompositeOperation = 'source-over';
+
+      // ctx.fillStyle = "rgba(0,0,0,"+d+")"
+      // ctx.fillRect(0,0,Width,Height)
+
       ctx.lineCap = "round"
       ctx.strokeStyle = "#00FF00"
       ctx.lineWidth = 25*(this.time+(1-t2))*(this.time+(1-t2))
@@ -214,20 +223,64 @@ class startclock{
       ctx.beginPath()
       ctx.arc(Width/2,Height/2,smallerDim/(6-(this.time-t2)*6),0,Math.PI*0.75)
       ctx.stroke()
-      // } else if(time<3){
-        // let d = 0.4+(time-2)*0.6
-      // ctx.fillStyle = "rgba(0,0,0,"+d+")"
-        // ctx.fillRect(0,0,Width,Height)
+      } else if(time<2.6){
+        let d = 0.02
+        ctx.save();
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.fillStyle = 'rgba(0,0,0,'+d+')'; // smaller = slower fade; larger = faster fade
+      ctx.fillRect(0, 0, Width, Height);
+      ctx.restore();
+            ctx.globalCompositeOperation = 'source-over';
       } else {
         // ctx.clearRect(0,0,Width,Height)
-        myCanvas.style.zIndex = -1
+        myCanvas.style.zIndex = -15
+        let div2 = document.createElement("div")
         let div = document.createElement("div")
         let txt = document.createElement("h1")
-        txt.style.zIndex = 1
-        txt.innerText = "Hey"
-        div.classList.add("text")
-        document.body.appendChild(div)
+        // txt.style.zIndex = 1
+        txt.innerText = "Hello"
+        div.classList.add("text1")
+        div2.classList.add("appear")
+        div2.style.position = "absolute"
+        document.getElementById("card1").appendChild(div2)
+        // document.body.appendChild(div2)
         div.appendChild(txt)
+        div2.appendChild(div)
+
+        // div2.classList.add("appeared")
+        // requestAnimationFrame(()=>{div2.classList.add("appeared")})
+        setTimeout(()=>{div2.classList.add("appeared");
+         setPos(div2)
+        },460)
+        setTimeout(()=>{
+          div.classList.add("appeared")
+          div2.style.top = "10%"
+        },1000)
+        setTimeout(()=>{
+
+          document.getElementById("cont").classList.add("appeared")
+
+          let arr = ["about me","motivation","projects","skills","FAQ & other"]
+          for(let i = 0; i < arr.length; i++){
+            setTimeout(()=>{
+              let div3 = document.createElement("div")
+              let div4 = document.createElement("div")
+              div4.innerText = arr[i]
+              div3.classList.add("typing-container")
+              div4.classList.add("typing")
+              div4.classList.add("line-1")
+              div3.style.left = "10%"
+              div3.style.top = Math.floor(30+i*10)+"%"
+              div3.style.position = "absolute"
+              div3.appendChild(div4)
+              document.getElementById("card1").appendChild(div3)
+            },i*700)
+          }
+          
+
+        },2300)
+        setTimeout(()=>{div.style.zIndex=30},4000)
+
 
         return("delete")
       }
@@ -236,8 +289,17 @@ class startclock{
   }
 }
 
+function setPos(d){
+   const computedStyle = window.getComputedStyle(d);
+            const currentTop = computedStyle.top;
+            const currentLeft = computedStyle.left;
 
-let mainLoop = setInterval(main,30)
+            d.style.top = currentTop;
+            d.style.left = currentLeft
+}
+
+
+let mainLoop = setInterval(main,20)
 let start = time = Date.now()
 
 let events = [startclock]

@@ -16,17 +16,25 @@
 
 <!-- </style> -->
 
-<body style="padding:0;margin:0;background-color: black;">
+<body style="padding:0;margin:0">
   
 <!--     <script src="/socket.io/socket.io.js"></script>
  <script src="https://cdn.socket.io/3.1.3/socket.io.min.js" integrity="sha384-cPwlPLvBTa3sKAgddT6krw0cJat7egBga3DJepJyrLl4Q9/5WLra3rrnMcyTyOnh" crossorigin="anonymous"></script> -->
 
-  <div draggable="false" ondragstart="return false">
+  <!-- <div draggable="false" ondragstart="return false"> -->
 
-<canvas id="myCanvas" disabled="true" style = "z-index: 1;touch-action: none; user-select: none;
--webkit-user-select: none;
+
+
+
+<div id="cards" class="container">
+<div id="cont" class="content">
+  <canvas id="myCanvas" disabled="true" style = "z-index: 1;touch-action: none; user-select: none;
+-webkit-user-select: none; position:fixed;
 -moz-user-select: none;"></canvas>
-
+  <div id="card1" class="card" style="width:100%; height:100%; display:flex; background-color: transparent;"></div>
+  <div id="card2" class="card" style="width:100%; height:100%; display:flex; background-color: transparent;"></div>
+</div>
+</div>
 
 
 <script src="sketch.js"></script>

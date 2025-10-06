@@ -1,5 +1,19 @@
-
 @import url("https://fonts.googleapis.com/css?family=IBM+Plex+Sans:700");
+
+
+
+
+@property --myColor1 {
+  syntax: '<color>';
+  initial-value: #000;
+  inherits: false;
+}
+
+@property --myColor2 {
+  syntax: '<color>';
+  initial-value: #000;
+  inherits: false;
+}
 
 
 body {
@@ -7,11 +21,70 @@ body {
    display: flex;
    justify-content: center;
    align-items: center;
-   background-color: black;
+   background: black;
    font-family: "IBM Plex Sans", sans-serif;
+   transition: all 2s 0s ease-in-out;
 }
 
-.text {
+
+
+/*body.appeared {
+  --myColor1: #bfe;
+  --myColor2: #8cf;
+}
+*/
+
+
+/*.appear {
+   width: 430px;
+   height: 200px;
+   transition: all 1.3s 0s ease-in-out;
+  mask-image: radial-gradient(black 0%, transparent 1%);
+}
+
+.appear.appeared {
+   transition: all 1.3s 0s ease-in-out;
+   mask-image: radial-gradient(black 0%, transparent 100%);
+}
+*/
+
+.appear {
+   width: 430px;
+   height: 200px;
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   position: absolute;
+   transition: all 0.7s 0.5s ease-in-out;
+}
+
+
+.appear:before {
+   content: "";
+   width: 100%;
+   height: 100%;
+   left: 0px;
+   top: 0px;
+   transition: all 0.7s 0.5s ease-in-out;
+   position: absolute;
+   background: #000000;
+   z-index: 10;
+}
+
+.appear.appeared:before{
+   content: "";
+   width: 0%;
+   height: 100%;
+   left: 430px;
+   top: 0px;
+   transition: all 1.5s 0s ease-in-out;
+   position: absolute;
+   background: #000000;
+   z-index: 10;
+}
+
+
+.text1 {
    width: 430px;
    height: 200px;
    display: flex;
@@ -19,11 +92,24 @@ body {
    align-items: center;
    position: absolute;
    padding: 0 0px 10px 0;
+   border: solid 2px transparent;
+   border-radius: 0px;
+}
+.text1.appeared {
+   width: 430px;
+   height: 200px;
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   position: absolute;
+   padding: 0 0px 10px 0;
+   transition: all 1s 0.2s ease-in-out;
    border: solid 2px #00FF00;
    border-radius: 5px;
+   z-index: 3;
 }
 
-.text:before {
+.text1:before {
    content: "";
    width: 100%;
    height: 0%;
@@ -35,11 +121,11 @@ body {
    z-index: -1;
 }
 
-.text:hover::before {
+.text1.appeared:hover::before {
    height: 100%;
 }
 
-.text:after {
+.text1:after {
    content: "";
    width: 100%;
    height: 0%;
@@ -47,10 +133,11 @@ body {
    top: 0px;
    transition: all 1s 0.4s ease-in-out;
    position: absolute;
-   background-color: white;
+   background-color: #FFF;
    z-index: -2;
 }
-.text:hover::after {
+
+.text1.appeared:hover::after {
    height: 100%;
 }
 
@@ -71,7 +158,7 @@ h1 {
    cursor: default;
 }
 
-.text:hover h1 {
+.text1:hover h1 {
    background-image: linear-gradient(transparent 50%, white 50%);
    background-clip: text;
    text-fill-color: transparent;
@@ -79,4 +166,125 @@ h1 {
    -webkit-text-fill-color: transparent;
    background-position: bottom;
    background-size: 100% 200%;
+}
+
+
+
+div {
+   /*top:50%;*/
+   /*left:50%;*/
+   transition: all 0.8s 0s ease-in-out;
+}
+
+
+
+
+.salutations{
+   top:10%;
+   transition: all 0.8s 0s ease-in-out;
+}
+
+
+.container {
+   height: 100vh;
+   width: 100%;
+   justify-content: center;
+   overflow-y: scroll;
+   position: absolute;
+   scrollbar-width: none;
+   overflow: auto;
+    -webkit-overflow-scrolling: touch;
+   /*scroll-snap-type: y mandatory;*/
+}
+
+.container::-webkit-scrollbar {
+  display: none;
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0px;
+    padding: 0px 0;
+  position:relative;
+}
+
+.card {
+   /*scroll-snap-align: center;*/
+   position: relative;
+   overflow-y: hidden;
+   min-height: 100vh;
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   background-color: transparent;
+   color:#AAA;
+   font-family: "IBM Plex Sans", sans-serif;
+   z-index: 20;
+}
+
+
+
+
+
+
+
+
+
+
+.typing-container {
+  /*width: 26ch;*/
+   font-size: 70px;
+  font-family: monospace;
+}
+
+.typing {
+  white-space: nowrap;
+  overflow: hidden;
+  border-right: 1ch solid;
+  margin-bottom: 0.2em;
+}
+
+.typing.line-1 {
+   cursor: pointer;
+  width: 12ch;
+  animation:
+    cursor-typing 1s steps(12) 0.12s backwards,
+    cursor-gone 1s steps(1) 1.24s forwards;
+}
+
+.typing:hover{
+   color: red;
+   transition: all 0.8s 0s ease-in-out;
+}
+
+@keyframes cursor-typing {
+  from {
+    width: 0;
+  }
+}
+
+@keyframes cursor-gone {
+  from, to {
+    border-color: transparent;
+  }
+}
+
+
+
+
+
+
+
+.content {
+  background: linear-gradient(180deg ,var(--myColor1), var(--myColor2));
+  transition: --myColor1 2s, --myColor2 2s;
+  z-index: 20;
+}
+
+
+.content.appeared {
+  --myColor1: #0b0f0e;
+  --myColor2: #25a;
 }
