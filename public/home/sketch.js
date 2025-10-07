@@ -32,7 +32,7 @@ class LCanvas{ //lopkns template canvas
     this.canvas = document.createElement("canvas")
     this.canvas.id = id
     this.ctx = this.canvas.getContext("2d")
-    this.canvas.style.position = "absolute"
+    this.canvas.style.position = "fixed"
     this.canvas.style.top = "0px"
     this.canvas.style.left = "0px"
     this.canvas.zIndex = "1500"
@@ -40,7 +40,6 @@ class LCanvas{ //lopkns template canvas
     this.canvas.height = h
     this.ctx.fillStyle = "black"
     this.ctx.fillRect(0,0,this.canvas.width,this.canvas.height)
-    document.body.appendChild(this.canvas)
     return(this)
   }
 
@@ -61,8 +60,6 @@ class LCanvas{ //lopkns template canvas
     let d = this.ctx.getImageData(x, y, 1, 1).data
     return(d)
   }
-
-
 }
 
 
@@ -160,6 +157,336 @@ class LPerceptron{ //it should have input name, input value. each input should h
 
 
 /// ======== NOT TEMPLATE ANYMORE. BUILDING AREA ============
+
+
+
+
+
+
+
+class liner{
+
+  constructor(ctx,x,y,type,colType,following){
+    this.x = x
+    this.y = y
+    this.vx = 0
+    this.vy = 0
+    this.size = 3
+
+    this.nvx = 0
+    this.nvy = 0
+
+    this.oldPath = []
+    this.lineLife = 100
+    this.actLife = 0
+    this.maxActLife = 10000000
+    this.counter = 0
+    this.type = type
+    this.colType = colType
+    this.bounded = false
+    this.following = false
+    this.basename = "liner"
+    this.mass = this.size
+    this.ctx = ctx
+
+    if(type == 5){
+      this.nonPlayerControllable = true
+    } else if(type == 6){
+      this.radius = Math.random()*8+0.2
+      if(Math.random()>0.5){this.radius*=-1}
+    } 
+
+
+
+    return(this)
+  }
+
+
+  update(){
+    this.counter += 1
+    let updated = false
+
+    if(this.following && !this.nonPlayerControllable){
+    let d = distance(this.x,this.y,mouseX,mouseY)
+      this.nvy -= (this.y - mouseY)/d*0.4
+      this.nvx -= (this.x - mouseX)/d*0.4
+    }
+
+    if(this.circulate){
+      this.nvy += -(this.y-(Height/2))/1200
+      this.nvx += -(this.x-(Width/2))/1200
+    }
+
+    if(this.type == 0){ //small line
+      this.x += this.vx
+      this.y += this.vy
+      this.vx += Math.random()-0.5
+      this.vy += Math.random()-0.5
+      this.vx += this.nvx
+      this.vy += this.nvy
+      this.nvx = 0
+      this.nvy = 0
+      updated = true
+
+    } else if(this.type == 1){ //more spontaneous small line
+      if(this.counter%5 == 0){
+        this.x += this.vx
+        this.y += this.vy
+        this.vx += this.nvx
+        this.vy += this.nvy
+        this.nvx = 0
+        this.nvy = 0
+        this.vx += (Math.random()-0.5)*5
+        this.vy += (Math.random()-0.5)*5
+        updated = true
+        
+      }
+    } else if(this.type == 2){ // slower electric small line
+      if(this.counter%15 == 0){
+        this.x += this.vx
+        this.y += this.vy
+        this.vx += this.nvx
+        this.vy += this.nvy
+        this.nvx = 0
+        this.nvy = 0  
+        this.vx += (Math.random()-0.5)*15
+        this.vy += (Math.random()-0.5)*15
+        updated = true
+        
+      }
+    } else if(this.type == 3){  //grower
+      if(this.counter%15 == 0){
+        this.x += this.vx
+        this.y += this.vy
+        this.vx += this.nvx
+        this.vy += this.nvy
+        this.nvx = 0
+        this.nvy = 0
+        this.size += 0.2
+        this.vx += (Math.random()-0.5)*15
+        this.vy += (Math.random()-0.5)*15
+        updated = true
+      }
+    } else if(this.type == 4){ //lightning
+      if(this.counter%5 == 0){
+        this.x += this.vx
+        this.y += this.vy
+        this.vx += this.nvx
+        this.vy += this.nvy
+        this.nvx = 0
+        this.nvy = 0
+        this.size += 0.6
+        this.vx += (Math.random()-0.5)*55
+        this.vy += (Math.random()-0.5)*55
+        updated = true
+      }
+    } else if(this.type == 5){ //tree
+      if(this.counter%this.updateSpeed == 0){
+        this.mass = Infinity
+        this.x += this.vx
+        this.y += this.vy
+        this.vx += this.nvx
+        this.vy += this.nvy
+        this.nvx = 0
+        this.nvy = 0
+        this.vx += (Math.random()-0.5)*55
+        this.vy += (Math.random()-0.5)*55
+
+        this.lineUp += 1
+        if(this.lineUp%this.myDat == 0 && this.bounded === false && parr.length < 1500){
+          let c = new liner(this.x,this.y,5,this.colType,0)
+          c.maxActLife = 10000000
+          c.vx = this.vx + Math.random()*100-50
+          c.vy = this.vy + Math.random()*100-50
+          c.lineLife = this.lineLife
+          c.size = this.size - 1
+          c.lineUp = 1
+          c.counter = 18
+          c.myDat = 1+this.myDat
+          c.updateSpeed = this.updateSpeed
+          parr.push(c)
+        }
+        updated = true
+      } 
+    } else if(this.type == 6){ // rotary
+        if(this.counter%5 == 0){
+          this.x += this.vx 
+          this.y += this.vy 
+          this.vx += this.nvx + Math.cos(COUNTER/10) * this.radius
+          this.vy += this.nvy + Math.sin(COUNTER/10) * Math.abs(this.radius)
+          this.nvx = 0
+          this.nvy = 0
+          this.vx += (Math.random()-0.5)*2
+          this.vy += (Math.random()-0.5)*2
+          updated = true
+        }
+      } else if(this.type == 7){ // line
+        if(this.counter%3 == 2){
+          this.x += this.vx 
+          this.y += this.vy 
+          this.vx += this.nvx 
+          this.vy += this.nvy
+          this.nvx = 0
+          this.nvy = 0
+          updated = true
+        }
+      } else if(this.type == 8){ //same as type 1 but straight
+      if(this.counter%5 == 0){
+        this.x += this.vx
+        this.y += this.vy
+        this.vx += this.nvx
+        this.vy += this.nvy
+        this.nvx = 0
+        this.nvy = 0
+        updated = true
+        
+      }
+    }
+
+
+
+    if(this.actLife < this.maxActLife && this.bounded === false && (updated||this.counter < 20)){
+      this.actLife += 1
+      this.oldPath.push([this.x,this.y,this.x+this.vx,this.y+this.vy,this.lineLife])
+    }
+
+
+    if(this.x < 0 || this.y < 0 || this.x > Width || this.y > Height){
+      if(this.invincible>0){
+        this.invincible -= 1
+      } else {
+        this.bounded = true
+      }
+    }
+    
+  }
+
+  draw(){
+    
+    for(let i = this.oldPath.length-1; i > -1; i--){
+      let e = this.oldPath[i]
+      getCol(this.colType,e[4]/this.lineLife,e,this.ctx)
+        this.ctx.lineWidth = this.size
+        if(this.sizef){
+          this.ctx.lineWidth = this.sizef(this,(i+1)/this.oldPath.length)
+        }
+      this.ctx.beginPath()
+      this.ctx.moveTo(e[0],e[1])
+      this.ctx.lineTo(e[2],e[3])
+      this.ctx.stroke()
+      e[4] -= 2
+      if(e[4] <= 0){
+        this.oldPath.splice(i,1)
+      }
+    }
+
+    if(this.specialDraw){
+      this.specialDraw(this)
+    }
+  
+
+    if(this.oldPath.length == 0){
+      this.DEL = true
+      return("del")
+    }
+  }
+}
+
+
+class textile{
+  constructor(text,x,y){
+
+    this.x = x
+    this.y = y
+    this.vx = vx
+    this.vy = vy
+    this.trailer = false
+    this.size = 3 + Math.random()*3
+    this.actLife = 400
+    this.counter = 0
+    this.following = false
+
+    return(this)
+  }
+}
+
+
+
+function getCol(type,l,e,ctx){
+  let a = Math.random()
+  switch(type){
+    case 0:
+        ctx.strokeStyle = ("rgba(0,"+e[4]*3.5*(1-a)+",255,"+(0.7+0.3*l)+")") // dark blue
+      break;
+    case 1:
+      ctx.strokeStyle = ("rgba("+(1-a)*255+","+(a)*255+",255,"+(0.7+0.3*l)+")") // lightning
+      break;
+    case 2:
+      ctx.strokeStyle = ("rgba(255,"+(1-a)*255+",255,"+(0.7+0.3*l)+")") //cherry blossom
+      break;
+    case 3: 
+      if(Math.random()<0.70){
+      ctx.strokeStyle = ("rgba(255,"+(a*255)+",0,"+(0.7+0.3*l)+")")} else { //keyfire
+        ctx.strokeStyle = ("rgba(235,0,0,"+l+")")
+      }
+      break;
+    case 4:
+      ctx.strokeStyle = ("rgba(0,"+(1-a)*255+",0,"+(0.7+0.3*l)+")") //conjure darkgreen
+      break;
+    case 5:
+      ctx.strokeStyle = ("rgba("+(1-a)*255+",255,"+(1-a)*255+","+l+")") // conjure lightgreen
+      break;
+    case 6:
+      ctx.strokeStyle = ("rgba(0,"+((1-a)*55+200)+",0,"+(l)+")") // tree green
+      break;
+    case 7:
+      ctx.strokeStyle = ("rgba("+((1-a)*55+200)+",0,0,"+(l)+")") // tree red
+      break;
+    case 8:
+      a = 1-a/2
+      ctx.strokeStyle = ("rgba(0,"+e[4]*3.5*(1-a)+",255,"+(0.3+0.7*l)+")") // quelled darkblue
+      break;
+    // case 8:
+    //  a = 1-a/2 // ??? broken?
+    //  ctx.strokeStyle = (""+e+(0.7+0.3*l)+")") // quelled darkblue
+    //  break;
+    case 9:
+        ctx.strokeStyle = ("rgba("+e[4]*3.5*(1-a)*5+","+e[4]*3.5*(1-a)*5+","+(e[4]*3.5*(1-a)*2.5*Math.random())+","+(0.7+0.3*l)+")") // shooting star
+      break;
+    case 10:
+      ctx.strokeStyle = ("rgba(255,255,"+(e[4]*3.5*2.5*Math.random())+","+(0.7+0.3*l)+")") // shooting star
+      break;
+    case 11: //sinusoidal blue
+      ctx.strokeStyle = "rgba(0,0,"+(100*Math.sin(e[4]/30)+100)+","+(0.3*a+0.7)+")"
+      break;
+    case 12: //red green phase shifter
+      ctx.strokeStyle = "hsla("+(360*Math.sin(e[4]/300))+",100%,"+(50*Math.sin(COUNTER/30+e[4]/30)+25)+"%,"+(0.3*a+0.7)+")"
+      break;
+    case 13: //rainbow hsla
+      ctx.strokeStyle = "hsla("+((COUNTER)%360)+",100%,50%,"+(0.3*a+0.7)+")"
+      break;
+    case 14: //stripped hsla
+      ctx.strokeStyle = "hsla("+((COUNTER+Math.sin(e[4]*50)*40)%360)+",100%,50%,"+(0.3*a+0.7)+")"
+      break;
+    case 15: //forward phase shifter
+      ctx.strokeStyle = "hsla("+(360*Math.sin(e[4]/115+COUNTER/150))+",100%,50%,"+(3.7*l)+")"
+      break;
+    case 16: //osmotic forward phase shifter
+      ctx.strokeStyle = "hsla("+(360*Math.sin(e[4]/115+COUNTER/150))+",100%,"+(25*Math.sin(e[4]/10+COUNTER/15)+70)+"%,"+(3.7*l)+")"
+      break;
+    case 17: //reverse osmotic reverse phase shifter
+      ctx.strokeStyle = "hsla("+(360*Math.sin(e[4]/150+COUNTER/115))+",100%,"+(25*Math.sin(e[4]/15+COUNTER/10)+70)+"%,"+(3.7*l)+")"
+      break;
+  }
+}
+
+
+
+
+
+
+
+
 
 class startclock{
 
@@ -260,6 +587,13 @@ class startclock{
 
           document.getElementById("cont").classList.add("appeared")
 
+          let div5 = document.createElement("div")
+              div5.id = "abouts"
+              div5.style.left = "10%"
+              div5.style.top = "30%"
+              div5.style.minHeight = "50%"
+              div5.style.position = "absolute"
+
           let arr = ["about me","motivation","projects","skills","FAQ & other"]
           for(let i = 0; i < arr.length; i++){
             setTimeout(()=>{
@@ -269,17 +603,67 @@ class startclock{
               div3.classList.add("typing-container")
               div4.classList.add("typing")
               div4.classList.add("line-1")
-              div3.style.left = "10%"
-              div3.style.top = Math.floor(30+i*10)+"%"
+              div3.style.left = "0%"
+              div3.style.top = Math.floor(i*100/arr.length)+"%"
               div3.style.position = "absolute"
               div3.appendChild(div4)
-              document.getElementById("card1").appendChild(div3)
+              div5.appendChild(div3)
             },i*700)
           }
+              document.getElementById("card1").appendChild(div5)
           
 
         },2300)
-        setTimeout(()=>{div.style.zIndex=30},4000)
+        setTimeout(()=>{div.style.zIndex=30
+          let drawingCanvas = new LCanvas(0,0,"drawing")
+          document.getElementById("cont").appendChild(drawingCanvas.canvas)
+          drawingCanvas.fitScreenSize()
+          drawingCanvas.balls = []
+
+          // for(let i = 0; i < 15; i++){
+          //   setTimeout(()=>{
+          //     // drawingCanvas.balls.push({"x":Math.random()*Width,"y":Math.random()*Height,"r":Math.random()*smallerDim/40+2,"vx":0,"vy":0})
+          //     let l = new liner(drawingCanvas.ctx,Math.random()*Width,Math.random()*Height,Math.floor(Math.random()*2),8)
+          //     // l.circulate = true
+          //     parrocesser.parr.push(l)
+          //   },Math.random()*10000)
+          // }
+
+          events.push({"tick":(dt)=>{
+
+            if(Math.random()**(dt/20)<0.01){
+              let l = new liner(drawingCanvas.ctx,Math.random()*Width,Math.random()*Height,Math.floor(Math.random()*2),8)
+              parrocesser.parr.push(l)
+
+            }
+
+            let d = 0.2
+            let ctx = drawingCanvas.ctx;
+            ctx.save();
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.fillStyle = 'rgba(0,0,0,'+d+')'; // smaller = slower fade; larger = faster fade
+            ctx.fillRect(0, 0, Width, Height);
+            ctx.restore();
+            ctx.globalCompositeOperation = 'source-over';
+            drawingCanvas.balls.forEach((e)=>{
+
+              e.x += e.vx
+              e.y += e.vy
+
+              e.vx += (Math.random()-0.5)/5
+              e.vy += (Math.random()-0.5)/5
+
+              e.vx *= 0.9995
+              e.vy *= 0.9995
+
+              drawingCanvas.ctx.fillStyle = "rgba(255,255,0,0.1)"
+              drawingCanvas.ctx.beginPath()
+              drawingCanvas.ctx.arc(e.x,e.y,e.r,0,Math.PI*2)
+              drawingCanvas.ctx.closePath()
+              drawingCanvas.ctx.fill()
+            })
+          }})
+        },4000)
 
 
         return("delete")
@@ -302,7 +686,22 @@ function setPos(d){
 let mainLoop = setInterval(main,20)
 let start = time = Date.now()
 
-let events = [startclock]
+var parrocesser={"parr":[],"tick":(dt,t)=>{
+  for(let i = t.parr.length-1; i > -1; i--){
+    let e = t.parr[i]
+    e.update()
+    if(e.draw() === "del"){
+      let g = i
+      if(t.parr[i] !== e){ //jank
+        t.parr.forEach((E,j)=>{if(E===e){g=j}})
+      }
+      let x = t.parr.splice(g,1)
+      if(x[0] !== e){console.log("CATCHED BUG")}
+    }
+  }
+}}
+
+let events = [startclock,parrocesser]
 
 function main(t){
   let dt = Date.now()-time
@@ -311,7 +710,7 @@ function main(t){
 
 
   for(let i = events.length-1; i > -1; i--){
-    if(events[i].tick(dt)=="delete"){events.splice(i,1)}
+    if(events[i].tick(dt,events[i])=="delete"){events.splice(i,1)}
   }
   // ctx.fillStyle = "red"
   // ctx.fillRect(0,0,Width/2,Height/2)

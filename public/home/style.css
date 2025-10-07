@@ -279,7 +279,7 @@ div {
 
 .content {
   background: linear-gradient(180deg ,var(--myColor1), var(--myColor2));
-  transition: --myColor1 2s, --myColor2 2s;
+  transition: --myColor1 7s, --myColor2 7s;
   z-index: 20;
 }
 
@@ -287,4 +287,26 @@ div {
 .content.appeared {
   --myColor1: #0b0f0e;
   --myColor2: #25a;
+}
+
+
+.rotated {
+  /* Optional: Set perspective for a more pronounced 3D effect */
+  perspective: 200px; 
+  
+  /* Apply 3D rotation */
+  transform: rotateY(45deg) rotateX(20deg); 
+  
+  /* Ensure children elements are rendered in 3D space */
+  transform-style: preserve-3d; 
+  
+  /* Other styling for the text */
+  font-size: 3em;
+  color: blue;
+  text-align: center;
+  margin-top: 100px;
+}
+
+.rotated.typing{
+  perspective: 200px; 
 }
