@@ -568,7 +568,7 @@ class startclock{
         txt.innerText = "Hello"
         div.classList.add("text1")
         div2.classList.add("appear")
-        div2.style.position = "absolute"
+        div.style.position = "relative"
         document.getElementById("card1").appendChild(div2)
         // document.body.appendChild(div2)
         div.appendChild(txt)
@@ -603,9 +603,27 @@ class startclock{
               div3.classList.add("typing-container")
               div4.classList.add("typing")
               div4.classList.add("line-1")
+
+              div4.classList.add("collapsible")
+
+              let extendDiv = document.createElement("div")
+              extendDiv.innerText = "HELLO TEST test"
+              extendDiv.classList.add("collapsible_content")
+              div4.appendChild(extendDiv)
+
+                div4.addEventListener("click", function() {
+                  div4.classList.toggle("active");
+                  var content = extendDiv
+                  if (content.style.maxHeight){
+                    content.style.maxHeight = null;
+                  } else {
+                    content.style.maxHeight = content.scrollHeight + "px";
+                  } 
+                });
+
               div3.style.left = "0%"
-              div3.style.top = Math.floor(i*100/arr.length)+"%"
-              div3.style.position = "absolute"
+              div3.style.top = "10%"
+              div3.style.position = "relative"
               div3.appendChild(div4)
               div5.appendChild(div3)
             },i*700)
