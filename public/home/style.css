@@ -49,8 +49,8 @@ body {
 */
 
 .appear {
-   width: 430px;
-   height: 200px;
+   width: 20%;
+   height: 15%;
    display: flex;
    justify-content: center;
    align-items: center;
@@ -85,8 +85,8 @@ body {
 
 
 .text1 {
-   width: 430px;
-   height: 200px;
+   width: 100%;
+   height: 100%;
    display: flex;
    justify-content: center;
    align-items: center;
@@ -96,8 +96,8 @@ body {
    border-radius: 0px;
 }
 .text1.appeared {
-   width: 430px;
-   height: 200px;
+   width: 100%;
+   height: 100%;
    display: flex;
    justify-content: center;
    align-items: center;
@@ -149,7 +149,8 @@ h1 {
    -webkit-background-clip: text;
    -webkit-text-fill-color: transparent;
    background-image: linear-gradient(transparent 50%, white 50%);
-   font-size: 150px;
+/*   font-size: 150px;*/
+   font-size: 5em;
    -webkit-text-stroke: 2px white;
    transition: all 0.8s 0s ease-in-out;
    background-size: 100% 200%;
@@ -235,7 +236,8 @@ div {
 
 .typing-container {
   /*width: 26ch;*/
-   font-size: 70px;
+/*   font-size: 70px;*/
+   font-size: 3em;
   font-family: monospace;
 }
 
@@ -254,10 +256,21 @@ div {
     cursor-gone 1s steps(1) 1.24s forwards;
 }
 
+
+.collapsible_content {
+  padding: 0 18px;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.2s ease-out;
+  background-color: #f1f1f1;
+}
+
 .typing:hover{
    color: red;
    transition: all 0.8s 0s ease-in-out;
 }
+
+
 
 @keyframes cursor-typing {
   from {
@@ -279,7 +292,7 @@ div {
 
 .content {
   background: linear-gradient(180deg ,var(--myColor1), var(--myColor2));
-  transition: --myColor1 7s, --myColor2 7s;
+  transition: --myColor1 2s, --myColor2 2s;
   z-index: 20;
 }
 
@@ -287,26 +300,4 @@ div {
 .content.appeared {
   --myColor1: #0b0f0e;
   --myColor2: #25a;
-}
-
-
-.rotated {
-  /* Optional: Set perspective for a more pronounced 3D effect */
-  perspective: 200px; 
-  
-  /* Apply 3D rotation */
-  transform: rotateY(45deg) rotateX(20deg); 
-  
-  /* Ensure children elements are rendered in 3D space */
-  transform-style: preserve-3d; 
-  
-  /* Other styling for the text */
-  font-size: 3em;
-  color: blue;
-  text-align: center;
-  margin-top: 100px;
-}
-
-.rotated.typing{
-  perspective: 200px; 
 }
