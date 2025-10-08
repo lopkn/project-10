@@ -169,7 +169,8 @@ class startclock{
       dt/=1000
       let t1 = 0.7
       let t2 = 1
-      if(this.time<t1){
+      let skip = true
+      if(this.time<t1 && !skip){
 
       ctx.clearRect(0,0,Width,Height)
       ctx.lineCap = "round"
@@ -184,7 +185,7 @@ class startclock{
       ctx.beginPath()
       ctx.arc(Width/2,Height/2,smallerDim/(6),0,Math.PI*0.75*(this.time/t1))
       ctx.stroke()
-      } else if(this.time<1){
+      } else if(this.time<1&& !skip){
         // ctx.clearRect(0,0,Width,Height)
       ctx.lineCap = "round"
       ctx.strokeStyle = "#00FF00"
@@ -198,7 +199,7 @@ class startclock{
       ctx.beginPath()
       ctx.arc(Width/2,Height/2,smallerDim/(6),0,Math.PI*0.75)
       ctx.stroke()
-      } else if(this.time<2){
+      } else if(this.time<2 && !skip){
 
         let d = 0.2
         ctx.save();
@@ -223,7 +224,7 @@ class startclock{
       ctx.beginPath()
       ctx.arc(Width/2,Height/2,smallerDim/(6-(this.time-t2)*6),0,Math.PI*0.75)
       ctx.stroke()
-      } else if(time<2.6){
+      } else if(time<2.6 && !skip){
         let d = 0.02
         ctx.save();
       ctx.globalCompositeOperation = 'destination-out';
@@ -260,22 +261,48 @@ class startclock{
 
           document.getElementById("cont").classList.add("appeared")
 
+          let div5 = document.createElement("div")
+              div5.style.left = "10%"
+              div5.style.top = "30%"
+              div5.style.minHeight = "50%"
+              div5.style.minWidth = "50%"
+              div5.style.position = "absolute"
           let arr = ["about me","motivation","projects","skills","FAQ & other"]
           for(let i = 0; i < arr.length; i++){
             setTimeout(()=>{
               let div3 = document.createElement("div")
               let div4 = document.createElement("div")
+              div4.style.position = "absolute"
               div4.innerText = arr[i]
               div3.classList.add("typing-container")
               div4.classList.add("typing")
               div4.classList.add("line-1")
-              div3.style.left = "10%"
-              div3.style.top = Math.floor(30+i*10)+"%"
-              div3.style.position = "absolute"
+              div3.style.left = "0%"
+              div3.style.height = "30px"
+              // div3.style.top = "10%"
+              // div3.style.top = Math.floor(i*100/arr.length)+"%"
+              div3.style.position = "relative"
+
+              let collapsible = document.createElement("div")
+              collapsible.classList.add("collapsible_content")
+              collapsible.innerText = "TESTING"
+              div4.addEventListener("click", function() {
+                div4.classList.toggle("active");
+                var content = collapsible
+                if (content.style.maxHeight){
+                  content.style.maxHeight = null;
+                } else {
+                  content.style.maxHeight = content.scrollHeight + "px";
+                } 
+              });
+              div4.appendChild(collapsible)
+
+
               div3.appendChild(div4)
-              document.getElementById("card1").appendChild(div3)
+              div5.appendChild(div3)
             },i*700)
           }
+              document.getElementById("card1").appendChild(div5)
           
 
         },2300)
