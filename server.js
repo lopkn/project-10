@@ -1585,7 +1585,7 @@ httpsIO.sockets.on("connection",newConnection)
 io.sockets.on('connection', newConnection)
 changingConfig.Build += 1
 function updateChangingConfigFile(){
-	fs.writeFile('./dynamics/changingConfig.json',JSON.stringify(changingConfig), function writeJSON(err){if(err)return console.log(err)})
+	fs.writeFile('./dynamics/changingConfig.json',JSON.stringify(changingConfig,null,4), function writeJSON(err){if(err)return console.log(err)})
 }
 updateChangingConfigFile()
 
