@@ -233,9 +233,8 @@ div {
 
 
 
-
 .typing-container {
-  /*width: 26ch;*/
+/*  width: 26ch;*/
 /*   font-size: 70px;*/
    font-size: 3em;
   font-family: monospace;
@@ -243,7 +242,9 @@ div {
 
 .typing {
   white-space: nowrap;
-  overflow: hidden;
+  width:100%;
+  overflow-y: hidden;
+/*  overflow-x: hidden;*/
   border-right: 1ch solid;
   margin-bottom: 0.2em;
 }
@@ -262,11 +263,15 @@ div {
 
 .collapsible_content {
   padding: 0 18px;
+  font-size: 0.5em;
   max-height: 0;
-  overflow: hidden;
+  min-width: 50vw;
+  max-width: 70vw;
+/*  overflow: hidden;*/
   transition: max-height 0.2s ease-out;
   background-color: rgba(0,0,0,0.2);
-  overflow-x: show;
+  overflow-x: visible;
+  overflow-y: hidden;
 }
 
 .typing:hover{

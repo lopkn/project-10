@@ -16,6 +16,9 @@ let smallerDim = Width<Height?Width:Height
 
 let ctx = document.getElementById("myCanvas").getContext("2d")
 
+function ranarr(arr){
+  return(arr[Math.floor(Math.random()*arr.length)])
+}
 
 
 
@@ -585,13 +588,13 @@ class startclock{
         },1000)
         setTimeout(()=>{
 
-          document.getElementById("cont").classList.add("appeared")
 
           let div5 = document.createElement("div")
               div5.id = "abouts"
               div5.style.left = "10%"
               div5.style.top = "30%"
               div5.style.minHeight = "50%"
+              div5.style.minWidth = "70%"
               div5.style.position = "absolute"
 
           let arr = ["about me","motivation","projects","skills","FAQ & other"]
@@ -607,9 +610,13 @@ class startclock{
               div4.classList.add("collapsible")
 
               let extendDiv = document.createElement("div")
-              extendDiv.innerText = "HELLO TEST test"
+              let str = ""
+              while(Math.random()<0.97){
+                str += ranarr(["Me ","am ","great ","is ","I ","best ","the "])
+              }
+              extendDiv.innerText = str
               extendDiv.classList.add("collapsible_content")
-              div4.appendChild(extendDiv)
+              // div4.appendChild(extendDiv)
 
                 div4.addEventListener("click", function() {
                   div4.classList.toggle("active");
@@ -626,6 +633,7 @@ class startclock{
               div3.style.position = "relative"
               div3.appendChild(div4)
               div5.appendChild(div3)
+              div4.insertAdjacentElement('afterend', extendDiv)
             },i*700)
           }
               document.getElementById("card1").appendChild(div5)
@@ -633,6 +641,8 @@ class startclock{
 
         },2300)
         setTimeout(()=>{div.style.zIndex=30
+          document.getElementById("cont").classList.add("appeared")
+
           let drawingCanvas = new LCanvas(0,0,"drawing")
           document.getElementById("cont").appendChild(drawingCanvas.canvas)
           drawingCanvas.fitScreenSize()
