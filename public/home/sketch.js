@@ -580,11 +580,14 @@ class startclock{
         // div2.classList.add("appeared")
         // requestAnimationFrame(()=>{div2.classList.add("appeared")})
         setTimeout(()=>{div2.classList.add("appeared");
-         setPos(div2)
+             const computedStyle = window.getComputedStyle(div2);
+            const currentTop = computedStyle.top;
+            div2.style.top = currentTop;
         },460)
         setTimeout(()=>{
           div.classList.add("appeared")
           div2.style.top = "10%"
+          // div2.style.left = "50%"
         },1000)
         setTimeout(()=>{
 
