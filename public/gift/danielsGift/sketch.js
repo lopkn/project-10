@@ -462,7 +462,7 @@ let overlay = document.getElementById("overlay")
 
 
 class wind{
-  constructor(name="untitled",canvas=false,res=false){
+  constructor(name="untitled",res=false){
 
     this.div = document.createElement("div")
     this.bar = document.createElement("div")
@@ -490,16 +490,6 @@ class wind{
       this.div.style.resize="both"
     }
 
-    if(canvas){
-    this.div.style.height = "130px"
-      this.lc = new LCanvas()
-      this.cdiv.appendChild(this.lc.canvas)
-      this.lc.fit()
-
-      this.rf = ()=>{console.log("HEY"); this.lc.fit()}
-      this.ros = new ResizeObserver(this.rf).observe(this.cdiv)
-    }
-
     
   }
 
@@ -508,6 +498,17 @@ class wind{
   }
   tick(){
     if(this.lim){this.lim()}
+  }
+
+  canv(w=390,h=300){
+    this.div.style.width = Math.floor(w)+"px"
+    this.div.style.height = Math.floor(h)+"px"
+    this.lc = new LCanvas()
+    this.cdiv.appendChild(this.lc.canvas)
+    this.lc.fit()
+
+    this.rf = ()=>{console.log("resize"); this.lc.fit()}
+    this.ros = new ResizeObserver(this.rf).observe(this.cdiv)
   }
 }
 
@@ -528,6 +529,8 @@ function Wlimit(w,t){
 
 
 let mainWindow = new wind("TASKS")
+mainWindow.div.style.top = "300px"
+mainWindow.div.style.left = "300px"
 
 let windowArr = [mainWindow]
 
@@ -545,7 +548,7 @@ let mainLoop = setInterval(()=>{
 
 
 
-var PROGRESS = 0
+var PROGRESS = -Infinity
 // var DIF = 0.05 //difficulty
 var DIF = 1 //difficulty
 
@@ -822,6 +825,26 @@ function reward(x){
 }
 
 
+function notify(str,x=10){
+  let notif = document.getElementById("notification_center")
+  let n = DCC("div",notif)
+  n.innerText = str
+  setTimeout(()=>{
+    n.remove()
+  },x*1000)
+}
+
+
+
+
+
+
+
+
+
+
+
+notify("move the task window around by dragging the blue bar")
 
 
 
@@ -838,113 +861,189 @@ function reward(x){
 
 
 
-new task("be born",(t,w)=>{
-  let el = DCC("button",w.div)
-  el.innerText = "GET BORN"
-  el.onclick = ()=>{
-    t.completion += 5 / DIF
-  }
-  t.win = ()=>{PROGRESS=0;
-    activateEvent("cry");
-    startYearCounter()
-    closeIn(t)}
-})
-
-pendEvent("cry","+2",()=>{
-  new task("cry",(t,w)=>{
-
-    let el = DCC("button",w.div)
-    el.innerText = "CRY"
-    el.onclick = ()=>{
-      t.completion += 5 / DIF
-    }
-      Wlimit(w,t)
-  },(t)=>{
-    t.setCompleteBefore(PROGRESS + 40*ENV.DAY)
-    t.win = ()=>{activateEvent("cry2");closeIn(t)}
-    t.lose = ()=>{loseGame("forgot to cry, died of suffocation")}
-  })
-})
-
-
-pendEvent("cry2","+2",()=>{
-  new task("cry",(t,w)=>{
-
-    let el = DCC("button",w.div)
-    el.innerText = "CRY"
-    el.onclick = ()=>{
-      t.completion += 5 / DIF
-    }
-      Wlimit(w,t)
-  },(t)=>{
-    t.setCompleteBefore(PROGRESS + 80*ENV.DAY)
-    t.win = ()=>{if(PROGRESS<2*ENV.YEAR){activateEvent("cry2")};closeIn(t)}
-    t.lose = ()=>{loseGame("forgot to cry, parents neglected you. You starved.")}
-  })
-})
 
 
 
 
-gameEvent(4*ENV.YEAR,()=>{
-    new task("go to kindergarten",(t,w)=>{
-
-    let el = DCC("button",w.div)
-    el.innerText = "struggle"
-    el.onclick = ()=>{
-      t.completion += 4 / DIF
-    }
-  },(t)=>{
-    t.completeBefore = PROGRESS + 40*ENV.DAY
-    t.win = ()=>{activateEvent("cry");closeIn(t)}
-    t.lose = ()=>{loseGame("skipped kindergarten")}
-  })
-})
-
-
-gameEvent(0.25*ENV.YEAR,()=>{
-    new task("Learn to walk",(t,w)=>{
-
-    let el = DCC("button",w.div)
-    el.innerText = "Learn"
-    el.onclick = ()=>{
-      t.completion += 2 / DIF
-    }
-    Wlimit(w,t)
-  },(t)=>{
-    t.completeBefore = 1.5*ENV.YEAR
-    t.win = ()=>{activateEvent("Learn to run");closeIn(t)}
-    t.lose = ()=>{loseGame("crippled")}
-  })
-})
-
-
-
-pendEvent("Learn to run","+0",()=>{
-    new task("Learn to run",(t,w)=>{
-
-    learn1(w,t,[{"name":"learn",f:reward(5)},{"name":"observe",f:reward(1),times:2},{"name":"stumble",f:reward(-0.2),times:3}],(w,t)=>{shuffleChildren(w.cdiv)})
-    
-  },(t)=>{
-    t.completeBefore = 1.5*ENV.YEAR
-    t.win = ()=>{closeIn(t)}
-    t.lose = ()=>{loseGame("crippled")}
-  })
-})
 
 
 
 
-// gameEvent(0,()=>{
-//     new task("Learn to debug",(t,w)=>{
+// new task("be born",(t,w)=>{
+//   let el = DCC("button",w.div)
+//   el.innerText = "GET BORN"
+//   el.onclick = ()=>{
+//     t.completion += 5 / DIF
+//   }
 
-//     learn1(w,t,[{"name":"learn",f:reward(5)},{"name":"observe",f:reward(1),times:2},{"name":"stumble",f:reward(-0.2),times:3}],(w,t)=>{shuffleChildren(w.cdiv);console.log("hey")})
+//   // <select name="cars" id="cars">
+//   //   <option value="volvo">Volvo</option>
+//   //   <option value="saab">Saab</option>
+//   //   <option value="opel">Opel</option>
+//   //   <option value="audi">Audi</option>
+//   // </select>
+
+//   let d1 = DCC("div",w.div)
+//   let lab = DCC("span",d1)
+//   lab.innerText = "Difficulty: "
+//   lab.style.color = "white"
+//   let sel = DCC("select",d1)
+//   let arr = ["wussy","daniel","daniel+","nightmare"]
+//   arr.forEach((e)=>{
+//     let op = DCC("option",sel)
+//     op.innerText = e
+//     op.value = e
+//   })
+
+
+//   t.win = ()=>{PROGRESS=0;
+
+//     if(sel.value == "nightmare"){DIF *= 1.5}
+//     if(sel.value == "wussy"){DIF /= 2}
+//     if(sel.value == "daniel"){DIF *= 1}
+//     if(sel.value == "daniel+"){DIF *= 1.2}
+
+//     activateEvent("cry");
+//     startYearCounter()
+//     closeIn(t)}
+// })
+
+// pendEvent("cry","+2",()=>{
+//   new task("cry",(t,w)=>{
+
+//     let el = DCC("button",w.div)
+//     el.innerText = "CRY"
+//     el.onclick = ()=>{
+//       t.completion += 5 / DIF
+//     }
+//       Wlimit(w,t)
+//   },(t)=>{
+//     t.setCompleteBefore(PROGRESS + 40*ENV.DAY)
+//     t.win = ()=>{activateEvent("cry2");closeIn(t)}
+//     t.lose = ()=>{loseGame("forgot to cry, died of suffocation")}
+//   })
+// })
+
+
+// pendEvent("cry2","+2",()=>{
+//   new task("cry",(t,w)=>{
+
+//     let el = DCC("button",w.div)
+//     el.innerText = "CRY"
+//     el.onclick = ()=>{
+//       t.completion += 5 / DIF
+//     }
+//       Wlimit(w,t)
+//   },(t)=>{
+//     t.setCompleteBefore(PROGRESS + 80*ENV.DAY)
+//     t.win = ()=>{if(PROGRESS<1.3*ENV.YEAR){activateEvent("cry2")};closeIn(t)}
+//     t.lose = ()=>{loseGame("forgot to cry, parents neglected you. You starved.")}
+//   })
+// })
+
+
+
+
+// gameEvent(4*ENV.YEAR,()=>{
+//     new task("go to kindergarten",(t,w)=>{
+
+//     let el = DCC("button",w.div)
+//     el.innerText = "struggle"
+//     el.onclick = ()=>{
+//       t.completion += 4 / DIF
+//     }
+//   },(t)=>{
+//     t.completeBefore = PROGRESS + 40*ENV.DAY
+//     t.win = ()=>{activateEvent("cry");closeIn(t)}
+//     t.lose = ()=>{loseGame("skipped kindergarten")}
+//   })
+// })
+
+
+// gameEvent(0.25*ENV.YEAR,()=>{
+//     new task("Learn to walk",(t,w)=>{
+
+//     let el = DCC("button",w.div)
+//     el.innerText = "Learn"
+//     el.onclick = ()=>{
+//       t.completion += 2 / DIF
+//     }
+//     Wlimit(w,t)
 //   },(t)=>{
 //     t.completeBefore = 1.5*ENV.YEAR
 //     t.win = ()=>{activateEvent("Learn to run");closeIn(t)}
 //     t.lose = ()=>{loseGame("crippled")}
 //   })
 // })
+
+
+
+// pendEvent("Learn to run","+0",()=>{
+//     new task("Learn to run",(t,w)=>{
+
+//     learn1(w,t,[{"name":"learn",f:reward(5)},{"name":"observe",f:reward(1),times:2},{"name":"stumble",f:reward(-4),times:3}],(w,t)=>{shuffleChildren(w.cdiv)})
+    
+//   },(t)=>{
+//     t.completeBefore = 1.5*ENV.YEAR
+//     t.win = ()=>{closeIn(t)}
+//     t.lose = ()=>{loseGame("crippled")}
+//   })
+// })
+
+
+
+
+gameEvent(-Infinity,()=>{
+    new task("Learn to debug",(t,w)=>{
+
+    // learn1(w,t,[{"name":"learn",f:reward(5)},{"name":"observe",f:reward(1),times:2},{"name":"stumble",f:reward(-0.2),times:3}],(w,t)=>{shuffleChildren(w.cdiv);console.log("hey")})
+    w.canv()
+    w.tick = ()=>{
+      let ctx = w.lc.ctx
+      ctx.fillStyle = "black"
+      ctx.fillRect(0,0,Width,Height)
+      ctx.strokeStyle = "white"
+      ctx.beginPath()
+      ctx.moveTo(15,5)
+      ctx.lineTo(15,260)
+      ctx.lineTo(360,260)
+      ctx.stroke()
+
+      let tx = 10 // time the graph should show
+      ctx.strokeStyle = "green"
+      ctx.beginPath()
+      ctx.lineWidth=2
+      while(t.progress-t.record[0].time > tx){
+        t.record.splice(0,1)
+      }
+      let offset = t.record[0].time
+      for(let i = 0; i<t.record.length-2; i++){
+
+        let r1 = t.record[i]
+        let x1 = 15+(r1.time-offset)/tx*360
+        let y1 = 260-r1.y*250/100
+
+        let r2 = t.record[i+1]
+        let x2 = 15+(r2.time-offset)/tx*360
+        let y2 = 260-r2.y*250/100
+        ctx.moveTo(x1,y1)
+        ctx.lineTo(x2,y2)      
+      }
+      ctx.stroke()
+    }
+
+  },(t)=>{
+    t.completeBefore = 1.5*ENV.YEAR
+    t.win = ()=>{activateEvent("Learn to run");closeIn(t)}
+    t.lose = ()=>{loseGame("crippled")}
+    t.record = []
+    t.tick = (sdt)=>{
+      t.progress += sdt
+      t.hp -= sdt/0.6
+      t.record.push({time:t.progress,y:t.hp})
+    }
+  })
+})
 
 
 

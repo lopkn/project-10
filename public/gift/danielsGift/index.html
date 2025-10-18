@@ -163,8 +163,47 @@
       position: absolute;
       /*z-index: 2;*/
     }
+
+
+  .notification > * {
+    background-color: rgba(220,255,255,0.3);
+    font-weight: 100;
+    font-size: 3vmin;
+    font-family: monospace;
+    text-align: center;
+    min-width: 30vmin;
+    max-width: 75vmin;
+    min-height: 3vh;
+    height:auto;
+    margin:5px;
+    margin-left:auto;
+    margin-right:auto;
+    overflow: auto;
+    position: relative;
+    top:0px;
+    display: inline-block;
+
+    color:black;
+    transition: all 1s;
+    border-radius: 25px;
+    animation: grow 1s forwards;
+  }
+
+  @keyframes grow {
+        0% {top: 50px; }
+        100% { top:0px }
+    }
+
+  .notification {
+    transition: all 1s;
+    display: flex;
+    align-items: end;
+    flex-direction: column;
+    justify-content: end;
+  }
 </style>
 
+<div class="screen passThrough notification" id="notification_center"></div>
 <div class="screen" id="main"></div>
 <div class="screen passThrough" id="overlay"></div>
 
