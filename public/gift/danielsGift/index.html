@@ -104,6 +104,7 @@
   }
 
 
+
   .task.urgent{
     animation: flash 1s infinite;
   }
@@ -201,9 +202,72 @@
     flex-direction: column;
     justify-content: end;
   }
+
+  .effects {
+    transition: all 1s;
+    display: flex;
+    align-items: flex-start;
+    flex-direction: column-reverse;
+    justify-content: end;
+  }
+  .effects > .debuff {
+    /*background-color: rgba(255,200,200,0.3);*/
+    font-weight: 100;
+    font-size: 3vmin;
+    font-family: monospace;
+    text-align: center;
+    min-width: 10vmin;
+    max-width: 75vmin;
+    min-height: 3vh;
+    height:auto;
+    margin:5px;
+    overflow: auto;
+    position: relative;
+    top:0px;
+    display: inline-block;
+
+    color:black;
+    transition: all 1s;
+    border-radius: 5px;
+    animation: grow2 2s forwards, flash2 4s infinite 2s;
+  }
+  @keyframes grow2 {
+        0% {top: -50px; color:transparent; background-color: transparent;}
+        100% { top:0px; color: black; background-color: rgba(255,200,200,0.3);}
+    }
+   @keyframes flash2 {
+        0%, 100% { background-color: rgba(255,200,200,0.3); color: black }
+        50% { background-color: rgba(155,20,20,0.6); color:white}
+    }
+
+
+    .delay{
+      animation: flash3 2s forwards;
+      color:green;
+      background-color: green;
+    }
+
+    @keyframes flash3 {
+        0% { background-color: green; }
+        100% { background-color: white; }
+    }
+
+  .task.depleat{
+    color:#700;
+    background-color: #300;
+    animation: flash4 6s infinite;
+  }
+
+      @keyframes flash4 {
+        0%, 100% { background-color: #999; }
+        50% { background-color: #700; }
+    }
+
+
 </style>
 
 <div class="screen passThrough notification" id="notification_center"></div>
+<div class="screen passThrough effects" id="debuff_center"></div>
 <div class="screen" id="main"></div>
 <div class="screen passThrough" id="overlay"></div>
 

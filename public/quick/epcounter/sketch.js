@@ -2694,7 +2694,7 @@ function push(particle,dx,dy){
 		particle.vy += dy / particle.mass
 	}
 }
-if(true){ //////////=============// ADD BALLGAME ballgame = false
+if(false){ //////////=============// ADD BALLGAME ballgame = false
 	comparer.disabled = {
 		"0":100000,
 		"1":100000,

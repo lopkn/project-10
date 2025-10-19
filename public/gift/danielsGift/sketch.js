@@ -495,6 +495,11 @@ class wind{
 
   close(){
     this.div.remove()
+    if(this.subWinds){
+      Object.values(this.subWinds).forEach((e)=>{
+        e.close()
+      })
+    }
   }
   tick(t){
     if(this.lim){this.lim()}
@@ -515,7 +520,7 @@ class wind{
         ctx.stroke()
 
         let tx = this.graph.tx // time the graph should show
-        ctx.strokeStyle = "green"
+        ctx.strokeStyle = this.graph.color?this.graph.color:"green"
         ctx.beginPath()
         while(t.progress-t.record[0].time > tx){
           t.record.splice(0,1)
@@ -559,6 +564,7 @@ class wind{
         let tx = this.graph.tx // time the graph should show
         ctx.strokeStyle = "green"
         ctx.beginPath()
+        if(t.record.length==0){return}
         while(t.progress-t.record[0].time > tx){
           t.record.splice(0,1)
         }
@@ -576,6 +582,57 @@ class wind{
           ctx.lineTo(x2,y2)      
         }
         ctx.stroke()
+        } else if(this.graph.type == 3){
+        let ctx = this.lc.ctx
+        ctx.fillStyle = "black"
+        ctx.fillRect(0,0,Width,Height)
+
+        ctx.lineWidth=1
+        ctx.strokeStyle = "red"
+        ctx.beginPath()
+        ctx.moveTo(15,255/2+5)
+        ctx.lineTo(360,255/2+5)
+        ctx.stroke()
+
+        ctx.lineWidth=2
+        ctx.strokeStyle = "white"
+        ctx.beginPath()
+        ctx.moveTo(15,5)
+        ctx.lineTo(15,260)
+        ctx.lineTo(360,260)
+        ctx.stroke()
+
+
+
+        let tx = this.graph.tx // time the graph should show
+
+
+        t.subarr.forEach((e)=>{
+          ctx.strokeStyle = t.wind.subWinds[e].color
+          ctx.beginPath()
+          while(t.progress-t.records[e][0].time > tx){
+            t.records[e].splice(0,1)
+          }
+          let offset = t.records[e][0].time
+          for(let i = 0; i<t.records[e].length-2; i++){
+
+            let r1 = t.records[e][i]
+            let x1 = 15+(r1.time-offset)/tx*350
+            let y1 = 260-r1.y*250/100
+
+            let r2 = t.records[e][i+1]
+            let x2 = 15+(r2.time-offset)/tx*350
+            let y2 = 260-r2.y*250/100
+            ctx.moveTo(x1,y1)
+            ctx.lineTo(x2,y2)      
+          }
+          ctx.stroke()
+        })
+        
+
+
+
+
       }
     }
   }
@@ -738,6 +795,19 @@ function startYearCounter(){
 
 
 
+var debuffs = {}
+
+function debuff(str){
+  debuffs[str] = true
+  notify("debuffed: "+str)
+
+  let db = document.getElementById("debuff_center")
+  let d = DCC("div",db)
+  d.innerText = str
+  d.classList.add("debuff")
+
+}
+
 
 class stats{
   static kindergarten_friends;
@@ -784,14 +854,19 @@ class task{
 
     this.completion = 0
 
+
+    this.wind = new wind("task: "+name)
+        this.wind.div.style.visibility = "hidden";
+    this.wind.bar.style.visibility = "hidden";
     pref(this)
+    windf(this,this.wind)
+
 
     this.div.addEventListener("mousedown",()=>{
-      this.wind = new wind("task: "+name)
       this.wind.div.style.top = Math.floor(mouseY) + "px"
       this.wind.div.style.left = Math.floor(mouseX + 50) + "px"
-
-      windf(this,this.wind)
+      this.wind.div.style.visibility = "visible";
+      this.wind.bar.style.visibility = "visible";
     },{once:true})
 
   }
@@ -806,12 +881,20 @@ class task{
     this.hp -= sdt/0.6
 
   }
+  dcLose(){
+    this.complete = true
+      this.div.classList.add("depleat")
+      this.lose()
+  }
   check(){
     if(this.hp <= 0){
-      this.lose()
+      this.dcLose()
+      return;
     }
     if(PROGRESS > this.completeBefore){
-      if(this.done){this.completion=100}else{this.lose()}
+      if(this.done){this.completion=100}else{
+      this.dcLose()
+      }
     }
     if(this.completion >= 100){
       this.complete = true
@@ -884,13 +967,14 @@ function activateEvent(name,time){
 }
 
 
-function loseGame(reason="no reason"){
+function loseGame(reason="no reason",t){
   el= DCC("div",document.body)
   el.style.zIndex="99999"
   el.classList.add("loser")
   el.innerText = "YOU DIED:\n"+reason
 
   clearInterval(mainLoop)
+  console.log(t)
   throw(new Error)
 }
 
@@ -962,6 +1046,13 @@ function reward2(x,v="hp"){
     return((w,t)=>{t[v] += (t.hp)*x/DIF})
   }
   return((w,t)=>{t[v] += (100-t.hp)*x})
+}
+
+function reward3(x,v="hp"){
+  if(x < 0){
+    return((w,t)=>{t[v] += Math.max(t.hp,50)*x/DIF})
+  }
+  return((w,t)=>{t[v] += Math.min(100-t.hp,50)*x})
 }
 
 
@@ -1046,6 +1137,7 @@ new task("be born",(t,w)=>{
     activateEvent("cry");
     startYearCounter()
     closeIn(t)}
+  t.lose = ()=>{loseGame("you got aborted")}
 })
 
 pendEvent("cry","+2",()=>{
@@ -1071,7 +1163,7 @@ pendEvent("cry2","+2",()=>{
     let el = DCC("button",w.div)
     el.innerText = "CRY"
     el.onclick = ()=>{
-      t.completion += 6 / DIF
+      t.completion += 6 / (DIF**0.5)
     }
       Wlimit(w,t)
   },(t)=>{
@@ -1107,12 +1199,13 @@ gameEvent(0.25*ENV.YEAR,()=>{
 pendEvent("Learn to run","+0",()=>{
     new task("Learn to run",(t,w)=>{
 
-    learn1(w,t,[{"name":"learn",f:reward(5/2)},{"name":"observe",f:reward(1/3),times:2},{"name":"stumble",f:reward(-2),times:3}],(w,t)=>{shuffleChildren(w.cdiv)})
+    learn1(w,t,[{"name":"learn",f:reward(7)},{"name":"observe",f:reward(1/3),times:2},{"name":"stumble",f:reward(-2),times:3}],(w,t)=>{shuffleChildren(w.cdiv)})
     
   },(t)=>{
-    t.setCompleteBefore(1.5*ENV.YEAR)
+    t.tick = (sdt)=>{t.progress += sdt}
+    t.setCompleteBefore(2.5*ENV.YEAR)
     t.win = ()=>{closeIn(t)}
-    t.lose = ()=>{loseGame("crippled")}
+    t.lose = ()=>{if(Math.random()>1-(0.4*DIF)){loseGame("crippled")} else {debuff("crippled")}}
   })
 })
 
@@ -1120,13 +1213,14 @@ pendEvent("Learn to run","+0",()=>{
 gameEvent(0.5*ENV.YEAR,()=>{
     new task("Learn to speak",(t,w)=>{
 
-    learn1(w,t,[{"name":"learn",f:reward(4/1.5)},{"name":"observe",f:reward(1/3),times:2},{"name":"practice",f:reward(5/3)},{"name":"stutter",f:reward(-2),times:3}],(w,t)=>{shuffleChildren(w.cdiv)})
+    learn1(w,t,[{"name":"learn",f:reward(4)},{"name":"observe",f:reward(3),times:2},{"name":"practice",f:reward(5)},{"name":"stutter",f:reward(-2),times:3}],(w,t)=>{shuffleChildren(w.cdiv)})
     
 
   },(t)=>{
-    t.setCompleteBefore(1.5*ENV.YEAR)
+    t.setCompleteBefore(2.2*ENV.YEAR)
+    t.tick = (sdt)=>{t.progress += sdt}
     t.win = ()=>{activateEvent("Speaking#2");closeIn(t)}
-    t.lose = ()=>{loseGame("Mute")}
+    t.lose = ()=>{debuff("mute")}
   })
 })
 
@@ -1143,7 +1237,7 @@ gameEvent(0.3*ENV.YEAR,()=>{
   },(t)=>{
     t.setCompleteBefore(1.5*ENV.YEAR)
     t.win = ()=>{closeIn(t)}
-    t.lose = ()=>{loseGame("Bad shitter")}
+    t.lose = ()=>{debuff("Bad shitter");closeIn(t)}
   })
 })
 
@@ -1151,10 +1245,21 @@ gameEvent(0.3*ENV.YEAR,()=>{
 pendEvent("Speaking#2","+0",()=>{
     new task("refine speaking skills",(t,w)=>{
 
-    learn1(w,t,[{"name":"learn",f:reward(5/3)},{"name":"observe",f:reward(1/3),times:2},{"name":"stumble",f:reward(-2),times:3}],(w,t)=>{shuffleChildren(w.cdiv)})
-    
+    let bt = DCC("button",w.cdiv)
+        bt.innerText = "S p e a k."
+        let delayed = false
+        bt.onclick = ()=>{
+          if(delayed){return}
+          t.completion += 6 / (DIF**0.5)
+          bt.classList.add("delay")
+          delayed = true;
+          STO(()=>{bt.classList.remove("delay");delayed=false},2000)
+        }
+    Wlimit(w,t)
 
   },(t)=>{
+    t.setCompleteBefore(5*ENV.YEAR)
+    t.tick = (sdt)=>{t.progress += sdt}
     t.win = ()=>{closeIn(t)}
     t.lose = ()=>{loseGame("Quiet")}
   })
@@ -1192,6 +1297,9 @@ gameEvent(3*ENV.YEAR,()=>{
 })
 
 
+
+
+
 gameEvent(3*ENV.YEAR,()=>{
     new task("Go to kindergarten",(t,w)=>{
     learn1(w,t,[{"name":"learn",f:reward2(0.3)},{"name":"struggle",f:reward2(-0.4),times:3},{"name":"play",f:reward2(0.32),times:2}],(w,t,d)=>{shuffleChildren(d)},DCC("div",w.cdiv))
@@ -1200,12 +1308,43 @@ gameEvent(3*ENV.YEAR,()=>{
   },(t)=>{
     t.setCompleteBefore(5.7*ENV.YEAR)
     t.done = ()=>{
+      if(t.hp<30){
+        debuff("dumb")
+      }
       closeIn(t);
     }
     t.record = []
     t.tick = (sdt)=>{
       t.progress += sdt
       t.hp -= sdt + t.hp*sdt/30
+      if(t.hp < 0){t.hp=0}
+      t.record.push({time:t.progress,y:t.hp})
+    }
+  })
+})
+
+
+gameEvent(3.3*ENV.YEAR,()=>{
+    new task("Throw tamper tantrum",(t,w)=>{
+    learn1(w,t,[{"name":"yell",f:reward2(0.3)},{"name":"fold",f:reward2(-0.4),times:3},{"name":"hit parents",f:reward2(0.1)},{"name":"throw",f:reward2(0.32)},{"name":"cry",f:reward2(0.20)}],(w,t,d)=>{shuffleChildren(d)},DCC("div",w.cdiv))
+
+
+  },(t)=>{
+    t.setCompleteBefore(5.7*ENV.YEAR)
+    t.lose = ()=>{
+      debuff("wuss")
+    }
+    t.done = ()=>{
+      if(t.hp<30){
+        debuff("wuss")
+      }
+      closeIn(t);
+    }
+    t.record = []
+    t.tick = (sdt)=>{
+      t.progress += sdt
+      t.hp -= sdt + t.hp*sdt/30
+      if(t.hp < 0){t.hp=0}
       t.record.push({time:t.progress,y:t.hp})
     }
   })
@@ -1264,6 +1403,205 @@ gameEvent(5.7*ENV.YEAR,()=>{
     }
   })
 })
+
+gameEvent(8.7*ENV.YEAR,()=>{
+    new task("Primary school grades (p4-p6)",(t,w)=>{
+    // learn1(w,t,[{"name":"muster",f:reward2(1.5,"vx")},{"name":"failure",f:reward(-5,"hp"),times:3},{"name":"neglect",f:reward2(-0.5,"vx"),times:2}],(w,t,d)=>{shuffleChildren(d)},DCC("div",w.cdiv))
+
+
+
+    w.canv().graph = {tx:40,type:3}
+
+    w.subWinds = {
+      "Chinese": new wind("subject: "),
+      "English": new wind("subject: "),
+      "Math": new wind("subject: "),
+      "General studies": new wind("subject: "),
+    }
+    let subject_div = DCC("div",w.cdiv)
+
+    t.subarr = Object.keys(w.subWinds)
+
+    w.subWinds.Chinese.color = "orange"
+    w.subWinds.English.color = "#40FFFF"
+    w.subWinds.Math.color = "lime"
+    w.subWinds["General studies"].color = "red"
+
+    t.subarr.forEach((name)=>{
+      let wind = w.subWinds[name]
+      t.records[name] = []
+      wind.button = DCC("button",subject_div)
+      wind.button.innerText = name
+
+      wind.button.style.color = wind.color
+
+      wind.score = Math.random()*80+20
+      wind.div.style.visibility = "hidden";
+      wind.bar.style.visibility = "hidden";
+      wind.title.innerText = "subject: "+name
+
+      wind.button.addEventListener("click",()=>{
+        if(wind.div.style.visibility=="hidden"){
+          wind.div.style.visibility = "visible";
+          wind.bar.style.visibility = "visible";
+          wind.div.style.top = Math.floor(mouseY) + "px"
+          wind.div.style.left = Math.floor(mouseX + 50) + "px"
+        } else {
+          wind.div.style.visibility = "hidden";
+          wind.bar.style.visibility = "hidden";
+        }
+      })
+    })
+
+    t.subarr.forEach((name)=>{
+      let wind = w.subWinds[name]
+      
+      if(name=="Math"){
+        let bt = DCC("button",wind.cdiv)
+        bt.innerText = "practice"
+        wind.vx = 0
+        bt.onclick = ()=>{wind.vx += 1}
+      }
+
+      if(name=="General studies"){
+        let bt = DCC("button",wind.cdiv)
+        bt.innerText = "curse"
+        wind.vx = 0
+        let delayed = false
+        bt.onclick = ()=>{
+          if(delayed){return}
+          wind.score += 10
+          wind.vx += 5
+          bt.classList.add("delay")
+          delayed = true;
+          STO(()=>{bt.classList.remove("delay");delayed=false},2000)
+        }
+      }
+
+      if(name=="Chinese"){
+        learn1(wind,t,[{"name":"memorize",f:()=>{wind.score+=3},times:5},{"name":"swear",f:()=>{wind.score+=5},times:5},{"name":"forget",f:()=>{wind.score-=5},times:40}],(w,t,d)=>{shuffleChildren(d)},DCC("div",wind.cdiv))
+
+      }
+      if(name=="English"){
+        let bt = DCC("button",wind.cdiv)
+        bt.innerText = "Grasp"
+        bt.style.position = "relative"
+        bt.style.width = "20%"
+        wind.vx = 0
+        wind.bt = bt
+        wind.x = 0
+        wind.cdiv.style.overflow = "hidden"
+
+        bt.onclick = ()=>{
+          wind.score += 5
+          wind.vx += Math.random()-0.5
+        }
+      }
+
+    })
+
+
+
+
+
+
+    
+
+  },(t)=>{
+      t.vx = 0
+      t.hp = Math.random()*42+50
+      t.records = {}
+
+      t.done = ()=>{
+        closeIn(t);
+      }
+      t.setCompleteBefore(11.7*ENV.YEAR)
+    t.tick = (sdt)=>{
+
+      t.progress += sdt
+      t.subarr.forEach((e)=>{
+        let tse=t.wind.subWinds[e]
+        let sc = tse.score
+
+        if(tse.score < 1){
+          tse.score = 1
+        }
+        if(tse.score > 100){
+          tse.score = 100
+        }
+
+        if(e == "Math"){
+          tse.score -= (0.4+sc/150)/sdt/1000
+          tse.vx *= 0.99
+          tse.score += tse.vx*sdt
+        }
+
+        if(e == "General studies"){
+          tse.score -= (0.3 + sc/100)/sdt/1000
+          tse.vx *= 0.99
+          tse.score += tse.vx*sdt
+        }
+
+        if(e == "Chinese"){
+          tse.score -= (0.01+sc/150)/sdt/1000
+        }
+
+        if(e == "English"){
+          tse.score -= (0.3)/sdt/1000
+          tse.x += tse.vx
+          tse.vx *= 0.995
+          if(tse.x < 0){tse.x = 0; tse.vx = 0}
+          if(tse.x > 80){tse.x = 80; tse.vx = 0}
+          tse.vx += Math.random()-0.5
+          tse.bt.style.left = Math.min(Math.floor(tse.x),80) + "%"
+        }
+
+
+        t.records[e].push({time:t.progress,y:tse.score})
+      })
+    }
+  })
+})
+
+gameEvent(7*ENV.YEAR,()=>{
+    new task("Avoid anime",(t,w)=>{
+    learn1(w,t,[{"name":"avoid",f:reward2(1.5,"vx")},{"name":"watch",f:(w,t)=>{t.hp -= 10; t.vx=Math.max(t.vx,0)},times:3},{"name":"watch",f:(w,t)=>{t.vx = Math.min(t.vx,0); t.vx -= (t.hp)*1.5*DIF},times:2}],(w,t,d)=>{shuffleChildren(d)},DCC("div",w.cdiv))
+
+
+    w.canv().graph = {tx:40,color:'red'}
+
+
+
+  },(t)=>{
+      t.record = []
+      t.vx = 0
+      t.hp = Math.random()*42+50
+
+      t.lose = ()=>{
+        closeIn(t);
+        t.complete = true;
+        t.div.classList.add("depleat")
+        debuff("anime addict")
+      }
+      t.done = ()=>{
+        closeIn(t);
+      }
+      t.setCompleteBefore(14*ENV.YEAR)
+    t.tick = (sdt)=>{
+      if(t.vx>0){
+        t.vx *= 1-(0.005*(t.hp/100)-0.001)
+      }
+      t.progress += sdt
+      // t.hp -= t.hp*sdt/30
+      t.vx -= (5+t.hp)*sdt/20
+      t.hp += t.vx*sdt/40
+      
+      if(t.hp>100){t.vx=0;t.hp=100}
+      t.record.push({time:t.progress,y:100-t.hp})
+    }
+  })
+})
+
 
 gameEvent(5.7*ENV.YEAR,()=>{
     new task("focus",(t,w)=>{
@@ -1371,15 +1709,26 @@ gameEvent(5.7*ENV.YEAR,()=>{
 
 
 
-// SKIPS.add("cry")
-// SKIPS.add("cry2")
-// SKIPS.add("Learn to run")
+SKIPS.add("cry")
+SKIPS.add("cry2")
+SKIPS.add("Learn to run")
 // SKIPS.add("Learn to speak")
-// SKIPS.add("Learn to walk")
-// SKIPS.add("Potty train")
+SKIPS.add("Learn to walk")
+SKIPS.add("Potty train")
+
 // SKIPS.add("Make childhood friends")
 // SKIPS.add("Go to kindergarten")
-// skiptime = 5*ENV.YEAR
+// SKIPS.add("Primary school grades (p1-p3)")
+// SKIPS.add("Primary school grades (p4-p6)")
+skiptime = 1*ENV.YEAR
+
+
+
+
+
+
+
+
 
 
 
@@ -1390,6 +1739,9 @@ gameEvent(5.7*ENV.YEAR,()=>{
 
 Go out play: too much: Get kidnapped
 Go out play: too little: socially stupid
+//sep 2020 avoid genshin
 
+Avoid anime/pokemon/ other temptations: 
 
+["general studies","English","Chinese","Math"]
 */
