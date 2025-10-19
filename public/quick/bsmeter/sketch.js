@@ -202,6 +202,16 @@ function data(){
     }
 
 
+    if(Math.random()>0.9995){
+      
+      if(board.dict["Dogshit capitualance"].on){
+        board.off("Dogshit capitualance")
+      } else {
+        board.on("Dogshit capitualance")
+      }
+    }
+
+
     smoothness = smoothf(smoothness,0.15 * Math.random(),0.1)
     if(infactor > 1.2){
       smoothness = smoothf(smoothness,0.2,0.1*Math.random())

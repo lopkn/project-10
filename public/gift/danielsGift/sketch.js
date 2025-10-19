@@ -496,19 +496,105 @@ class wind{
   close(){
     this.div.remove()
   }
-  tick(){
+  tick(t){
     if(this.lim){this.lim()}
+
+    if(this.graph){
+      if(this.graph.type == undefined){
+
+        let ctx = this.lc.ctx
+        ctx.fillStyle = "black"
+        ctx.fillRect(0,0,Width,Height)
+        ctx.lineWidth=2
+        ctx.strokeStyle = "white"
+        ctx.textAlign = "center"
+        ctx.beginPath()
+        ctx.moveTo(15,5)
+        ctx.lineTo(15,260)
+        ctx.lineTo(360,260)
+        ctx.stroke()
+
+        let tx = this.graph.tx // time the graph should show
+        ctx.strokeStyle = "green"
+        ctx.beginPath()
+        while(t.progress-t.record[0].time > tx){
+          t.record.splice(0,1)
+        }
+        let offset = t.record[0].time
+        for(let i = 0; i<t.record.length-2; i++){
+
+          let r1 = t.record[i]
+          let x1 = 15+(r1.time-offset)/tx*360
+          let y1 = 260-r1.y*255/100
+
+          let r2 = t.record[i+1]
+          let x2 = 15+(r2.time-offset)/tx*360
+          let y2 = 260-r2.y*255/100
+          ctx.moveTo(x1,y1)
+          ctx.lineTo(x2,y2)      
+        }
+        ctx.stroke()
+      } else if(this.graph.type == 2){
+        let ctx = this.lc.ctx
+        ctx.fillStyle = "black"
+        ctx.fillRect(0,0,Width,Height)
+
+        ctx.lineWidth=1
+        ctx.strokeStyle = "yellow"
+        ctx.beginPath()
+        ctx.moveTo(15,255/2+5)
+        ctx.lineTo(360,255/2+5)
+        ctx.stroke()
+
+        ctx.lineWidth=2
+        ctx.strokeStyle = "white"
+        ctx.beginPath()
+        ctx.moveTo(15,5)
+        ctx.lineTo(15,260)
+        ctx.lineTo(360,260)
+        ctx.stroke()
+
+
+
+        let tx = this.graph.tx // time the graph should show
+        ctx.strokeStyle = "green"
+        ctx.beginPath()
+        while(t.progress-t.record[0].time > tx){
+          t.record.splice(0,1)
+        }
+        let offset = t.record[0].time
+        for(let i = 0; i<t.record.length-2; i++){
+
+          let r1 = t.record[i]
+          let x1 = 15+(r1.time-offset)/tx*360
+          let y1 = 260-r1.y*250/100
+
+          let r2 = t.record[i+1]
+          let x2 = 15+(r2.time-offset)/tx*360
+          let y2 = 260-r2.y*250/100
+          ctx.moveTo(x1,y1)
+          ctx.lineTo(x2,y2)      
+        }
+        ctx.stroke()
+      }
+    }
   }
 
-  canv(w=390,h=300){
-    this.div.style.width = Math.floor(w)+"px"
-    this.div.style.height = Math.floor(h)+"px"
+  canv(w=390,h=300,graph){
+    // this.div.style.width = Math.floor(w)+"px"
+    // this.div.style.height = Math.floor(h)+"px"
     this.lc = new LCanvas()
     this.cdiv.appendChild(this.lc.canvas)
-    this.lc.fit()
 
-    this.rf = ()=>{console.log("resize"); this.lc.fit()}
-    this.ros = new ResizeObserver(this.rf).observe(this.cdiv)
+    this.lc.canvas.width = w
+    this.lc.canvas.height = h
+    this.div.style.width = ""
+    if(graph){this.graph=graph}
+    // this.lc.fit()
+
+    // this.rf = ()=>{console.log("resize"); this.lc.fit()}
+    // this.ros = new ResizeObserver(this.rf).observe(this.cdiv)
+      return(this)
   }
 }
 
@@ -524,7 +610,7 @@ function Wlimit(w,t){
       w.lim = ()=>{
       let a = t.limit;
       let b = t.completion
-      el2.style.width = Math.floor(a)+"%";el3.style.width = Math.floor(b)+"%"}
+      el2.style.width = Math.min(100,Math.floor(a))+"%";el3.style.width = Math.min(100,Math.floor(b))+"%"}
 }
 
 
@@ -556,11 +642,11 @@ class ENV{
   static YEAR = 60 //a year is 60 progress seconds
   static DAY = 0
 }
-
 //calc
 ENV.DAY = ENV.YEAR/365
 
 ///
+
 
 
 function gameEvent(time,event){
@@ -579,6 +665,9 @@ function gameEvent(time,event){
 
 
 function mainFunc(dt){
+
+  if(taskArr[0].complete){dt*=15}
+
   let sdt = dt/1000
   PROGRESS += sdt 
 
@@ -624,6 +713,8 @@ function startYearCounter(){
     l.classList.add("birthday")
     l.style.left = (i*100/20-0.25)+"vw"
 
+    gameEvent(ENV.YEAR*i,()=>{notify("Happy birthday")})
+
   }
 
     let n = DCC("div",tb)
@@ -641,8 +732,37 @@ function startYearCounter(){
 }
 
 
+
+
+
+
+
+
+
+class stats{
+  static kindergarten_friends;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+var completedTasks = {}
+var SKIPS = new Set()
+
 class task{
   constructor(name="unnamed",windf,pref=()=>{}){
+
+    if(SKIPS.has(name)){return}
 
     this.name=name
     this.div = document.createElement("div")
@@ -687,22 +807,30 @@ class task{
 
   }
   check(){
-    if(this.hp <= 0 || PROGRESS > this.completeBefore){
+    if(this.hp <= 0){
       this.lose()
+    }
+    if(PROGRESS > this.completeBefore){
+      if(this.done){this.completion=100}else{this.lose()}
     }
     if(this.completion >= 100){
       this.complete = true
       this.div.classList.add("complete")
       this.div.classList.remove("urgent")
 
-      this.win()
+      if(this.done){this.done()}else{
+        this.win()
+      }
+      if(completedTasks[this.name]==undefined){completedTasks[this.name]=0}
+        completedTasks[this.name]+=1
       console.log("task complete: "+this.name)
 
 
       this.limit = 0
-      if(this.wind){this.wind.tick()}
+      if(this.wind){this.wind.tick(this)}
         return;
     }
+    if(this.completion < 0){this.completion = 0}
     
     this.calculate()
 
@@ -712,14 +840,14 @@ class task{
       this.div.classList.remove("urgent")
     }
 
-    if(this.wind){this.wind.tick()}
+    if(this.wind){this.wind.tick(this)}
 
 
   }
 
   calculate(){
     let candidate = [this.hp]
-    if(this.timeAllowed!==undefined){
+    if(this.timeAllowed!==undefined && this.done == undefined){
       candidate.push((this.completeBefore-PROGRESS)/this.timeAllowed*100)
     }
     this.limit = Math.min(...candidate)
@@ -763,6 +891,7 @@ function loseGame(reason="no reason"){
   el.innerText = "YOU DIED:\n"+reason
 
   clearInterval(mainLoop)
+  throw(new Error)
 }
 
 
@@ -799,16 +928,17 @@ function shuffleChildren(parent) {
 //     children.forEach(child => container.appendChild(child));
 // }
 
-function learn1(w,t,arr,func){ // [{"name":"learn",f:f}] , master func
+function learn1(w,t,arr,func=()=>{},div){ // [{"name":"learn",f:f}] , master func
 
+  if(div===undefined){div=w.cdiv}
   arr.forEach((e)=>{
     let times = e.times?e.times:1
     for(let i = 0; i < times; i++){
-      let el = DCC("button",w.cdiv)
+      let el = DCC("button",div)
       el.innerText = e.name
       el.onclick = ()=>{
         e.f(w,t)
-        func(w,t)
+        func(w,t,div)
       }
     }
   })
@@ -820,8 +950,18 @@ function learn1(w,t,arr,func){ // [{"name":"learn",f:f}] , master func
 }
 
 
-function reward(x){
-  return((w,t)=>{t.completion += x/DIF})
+function reward(x,v="completion"){
+  if(x < 0){
+    return((w,t)=>{t[v] += x})
+  }
+  return((w,t)=>{t[v] += x/DIF})
+}
+
+function reward2(x,v="hp"){
+  if(x < 0){
+    return((w,t)=>{t[v] += (t.hp)*x/DIF})
+  }
+  return((w,t)=>{t[v] += (100-t.hp)*x})
 }
 
 
@@ -863,187 +1003,393 @@ notify("move the task window around by dragging the blue bar")
 
 
 
+let skiptime = 0
 
 
 
 
+new task("be born",(t,w)=>{
+  let el = DCC("button",w.div)
+  el.innerText = "GET BORN"
+  el.onclick = ()=>{
+    t.completion += 500 / DIF
+    // t.completion += 5 / DIF
+  }
+
+  // <select name="cars" id="cars">
+  //   <option value="volvo">Volvo</option>
+  //   <option value="saab">Saab</option>
+  //   <option value="opel">Opel</option>
+  //   <option value="audi">Audi</option>
+  // </select>
+
+  let d1 = DCC("div",w.div)
+  let lab = DCC("span",d1)
+  lab.innerText = "Difficulty: "
+  lab.style.color = "white"
+  let sel = DCC("select",d1)
+  let arr = ["wussy","daniel","daniel+","nightmare"]
+  arr.forEach((e)=>{
+    let op = DCC("option",sel)
+    op.innerText = e
+    op.value = e
+  })
 
 
-// new task("be born",(t,w)=>{
-//   let el = DCC("button",w.div)
-//   el.innerText = "GET BORN"
-//   el.onclick = ()=>{
-//     t.completion += 5 / DIF
-//   }
+  t.win = ()=>{PROGRESS=skiptime;
 
-//   // <select name="cars" id="cars">
-//   //   <option value="volvo">Volvo</option>
-//   //   <option value="saab">Saab</option>
-//   //   <option value="opel">Opel</option>
-//   //   <option value="audi">Audi</option>
-//   // </select>
+    if(sel.value == "nightmare"){DIF *= 1.5}
+    if(sel.value == "wussy"){DIF /= 1.4}
+    if(sel.value == "daniel"){DIF *= 1}
+    if(sel.value == "daniel+"){DIF *= 1.2}
 
-//   let d1 = DCC("div",w.div)
-//   let lab = DCC("span",d1)
-//   lab.innerText = "Difficulty: "
-//   lab.style.color = "white"
-//   let sel = DCC("select",d1)
-//   let arr = ["wussy","daniel","daniel+","nightmare"]
-//   arr.forEach((e)=>{
-//     let op = DCC("option",sel)
-//     op.innerText = e
-//     op.value = e
-//   })
+    activateEvent("cry");
+    startYearCounter()
+    closeIn(t)}
+})
 
+pendEvent("cry","+2",()=>{
+  new task("cry",(t,w)=>{
 
-//   t.win = ()=>{PROGRESS=0;
-
-//     if(sel.value == "nightmare"){DIF *= 1.5}
-//     if(sel.value == "wussy"){DIF /= 2}
-//     if(sel.value == "daniel"){DIF *= 1}
-//     if(sel.value == "daniel+"){DIF *= 1.2}
-
-//     activateEvent("cry");
-//     startYearCounter()
-//     closeIn(t)}
-// })
-
-// pendEvent("cry","+2",()=>{
-//   new task("cry",(t,w)=>{
-
-//     let el = DCC("button",w.div)
-//     el.innerText = "CRY"
-//     el.onclick = ()=>{
-//       t.completion += 5 / DIF
-//     }
-//       Wlimit(w,t)
-//   },(t)=>{
-//     t.setCompleteBefore(PROGRESS + 40*ENV.DAY)
-//     t.win = ()=>{activateEvent("cry2");closeIn(t)}
-//     t.lose = ()=>{loseGame("forgot to cry, died of suffocation")}
-//   })
-// })
-
-
-// pendEvent("cry2","+2",()=>{
-//   new task("cry",(t,w)=>{
-
-//     let el = DCC("button",w.div)
-//     el.innerText = "CRY"
-//     el.onclick = ()=>{
-//       t.completion += 5 / DIF
-//     }
-//       Wlimit(w,t)
-//   },(t)=>{
-//     t.setCompleteBefore(PROGRESS + 80*ENV.DAY)
-//     t.win = ()=>{if(PROGRESS<1.3*ENV.YEAR){activateEvent("cry2")};closeIn(t)}
-//     t.lose = ()=>{loseGame("forgot to cry, parents neglected you. You starved.")}
-//   })
-// })
-
-
-
-
-// gameEvent(4*ENV.YEAR,()=>{
-//     new task("go to kindergarten",(t,w)=>{
-
-//     let el = DCC("button",w.div)
-//     el.innerText = "struggle"
-//     el.onclick = ()=>{
-//       t.completion += 4 / DIF
-//     }
-//   },(t)=>{
-//     t.completeBefore = PROGRESS + 40*ENV.DAY
-//     t.win = ()=>{activateEvent("cry");closeIn(t)}
-//     t.lose = ()=>{loseGame("skipped kindergarten")}
-//   })
-// })
-
-
-// gameEvent(0.25*ENV.YEAR,()=>{
-//     new task("Learn to walk",(t,w)=>{
-
-//     let el = DCC("button",w.div)
-//     el.innerText = "Learn"
-//     el.onclick = ()=>{
-//       t.completion += 2 / DIF
-//     }
-//     Wlimit(w,t)
-//   },(t)=>{
-//     t.completeBefore = 1.5*ENV.YEAR
-//     t.win = ()=>{activateEvent("Learn to run");closeIn(t)}
-//     t.lose = ()=>{loseGame("crippled")}
-//   })
-// })
-
-
-
-// pendEvent("Learn to run","+0",()=>{
-//     new task("Learn to run",(t,w)=>{
-
-//     learn1(w,t,[{"name":"learn",f:reward(5)},{"name":"observe",f:reward(1),times:2},{"name":"stumble",f:reward(-4),times:3}],(w,t)=>{shuffleChildren(w.cdiv)})
-    
-//   },(t)=>{
-//     t.completeBefore = 1.5*ENV.YEAR
-//     t.win = ()=>{closeIn(t)}
-//     t.lose = ()=>{loseGame("crippled")}
-//   })
-// })
-
-
-
-
-gameEvent(-Infinity,()=>{
-    new task("Learn to debug",(t,w)=>{
-
-    // learn1(w,t,[{"name":"learn",f:reward(5)},{"name":"observe",f:reward(1),times:2},{"name":"stumble",f:reward(-0.2),times:3}],(w,t)=>{shuffleChildren(w.cdiv);console.log("hey")})
-    w.canv()
-    w.tick = ()=>{
-      let ctx = w.lc.ctx
-      ctx.fillStyle = "black"
-      ctx.fillRect(0,0,Width,Height)
-      ctx.strokeStyle = "white"
-      ctx.beginPath()
-      ctx.moveTo(15,5)
-      ctx.lineTo(15,260)
-      ctx.lineTo(360,260)
-      ctx.stroke()
-
-      let tx = 10 // time the graph should show
-      ctx.strokeStyle = "green"
-      ctx.beginPath()
-      ctx.lineWidth=2
-      while(t.progress-t.record[0].time > tx){
-        t.record.splice(0,1)
-      }
-      let offset = t.record[0].time
-      for(let i = 0; i<t.record.length-2; i++){
-
-        let r1 = t.record[i]
-        let x1 = 15+(r1.time-offset)/tx*360
-        let y1 = 260-r1.y*250/100
-
-        let r2 = t.record[i+1]
-        let x2 = 15+(r2.time-offset)/tx*360
-        let y2 = 260-r2.y*250/100
-        ctx.moveTo(x1,y1)
-        ctx.lineTo(x2,y2)      
-      }
-      ctx.stroke()
+    let el = DCC("button",w.div)
+    el.innerText = "CRY"
+    el.onclick = ()=>{
+      t.completion += 5 / DIF
     }
+      Wlimit(w,t)
+  },(t)=>{
+    t.setCompleteBefore(PROGRESS + 40*ENV.DAY)
+    t.win = ()=>{activateEvent("cry2");closeIn(t)}
+    t.lose = ()=>{loseGame("forgot to cry, died of suffocation")}
+  })
+})
+
+
+pendEvent("cry2","+2",()=>{
+  new task("cry",(t,w)=>{
+
+    let el = DCC("button",w.div)
+    el.innerText = "CRY"
+    el.onclick = ()=>{
+      t.completion += 6 / DIF
+    }
+      Wlimit(w,t)
+  },(t)=>{
+    t.setCompleteBefore(PROGRESS + 100*ENV.DAY)
+    t.win = ()=>{if(PROGRESS<1.3*ENV.YEAR){if(!completedTasks["Learn to speak"]){activateEvent("cry2")}};closeIn(t)}
+    t.lose = ()=>{loseGame("forgot to cry, parents neglected you. You starved.")}
+  })
+})
+
+
+
+
+
+
+gameEvent(0.25*ENV.YEAR,()=>{
+    new task("Learn to walk",(t,w)=>{
+
+    let el = DCC("button",w.div)
+    el.innerText = "Learn"
+    el.onclick = ()=>{
+      t.completion += 3 / DIF
+    }
+    Wlimit(w,t)
+  },(t)=>{
+    t.setCompleteBefore(1.5*ENV.YEAR)
+    t.win = ()=>{activateEvent("Learn to run");closeIn(t)}
+    t.lose = ()=>{loseGame("very crippled")}
+  })
+})
+
+
+
+pendEvent("Learn to run","+0",()=>{
+    new task("Learn to run",(t,w)=>{
+
+    learn1(w,t,[{"name":"learn",f:reward(5/2)},{"name":"observe",f:reward(1/3),times:2},{"name":"stumble",f:reward(-2),times:3}],(w,t)=>{shuffleChildren(w.cdiv)})
+    
+  },(t)=>{
+    t.setCompleteBefore(1.5*ENV.YEAR)
+    t.win = ()=>{closeIn(t)}
+    t.lose = ()=>{loseGame("crippled")}
+  })
+})
+
+
+gameEvent(0.5*ENV.YEAR,()=>{
+    new task("Learn to speak",(t,w)=>{
+
+    learn1(w,t,[{"name":"learn",f:reward(4/1.5)},{"name":"observe",f:reward(1/3),times:2},{"name":"practice",f:reward(5/3)},{"name":"stutter",f:reward(-2),times:3}],(w,t)=>{shuffleChildren(w.cdiv)})
+    
 
   },(t)=>{
-    t.completeBefore = 1.5*ENV.YEAR
-    t.win = ()=>{activateEvent("Learn to run");closeIn(t)}
-    t.lose = ()=>{loseGame("crippled")}
+    t.setCompleteBefore(1.5*ENV.YEAR)
+    t.win = ()=>{activateEvent("Speaking#2");closeIn(t)}
+    t.lose = ()=>{loseGame("Mute")}
+  })
+})
+
+gameEvent(0.3*ENV.YEAR,()=>{
+    new task("Potty train",(t,w)=>{
+
+    let el = DCC("button",w.div)
+    el.innerText = "Learn"
+    el.onclick = ()=>{
+      t.completion += 2 / DIF
+    }
+    Wlimit(w,t)
+
+  },(t)=>{
+    t.setCompleteBefore(1.5*ENV.YEAR)
+    t.win = ()=>{closeIn(t)}
+    t.lose = ()=>{loseGame("Bad shitter")}
+  })
+})
+
+
+pendEvent("Speaking#2","+0",()=>{
+    new task("refine speaking skills",(t,w)=>{
+
+    learn1(w,t,[{"name":"learn",f:reward(5/3)},{"name":"observe",f:reward(1/3),times:2},{"name":"stumble",f:reward(-2),times:3}],(w,t)=>{shuffleChildren(w.cdiv)})
+    
+
+  },(t)=>{
+    t.win = ()=>{closeIn(t)}
+    t.lose = ()=>{loseGame("Quiet")}
+  })
+})
+
+
+gameEvent(3*ENV.YEAR,()=>{
+    new task("Make childhood friends",(t,w)=>{
+    learn1(w,t,[{"name":"make friends",f:()=>{t.vx+=44/DIF},times:2},{"name":"imaginary friends",f:reward2(-0.4),times:2},{"name":"solitude",f:reward2(-0.4),times:2}],(w,t,d)=>{shuffleChildren(d)},DCC("div",w.cdiv))
+
+    w.canv().graph = {tx:40}
+
+  },(t)=>{
+    t.setCompleteBefore(5.7*ENV.YEAR)
+    t.done = ()=>{
+      closeIn(t);
+      stats.kindergarten_friends = t.hp
+      activateEvent("Maintain kindergarten friends")
+    }
     t.record = []
+      t.vx = 0
+      t.hp = 1
     t.tick = (sdt)=>{
+      if(t.vx>0){
+        t.vx *= 0.995
+      }
       t.progress += sdt
-      t.hp -= sdt/0.6
+      // t.hp -= t.hp*sdt/30
+      t.vx -= (35+t.hp/2)*sdt/20
+      t.hp += t.vx*sdt/20
+      if(t.hp<1){t.hp = 1;} if(t.hp>100){t.vx=-1;t.hp=100}
       t.record.push({time:t.progress,y:t.hp})
     }
   })
 })
 
 
+gameEvent(3*ENV.YEAR,()=>{
+    new task("Go to kindergarten",(t,w)=>{
+    learn1(w,t,[{"name":"learn",f:reward2(0.3)},{"name":"struggle",f:reward2(-0.4),times:3},{"name":"play",f:reward2(0.32),times:2}],(w,t,d)=>{shuffleChildren(d)},DCC("div",w.cdiv))
 
+
+  },(t)=>{
+    t.setCompleteBefore(5.7*ENV.YEAR)
+    t.done = ()=>{
+      closeIn(t);
+    }
+    t.record = []
+    t.tick = (sdt)=>{
+      t.progress += sdt
+      t.hp -= sdt + t.hp*sdt/30
+      t.record.push({time:t.progress,y:t.hp})
+    }
+  })
+})
+
+
+pendEvent("Maintain kindergarten friends","+4",()=>{
+    new task("Maintain childhood friends",(t,w)=>{
+    learn1(w,t,[{"name":"remember",f:()=>{t.vx+=37/DIF}},{"name":"ignore",f:reward2(-0.4),times:3},{"name":"forget",f:reward2(-0.4),times:2}],(w,t,d)=>{shuffleChildren(d)},DCC("div",w.cdiv))
+
+    w.canv().graph = {tx:40}
+
+  },(t)=>{
+    t.record = []
+      t.vx = 0
+      t.hp = stats.kindergarten_friends
+    t.tick = (sdt)=>{
+      if(t.vx>0){
+        t.vx *= 0.99
+      }
+      t.progress += sdt
+      // t.hp -= t.hp*sdt/30
+      t.vx -= (5+t.hp/2)*sdt/20
+      t.hp += t.vx*sdt/20
+      if(t.hp<1){t.hp = 1;} if(t.hp>stats.kindergarten_friends){t.vx=0;t.hp=stats.kindergarten_friends}
+      t.record.push({time:t.progress,y:t.hp})
+    }
+  })
+})
+
+gameEvent(5.7*ENV.YEAR,()=>{
+    new task("Primary school grades (p1-p3)",(t,w)=>{
+    learn1(w,t,[{"name":"muster",f:reward2(1.5,"vx")},{"name":"failure",f:reward(-5,"hp"),times:3},{"name":"neglect",f:reward2(-0.5,"vx"),times:2}],(w,t,d)=>{shuffleChildren(d)},DCC("div",w.cdiv))
+
+    w.canv().graph = {tx:40}
+
+  },(t)=>{
+    t.record = []
+      t.vx = 0
+      t.hp = Math.random()*42+50
+
+      t.done = ()=>{
+        closeIn(t);
+      }
+      t.setCompleteBefore(8.7*ENV.YEAR)
+    t.tick = (sdt)=>{
+      if(t.vx>0){
+        t.vx *= 1-(0.005*(t.hp/100)-0.001)
+      }
+      t.progress += sdt
+      // t.hp -= t.hp*sdt/30
+      t.vx -= (5+t.hp)*sdt/20
+      t.hp += t.vx*sdt/40
+      if(t.hp<1){t.hp = 1;} if(t.hp>100){t.vx=0;t.hp=100}
+      t.record.push({time:t.progress,y:t.hp})
+    }
+  })
+})
+
+gameEvent(5.7*ENV.YEAR,()=>{
+    new task("focus",(t,w)=>{
+    learn1(w,t,[{"name":"---",f:reward(-1.3,"current")},{"name":"+++",f:reward(1.3,"current")}],undefined,DCC("div",w.cdiv))
+    w.canv().graph = {tx:40,type:2}
+
+
+  },(t)=>{
+    // t.win = ()=>{activateEvent("Learn to run");closeIn(t)}
+    // t.lose = ()=>{loseGame("failed to focus")}
+    t.record = []
+
+    t.aimto = 50
+    t.current = 50
+
+      t.vx = 0
+      t.lastTick = 0
+    t.tick = (sdt)=>{
+      t.progress += sdt
+      let tickpoint = Math.floor(t.progress*3)
+      if(tickpoint > t.lastTick ){t.lastTick = tickpoint}else{return}
+      t.hp = 100-Math.abs(t.current-t.aimto)*2
+      t.vx += (Math.random()-0.5)/100
+      t.vx *= 0.94
+      t.current += (5*( (Math.random()-0.5)+(t.current/200-0.25))+ t.vx) * DIF
+      //current = 0 -> -0.5
+      //current = 1 -> 0.5
+      stats.focus = t.hp
+      if(t.current < 1){t.current = 1}
+      if(t.current > 100){t.current = 100}
+      t.hp = Math.max(t.hp,1)
+      t.record.push({time:t.progress,y:t.current})
+    }
+  })
+})
+
+
+
+
+
+
+
+
+
+
+// gameEvent(-Infinity,()=>{
+//     new task("Learn to debug",(t,w)=>{
+//     learn1(w,t,[{"name":"learn",f:reward2(0.3)},{"name":"observe",f:reward2(0.1),times:2},{"name":"stumble",f:reward2(-0.2),times:3}],(w,t,d)=>{shuffleChildren(d)},DCC("div",w.cdiv))
+
+//     w.canv().graph = {tx:40}
+
+
+
+//   },(t)=>{
+    // t.setCompleteBefore(1.5*ENV.YEAR)
+//     // t.win = ()=>{activateEvent("Learn to run");closeIn(t)}
+//     t.lose = ()=>{loseGame("crippled")}
+//     t.record = []
+//     t.tick = (sdt)=>{
+//       t.progress += sdt
+//       t.hp -= sdt/10 + t.hp*sdt/50  
+//       t.record.push({time:t.progress,y:t.hp})
+//     }
+//   })
+// })
+
+
+// gameEvent(-Infinity,()=>{
+//     new task("Learn to debug",(t,w)=>{
+//     // learn1(w,t,[{"name":"learn",f:reward2(0.3)},{"name":"observe",f:reward2(0.1),times:2},{"name":"stumble",f:reward2(-0.2),times:3}],(w,t,d)=>{shuffleChildren(d)},DCC("div",w.cdiv))
+//     learn1(w,t,[{"name":"---",f:reward(-1,"current")},{"name":"+++",f:reward(1,"current")}],undefined,DCC("div",w.cdiv))
+
+//     w.canv().graph = {tx:40,type:2}
+
+
+
+//   },(t)=>{
+//     // t.win = ()=>{activateEvent("Learn to run");closeIn(t)}
+//     t.lose = ()=>{loseGame("crippled")}
+//     t.record = []
+
+//     t.aimto = 50
+//     t.current = 50
+
+//     t.tick = (sdt)=>{
+//       t.progress += sdt
+//       t.hp = 100-Math.abs(t.current-t.aimto)*2
+//       t.current += Math.random()-0.5 
+//       t.record.push({time:t.progress,y:t.current})
+//     }
+//   })
+// })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// SKIPS.add("cry")
+// SKIPS.add("cry2")
+// SKIPS.add("Learn to run")
+// SKIPS.add("Learn to speak")
+// SKIPS.add("Learn to walk")
+// SKIPS.add("Potty train")
+// SKIPS.add("Make childhood friends")
+// SKIPS.add("Go to kindergarten")
+// skiptime = 5*ENV.YEAR
+
+
+
+
+
+
+/* IDEAS
+
+Go out play: too much: Get kidnapped
+Go out play: too little: socially stupid
+
+
+*/
