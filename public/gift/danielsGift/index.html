@@ -61,7 +61,7 @@
     width: 100%;
     height: calc(100% - 2vmin);
     overflow-y: hidden;
-    background-color: #700000;
+    background-color: #100020;
   }
   .wind{
     background-color: black;
@@ -88,6 +88,14 @@
 
   .loser{
     background-color: #700000;
+    position:fixed;
+    font-size: 10vw;
+    width:100vw;
+    height:100vw;
+    text-align: center;
+  }
+    .winner{
+    background-color: #007000;
     position:fixed;
     font-size: 10vw;
     width:100vw;
@@ -188,6 +196,7 @@
     transition: all 1s;
     border-radius: 25px;
     animation: grow 1s forwards;
+    overflow-y: hidden;
   }
 
   @keyframes grow {
@@ -201,6 +210,7 @@
     align-items: end;
     flex-direction: column;
     justify-content: end;
+    overflow-y: hidden;
   }
 
   .effects {
@@ -247,10 +257,17 @@
       background-color: green;
     }
 
+    .delayThing{
+      color:black;
+      background-color: white;
+    }
+
     @keyframes flash3 {
         0% { background-color: green; }
         100% { background-color: white; }
     }
+
+
 
   .task.depleat{
     color:#700;
@@ -263,6 +280,32 @@
         50% { background-color: #700; }
     }
 
+    .roll{
+      color:black;
+      background-color: white;
+      animation: roller 1s forwards;
+    }
+
+    @keyframes roller {
+        0% { background-color: red; }
+        100% { background-color: white; }
+    }
+
+    .CHINESE > div > * {
+      background-color: white;
+      animation: flash6 4s infinite;
+      width: 25%;
+    }
+
+    @keyframes flash6 {
+        0%, 10%, 100% { background-color: black; color: black }
+        50% { background-color: black; color:white}
+    }
+
+    @keyframes flash7 {
+        0% { background-color: green; }
+        100% { background-color: white; color:red }
+    }
 
 </style>
 

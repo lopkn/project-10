@@ -448,6 +448,25 @@ function dragElement(elmnt) {
   }
 }
 
+
+function ranarr(arr){
+  return(arr[Math.floor(Math.random()*arr.length)])
+}
+function genHS(){
+  let arr1 = ["Dong","Chau","Ding","Ming","Ling","Lin","Fang","Guan","Diu","dé","Ning","Ping","Jang","Nam","Po","Leung","Kok","Bok","Kei","Gwai","Heung","Cheung","Ching","Chong"]
+  let arr = ["Dong","Chau","Ding","Ming","Ling","Lin","Fang","Guan","Diu","Ning","Ping","Jang","Nam","Po","Leung","Kok","Bok","Kei","Gwai","Heung","Cheung","Ching","Chong"]
+  let arr2 = [" Christian"," Catholic", " Bhuddist"," Goverment"," Baptist"," Intranational"," Chinese"," Chinese","","","","",""]
+  let arr3 = ["Secondary School", "College"]
+  let name = ranarr(arr)+" "+ranarr(arr)+" "
+  while(Math.random()>0.7){
+    name += ranarr(arr1)+" "
+  }
+
+  name += ranarr(arr)+ranarr(arr2)+" "+ranarr(arr3)
+  return(name)
+}
+
+
 // can = new LCanvas()
 // can.clear()
 // can.fitScreenSize()
@@ -603,7 +622,7 @@ class wind{
         ctx.stroke()
 
 
-
+        let offset;
         let tx = this.graph.tx // time the graph should show
 
 
@@ -613,7 +632,7 @@ class wind{
           while(t.progress-t.records[e][0].time > tx){
             t.records[e].splice(0,1)
           }
-          let offset = t.records[e][0].time
+          offset = t.records[e][0].time
           for(let i = 0; i<t.records[e].length-2; i++){
 
             let r1 = t.records[e][i]
@@ -626,6 +645,16 @@ class wind{
             ctx.moveTo(x1,y1)
             ctx.lineTo(x2,y2)      
           }
+          ctx.stroke()
+        })
+
+        this.graph.lines.forEach((e)=>{
+          ctx.lineWidth = 3
+          ctx.strokeStyle = "white"
+            let x = 15+(e-offset)/tx*350
+          ctx.beginPath()
+            ctx.moveTo(x,260)
+            ctx.lineTo(x,260-30)      
           ctx.stroke()
         })
         
@@ -698,6 +727,7 @@ var DIF = 1 //difficulty
 class ENV{
   static YEAR = 60 //a year is 60 progress seconds
   static DAY = 0
+  static dt = 1
 }
 //calc
 ENV.DAY = ENV.YEAR/365
@@ -723,7 +753,9 @@ function gameEvent(time,event){
 
 function mainFunc(dt){
 
-  if(taskArr[0].complete){dt*=15}
+  // if(taskArr[0].complete){dt*=15}
+
+  dt *= ENV.dt
 
   let sdt = dt/1000
   PROGRESS += sdt 
@@ -811,6 +843,9 @@ function debuff(str){
 
 class stats{
   static kindergarten_friends;
+  static CFS = [];
+  static CFST = 0;
+  static repeatGrade = 0;
 }
 
 
@@ -873,7 +908,7 @@ class task{
 
   setCompleteBefore(t){
     this.completeBefore = t;
-    this.timeAllowed = t-PROGRESS
+    this.timeAllowed = t-this.startTime
   }
 
   tick(sdt){
@@ -978,6 +1013,19 @@ function loseGame(reason="no reason",t){
   throw(new Error)
 }
 
+function winGame(reason="no reason",t){
+  el= DCC("div",document.body)
+  el.style.zIndex="99999"
+  el.classList.add("winner")
+  el.innerText = "YOU WON:\n"+reason
+
+  document.querySelector(".effects").style.zIndex = "9999999"
+
+  clearInterval(mainLoop)
+  console.log(t)
+  throw(new Error)
+}
+
 
 function shuffleChildren(parent) {
   const children = parent.children;
@@ -1028,8 +1076,9 @@ function learn1(w,t,arr,func=()=>{},div){ // [{"name":"learn",f:f}] , master fun
   })
 
 
-
-  Wlimit(w,t)
+  if(!w.NOTWIND){
+    Wlimit(w,t)
+  }
 
 }
 
@@ -1163,13 +1212,15 @@ pendEvent("cry2","+2",()=>{
     let el = DCC("button",w.div)
     el.innerText = "CRY"
     el.onclick = ()=>{
-      t.completion += 6 / (DIF**0.5)
+      t.completion += 7 / (DIF**0.5)
     }
       Wlimit(w,t)
   },(t)=>{
     t.setCompleteBefore(PROGRESS + 100*ENV.DAY)
     t.win = ()=>{if(PROGRESS<1.3*ENV.YEAR){if(!completedTasks["Learn to speak"]){activateEvent("cry2")}};closeIn(t)}
-    t.lose = ()=>{loseGame("forgot to cry, parents neglected you. You starved.")}
+    t.lose = ()=>{if(Math.random()<0.5){loseGame("forgot to cry, parents neglected you. You starved.")}else{
+      debuff("neglected")
+    }}
   })
 })
 
@@ -1220,7 +1271,7 @@ gameEvent(0.5*ENV.YEAR,()=>{
     t.setCompleteBefore(2.2*ENV.YEAR)
     t.tick = (sdt)=>{t.progress += sdt}
     t.win = ()=>{activateEvent("Speaking#2");closeIn(t)}
-    t.lose = ()=>{debuff("mute")}
+    t.lose = ()=>{debuff("mute");closeIn(t)}
   })
 })
 
@@ -1237,7 +1288,55 @@ gameEvent(0.3*ENV.YEAR,()=>{
   },(t)=>{
     t.setCompleteBefore(1.5*ENV.YEAR)
     t.win = ()=>{closeIn(t)}
-    t.lose = ()=>{debuff("Bad shitter");closeIn(t)}
+    t.lose = ()=>{debuff("Bad shitter");closeIn(t);
+      for(let i = 0; i < 4; i++){
+        gameEvent(PROGRESS+Math.random()*10*ENV.YEAR,()=>{notify("You shat yourself")})
+      }
+    }
+  })
+})
+
+gameEvent(2*ENV.YEAR,()=>{
+    new task("Human decency",(t,w)=>{
+
+    let el = DCC("button",w.div)
+    el.innerText = "Learn"
+    el.onclick = ()=>{
+      t.completion += 2 / DIF
+    }
+    Wlimit(w,t)
+
+  },(t)=>{
+    t.setCompleteBefore(6*ENV.YEAR)
+    t.tick = (sdt)=>{t.progress += sdt}
+    t.win = ()=>{closeIn(t)}
+    t.lose = ()=>{debuff("Homosexual");closeIn(t);
+      for(let i = 0; i < 14; i++){
+        gameEvent(PROGRESS+Math.random()*10*ENV.YEAR,()=>{notify("You are gay")})
+      }
+    }
+  })
+})
+
+gameEvent(2.5*ENV.YEAR,()=>{
+    new task("common sense",(t,w)=>{
+
+    let el = DCC("button",w.div)
+    el.innerText = "Learn"
+    el.onclick = ()=>{
+      t.completion += 3 / DIF
+    }
+    Wlimit(w,t)
+
+  },(t)=>{
+    t.setCompleteBefore(5*ENV.YEAR)
+    t.tick = (sdt)=>{t.progress += sdt}
+    t.win = ()=>{closeIn(t)}
+    t.lose = ()=>{debuff("sped");closeIn(t);
+      for(let i = 0; i < 14; i++){
+        gameEvent(PROGRESS+Math.random()*10*ENV.YEAR,()=>{notify("You are sped.")})
+      }
+    }
   })
 })
 
@@ -1261,7 +1360,7 @@ pendEvent("Speaking#2","+0",()=>{
     t.setCompleteBefore(5*ENV.YEAR)
     t.tick = (sdt)=>{t.progress += sdt}
     t.win = ()=>{closeIn(t)}
-    t.lose = ()=>{loseGame("Quiet")}
+    t.lose = ()=>{debuff("Quiet");closeIn(t)}
   })
 })
 
@@ -1282,6 +1381,11 @@ gameEvent(3*ENV.YEAR,()=>{
     t.record = []
       t.vx = 0
       t.hp = 1
+
+    t.lose = ()=>{
+      notify("you have lost all your childhood friends")
+      closeIn(t)
+    }
     t.tick = (sdt)=>{
       if(t.vx>0){
         t.vx *= 0.995
@@ -1290,7 +1394,78 @@ gameEvent(3*ENV.YEAR,()=>{
       // t.hp -= t.hp*sdt/30
       t.vx -= (35+t.hp/2)*sdt/20
       t.hp += t.vx*sdt/20
-      if(t.hp<1){t.hp = 1;} if(t.hp>100){t.vx=-1;t.hp=100}
+      if(t.hp>100){t.vx=-1;t.hp=100}
+      t.record.push({time:t.progress,y:t.hp})
+    }
+  })
+})
+
+gameEvent(5.7*ENV.YEAR,()=>{
+    new task("Make primary school friends",(t,w)=>{
+    learn1(w,t,[{"name":"make friends",f:()=>{t.vx+=37/DIF},times:2},{"name":"imaginary friends",f:reward2(-0.4),times:2},{"name":"solitude",f:reward2(-0.4),times:2}],(w,t,d)=>{shuffleChildren(d)},DCC("div",w.cdiv))
+
+    w.canv().graph = {tx:40}
+
+  },(t)=>{
+    t.setCompleteBefore(11.7*ENV.YEAR)
+    t.done = ()=>{
+      closeIn(t);
+      stats.ps_friends = t.hp
+      activateEvent("Maintain primary school friends")
+    }
+    t.record = []
+      t.vx = 0
+      t.hp = 50
+
+    t.lose = ()=>{
+      notify("you have no primary school friends")
+      debuff("social outcast")
+      closeIn(t)
+    }
+    t.tick = (sdt)=>{
+      if(t.vx>0){
+        t.vx *= 0.995
+      }
+      t.progress += sdt
+      // t.hp -= t.hp*sdt/30
+      t.vx -= (35+t.hp/2)*sdt/20
+      t.hp += t.vx*sdt/20
+      if(t.hp>100){t.vx=-1;t.hp=100}
+      t.record.push({time:t.progress,y:t.hp})
+    }
+  })
+})
+
+gameEvent(11.7*ENV.YEAR,()=>{
+    new task("Make secondary school friends",(t,w)=>{
+    learn1(w,t,[{"name":"make friends",f:()=>{t.vx+=27/DIF},times:2},{"name":"imaginary friends",f:reward2(-0.4),times:2},{"name":"regress",f:reward2(-0.4),times:4}],(w,t,d)=>{shuffleChildren(d)},DCC("div",w.cdiv))
+    w.canv().graph = {tx:40}
+
+  },(t)=>{
+    t.setCompleteBefore(17.7*ENV.YEAR)
+    t.done = ()=>{
+      closeIn(t);
+      stats.hs_friends = t.hp
+      activateEvent("Maintain secondary school friends")
+    }
+    t.record = []
+      t.vx = 0
+      t.hp = 25
+
+    t.lose = ()=>{
+      notify("you have no secondary school friends")
+      debuff("bagged bob")
+      closeIn(t)
+    }
+    t.tick = (sdt)=>{
+      if(t.vx>0){
+        t.vx *= 0.995
+      }
+      t.progress += sdt
+      // t.hp -= t.hp*sdt/30
+      t.vx -= (25+t.hp/2)*sdt/20
+      t.hp += t.vx*sdt/20
+      if(t.hp>100){t.vx=-1;t.hp=100}
       t.record.push({time:t.progress,y:t.hp})
     }
   })
@@ -1299,6 +1474,92 @@ gameEvent(3*ENV.YEAR,()=>{
 
 
 
+
+
+gameEvent(4.5*ENV.YEAR,()=>{
+    new task("eating habbits",(t,w)=>{
+
+    let bt = DCC("button",w.cdiv)
+        bt.innerText = "maintain"
+        let delayed = false
+        bt.onclick = ()=>{
+          if(delayed){return}
+          t.hp += 12 / (DIF**0.5)
+          bt.classList.add("delay")
+          delayed = true;
+          STO(()=>{bt.classList.remove("delay");delayed=false},4000)
+        }
+    Wlimit(w,t)
+
+  },(t)=>{
+    t.win = ()=>{closeIn(t)}
+    t.lose = ()=>{debuff("bulimic");closeIn(t)}
+  })
+  })
+
+
+gameEvent(14.5*ENV.YEAR,()=>{
+    new task("sleeping habbits",(t,w)=>{
+
+    let bt = DCC("button",w.cdiv)
+        bt.innerText = "maintain"
+        let delayed = false
+        bt.onclick = ()=>{
+          if(delayed){return}
+          t.hp += 8 / (DIF**0.5)
+          bt.classList.add("delay")
+          delayed = true;
+          STO(()=>{bt.classList.remove("delay");delayed=false},2000)
+        }
+    Wlimit(w,t)
+
+  },(t)=>{
+    t.win = ()=>{closeIn(t)}
+    t.lose = ()=>{debuff("insomiac");closeIn(t)}
+  })
+})
+
+gameEvent(16.1*ENV.YEAR,()=>{
+    new task("social status",(t,w)=>{
+
+    let bt = DCC("button",w.cdiv)
+        bt.innerText = "maintain"
+        let delayed = false
+        bt.onclick = ()=>{
+          if(delayed){return}
+          t.hp += 12 / (DIF**0.5)
+          bt.classList.add("delay")
+          delayed = true;
+          STO(()=>{bt.classList.remove("delay");delayed=false},3000)
+        }
+    Wlimit(w,t)
+
+  },(t)=>{
+    t.win = ()=>{closeIn(t)}
+    t.lose = ()=>{debuff("reject");closeIn(t)}
+  })
+})
+
+gameEvent(17.1*ENV.YEAR,()=>{
+    new task("Networking",(t,w)=>{
+
+    let bt = DCC("button",w.cdiv)
+        bt.innerText = "network"
+        let delayed = false
+        bt.onclick = ()=>{
+          if(delayed){return}
+          t.hp += 12 / (DIF**0.5)
+          bt.classList.add("delay")
+          delayed = true;
+          STO(()=>{bt.classList.remove("delay");delayed=false},6000)
+        }
+    Wlimit(w,t)
+
+  },(t)=>{
+    t.win = ()=>{closeIn(t)}
+    t.lose = ()=>{debuff("outcast");closeIn(t)}
+  })
+})
 
 gameEvent(3*ENV.YEAR,()=>{
     new task("Go to kindergarten",(t,w)=>{
@@ -1312,6 +1573,10 @@ gameEvent(3*ENV.YEAR,()=>{
         debuff("dumb")
       }
       closeIn(t);
+    }
+    t.lose = ()=>{
+      notify("you failed kindergarten")
+      debuff("dumb")
     }
     t.record = []
     t.tick = (sdt)=>{
@@ -1361,6 +1626,13 @@ pendEvent("Maintain kindergarten friends","+4",()=>{
     t.record = []
       t.vx = 0
       t.hp = stats.kindergarten_friends
+
+    t.lose = ()=>{
+      notify("you have lost all your kindergarten friends")
+      debuff("nostalgiapathic")
+      closeIn(t)
+    }
+
     t.tick = (sdt)=>{
       if(t.vx>0){
         t.vx *= 0.99
@@ -1375,9 +1647,65 @@ pendEvent("Maintain kindergarten friends","+4",()=>{
   })
 })
 
+pendEvent("Maintain primary school friends","+4",()=>{
+    new task("Maintain primary school friends",(t,w)=>{
+    learn1(w,t,[{"name":"remember",f:()=>{t.vx+=37/DIF}},{"name":"ignore",f:reward2(-0.4),times:3},{"name":"forget",f:reward2(-0.4),times:2}],(w,t,d)=>{shuffleChildren(d)},DCC("div",w.cdiv))
+
+    w.canv().graph = {tx:40}
+
+  },(t)=>{
+    t.record = []
+      t.vx = 0
+      t.hp = stats.ps_friends
+    t.lose = ()=>{
+      notify("you have lost all your primary school friends")
+      debuff("poor social memory")
+      closeIn(t)
+    }
+    t.tick = (sdt)=>{
+      if(t.vx>0){
+        t.vx *= 0.99
+      }
+      t.progress += sdt
+      // t.hp -= t.hp*sdt/30
+      t.vx -= (5+t.hp/2)*sdt/20
+      t.hp += t.vx*sdt/20
+      if(t.hp>stats.ps_friends){t.vx=0;t.hp=stats.ps_friends}
+      t.record.push({time:t.progress,y:t.hp})
+    }
+  })
+})
+
+pendEvent("Maintain secondary school friends","+4",()=>{
+    new task("Maintain secondary school friends",(t,w)=>{
+    learn1(w,t,[{"name":"remember",f:()=>{t.vx+=37/DIF}},{"name":"ignore",f:reward2(-0.4),times:3},{"name":"forget",f:reward2(-0.4),times:2}],(w,t,d)=>{shuffleChildren(d)},DCC("div",w.cdiv))
+
+    w.canv().graph = {tx:40}
+
+  },(t)=>{
+    t.record = []
+      t.vx = 0
+      t.hp = stats.hs_friends
+      t.lose = ()=>{
+      loseGame("lost all contact to society")
+    }
+    t.tick = (sdt)=>{
+      if(t.vx>0){
+        t.vx *= 0.99
+      }
+      t.progress += sdt
+      // t.hp -= t.hp*sdt/30
+      t.vx -= (5+t.hp/2)*sdt/20
+      t.hp += t.vx*sdt/20
+      if(t.hp<1){t.hp = 1;} if(t.hp>stats.hs_friends){t.vx=0;t.hp=stats.hs_friends}
+      t.record.push({time:t.progress,y:t.hp})
+    }
+  })
+})
+
 gameEvent(5.7*ENV.YEAR,()=>{
     new task("Primary school grades (p1-p3)",(t,w)=>{
-    learn1(w,t,[{"name":"muster",f:reward2(1.5,"vx")},{"name":"failure",f:reward(-5,"hp"),times:3},{"name":"neglect",f:reward2(-0.5,"vx"),times:2}],(w,t,d)=>{shuffleChildren(d)},DCC("div",w.cdiv))
+    learn1(w,t,[{"name":"muster",f:reward2(1.5*stats.focus,"vx")},{"name":"failure",f:reward(-5,"hp"),times:3},{"name":"neglect",f:reward2(-0.5,"vx"),times:2}],(w,t,d)=>{shuffleChildren(d)},DCC("div",w.cdiv))
 
     w.canv().graph = {tx:40}
 
@@ -1410,7 +1738,7 @@ gameEvent(8.7*ENV.YEAR,()=>{
 
 
 
-    w.canv().graph = {tx:40,type:3}
+    w.canv().graph = {tx:40,type:3,lines : []}
 
     w.subWinds = {
       "Chinese": new wind("subject: "),
@@ -1422,6 +1750,8 @@ gameEvent(8.7*ENV.YEAR,()=>{
 
     t.subarr = Object.keys(w.subWinds)
 
+
+
     w.subWinds.Chinese.color = "orange"
     w.subWinds.English.color = "#40FFFF"
     w.subWinds.Math.color = "lime"
@@ -1429,6 +1759,9 @@ gameEvent(8.7*ENV.YEAR,()=>{
 
     t.subarr.forEach((name)=>{
       let wind = w.subWinds[name]
+
+      w.subWinds[name].cdiv.style.backgroundColor = w.subWinds[name].color
+
       t.records[name] = []
       wind.button = DCC("button",subject_div)
       wind.button.innerText = name
@@ -1460,18 +1793,18 @@ gameEvent(8.7*ENV.YEAR,()=>{
         let bt = DCC("button",wind.cdiv)
         bt.innerText = "practice"
         wind.vx = 0
-        bt.onclick = ()=>{wind.vx += 1}
+        bt.onclick = ()=>{wind.vx += 0.6+stats.focus*0.6}
       }
 
       if(name=="General studies"){
         let bt = DCC("button",wind.cdiv)
-        bt.innerText = "curse"
+        bt.innerText = "Grasp"
         wind.vx = 0
         let delayed = false
         bt.onclick = ()=>{
           if(delayed){return}
-          wind.score += 10
-          wind.vx += 5
+          wind.score += 10 + 4*stats.focus
+          wind.vx += 5 + stats.focus
           bt.classList.add("delay")
           delayed = true;
           STO(()=>{bt.classList.remove("delay");delayed=false},2000)
@@ -1479,12 +1812,13 @@ gameEvent(8.7*ENV.YEAR,()=>{
       }
 
       if(name=="Chinese"){
-        learn1(wind,t,[{"name":"memorize",f:()=>{wind.score+=3},times:5},{"name":"swear",f:()=>{wind.score+=5},times:5},{"name":"forget",f:()=>{wind.score-=5},times:40}],(w,t,d)=>{shuffleChildren(d)},DCC("div",wind.cdiv))
+        wind.NOTWIND = true
+        learn1(wind,t,[{"name":"memorize",f:()=>{wind.score+=stats.focus*3},times:5},{"name":"swear",f:()=>{wind.score+=5},times:5},{"name":"forget",f:()=>{wind.score-=5},times:40}],(w,t,d)=>{shuffleChildren(d)},DCC("div",wind.cdiv))
 
       }
       if(name=="English"){
         let bt = DCC("button",wind.cdiv)
-        bt.innerText = "Grasp"
+        bt.innerText = "curse"
         bt.style.position = "relative"
         bt.style.width = "20%"
         wind.vx = 0
@@ -1493,32 +1827,41 @@ gameEvent(8.7*ENV.YEAR,()=>{
         wind.cdiv.style.overflow = "hidden"
 
         bt.onclick = ()=>{
-          wind.score += 5
+          wind.score += 5 + stats.focus*2
           wind.vx += Math.random()-0.5
         }
       }
 
     })
 
-
-
-
-
-
-    
-
   },(t)=>{
+      t.cfs = [1.6,2.4,2.6,Infinity]
+      t.cfsNo = 0
       t.vx = 0
       t.hp = Math.random()*42+50
       t.records = {}
 
       t.done = ()=>{
+
+      let de = false
+      console.log(t.wind.subWinds)
+      Object.keys(t.wind.subWinds).forEach((e)=>{
+        if(t.wind.subWinds[e].score < 40 && e!="Chinese"){
+          notify("Failed horribly: "+e+"-"+Math.floor(t.wind.subWinds[e].score))
+          de = true
+        }
+      })
+      if(de){
+        debuff(useful())
+      }
         closeIn(t);
       }
       t.setCompleteBefore(11.7*ENV.YEAR)
     t.tick = (sdt)=>{
 
       t.progress += sdt
+
+
       t.subarr.forEach((e)=>{
         let tse=t.wind.subWinds[e]
         let sc = tse.score
@@ -1531,23 +1874,23 @@ gameEvent(8.7*ENV.YEAR,()=>{
         }
 
         if(e == "Math"){
-          tse.score -= (0.4+sc/150)/sdt/1000
+          tse.score -= (0.4+sc/150)*sdt * (DIF) /2
           tse.vx *= 0.99
           tse.score += tse.vx*sdt
         }
 
         if(e == "General studies"){
-          tse.score -= (0.3 + sc/100)/sdt/1000
+          tse.score -= (0.3 + sc/100)*sdt * (DIF) /2
           tse.vx *= 0.99
           tse.score += tse.vx*sdt
         }
 
         if(e == "Chinese"){
-          tse.score -= (0.01+sc/150)/sdt/1000
+          tse.score -= (0.01+sc/150)*sdt * (DIF) /2
         }
 
         if(e == "English"){
-          tse.score -= (0.3)/sdt/1000
+          tse.score -= (0.3)*sdt * (DIF) /2
           tse.x += tse.vx
           tse.vx *= 0.995
           if(tse.x < 0){tse.x = 0; tse.vx = 0}
@@ -1556,9 +1899,25 @@ gameEvent(8.7*ENV.YEAR,()=>{
           tse.bt.style.left = Math.min(Math.floor(tse.x),80) + "%"
         }
 
-
         t.records[e].push({time:t.progress,y:tse.score})
       })
+      if(t.progress > t.cfs[t.cfsNo]*ENV.YEAR){
+        notify("Ching Fun Shit Exam!")
+
+
+        t.wind.graph.lines.push(t.progress)
+        let dict = {}
+        let tot = 0
+        t.subarr.forEach((e)=>{
+          dict[e] = t.wind.subWinds[e].score
+          tot += dict[e]
+        })
+
+        stats.CFS.push(dict)
+        stats.CFST += tot
+        t.cfsNo += 1
+      }
+
     }
   })
 })
@@ -1610,8 +1969,6 @@ gameEvent(5.7*ENV.YEAR,()=>{
 
 
   },(t)=>{
-    // t.win = ()=>{activateEvent("Learn to run");closeIn(t)}
-    // t.lose = ()=>{loseGame("failed to focus")}
     t.record = []
 
     t.aimto = 50
@@ -1629,7 +1986,7 @@ gameEvent(5.7*ENV.YEAR,()=>{
       t.current += (5*( (Math.random()-0.5)+(t.current/200-0.25))+ t.vx) * DIF
       //current = 0 -> -0.5
       //current = 1 -> 0.5
-      stats.focus = t.hp
+      stats.focus = t.hp/100
       if(t.current < 1){t.current = 1}
       if(t.current > 100){t.current = 100}
       t.hp = Math.max(t.hp,1)
@@ -1641,6 +1998,630 @@ gameEvent(5.7*ENV.YEAR,()=>{
 
 
 
+gameEvent(9.7*ENV.YEAR,()=>{
+  new task("Select middle school",(t,w)=>{
+
+    let d1 = DCC("div",w.div)
+    let lab = DCC("span",d1)
+    lab.innerText = "Choose Middle school: "
+    lab.style.color = "white"
+    let sel = DCC("select",d1)
+    let arr = ["HLC","DBS","SHIT","RTD"]
+
+    arr.forEach((e)=>{
+      let op = DCC("option",sel)
+      op.innerText = e
+      op.value = e
+    })
+
+    t.setCompleteBefore((5.7+5.4)*ENV.YEAR)
+    t.hp = Infinity
+    t.done = ()=>{
+
+      let grade_boundary = Math.floor(Math.random()*15 + 70)
+
+      let avg = stats.CFST/8
+      notify("grade boundary: "+grade_boundary)
+      notify("your average: "+Math.floor(avg))
+
+      if(avg<grade_boundary){
+        notify("your average was too low to get into your school of choice. now rolling balls.")
+        activateEvent("Rolling Ball: select HS")
+      }
+
+
+
+      t.complete = true;
+      stats.HS = sel.value
+      closeIn(t)
+    }
+  })
+})
+
+
+pendEvent("Rolling Ball: select HS","+2",()=>{
+  new task("Roll pearl - select HS",(t,w)=>{
+    w.title.innerText = "View: Roll pearl-select HS"
+    t.buttons = []
+    for(let i = 0; i < 20; i++){
+      let bt = DCC("button",w.cdiv)
+      bt.style.width = "100%"
+      bt.innerText = genHS()
+      t.buttons.push(bt)
+    }
+
+  },(t)=>{
+    t.setCompleteBefore((5.7+6)*ENV.YEAR)
+      t.lastTick = 0
+      t.hp = Infinity
+      t.done = ()=>{
+        notify("Enrolled in: "+t.lastSchool)
+        stats.HS = t.lastSchool
+        closeIn(t)
+      }
+    t.tick = (sdt)=>{
+      t.progress += sdt
+      let tickpoint = Math.floor(t.progress*2)
+      if(tickpoint > t.lastTick ){t.lastTick = tickpoint}else{return}
+        
+        let bt = ranarr(t.buttons)
+        for( let i = 0; bt.classList.contains("roll") && i < 500; i++){
+          bt = ranarr(t.buttons)
+        }
+        bt.classList.add("roll")
+        STO(()=>{bt.classList.remove("roll")},1000)
+        t.lastSchool=bt.innerText
+
+    }
+  })
+})
+
+
+
+gameEvent(11.7*ENV.YEAR,()=>{
+    new task("Secondary school grades (s1-s3)",(t,w)=>{
+    w.canv().graph = {tx:40,type:3,lines : []}
+    w.subWinds = {
+      "Chinese": new wind("subject: "),
+      "English": new wind("subject: "),
+      "Math": new wind("subject: "),
+      "Science": new wind("subject: "),
+      "History": new wind("subject: "),
+    }
+    let subject_div = DCC("div",w.cdiv)
+
+    t.subarr = Object.keys(w.subWinds)
+
+
+
+    w.subWinds.Chinese.color = "#707000"
+    w.subWinds.English.color = "#208888"
+    w.subWinds.Math.color = "#208020"
+    w.subWinds["Science"].color = "#AA0000"
+    w.subWinds["History"].color = "#803000"
+
+    t.subarr.forEach((name)=>{
+      let wind = w.subWinds[name]
+
+      w.subWinds[name].cdiv.style.backgroundColor = w.subWinds[name].color
+
+      t.records[name] = []
+      wind.button = DCC("button",subject_div)
+      wind.button.innerText = name
+
+      wind.button.style.color = wind.color
+
+      wind.score = Math.random()*80+20
+      wind.div.style.visibility = "hidden";
+      wind.bar.style.visibility = "hidden";
+      wind.title.innerText = "subject: "+name
+
+      wind.button.addEventListener("click",()=>{
+        if(wind.div.style.visibility=="hidden"){
+          wind.div.style.visibility = "visible";
+          wind.bar.style.visibility = "visible";
+          wind.div.style.top = Math.floor(mouseY) + "px"
+          wind.div.style.left = Math.floor(mouseX + 50) + "px"
+        } else {
+          wind.div.style.visibility = "hidden";
+          wind.bar.style.visibility = "hidden";
+        }
+      })
+    })
+
+    t.subarr.forEach((name)=>{
+      let wind = w.subWinds[name]
+      wind.vx = 0
+      if(name=="Math"){
+        let que = DCC("div",wind.cdiv)
+
+        let barr = []
+
+
+        let gen = ()=>{
+          let x = Math.floor(Math.random()*200)
+          let y = Math.floor(Math.random()*200)
+          let ans = Math.floor(x+y)
+          let ansarr = [ans]
+          que.innerText = "whats "+x+" + "+y+"?"
+          wind.ans = ans
+
+          barr.forEach((e)=>{e.innerText=""})
+
+          let zz= ranarr([0,1,2,3])
+
+          barr.forEach((e,i)=>{
+            if(i != zz){
+              let tans = ans+Math.round(Math.random()*22-11)
+              while(ansarr.includes(tans)){
+                tans = ans+Math.round(Math.random()*22-11)
+              }
+              ansarr.push(tans)
+              e.innerText = tans
+            } else {e.innerText = ans}
+          })
+
+
+        }
+
+        let fnc = (bt)=>{
+          if(bt.innerText == wind.ans){
+            notify("correct")
+            wind.score += (5 + 2*stats.focus) / DIF
+            wind.vx += 5 + stats.focus
+          } else {
+            notify("incorrect")
+            wind.score -= 6
+          }
+          gen()
+        }
+
+        for(let i = 0; i < 4; i++){
+          let bt = DCC("button",wind.cdiv)
+          bt.innerText = ""
+          barr.push(bt)
+          bt.onclick = ()=>{fnc(bt)}
+        }
+        gen()
+
+      }
+      if(name=="History"){
+        let bt = DCC("button",wind.cdiv)
+        bt.innerText = "Cram. Cram. Cram."
+        wind.vx = 0
+        bt.onclick = ()=>{wind.vx += 0.6+stats.focus*0.6}
+      }
+
+      if(name=="Science"){
+        let delTime = [4000,2100,900,700]
+        for(let i = 0; i < 4; i++){
+          let bt = DCC("button",wind.cdiv)
+          bt.innerText = "Grasp"
+          wind.vx = 0
+          let delayed = false
+          bt.classList.add("delayThing")
+          bt.onclick = ()=>{
+            if(delayed){return}
+            wind.score += (10 + 4*stats.focus)/2000*delTime[i]/10
+            wind.vx += (5 + stats.focus)/2000*delTime[i]/10
+            bt.style.animation = "flash7 "+(delTime[i]/1000)+"s forwards"
+            delayed = true;
+            STO(()=>{bt.style.animation="";delayed=false},delTime[i])
+          }
+        }
+      }
+
+      if(name=="Chinese"){
+        wind.NOTWIND = true
+        learn1(wind,t,[{"name":"memorize",f:()=>{wind.score+=stats.focus*3},times:5},{"name":"swear",f:()=>{wind.score+=5},times:5},{"name":"forget",f:()=>{wind.score-=5},times:40}],(w,t,d)=>{shuffleChildren(d)},DCC("div",wind.cdiv))
+        wind.cdiv.classList.add("CHINESE")
+        wind.div.style.width = "300px"
+      }
+      if(name=="English"){
+        wind.cdiv.style.height = wind.cdiv.style.width = "230px"
+        let bt = DCC("button",wind.cdiv)
+        bt.innerText = "curse"
+        bt.style.position = "relative"
+        bt.style.width = "20%"
+        bt.style.height = "10%"
+        wind.vx = 0
+        wind.vy = 0
+        wind.bt = bt
+        wind.x = 0
+        wind.y = 0
+        wind.cdiv.style.overflow = "hidden"
+
+        bt.onclick = ()=>{
+          wind.score += 5 + stats.focus*2
+          wind.vx += Math.random()-0.5
+          wind.vy += Math.random()-0.5
+        }
+      }
+
+    })
+
+  },(t)=>{
+      t.vx = 0
+      t.hp = Math.random()*42+50
+      t.records = {}
+      t.cfs = 1
+
+      t.done = ()=>{
+        closeIn(t);
+      }
+      t.setCompleteBefore(14.7*ENV.YEAR)
+    t.tick = (sdt)=>{
+
+      t.progress += sdt
+
+
+      t.subarr.forEach((e)=>{
+        let tse=t.wind.subWinds[e]
+        let sc = tse.score
+
+        if(tse.score < 1){
+          tse.score = 1
+        }
+        if(tse.score > 100){
+          tse.score = 100
+        }
+
+        if(e == "Math"){
+          tse.score -= (0.3 + sc/100)*sdt * (DIF) /2
+          tse.vx *= 0.99
+          tse.score += tse.vx*sdt
+
+        }
+
+        if(e == "History"){
+          tse.score -= (0.4+sc/150)*sdt * (DIF) /2
+          tse.vx *= 0.99
+          tse.score += tse.vx*sdt
+        }
+
+        if(e == "Science"){
+          tse.score -= (0.3 + sc/100)*sdt * (DIF) /2
+          tse.vx *= 0.99
+          tse.score += tse.vx*sdt
+        }
+
+        if(e == "Chinese"){
+          tse.score -= (0.01+sc/150)*sdt * (DIF) /2
+        }
+
+        if(e == "English"){
+          tse.score -= (0.3)*sdt * (DIF) /2
+          tse.x += tse.vx
+          tse.y += tse.vy
+          tse.vx *= 0.995
+          tse.vy *= 0.995
+          if(tse.x < 0){tse.x = 0; tse.vx = 0}
+          if(tse.x > 80){tse.x = 80; tse.vx = 0}
+
+          if(tse.y < 0){tse.y = 0; tse.vy = 0}
+          if(tse.y > 90){tse.y = 80; tse.vy = 0}
+          tse.vx += Math.random()-0.5
+          tse.vy += Math.random()-0.5
+          tse.bt.style.left = Math.min(Math.floor(tse.x),80) + "%"
+          tse.bt.style.top = Math.min(Math.floor(tse.y),90) + "%"
+        }
+
+        t.records[e].push({time:t.progress,y:tse.score})
+      })
+      if(t.progress > (t.cfs-0.2)*ENV.YEAR){
+        t.cfs += 1
+        t.wind.graph.lines.push(t.progress)
+        let dict = {}
+        let tot = 0
+        t.subarr.forEach((e)=>{
+          dict[e] = t.wind.subWinds[e].score
+          tot += dict[e]
+        })
+        let avg = tot/Object.keys(t.wind.subWinds).length
+        notify("your average was: "+Math.floor(avg))
+
+        if(avg<30){
+          if(stats.repeatGrade == 1){
+            loseGame("stupid and homeless - (repeat grade 2 times)")
+          }
+          notify("you had to repeat a grade.")
+          stats.repeatGrade = 1
+        }
+
+      }
+    }
+
+  })
+})
+
+
+gameEvent((14.7 + stats.repeatGrade)*ENV.YEAR,()=>{
+    new task("Secondary school grades (s4-s6)",(t,w)=>{
+    w.canv().graph = {tx:40,type:3,lines : []}
+    w.subWinds = {
+      "Chinese": new wind("subject: "),
+      "English": new wind("subject: "),
+      "Math": new wind("subject: "),
+      "Chemistry": new wind("subject: "),
+      "Biology": new wind("subject: "),
+      "Physics": new wind("subject: "),
+    }
+    let subject_div = DCC("div",w.cdiv)
+
+    t.subarr = Object.keys(w.subWinds)
+
+
+
+    w.subWinds.Chinese.color = "#707000"
+    w.subWinds.English.color = "#208888"
+    w.subWinds.Math.color = "#208020"
+    w.subWinds["Chemistry"].color = "#AA0000"
+    w.subWinds["Biology"].color = "#FF6060"
+    w.subWinds["Physics"].color = "#2020FF"
+
+    t.subarr.forEach((name)=>{
+      let wind = w.subWinds[name]
+
+      w.subWinds[name].cdiv.style.backgroundColor = w.subWinds[name].color
+
+      t.records[name] = []
+      wind.button = DCC("button",subject_div)
+      wind.button.innerText = name
+
+      wind.button.style.color = wind.color
+
+      wind.score = Math.random()*80+20
+      wind.div.style.visibility = "hidden";
+      wind.bar.style.visibility = "hidden";
+      wind.title.innerText = "subject: "+name
+
+      wind.button.addEventListener("click",()=>{
+        if(wind.div.style.visibility=="hidden"){
+          wind.div.style.visibility = "visible";
+          wind.bar.style.visibility = "visible";
+          wind.div.style.top = Math.floor(mouseY) + "px"
+          wind.div.style.left = Math.floor(mouseX + 50) + "px"
+        } else {
+          wind.div.style.visibility = "hidden";
+          wind.bar.style.visibility = "hidden";
+        }
+      })
+    })
+
+    t.subarr.forEach((name)=>{
+      let wind = w.subWinds[name]
+      wind.vx = 0
+      if(name=="Math"){
+        let que = DCC("div",wind.cdiv)
+
+        let barr = []
+
+
+        let gen = ()=>{
+          let x = Math.floor(Math.random()*50)
+          let y = Math.floor(Math.random()*50)
+          let ans = Math.floor(x*y)
+          let ansarr = [ans]
+          que.innerText = "whats "+x+" x "+y+"? (use calc)"
+          wind.ans = ans
+
+          barr.forEach((e)=>{e.innerText=""})
+
+          let zz= ranarr([0,1,2,3,4,5])
+
+          barr.forEach((e,i)=>{
+            if(i != zz){
+              let tans = ans+Math.round(Math.random()*42-21)
+              while(ansarr.includes(tans)){
+                tans = ans+Math.round(Math.random()*42-21)
+              }
+              ansarr.push(tans)
+              e.innerText = tans
+            } else {e.innerText = ans}
+          })
+
+
+        }
+
+        let fnc = (bt)=>{
+          if(bt.innerText == wind.ans){
+            notify("correct")
+            wind.score += (5 + 2*stats.focus) / DIF
+            wind.vx += 5 + stats.focus
+          } else {
+            notify("incorrect")
+            wind.score -= 6
+          }
+          gen()
+        }
+
+        for(let i = 0; i < 6; i++){
+          let bt = DCC("button",wind.cdiv)
+          bt.innerText = ""
+          barr.push(bt)
+          bt.onclick = ()=>{fnc(bt)}
+        }
+        gen()
+
+      }
+      if(name=="Biology"){
+        let bt = DCC("button",wind.cdiv)
+        bt.innerText = "Stody. Study. Study."
+        wind.vx = 0
+        bt.onclick = ()=>{wind.vx += 0.2+stats.focus*0.6}
+      }
+
+      if(name=="Physics"){
+        let d = DCC("div",wind.cdiv)
+        d.innerText = "Experiment / THROB"
+        let bt = DCC("input",wind.cdiv)
+        bt.type = "range"
+        bt.min = 1
+        bt.max = 100
+        bt.value = 50
+        wind.vx = 0
+        let lastval = 50
+        bt.addEventListener('input', function() {
+            wind.vx += 0.0025 * Math.abs(lastval - bt.value)
+            lastval = bt.value
+        });
+      }
+
+      if(name=="Chemistry"){
+        let delTime = [4000,2100,900,700]
+        for(let i = 0; i < 4; i++){
+          let bt = DCC("button",wind.cdiv)
+          bt.innerText = "Shek"
+          wind.vx = 0
+          let delayed = false
+          bt.classList.add("delayThing")
+          bt.onclick = ()=>{
+            if(delayed){return}
+            wind.score += (10 + 4*stats.focus)/2000*delTime[i]/10
+            wind.vx += (5 + stats.focus)/2000*delTime[i]/10
+            bt.style.animation = "flash7 "+(delTime[i]/1000)+"s forwards"
+            delayed = true;
+            STO(()=>{bt.style.animation="";delayed=false},delTime[i])
+          }
+        }
+      }
+
+      if(name=="Chinese"){
+        wind.NOTWIND = true
+        learn1(wind,t,[{"name":"memorize",f:()=>{wind.score+=stats.focus*6},times:5},{"name":"swear",f:()=>{wind.score+=10},times:5},{"name":"forget",f:()=>{wind.score-=5},times:40}],(w,t,d)=>{shuffleChildren(d)},DCC("div",wind.cdiv))
+        wind.cdiv.classList.add("CHINESE")
+        wind.div.style.width = "300px"
+      }
+      if(name=="English"){
+        wind.cdiv.style.height = wind.cdiv.style.width = "230px"
+        let bt = DCC("button",wind.cdiv)
+        bt.innerText = "curse"
+        bt.style.position = "relative"
+        bt.style.width = "20%"
+        bt.style.height = "20%"
+        wind.vx = 0
+        wind.vy = 0
+        wind.bt = bt
+        wind.x = 0
+        wind.y = 0
+        wind.cdiv.style.overflow = "hidden"
+
+        bt.onclick = ()=>{
+          wind.score += 5 + stats.focus*10
+          wind.vx += Math.random()-0.5
+          wind.vy += Math.random()-0.5
+        }
+      }
+
+    })
+
+  },(t)=>{
+      t.vx = 0
+      t.hp = Math.random()*42+50
+      t.records = {}
+
+      t.done = ()=>{
+        closeIn(t);
+      }
+      t.setCompleteBefore((17.7+ stats.repeatGrade)*ENV.YEAR)
+      t.cfs = 0
+    t.tick = (sdt)=>{
+
+      t.progress += sdt
+
+
+      t.subarr.forEach((e)=>{
+        let tse=t.wind.subWinds[e]
+        let sc = tse.score
+
+        if(tse.score < 1){
+          tse.score = 1
+        }
+        if(tse.score > 100){
+          tse.score = 100
+        }
+
+        if(e == "Math"){
+          tse.score -= (0.3 + sc/100)*sdt * (DIF) /2
+          tse.vx *= 0.99
+          tse.score += tse.vx*sdt
+
+        }
+
+        if(e == "Biology"){
+          tse.score -= (0.4+sc/150)*sdt * (DIF) /2
+          tse.vx *= 0.99
+          tse.score += tse.vx*sdt
+        }
+
+        if(e == "Physics"){
+          tse.score -= (0.4+sc/150)*sdt * (DIF) /2
+          tse.vx *= 0.99
+          tse.score += tse.vx*sdt
+        }
+
+
+        if(e == "Chemistry"){
+          tse.score -= (0.3 + sc/100)*sdt * (DIF) /2
+          tse.vx *= 0.99
+          tse.score += tse.vx*sdt
+        }
+
+        if(e == "Chinese"){
+          tse.score -= (0.01+sc/150)*sdt * (DIF) /2
+        }
+
+        if(e == "English"){
+          tse.score -= (0.3)*sdt * (DIF) /2
+          tse.x += tse.vx
+          tse.y += tse.vy
+          tse.vx *= 0.995
+          tse.vy *= 0.995
+          if(tse.x < 0){tse.x = 0; tse.vx = 0}
+          if(tse.x > 80){tse.x = 80; tse.vx = 0}
+
+          if(tse.y < 0){tse.y = 0; tse.vy = 0}
+          if(tse.y > 80){tse.y = 80; tse.vy = 0}
+          tse.vx += Math.random()-0.5
+          tse.vy += Math.random()-0.5
+          tse.bt.style.left = Math.min(Math.floor(tse.x),80) + "%"
+          tse.bt.style.top = Math.min(Math.floor(tse.y),80) + "%"
+        }
+
+        t.records[e].push({time:t.progress,y:tse.score})
+      })
+
+       if(t.progress > (t.cfs-0.2)*ENV.YEAR){
+        t.cfs += 1
+        t.wind.graph.lines.push(t.progress)
+        let dict = {}
+        let tot = 0
+        t.subarr.forEach((e)=>{
+          dict[e] = t.wind.subWinds[e].score
+          tot += dict[e]
+        })
+        let avg = tot/Object.keys(t.wind.subWinds).length
+        notify("your average was: "+Math.floor(avg))
+
+        if(avg<30){
+          if(stats.repeatGrade == 1){
+            loseGame("stupid and homeless - (repeat grade 2 times)")
+          }
+          notify("you had to repeat a grade.")
+          stats.repeatGrade = 1
+        }
+
+      }
+
+    }
+  })
+})
+
+
+
+gameEvent(19*ENV.YEAR,()=>{
+  winGame("Reached 19 years. Happy birthday")
+})
 
 
 
@@ -1700,6 +2681,9 @@ gameEvent(5.7*ENV.YEAR,()=>{
 
 
 
+function useful(){
+  return(atob('cmV0YXJkZWQ='))
+}
 
 
 
@@ -1708,24 +2692,19 @@ gameEvent(5.7*ENV.YEAR,()=>{
 
 
 
-
-SKIPS.add("cry")
-SKIPS.add("cry2")
-SKIPS.add("Learn to run")
+// SKIPS.add("cry")
+// SKIPS.add("cry2")
+// SKIPS.add("Learn to run")
 // SKIPS.add("Learn to speak")
-SKIPS.add("Learn to walk")
-SKIPS.add("Potty train")
+// SKIPS.add("Learn to walk")
+// SKIPS.add("Potty train")
 
 // SKIPS.add("Make childhood friends")
 // SKIPS.add("Go to kindergarten")
 // SKIPS.add("Primary school grades (p1-p3)")
 // SKIPS.add("Primary school grades (p4-p6)")
-skiptime = 1*ENV.YEAR
-
-
-
-
-
+// SKIPS.add("Secondary school grades (s1-s3)")
+// skiptime = 1.9*ENV.YEAR
 
 
 
@@ -1745,3 +2724,6 @@ Avoid anime/pokemon/ other temptations:
 
 ["general studies","English","Chinese","Math"]
 */
+
+
+// 75%+ 80+ // no pig -> wheel
