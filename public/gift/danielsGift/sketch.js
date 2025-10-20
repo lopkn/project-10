@@ -1302,12 +1302,12 @@ gameEvent(2*ENV.YEAR,()=>{
     let el = DCC("button",w.div)
     el.innerText = "Learn"
     el.onclick = ()=>{
-      t.completion += 2 / DIF
+      t.completion += 1 / DIF
     }
     Wlimit(w,t)
 
   },(t)=>{
-    t.setCompleteBefore(6*ENV.YEAR)
+    t.setCompleteBefore(5*ENV.YEAR)
     t.tick = (sdt)=>{t.progress += sdt}
     t.win = ()=>{closeIn(t)}
     t.lose = ()=>{debuff("Homosexual");closeIn(t);
@@ -1329,7 +1329,7 @@ gameEvent(2.5*ENV.YEAR,()=>{
     Wlimit(w,t)
 
   },(t)=>{
-    t.setCompleteBefore(5*ENV.YEAR)
+    t.setCompleteBefore(6*ENV.YEAR)
     t.tick = (sdt)=>{t.progress += sdt}
     t.win = ()=>{closeIn(t)}
     t.lose = ()=>{debuff("sped");closeIn(t);
@@ -1394,6 +1394,7 @@ gameEvent(3*ENV.YEAR,()=>{
       // t.hp -= t.hp*sdt/30
       t.vx -= (35+t.hp/2)*sdt/20
       t.hp += t.vx*sdt/20
+      if(t.hp<1){t.hp=1}
       if(t.hp>100){t.vx=-1;t.hp=100}
       t.record.push({time:t.progress,y:t.hp})
     }
@@ -1577,6 +1578,7 @@ gameEvent(3*ENV.YEAR,()=>{
     t.lose = ()=>{
       notify("you failed kindergarten")
       debuff("dumb")
+      closeIn(t);
     }
     t.record = []
     t.tick = (sdt)=>{
@@ -1588,6 +1590,58 @@ gameEvent(3*ENV.YEAR,()=>{
   })
 })
 
+gameEvent(4*ENV.YEAR,()=>{
+  new task("Collect childhood happiness",(t,w)=>{
+    Wlimit(w,t)
+    w.div.style.width = "300px"
+  },(t)=>{
+
+    t.setCompleteBefore(5*ENV.YEAR)
+
+    t.bts = []
+    for(let i = 0; i < 20; i++){
+      let d = {"vx":0,"vy":0,"x":Width/2,"y":Height/2}
+      let bt = DCC("button",main)
+      bt.style.position="absolute"
+      bt.style.left = Math.floor(d.x)+"px"
+      bt.style.top = Math.floor(d.y)+"px"
+      bt.innerText = "COLLECT\nHAPPINESS"
+      bt.onclick = ()=>{t.completion+=100/20;bt.remove()}
+      t.bts.push([bt,d])
+    }
+
+
+    t.done = ()=>{
+      if(t.completion<30){
+        debuff("depressed")
+      }
+      closeIn(t);
+    }
+
+    t.tick = (sdt)=>{
+      t.progress += sdt
+
+      t.bts.forEach((e)=>{
+        let bt = e[0]
+        let d = e[1]
+         d.vx += Math.random()-0.5
+        d.vy += Math.random()-0.5
+        d.x += d.vx
+        d.y += d.vy
+
+        if(d.x < 0 || d.x > Width || d.y < 0 || d.y > Height){
+          bt.remove();return;
+        }
+
+        bt.style.left = Math.floor(d.x)+"px"
+        bt.style.top = Math.floor(d.y)+"px"
+      })
+     
+    }
+  })
+})
+
+
 
 gameEvent(3.3*ENV.YEAR,()=>{
     new task("Throw tamper tantrum",(t,w)=>{
@@ -1598,6 +1652,7 @@ gameEvent(3.3*ENV.YEAR,()=>{
     t.setCompleteBefore(5.7*ENV.YEAR)
     t.lose = ()=>{
       debuff("wuss")
+      closeIn(t);
     }
     t.done = ()=>{
       if(t.hp<30){
@@ -1640,8 +1695,9 @@ pendEvent("Maintain kindergarten friends","+4",()=>{
       t.progress += sdt
       // t.hp -= t.hp*sdt/30
       t.vx -= (5+t.hp/2)*sdt/20
+      // if(t.hp<1){t.hp = 1;} 
+      if(t.hp>stats.kindergarten_friends){t.vx=0;t.hp=stats.kindergarten_friends}
       t.hp += t.vx*sdt/20
-      if(t.hp<1){t.hp = 1;} if(t.hp>stats.kindergarten_friends){t.vx=0;t.hp=stats.kindergarten_friends}
       t.record.push({time:t.progress,y:t.hp})
     }
   })
@@ -1705,7 +1761,7 @@ pendEvent("Maintain secondary school friends","+4",()=>{
 
 gameEvent(5.7*ENV.YEAR,()=>{
     new task("Primary school grades (p1-p3)",(t,w)=>{
-    learn1(w,t,[{"name":"muster",f:reward2(1.5*stats.focus,"vx")},{"name":"failure",f:reward(-5,"hp"),times:3},{"name":"neglect",f:reward2(-0.5,"vx"),times:2}],(w,t,d)=>{shuffleChildren(d)},DCC("div",w.cdiv))
+    learn1(w,t,[{"name":"muster",f:reward2(1.5,"vx")},{"name":"failure",f:reward(-5,"hp"),times:3},{"name":"neglect",f:reward2(-0.5,"vx"),times:2}],(w,t,d)=>{shuffleChildren(d)},DCC("div",w.cdiv))
 
     w.canv().graph = {tx:40}
 
@@ -2014,7 +2070,7 @@ gameEvent(9.7*ENV.YEAR,()=>{
       op.value = e
     })
 
-    t.setCompleteBefore((5.7+5.4)*ENV.YEAR)
+    t.setCompleteBefore((5.7+5.8)*ENV.YEAR)
     t.hp = Infinity
     t.done = ()=>{
 
@@ -2247,6 +2303,7 @@ gameEvent(11.7*ENV.YEAR,()=>{
       t.cfs = 1
 
       t.done = ()=>{
+        t.complete=true
         closeIn(t);
       }
       t.setCompleteBefore(14.7*ENV.YEAR)
@@ -2320,10 +2377,20 @@ gameEvent(11.7*ENV.YEAR,()=>{
         let avg = tot/Object.keys(t.wind.subWinds).length
         notify("your average was: "+Math.floor(avg))
 
-        if(avg<30){
+        let de = false
+      Object.keys(t.wind.subWinds).forEach((e)=>{
+        if(t.wind.subWinds[e].score < 40 && e!="Chinese"){
+          notify("Failed horribly: "+e+"-"+Math.floor(t.wind.subWinds[e].score))
+          de = true
+        }
+      })
+
+        if(de){
           if(stats.repeatGrade == 1){
             loseGame("stupid and homeless - (repeat grade 2 times)")
           }
+          // t.setCompleteBefore(15.7)
+          t.completeBefore += 1
           notify("you had to repeat a grade.")
           stats.repeatGrade = 1
         }
@@ -2603,10 +2670,19 @@ gameEvent((14.7 + stats.repeatGrade)*ENV.YEAR,()=>{
         let avg = tot/Object.keys(t.wind.subWinds).length
         notify("your average was: "+Math.floor(avg))
 
-        if(avg<30){
+                let de = false
+      Object.keys(t.wind.subWinds).forEach((e)=>{
+        if(t.wind.subWinds[e].score < 40 && e!="Chinese"){
+          notify("Failed horribly: "+e+"-"+Math.floor(t.wind.subWinds[e].score))
+          de = true
+        }
+      })
+
+        if(de){
           if(stats.repeatGrade == 1){
             loseGame("stupid and homeless - (repeat grade 2 times)")
           }
+          t.completeBefore += 1
           notify("you had to repeat a grade.")
           stats.repeatGrade = 1
         }
@@ -2692,11 +2768,11 @@ function useful(){
 
 
 
-// SKIPS.add("cry")
-// SKIPS.add("cry2")
+SKIPS.add("cry")
+SKIPS.add("cry2")
 // SKIPS.add("Learn to run")
 // SKIPS.add("Learn to speak")
-// SKIPS.add("Learn to walk")
+SKIPS.add("Learn to walk")
 // SKIPS.add("Potty train")
 
 // SKIPS.add("Make childhood friends")
@@ -2704,7 +2780,7 @@ function useful(){
 // SKIPS.add("Primary school grades (p1-p3)")
 // SKIPS.add("Primary school grades (p4-p6)")
 // SKIPS.add("Secondary school grades (s1-s3)")
-// skiptime = 1.9*ENV.YEAR
+skiptime = 3.9*ENV.YEAR
 
 
 
