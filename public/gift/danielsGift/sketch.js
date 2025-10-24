@@ -1996,7 +1996,8 @@ gameEvent(7*ENV.YEAR,()=>{
         closeIn(t);
         t.complete = true;
         t.div.classList.add("depleat")
-        debuff("anime addict")
+        debuff("anime addict");
+        DIF += 0.2
       }
       t.done = ()=>{
         closeIn(t);
