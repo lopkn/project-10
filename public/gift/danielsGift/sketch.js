@@ -2769,11 +2769,11 @@ function useful(){
 
 
 
-SKIPS.add("cry")
-SKIPS.add("cry2")
+// SKIPS.add("cry")
+// SKIPS.add("cry2")
 // SKIPS.add("Learn to run")
 // SKIPS.add("Learn to speak")
-SKIPS.add("Learn to walk")
+// SKIPS.add("Learn to walk")
 // SKIPS.add("Potty train")
 
 // SKIPS.add("Make childhood friends")
@@ -2781,7 +2781,7 @@ SKIPS.add("Learn to walk")
 // SKIPS.add("Primary school grades (p1-p3)")
 // SKIPS.add("Primary school grades (p4-p6)")
 // SKIPS.add("Secondary school grades (s1-s3)")
-skiptime = 3.9*ENV.YEAR
+// skiptime = 3.9*ENV.YEAR
 
 
 
