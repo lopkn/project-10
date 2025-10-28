@@ -16,10 +16,18 @@ let smallerDim = Width<Height?Width:Height
 
 let ctx = document.getElementById("myCanvas").getContext("2d")
 
+var drawingCanvas;
+
 function ranarr(arr){
   return(arr[Math.floor(Math.random()*arr.length)])
 }
 
+
+addEventListener("resize", (event) => { 
+
+Width = window.innerWidth
+Height = window.innerHeight
+})
 
 
 
@@ -499,7 +507,8 @@ class startclock{
       dt/=1000
       let t1 = 0.7
       let t2 = 1
-      if(this.time<t1){
+      let skip = true;
+      if(this.time<t1 && !skip){
 
       ctx.clearRect(0,0,Width,Height)
       ctx.lineCap = "round"
@@ -514,7 +523,7 @@ class startclock{
       ctx.beginPath()
       ctx.arc(Width/2,Height/2,smallerDim/(6),0,Math.PI*0.75*(this.time/t1))
       ctx.stroke()
-      } else if(this.time<1){
+      } else if(this.time<1 && !skip){
         // ctx.clearRect(0,0,Width,Height)
       ctx.lineCap = "round"
       ctx.strokeStyle = "#00FF00"
@@ -528,7 +537,7 @@ class startclock{
       ctx.beginPath()
       ctx.arc(Width/2,Height/2,smallerDim/(6),0,Math.PI*0.75)
       ctx.stroke()
-      } else if(this.time<2){
+      } else if(this.time<2 && !skip){
 
         let d = 0.2
         ctx.save();
@@ -553,7 +562,7 @@ class startclock{
       ctx.beginPath()
       ctx.arc(Width/2,Height/2,smallerDim/(6-(this.time-t2)*6),0,Math.PI*0.75)
       ctx.stroke()
-      } else if(time<2.6){
+      } else if(time<2.6 && !skip){
         let d = 0.02
         ctx.save();
       ctx.globalCompositeOperation = 'destination-out';
@@ -564,6 +573,10 @@ class startclock{
       } else {
         // ctx.clearRect(0,0,Width,Height)
         myCanvas.style.zIndex = -15
+
+        let centerer = document.createElement("div")
+        centerer.classList.add("centerer")
+
         let div2 = document.createElement("div")
         let div = document.createElement("div")
         let txt = document.createElement("h1")
@@ -572,7 +585,9 @@ class startclock{
         div.classList.add("text1")
         div2.classList.add("appear")
         div.style.position = "relative"
-        document.getElementById("card1").appendChild(div2)
+
+        centerer.appendChild(div2)
+        document.getElementById("card1").appendChild(centerer)
         // document.body.appendChild(div2)
         div.appendChild(txt)
         div2.appendChild(div)
@@ -595,12 +610,19 @@ class startclock{
           let div5 = document.createElement("div")
               div5.id = "abouts"
               div5.style.left = "10%"
-              div5.style.top = "30%"
+              // div5.style.top = "30%"
               div5.style.minHeight = "50%"
               div5.style.minWidth = "70%"
-              div5.style.position = "absolute"
+              div5.style.marginTop = "30vh"
+              div5.style.position = "relative"
 
           let arr = ["about me","motivation","projects","skills","FAQ & other"]
+          let arr2= [
+            "Hi, I'm Leo! I code a lot as a hobby, creating extensions, prototypes, and automation projects. As a microbiology student, I love blending my scientific knowledge with technology. I'm particularly interested in big data, statistics, and data visualizations.",
+            "",
+            "",
+            "- Large data analysis and visualization (d3js, SQL, python, R) \n\n- Micropipette handling, gel electrophoresis, PCR, cell cultures, aseptic techniques \n\n- 3D printing, rendering, splicing and model design \n\n- Physics engine and simulation programming\t \n\n- Breadboarding, Microcontroller handling and soldering for electronic projects \n\n- Competent in Microsoft Office® software \n\n- Fluent in English, Cantonese, Mandarin",
+          ]
           for(let i = 0; i < arr.length; i++){
             setTimeout(()=>{
               let div3 = document.createElement("div")
@@ -615,9 +637,9 @@ class startclock{
               let extendDiv = document.createElement("div")
               let str = ""
               while(Math.random()<0.97){
-                str += ranarr(["Me ","am ","great ","is ","I ","best ","the "])
+                str += ranarr(["this","temporary","is"])
               }
-              extendDiv.innerText = str
+              extendDiv.innerText = arr2[i]?arr2[i]:str
               extendDiv.classList.add("collapsible_content")
               // div4.appendChild(extendDiv)
 
@@ -646,7 +668,7 @@ class startclock{
         setTimeout(()=>{div.style.zIndex=30
           document.getElementById("cont").classList.add("appeared")
 
-          let drawingCanvas = new LCanvas(0,0,"drawing")
+          drawingCanvas = new LCanvas(0,0,"drawing")
           document.getElementById("cont").appendChild(drawingCanvas.canvas)
           drawingCanvas.fitScreenSize()
           drawingCanvas.balls = []
@@ -669,6 +691,7 @@ class startclock{
             }
 
             let d = 0.2
+            // d = 1
             let ctx = drawingCanvas.ctx;
             ctx.save();
             ctx.globalCompositeOperation = 'destination-out';
@@ -716,6 +739,7 @@ function setPos(d){
 
 let mainLoop = setInterval(main,20)
 let start = time = Date.now()
+// var COUNTER = 0;
 
 var parrocesser={"parr":[],"tick":(dt,t)=>{
   for(let i = t.parr.length-1; i > -1; i--){
@@ -737,6 +761,7 @@ let events = [startclock,parrocesser]
 function main(t){
   let dt = Date.now()-time
   time = Date.now()
+  // COUNTER ++ 
 
 
 

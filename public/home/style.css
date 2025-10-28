@@ -215,8 +215,9 @@ div {
    /*scroll-snap-align: center;*/
    position: relative;
    /*overflow-y: hidden;*/
+   left:0px;
    min-height: 100vh;
-   display: flex;
+/*   display: flex;*/
    justify-content: center;
    align-items: center;
    background-color: transparent;
@@ -225,6 +226,16 @@ div {
    z-index: 20;
 }
 
+.centerer {
+   justify-content: center;
+   align-items: center;
+   display: flex;
+   left:0px;
+   top:0px;
+   position: absolute;
+   width: 100%;
+   height: 100%;
+}
 
 
 
@@ -281,7 +292,7 @@ div {
 .typing:hover{
    color: red;
    text-shadow: 5px 5px #558abb;
-   transition: all 0.8s 0s ease-in-out;
+   transition: all 0.4s 0s ease-in-out;
 }
 
 
@@ -325,3 +336,16 @@ div {
   border: 3px solid #73AD21;
   padding: 10px;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+

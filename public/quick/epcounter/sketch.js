@@ -1768,7 +1768,7 @@ let parr = []
 class events{
 	static happening = {}
 	static interactions = {"cutInteraction":[]}
-	static varbs = {handOnScreen:true,boltrate:0.99,rippleStrength:1,trip:1,noteCeiling:85,noteFloor:45,octave:0,conjureStrength:0/*25*/}
+	static varbs = {handOnScreen:true,boltrate:0.99,rippleStrength:1,trip:1,noteCeiling:85,noteFloor:45,octave:0,conjureStrength:2.5/*25*/}
 	static updateAll(dt){
 		let objk = Object.keys(this.happening)
 		objk.forEach((E)=>{
