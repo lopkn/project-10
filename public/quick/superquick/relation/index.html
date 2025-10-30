@@ -90,6 +90,27 @@ C6,7,8,9 -> membrane attack map
 `
 }
 
+function test4(){
+  let s = `j::joesguns
+h::home
+f::foodstuff
+h -> n00dles, f, sigma-cosmetics,j,hong-fang-tea,sushi::harakiri-sushi,iron-gym
+
+
+f -> zer0
+
+
+
+n00dles -> nectar-net 
+nectar-net -> neo-net, silver-helix
+
+zer0 -> omega-net, phantasy
+sushi -> max-hardware, CSEC
+
+
+`
+}
+
 class envs{
   static causality = "->"
   static definer = "::"
@@ -160,6 +181,9 @@ function createLink(a,b,reason){
     return;
   }
 
+  a=removeWhiteSpace(a)
+  b=removeWhiteSpace(b)
+
   if(a.includes(envs.definer)){
     a = defineSyntax(a)
   }
@@ -207,7 +231,8 @@ function declareNode(e,display=true){
 }
 
 function removeWhiteSpace(str) {
-    return str.replace(/^\s+|\s+$/g, '');
+  return(str.trim())
+    // return str.replace(/^\s+|\s+$/g, '');
 }
 
     </script>
