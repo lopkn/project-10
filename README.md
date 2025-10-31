@@ -9,6 +9,8 @@ Many fun projects are here, ran by one central server.js file
 visit the join link with suffixes for fun stuff:
 - https://game.lopkn.dev/quick/three 3d flight simulator
 
+- https://game.lopkn.dev/quick/FPV 3d FPV flight simulator
+
 - https://game.lopkn.dev/quick/particles 2d particle system universe (PWA)
 
 - https://game.lopkn.dev/quick/zchess 2d real time singleplayer chess (PWA)

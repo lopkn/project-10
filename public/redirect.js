@@ -16,5 +16,7 @@ if(a == 0){
 } else if(a == 2){
   loadScript("ceator/creator.js")
 } else {
+  alert("not found!")
+  window.location.href = "/home"
   console.log(a)
 }
