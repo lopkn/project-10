@@ -583,8 +583,12 @@ class startclock{
         // txt.style.zIndex = 1
         txt.innerText = "Hello"
         div.classList.add("text1")
+
         div2.classList.add("appear")
         div.style.position = "relative"
+        div2.onclick = ()=>{
+          spawnStars()
+        }
 
         centerer.appendChild(div2)
         document.getElementById("card1").appendChild(centerer)
@@ -775,6 +779,41 @@ function main(t){
 
 }
 
+
+
+function spawnStars(){
+  for(let i = 0; i < 10; i++){
+    setTimeout(()=>{
+
+      let startPoint = [-200,-200]
+      let c = new liner(drawingCanvas.ctx,startPoint[0],startPoint[1],7,10)
+      c.vx = -(startPoint[0] - Width*Math.random() - 20)/48
+      c.vy = -(startPoint[1] - Height*Math.random() - 20)/48
+      // c.vx *= Math.random()*2-1
+      // c.vy *= Math.random()*2-1
+      c.size = distance(c.vx,c.vy,0,0)/9
+      c.sizef = (a,b)=>{return(c.size*b*b*4)}
+      c.mass = c.size * 30
+      c.starSignature = Math.random()*Math.PI*2
+      c.asize = 3*(c.size+1)**1.7
+      c.specialDraw = (a)=>{
+          gradient = a.ctx.createRadialGradient(a.x+a.vx, a.y+a.vy, 0, a.x+a.vx, a.y+a.vy, a.asize)
+          a.A = Math.abs(Math.sin(time/10/(a.asize+3)+a.starSignature))*0.6+0.4
+          gradient.addColorStop(0.2, "rgba(255,255,"+a.A*Math.random()*255+","+a.A+")");
+          gradient.addColorStop(1, "rgba(255,255,0,0)");
+
+          a.ctx.fillStyle = gradient;
+          a.ctx.fillRect(a.x-a.asize+a.vx, a.y-a.asize+a.vy, a.asize*2+a.vx, a.asize*2+a.vy);
+          // console.log(a.A)
+      }
+
+      parrocesser.parr.push(c)
+      c.invincible = 1550
+
+    },Math.random()*10*1000)
+  }
+  
+}
 
 
 
