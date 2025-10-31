@@ -432,7 +432,12 @@ function newReq(req,item){ //if .then returns a correction for what the tag shou
 }
 
 var SENTENCE = undefined
-
+function sensitive(arr){
+    for(let i = 0; i < arr.length; i++){
+        arr[i] = atob(arr[i])
+    }
+    return(arr)
+}
 function responder(MSG){
 	let sender = MSG.author.username
 	let amsg = MSG.content
@@ -539,7 +544,7 @@ function responder(MSG){
 	if(requirements["@ summary"]){return("dont wanna help with that")}
 
 
-	rs=refsegarr(["shut up","stupid","dumb","gay","retard","fuck","shit","jump"],"@ insults",msg,requirements)
+	rs=refsegarr(sensitive(["c2h1dCB1cA==","c3R1cGlk","ZHVtYg==","Z2F5","cmV0YXJk","ZnVjaw==","c2hpdA==","anVtcA=="]),"@ insults",msg,requirements)
 	rs=refsegarr(["great","amazing","the best"],"@ compliments",msg,requirements)
 	// rs=refsegarr(["you","i","they","she","he","her","his","their"],"@D pronoun",msg,requirements)
 	rs=refsegarr(["is","are"],"@ equate",msg,requirements)

@@ -70,12 +70,14 @@ function picarr(arr){
 
 
 
-var defaults = ["gay","fucking fatty","dangle yourself",
-    "kill yourself","kys","jump off",
-    "i hate you",">:(","YOU SUCK","i hope you die",
-    "ur the worst","whats with your fucking attitude","fuck you",
-    "fuck you","ur a bitch","ur a pig",
-    "mind your fucking language","ur rude asf","rude","ur gay"]
+var defaults = ["Z2F5","ZnVja2luZyBmYXR0eQ==","ZGFuZ2xlIHlvdXJzZWxm","a2lsbCB5b3Vyc2VsZg==","a3lz","anVtcCBvZmY=","aSBoYXRlIHlvdQ==","Pjoo","WU9VIFNVQ0s=","aSBob3BlIHlvdSBkaWU=","dXIgdGhlIHdvcnN0","d2hhdHMgd2l0aCB5b3VyIGZ1Y2tpbmcgYXR0aXR1ZGU=","ZnVjayB5b3U=","ZnVjayB5b3U=","dXIgYSBiaXRjaA==","dXIgYSBwaWc=","bWluZCB5b3VyIGZ1Y2tpbmcgbGFuZ3VhZ2U=","dXIgcnVkZSBhc2Y=","cnVkZQ==","dXIgZ2F5"]
+function sensitive(arr){
+    for(let i = 0; i < arr.length; i++){
+        arr[i] = atob(arr[i])
+    }
+    return(arr)
+}
+sensitive(defaults)
 
 var S = sendMessage
 var s = (msg,t)=>{sendMessage(msg+"\n[FLUSH]",t)}

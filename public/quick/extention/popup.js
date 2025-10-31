@@ -1,4 +1,3 @@
-// console.log("hifag")
   
 // document.getElementById('runButton').addEventListener('click', () => {
 //   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
