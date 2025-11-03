@@ -75,7 +75,7 @@ body {
    content: "";
    width: 0%;
    height: 100%;
-   left: 100%;
+   left: 98%;
    top: 0px;
    transition: all 1.5s 0s ease-in-out;
    position: absolute;
