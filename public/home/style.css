@@ -50,7 +50,7 @@ body {
 
 .appear {
    min-width: 20%;
-   height: 15%;
+   /*height: 15%;*/
    display: flex;
    justify-content: center;
    align-items: center;
@@ -287,6 +287,8 @@ div {
   background-color: rgba(0,0,0,0.2);
   overflow-x: visible;
   overflow-y: hidden;
+  font-weight: 2;
+  color:#F0E0E0;
 }
 
 .typing:hover{

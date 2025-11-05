@@ -4,6 +4,10 @@ let Height = window.innerHeight
 
 let myCanvas = document.getElementById("myCanvas")
 
+if(document.hasFocus()){
+    Width = window.innerWidth
+  Height = window.innerHeight
+
   myCanvas.width = Math.floor(Width)
   myCanvas.height = Math.floor(Height)
   myCanvas.style.width = "100%"
@@ -11,6 +15,8 @@ let myCanvas = document.getElementById("myCanvas")
   myCanvas.style.position = "fixed"
   myCanvas.style.top = "0px"
   myCanvas.style.left = "0px"
+}
+  
 
 let smallerDim = Width<Height?Width:Height
 
@@ -29,6 +35,19 @@ Width = window.innerWidth
 Height = window.innerHeight
 })
 
+addEventListener("focus",(e)=>{
+  Width = window.innerWidth
+  Height = window.innerHeight
+
+  myCanvas.width = Math.floor(Width)
+  myCanvas.height = Math.floor(Height)
+  myCanvas.style.width = "100%"
+  myCanvas.style.height = "100%"
+  myCanvas.style.position = "fixed"
+  myCanvas.style.top = "0px"
+  myCanvas.style.left = "0px"
+
+},{once:true})
 
 
 let mouseX = 0
@@ -504,10 +523,12 @@ class startclock{
   static time = 0
 
   static tick(dt){
+
+
       dt/=1000
       let t1 = 0.7
       let t2 = 1
-      let skip = true;
+      let skip = false;
       if(this.time<t1 && !skip){
 
       ctx.clearRect(0,0,Width,Height)
@@ -605,7 +626,7 @@ class startclock{
         },460)
         setTimeout(()=>{
           div.classList.add("appeared")
-          div2.style.top = "10%"
+          div2.style.top = "10vh"
           // div2.style.left = "50%"
         },1000)
         setTimeout(()=>{
@@ -623,9 +644,10 @@ class startclock{
           let arr = ["about me","motivation","projects","skills","FAQ & other"]
           let arr2= [
             "Hi, I'm Leo! I code a lot as a hobby, creating extensions, prototypes, and automation projects. As a microbiology student, I love blending my scientific knowledge with technology. I'm particularly interested in big data, statistics, and data visualizations.",
-            "",
-            "",
+            "My primary goal in life is to first try to get a deep understanding of how adult somatic cells work, then work towards curing/preventing aging. I believe this to be the top leading causes in suffering and people with shorter lifespans are unable to make long-term decisions. Would people be so eager to throw away their lives if there is 400 more years ahead instead of 40? Given the progress of modern medicine in the last century, I believe it to be completely within the realm of possibility for us to cure all major diseases AND aging within our current lifespans, if everyone focused on it.\n\nFurthermore I believe that computers/computational analysis is definitely the future in medicine, I think that with the huge amounts of data we already have, we could already be able to make a lot of useful conclusions with some time and dedication.",
+            "(see links in resume/github)\n- Real time 3D First Person Flight simulators with custom built physics engines, geometry and collision handling\n- Multiplayer game servers with websockets\n- custom particle simulator\n- Linked node data visualisation tools\n- Various automation based Chrome extensions",
             "- Large data analysis and visualization (d3js, SQL, python, R) \n\n- Micropipette handling, gel electrophoresis, PCR, cell cultures, aseptic techniques \n\n- 3D printing, rendering, splicing and model design \n\n- Physics engine and simulation programming\t \n\n- Breadboarding, Microcontroller handling and soldering for electronic projects \n\n- Competent in Microsoft Office® software \n\n- Fluent in English, Cantonese, Mandarin",
+            "WHY do the websites look so boring??\n\n    this is not finished yet! and also the other websites are mostly for prototyping purposes made on a time crunch and do not have polished introductions, whoops. Still, I think they are decently fun/functional. I would love to discuss them with you though if you'd like."
           ]
           for(let i = 0; i < arr.length; i++){
             setTimeout(()=>{
@@ -766,6 +788,7 @@ function main(t){
   let dt = Date.now()-time
   time = Date.now()
   // COUNTER ++ 
+      if(!document.hasFocus()){return}
 
 
 
