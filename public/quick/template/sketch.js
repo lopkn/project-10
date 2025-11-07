@@ -23,6 +23,14 @@ onmousemove = (e)=>{mouseX = (e.clientX); mouseY = (e.clientY)}
 
 
 // const socket = io.connect('/')
+function readCSV(str,del=","){
+  let arr = str.split("\n")
+  for(let i = 0; i < arr.length; i++){
+    arr[i] = arr[i].split(del)
+  }
+  return(arr)
+}
+
 
 class LCanvas{ //lopkns template canvas
   constructor(w=100,h=100,id=("LCanvas-"+Math.random())){
