@@ -1075,6 +1075,10 @@ function render(){
 	// } wow this game is terrifically optimized
 
 	ctx.fillRect(0,0,camera.menuButtonSize,camera.menuButtonSize)
+	ctx.textAlign="center"
+	ctx.fillStyle = "yellow"
+	ctx.font = "bold "+Math.floor(camera.menuButtonSize/3)+"px Courier New"
+	ctx.fillText("Menu",camera.menuButtonSize/2,camera.menuButtonSize/2)
 	DBG.tickTime = DBG.tickTime + 0.05*(Date.now()-renderStartTime- DBG.tickTime)
 }
 
