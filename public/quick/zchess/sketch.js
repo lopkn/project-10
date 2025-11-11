@@ -1080,6 +1080,7 @@ function render(){
 	ctx.font = "bold "+Math.floor(camera.menuButtonSize/3)+"px Courier New"
 	
 	if(gameStart == "lost"){
+		ctx.fillStyle = Math.random()>0.5?"yellow":"orange"
 		ctx.fillText("Back",camera.menuButtonSize/2,camera.menuButtonSize/2)
 	} else {
 		ctx.fillText("Menu",camera.menuButtonSize/2,camera.menuButtonSize/2)
