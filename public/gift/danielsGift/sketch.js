@@ -2071,7 +2071,7 @@ gameEvent(9.7*ENV.YEAR,()=>{
       op.value = e
     })
 
-    t.setCompleteBefore((5.7+5.8)*ENV.YEAR)
+    t.setCompleteBefore((5.7+5.5)*ENV.YEAR)
     t.hp = Infinity
     t.done = ()=>{
 
