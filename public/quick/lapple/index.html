@@ -169,6 +169,7 @@ import { InstancedMesh2 } from '@three.ez/instanced-mesh';
 import { createRadixSort} from '@three.ez/instanced-mesh';
 
 
+
 var COUNTER = 0
 
 
@@ -190,11 +191,8 @@ document.addEventListener("mousemove",(e)=>{
   if(mouseLocked){
     mouseDisp.x += e.movementX
     mouseDisp.y += e.movementY
-    if(DRONE.grapplePoint == false){
-
-    mouseX += e.movementX
-    mouseY += e.movementY
-    }
+    // mouseX += e.movementX
+    // mouseY += e.movementY
   } else if(!Mobile.initialized){
     mouseX = e.clientX
     mouseY = e.clientY
@@ -435,16 +433,23 @@ class DRONE{
     "yaw":0
   }
 
+  static grapple = [
+    new THREE.Vector3(0,0,0),
+    new THREE.Vector3(0,0,0)
+  ]
+
   static controlSpeed = 0.0008
   static rollControlSpeed = 1
   static controlStrength = 0.0009
 
-  static grapplePoint = new THREE.Vector3(0,0,0)
-  static grappled = false
+  static grapplePoint = false
 
   static invertedControls = 1
 
+
   static lockMousePos = {x:0,y:0}
+
+  static grappleLine;
 
   static forwardLocked = true
 
@@ -455,33 +460,36 @@ class DRONE{
 
       if(!this.forwardLocked){
         if(downs.w){
-          DRONE.controls.pitch += this.controlSpeed * this.invertedControls * dt
+          // DRONE.controls.pitch += this.controlSpeed * this.invertedControls * dt
           // DRONE.forces.up += this.controlSpeed * 345/4
         }  if(downs.s){
-          DRONE.controls.pitch -= this.controlSpeed * this.invertedControls * dt
+          // DRONE.controls.pitch -= this.controlSpeed * this.invertedControls * dt
           // DRONE.forces.up -= this.controlSpeed * 345/4
         } if(downs.a){
-          DRONE.controls.yaw += this.controlSpeed * dt
+          // DRONE.controls.yaw += this.controlSpeed * dt
+          DRONE.controls.roll += this.controlSpeed * dt * 0.1
         }  if(downs.d){
-          DRONE.controls.yaw -= this.controlSpeed * dt
+          // DRONE.controls.yaw -= this.controlSpeed * dt
+          DRONE.controls.roll -= this.controlSpeed * dt * 0.1
         }  if(downs.e){
           DRONE.controls.roll -= this.controlSpeed * dt
         }  if(downs.q){
           DRONE.controls.roll += this.controlSpeed * dt
         } if(downs[" "]){
-        ENV.timeWarp *= 0.97**(dt/ENV.timeWarp)
           // DRONE.forces.up += this.controlSpeed * 345/4
         } if(downs.Control){
           DRONE.forces.up -= this.controlSpeed * 345/4
+        }
+        if(downs["M0"]){
+          // DRONE.vel.add(camera.getWorldDirection(new THREE.Vector3()).multiplyScalar(1*dt))
+        ENV.timeWarp *= 0.97**(dt/ENV.timeWarp)
         }
       } else {
         if(downs[" "]){
           // DRONE.vel.add(camera.getWorldDirection(new THREE.Vector3()).multiplyScalar(2*dt))
         }
         
-        if(downs["M0"]){
-          // DRONE.vel.add(camera.getWorldDirection(new THREE.Vector3()).multiplyScalar(1*dt))
-        }
+        
       }
 
       if(downs["`"]){
@@ -500,17 +508,20 @@ class DRONE{
 
     this.controls.yaw *= 0.995** adt
     this.controls.pitch *= 0.995** adt
+    this.controls.roll *= 0.995** adt
     this.controls.up *= 0.95** dt
 
-    if(!Mobile.initialized && this.grapplePoint !== false){
-      // this.controls.up = (Height/2-mouseY)*0.005 / Height * 1500
-      this.controls.roll = ((Width/2-mouseX)*0.00007) * this.rollControlSpeed / Width * 2000
+    // if(!Mobile.initialized && this.grapplePoint !== false){
+    //   // this.controls.up = (Height/2-mouseY)*0.005 / Height * 1500
+    //   this.controls.roll = ((Width/2-mouseX)*0.00007) * this.rollControlSpeed / Width * 2000
       
-    } else {
-      this.controls.pitch = -mouseDisp.y*0.01
-      this.controls.yaw = -mouseDisp.x *0.01
+    // } else {
+      
 
-    }
+    // }
+
+    this.forces.pitch = -mouseDisp.y*0.001
+    this.forces.yaw = -mouseDisp.x *0.001
 
 
 
@@ -549,7 +560,8 @@ class DRONE{
     const intersects = raycaster.intersectObjects( world.activeMeshes );
     // this.raycaster.set( camera.position,camera.getWorldDirection(new THREE.Vector3))
 
-    this.raycaster.setFromCamera({x:(mouseX / window.innerWidth) * 2 - 1,y:-(mouseY / window.innerHeight) * 2 + 1},camera)
+    // this.raycaster.setFromCamera({x:(mouseX / window.innerWidth) * 2 - 1,y:-(mouseY / window.innerHeight) * 2 + 1},camera)
+    this.raycaster.setFromCamera({x:0,y:0},camera)
     const lookIntersects = DRONE.raycaster.intersectObjects( world.activeMeshes );
 
 
@@ -585,7 +597,7 @@ class DRONE{
         }
       }
     }
-    if(lookIntersects.length>0 && downs["M0"]){
+    if(lookIntersects.length>0 && downs[" "]){
       if(lookIntersects[0].instanceId!==undefined){
         if(this.grapplePoint == false){
         lookIntersects[0].object.setColorAt(lookIntersects[0].instanceId,new THREE.Color( 0xffff00 ))
@@ -595,24 +607,47 @@ class DRONE{
         // lookIntersects[0].object.instanceColor.needsUpdate = true
       }
     } 
-    if(!downs["M0"]) {
+    if(!downs[" "]) {
       this.grapplePoint = false
     }
 
 
     if(this.grapplePoint !== false){
-      let stringy = this.grapplePoint.clone().sub(camera.position.clone()).normalize()
+
+      this.grapple[0] = this.grapplePoint.clone()
+      this.grapple[1] = camera.position.clone().add(camera.getWorldDirection(new THREE.Vector3()).multiplyScalar(200))
+
+          let gpositions = new Float32Array( [this.grapple[0].x,this.grapple[0].y,this.grapple[0].z,this.grapple[1].x,this.grapple[1].y,this.grapple[1].z] ); // 3 vertices per point
+          let positionAttribute = DRONE.grappleLine.geometry.getAttribute('position')
+          positionAttribute.setXYZ(0, this.grapple[0].x,this.grapple[0].y,this.grapple[0].z);
+          positionAttribute.setXYZ(1, this.grapple[1].x,this.grapple[1].y,this.grapple[1].z);
+          DRONE.grappleLine.geometry.boundingSphere.radius = Infinity
+          positionAttribute.needsUpdate = true
+
+
+      let stringy = this.grapplePoint.clone().sub(camera.position.clone())
+        let stringLength = stringy.length()
+        stringy.normalize()
       let taut = stringy.dot(this.vel)
-      if(taut < 0){
+      if(taut < 0 && !downs["s"]){
         let pullForce = stringy.dot(this.vel)*-1
         let adder = stringy.clone().multiplyScalar(pullForce)
 
+
+
+        let rotAngle = Math.atan(this.vel.length()/stringLength)
+
+        console.log(Math.atan(this.vel.length()/stringLength))
         this.vel.add(adder)
+
         // this.vel.add(stringy.multiplyScalar(10.1))
       }
-    if(downs["f"]) {
+    if(downs["w"]) {
         this.vel.add(stringy.multiplyScalar(1.5))
     }
+
+      
+    this.dPos = this.vel.clone().multiplyScalar(dt)
     }
 
     camera.position.add(this.dPos)
@@ -1457,7 +1492,27 @@ scene.add( mesh2 );
 window.mesh2 = mesh2
 
 
+// let line_material = new THREE.LineBasicMaterial( { color: 0xffffff } );
+// const geometry = new THREE.BufferGeometry().setFromPoints( DRONE.grapple );
+// DRONE.grappleLine = new THREE.Line( geometry, line_material );
+// scene.add( DRONE.grappleLine );
 
+
+          const geometry = new THREE.BufferGeometry();
+
+          // attributes
+          let gpositions = new Float32Array( [0,0,0,0,0,0] ); // 3 vertices per point
+          geometry.setAttribute( 'position', new THREE.BufferAttribute( gpositions, 3 ) );
+
+          // drawcalls
+          geometry.setDrawRange( 0, 2 );
+
+          // material
+          const material = new THREE.LineBasicMaterial( { color: 0x99ccff } );
+
+          // line
+          DRONE.grappleLine = new THREE.Line( geometry,  material );
+          scene.add( DRONE.grappleLine );
 
 
   window.addEventListener("resize", onWindowResize, false);
@@ -1632,7 +1687,7 @@ function animate(){
   ctx.moveTo(Width/2-20,Height/2)
   ctx.lineTo(Width/2+20,Height/2)
   ctx.lineWidth = 2;
-  ctx.strokeStyle = "rgba(100,0,0,0.5)"
+  ctx.strokeStyle = "rgba(255,255,0)"
   ctx.stroke()
 
   ctx.beginPath() // level cross
@@ -1653,8 +1708,8 @@ function animate(){
   }
 
 
-  ctx.fillStyle = "pink"
-  ctx.fillRect(mouseX-5,mouseY-5,10,10)
+  // ctx.fillStyle = "pink"
+  // ctx.fillRect(mouseX-5,mouseY-5,10,10)
 
 
   ctx.fillStyle = DRONE.forwardLocked?"orange":"red"
@@ -2093,15 +2148,58 @@ function handleMotion(event) {
 // });
 
 
-  function tutorial1(){
 
-    DRONE.softReset()
+function rotateCameraToward(camera, V, step) {
+    // Current forward direction of camera in world space
+    const currentDir = new THREE.Vector3();
+    camera.getWorldDirection(currentDir).normalize();
 
-    camera.position.z = 300000
-    camera.position.y = 0
-    let x = camera.position.x
+    // Target direction (ensure normalized)
+    const targetDir = V.clone().normalize();
 
-  }
+    // Convert degrees to ratio for slerp
+    // Xdeg should be smaller relative to angle between vectors
+    const angle = currentDir.angleTo(targetDir);     // in radians
+    // const step = THREE.MathUtils.degToRad(Xdeg);     // rotate this much
+
+    // Limit step so we never overshoot if Xdeg > angle
+    const t = Math.min(1, step / angle);              // convert radians to fraction
+
+    // Build quaternions for slerp
+    const q1 = new THREE.Quaternion().setFromUnitVectors(currentDir, targetDir);
+    const qStep = new THREE.Quaternion().slerpQuaternions(
+        new THREE.Quaternion(), // identity
+        q1,
+        t
+    );
+
+    // Apply rotation to camera
+    camera.quaternion.premultiply(qStep);
+}
+
+function rotateCopy(V1, V2, step) {
+    // Normalize V1 & V2
+    const a = V1.clone().normalize();
+    const b = V2.clone().normalize();
+
+    // Rotation axis
+    const axis = new THREE.Vector3().crossVectors(a, b).normalize();
+
+    // Total angle from V1 to V2
+    const fullAngle = Math.acos(THREE.MathUtils.clamp(a.dot(b), -1, 1)); // radians
+
+    // Convert X degrees into radians, limit so we never exceed full rotation
+    // const step = THREE.MathUtils.degToRad(Xdeg);
+    const stepAngle = Math.min(step, fullAngle); // optional safety
+
+    // Create quaternion for rotation of stepAngle around axis
+    const q = new THREE.Quaternion().setFromAxisAngle(axis, stepAngle);
+
+    // Apply rotation to V3
+    return camera.quaternion.applyQuaternion(q);
+}
+
+
 
 
 
