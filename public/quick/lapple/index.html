@@ -614,15 +614,7 @@ class DRONE{
 
     if(this.grapplePoint !== false){
 
-      this.grapple[0] = this.grapplePoint.clone()
-      this.grapple[1] = camera.position.clone().add(camera.getWorldDirection(new THREE.Vector3()).multiplyScalar(200))
-
-          let gpositions = new Float32Array( [this.grapple[0].x,this.grapple[0].y,this.grapple[0].z,this.grapple[1].x,this.grapple[1].y,this.grapple[1].z] ); // 3 vertices per point
-          let positionAttribute = DRONE.grappleLine.geometry.getAttribute('position')
-          positionAttribute.setXYZ(0, this.grapple[0].x,this.grapple[0].y,this.grapple[0].z);
-          positionAttribute.setXYZ(1, this.grapple[1].x,this.grapple[1].y,this.grapple[1].z);
-          DRONE.grappleLine.geometry.boundingSphere.radius = Infinity
-          positionAttribute.needsUpdate = true
+      
 
 
       let stringy = this.grapplePoint.clone().sub(camera.position.clone())
@@ -658,6 +650,18 @@ class DRONE{
     raycaster.set(camera.position,this.vel.clone().normalize())
     this.lookingTowards = camera.getWorldDirection(new THREE.Vector3()).multiplyScalar(1200)
 
+
+    if(this.grapplePoint !== false){
+      this.grapple[0] = this.grapplePoint.clone()
+      this.grapple[1] = camera.position.clone().add(camera.getWorldDirection(new THREE.Vector3()).multiplyScalar(400))
+
+          let gpositions = new Float32Array( [this.grapple[0].x,this.grapple[0].y,this.grapple[0].z,this.grapple[1].x,this.grapple[1].y,this.grapple[1].z] ); // 3 vertices per point
+          let positionAttribute = DRONE.grappleLine.geometry.getAttribute('position')
+          positionAttribute.setXYZ(0, this.grapple[0].x,this.grapple[0].y,this.grapple[0].z);
+          positionAttribute.setXYZ(1, this.grapple[1].x,this.grapple[1].y,this.grapple[1].z);
+          DRONE.grappleLine.geometry.boundingSphere.radius = Infinity
+          positionAttribute.needsUpdate = true
+    }
 
 
     if(this.topHemisphere.position){
