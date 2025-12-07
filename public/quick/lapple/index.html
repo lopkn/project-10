@@ -571,8 +571,8 @@ class DRONE{
       this.dst = intersects[0].distance
       if(this.dst < DRONE.dPos.length()){
         div.style.backgroundColor = "red"
-        DRONE.forces.roll += minMax(-1,(Math.random()-0.5)*0.0005*DRONE.speed,1) //formerly 0.0015 and 2 before reflection
-        DRONE.forces.yaw += minMax(-1,(Math.random()-0.5)*0.0005*DRONE.speed,1)
+        // DRONE.forces.roll += minMax(-1,(Math.random()-0.5)*0.0005*DRONE.speed,1) //formerly 0.0015 and 2 before reflection
+        // DRONE.forces.yaw += minMax(-1,(Math.random()-0.5)*0.0005*DRONE.speed,1)
 
         DRONE.vel.multiplyScalar(0.8)
         let faceNormal = intersects[0].face.normal.clone()
@@ -581,9 +581,9 @@ class DRONE{
         faceNormal.applyMatrix3( new THREE.Matrix3().getNormalMatrix( im ) );
         faceNormal.normalize();
         
-        if(DRONE.speed < 300){
+        // if(DRONE.speed < 300){
           DRONE.vel.reflect(faceNormal)
-        }
+        // }
 
         this.dPos = this.vel.clone().multiplyScalar(dt)
         
@@ -629,7 +629,6 @@ class DRONE{
 
         let rotAngle = Math.atan(this.vel.length()/stringLength)
 
-        console.log(Math.atan(this.vel.length()/stringLength))
         this.vel.add(adder)
 
         // this.vel.add(stringy.multiplyScalar(10.1))
@@ -656,11 +655,13 @@ class DRONE{
       this.grapple[1] = camera.position.clone().add(camera.getWorldDirection(new THREE.Vector3()).multiplyScalar(400))
 
           let gpositions = new Float32Array( [this.grapple[0].x,this.grapple[0].y,this.grapple[0].z,this.grapple[1].x,this.grapple[1].y,this.grapple[1].z] ); // 3 vertices per point
-          let positionAttribute = DRONE.grappleLine.geometry.getAttribute('position')
-          positionAttribute.setXYZ(0, this.grapple[0].x,this.grapple[0].y,this.grapple[0].z);
-          positionAttribute.setXYZ(1, this.grapple[1].x,this.grapple[1].y,this.grapple[1].z);
+          // let positionAttribute = DRONE.grappleLine.geometry.getAttribute('position')
+          // positionAttribute.setXYZ(0, this.grapple[0].x,this.grapple[0].y,this.grapple[0].z);
+          // positionAttribute.setXYZ(1, this.grapple[1].x,this.grapple[1].y,this.grapple[1].z);
+
+          DRONE .grappleLine.geometry.setPositions(gpositions)
           DRONE.grappleLine.geometry.boundingSphere.radius = Infinity
-          positionAttribute.needsUpdate = true
+          // positionAttribute.needsUpdate = true
     }
 
 
@@ -959,50 +960,15 @@ class world{
 
       let lineGeom = new THREE.EdgesGeometry(geometry);
 
-      // lineGeom = new THREE.InstancedBufferGeometry().copy(lineGeom);
-      // lineGeom = new LineSegmentsGeometry().fromMesh(mesh);
-
-      // lineGeom = new LineSegmentsGeometry().fromEdgesGeometry(lineGeom);
       lineGeom = new LineSegmentsGeometry().copy(lineGeom);
-      // lineGeom = new LineGeometry().copy(lineGeom);
       
       lineGeom.instanceCount = Infinity;
       lineGeom.setAttribute("instT", new THREE.InstancedBufferAttribute(new Float32Array(pos), 3));
       lineGeom.setAttribute("instR", new THREE.InstancedBufferAttribute(new Float32Array(rot), 4));
       lineGeom.setAttribute("instS", new THREE.InstancedBufferAttribute(new Float32Array(scl), 3));
-      // let lineMat = new THREE.LineBasicMaterial({
 
-      // let lineMat = new LineMaterial({
-      //   color: 0xff0000,
-      //   dashed:false,
-      //   lineWidth:5
-      // })
       let lineMat = new LineMaterial({
-        color: "yellow"
-        // ,linewidth:20
-      //   ,onBeforeCompile: shader => {
-      //     shader.vertexShader = `
-      //     attribute vec3 instT;
-      //     attribute vec4 instR;
-      //     attribute vec3 instS;
-          
-      //     // http://barradeau.com/blog/?p=1109
-      //     vec3 trs( inout vec3 position, vec3 T, vec4 R, vec3 S ) {
-      //         position *= S;
-      //         position += 2.0 * cross( R.xyz, cross( R.xyz, position ) + R.w * position );
-      //         position += T;
-      //         return position;
-      //     }
-      //     ${shader.vertexShader}
-      // `.replace(
-      //       `#include <begin_vertex>`,
-      //       `#include <begin_vertex>
-      //       transformed = trs(transformed, instT, instR, instS);
-      // `
-      //     );
-      //     console.log(shader.vertexShader);
-      //   }
-        ,vertexShader:`
+        color: "yellow" ,vertexShader:`
           attribute vec3 instT;
           attribute vec4 instR;
           attribute vec3 instS;
@@ -1046,8 +1012,6 @@ class world{
         ,transparent: true
       });
       let lines = new THREE.LineSegments(lineGeom, lineMat);
-      // let lines = new LineSegments2(lineGeom, lineMat);
-      // let lines = new Line2(lineGeom, lineMat);
       
       // lines.computeLineDistances();
       // lines.scale.set( 1, 1, 1 );
@@ -1502,20 +1466,23 @@ window.mesh2 = mesh2
 // scene.add( DRONE.grappleLine );
 
 
-          const geometry = new THREE.BufferGeometry();
+          const geometry = new LineGeometry();
 
           // attributes
-          let gpositions = new Float32Array( [0,0,0,0,0,0] ); // 3 vertices per point
-          geometry.setAttribute( 'position', new THREE.BufferAttribute( gpositions, 3 ) );
+          let gpositions = new Float32Array( [0,0,0,0,200,0] ); // 3 vertices per point
+          // geometry.setAttribute( 'position', new THREE.BufferAttribute( gpositions, 3 ) );
+          geometry.setPositions(gpositions)
 
           // drawcalls
-          geometry.setDrawRange( 0, 2 );
+          // geometry.setDrawRange( 0, 2 );
 
           // material
-          const material = new THREE.LineBasicMaterial( { color: 0x99ccff } );
+          const material = new LineMaterial( { color: 0x99ccff, linewidth: 3 } );
 
           // line
-          DRONE.grappleLine = new THREE.Line( geometry,  material );
+          DRONE.grappleLine = new Line2( geometry,  material );
+
+
           scene.add( DRONE.grappleLine );
 
 
@@ -2060,6 +2027,35 @@ music.synth.set({
 
 
 
+
+function duckshit(){
+  var positions = [0,0,0,0,0,200], angle;
+
+var geometry = new LineGeometry();
+    geometry.setPositions( positions );
+
+var badMaterial = new LineMaterial(
+    {
+      color: 'blue',
+      linewidth: 30, 
+      alphaToCoverage: true,
+    } );
+
+var goodMaterial = new LineMaterial(
+    {
+      color: 'crimson',
+      linewidth: 30, 
+      alphaToCoverage: false,
+    } );
+
+var badLine = new Line2( geometry, badMaterial );
+    badLine.position.x = -25;
+
+var goodLine = new Line2( geometry, goodMaterial );
+    goodLine.position.x = 25;
+
+scene.add( badLine, goodLine );
+}
 
 
 
