@@ -465,15 +465,15 @@ class DRONE{
         }  if(downs.s){
           // DRONE.controls.pitch -= this.controlSpeed * this.invertedControls * dt
           // DRONE.forces.up -= this.controlSpeed * 345/4
-        } if(downs.a){
+        } if(downs.q){
           // DRONE.controls.yaw += this.controlSpeed * dt
           DRONE.controls.roll += this.controlSpeed * dt * 0.1
-        }  if(downs.d){
+        }  if(downs.e){
           // DRONE.controls.yaw -= this.controlSpeed * dt
           DRONE.controls.roll -= this.controlSpeed * dt * 0.1
-        }  if(downs.e){
+        }  if(downs.d){
           DRONE.controls.roll -= this.controlSpeed * dt
-        }  if(downs.q){
+        }  if(downs.a){
           DRONE.controls.roll += this.controlSpeed * dt
         } if(downs[" "]){
           // DRONE.forces.up += this.controlSpeed * 345/4
