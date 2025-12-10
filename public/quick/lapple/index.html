@@ -467,14 +467,14 @@ class DRONE{
           // DRONE.forces.up -= this.controlSpeed * 345/4
         } if(downs.q){
           // DRONE.controls.yaw += this.controlSpeed * dt
-          DRONE.controls.roll += this.controlSpeed * dt * 0.1
+          DRONE.controls.roll += this.controlSpeed * dt * 0.6
         }  if(downs.e){
           // DRONE.controls.yaw -= this.controlSpeed * dt
-          DRONE.controls.roll -= this.controlSpeed * dt * 0.1
+          DRONE.controls.roll -= this.controlSpeed * dt * 0.6
         }  if(downs.d){
-          DRONE.controls.roll -= this.controlSpeed * dt
+          DRONE.controls.roll -= this.controlSpeed * dt * 0.2
         }  if(downs.a){
-          DRONE.controls.roll += this.controlSpeed * dt
+          DRONE.controls.roll += this.controlSpeed * dt * 0.2
         } if(downs[" "]){
           // DRONE.forces.up += this.controlSpeed * 345/4
         } if(downs.Control){
@@ -566,37 +566,7 @@ class DRONE{
 
 
 
-    if(intersects.length>0){
-      div.innerText += "\n INTERSECTS \n"
-      this.dst = intersects[0].distance
-      if(this.dst < DRONE.dPos.length()){
-        div.style.backgroundColor = "red"
-        // DRONE.forces.roll += minMax(-1,(Math.random()-0.5)*0.0005*DRONE.speed,1) //formerly 0.0015 and 2 before reflection
-        // DRONE.forces.yaw += minMax(-1,(Math.random()-0.5)*0.0005*DRONE.speed,1)
 
-        DRONE.vel.multiplyScalar(0.8)
-        let faceNormal = intersects[0].face.normal.clone()
-        let im = new THREE.Matrix4()
-        intersects[0].object.getMatrixAt(intersects[0].instanceId,im)
-        faceNormal.applyMatrix3( new THREE.Matrix3().getNormalMatrix( im ) );
-        faceNormal.normalize();
-        
-        // if(DRONE.speed < 300){
-          DRONE.vel.reflect(faceNormal)
-        // }
-
-        this.dPos = this.vel.clone().multiplyScalar(dt)
-        
-        DRONE.forwardLocked = false
-        console.log(faceNormal)
-        console.log("HIT")
-
-        if(intersects[0].instanceId!==undefined){
-          intersects[0].object.setColorAt(intersects[0].instanceId,new THREE.Color( 0xff0000 ))
-          // intersects[0].object.instanceColor.needsUpdate = true
-        }
-      }
-    }
     if(lookIntersects.length>0 && downs[" "]){
       if(lookIntersects[0].instanceId!==undefined){
         if(this.grapplePoint == false){
@@ -639,6 +609,38 @@ class DRONE{
 
       
     this.dPos = this.vel.clone().multiplyScalar(dt)
+    }
+
+    if(intersects.length>0){
+      div.innerText += "\n INTERSECTS \n"
+      this.dst = intersects[0].distance
+      if(this.dst < DRONE.dPos.length()){
+        div.style.backgroundColor = "red"
+        // DRONE.forces.roll += minMax(-1,(Math.random()-0.5)*0.0005*DRONE.speed,1) //formerly 0.0015 and 2 before reflection
+        // DRONE.forces.yaw += minMax(-1,(Math.random()-0.5)*0.0005*DRONE.speed,1)
+
+        DRONE.vel.multiplyScalar(0.8)
+        let faceNormal = intersects[0].face.normal.clone()
+        let im = new THREE.Matrix4()
+        intersects[0].object.getMatrixAt(intersects[0].instanceId,im)
+        faceNormal.applyMatrix3( new THREE.Matrix3().getNormalMatrix( im ) );
+        faceNormal.normalize();
+        
+        // if(DRONE.speed < 300){
+          DRONE.vel.reflect(faceNormal)
+        // }
+
+        this.dPos = this.vel.clone().multiplyScalar(dt)
+        
+        DRONE.forwardLocked = false
+        console.log(faceNormal)
+        console.log("HIT")
+
+        if(intersects[0].instanceId!==undefined){
+          intersects[0].object.setColorAt(intersects[0].instanceId,new THREE.Color( 0xff0000 ))
+          // intersects[0].object.instanceColor.needsUpdate = true
+        }
+      }
     }
 
     camera.position.add(this.dPos)
@@ -778,7 +780,7 @@ class DRONE{
 window.drone = DRONE
 
 class world{
-  static worldbox = {"y":2*20000,"z":2*20000}
+  static worldbox = {"y":2*20000*4,"z":2*20000}
   static activeMeshes = []
   static loadeds = {}
   static seed = "welcome"
