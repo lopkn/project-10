@@ -780,7 +780,7 @@ class DRONE{
 window.drone = DRONE
 
 class world{
-  static worldbox = {"y":2*20000*4,"z":2*20000}
+  static worldbox = {"y":2*20000*3,"z":2*20000}
   static activeMeshes = []
   static loadeds = {}
   static seed = "welcome"
@@ -1094,7 +1094,7 @@ class world{
       count = Math.floor(count/5)
 
       this.preloadChunk({id:id+1,level:0})
-      this.preloadChunk({id:id+2,level:3,length:2000000})
+      this.preloadChunk({id:id+2,level:Math.floor(Math.random()*3+1),length:2000000})
 
       var geometry = new THREE.BoxGeometry(800, 200, 200);
       var materials = [
