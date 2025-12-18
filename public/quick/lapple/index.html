@@ -571,7 +571,7 @@ class DRONE{
       if(lookIntersects[0].instanceId!==undefined){
         if(this.grapplePoint == false){
         lookIntersects[0].object.setColorAt(lookIntersects[0].instanceId,new THREE.Color( 0xffff00 ))
-        if(lookIntersects[0].point.clone().sub(camera.position.clone()).length() < 20000){
+        if(lookIntersects[0].point.clone().sub(camera.position.clone()).length() < 40000){
           this.grapplePoint = lookIntersects[0].point.clone()
         }
         this.lockMousePos = {x:mouseX,y:mouseY}
