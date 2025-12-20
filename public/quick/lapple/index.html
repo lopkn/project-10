@@ -2239,7 +2239,8 @@ function rotateCopy(V1, V2, step) {
         }
 
         if(e.key == "Enter"){
-          camera.position.x += (world.loadeds[DRONE.worldPos].userData.end - camera.position.x) * 0.9
+          // camera.position.x += (world.loadeds[DRONE.worldPos].userData.end - camera.position.x) * 0.9
+          DRONE.vel.add(camera.getWorldDirection(new THREE.Vector3()).multiplyScalar(200))
         }
 
         if(e.key == "p"){
