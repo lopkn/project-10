@@ -369,6 +369,12 @@ function rless(){
 
 
 function test1(center=500){
+
+	let mdiv = document.createElement("div")
+	document.body.appendChild(mdiv)
+	mdiv.style.color = "#308050"
+
+
 let z = center
 	for(let i = 0; i < 120; i++){
 	    music.playBellf(z,undefined,i/5)
@@ -405,7 +411,9 @@ let z = center
 	    	}
 	    }
 
+	    let x = z
 
+		setTimeout(()=>{mdiv.innerText = Math.round(x) + " " + a + " " + b  + " --- " + a/b + "\n" + mdiv.innerText},i*1000/5)
 
 
 
