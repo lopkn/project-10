@@ -41,12 +41,120 @@
 
 
 <script>
+
+  var Width = window.innerWidth
+  var Height = window.innerHeight
+  var w2 = Width/2
+  var h2 = Height/2
 function setup() {
-  createCanvas(400, 400);
+  createCanvas(window.innerWidth, window.innerHeight);
+  frameRate(60)
+  colorMode(HSL,100,100,100,255)
 }
+
+function intersects(a,b,c,d,p,q,r,s) {
+  var det, gamma, lambda;
+  det = (c - a) * (s - q) - (r - p) * (d - b);
+  if (det === 0) {
+    return false;
+  } else {
+    lambda = ((s - q) * (r - a) + (p - r) * (s - b)) / det;
+    gamma = ((b - d) * (r - a) + (c - a) * (s - b)) / det;
+    if ( (0 < lambda && lambda < 1) && (0 < gamma && gamma < 1) ) {
+      return([a+lambda*(c-a),b+lambda*(d-b)])
+    };
+    return(false)
+  }
+};
+
+class liney{
+  constructor(x=Width/2,y=Height/2){
+    this.x = x
+    this.y = y
+    this.vx = 0
+    this.vy = 0
+    this.points = [[x,y],[x,y],[x,y],[x,y],[x,y],[x,y]]
+  }
+  update(dt=1){
+    this.x += this.vx*dt
+    this.y += this.vy*dt
+
+    this.points.push([this.x,this.y])
+
+    if(!this.noRand){
+    this.vx += Math.random()-0.5
+    this.vy += Math.random()-0.5
+    this.vx *= 0.999
+    this.vy *= 0.999}
+
+    let d = dist(this.x,this.y,w2,h2)
+
+    this.vx -= (this.x-w2)/(d+1)*0.5
+    this.vy -= (this.y-h2)/(d+1)*0.5
+
+    if(this.points.length>150){
+      this.points.splice(0,1)
+    }
+
+    let p = this.points[this.points.length-1] //this point
+    let lp = this.points[this.points.length-2] //last point
+
+    for(let i = 0; i < this.points.length-2; i++){
+      let tp = this.points[i]
+      let tp2 = this.points[i+1]
+      let int = intersects(tp[0],tp[1],tp2[0],tp2[1],p[0],p[1],lp[0],lp[1])
+      if(int){
+        let arr = [[int[0],int[1]]]
+        for(let j = i; j < this.points.length-1; j++){
+          arr.push([this.points[j][0],this.points[j][1]])
+        }
+        particles.push({"arr":arr,"life":100,
+          "h":Date.now()/100%100,
+          "update":(x)=>{x.life-=1;if(x.life<=0){return("delete")}},
+          "draw":(x)=>{
+            noStroke()
+            fill(x.h,100,50,x.life)
+            beginShape()
+            for(let i = 0; i < arr.length;i++){
+              vertex(...arr[i])
+            }
+            endShape(CLOSE);
+          }})
+        break;
+      }
+    }
+
+  }
+
+  draw(){
+    stroke(0)
+    for(let i = 0; i < this.points.length-1;i++){
+      let p1 = this.points[i]
+      let p2 = this.points[i+1]
+      line(p1[0],p1[1],p2[0],p2[1])
+    }
+  }
+}
+
+let particles = []
+
+let la = [new liney()]
 
 function draw() {
   background(220);
+
+  la.forEach((l)=>{
+    l.update(2)
+    l.draw()  
+  })
+  for(let i = particles.length-1; i>-1; i--){
+    if(particles[i].update(particles[i])=="delete"){
+      particles.splice(i,1)
+      continue;
+    }
+    particles[i].draw(particles[i])
+  }
+  
 }
 </script>
 
