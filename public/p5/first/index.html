@@ -143,7 +143,11 @@ class liney{
 
 let particles = []
 
-let la = [new liney(),new liney()]
+let la = [new liney()]
+
+while(Math.random()>0.75){
+  la.push(new liney())
+}
 
 function draw() {
   background(220);
