@@ -49,16 +49,20 @@
   var h2 = Height/2
 
   let globalRands = []
-  for(let i = 0; i < 100; i++){
-    globalRands.push(Math.random())
-  }
+  let globalGRands = []
+
 
 function setup() {
   createCanvas(window.innerWidth, window.innerHeight);
   frameRate(60)
   colorMode(HSL,100,100,100,255)
   rgaus = randomGaussian
+  for(let i = 0; i < 100; i++){
+    globalRands.push(Math.random())
+    globalGRands.push(randomGaussian(0,1))
+  }
   particles.push(new bally())
+
 }
 
 var hfunc = Math.random()>0.5?(()=>{return(Date.now()/100%100)}):(()=>{return(Date.now()%100)})
@@ -182,6 +186,7 @@ class bally{
 
 
     this.size = Math.abs(size)
+    this.gravStrength = 1+(globalGRands[0]/4)
 
     this.life = 0
     this.spawn = Date.now()
@@ -218,8 +223,8 @@ class bally{
       let g = this.grav
       let d = dist(this.x,this.y,g[0],g[1])
 
-      this.vx -= (this.x-g[0])*50/(d*d+1)
-      this.vy -= (this.y-g[1])*50/(d*d+1)
+      this.vx -= (this.x-g[0])*40*this.gravStrength/(d*d+1)
+      this.vy -= (this.y-g[1])*40*this.gravStrength/(d*d+1)
     }
 
   }

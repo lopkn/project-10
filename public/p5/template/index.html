@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="icon" href="../../images/psim2.png">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable = no, maximum-scale=1, minimum-scale=1">
+  <title>LTPT</title>
+
+</head>
+<body style="padding:0;margin:0;background-color: black;">
+  
+<!--     <script src="/socket.io/socket.io.js"></script>
+ <script src="https://cdn.socket.io/3.1.3/socket.io.min.js" integrity="sha384-cPwlPLvBTa3sKAgddT6krw0cJat7egBga3DJepJyrLl4Q9/5WLra3rrnMcyTyOnh" crossorigin="anonymous"></script> -->
+
+  <div draggable="false" ondragstart="return false">
+
+	  <script src="../p5.js"></script>
+
+<!--TONE JS STUFF-->
+
+<!-- 
+
+    <button id = "wow" top="0px" left = "0px" style = "z-index:20; color: rgba(0,150,255,0.2);background-color: transparent;font-size: 50px;width:100%;height:100%;border-radius: 1px;position:absolute" onclick = "
+      // window.navigator.vibrate(200)
+      const player = new Tone.Player('./start.wav').toDestination();
+    Tone.loaded().then(() => {
+      player.start();
+      player.stop()
+    });
+      
+
+      console.log('tone start');
+
+      soundInit()
+      document.getElementById('wow').remove()
+    ">click to start..</button>
+    <script src="tone.js"></script> 
+
+-->
+<!--TONE JS STUFF-->
+
+<script src="../../library/gpu-browser.min.js"></script>
+
+<script>
+
+
+
+
+  /// gpu things
+
+  /// gpu things
+
+  var Width = window.innerWidth
+  var Height = window.innerHeight
+  var scrMax = Math.max(Width,Height)
+  var w2 = Width/2
+  var h2 = Height/2
+
+
+function setup() {
+  createCanvas(window.innerWidth, window.innerHeight);
+  frameRate(60)
+  colorMode(HSL,100,100,100,255)
+
+}
+
+
+function intersects(a,b,c,d,p,q,r,s) {
+  var det, gamma, lambda;
+  det = (c - a) * (s - q) - (r - p) * (d - b);
+  if (det === 0) {
+    return false;
+  } else {
+    lambda = ((s - q) * (r - a) + (p - r) * (s - b)) / det;
+    gamma = ((b - d) * (r - a) + (c - a) * (s - b)) / det;
+    if ( (0 < lambda && lambda < 1) && (0 < gamma && gamma < 1) ) {
+      return([a+lambda*(c-a),b+lambda*(d-b)])
+    };
+    return(false)
+  }
+};
+
+class phys{
+  constructor(x=Width/2,y=Height/2){
+    this.x = x
+    this.y = y
+    this.vx = 0
+    this.vy = 0
+  }
+  update(me,dt=1){
+    this.x += this.vx*dt
+    this.y += this.vy*dt
+
+    // let d = dist(this.x,this.y,w2,h2)
+    // this.vx -= (this.x-w2)/(d+1)*0.5
+    // this.vy -= (this.y-h2)/(d+1)*0.5
+
+  }
+
+  draw(){
+    circle(this.x,this.y,10)
+  }
+}
+
+var rand = (x)=>{
+  if(x == undefined){return(Math.random())}
+  if(x < 1){return(Math.random()<x)}
+  return(Math.random()*x)
+}
+
+
+var particles = []
+
+
+function draw() {
+  background(120,0,0);
+
+  for(let i = particles.length-1; i>-1; i--){
+    if(particles[i].update(particles[i])=="delete"){
+      particles.splice(i,1)
+      continue;
+    }
+    particles[i].draw(particles[i])
+  }
+  
+}
+</script>
+
+<!--script src="sketch.js"></script-->
+</body>
+</html>
