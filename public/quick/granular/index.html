@@ -1,0 +1,148 @@
+[200~<!DOCTYPE html>
+<html>
+
+<body>
+
+
+<h1 id="main">? - ?</h1>
+
+<br>
+<button id="add">add point</button>
+<input type="text" id="txt">
+
+<button id="add2">add slider</button>
+<input type="text" id="txt2">
+
+
+<script>
+
+let sliders = []
+let existing_sliders = {}
+
+
+function addThing(name){
+
+	if(existing_sliders[name]){return}
+	existing_sliders[name] = true
+    
+	let id = "slider-"+name
+ let l = document.createElement("label")
+ l.for = id
+ l.innerText = name+":"
+ let i = document.createElement("input")
+ i.id = id
+ i.type = "range"
+ i.name = id
+ i.min = 0
+ i.max = 100
+ i.value = 50
+ i.style.width = "80%"
+ 
+ i.addEventListener("input",()=>{
+ 	s.innerText = i.value
+    update()
+ })
+ 
+ let s = document.createElement("span")
+ s.innerText = "50"
+ 
+ document.body.appendChild(document.createElement("br"))
+ document.body.appendChild(l)
+ document.body.appendChild(i)
+ document.body.appendChild(s)
+ sliders.push(i)
+ 
+}
+
+
+let b = document.getElementById("add")
+let b2 = document.getElementById("add2")
+
+
+let arr = []
+
+function update(){
+
+	let cpos = []
+    sliders.forEach((e)=>{
+    	cpos.push(parseFloat(e.value))
+    })
+    
+    let min = Infinity
+
+    document.getElementById("main").innerText = "?-?"
+	arr.forEach((e)=>{
+    	d = dist(cpos,e.pos)
+        if(d<min){
+        	min = d
+            document.getElementById("main").innerText = e.name
+        }
+    })
+}
+
+function dist(pos1,pos2){
+	let n = 0;
+    for(let i = 0; i < pos1.length; i++){
+    	if(pos2[i] === undefined){pos2[i]=50}
+        n += (pos1[i]-pos2[i])**2
+    }
+    
+    return(Math.sqrt(n))
+
+}
+
+
+function bclick(){	b.style.color="red";
+	
+    let parr = []
+	sliders.forEach((e)=>{
+    	parr.push(parseFloat(e.value))
+    })
+    
+    let dict = {}
+    dict.pos = parr
+    dict.name = document.getElementById("txt").value
+    
+    arr.push(dict)
+    update()
+    }
+
+b.onclick=()=>{
+
+bclick()
+    
+}
+
+b2.onclick=()=>{
+	addThing(document.getElementById("txt2").value)
+}
+
+
+let t = document.getElementById("txt")
+let t2 = document.getElementById("txt2")
+
+
+
+t.addEventListener("keydown", (e)=>{
+	if(e.key=="Enter"){
+    	bclick()
+        t.value = ""
+    }
+})
+
+
+
+
+t2.addEventListener("keydown", (e)=>{
+	if(e.key=="Enter"){
+    					addThing(document.getElementById("txt2").value)
+        t2.value = ""
+    }
+})
+
+
+
+</script>
+</body>
+
+</html>
