@@ -80,10 +80,14 @@ function update(){
     })
 }
 
+
+
 function dist(pos1,pos2){
 	let n = 0;
     for(let i = 0; i < pos1.length; i++){
-    	if(pos2[i] === undefined){pos2[i]=50}
+    	if(pos2[i] === undefined){
+            pos2[i]=50
+        }
         n += (pos1[i]-pos2[i])**2
     }
     
