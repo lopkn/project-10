@@ -3670,8 +3670,8 @@ class GI{
 		}
 
 	static typeDict2 = {
-		"F01":{"color":"#00FF00","letter":"U"},
-		"F02":{"color":"#FF0000","letter":"U"},
+		"F01":{"color":"#00FF00","letter":"U"},//original griddy sin Green
+		"F02":{"color":"#FF0000","letter":"U"},//original griddy sin Red
 		"F03":{"color":"#FFFF00","letter":"U"},//gridpt ST
 		"F04":{"color":"#FFFFFF","letter":"U"},//cross displace INF
 		"F05":{"color":"#0000FF","letter":"U"},//does nothing
