@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image to Color Array Converter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+        canvas {
+            display: none;
+        }
+        #colorArray {
+            margin-top: 20px;
+            white-space: pre-wrap; /* Preserve formatting */
+            max-height: 300px;
+            overflow-y: auto;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Image to Color Array Converter</h1>
+    <input type="file" id="imageInput" accept="image/*">
+    <canvas id="canvas"></canvas>
+    <div id="colorArray" contenteditable=true></div>
+
+    <div id="help">
+        array stored into arr,
+        attributes stored in dict: {w,h}
+
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const colorArrayDiv = document.getElementById('colorArray');
+
+        var arr;
+        var dict = {}
+        
+        function processImage(img) {
+            canvas.width = img.width;
+            canvas.height = img.height;
+            dict.w = img.width
+            dict.h = img.height
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imageData.data;
+            
+            const colorArray = [];
+            for (let i = 0; i < data.length; i += 4) {
+                const r = data[i];
+                const g = data[i + 1];
+                const b = data[i + 2];
+                const a = data[i + 3];
+                colorArray.push([r,g,b,a]);
+            }
+            
+            colorArrayDiv.textContent = JSON.stringify(colorArray);
+            arr = colorArray
+        }
+
+        document.getElementById('imageInput').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const img = new Image();
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                img.src = e.target.result;
+            }
+
+            img.onload = function() {
+                processImage(img);
+            }
+
+            reader.readAsDataURL(file);
+        });
+
+        document.addEventListener('paste', function(event) {
+            const items = event.clipboardData.items;
+            for (let i = 0; i < items.length; i++) {
+                if (items[i].type.startsWith('image/')) {
+                    const file = items[i].getAsFile();
+                    const img = new Image();
+                    const reader = new FileReader();
+
+                    reader.onload = function(e) {
+                        img.src = e.target.result;
+                    }
+
+                    img.onload = function() {
+                        processImage(img);
+                    }
+
+                    reader.readAsDataURL(file);
+                }
+            }
+        });
+
+
+        function check(d,x,y,f,result){
+            let pos = x+","+y
+            if(d[pos]===undefined){
+                let data = arr[y*dict.width*y]
+                let res = f(data)
+                d[pos] = res
+                return(res?result:0)
+            }
+            return(0)
+        }
+
+        function checkArea(d,x,y,f,num,spreadarr=[]){
+            let darr = [[x,y]]
+
+            while(darr.length>0){
+
+                let rult = check(d,darr[0][0],darr[0][1],f,num)
+                if(rult){
+                    spreadarr.forEach((e)=>{
+                        darr.push([darr[0][0]+spreadarr[0],darr[0][1]+spreadarr[1]])
+                    })
+                }
+                
+
+                darr.splice(0,1)
+            }
+
+        }
+
+        function group(f,spread){
+
+            let dict = {}
+            let counter = 0
+            for(let i = 0; i < dict.w; i++){
+                for(let j = 0; j < dict.h; j++){
+                    if(checkArea(dict,i,j,f,counter+1,spread)){counter+=1}
+                }
+            }
+        }
+
+
+    </script>
+
+</body>
+</html>
