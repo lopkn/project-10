@@ -1,0 +1,58 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <style>
+    body { height:200vh; background: linear-gradient(180deg,#bfe 0%, #8cf 100%); }
+    canvas { position: fixed; left: 0; top: 0; pointer-events: none; }
+  </style>
+</head>
+<body>
+ <!-- <h1 style="margin:20px">Underlying page content visible under the canvas</h1> -->
+
+  <canvas id="c"></canvas>
+  <script>
+    const canvas = document.getElementById('c');
+    const ctx = canvas.getContext('2d');
+
+    function resize() {
+      canvas.width = innerWidth;
+      canvas.height = innerHeight;
+    }
+    addEventListener('resize', resize);
+    resize();
+
+    let t = 0;
+
+    function draw() {
+      // 1) Fade existing canvas content by reducing pixel alpha.
+      // globalCompositeOperation 'destination-out' subtracts the alpha of the source from the destination.
+      // Using a semi-transparent fillRect with rgba(0,0,0,alpha) will make existing pixels more transparent.
+      ctx.save();
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.fillStyle = 'rgba(0,0,0,0.03)'; // smaller = slower fade; larger = faster fade
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.restore();
+
+      // 2) Draw new content normally (source-over).
+      ctx.globalCompositeOperation = 'source-over';
+      // Example: moving colorful circles
+      for (let i = 0; i < 6; i++) {
+        const x = canvas.width * (0.5 + 0.45 * Math.cos((t + i*0.8) * 0.02 + i));
+        const y = canvas.height * (0.5 + 0.45 * Math.sin((t + i*0.6) * 0.015 - i));
+        const r = 30 + 20 * Math.sin(t * 0.01 + i);
+        ctx.beginPath();
+        ctx.fillStyle = `hsla(${(t*0.5 + i*60) % 360}, 80%, 60%, 0.9)`;
+        ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      t++;
+      requestAnimationFrame(draw);
+    }
+
+    draw();
+  </script>
+</body>
+</html>
+
