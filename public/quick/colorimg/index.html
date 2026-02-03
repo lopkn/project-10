@@ -120,10 +120,13 @@
         function checkArea(d,x,y,f,num,spreadarr=[]){
             let darr = [[x,y]]
 
+            let rulted = 0
+
             while(darr.length>0){
 
                 let rult = check(d,darr[0][0],darr[0][1],f,num)
                 if(rult){
+                    rulted = 1
                     spreadarr.forEach((e)=>{
                         darr.push([darr[0][0]+spreadarr[0],darr[0][1]+spreadarr[1]])
                     })
@@ -132,6 +135,7 @@
 
                 darr.splice(0,1)
             }
+            return(rulted)
 
         }
 
