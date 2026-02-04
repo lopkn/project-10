@@ -10,9 +10,9 @@
             text-align: center;
             padding: 20px;
         }
-        canvas {
-            display: none;
-        }
+/*        canvas {*/
+/*            display: none;*/
+/*        }*/
         #colorArray {
             margin-top: 20px;
             white-space: pre-wrap; /* Preserve formatting */
@@ -26,12 +26,19 @@
 
     <h1>Image to Color Array Converter</h1>
     <input type="file" id="imageInput" accept="image/*">
-    <canvas id="canvas"></canvas>
+    <canvas id="canvas" style="display:none"></canvas>
+    <canvas id="canvas2" style="border: 2px solid black"></canvas>
     <div id="colorArray" contenteditable=true></div>
 
     <div id="help">
         array stored into arr,
         attributes stored in dict: {w,h}
+        <br>
+        group(function, spread).and(f2).to(f3)
+        <br>
+        f2 (val, ind): each cell do f2
+        <br>
+        f3 (val, ind): each cell map to arr by f3
 
     </div>
 
@@ -42,11 +49,15 @@
         var arr;
         var dict = {}
         
+        function text(str){
+            colorArrayDiv.textContent = str
+        }
         function processImage(img) {
             canvas.width = img.width;
             canvas.height = img.height;
             dict.w = img.width
             dict.h = img.height
+            console.log(dict.w*dict.h)
             const ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0);
 
@@ -62,8 +73,10 @@
                 colorArray.push([r,g,b,a]);
             }
             
-            colorArrayDiv.textContent = JSON.stringify(colorArray);
+             //text(JSON.stringify(colorArray);)
             arr = colorArray
+            render()
+            console.log("done")
         }
 
         document.getElementById('imageInput').addEventListener('change', function(event) {
@@ -86,7 +99,7 @@
 
         document.addEventListener('paste', function(event) {
             const items = event.clipboardData.items;
-            for (let i = 0; i < items.length; i++) {
+            for (let i = 0; i < items.length && i < 3 ; i++) {
                 if (items[i].type.startsWith('image/')) {
                     const file = items[i].getAsFile();
                     const img = new Image();
@@ -103,32 +116,40 @@
                     reader.readAsDataURL(file);
                 }
             }
+            console.log("complete")
         });
 
 
-        function check(d,x,y,f,result){
+        function check(d,a,x,y,f,result){
+            if(!boxed(x,y)){return}
             let pos = x+","+y
             if(d[pos]===undefined){
-                let data = arr[y*dict.width*y]
+                let arrpos = y*dict.w+x
+                let data = arr[arrpos]
                 let res = f(data)
-                d[pos] = res
-                return(res?result:0)
+                d[pos] = res?result:0
+                a[arrpos] = d[pos]
+                return(res)
             }
             return(0)
         }
 
-        function checkArea(d,x,y,f,num,spreadarr=[]){
+        function boxed(x,y){
+            return(x>-1&&y>-1&&x<dict.w&&y<dict.h)
+        }
+
+        function checkArea(d,a,x,y,f,num,spreadarr=[[0,1],[0,-1],[1,0],[-1,0]]){
             let darr = [[x,y]]
 
             let rulted = 0
 
             while(darr.length>0){
 
-                let rult = check(d,darr[0][0],darr[0][1],f,num)
+                let rult = check(d,a,darr[0][0],darr[0][1],f,num)
                 if(rult){
                     rulted = 1
                     spreadarr.forEach((e)=>{
-                        darr.push([darr[0][0]+spreadarr[0],darr[0][1]+spreadarr[1]])
+                        darr.push([darr[0][0]+e[0],darr[0][1]+e[1]])
                     })
                 }
                 
@@ -141,14 +162,82 @@
 
         function group(f,spread){
 
-            let dict = {}
+            let d = {}
+            let a = []
             let counter = 0
-            for(let i = 0; i < dict.w; i++){
                 for(let j = 0; j < dict.h; j++){
-                    if(checkArea(dict,i,j,f,counter+1,spread)){counter+=1}
-                }
+            for(let i = 0; i < dict.w; i++){
+                    if(checkArea(d,a,i,j,f,counter+1,spread)){counter+=1}
             }
+                }
+                let ret = {count:counter,dict:d,arr:a}
+
+            ret.to = (ff)=>{
+                ret.arr.forEach((e,i)=>{
+                    ret.arr[i] = ff(e,i)
+                })
+                arr = ret.arr
+                render()
+            }
+            ret.and = (ff)=>{
+                ret.arr.forEach((e,i)=>{
+                    ff(e,i)
+                })
+                return(ret)
+            }
+            return(ret)
         }
+
+        function copy(){
+
+            // let out = {"d":dict,"a":arr}
+            let out = {w:dict.w,h:dict.h,arr:arr}
+            navigator.clipboard.writeText(JSON.stringify(out))
+        }
+
+        document.addEventListener("keydown",(e)=>{
+            if(e.key=="c"){
+                copy()
+            }
+        })
+
+
+
+
+
+        //     document.getElementById('generate').addEventListener('click', function() {
+        //     const input = document.getElementById('input').value;
+        //     let data;
+
+        //     try {
+        //         data = JSON.parse(input);
+        //         if (typeof data.w !== 'number' || typeof data.h !== 'number' || !Array.isArray(data.arr)) {
+        //             throw new Error("Invalid input format.");
+        //         }
+        //     } catch (error) {
+        //         alert("Invalid input. Please ensure it's in the correct format.");
+        //         return;
+        //     }
+
+        function render(){
+            const canvas = document.getElementById('canvas2');
+            canvas.width = dict.w;
+            canvas.height = dict.h;
+            const ctx = canvas.getContext('2d');
+
+            // Loop through the arr and set pixel colors
+            arr.forEach((color, index) => {
+                const x = index % dict.w;
+                const y = Math.floor(index / dict.w);
+                
+                // if (x < data.w && y < data.h) {
+                    ctx.fillStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${color[3] / 255})`;
+                    ctx.fillRect(x, y, 1, 1);
+                // }
+            });            
+        }
+
+        // });
 
 
     </script>
