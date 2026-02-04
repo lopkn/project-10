@@ -14,7 +14,11 @@ let Height = window.innerHeight
 // let ctx = document.getElementById("myCanvas").getContext("2d")
 
 
-
+var rand = (x)=>{
+  if(x == undefined){return(Math.random())}
+  if(x < 1){return(Math.random()<x)}
+  return(Math.random()*x)
+}
 
 
 let mouseX = 0

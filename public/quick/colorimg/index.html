@@ -24,7 +24,7 @@
 </head>
 <body>
 
-    <h1>Image to Color Array Converter</h1>
+    <h1>Image to Array "quick/colorimg"</h1>
     <input type="file" id="imageInput" accept="image/*">
     <canvas id="canvas" style="display:none"></canvas>
     <canvas id="canvas2" style="border: 2px solid black"></canvas>
@@ -34,11 +34,17 @@
         array stored into arr,
         attributes stored in dict: {w,h}
         <br>
-        group(function, spread).and(f2).to(f3)
+        group(function, spread).seed(x).my(f1).and(f2).to(f3) = {count,dict,arr}
         <br>
-        f2 (val, ind): each cell do f2
+        seed (number): generate an array of random numbers to the groups + 1
         <br>
-        f3 (val, ind): each cell map to arr by f3
+        f1 (answer): run f1.
+        <br>
+        f2 (answer, val, ind): each cell do f2
+        <br>
+        f3 (answer, val, ind): each cell map to arr by f3
+        <br>
+        example: group((x)=>{return(x[0]>100)}).my((x)=>{x.count.forEach(()=>{randarr.push(Math.random)})}).and((x)=>{})
 
     </div>
 
@@ -48,9 +54,20 @@
 
         var arr;
         var dict = {}
-        
+        var rand = (x)=>{
+  if(x == undefined){return(Math.random())}
+  if(x < 1){return(Math.random()<x)}
+  return(Math.random()*x)
+}
+    var ran = rand
         function text(str){
             colorArrayDiv.textContent = str
+        }
+
+        function fori(x,f){
+            for(let i = 0; i < x; i++){
+                f(i,x)
+            }
         }
         function processImage(img) {
             canvas.width = img.width;
@@ -174,15 +191,27 @@
 
             ret.to = (ff)=>{
                 ret.arr.forEach((e,i)=>{
-                    ret.arr[i] = ff(e,i)
+                    ret.arr[i] = ff(ret,e,i)
                 })
                 arr = ret.arr
                 render()
             }
             ret.and = (ff)=>{
                 ret.arr.forEach((e,i)=>{
-                    ff(e,i)
+                    ff(ret,e,i)
                 })
+                return(ret)
+            }
+            ret.my = (ff)=>{
+                ff(ret)
+                return(ret)
+            }
+            ret.seed = (x=1,origin)=>{
+                ret.ranArr = []
+                fori(counter+1,()=>{ret.ranArr.push(Math.random()*x)})
+                if(origin!==undefined){
+                    ret.ranArr[0] = origin
+                }
                 return(ret)
             }
             return(ret)
