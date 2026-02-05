@@ -30,13 +30,13 @@
     <canvas id="canvas2" style="border: 2px solid black"></canvas>
     <div id="colorArray" contenteditable=true></div>
 
-    <div id="help">
+    <div id="help" style="text-align:left">
         array stored into arr,
         attributes stored in dict: {w,h}
         <br>
         group(function, spread).seed(x).my(f1).and(f2).to(f3) = {count,dict,arr}
         <br>
-        seed (number): generate an array of random numbers to the groups + 1
+        seed (number): generate an array of random numbers to the groups + 1 (puts into ranArr)
         <br>
         f1 (answer): run f1.
         <br>
@@ -137,13 +137,13 @@
         });
 
 
-        function check(d,a,x,y,f,result){
+        function check(d,a,x,y,f,result,spread){
             if(!boxed(x,y)){return}
             let pos = x+","+y
             if(d[pos]===undefined){
                 let arrpos = y*dict.w+x
                 let data = arr[arrpos]
-                let res = f(data)
+                let res = f(data,spread)
                 d[pos] = res?result:0
                 a[arrpos] = d[pos]
                 return(res)
@@ -160,36 +160,43 @@
 
             let rulted = 0
 
-            while(darr.length>0){
+            let pos = 0
+            while(darr.length>pos){
 
-                let rult = check(d,a,darr[0][0],darr[0][1],f,num)
+                let cur = darr[pos]
+
+                let rult = check(d,a,cur[0],cur[1],f,num,pos)
                 if(rult){
                     rulted = 1
-                    spreadarr.forEach((e)=>{
-                        darr.push([darr[0][0]+e[0],darr[0][1]+e[1]])
-                    })
+                    for(let i = 0; i < spreadarr.length; i++){
+                        let e = spreadarr[i]
+                        darr.push([cur[0]+e[0],cur[1]+e[1]])
+                    }
                 }
                 
-
-                darr.splice(0,1)
+                pos++;
             }
             return(rulted)
 
         }
 
         function group(f,spread){
-
+            console.log("grouping...")
+            let dn = Date.now()
             let d = {}
             let a = []
             let counter = 0
                 for(let j = 0; j < dict.h; j++){
-            for(let i = 0; i < dict.w; i++){
-                    if(checkArea(d,a,i,j,f,counter+1,spread)){counter+=1}
-            }
+                    for(let i = 0; i < dict.w; i++){
+                            if(checkArea(d,a,i,j,f,counter+1,spread)){counter+=1}
+                    }
                 }
                 let ret = {count:counter,dict:d,arr:a}
 
+            console.log("groupped in: "+(Date.now()-dn))
+
             ret.to = (ff)=>{
+                console.log("mapping...")
                 ret.arr.forEach((e,i)=>{
                     ret.arr[i] = ff(ret,e,i)
                 })
@@ -207,6 +214,7 @@
                 return(ret)
             }
             ret.seed = (x=1,origin)=>{
+                console.log("seeding...")
                 ret.ranArr = []
                 fori(counter+1,()=>{ret.ranArr.push(Math.random()*x)})
                 if(origin!==undefined){
@@ -249,6 +257,7 @@
         //     }
 
         function render(){
+            console.log("rendering...")
             const canvas = document.getElementById('canvas2');
             canvas.width = dict.w;
             canvas.height = dict.h;
