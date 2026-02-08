@@ -1,6 +1,6 @@
 
 var io;
-class quantum{
+class quantum_old{
 	static rooms = {}
 	static handle(date,name,packet,socket){
 		if(name == "room"){
@@ -62,6 +62,43 @@ class quantum{
 		room[0].messages.push(val1)
 		room[1].messages.push(val2)
 	}
+
+	static setio(i){
+		io = i
+	}
+
+
+}
+
+class quantum{
+	static measures = {
+
+	}
+	static rooms = {}
+	static handle(date,name,packet,socket){
+		if(name == "room"){
+			this.joinroom(packet.name,socket)
+		} else {
+			this.in(name,packet.room,socket,packet.input)
+		}
+	}
+
+	static joinroom(roomName,socket){
+		if(!this.rooms[roomName]){
+			this.rooms[roomName] = {"players":[]}
+		} 
+		if(this.rooms[roomName].players.length==2){io.to(socket.id).emit("room full");return;}
+		this.rooms[roomName].players.push({"id":socket.id,"room":roomName,"state":0})
+		socket.join("G10.8-"+roomName)
+
+	}
+
+	static in(name,room,socket,input){
+		console.log(name,room,input)
+		if(name=="up"){io.to("G10.8-"+room).emit("down",input)}
+	}
+
+
 
 	static setio(i){
 		io = i
