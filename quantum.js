@@ -87,7 +87,7 @@ class quantum{
 		if(!this.rooms[roomName]){
 			this.rooms[roomName] = {"players":[]}
 		} 
-		if(this.rooms[roomName].players.length==2){io.to(socket.id).emit("room full");return;}
+		// if(this.rooms[roomName].players.length==2){io.to(socket.id).emit("room full");return;}
 		this.rooms[roomName].players.push({"id":socket.id,"room":roomName,"state":0})
 		socket.join("G10.8-"+roomName)
 

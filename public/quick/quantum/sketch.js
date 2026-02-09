@@ -288,5 +288,29 @@ document.body.appendChild(res)
 res.innerText = "RESET"
 res.onclick = reset
 
+let device = document.createElement("button")
+document.body.appendChild(device)
+device.innerText = "create device"
+device.onclick = ()=>{game.hide=undefined;game.type="quantum";update()}
+
+
+let hep = document.createElement("div")
+document.body.appendChild(hep)
+hep.style.color = "purple"
+hep.innerText = `
+  You and the other player are 2 light years apart, in opposite directions.
+  you both see a color, either "green" or "red"
+
+  you both need to send a message back to earth
+  if BOTH of you saw the color "red", your messages sent back need to be different.
+  Otherwise, your messages must be the same.
+
+  
+  Earth expects to see this message back in 2 years! 
+
+  (You also get a reward if you manage to submit the other player's color!)
+
+`
+
 box(0)
 box(1)
