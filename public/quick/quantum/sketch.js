@@ -84,6 +84,7 @@ function down(str){
     document.getElementById('a1'+i).style.backgroundColor = e.astate==-1?"white":(e.astate==1?"#B00":"#999")
     document.getElementById('s'+i).style.backgroundColor = game.final[i]==undefined?"white":(game.final[i]==1?"#B00":"#0B0")
     document.getElementById('hi'+i).style.visibility = game.hide?"hidden":"visible"
+    document.getElementById("top").innerText = "current measurement device: "+ (game.hide?"none":game.type)
 
     if(game.hideLock!==undefined && !hidden){
       hidey(document.getElementById("hide"+game.hideLock),game.hideLock,true)
@@ -144,6 +145,14 @@ function genans(){
     if(a1==a2 && a1==1){x=r();return([x,1-x])}else{x=r();return([x,x])}
   }
 }
+
+let topp = document.createElement("div")
+topp.innerText = "current measurement device: "+ (game.hide?"none":game.type)
+topp.id="top"
+topp.style.color = "white"
+topp.style.fontSize = "30px"
+topp.style.padding = "5px"
+document.body.appendChild(topp)
 
 let left = document.createElement("div")
 left.style.backgroundColor = "#111"
@@ -298,7 +307,25 @@ res.onclick = reset
 let device = document.createElement("button")
 document.body.appendChild(device)
 device.innerText = "create device"
-device.onclick = ()=>{game.hide=undefined;game.type="quantum";update()}
+device.onclick = ()=>{game.hide=undefined;game.type=document.getElementById("sel").value;update()}
+
+
+
+let selector = document.createElement("select")
+selector.id="sel"
+document.body.appendChild(selector)
+
+
+let adop = (x)=>{
+  let o1 = document.createElement("option")
+  o1.value = o1.innerText = x
+  selector.appendChild(o1)
+}
+adop("correlated")
+adop("reliable")
+adop("unreliable")
+adop("quantum")
+
 
 
 let hep = document.createElement("div")
