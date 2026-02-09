@@ -306,8 +306,12 @@ res.onclick = reset
 
 let device = document.createElement("button")
 document.body.appendChild(device)
-device.innerText = "create device"
-device.onclick = ()=>{game.hide=undefined;game.type=document.getElementById("sel").value;update()}
+device.innerText = "create/reset device"
+device.onclick = ()=>{game.hide=undefined;
+game.answer = undefined
+game.final = []
+game.players[0].result = game.players[1].result = -1
+game.type=document.getElementById("sel").value;update()}
 
 
 
