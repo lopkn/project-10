@@ -214,6 +214,13 @@ start.onclick = ()=>{game.prompt = [Math.round(Math.random()),Math.round(Math.ra
 start.innerText = "START/SYNC"
 
 let hi = document.createElement("div")
+
+let devi = document.createElement("div")
+devi.innerText = "device: "
+hi.appendChild(devi)
+
+hi.style.margin = "5px"
+hi.style.padding = "3px"
 p.style.color = "white"
 p.innerText = "PLAYER:" + x
 p.id = "p"+x
@@ -261,7 +268,7 @@ s.onclick = ()=>{
 }
 
 hi.style.visibility = "hidden"
-hi.style.backgroundColor = "#303"
+hi.style.backgroundColor = "#58D"
 hi.id = "hi"+x
 
 d.appendChild(hide)
