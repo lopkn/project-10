@@ -136,10 +136,10 @@ function genans(){
     if(a1==a2 && a1==1){return([1,0])}else{return([1,1])}
   }
   if(t=="reliable"){
-    if(Math.random()>0.5){if(a1==a2 && a1==1){return([1,0])}else{return([a1,a2])}}else{x=r();return([x,1-x])}
+    if(Math.random()>0.6){if(a1==a2 && a1==1){return([1,0])}else{return([1,1])}}else{x=r();return([r(),r()])}
   }
   if(t=="unreliable"){
-    if(Math.random()>0.15){if(a1==a2 && a1==1){return([1,0])}else{return([a1,a2])}}else{return([r(),r()])}
+    if(Math.random()>0.15){if(a1==a2 && a1==1){return([1,0])}else{return([1,1])}}else{return([r(),r()])}
   }
   if(t=="quantum"){
     if(a1==a2 && a1==1){x=r();return([x,1-x])}else{x=r();return([x,x])}
