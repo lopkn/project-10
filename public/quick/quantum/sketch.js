@@ -348,6 +348,17 @@ hep.innerText = `
 
   (You also get a reward if you manage to submit the other player's color!)
 
+
+
+
+  questions to answer:
+   what is the maximal probability that you win without a meausrment device?
+   what is the maximal probability that you win the reward without the measurement device?
+   what is the maximal probability that you win with the correlation device?
+   what is the maximal probability that you win the reward with the correlation device?
+   what is the maximal probability that you win with the quantum device?
+   what is the maximal probability that you win the reward with the quantum device?
+
 `
 
 box(0)
