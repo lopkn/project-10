@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+  <meta charset="UTF-8" />
+
+  <script
+    src="https://cdn.jsdelivr.net/npm/three@0.143.0/build/three.js"
+    onerror="alert('Error: Fetching 3JS')"
+  ></script>
+  <script
+    src="https://cdn.jsdelivr.net/npm/three@0.143.0/examples/js/controls/OrbitControls.js"
+    onerror="alert('Error: Fetching OrbitControls')"
+  ></script>
+
+  <style>
+    html {
+      height: 100%;
+      width: 100%;
+    }
+    body {
+      margin: 0;
+      height: 100%;
+      width: 100%;
+      font-size: 0;
+    }
+    #cv {
+      height: 100%;
+      width: 100%;
+      background: #777;
+    }
+    #dat {
+      position: absolute;
+      top: 4px;
+      left: 6px;
+      width: 400px;
+      font-size: 18px;
+      color: #eee;
+      background: none;
+      font-family: arial;
+      font-weight: 800;
+      text-shadow: 2px 2px 4px #000;
+      pointer-events: none;
+      border: none;
+    }
+  </style>
+  <body>
+    <input type="text" id="dat" autocomplete="off" disabled />
+
+    <script>
+      const clock = new THREE.Clock();
+      const scene = new THREE.Scene();
+
+      var foggy = 0
+
+      const camera = new THREE.PerspectiveCamera(
+        36,
+        window.innerWidth / window.innerHeight,
+        1,
+        1000
+      );
+      camera.position.set(0, 0, 7.7);
+
+      // LIGHTS
+      // scene.add(new THREE.AmbientLight(0xffaaaa, 0.3));
+
+      // const dirLight = new THREE.DirectionalLight(0xffffff, 0.5);
+      // dirLight.position.set(5, 10, 7.5);
+      // dirLight.castShadow = true;
+      // dirLight.shadow.camera.right = 2;
+      // dirLight.shadow.camera.left = -2;
+      // dirLight.shadow.camera.top = 2;
+      // dirLight.shadow.camera.bottom = -2;
+      // dirLight.shadow.mapSize.width = 1024;
+      // dirLight.shadow.mapSize.height = 1024;
+      // scene.add(dirLight);
+
+      function addLight(x,objectPos){
+        let l = new THREE.PointLight(0xffee50,2*(Math.random()*0.4+0.4)*x/50,8)
+        // l.castShadow = true
+        l.position.copy(objectPos);
+        scene.add(l)
+      }
+
+      // RENDERER
+      const renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.shadowMap.enabled = true;
+      renderer.setPixelRatio(window.devicePixelRatio);
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setClearColor(foggy);
+      window.addEventListener("resize", onWindowResize);
+      document.body.appendChild(renderer.domElement);
+
+      // CONTROLS
+      // const controls = new THREE.OrbitControls(camera, renderer.domElement);
+      // controls.minDistance = 2;
+      // controls.maxDistance = 20;
+      // controls.update();
+
+      init();
+      animate();
+
+
+      function outterObject(objectGeom, objectColor, objectPos) {
+        const objectMat = new THREE.MeshPhongMaterial({ color: objectColor });
+        const object = new THREE.Mesh(objectGeom, objectMat);
+        object.position.copy(objectPos);
+        scene.add(object);
+      }
+
+      function plane(x,y,col,objectPos){
+        const geometry = new THREE.PlaneGeometry( x, y );
+        const material = new THREE.MeshPhongMaterial( { color: col, side: THREE.DoubleSide, flatShading:true } );
+        const plane = new THREE.Mesh( geometry, material );
+        plane.rotation.x = Math.PI/2
+        plane.position.copy(objectPos);
+        scene.add(plane)
+      }
+      function plane2(x,y,col,objectPos){
+        const geometry = new THREE.PlaneGeometry( x, y );
+        const material = new THREE.MeshStandardMaterial( { color: col, side: THREE.DoubleSide, flatShading:true } );
+        const plane = new THREE.Mesh( geometry, material );
+        plane.rotation.x = Math.PI/2
+        plane.position.copy(objectPos);
+        scene.add(plane)
+      }
+
+
+      function pillar(x){
+        outterObject(
+          new THREE.BoxGeometry(0.25, 2, 0.25),
+          "#ffb2a0",
+          new THREE.Vector3(1, 0, x)
+        );
+        outterObject(
+          new THREE.BoxGeometry(0.25, 2, 0.25),
+          "#ffb2a0",
+          new THREE.Vector3(-1, 0, x)
+        );
+                outterObject(
+          new THREE.BoxGeometry(2, 0.25, 0.25),
+          "#ffb2a0",
+          new THREE.Vector3(0, 0.875, x)
+        );
+      }
+      
+      function init() {
+
+        var light = new THREE.SpotLight( '0x11ffff', 1500, 10000, Math.PI/2*0.99, 1, 2*112 );
+        light.position.set( 0, -1.5, 0 );
+        scene.add( light );
+          // new THREE.MeshLambertMaterial( {
+
+        let background = new THREE.Mesh(
+          new THREE.SphereGeometry( 150 ),
+          new THREE.MeshLambertMaterial( {
+                color: 0x100400,
+                side: THREE.BackSide,
+          } )
+        );  
+        light.layers.set(2);
+        background.layers.set(2)
+        background.scale.y = 0.3;
+        background.position.copy(new THREE.Vector3(0,0,0))
+        scene.add( background );
+
+
+
+        scene.fog = new THREE.Fog( foggy, 0, 500 );
+
+        plane(2.5,1000,0x452205,new THREE.Vector3(0,-1,0))
+        plane2(100,1000,0x111111,new THREE.Vector3(0,-1.1,0))
+
+        let j = 0;
+        for(let i = -170; i < 10; i+=3){
+          pillar(i)
+          if(i%2){
+            addLight(j,new THREE.Vector3(0, 1.1, i+1.5))
+          }
+          j++
+        }
+        console.log(j)
+
+            // addLight(180,new THREE.Vector3(6, 3, -32+2.6))
+
+            light = new THREE.SpotLight( 0xffffff, 10, 10000, Math.PI/2*0.7, 1, 2*112 );
+            light.position.set(6, 3, -32+2.6);
+            const targetObject = new THREE.Object3D();
+            scene.add(targetObject);
+            targetObject.position.set(6, 0, -32+2.6); // Where the light points
+            light.target = targetObject;
+
+            scene.add( light );
+        
+        outterObject(
+          new THREE.BoxGeometry(3.1, 0.25, 40),
+          "#6f8290",
+          new THREE.Vector3(0, 1.3, 0)
+          )
+          outterObject(
+          new THREE.BoxGeometry(5, 400, 5),
+          "#7fb2fa",
+          new THREE.Vector3(6, 1.3, -32)
+          )
+
+          outterObject(
+          new THREE.BoxGeometry(0.25, 2, 50),
+          "#050505",
+          new THREE.Vector3(-3, -0.3, -10)
+          )
+
+          outterObject(
+          new THREE.BoxGeometry(5, 400, 5),
+          "#4f72f0",
+          new THREE.Vector3(6, 1.3, -1)
+          )
+
+      
+        camera.layers.enableAll();
+      }
+
+
+      function onWindowResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      }
+
+      function animate() {
+        const delta = clock.getDelta();
+
+        requestAnimationFrame(animate);
+        renderer.autoClear = true;
+
+        camera.layers.set(2)
+        renderer.render(scene, camera);
+         renderer.autoClear = false;
+        camera.layers.set(0)
+        renderer.render(scene, camera);
+      }
+    </script>
+  </body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
