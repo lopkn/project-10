@@ -1,67 +1,27 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <title>three.js webgl - geometry - cube</title>
-    <meta charset="utf-8" />
-    <meta
+<html>
+  <meta charset="UTF-8" />
+  <meta
       name="viewport"
       content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
     />
-    <script src="https://mrdoob.github.io/stats.js/build/stats.min.js"></script>
-    <!-- <script src="https://cdn.skypack.dev/three@0.129.0/build/three.module.js"></script> -->
 
-    <!-- <script src="https://unpkg.com/three@0.178.0/build/three.cjs"></script> -->
-    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" integrity="sha512-n8IpKWzDnBOcBhRlHirMZOUvEq2bLRMuJGjuVqbzUJwtTsgwOgK5aS0c1JA647XWYfqvXve8k3PtZdzpipFjgg==" crossorigin="anonymous"></script> -->
-<!--     <script src="/socket.io/socket.io.js"></script>
- <script src="https://cdn.socket.io/3.1.3/socket.io.min.js" integrity="sha384-cPwlPLvBTa3sKAgddT6krw0cJat7egBga3DJepJyrLl4Q9/5WLra3rrnMcyTyOnh" crossorigin="anonymous"></script> -->
-
-    <style>
-      html,
+  <style>
+    html,
       body {
         margin: 0;
         padding: 0;
       }
-    </style>
-  </head>
 
+  </style>
   <body>
 
 
 
 
-    <!-- <script src="https://unpkg.com/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script> -->
-
-    <!-- <script> -->
-<script src="//cdnjs.cloudflare.com/ajax/libs/seedrandom/3.0.5/seedrandom.min.js"></script>
-
-          <script type="importmap">
-    {
-        "imports": {
-            "three": "https://unpkg.com/three@0.178.0/build/three.module.js",
-            "three/examples/jsm/shaders/CopyShader.js": "https://unpkg.com/three@0.178.0/examples/jsm/shaders/CopyShader.js",
-            "three/examples/jsm/postprocessing/EffectComposer.js": "https://unpkg.com/three@0.178.0/examples/jsm/postprocessing/EffectComposer.js",
-            "three/examples/jsm/postprocessing/RenderPass.js": "https://unpkg.com/three@0.178.0/examples/jsm/postprocessing/RenderPass.js",
-            "three/examples/jsm/postprocessing/ShaderPass.js": "https://unpkg.com/three@0.178.0/examples/jsm/postprocessing/ShaderPass.js",
-            "three/examples/jsm/postprocessing/OutlinePass.js": "https://unpkg.com/three@0.178.0/examples/jsm/postprocessing/OutlinePass.js",
-            "three/examples/jsm/postprocessing/OutputPass.js": "https://unpkg.com/three@0.178.0/examples/jsm/postprocessing/OutputPass.js",
-            "three/examples/jsm/shaders/FXAAShader.js":"https://unpkg.com/three@0.178.0/examples/jsm/shaders/FXAAShader.js",
-            "three/examples/jsm/loaders/GLTFLoader.js":"https://unpkg.com/three@0.178.0/examples/jsm/loaders/GLTFLoader.js",
 
 
-            "three/addons/": "https://unpkg.com/three@0.178.0/examples/jsm/",
-
-            "three-mesh-bvh": "https://cdn.jsdelivr.net/npm/three-mesh-bvh@0.9.0/build/index.module.js",
-
-            "@three.ez/instanced-mesh": "https://cdn.jsdelivr.net/npm/@three.ez/instanced-mesh/build/index.js",
-            "bvh.js": "https://cdn.jsdelivr.net/npm/bvh.js/build/index.js",
-
-            "@three.ez/simplify-geometry": "https://cdn.jsdelivr.net/npm/@three.ez/simplify-geometry@0.0.1/build/index.js",
-            "meshoptimizer": "https://cdn.jsdelivr.net/npm/meshoptimizer@0.23.0/+esm"
-        }
-    }
-    </script>
-
-      <script id="vertexShader" type="x-shader/x-vertex">
+     <script id="vertexShader" type="x-shader/x-vertex">
     precision highp float;
 
     uniform float sineTime;
@@ -87,7 +47,7 @@
 
     void main(){
 
-      float size = 500000.0;
+      float size = 50000.0;
       vPosition = offset;
       vPosition.x += floor((cameraPos.x-vPosition.x)/size + 0.5)*size;
       vPosition.y += floor((cameraPos.y-vPosition.y)/size + 0.5)*size;
@@ -134,20 +94,37 @@
 
   </script>
 
+
+
+    <script type="importmap">
+        {
+        "imports": {
+            "three": "https://unpkg.com/three@0.178.0/build/three.module.js",
+            "three/examples/jsm/shaders/CopyShader.js": "https://unpkg.com/three@0.178.0/examples/jsm/shaders/CopyShader.js",
+            "three/examples/jsm/postprocessing/EffectComposer.js": "https://unpkg.com/three@0.178.0/examples/jsm/postprocessing/EffectComposer.js",
+            "three/examples/jsm/postprocessing/RenderPass.js": "https://unpkg.com/three@0.178.0/examples/jsm/postprocessing/RenderPass.js",
+            "three/examples/jsm/postprocessing/ShaderPass.js": "https://unpkg.com/three@0.178.0/examples/jsm/postprocessing/ShaderPass.js",
+            "three/examples/jsm/postprocessing/OutlinePass.js": "https://unpkg.com/three@0.178.0/examples/jsm/postprocessing/OutlinePass.js",
+            "three/examples/jsm/postprocessing/OutputPass.js": "https://unpkg.com/three@0.178.0/examples/jsm/postprocessing/OutputPass.js",
+            "three/examples/jsm/shaders/FXAAShader.js":"https://unpkg.com/three@0.178.0/examples/jsm/shaders/FXAAShader.js",
+            "three/examples/jsm/loaders/GLTFLoader.js":"https://unpkg.com/three@0.178.0/examples/jsm/loaders/GLTFLoader.js",
+
+
+            "three/addons/": "https://unpkg.com/three@0.178.0/examples/jsm/",
+
+            "three-mesh-bvh": "https://cdn.jsdelivr.net/npm/three-mesh-bvh@0.9.0/build/index.module.js",
+
+            "@three.ez/instanced-mesh": "https://cdn.jsdelivr.net/npm/@three.ez/instanced-mesh/build/index.js",
+            "bvh.js": "https://cdn.jsdelivr.net/npm/bvh.js/build/index.js",
+
+            "@three.ez/simplify-geometry": "https://cdn.jsdelivr.net/npm/@three.ez/simplify-geometry@0.0.1/build/index.js",
+            "meshoptimizer": "https://cdn.jsdelivr.net/npm/meshoptimizer@0.23.0/+esm"
+        }
+    }
+    </script>
+
+
     <script type="module">
-
-
-      // import * as THREE from 'https://unpkg.com/three@0.178.0/build/three.module.js';
-      // import * as three from 'https://unpkg.com/three@0.178.0/build/three.module.js';
-
-
-      // import * as CopyShader from 'https://unpkg.com/three@0.178.0/examples/jsm/shaders/CopyShader.js';
-      // // import * as ShaderPass from 'https://unpkg.com/three@0.178.0/examples/jsm/postprocessing/ShaderPass.js';
-      // import * as EffectComposer from 'https://unpkg.com/three@0.178.0/examples/jsm/postprocessing/EffectComposer.js';
-      // // import { RenderPass } from 'https://unpkg.com/three@0.178.0/examples/jsm/postprocessing/RenderPass.js';
-      // // import { OutlinePass } from 'https://unpkg.com/three@0.178.0/examples/jsm/postprocessing/OutlinePass.js';
-      // // import { OutputPass } from 'https://unpkg.com/three@0.178.0/examples/jsm/postprocessing/OutputPass.js';
-
 
         import * as THREE from 'three';
         import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
@@ -158,1994 +135,374 @@
         import { FXAAShader } from 'three/examples/jsm/shaders/FXAAShader.js';
         import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
         import { Line2 } from 'https://unpkg.com/three@0.178.0/examples/jsm/lines/Line2.js';
-import { LineGeometry } from 'https://unpkg.com/three@0.178.0/examples/jsm/lines/LineGeometry.js';
-// import { GeometryUtils } from 'https://unpkg.com/three@0.178.0/examples/jsm/utils/GeometryUtils.js';
-import { LineMaterial } from 'https://unpkg.com/three@0.178.0/examples/jsm/lines/LineMaterial.js';
-import { LineSegments2 } from 'https://unpkg.com/three@0.178.0/examples/jsm/lines/LineSegments2.js';
-import { LineSegmentsGeometry } from 'https://unpkg.com/three@0.178.0/examples/jsm/lines/LineSegmentsGeometry.js';
-import { acceleratedRaycast, computeBatchedBoundsTree } from 'three-mesh-bvh';
+        import { LineGeometry } from 'https://unpkg.com/three@0.178.0/examples/jsm/lines/LineGeometry.js';
+        // import { GeometryUtils } from 'https://unpkg.com/three@0.178.0/examples/jsm/utils/GeometryUtils.js';
+        import { LineMaterial } from 'https://unpkg.com/three@0.178.0/examples/jsm/lines/LineMaterial.js';
+        import { LineSegments2 } from 'https://unpkg.com/three@0.178.0/examples/jsm/lines/LineSegments2.js';
+        import { LineSegmentsGeometry } from 'https://unpkg.com/three@0.178.0/examples/jsm/lines/LineSegmentsGeometry.js';
+        import { acceleratedRaycast, computeBatchedBoundsTree } from 'three-mesh-bvh';
 
-import { InstancedMesh2 } from '@three.ez/instanced-mesh';
-import { createRadixSort} from '@three.ez/instanced-mesh';
+        import { InstancedMesh2 } from '@three.ez/instanced-mesh';
+        import { createRadixSort} from '@three.ez/instanced-mesh';
 
+      const clock = new THREE.Clock();
+      const scene = new THREE.Scene();
 
-var COUNTER = 0
+      var foggy = 0
+      var downs = {}
 
+      const camera = new THREE.PerspectiveCamera(
+        36,
+        window.innerWidth / window.innerHeight,
+        1,
+        999999
+      );
+      camera.position.set(0, 0, 0);
 
-let Height = window.innerWidth >window.innerHeight?window.innerHeight:window.innerWidth
-let Width = window.innerWidth >window.innerHeight?window.innerWidth:window.innerHeight
-
-let mouseX = Width/2
-let mouseY = Height/2
-
-// onmousemove = (e)=>{mouseX = (e.clientX); mouseY = (e.clientY)}
-document.addEventListener("mousemove",(e)=>{
-
-  if(!Mobile.initialized){
-    mouseX = e.clientX
-    mouseY = e.clientY
-  }
-})
-
-let div = document.createElement("div")
-div.style.position="absolute"
-div.style.color="white"
-div.style.backgroundColor="rgba(0,255,0,0.1)"
-div.style.zIndex="500"
-div.style.top="0px"
-div.style.left="0px"
-div.id = "debugdiv"
-div.style.width = "50%"
-div.style.height = "50%"
-
-document.body.appendChild(div)
-
-
-class LCanvas{ //lopkns template canvas
-  constructor(w=100,h=100,id=("LCanvas-"+Math.random())){
-    this.canvas = document.createElement("canvas")
-    this.canvas.id = id
-    this.ctx = this.canvas.getContext("2d")
-    this.canvas.style.position = "absolute"
-    this.canvas.style.top = "0px"
-    this.canvas.style.left = "0px"
-    this.canvas.zIndex = "1500"
-    this.canvas.width = w
-    this.canvas.height = h
-    this.ctx.fillStyle = "black"
-    this.ctx.fillRect(0,0,this.canvas.width,this.canvas.height)
-    document.body.appendChild(this.canvas)
-    return(this)
-  }
-
-  fitScreenSize(){
-    this.canvas.width = window.innerWidth
-    this.canvas.height = window.innerHeight
-  }
-
-  clear(){
-    this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height)
-  }
-
-  oneTimeDown(f){ // pass in a function for what to do with one click
-    this.canvas.addEventListener("mousedown",f,{once:true})
-  }
-
-  getPixelRGB(x,y){
-    let d = this.ctx.getImageData(x, y, 1, 1).data
-    return(d)
-  }
-
-
-}
-
-class Mobile {
-  // static joystick_move = {"mx":185,"my":821,"x":100,"y":100,"r":100,"vect":[0,0]}
-  // static joystick_fire = {"mx":600,"my":100,"x":600,"y":100,"r":100,"vect":[0,0]}
-  // static scroller_weapon = {"x":40,"y":60,"w":170,"h":40,"val":0}
-  // static scroller_wall = {"x":(window.innerWidth-10-170),"y":60,"w":170,"h":40,"val":0}
-  // static button_chat = {"x":(window.innerWidth-10-170),"y":110,"w":170,"h":40,"val":"chat"}
-
-  static UI = {}
-
-  static activeTouches = {}
-  static canvas;
-  static canvasFingers = 0
-  static canvasGesture = "none"
-  static initialized = false
-  static init(){
-  this.initialized = true
-
-    document.body.style.touchAction = 'none';
-    let mobileCanvas = document.createElement("canvas")
-    mobileCanvas.width = window.innerWidth
-    mobileCanvas.height = window.innerHeight
-    mobileCanvas.style.position = "absolute"
-    mobileCanvas.style.top = "0px"
-    mobileCanvas.style.left = "0px"
-    mobileCanvas.style.zIndex = "5"
-    mobileCanvas.id = "mcanvas"
-    mobileCanvas.style.userSelect = "none" //gay
-    mobileCanvas.style.touchAction = "none"
-    mobileCanvas.addEventListener("contextmenu",(e)=>{e.preventDefault()})
-    mobileCanvas.classList.add("mobile")
-    this.ctx = mobileCanvas.getContext("2d")
-    this.canvas = mobileCanvas
-    document.body.insertBefore(mobileCanvas,canvas.canvas)
-    mobileCanvas.addEventListener("touchstart",(e)=>{})
-    let r = canvas.canvas.getBoundingClientRect()
-    this.radius = Height/8
-    this.padding = 25
-
-    this.UI.leftJoystick = {x:this.padding + this.radius,y: Height - this.padding - this.radius,r :this.radius, update:(id,x,y,e)=>{
-      let ui = this.UI[this.activeTouches[id].type]
-      let dx = minMax(-1,(x - ui.x)/ui.r,1)
-      let dy = minMax(-1,(y - ui.y)/ui.r,1)
-
-      DRONE.controls.yaw = (-dx)*0.00017 * 88
-      DRONE.controls.pitch = (-dy)*0.00017 * 88
-
-    }, end:()=>{
-        // DRONE.controls.yaw = 0
-        // DRONE.controls.pitch = 0
-      }
-    }
-    this.UI.rightJoystick = {x:Width - this.padding - this.radius,y:Height - this.padding - this.radius,r :this.radius, update:(id,x,y,e)=>{
-        let ui = this.UI[this.activeTouches[id].type]
-        let dx = minMax(-1,(x - ui.x)/ui.r,1)
-        let dy = minMax(-1,(y - ui.y)/ui.r,1)
-
-        DRONE.controls.roll = ((-dx)*0.00007) * DRONE.rollControlSpeed * 500
-        DRONE.controls.up = (-dy)*0.005 * 1500 / 2
-      }, end:()=>{
-        // DRONE.controls.up = 0
-        // DRONE.controls.roll = 0
-      }
-    }
-
-
-    console.log(r)
-    // init()
-
-  }
-  static draw(){
-    this.ctx.clearRect(0,0,Width,Height)
-    // this.ctx.fillStyle = "#FF00FF"
-    // this.ctx.fillRect(0,0,Width,Height)
-
-    if(!this.initialized){return}
-      this.ctx.beginPath()
-      this.ctx.strokeStyle="white"
-      this.ctx.lineWidth = 5
-      
-
-      
-
-      this.ctx.arc(this.UI.leftJoystick.x,this.UI.leftJoystick.y, this.radius, 0, 2*Math.PI)
-      this.ctx.stroke()
-      this.ctx.beginPath()
-      this.ctx.arc(this.UI.rightJoystick.x,this.UI.rightJoystick.y, this.radius, 0, 2*Math.PI)
-      this.ctx.stroke()
     
+      function instance(count,mov){
 
-  }
+          var geometry = new THREE.BoxGeometry(1, 1, 1);
+          var materials = new THREE.MeshStandardMaterial({ color: "#FF3030"/*, roughness:0, metalness: 0.8*/})
 
-  static touchTyper(x,y){
-    if(distance(x,y,this.UI.leftJoystick.x,this.UI.leftJoystick.y) < this.radius){
-      return("leftJoystick")
-    }
-    if(distance(x,y,this.UI.rightJoystick.x,this.UI.rightJoystick.y) < this.radius){
-      return("rightJoystick")
-    }
+          // geometry.computeVertexNormals() // delete if not found useful
 
-    return("unidentified")
-  }
+          mesh = new InstancedMesh2( geometry, materials, count );
+          mesh.instanceMatrix.setUsage( THREE.DynamicDrawUsage ); // will be updated every frame
+          scene.add(mesh);
+          mesh.addInstances(count);
 
-  static touchUpdate(id,x,y,E){
-    if(this.activeTouches[id].type !== "unidentified"){
-      if(this.UI[this.activeTouches[id].type].update){
-        this.UI[this.activeTouches[id].type].update(id,x,y,E)
+          let dummy = new THREE.Object3D()
+          for ( let i = 0; i < count; i ++) {
+              mov(dummy,i)
+              dummy.updateMatrix();
+              mesh.setMatrixAt( i, dummy.matrix );
+          }
       }
-    }
-  }
-  static touchStart(id,x,y,E){
-    if(this.activeTouches[id].type !== "unidentified"){
-      if(this.UI[this.activeTouches[id].type].start){
-        this.UI[this.activeTouches[id].type].start(id,x,y,E)
+
+      function addLight(x,objectPos){
+        let l = new THREE.PointLight(0xffee50,2*(Math.random()*0.4+0.4)*x/50,8)
+        l.position.copy(objectPos);
+        scene.add(l)
       }
-    }
-  }
-  static touchEnd(id,x,y,E){
-    if(this.activeTouches[id].type !== "unidentified"){
-      if(this.UI[this.activeTouches[id].type].end){
-        this.UI[this.activeTouches[id].type].end(id,x,y,E)
+
+
+
+      // RENDERER
+      const renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.shadowMap.enabled = true;
+      renderer.setPixelRatio(window.devicePixelRatio);
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setClearColor(foggy);
+      window.addEventListener("resize", onWindowResize);
+      document.body.appendChild(renderer.domElement);
+
+      // CONTROLS
+      // const controls = new THREE.OrbitControls(camera, renderer.domElement);
+      // controls.minDistance = 2;
+      // controls.maxDistance = 20;
+      // controls.update();
+
+
+
+
+
+      function outterObjectS(objectGeom, objectColor, objectPos) {
+        const objectMat = new THREE.MeshStandardMaterial({ color: objectColor });
+        const object = new THREE.Mesh(objectGeom, objectMat);
+        object.position.copy(objectPos);
+        scene.add(object);
       }
-    }
-  }
-}
 
 
-var light
-
-class ENV{
-  static targetFPS = 60
-  static airFriction = 0.9995
-  static grav = 9.81/this.targetFPS*7 
-
-  static timeWarp = 1
-  static otherWarp = 1
-
-  static paused = false
-
-  static update(dt){
-    this.timeWarp = this.timeWarp ** (0.99**dt) + 0.0001
-    if(this.paused){this.timeWarp = 0;}
-    DRONE.light.color.r = this.timeWarp
-    DRONE.light.color.g = this.timeWarp
-  }
-
-}
-window.ENV = ENV
-    var downs = {}
-
-const raycaster = new THREE.Raycaster();
 
 
-class DRONE{
+      class fighter{
+        constructor(){
+          this.obj = new THREE.Object3D()
+          this.vel = 0
+          this.obj.position.set(0,0,7);
 
-  static raycaster = new THREE.Raycaster()
+            this.controls = {
+              "up":0,
+              "pitch":0,
+              "roll":0,
+              "yaw":0
+            }
 
-  static vel = new THREE.Vector3(0,0,0)
+            this.forces = {
+              "up":0,
+              "pitch":0,
+              "roll":0,
+              "yaw":0
+            }
+            scene.add(this.obj)
+          return(this)
+        }
 
-  static controls = {
-    "up":0,
-    "pitch":0,
-    "roll":0,
-    "yaw":0
-  }
+        updatePos(dt=1){
 
-  static forces = {
-    "up":0,
-    "pitch":0,
-    "roll":0,
-    "yaw":0
-  }
-
-  static controlSpeed = 0.0008
-  static rollControlSpeed = 1
-  static controlStrength = 0.0009
-
-  static invertedControls = 1
-
-  static forwardLocked = true
-
-  static updatePos(dt=1){
-
+          dt *= 0.1
       let adt = Math.abs(dt)
 
 
-      if(!this.forwardLocked){
+
+        let controlSpeed = 0.1
         if(downs.w){
-          DRONE.controls.pitch += this.controlSpeed * this.invertedControls * dt
-          // DRONE.forces.up += this.controlSpeed * 345/4
+          this.controls.pitch =  Math.min(1,this.controls.pitch+dt*controlSpeed)
         }  if(downs.s){
-          DRONE.controls.pitch -= this.controlSpeed* this.invertedControls * dt
-          // DRONE.forces.up -= this.controlSpeed * 345/4
-        } if(downs.a){
-          DRONE.controls.yaw += this.controlSpeed* dt
+          this.controls.pitch = Math.max(-1,this.controls.pitch-dt*controlSpeed)
         }  if(downs.d){
-          DRONE.controls.yaw -= this.controlSpeed* dt
-        }  if(downs.e){
-          DRONE.controls.roll -= this.controlSpeed* dt
-        }  if(downs.q){
-          DRONE.controls.roll += this.controlSpeed* dt
+          this.controls.roll = Math.max(-1,this.controls.roll-dt*controlSpeed)
+        }  if(downs.a){
+          this.controls.roll =  Math.min(1,this.controls.roll+dt*controlSpeed)
         } if(downs[" "]){
-        ENV.timeWarp *= 0.97**(dt/ENV.timeWarp)
-          // DRONE.forces.up += this.controlSpeed * 345/4
-        } if(downs.Control){
-          DRONE.forces.up -= this.controlSpeed * 345/4
+          this.vel += dt
+        } if(downs["q"]){
+          this.vel *= 0.96 ** dt
         }
-      } else {
-        if(downs[" "]){
-          DRONE.vel.add(camera.getWorldDirection(new THREE.Vector3()).multiplyScalar(2*dt))
-        }
-        
-        if(downs["M0"]){
-          DRONE.vel.add(camera.getWorldDirection(new THREE.Vector3()).multiplyScalar(1*dt))
-        }
-      }
-
-      if(downs["`"]){
-        ENV.timeWarp *= 1.02
-      }
-      if(downs["["]){
-        if(COUNTER%4<2){
-          camera.rotateY(0.01)
-        } else {
-          camera.rotateY(-0.01)
-        }
-      }
-
-    div.innerText = JSON.stringify(this.forces)
 
 
-    this.controls.yaw *= 0.995** adt
-    this.controls.pitch *= 0.995** adt
-    this.controls.up *= 0.95** dt
 
-    if(!Mobile.initialized){
-      this.controls.up = (Height/2-mouseY)*0.005 / Height * 1500
-      this.controls.roll = ((Width/2-mouseX)*0.00007) * this.rollControlSpeed / Width * 2000
-    }
+      this.controls.roll *= 0.9** adt
+      this.controls.pitch *= 0.9** adt
     
 
 
-    Object.keys(this.controls).forEach((e)=>{
-      if(e==="up"){this.forces[e] = this.controls[e];return}
-      let mns = this.controls[e]-this.forces[e]
-      this.forces[e] += Math.min(Math.abs(mns),this.controlStrength+Math.abs(mns/100)) * Math.sign(mns) * adt
-    })
+      // Object.keys(this.controls).forEach((e)=>{
+      //   if(e==="up"){this.forces[e] = this.controls[e];return}
+      //   let mns = this.controls[e]-this.forces[e]
+      //   this.forces[e] += Math.min(Math.abs(mns),Math.abs(mns/100)) * Math.sign(mns) * adt
+      // })
 
-    camera.rotateY(this.forces.yaw* dt)
-    camera.rotateZ(this.forces.roll* dt)
-    camera.rotateX(this.forces.pitch* dt)
-
-
-    this.upVector = new THREE.Vector3(0, 1, 0).applyQuaternion(camera.quaternion)
-    this.angleUp = this.upVector.angleTo(new THREE.Vector3(0,1,0))
-    this.vel.add(this.upVector.clone().multiplyScalar(this.forces.up*dt))
-
-    this.vel.y -= ENV.grav * dt
+    this.obj.rotateY(this.controls.yaw* dt)
+    this.obj.rotateZ(this.controls.roll* dt)
+    this.obj.rotateX(this.controls.pitch* dt)
 
 
-    this.vel.multiplyScalar(ENV.airFriction** dt)
-    this.speed = DRONE.vel.length()
-    this.dPos = this.vel.clone().multiplyScalar(dt)
+    // this.upVector = new THREE.Vector3(0, 1, 0).applyQuaternion(this.obj.quaternion)
+    // this.angleUp = this.upVector.angleTo(new THREE.Vector3(0,1,0))
+    // this.vel.add(this.upVector.clone().multiplyScalar(this.forces.up*dt))
+
+
+
+    // this.vel.multiplyScalar(ENV.airFriction** dt)
+    // this.speed = DRONE.vel.length()
+    // this.dPos = this.vel.clone().multiplyScalar(dt)
+
 
     this.dst = Infinity
-    const intersects = raycaster.intersectObjects( world.activeMeshes );
-    this.raycaster.set(camera.position,camera.getWorldDirection(new THREE.Vector3))
-    const lookIntersects = DRONE.raycaster.intersectObjects( world.activeMeshes );
+    // const intersects = raycaster.intersectObjects( world.activeMeshes );
+    // this.raycaster.set(camera.position,camera.getWorldDirection(new THREE.Vector3))
+    // const lookIntersects = DRONE.raycaster.intersectObjects( world.activeMeshes );
 
 
 
-    if(intersects.length>0){
-      div.innerText += "\n INTERSECTS \n"
-      this.dst = intersects[0].distance
-      if(this.dst < DRONE.dPos.length()){
-        div.style.backgroundColor = "red"
-        DRONE.forces.roll += minMax(-1,(Math.random()-0.5)*0.0005*DRONE.speed,1) //formerly 0.0015 and 2 before reflection
-        DRONE.forces.yaw += minMax(-1,(Math.random()-0.5)*0.0005*DRONE.speed,1)
+    // if(intersects.length>0){
 
-        DRONE.vel.multiplyScalar(0.8)
-        let faceNormal = intersects[0].face.normal.clone()
-        let im = new THREE.Matrix4()
-        intersects[0].object.getMatrixAt(intersects[0].instanceId,im)
-        faceNormal.applyMatrix3( new THREE.Matrix3().getNormalMatrix( im ) );
-        faceNormal.normalize();
+    // }
+    // if(lookIntersects.length>0 && downs["M0"]){
+    //   if(lookIntersects[0].instanceId!==undefined){
+    //     lookIntersects[0].object.setColorAt(lookIntersects[0].instanceId,new THREE.Color( 0xffff00 ))
+    //     // lookIntersects[0].object.instanceColor.needsUpdate = true
+    //   }
+    // }
+
+    // this.obj.position.add(this.dPos)
+
+    // this.vel.add(camera.getWorldDirection(new THREE.Vector3()).multiplyScalar(2*dt))
+
+    this.obj.translateZ(-this.vel)
+
+    // light.position.set(camera.position.x,camera.position.y,camera.position.z)
+    // raycaster.set(this.obj.position,this.vel.clone().normalize())
+    // this.lookingTowards = this.obj.getWorldDirection(new THREE.Vector3()).multiplyScalar(1200)
+
+
+
+  }
+}
+
+      class world{
+        static cameraDrone = new fighter()
+        static entities = [this.cameraDrone]
+        static init(){
+          this.cameraDrone.obj.add(camera)
+        }
+      }
+
+
+      function starcloud(){
+
+
+        let count = Math.floor(21400)
+
+        const vector = new THREE.Vector4();
+        const positions = [];
+        const offsets = [];
+        const colors = [];
+        const orientationsStart = [];
+        const orientationsEnd = [];
+
+        let size = 225/10
+
+        positions.push( 0, -size*2, 0 );
+        positions.push( 0, size*2, 0 );
+        positions.push( 0, size, size );
+
+
+
+
+        let galazyBoxSize = 50000
+
+        for ( let i = 0; i < count; i ++ ) {
+
+            // offsets
+            let [x,y,z] = [Math.random()*galazyBoxSize, Math.random()*galazyBoxSize, Math.random()*galazyBoxSize];
+            // [x,y,z] = [136*Math.random()*20000, 2*Math.random()*20000, 2*Math.random()*20000];
+            offsets.push(x,y,z);
+            // offsets.push( Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5 );
+            // colors
+            colors.push( Math.random(), Math.random(), Math.random(),1);
+            // colors.push( Math.random(), Math.random(), Math.random(), Math.random() );
+            // orientation start
+            vector.set( Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1 );
+            vector.normalize();
+            orientationsStart.push( vector.x, vector.y, vector.z, vector.w );
+            // orientation end
+            vector.set( Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1 );
+            vector.normalize();
+            orientationsEnd.push( vector.x, vector.y, vector.z, vector.w );
+        }
+
+        // mesh.instanceMatrix.needsUpdate = true
+
+        const geometry2 = new THREE.InstancedBufferGeometry();
+
+        geometry2.instanceCount = count; // set so its initialized for dat.GUI, will be set in first draw otherwise
+        geometry2.setAttribute( 'position', new THREE.Float32BufferAttribute( positions, 3 ) );
+        geometry2.setAttribute( 'offset', new THREE.InstancedBufferAttribute( new Float32Array( offsets ), 3 ) );
+        geometry2.setAttribute( 'color', new THREE.InstancedBufferAttribute( new Float32Array( colors ), 4 ) );
+        geometry2.setAttribute( 'orientationStart', new THREE.InstancedBufferAttribute( new Float32Array( orientationsStart ), 4 ) );
+        geometry2.setAttribute( 'orientationEnd', new THREE.InstancedBufferAttribute( new Float32Array( orientationsEnd ), 4 ) );
+        let mesh2 = new THREE.Mesh(geometry2, new THREE.RawShaderMaterial( {
+
+        uniforms: {
+          'time': { value: 1.0 },
+          'sineTime': { value: 1.0 },
+          'cameraPos': { value: world.cameraDrone.obj.position },
+        },
+        vertexShader: document.getElementById( 'vertexShader' ).textContent,
+        fragmentShader: document.getElementById( 'fragmentShader' ).textContent,
+        side: THREE.DoubleSide,
+        forceSinglePass: true,
+        transparent: false
+
+        } ))
+        geometry2.computeBoundingSphere()
+        geometry2.boundingSphere.radius = Infinity
+        window.gem = geometry2
+        mesh2.name = "starcloud"
+        scene.add( mesh2 );
+        world.starcloud = mesh2
+      }
+      
+      function init() {
+        scene.add(new THREE.AmbientLight(0x888888, 1));
+
+        for(let i = 0; i< 100; i++){
+          outterObjectS(
+            new THREE.BoxGeometry(5,5,5),
+            "#ff00ff",
+            new THREE.Vector3(Math.random()*200-100,Math.random()*200-100,Math.random()*200-100)
+          )
+        }
         
-        if(DRONE.speed < 300){
-          DRONE.vel.reflect(faceNormal)
-        }
-
-        this.dPos = this.vel.clone().multiplyScalar(dt)
-        
-        DRONE.forwardLocked = false
-        console.log(faceNormal)
-        console.log("HIT")
-
-        if(intersects[0].instanceId!==undefined){
-          intersects[0].object.setColorAt(intersects[0].instanceId,new THREE.Color( 0xff0000 ))
-          // intersects[0].object.instanceColor.needsUpdate = true
-        }
-      }
-    }
-    if(lookIntersects.length>0 && downs["M0"]){
-      if(lookIntersects[0].instanceId!==undefined){
-        lookIntersects[0].object.setColorAt(lookIntersects[0].instanceId,new THREE.Color( 0xffff00 ))
-        // lookIntersects[0].object.instanceColor.needsUpdate = true
-      }
-    }
-
-    camera.position.add(this.dPos)
-    if(camera.position.y < -100000 && Mobile.initialized){
-      this.reset()
-    }
-    light.position.set(camera.position.x,camera.position.y,camera.position.z)
-    raycaster.set(camera.position,this.vel.clone().normalize())
-    this.lookingTowards = camera.getWorldDirection(new THREE.Vector3()).multiplyScalar(1200)
 
 
 
-    if(this.topHemisphere.position){
 
-      this.topHemisphere.position.set(camera.position.x,camera.position.y,camera.position.z)
-      this.topHemisphere.position.add(this.lookingTowards)
-      this.topHemisphere.position.add(new THREE.Vector3(-0,-600,0).applyQuaternion(camera.quaternion))
+        world.init()
+        starcloud()
 
-      this.bottomHemisphere.position.set(camera.position.x,camera.position.y,camera.position.z)
-      this.bottomHemisphere.position.add(this.lookingTowards)
-      this.bottomHemisphere.position.add(new THREE.Vector3(-0,-600,0).applyQuaternion(camera.quaternion))
-
-    }
-
-
-
-    div.innerText += JSON.stringify(this.vel)
-  }
-
-
-  static getInfo(){
-    this.stableYlevel = Height/2 - ENV.grav / 1500 * Height / 0.005
-  }
-
- 
-  static softReset(){
-    this.controls = {
-      "up":0,
-      "pitch":0,
-      "roll":0,
-      "yaw":0
-    }
-
-    this.forces = {
-      "up":0,
-      "pitch":0,
-      "roll":0,
-      "yaw":0
-    }
-
-    this.vel = new THREE.Vector3(0,0,0)
-    camera.rotation.set(0,Math.PI*3/2,0)
-  }
-
-  static reset(){
-    console.log("reset")
-
-
-
-    this.softReset()
-
-    this.furthestOut = 0
-
-    this.forwardLocked = true
-    this.score = 0;
-    camera.position.z = 0;
-    camera.position.y = 0;
-    camera.position.x = -21200;
-    // camera.position.x = 0
-
-    this.worldPos = this.checkpointId
-    world.recalculate()
-    world.loadChunk({id:this.checkpointId})
-    world.recalculate()
-    camera.position.x = world.loadeds[this.checkpointId].userData.start - 21200
-    world.autogen()
-
-    this.calcWorldPos()
-
-
-    this.getInfo()
-
-  }
-
-}
-window.drone = DRONE
-
-class world{
-  static worldbox = {"y":2*20000,"z":2*20000}
-  static activeMeshes = []
-  static loadeds = {}
-  static seed = "welcome"
-
-  static rng = new Math.seedrandom(this.seed)
-
-  static levelDesign = {}
-
-
-  static autogen(){
-    // this.recalculate()
-
-    let pStart = camera.position.x - DRONE.light.distance*2 
-    let pEnd = camera.position.x + DRONE.light.distance*2 
-
-    // if(DRONE.vel.x >= 0){
-      //delete meshes first
-      this.removeBehind(pStart)
-      this.removeForward(pEnd)
-
-      let i = 15
-      while(pEnd > this.end){
-        i--
-        // if(i<1){
-        //   console.log("BOMBBBBBBBB!!!")
-        //   this.activeMeshes.sort((a,b)=>{return(a.userData.id - b.userData.id)})
-        //   this.recalculate()
-        // }
-        if(i < 0){debugger}
-        console.log("jhey1"+ pEnd + "," + this.end)
-        this.loadChunk({id: this.endMesh.userData.id+1})
-      }
-      while(pStart < this.start){
-        console.log("jhey")
-        this.loadChunk({id: this.startMesh.userData.id-1, reverse:true})
       }
 
 
-  }
+      function onWindowResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
 
-  static preloadChunk(dict){
-    if(this.levelDesign[dict.id]){return}
-    this.levelDesign[dict.id] = dict
-  }
-
-  static loadChunk(dict){
-    if(this.loadeds[dict.id]){console.log("already loaded: "+dict.id);return}
-    if(this.levelDesign[dict.id]){
-      this.generate(this.levelDesign[dict.id])
-    } else {
-      this.levelDesign[dict.id] = dict
-      this.generate(dict)
-      dict.fullyLoaded = true
-    }
-  }
-
-
-  static recalculate(){
-
-    if(this.activeMeshes.length === 0){
-      this.startMesh = {userData:{id:0}}
-      this.endMesh = {userData:{id:0}}
-      this.start = camera.position.x+21200
-      this.end = camera.position.x+21200
-      console.log("DEFAULTED RECALC:" + camera.position.x)
-      return
-    }
-
-    this.startMesh = this.activeMeshes[0]
-    this.endMesh = this.activeMeshes[this.activeMeshes.length-1]
-    this.start = this.startMesh.userData.start
-    this.end = this.endMesh.userData.end
-  }
-
-
-  // static generate(level,length=2000000,count=20000){
-
-
-
-  static generate({level=0,length=200000,count=20000,id=1,reverse=false,startPos=undefined} = {}){
-
-
-
-    let rng = new Math.seedrandom(this.seed+id)
-    if(startPos === undefined){
-      if(reverse){
-        startPos = this.start - length
-      } else {
-        startPos = this.end
-      }
-    this.levelDesign[id].startPos = startPos
-    }
-
-
-
-    // console.log("GENERATE")
-
-
-    count = Math.floor(count)
-    let mesh;
-    if(level === 0){
-      let per = 10000
-      let count = Math.floor(length/10000)*4
-
-      var geometry = new THREE.BoxGeometry(4200, 1200, 1200);
-      var materials = new THREE.MeshStandardMaterial({ color: "#FF3030", roughness:0, metalness: 0.8})
-
-      // geometry.computeVertexNormals() // delete if not found useful
-
-      mesh = new InstancedMesh2( geometry, materials, count );
-      mesh.instanceMatrix.setUsage( THREE.DynamicDrawUsage ); // will be updated every frame
-      scene.add(mesh);
-      mesh.addInstances(count);
-
-      let dummy = new THREE.Object3D()
-      for ( let i = 0; i < count; i ++) {
-          let [x,y,z] = [Math.floor(i/4)*per+startPos, world.worldbox.y*0.8 * (i%2-0.5), world.worldbox.z*0.8 * (Math.floor(i%4/2)-0.5)];
-          dummy.rotation.set(Math.PI/4,0,0)
-          dummy.position.set(x,y,z);
-          dummy.updateMatrix();
-          mesh.setMatrixAt( i, dummy.matrix );
-      }
-      mesh.name = "spaceRail"
-
-      mesh.userData.decorations = [this.border(startPos,length)] 
-      mesh.userData.noCheckpoint = true
-
-    }
-
-    if(level === 1){
-
-
-      this.preloadChunk({id:id+1,level:0})
-      this.preloadChunk({id:id+2,level:2,length:2000000})
-
-      // count *= 20
-
-      var geometry = new THREE.BoxGeometry(200, 200, 200);
-      var materials = [
-        new THREE.MeshStandardMaterial({ color: "#AA5555" /*, depthTest:false*/}),
-        new THREE.MeshStandardMaterial({ color: "#55AA55" }),
-        new THREE.MeshStandardMaterial({ color: "#AAAAFF" }),
-        new THREE.MeshStandardMaterial({ color: "#AAFFFF" }),
-        new THREE.MeshStandardMaterial({ color: "#FFAAFF" }),
-        new THREE.MeshStandardMaterial({ color: "#FFFFAA" })
-      ];
-      mesh = new InstancedMesh2( geometry, materials, { capacity: count } );
-      mesh.instanceMatrix.setUsage( THREE.DynamicDrawUsage ); // will be updated every frame
-      scene.add(mesh);
-      window.mesh = mesh
-      let dummy = new THREE.Object3D()
-
-
-      let pos = [];
-      let rot = [];
-      let scl = [];
-
-
-      mesh.addInstances(count);
-
-
-      for ( let i = 0; i < count; i ++ ) {
-        let mr = rng()
-          let [x,y,z] = [mr*length+startPos, ranRange(world.worldbox.y), ranRange(world.worldbox.z)];
-          dummy.position.set(x,y,z);
-          dummy.rotation.set(rng()*Math.PI*mr,rng()*Math.PI*mr,rng()*Math.PI*mr)
-          dummy.scale.set( 1 + Math.abs(normalRandom(1,3,rng)), 1 + Math.abs(normalRandom(1,3,rng)), 1 + Math.abs(normalRandom(1,3,rng)) );
-          dummy.updateMatrix();
-          pos.push(dummy.position.x, dummy.position.y, dummy.position.z);
-          rot.push(dummy.quaternion.x, dummy.quaternion.y, dummy.quaternion.z, dummy.quaternion.w);
-          scl.push(dummy.scale.x, dummy.scale.y, dummy.scale.z);
-          mesh.setMatrixAt( i, dummy.matrix );
+        renderer.setSize(window.innerWidth, window.innerHeight);
       }
 
 
+      var startDate = Date.now()
+      function animate() {
+        // const delta = clock.getDelta();
 
 
 
+        requestAnimationFrame(animate);
+        renderer.render(scene, camera);
 
-      let lineGeom = new THREE.EdgesGeometry(geometry);
-
-      // lineGeom = new THREE.InstancedBufferGeometry().copy(lineGeom);
-      // lineGeom = new LineSegmentsGeometry().fromMesh(mesh);
-
-      // lineGeom = new LineSegmentsGeometry().fromEdgesGeometry(lineGeom);
-      lineGeom = new LineSegmentsGeometry().copy(lineGeom);
-      // lineGeom = new LineGeometry().copy(lineGeom);
-      
-      lineGeom.instanceCount = Infinity;
-      lineGeom.setAttribute("instT", new THREE.InstancedBufferAttribute(new Float32Array(pos), 3));
-      lineGeom.setAttribute("instR", new THREE.InstancedBufferAttribute(new Float32Array(rot), 4));
-      lineGeom.setAttribute("instS", new THREE.InstancedBufferAttribute(new Float32Array(scl), 3));
-      // let lineMat = new THREE.LineBasicMaterial({
-
-      // let lineMat = new LineMaterial({
-      //   color: 0xff0000,
-      //   dashed:false,
-      //   lineWidth:5
-      // })
-      let lineMat = new LineMaterial({
-        color: "yellow"
-        // ,linewidth:20
-      //   ,onBeforeCompile: shader => {
-      //     shader.vertexShader = `
-      //     attribute vec3 instT;
-      //     attribute vec4 instR;
-      //     attribute vec3 instS;
-          
-      //     // http://barradeau.com/blog/?p=1109
-      //     vec3 trs( inout vec3 position, vec3 T, vec4 R, vec3 S ) {
-      //         position *= S;
-      //         position += 2.0 * cross( R.xyz, cross( R.xyz, position ) + R.w * position );
-      //         position += T;
-      //         return position;
-      //     }
-      //     ${shader.vertexShader}
-      // `.replace(
-      //       `#include <begin_vertex>`,
-      //       `#include <begin_vertex>
-      //       transformed = trs(transformed, instT, instR, instS);
-      // `
-      //     );
-      //     console.log(shader.vertexShader);
-      //   }
-        ,vertexShader:`
-          attribute vec3 instT;
-          attribute vec4 instR;
-          attribute vec3 instS;
-          varying vec3 vPosition2;
-          // attribute vec3 position;
-
-          // http://barradeau.com/blog/?p=1109
-          vec3 trs(vec3 T, vec4 R, vec3 S ) {
-              vec3 pos = S * position;
-              pos += 2.0 * cross( R.xyz, cross( R.xyz, pos ) + R.w * pos );
-              pos += T;
-              // pos.x += 500.0;
-              return pos;
-          }
-        void main(){
-          vPosition2 = trs(instT,instR,instS);
-        gl_Position = projectionMatrix * modelViewMatrix * vec4( vPosition2, 1.0 );
-          }
-          `
-
-
-        ,fragmentShader: `
-        varying vec3 vPosition2; // Varying for vertex position
-        uniform vec3 camPos; // Camera position passed from JavaScript
-        //varying float vAlpha;
-
-        void main() {
-            // Calculate distance from the vertex to the camera
-            float distance = length(vPosition2 - camPos);
-            float vAlpha = 1.0 - distance / 25000.0; // Adjust based on your scene scale
-            vAlpha = clamp(vAlpha, 0.0, 1.0); // Ensure alpha is in [0, 1]
-
-            gl_FragColor = vec4(1.0, 0.0, 0.0, vAlpha); // Yellow color with varying alpha
-
-        }
-    `
-        ,uniforms: {
-          camPos: { value: camera.position },
-          linewidth: {value: 4}
-        }
-        ,transparent: true
-      });
-      let lines = new THREE.LineSegments(lineGeom, lineMat);
-      // let lines = new LineSegments2(lineGeom, lineMat);
-      // let lines = new Line2(lineGeom, lineMat);
-      
-      // lines.computeLineDistances();
-      // lines.scale.set( 1, 1, 1 );
-      lines.frustumCulled = false
-      scene.add(lines);
-
-      mesh.name = "level1"
-      mesh.userData.decorations = [this.border(startPos,length),lines] // remember to add lines back if done 
-    }
-
-    if(level === 2){
-
-      this.preloadChunk({id:id+1,level:0})
-      this.preloadChunk({id:id+2,level:3,length:2000000})
-
-      var geometry = new THREE.BoxGeometry(800, 200, 200);
-      var materials = [
-        new THREE.MeshStandardMaterial({ color: "#55AA55" /*, depthTest:false*/}),
-        new THREE.MeshStandardMaterial({ color: "#55AA55" }),
-        new THREE.MeshStandardMaterial({ color: "#AAAAFF" }),
-        new THREE.MeshStandardMaterial({ color: "#AAFFFF" }),
-        new THREE.MeshStandardMaterial({ color: "#55AA55" }),
-        new THREE.MeshStandardMaterial({ color: "#55AA55" })
-      ];
-      mesh = new InstancedMesh2( geometry, materials, count );
-      mesh.instanceMatrix.setUsage( THREE.DynamicDrawUsage ); // will be updated every frame
-      scene.add(mesh);
-      mesh.addInstances(count);
-
-      let dummy = new THREE.Object3D()
-
-      for ( let i = 0; i < count; i ++ ) {
-        let mr = rng()
-          let [x,y,z] = [mr*length+startPos, ranRange(world.worldbox.y), ranRange(world.worldbox.z)];
-          dummy.position.set(x,y,z);
-          dummy.rotation.set((rng()-0.5)*Math.PI*mr,(rng()-0.5)*Math.PI*mr,(rng()-0.5)*Math.PI*mr)
-          dummy.scale.set( 1 + Math.abs(normalRandom(1,6,rng)), 1 + Math.abs(normalRandom(1,3,rng)), 1 + Math.abs(normalRandom(1,3,rng)) );
-          dummy.updateMatrix();
-          mesh.setMatrixAt( i, dummy.matrix );
+        world.entities.forEach((e)=>{
+          e.updatePos()
+        })
+        world.starcloud.material.uniforms['time'].value = Math.sin((Date.now()-startDate) * 0.0005);
       }
 
-      mesh.userData.decorations = [this.border(startPos,length)] // NEED TO CLEAR THIS SHIT AFTER
-    }
 
-
-    if(level === 3){
-
-      this.preloadChunk({id:id+1,level:0})
-      this.preloadChunk({id:id+2,level:4,length:2000000})
-
-      count = Math.floor(count*2/3)
-
-
-      var geometry = new THREE.TetrahedronGeometry(300);
-      var materials = new THREE.MeshStandardMaterial({ color: "#F5BE27" /*, depthTest:false*/})
-      mesh = new InstancedMesh2( geometry, materials, count );
-      mesh.instanceMatrix.setUsage( THREE.DynamicDrawUsage ); // will be updated every frame
-      scene.add(mesh);
-      mesh.addInstances(count);
-
-      let dummy = new THREE.Object3D()
-
-      for ( let i = 0; i < count; i ++ ) {
-        let mr = rng()
-          let [x,y,z] = [mr*length+startPos, ranRange(world.worldbox.y), ranRange(world.worldbox.z)];
-          dummy.position.set(x,y,z);
-          dummy.rotation.set((rng()-0.5)*Math.PI,(rng()-0.5)*Math.PI,(rng()-0.5)*Math.PI)
-          let mr2 = 1 + Math.abs(normalRandom(1,4,rng))
-          dummy.scale.set( mr2, mr2, mr2 );
-          dummy.updateMatrix();
-          mesh.setMatrixAt( i, dummy.matrix );
-      }
-
-      mesh.userData.decorations = [this.border(startPos,length)] // NEED TO CLEAR THIS SHIT AFTER
-    }
-    if(level === 4){
-
-      count = Math.floor(count/5)
-
-      this.preloadChunk({id:id+1,level:0})
-      this.preloadChunk({id:id+2,level:3,length:2000000})
-
-      var geometry = new THREE.BoxGeometry(800, 200, 200);
-      var materials = [
-        new THREE.MeshStandardMaterial({ color: "#55AA55" /*, depthTest:false*/}),
-        new THREE.MeshStandardMaterial({ color: "#55AA55" }),
-        new THREE.MeshStandardMaterial({ color: "#AAAAFF" }),
-        new THREE.MeshStandardMaterial({ color: "#AAFFFF" }),
-        new THREE.MeshStandardMaterial({ color: "#55AA55" }),
-        new THREE.MeshStandardMaterial({ color: "#55AA55" })
-      ];
-      geometry = window.loadedGeom.geometry
-      materials = window.loadedGeom.material
-      mesh = new InstancedMesh2( geometry, materials, count );
-      mesh.addInstances(count);
-
-      mesh.instanceMatrix.setUsage( THREE.DynamicDrawUsage ); // will be updated every frame
-      scene.add(mesh);
-
-      let dummy = new THREE.Object3D()
-
-      for ( let i = 0; i < count; i ++ ) {
-        let mr = rng()
-          let [x,y] = [mr*length+startPos, -world.worldbox.y/1.5];
-          let z = Math.abs(ranRange(world.worldbox.z**2))**0.5 * Math.sign(rng()-0.5)
-          dummy.position.set(x,y,z);
-          dummy.rotation.set((rng()-0.5)*Math.PI*mr /15,(rng()-0.5)*Math.PI*mr /15,(rng()-0.5)*Math.PI*mr /15)
-          // dummy.scale.set( 1 + Math.abs(normalRandom(1,6,rng)), 1 + Math.abs(normalRandom(1,3,rng)), 1 + Math.abs(normalRandom(1,3,rng)) );
-          dummy.scale.set(1000 + Math.abs(normalRandom(0,600,rng)),Math.abs(z) + 2000 * Math.abs(normalRandom(1,10*mr,rng)) ,1000 + Math.abs(normalRandom(0,600,rng)));
-          dummy.updateMatrix();
-          mesh.setMatrixAt( i, dummy.matrix );
-      }
-
-      mesh.userData.decorations = [this.border(startPos,length)] // NEED TO CLEAR THIS SHIT AFTER
-    }
-
-
-
-
-
-
-    if(mesh.isInstancedMesh2){
-      // mesh.sortObjects = true;
-      // mesh.customSort = createRadixSort(mesh);
-      mesh.computeBVH(THREE.WebGLCoordinateSystem)
-    }
-
-
-
-
-
-
-
-
-
-    let midpt = startPos + length/2
-    if(id > this.endMesh.userData.id || this.activeMeshes.length===0){
-      this.activeMeshes.push(mesh)
-      console.log("PUSHED: "+id+ " at "+startPos+" with world: "+ this.start + "-"+this.end + ", camera at:"+camera.position.x+", reverse: "+reverse)
-    } else if(id < this.startMesh.userData.id){
-      this.activeMeshes.splice(0,0,mesh)
-      console.log("SPLICED: "+id+ " at "+startPos+" with world: "+ this.start + "-"+this.end + ", camera at:"+camera.position.x+ ", reverse: "+reverse)
-    } else {
-      console.log("dont know what to do");
-      debugger;
-    }
-
-
-    // console.log("GENERATE DONE")
-
-      mesh.userData.start = startPos
-      mesh.userData.end = startPos + length
-
-    mesh.userData.id = id
-    console.log("ID "+id)
-
-    this.loadeds[id] = mesh
-
-    this.recalculate()
-
-    return(mesh)
-  }
-
-
-  static border(startPos,length,per=4000){
-      let material = new THREE.MeshPhysicalMaterial({color:"#00FFFF",metalness:0.7,roughness:1,reflectivity:1})
-      var geometry = new THREE.BoxGeometry(2000, 150, 150);
-
-      let count = Math.floor(length/per)*4
-
-      let mesh = new THREE.InstancedMesh( geometry, material, count)
-      mesh.instanceMatrix.setUsage( THREE.StaticDrawUsage ); // will be updated every frame
-      scene.add(mesh);
-
-      let dummy = new THREE.Object3D()
-      for ( let i = 0; i < count; i ++ ) {
-          let [x,y,z] = [Math.floor(i/4)*per+startPos, world.worldbox.y * (i%2-0.5), world.worldbox.z * (Math.floor(i%4/2)-0.5)];
-          dummy.position.set(x,y,z);
-          dummy.updateMatrix();
-          mesh.setMatrixAt( i, dummy.matrix );
-      }
-      mesh.name = "border1"
-      return(mesh)
-  }
-
-
-  static removeBehind(start){
-    let meshes = []
-    while(this.activeMeshes.length > 0){
-      if(start > this.activeMeshes[0].userData.end){
-        let msh = this.activeMeshes.splice(0,1)[0]
-        meshes.push(msh)
-        console.log("removed behind:" + msh.userData.id)
-        continue;
-      }
-      break;
-    }
-    if(meshes.length===0){return}
-    this.remove(meshes)
-  }
-  static removeForward(end){
-    let meshes = []
-    while(this.activeMeshes.length > 0){
-      if(end < this.activeMeshes[this.activeMeshes.length-1].userData.start){
-        meshes.push(this.activeMeshes.pop())
-        console.log("removed forward")
-        continue;
-      }
-      break;
-    }
-    if(meshes.length===0){return}
-    this.remove(meshes)
-  }
-
-  static remove(meshes){
-    // console.log("removing:"+meshes)
-    while(meshes.length>0){
-      let mesh = meshes.splice(0,1)[0];
-      if(mesh.userData.id!==undefined){
-        this.loadeds[mesh.userData.id] = false
-        // console.log(mesh.name,mesh.userData.id)
-      } else {
-        // console.log("not found ",mesh.name,JSON.stringify(mesh.userData))
-      }
-      scene.remove(mesh)
-      if(mesh.userData.decorations){
-        meshes.push(...mesh.userData.decorations)
-      }
-      mesh.geometry.dispose();
-    }
-    this.recalculate()
-  }
-
-}
-window.world = world
-
-
-
-var sensors = {
-  Orientation_a:0,
-  Orientation_b:0,
-  Orientation_g:0
-}
-var camera, scene, renderer;
-var mesh2;
-
-
-
-function ranRange(x,rng=world.rng){
-  return(rng()*x-x*0.5)
-}
-
-function ran(x){
-  return(Math.random()*x)
-}
-
-
-
-function init() {
-  window.camera = camera = new THREE.PerspectiveCamera(
-    70,
-    window.innerWidth / window.innerHeight,
-    1,
-    502000,
-  );
-    
-
-  // camera.position.z = 2
-  // camera.position.x = 0
-  // camera.position.y = 0
-
-  window.scene = scene = new THREE.Scene();
-
-  window.renderer = renderer = new THREE.WebGLRenderer({ antialias: true });
-  renderer.setPixelRatio(window.devicePixelRatio);
-  renderer.setSize(window.innerWidth, window.innerHeight);
-
-  document.body.appendChild(renderer.domElement);
-
-
-
-
-
-
-
-  DRONE.topHemisphere = new THREE.Mesh(new THREE.SphereGeometry( 140, 20, 20, 0, Math.PI, 0, Math.PI ),new THREE.MeshStandardMaterial({ color: "#33AAFF" }))
-  DRONE.topHemisphere.name = "topHem"
-  DRONE.bottomHemisphere = new THREE.Mesh(new THREE.SphereGeometry( 140, 20, 20, Math.PI, Math.PI,0, Math.PI ),new THREE.MeshStandardMaterial({ color: "#FF3300" }))
-  DRONE.bottomHemisphere.name = "bottomHem"
-
-
-
-  DRONE.topHemisphere.rotateX(Math.PI*3/2)
-  DRONE.topHemisphere.renderOrder = 998
-  DRONE.topHemisphere.material.depthTest = false;
-  DRONE.bottomHemisphere.renderOrder = 999
-  DRONE.bottomHemisphere.rotateX(Math.PI*3/2)
-  // DRONE.topHemisphere.rotateY(Math.atan(1/2))
-  // DRONE.bottomHemisphere.rotateY(Math.atan(1/2))
-  DRONE.bottomHemisphere.material.depthTest = false;
-
-
-
-
-
-        const loader = new GLTFLoader();
-
-      // let geometry;
-
-      loader.load( '../three/source/s_building2.gltf', function ( gltf ) {
-
-        let model = gltf.scene
-        gltf.scene.position.y = 0
-        gltf.scene.position.z = 0
-        gltf.scene.position.x = 200
-        // gltf.scene.scale.multiplyScalar(5)
-        // let mesh3 = new THREE.Mesh(
-        // new THREE.BoxGeometry(30,170,30),
-        // new THREE.MeshStandardMaterial({ color: 0xffffff }))
-
-        // mesh3.position.z = gltf.scene.position.z
-        // mesh3.position.y = gltf.scene.position.y
-        // mesh3.position.x = gltf.scene.position.x + 50
-
-         // let bbox = new THREE.Box3().setFromObject(model);
-         //    let helper = new THREE.Box3Helper(bbox, new THREE.Color(0, 255, 0));
-         //    let size = bbox.getSize(new THREE.Vector3());
-         //    console.log(size)
-
-        gltf.scene.rotateX(1.2368643351396535)
-        gltf.scene.rotateY(0.4719777676633856)
-        gltf.scene.rotateZ(-0.918989255293726)
-
-
-
-        console.log(gltf.scene)
-
-        window.loadedGeom = gltf.scene.children[0]
-
-      // scene.add( gltf.scene );
-
-      
-
-
-    }, undefined, function ( error ) {
-
-      console.error( error );
-
-    } );
-
-
-
-
-
-
-  // var materials = new THREE.MeshStandardMaterial({ color: 0xffff00 })
-
-  // mesh = new THREE.Mesh(geometry, materials);
-
-  DRONE.light = light = new THREE.PointLight( 0xffffff, 300, 100000 , 0.5 );
-  light.position.set( 50, 50, 50 );
-  scene.add( light );
-
-  world.recalculate()
-  world.loadChunk({id:1,level:1,length:2000000})
-  DRONE.reset()
-
-
-
-  let count = Math.floor(21400)
-
-  const vector = new THREE.Vector4();
-  const positions = [];
-  const offsets = [];
-  const colors = [];
-  const orientationsStart = [];
-  const orientationsEnd = [];
-
-  let size = 225
-
-  positions.push( 0, -size*2, 0 );
-  positions.push( 0, size*2, 0 );
-  positions.push( 0, size, size );
-
-
-
-
-  let galazyBoxSize = 500000
-
-  for ( let i = 0; i < count; i ++ ) {
-
-      // offsets
-      let [x,y,z] = [Math.random()*galazyBoxSize, Math.random()*galazyBoxSize, Math.random()*galazyBoxSize];
-      // [x,y,z] = [136*Math.random()*20000, 2*Math.random()*20000, 2*Math.random()*20000];
-      offsets.push(x,y,z);
-      // offsets.push( Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5 );
-      // colors
-      colors.push( Math.random(), Math.random(), Math.random(),1);
-      // colors.push( Math.random(), Math.random(), Math.random(), Math.random() );
-      // orientation start
-      vector.set( Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1 );
-      vector.normalize();
-      orientationsStart.push( vector.x, vector.y, vector.z, vector.w );
-      // orientation end
-      vector.set( Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1 );
-      vector.normalize();
-      orientationsEnd.push( vector.x, vector.y, vector.z, vector.w );
-  }
-
-  // mesh.instanceMatrix.needsUpdate = true
-
-
-const geometry2 = new THREE.InstancedBufferGeometry();
-
-geometry2.instanceCount = count; // set so its initialized for dat.GUI, will be set in first draw otherwise
-geometry2.setAttribute( 'position', new THREE.Float32BufferAttribute( positions, 3 ) );
-geometry2.setAttribute( 'offset', new THREE.InstancedBufferAttribute( new Float32Array( offsets ), 3 ) );
-geometry2.setAttribute( 'color', new THREE.InstancedBufferAttribute( new Float32Array( colors ), 4 ) );
-geometry2.setAttribute( 'orientationStart', new THREE.InstancedBufferAttribute( new Float32Array( orientationsStart ), 4 ) );
-geometry2.setAttribute( 'orientationEnd', new THREE.InstancedBufferAttribute( new Float32Array( orientationsEnd ), 4 ) );
-
-
-
-// const mesh2 = new THREE.Mesh( geometry2, new THREE.MeshStandardMaterial({color : 0xffffff }) );
-mesh2 = new THREE.Mesh(geometry2, new THREE.RawShaderMaterial( {
-
-  uniforms: {
-    'time': { value: 1.0 },
-    'sineTime': { value: 1.0 },
-    'cameraPos': { value: camera.position },
-  },
-  vertexShader: document.getElementById( 'vertexShader' ).textContent,
-  fragmentShader: document.getElementById( 'fragmentShader' ).textContent,
-  side: THREE.DoubleSide,
-  forceSinglePass: true,
-  transparent: false
-
-} ))
-geometry2.computeBoundingSphere()
-geometry2.boundingSphere.radius = Infinity
-window.gem = geometry2
-mesh2.name = "starcloud"
-scene.add( mesh2 );
-
-
-window.mesh2 = mesh2
-
-
-
-
-
-  window.addEventListener("resize", onWindowResize, false);
-}
-
-function onWindowResize() {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-  canvas.fitScreenSize()
-
-  Height = window.innerWidth >window.innerHeight?window.innerHeight:window.innerWidth
-  Width = window.innerWidth >window.innerHeight?window.innerWidth:window.innerHeight
-
-  renderer.setSize(window.innerWidth, window.innerHeight);
-}
-
-
-
-// var composer
-
-
-
-
-
-    var canvas = new LCanvas(Width,Height)
-
-    canvas.canvas.style.cursor = "none"
-
-
-var startDate = performance.now()
-var lastDate = performance.now()
-
-function minMax(a,b,c){
-  return(Math.min(Math.max(a,b),c))
-}
-
-var stats = new Stats();
-var statsFPS = new Stats();
-statsFPS.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
-stats.showPanel(1); // 0: fps, 1: ms, 2: mb, 3+: custom
-stats.domElement.style.cssText = 'position:absolute;top:0px;left:80px;'
-// document.body.appendChild( stats.dom );
-// document.body.appendChild( statsFPS.dom );
-
-
-requestAnimationFrame( animate );
-
-function animate(){
-  stats.begin();
-  statsFPS.begin();
-
-  COUNTER++
-
-  let dt = performance.now()-lastDate
-  lastDate = performance.now()
-  if(DRONE){
-    DRONE.updatePos(dt/16 * ENV.timeWarp * ENV.otherWarp)
-    ENV.update(dt/16)  
-  }
-
-
-  // mesh.rotation.y = Date.now()/1000
-
-  mesh2.material.uniforms['time'].value = Math.sin((Date.now()-startDate) * 0.0005);
-  // renderer.autoClear = false
-  // renderer.clear();
-  // renderer.render(DRONE.topHemisphere,camera)
-  // renderer.clearDepth();
-
-  renderer.render(scene, camera);
-
-  let ctx = canvas.ctx
-
-
-  // DRONE.vel.y += 20
-
-  ctx.clearRect(0,0,Width,Height)
-  ctx.beginPath()
-  let speedMeter = Math.min(DRONE.speed/300,3)
-  ctx.arc(Width/2,Height/2,Height/3*2,Math.PI/2*3-speedMeter-0.5,Math.PI/2*3+speedMeter+0.5)
-  let dvy = minMax(-255,DRONE.vel.y,255)
-  ctx.strokeStyle = "rgba("+Math.floor(-dvy)+","+Math.floor(255+dvy)+","+Math.floor(dvy)+","+0.5+")"
-  ctx.lineWidth = 25;
-  ctx.stroke()
-
-  if(DRONE.speed>400){
-    speedMeter = Math.min((DRONE.speed-400)/400,3)
-    ctx.beginPath()
-    ctx.arc(Width/2,Height/2,Height/3*2+45,Math.PI/2*3-speedMeter-0.5,Math.PI/2*3+speedMeter+0.5)
-    let dvy = minMax(-255,DRONE.vel.y*3,255)
-    ctx.strokeStyle = "rgba("+(-dvy)+","+(255+dvy)+","+dvy+","+0.5+")"
-    ctx.lineWidth = 25;
-    ctx.stroke()
-
-    let Wspd = DRONE.speed-900
-    let i = 2
-    while(Wspd>0){
-    speedMeter = Math.min((Wspd)/400,3)
-    ctx.beginPath()
-    ctx.arc(Width/2,Height/2,Height/3*2+45*i,Math.PI/2*3-speedMeter-0.5,Math.PI/2*3+speedMeter+0.5)
-    let dvy = minMax(-255,DRONE.vel.y*(3+i),255)
-    ctx.strokeStyle = "rgba("+(-dvy)+","+(255+dvy)+","+dvy+","+0.5+")"
-    ctx.lineWidth = 25;
-    ctx.stroke()
-    i++
-      Wspd -= 400
-    }
-
-  }
-
-
-
-  try{
-  if(DRONE.dst !== Infinity){
-  let impactMarker = Math.min(Math.max(DRONE.dst/DRONE.speed/50,0),0.5)
-
-  const impactGradient = ctx.createLinearGradient(0, 0, Width, 0);
-    impactGradient.addColorStop(0, "rgba(255,0,0,0.5)");
-    impactGradient.addColorStop(0.5-impactMarker, "rgba(255,0,0,0)");
-    impactGradient.addColorStop(0.5+impactMarker, "rgba(255,0,0,0)");
-    impactGradient.addColorStop(1, "rgba(255,0,0,0.5)");
-    ctx.fillStyle = impactGradient
-    ctx.fillRect(0,0,Width,Height)
-  }
-
-
-  const gradient = ctx.createLinearGradient(0, 0, Width, 0);
-
-
-
-    // Add three color stops
-    // gradient.addColorStop(0.4, "rgba(255,0,0,0.5)");
-    // gradient.addColorStop(0.5, "rgba(0,255,0,0.5)");
-    // gradient.addColorStop(0.6, "rgba(255,0,0,0.5)");
-
-    gradient.addColorStop(0, "rgba(0,255,0,0.5)");
-    gradient.addColorStop(0.1, "rgba(255,0,0,0.5)");
-    gradient.addColorStop(0.9, "rgba(255,0,0,0.5)");
-    gradient.addColorStop(1, "rgba(0,255,0,0.5)");
-
-    let yawDraw = minMax(-Width/4,DRONE.forces.yaw*Width*2,Width/4)
-
-  ctx.beginPath()
-  ctx.moveTo(Width,Height/2-20)
-  ctx.lineTo(Width - yawDraw ,Height/2-20)
-  ctx.moveTo(0,Height/2-20)
-  ctx.lineTo(0 - yawDraw ,Height/2-20)
-    ctx.moveTo(Width,Height/2+40)
-  ctx.lineTo(Width - yawDraw ,Height/2+40)
-  ctx.moveTo(0,Height/2+40)
-  ctx.lineTo(0 - yawDraw ,Height/2+40)
-  ctx.lineWidth = 25;
-  // ctx.strokeStyle = "rgba("+(-DRONE.vel.y)+","+(255+DRONE.vel.y)+","+DRONE.vel.y+","+0.7+")"
-  ctx.strokeStyle = gradient
-  ctx.stroke()
-
-  ctx.beginPath()
-  ctx.moveTo(Width/2,Height/4)
-  ctx.lineTo(Width/2,Height/1.8)
-  ctx.lineWidth = 2;
-  // ctx.strokeStyle = "rgba("+(-DRONE.vel.y)+","+(255+DRONE.vel.y)+","+DRONE.vel.y+","+0.7+")"
-  ctx.strokeStyle = "rgba(100,0,0,0.5)"
-  ctx.stroke()
-
-  ctx.beginPath() // red cross
-  ctx.moveTo(Width/2-20,Height/2)
-  ctx.lineTo(Width/2+20,Height/2)
-  ctx.lineWidth = 2;
-  ctx.strokeStyle = "rgba(100,0,0,0.5)"
-  ctx.stroke()
-
-  ctx.beginPath() // level cross
-  ctx.moveTo(Width/2-40,DRONE.stableYlevel)
-  ctx.lineTo(Width/2+40,DRONE.stableYlevel)
-  ctx.lineWidth = 2;
-  ctx.strokeStyle = "rgba(0,160,160,0.8)"
-  ctx.stroke()
-
-  let dynamicStableYlevel = Height/2 - (ENV.grav / 1500 * Height / 0.005) / Math.cos(DRONE.angleUp)
-  if(isFinite(dynamicStableYlevel)){
-    ctx.beginPath() // level cross dynamic
-    ctx.moveTo(Width/2-40,dynamicStableYlevel)
-    ctx.lineTo(Width/2+40,dynamicStableYlevel)
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = "rgba(0,200,0,0.5)"
-    ctx.stroke()
-  }
-
-
-  ctx.fillStyle = "pink"
-  ctx.fillRect(mouseX-5,mouseY-5,10,10)
-
-
-  ctx.fillStyle = DRONE.forwardLocked?"orange":"red"
-  ctx.font = "30px Arial"
-  ctx.fillText(DRONE.forwardLocked?"Cruise mode: hold space to accelerate":"Manual mode: WASD to navigate",0,Height)
-  ctx.font = "50px Arial"
-  ctx.fillText(Math.floor(DRONE.score),0,Height-35)
-  }catch(err){debugger}
-
-
-  if(Mobile.initialized){
-    Mobile.draw()
-  }
-
-  statsFPS.end();
-  stats.end();
-
-  requestAnimationFrame(animate)
-}
-
-init();
-animate();
-
-function updateRotation(pitch, roll, yaw) {
-
- const quaternionYaw = new THREE.Quaternion().setFromAxisAngle(
-      new THREE.Vector3(0, 1, 0), // Y-axis
-      yaw
-    );
-    const quaternionPitch = new THREE.Quaternion().setFromAxisAngle(
-      new THREE.Vector3(1, 0, 0), // X-axis
-      pitch
-    );
-    const quaternionRoll = new THREE.Quaternion().setFromAxisAngle(
-      new THREE.Vector3(0, 0, 1), // Z-axis
-      -roll
-    );
-  
-    // Combine the quaternions: Yaw * Pitch * Roll
-    const deviceQuaternion = new THREE.Quaternion()
-      .multiply(quaternionYaw)
-      .multiply(quaternionPitch)
-      .multiply(quaternionRoll);
-  
-    // Reference Quaternion: Rotate -90 degrees around X-axis to align device frame with Three.js frame
-    const referenceQuaternion = new THREE.Quaternion().setFromEuler(
-      new THREE.Euler(-Math.PI / 2, 0, 0, 'YXZ') // -90 degrees around X-axis
-    );
-  
-    // Combine Device Quaternion with Reference Quaternion
-    let finalQuaternion = deviceQuaternion.multiply(referenceQuaternion);
-    finalQuaternion = finalQuaternion.invert()
-    mesh.quaternion.copy(finalQuaternion)
-  
-    // Apply the final quaternion to the camera
-    // mesh.quaternion.copy(finalQuaternion);
-    // mesh.rotation.x += 0.02
-    // mesh.rotation.y += 0.02
-    // camera.quaternion.copy(finalQuaternion);
-}
-
-
-
-
-class LRTC{ //lopkn's boilerplate RTC
-
-  static connectee(){
-    this.type = "connectee"
-    this.localConnection = new RTCPeerConnection()
- 
-
-    this.localConnection.onicecandidate = e =>  {
-    console.log(" NEW ice candidate!! on localconnection reprinting SDP " )
-     this.latestSDP = JSON.stringify(this.localConnection.localDescription)
-     console.log(this.latestSDP)
-    }
-
-
-    this.sendChannel = this.localConnection.createDataChannel("sendChannel");
-    this.sendChannel.onmessage = this.recieve
-      this.sendChannel.onopen = e => console.log("open!!!!");
-      this.sendChannel.onclose =e => console.log("closed!!!!!!");
-
-
-    this.localConnection.createOffer().then(o => this.localConnection.setLocalDescription(o) )
-  }
-
-  static connecteeAnswer(answer){
-    this.localConnection.setRemoteDescription(answer).then(a=>console.log("done"))
-  }
-
-  static async connector(offer){
-    this.remoteConnection = new RTCPeerConnection()
-
-    this.remoteConnection.onicecandidate = e =>  {
-    console.log(" NEW ice candidnat!! on localconnection reprinting SDP ")
-     this.latestSDP = JSON.stringify(this.remoteConnection.localDescription)
-     console.log(this.latestSDP)
-    }
-
-     
-    this.remoteConnection.ondatachannel= e => {
-
-          this.receiveChannel = e.channel;
-          this.receiveChannel.onmessage = this.recieve
-          this.receiveChannel.onopen = e => console.log("open!!!!");
-          this.receiveChannel.onclose =e => console.log("closed!!!!!!");
-          this.remoteConnection.channel = this.receiveChannel;
-
-    }
-
-
-    this.remoteConnection.setRemoteDescription(offer).then(a=>console.log("done"))
-
-    //create answer
-    await this.remoteConnection.createAnswer().then(a => this.remoteConnection.setLocalDescription(a)).then(a=>
-    console.log(JSON.stringify(this.remoteConnection.localDescription)))
-  }
-
-
-  static recieve(e){
-    console.log("recieved: "+e.data)
-    this.lastMessage = e
-  }
-
-  static send(e){
-    if(this.type==="connectee"){
-      this.sendChannel.send(e)
-    } else {
-      this.remoteConnection.channel.send(e)
-    }
-  }
-
-}
-
-
-
-
-
-
-function distance(x1,y1,x2,y2) {
-    let a = x2-x1
-    let b = y2-y1
-  return(Math.sqrt(a*a+b*b))
-}
-
-
-var frameFuncs = []
-
-function mainLoop(time){
-  frameFuncs.forEach((e)=>{
-    e(time)
-  })
-  requestAnimationFrame(mainLoop)
-}
-
-function oneTimeTrustedButton(f){
-  let button = document.createElement("button")
-  button.style.position = "absolute"
-  button.style.backgroundColor = "purple"
-  button.innerText = "one time verifier"
-  button.style.top = button.style.left = "0px"
-
-  button.style.zIndex = 5000
-  button.addEventListener("click",(e)=>{f(e);button.remove()},{once:true})
-  document.body.appendChild(button)
-}
-
-
-function Lvideo(type="screen",append=false){
-    let video = document.createElement('video')
-    video.id = "Lvideo-"+Math.random()
-    video.setAttribute("autoplay","autoplay")
-    if(append){
-      document.body.append(video)
-    }
-    if(type=="screen"){
-      oneTimeTrustedButton(async function() {let stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });video.srcObject = stream;})
-    } else {
-      oneTimeTrustedButton(async function() {let stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });video.srcObject = stream;})
-    }
-    return(video)
-  }
-
-
-//oneTimeTrustedButton(Lvideo)
-
-
-function copyToCanvas(img,Lcan){
-  Lcan.ctx.drawImage(img, 0, 0, Lcan.canvas.width, Lcan.canvas.height);
-}
-
-function setDefaultAbsolute(elm){
-  elm.style.position = "absolute"
-  elm.style.top = elm.style.left = "0px"
-}
-
-
-
-
-class Lcolorf{ //lopkn's color functions
-  static dictify(arr){ //turns arrays of numbers into arrays of dicts
-    let outarr = []
-    for(let i = 0; i < arr.length; i+=4){
-      outarr.push({"r":arr[0],"g":arr[1],"b":arr[2],"a":arr[3]})
-    }
-    return(outarr)
-  }
-  static colorDistA(arr1,arr2){//only works on Arrays of numbers //arr2 should be same length or shorter
-    let dst = 0
-    for(let i = 0; i < arr2.length; i++){
-      dst += Math.abs(arr1[i]-arr2[i])
-    }
-    return(dst)
-  }
-}
-
-
-function normalRandom(mean, stderr, rng=world.rng) {
-    const u1 = rng();
-    const u2 = rng();
-
-    const z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
-    return z0 * stderr + mean;
-}
-
-/* MUSIC/TONE
-
-var scene = {
-  "sounds":true,
-  "interval":0.3,
-  "beatsPerBar":4
-}
-
-function soundInit(){
-    Tone.Transport.start();
-    Tone.Transport.scheduleRepeat((time) => {
-        music.runbar(time)
-    }, scene.interval*scene.beatsPerBar)
-
-    { let audio = new Tone.Sampler({
-      urls: {
-        "C4":"./../../soundEffects/sinC4.mp3",
-        "F3":"./../../soundEffects/sinF3.mp3",
-      },
-    }).toDestination();
-        SOUND["sinC4"] = audio
-
-    }
-      arr.forEach((E,i)=>{
-        let e = "./../../soundEffects/"+E+".mp3"
-        let audio = new Tone.Sampler({
-      urls: {
-        "C4":e,
-      },
-    }).toDestination();
-        SOUND[E] = audio
-      })
-}
-
-function mtn(midiNumber) {
-    return Tone.Frequency(midiNumber, "midi");
-}
-
-class music{
-  static counter = 0
-  static synth = new Tone.PolySynth(Tone.Synth,8).toDestination(); // Connect to audio output
-  static eq = new Tone.EQ3(-10, 3, 0);
-  static reverb = new Tone.Reverb({
-    decay: 20, // Duration of the reverb tail
-    preDelay: 0.3,
-    wet: 0.95,
-    input:1,
-    output:1
-}).toDestination();
-  static bell = new Tone.Sampler({
-  urls: {
-    "C4":"../epcounter/untitled.mp3",
-  },
-}).toDestination();
-  static kick = new Tone.Sampler({
-  urls: {
-    "C4":"../epcounter/kick.mp3",
-  },
-}).toDestination();
-  static click = new Tone.Sampler({
-  urls: {
-    "C4":"../epcounter/test.mp3",
-  },
-}).toDestination();
-  static drumSynth = new Tone.MembraneSynth().toDestination();
-  static echo = new Tone.PingPongDelay(scene.interval*2, scene.interval*2).toDestination();
-  static playBell(note,vel=1,delay=0){
-      this.bell.triggerAttackRelease(mtn(note),1.7,Tone.now()+delay,vel);
-  }
-  static playFile(file,note,vel=1,delay=0){
-    this.sounds[file].triggerAttackRelease(mtn(note),1.7,Tone.now()+delay,vel);
-  }
-
-  static checkCollide(note,arr,dist=1){
-
-    let mod = note%12
-    for(let i = 0; i < arr.length; i++){
-      let resd = Math.abs(arr[i]-mod)%12
-      if(resd == dist || resd == 12-dist){
-        return(true)
-      }
-    }
-    return(false)
-  }
-
-  static checkCollider(note,dict,dist=1,oct=1){
-    for(let i = 0; i < oct+1; i++){
-      if(dict[note+dist+i*12] === true){return(true)}
-      if(dict[note-dist+i*12] === true){return(true)}
-      if(dict[note+dist-i*12] === true){return(true)}
-      if(dict[note-dist-i*12] === true){return(true)}
-    }
-    return(false)
-  }
-
-
-
-}
-
-music.bell.connect(music.reverb)
-music.bell.connect(music.echo)
-music.bell.connect(music.eq)
-music.bell.set({volume:-20})
-music.synth.set({
-    oscillator: {
-        type: 'sine4' 
-    },
-    envelope: {
-        attack: 0.005,
-        decay: 0.5,
-        sustain:1,
-        release:2
-    },
-    volume:-60
-})
-*/
-
-
-
-
-
-
-
-
-function handleOrientation(event) {
-  updateFieldIfNotNull('Orientation_a', event.alpha);
-  updateFieldIfNotNull('Orientation_b', event.beta);
-  updateFieldIfNotNull('Orientation_g', event.gamma);
-  incrementEventCount();
-}
-
-function incrementEventCount(){
-  // let counterElement = document.getElementById("num-observed-events")
-  // let eventCount = parseInt(counterElement.innerHTML)
-  // counterElement.innerHTML = eventCount + 1;
-}
-
-
-let vx, vy, vz;
-vx = vy = vz = 0
-
-
-function updateFieldIfNotNull(fieldName, value, precision=10){
-  if (value != null)
-    sensors[fieldName] = value.toFixed(precision);
-}
-
-function handleMotion(event) {
-  updateFieldIfNotNull('Accelerometer_gx', event.accelerationIncludingGravity.x);
-  updateFieldIfNotNull('Accelerometer_gy', event.accelerationIncludingGravity.y);
-  updateFieldIfNotNull('Accelerometer_gz', event.accelerationIncludingGravity.z);
-
-  // vx += parseFloat(event.acceleration.x)
-  // vy += parseFloat(event.acceleration.y)
-  // vz += parseFloat(event.acceleration.z)
-
-  // vx *= 0.9
-  // vy *= 0.99
-  // vz *= 0.99
-
-
-  // velocity = new THREE.Vector3(0, vy, 0)
-  // localVelocity = velocity.clone().applyQuaternion(camera.quaternion);
-  // camera.position.add(localVelocity.multiplyScalar(1))
-
-  // camera.position.x += -vx
-  // camera.position.y += vy
-  // camera.position.z += vz
-
-  updateFieldIfNotNull('Accelerometer_x', event.acceleration.x);
-  updateFieldIfNotNull('Accelerometer_y', event.acceleration.y);
-  updateFieldIfNotNull('Accelerometer_z', event.acceleration.z);
-
-  updateFieldIfNotNull('Accelerometer_i', event.interval, 2);
-
-  updateFieldIfNotNull('Gyroscope_z', event.rotationRate.alpha);
-  updateFieldIfNotNull('Gyroscope_x', event.rotationRate.beta);
-  updateFieldIfNotNull('Gyroscope_y', event.rotationRate.gamma);
-  incrementEventCount();
-}
-
-// let is_running = false;
-// let demo_button = document.getElementById("start_demo");
-// oneTimeTrustedButton(function(e) {
-//   e.preventDefault();
-  
-//   // Request permission for iOS 13+ devices
-//   if (
-//     DeviceMotionEvent &&
-//     typeof DeviceMotionEvent.requestPermission === "function"
-//   ) {
-//     DeviceMotionEvent.requestPermission();
-//   }
-  
-//   if (is_running){
-//     window.removeEventListener("devicemotion", handleMotion);
-//     window.removeEventListener("deviceorientation", handleOrientation);
-//     // demo_button.innerHTML = "Start demo";
-//     // demo_button.classList.add('btn-success');
-//     // demo_button.classList.remove('btn-danger');
-//     is_running = false;
-//   }else{
-//     window.addEventListener("devicemotion", handleMotion);
-//     window.addEventListener("deviceorientation", handleOrientation);
-//     // document.getElementById("start_demo").innerHTML = "Stop demo";
-//     // demo_button.classList.remove('btn-success');
-//     // demo_button.classList.add('btn-danger');
-//     is_running = true;
-//   }
-// });
-
-
-  function tutorial1(){
-
-    DRONE.softReset()
-
-    camera.position.z = 300000
-    camera.position.y = 0
-    let x = camera.position.x
-
-  }
-
-
-
-
-
-    document.addEventListener("keydown",(e)=>{
-      if(e.repeat){return}
-
-        if(e.key=="r"){
-          // window.location.reload()
-          DRONE.reset()
-        } if(e.key == "R"){
-          window.location.reload()
-        } if(e.key == "1"){
-          DRONE.rollControlSpeed *= 1.1
-        } if(e.key == "2"){
-          DRONE.rollControlSpeed *= 0.9
-        } 
-        if(e.key == "3"){
-          tutorial1()
-        }
-        if(e.key == "i"){
-          DRONE.invertedControls *= -1
-        }
-        if(e.key == "g"){
-            scene.add(DRONE.topHemisphere)
-            scene.add(DRONE.bottomHemisphere)
-             // DRONE.topHemisphere.rotateY(Math.atan(1/2))
-             // DRONE.bottomHemisphere.rotateY(Math.atan(1/2))
-        }
-        if(e.key == "G"){
-          scene.remove(DRONE.topHemisphere)
-            scene.remove(DRONE.bottomHemisphere)
-             // DRONE.topHemisphere.rotateY(-Math.atan(1/2))
-             // DRONE.bottomHemisphere.rotateY(-Math.atan(1/2))
-        }
-
-        if(e.key == "Enter"){
-          camera.position.x += (world.loadeds[DRONE.worldPos].userData.end - camera.position.x) * 0.9
-        }
-
-        if(e.key == "p"){
-          ENV.paused = !ENV.paused
-        }
-
-
-        if(e.key == "Tab"){
-          e.preventDefault()
-          // DRONE.vel.add(camera.getWorldDirection(new THREE.Vector3()).multiplyScalar(200))
-          DRONE.forwardLocked = !DRONE.forwardLocked
-        }
-      downs[e.key] = true
-    })
-
-    document.addEventListener("mousedown",(e)=>{
-      downs["M"+e.button] = true
-    })
-    document.addEventListener("mouseup",(e)=>{
-      downs["M"+e.button] = false
-    })
-    document.addEventListener("keyup",(e)=>{
-      if(e.repeat){return}
-
-      downs[e.key] = false
-    })
-
-
-
-    function test(){
-      console.log("tri: " + renderer.info.render.triangles)
-      console.log("drawcalls: " + renderer.info.render.calls)
-    }
-    window.test = test
-
-
-    div.style.visibility = "hidden"
-
-
-document.body.addEventListener('touchstart', function() {
-  Mobile.init()
-  // Mobile.draw()
-}, { once: true })
-
-
-function touchHandler(e){
-  e.preventDefault()
-  let touches = e.changedTouches,
-        first = touches[0]
-
-
-        for(let i = 0; i < touches.length; i++){
-            let E = touches[i]
-            if(!Mobile.activeTouches[E.identifier]){
-              Mobile.activeTouches[E.identifier] = {"type":"unidentified"}
+       document.addEventListener("keydown",(e)=>{
+          if(e.repeat){return}
+
+            if(e.key=="r"){
+            } if(e.key == "R"){
+              window.location.reload()
+            } if(e.key == "1"){
+            } if(e.key == "2"){
+            } 
+            if(e.key == "i"){
             }
-        }
-
-      if(e.type == "touchstart"){
-          let E = touches[touches.length-1]
-          let x = E.pageX
-          let y = E.pageY
-          let EUID = E.identifier
-          Mobile.activeTouches[E.identifier].type = Mobile.touchTyper(x,y)
-          Mobile.touchStart(E.identifier,x,y,E)
-      }
-
-    if(e.type !== "touchend"){ // touch moving
-        for(let i = 0; i < touches.length; i++){
-          let E = touches[i]
-          let EUID = Mobile.activeTouches[E.identifier]
-        Mobile.ctx.fillStyle = EUID.color?EUID.color:"cyan"
-
-        let x = E.pageX, y = E.pageY
-
-        Mobile.touchUpdate(E.identifier,x,y,E)
-
-        Mobile.ctx.fillRect(x,y,10,10)
-      }
-
-  } else { // touch ended
-        for(let i = 0; i < touches.length; i++){
-          let E = touches[i]
-          let x = E.pageX, y = E.pageY
-          let EUID = Mobile.activeTouches[E.identifier]
-
-        
-          //stuff
-
-          Mobile.touchEnd(E.identifier,x,y,E)
-        delete Mobile.activeTouches[E.identifier]
-      }
-
-  }
-
-    
-  e.preventDefault()
-}
-function mobileInit(){
-
-    document.addEventListener("touchstart", (e)=>{touchHandler(e)},  { passive: false });
-    document.addEventListener("touchmove", (e)=>{e.preventDefault();touchHandler(e)}, { passive: false });
-    document.addEventListener("touchend", (e)=>{touchHandler(e)}, { passive: false });
-    document.addEventListener("touchcancel", (e)=>{touchHandler(e)}, { passive: false });    
-}
-mobileInit()
 
 
+            if(e.key == "Enter"){
+            }
+
+            if(e.key == "p"){
+            }
 
 
+            if(e.key == "Tab"){
+              e.preventDefault()
+            }
+          downs[e.key] = true
+        })
 
+        document.addEventListener("mousedown",(e)=>{
+          downs["M"+e.button] = true
+        })
+        document.addEventListener("mouseup",(e)=>{
+          downs["M"+e.button] = false
+        })
+        document.addEventListener("keyup",(e)=>{
+          if(e.repeat){return}
 
+          downs[e.key] = false
+        })
 
-
-
+      init();
+      animate();
     </script>
   </body>
 </html>
+
+
+
+
+
+
+
+
+
+
 
