@@ -99,7 +99,7 @@
     <script type="importmap">
         {
         "imports": {
-            "three": "https://unpkg.com/three@0.178.0/build/three.module.js",
+            "three": "../../../node_modules/three/build/three.module.js",
             "three/examples/jsm/shaders/CopyShader.js": "https://unpkg.com/three@0.178.0/examples/jsm/shaders/CopyShader.js",
             "three/examples/jsm/postprocessing/EffectComposer.js": "https://unpkg.com/three@0.178.0/examples/jsm/postprocessing/EffectComposer.js",
             "three/examples/jsm/postprocessing/RenderPass.js": "https://unpkg.com/three@0.178.0/examples/jsm/postprocessing/RenderPass.js",
@@ -163,11 +163,11 @@
       function instance(count,mov){
 
           var geometry = new THREE.BoxGeometry(1, 1, 1);
-          var materials = new THREE.MeshStandardMaterial({ color: "#FF3030"/*, roughness:0, metalness: 0.8*/})
+          var materials = new THREE.MeshStandardMaterial({ color: "#FFFFFF"/*, roughness:0, metalness: 0.8*/})
 
           // geometry.computeVertexNormals() // delete if not found useful
 
-          mesh = new InstancedMesh2( geometry, materials, count );
+          let mesh = new InstancedMesh2( geometry, materials, count );
           mesh.instanceMatrix.setUsage( THREE.DynamicDrawUsage ); // will be updated every frame
           scene.add(mesh);
           mesh.addInstances(count);
@@ -178,6 +178,7 @@
               dummy.updateMatrix();
               mesh.setMatrixAt( i, dummy.matrix );
           }
+          return(mesh)
       }
 
       function addLight(x,objectPos){
@@ -221,7 +222,7 @@
         constructor(){
           this.obj = new THREE.Object3D()
           this.vel = 0
-          this.obj.position.set(0,0,7);
+          this.obj.position.set(0,0,0);
 
             this.controls = {
               "up":0,
@@ -237,12 +238,27 @@
               "yaw":0
             }
             scene.add(this.obj)
+
+            this.light = new THREE.SpotLight("0xffffff",10000,10000,Math.PI/2*0.2, 1, 2)
+            this.light.position.set(0,0,0)
+            let targ = new THREE.Object3D()
+            targ.position.set(0,0,-10)
+            this.obj.add(targ)
+            this.light.target = targ
+            this.obj.add(this.light)
+
+            
+
+            // const objectMat = new THREE.MeshStandardMaterial({ color: "#ff00ff" });
+            // const object = new THREE.Mesh(new THREE.BoxGeometry(1,1,1), objectMat);
+            // object.position.set(0,0,-10);
+            // this.obj.add(object);
           return(this)
         }
 
         updatePos(dt=1){
 
-          dt *= 0.1
+          dt *= 0.04
       let adt = Math.abs(dt)
 
 
@@ -259,7 +275,7 @@
         } if(downs[" "]){
           this.vel += dt
         } if(downs["q"]){
-          this.vel *= 0.96 ** dt
+          this.vel *= 0.9 ** dt
         }
 
 
@@ -267,6 +283,7 @@
       this.controls.roll *= 0.9** adt
       this.controls.pitch *= 0.9** adt
     
+      this.vel *= 0.97 ** dt
 
 
       // Object.keys(this.controls).forEach((e)=>{
@@ -407,6 +424,17 @@
         world.starcloud = mesh2
       }
       
+
+
+      var rand = (x)=>{
+        if(x == undefined){return(Math.random())}
+        if(x < 1){return(Math.random()<x)}
+        return(Math.random()*x)
+      }
+
+
+
+      //iin
       function init() {
         scene.add(new THREE.AmbientLight(0x888888, 1));
 
@@ -417,10 +445,17 @@
             new THREE.Vector3(Math.random()*200-100,Math.random()*200-100,Math.random()*200-100)
           )
         }
-        
 
 
-
+        let s = instance(500,(x)=>{
+          x.position.set(rand(1000)-500,rand(1000)-500,rand(1000)-500)
+          x.scale.set(rand(100),rand(100),rand(100))
+        })
+        for(let i = 0; i < 500; i++){
+          let color = new THREE.Color()
+          color.setHex(Math.floor(0xffffff*Math.random()))
+          s.setColorAt(i, color);
+        }
 
         world.init()
         starcloud()
@@ -438,7 +473,7 @@
 
       var startDate = Date.now()
       function animate() {
-        // const delta = clock.getDelta();
+        const delta = clock.getDelta();
 
 
 
@@ -446,9 +481,24 @@
         renderer.render(scene, camera);
 
         world.entities.forEach((e)=>{
-          e.updatePos()
+          e.updatePos(delta*100)
         })
         world.starcloud.material.uniforms['time'].value = Math.sin((Date.now()-startDate) * 0.0005);
+
+
+        if(downs.j){
+          camera.rotateY(0.02)
+        }
+        if(downs.l){
+          camera.rotateY(-0.02)
+        }
+        if(downs.i){
+          camera.rotateX(0.02)
+        }
+        if(downs.k){
+          camera.rotateX(-0.02)
+        }
+
       }
 
 
@@ -468,7 +518,7 @@
             if(e.key == "Enter"){
             }
 
-            if(e.key == "p"){
+            if(e.key == "j"){
             }
 
 
