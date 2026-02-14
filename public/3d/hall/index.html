@@ -112,7 +112,7 @@
         object.position.copy(objectPos);
         scene.add(object);
       }
-              function outterObjectS(objectGeom, objectColor, objectPos) {
+      function outterObjectS(objectGeom, objectColor, objectPos) {
         const objectMat = new THREE.MeshStandardMaterial({ color: objectColor });
         const object = new THREE.Mesh(objectGeom, objectMat);
         object.position.copy(objectPos);
@@ -148,7 +148,7 @@
           "#423230",
           new THREE.Vector3(-1, 0, x)
         );
-                outterObjectS(
+      outterObjectS(
           new THREE.BoxGeometry(2, 0.25, 0.25),
           "#423230",
           new THREE.Vector3(0, 0.875, x)
