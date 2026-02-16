@@ -207,11 +207,73 @@
 
 
 
+
+
+
+
+
+      var AIs = { // target
+        "v1":(x)=>{
+
+
+          x.downs[" "]=true
+
+          if(x.hunting){
+            x.target = x.hunting.obj.position.clone()
+          }
+
+          x.targetVect = x.obj.position.clone().sub(x.target)
+          // x.targRollAng = x.up.clone().dot(x.targetDir)
+          x.targetDir = x.targetVect.clone().normalize()
+          x.targDist = x.targetVect.length()
+          x.targAng = x.dir.clone().dot(x.targetDir) // -1 means perfectly pointed towards target
+
+          x.rightVec = new THREE.Vector3(1, 0, 0).applyQuaternion(x.obj.quaternion)
+          x.targRollAng = x.rightVec.clone().dot(x.targetDir)
+
+          x.targetBlock.position.copy(x.target)
+
+          // PITCH logic (on same plane)
+
+          if(x.targDist > 2000 && x.targAng > -0.6){
+            x.downs.w = true
+          } else {
+            x.downs.w = false
+
+            if(x.controls.pitch>0.1){
+              x.downs.s = true
+            } else {
+              x.downs.s = false
+            }
+          }
+
+          // ROLL logic
+
+          if(x.targRollAng > 0){
+            x.downs.a = true
+            x.downs.d = false
+
+          } else {
+            x.downs.a = false
+            x.downs.d = true
+          }
+
+        }
+      }
+
+
+
+
+
+
+
+
       function outterObjectS(objectGeom, objectColor, objectPos) {
         const objectMat = new THREE.MeshStandardMaterial({ color: objectColor });
         const object = new THREE.Mesh(objectGeom, objectMat);
         object.position.copy(objectPos);
         scene.add(object);
+        return(object)
       }
 
       class liney{
@@ -254,6 +316,7 @@
           this.obj = new THREE.Object3D()
           this.vel = 0
           this.obj.position.set(0,0,0);
+          this.dir = new THREE.Vector3(0,0,1)
 
           this.tailLength = 500
           this.tailCounter = 0;
@@ -289,15 +352,31 @@
             return(this)
         }
 
-        cast(){
+        initAI(type="v1"){
+          this.AI = true
+          this.memory = [];
+          this.target = new THREE.Vector3(0,0,0)
+          this.castFrequency = 1;
+          this.counter = 0;
 
+          this.AIupdate = AIs[type]
+
+          this.targetBlock = outterObjectS(
+            new THREE.BoxGeometry(15,15,15),
+            "#ff00ff",
+            this.target
+          )
+          return(this)
+        }
+
+        cast(){
           let rand = new THREE.Vector3(
               Math.random() * 2 - 1,
               Math.random() * 2 - 1,
               Math.random() * 2 - 1
           ).multiplyScalar(0.1)
 
-          this.raycaster.set(this.obj.position,this.obj.getWorldDirection(new THREE.Vector3()).add(rand).normalize().negate())
+          this.raycaster.set(this.obj.position,this.dir.add(rand).normalize().negate())
           const intersects = this.raycaster.intersectObjects( world.collidables );
 
           if(intersects.length>0){
@@ -310,7 +389,15 @@
 
         updatePos(dt=1){
 
-          this.cast()
+          this.dir = this.obj.getWorldDirection(new THREE.Vector3())
+
+          if(this.AI){
+            this.counter += 1
+            if(this.counter%this.castFrequency==0){
+              this.cast()
+            }
+            this.AIupdate(this)
+          }
 
             this.tail.setMatrixAt(this.tailCounter%this.tailLength,this.obj.matrix)
             this.tailCounter += 1
@@ -324,12 +411,14 @@
         let controlSpeed = 0.1
         let pitchMult = Math.max(Math.min(this.vel/20,0.5),0.1)
         let rollMult = Math.max(Math.min(this.vel/10,2),0.3)
+
         if(this.downs.w){
           this.controls.pitch =  Math.min(1,this.controls.pitch+dt*controlSpeed*pitchMult)
         }  if(downs.s){
           this.controls.pitch = Math.max(-1,this.controls.pitch-dt*controlSpeed*pitchMult)
+        }  
 
-        }  if(this.downs.d){
+        if(this.downs.d){
           this.controls.roll = Math.max(-1,this.controls.roll-dt*controlSpeed*rollMult)
         }  if(this.downs.a){
           this.controls.roll =  Math.min(1,this.controls.roll+dt*controlSpeed*rollMult)
@@ -365,38 +454,10 @@
 
 
 
-    // this.vel.multiplyScalar(ENV.airFriction** dt)
-    // this.speed = DRONE.vel.length()
-    // this.dPos = this.vel.clone().multiplyScalar(dt)
-
 
     this.dst = Infinity
-    // const intersects = raycaster.intersectObjects( world.activeMeshes );
-    // this.raycaster.set(camera.position,camera.getWorldDirection(new THREE.Vector3))
-    // const lookIntersects = DRONE.raycaster.intersectObjects( world.activeMeshes );
-
-
-
-    // if(intersects.length>0){
-
-    // }
-    // if(lookIntersects.length>0 && downs["M0"]){
-    //   if(lookIntersects[0].instanceId!==undefined){
-    //     lookIntersects[0].object.setColorAt(lookIntersects[0].instanceId,new THREE.Color( 0xffff00 ))
-    //     // lookIntersects[0].object.instanceColor.needsUpdate = true
-    //   }
-    // }
-
-    // this.obj.position.add(this.dPos)
-
-    // this.vel.add(camera.getWorldDirection(new THREE.Vector3()).multiplyScalar(2*dt))
-
+ 
     this.obj.translateZ(-this.vel)
-
-    // light.position.set(camera.position.x,camera.position.y,camera.position.z)
-    // raycaster.set(this.obj.position,this.vel.clone().normalize())
-    // this.lookingTowards = this.obj.getWorldDirection(new THREE.Vector3()).multiplyScalar(1200)
-
 
 
   }
@@ -404,7 +465,7 @@
 
       class world{
         static cameraDrone = new fighter()
-        static entities = [this.cameraDrone]
+        static entities = [this.cameraDrone, new fighter().initAI()]
         static init(){
           this.cameraDrone.obj.add(camera)
           this.cameraDrone.downs = downs
@@ -522,6 +583,9 @@
 
         world.init()
         starcloud()
+
+
+        world.cameraDrone.initAI()
 
 
         window.THREE = THREE;
