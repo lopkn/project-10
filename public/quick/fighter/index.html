@@ -13,10 +13,17 @@
         padding: 0;
       }
 
+    #debug {
+      position: absolute;
+      top:0;
+      left:0;
+      color: #ff9999;
+    }
+
   </style>
   <body>
 
-
+    <div id="debug"></div>
 
 
 
@@ -205,8 +212,12 @@
 
 
 
+      var debugData = {}
 
-
+      function dbg(val,str){
+        debugData[val] = str
+        return(str)
+      }
 
 
 
@@ -229,34 +240,73 @@
           x.targAng = x.dir.clone().dot(x.targetDir) // -1 means perfectly pointed towards target
 
           x.rightVec = new THREE.Vector3(1, 0, 0).applyQuaternion(x.obj.quaternion)
+          x.upVec = new THREE.Vector3(0, 1, 0).applyQuaternion(x.obj.quaternion)
           x.targRollAng = x.rightVec.clone().dot(x.targetDir)
+          x.targPitchAng = x.upVec.clone().dot(x.targetDir) // 0 means perpendicular, -1 means head pointed toward target
+          x.pitchDir = !(x.targPitchAng>0)
 
           x.targetBlock.position.copy(x.target)
 
           // PITCH logic (on same plane)
 
-          if(x.targDist > 2000 && x.targAng > -0.6){
-            x.downs.w = true
-          } else {
-            x.downs.w = false
+          // if(x.targDist > 2000 && x.targAng > -0.6){
+          //   x.downs.w = true
+          // } else {
+          //   x.downs.w = false
 
-            if(x.controls.pitch>0.1){
-              x.downs.s = true
+          //   if(x.controls.pitch>0.1){
+          //     x.downs.s = true
+          //   } else {
+          //     x.downs.s = false
+          //   }
+          // }
+            // console.log(x.targPitchAng)
+
+            dbg("pitch ang",x.targPitchAng)
+            dbg("target ang",x.targAng)
+
+          if(dbg("far",x.targDist > 2000)){
+
+            if(x.targAng > -0.6){ // if not pointed near target
+              x.up(x.pitchDir)
+              
+
             } else {
-              x.downs.s = false
+              x.downs.w = x.downs.s = false
             }
-          }
+
+
+          } 
+           if(dbg("precise",x.targAng < -0.6)){ // pointed near target, precise manuvers needed
+              x.downs.w = x.downs.s = false
+              if(x.controls.pitch>0.1 && x.pitchDir){
+                x.up(!x.pitchDir)
+              } else if(x.controls.pitch<-0.1 && !x.pitchDir){
+                x.up(!x.pitchDir)
+              }
+            }
 
           // ROLL logic
 
-          if(x.targRollAng > 0){
-            x.downs.a = true
-            x.downs.d = false
+          if(Math.abs(x.targRollAng)<0.3){
 
-          } else {
-            x.downs.a = false
-            x.downs.d = true
+            if(x.targRollAng > 0){
+              x.right(!x.pitchDir)
+            } else {
+              x.right(x.pitchDir)
+            }
+
           }
+
+
+          //panic
+          if(x.targDist > 6000 || x.paniced){
+              x.downs[" "] = false
+            }
+
+          dbg("PITCH UP",x.downs.w)
+          dbg("PITCH DOWN",x.downs.s)
+          dbg("ACCELERATE",x.downs[" "])
 
         }
       }
@@ -366,6 +416,14 @@
             "#ff00ff",
             this.target
           )
+          this.up = (x=false)=>{
+            this.downs.w = x
+            this.downs.s = !x
+          }
+          this.right = (x=false)=>{
+            this.downs.d = x
+            this.downs.a = !x
+          }
           return(this)
         }
 
@@ -414,7 +472,7 @@
 
         if(this.downs.w){
           this.controls.pitch =  Math.min(1,this.controls.pitch+dt*controlSpeed*pitchMult)
-        }  if(downs.s){
+        }  if(this.downs.s){
           this.controls.pitch = Math.max(-1,this.controls.pitch-dt*controlSpeed*pitchMult)
         }  
 
@@ -465,7 +523,9 @@
 
       class world{
         static cameraDrone = new fighter()
-        static entities = [this.cameraDrone, new fighter().initAI()]
+        static entities = [ this.cameraDrone, new fighter().initAI(),
+
+        ]
         static init(){
           this.cameraDrone.obj.add(camera)
           this.cameraDrone.downs = downs
@@ -589,6 +649,7 @@
 
 
         window.THREE = THREE;
+        window.fighter = fighter;
         window.world = world;
         window.camera = camera;
         window.scene = scene
@@ -630,6 +691,21 @@
         if(downs.k){
           camera.rotateX(-0.02)
         }
+
+
+
+
+
+
+        let dbgstr = ""
+        let dbgdiv = document.getElementById("debug")
+        Object.keys(debugData).forEach((e)=>{
+          dbgstr += e + ": "+debugData[e] + "\n"
+          debugData[e] = "not updated"
+        })
+        dbgdiv.innerText = dbgstr
+
+
 
       }
 
