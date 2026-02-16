@@ -189,7 +189,7 @@
 
 
       // RENDERER
-      const renderer = new THREE.WebGLRenderer({ antialias: true });
+      const renderer = new THREE.WebGLRenderer({ antialias: true, logarithmicDepthBuffer: true });
       renderer.shadowMap.enabled = true;
       renderer.setPixelRatio(window.devicePixelRatio);
       renderer.setSize(window.innerWidth, window.innerHeight);
@@ -239,6 +239,7 @@
           let line = new Line2( geometry, matLine );
           line.scale.set( 1, 1, 1 );
           line.frustumCulled = false
+          line.computeLineDistances()
           scene.add( line );
         }
 
@@ -254,10 +255,12 @@
           this.vel = 0
           this.obj.position.set(0,0,0);
 
-          this.tailLength = 5000
+          this.tailLength = 500
           this.tailCounter = 0;
           this.tail = instance(this.tailLength,undefined,new THREE.BoxGeometry(10, 0.1, 10))
           this.tail.frustumCulled = false
+          this.raycaster = new THREE.Raycaster()
+          this.downs = {}
 
 
             this.controls = {
@@ -286,7 +289,28 @@
             return(this)
         }
 
+        cast(){
+
+          let rand = new THREE.Vector3(
+              Math.random() * 2 - 1,
+              Math.random() * 2 - 1,
+              Math.random() * 2 - 1
+          ).multiplyScalar(0.1)
+
+          this.raycaster.set(this.obj.position,this.obj.getWorldDirection(new THREE.Vector3()).add(rand).normalize().negate())
+          const intersects = this.raycaster.intersectObjects( world.collidables );
+
+          if(intersects.length>0){
+            if(intersects[0].instanceId!==undefined){
+              intersects[0].object.setColorAt(intersects[0].instanceId,new THREE.Color( 0xffff00 ))
+              // intersects[0].object.instanceColor.needsUpdate = true
+            }
+          }
+        }
+
         updatePos(dt=1){
+
+          this.cast()
 
             this.tail.setMatrixAt(this.tailCounter%this.tailLength,this.obj.matrix)
             this.tailCounter += 1
@@ -297,21 +321,21 @@
 
 
 
-        let controlSpeed = 0.5
+        let controlSpeed = 0.1
         let pitchMult = Math.max(Math.min(this.vel/20,0.5),0.1)
         let rollMult = Math.max(Math.min(this.vel/10,2),0.3)
-        if(downs.w){
+        if(this.downs.w){
           this.controls.pitch =  Math.min(1,this.controls.pitch+dt*controlSpeed*pitchMult)
         }  if(downs.s){
           this.controls.pitch = Math.max(-1,this.controls.pitch-dt*controlSpeed*pitchMult)
 
-        }  if(downs.d){
+        }  if(this.downs.d){
           this.controls.roll = Math.max(-1,this.controls.roll-dt*controlSpeed*rollMult)
-        }  if(downs.a){
+        }  if(this.downs.a){
           this.controls.roll =  Math.min(1,this.controls.roll+dt*controlSpeed*rollMult)
-        } if(downs[" "] || downs["/"]){
-          this.vel += dt*0.5
-        } if(downs["q"]){
+        } if(this.downs[" "] || this.downs["/"]){
+          this.vel += dt
+        } if(this.downs["q"]){
           this.vel *= 0.9 ** dt
         }
 
@@ -383,7 +407,9 @@
         static entities = [this.cameraDrone]
         static init(){
           this.cameraDrone.obj.add(camera)
+          this.cameraDrone.downs = downs
         }
+        static collidables = []
       }
 
 
@@ -474,11 +500,11 @@
         scene.add(new THREE.AmbientLight(0x888888, 1));
 
         for(let i = 0; i< 100; i++){
-          outterObjectS(
-            new THREE.BoxGeometry(5,5,5),
-            "#ff00ff",
-            new THREE.Vector3(Math.random()*200-100,Math.random()*200-100,Math.random()*200-100)
-          )
+          // outterObjectS(
+          //   new THREE.BoxGeometry(5,5,5),
+          //   "#ff00ff",
+          //   new THREE.Vector3(Math.random()*200-100,Math.random()*200-100,Math.random()*200-100)
+          // )
           new liney([rand(500),rand(500),rand(500),rand(500),rand(500),rand(500)])
         }
 
@@ -492,10 +518,16 @@
           color.setHex(Math.floor(0xffffff*Math.random()))
           s.setColorAt(i, color);
         }
+        world.collidables.push(s)
 
         world.init()
         starcloud()
 
+
+        window.THREE = THREE;
+        window.world = world;
+        window.camera = camera;
+        window.scene = scene
       }
 
 
