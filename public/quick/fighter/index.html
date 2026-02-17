@@ -210,6 +210,67 @@ document.addEventListener("mousemove",(e)=>{
       }
 
 
+      class LCanvas{ //lopkns template canvas
+        constructor(w=100,h=100,id=("LCanvas-"+Math.random())){
+          this.canvas = document.createElement("canvas")
+          this.canvas.id = id
+          this.ctx = this.canvas.getContext("2d")
+          this.canvas.style.position = "absolute"
+          this.canvas.style.top = "0px"
+          this.canvas.style.left = "0px"
+          this.canvas.zIndex = "1500"
+          this.canvas.width = w
+          this.canvas.height = h
+          this.ctx.fillStyle = "black"
+          this.ctx.fillRect(0,0,this.canvas.width,this.canvas.height)
+          document.body.appendChild(this.canvas)
+          return(this)
+        }
+
+        fitScreenSize(){
+          this.canvas.width = window.innerWidth
+          this.canvas.height = window.innerHeight
+        }
+
+        clear(){
+          this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height)
+        }
+
+        oneTimeDown(f){ // pass in a function for what to do with one click
+          this.canvas.addEventListener("mousedown",f,{once:true})
+        }
+
+        getPixelRGB(x,y){
+          let d = this.ctx.getImageData(x, y, 1, 1).data
+          return(d)
+        }
+
+
+      }
+
+
+      var canvas = new LCanvas(Width,Height)
+      var ctx = canvas.ctx
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
       // RENDERER
       const renderer = new THREE.WebGLRenderer({ antialias: true, logarithmicDepthBuffer: false });
@@ -244,8 +305,10 @@ document.addEventListener("mousemove",(e)=>{
       var AIs = { // target
         "v1":(x)=>{
 
+          x.target = new THREE.Vector3(0,2000,2000)
 
-          x.downs[" "]=true
+
+          x.AIdowns[" "]=true
 
           if(x.hunting){
             x.target = x.hunting.obj.position.clone()
@@ -255,6 +318,7 @@ document.addEventListener("mousemove",(e)=>{
           // x.targRollAng = x.up.clone().dot(x.targetDir)
           x.targetDir = x.targetVect.clone().normalize()
           x.targDist = x.targetVect.length()
+          // x.lastTargAng = x.targAng
           x.targAng = x.dir.clone().dot(x.targetDir) // -1 means perfectly pointed towards target
 
           x.rightVec = new THREE.Vector3(1, 0, 0).applyQuaternion(x.obj.quaternion)
@@ -266,19 +330,6 @@ document.addEventListener("mousemove",(e)=>{
           x.targetBlock.position.copy(x.target)
 
           // PITCH logic (on same plane)
-
-          // if(x.targDist > 2000 && x.targAng > -0.6){
-          //   x.downs.w = true
-          // } else {
-          //   x.downs.w = false
-
-          //   if(x.controls.pitch>0.1){
-          //     x.downs.s = true
-          //   } else {
-          //     x.downs.s = false
-          //   }
-          // }
-            // console.log(x.targPitchAng)
 
             dbg("pitch ang",x.targPitchAng)
             dbg("target ang",x.targAng)
@@ -292,21 +343,19 @@ document.addEventListener("mousemove",(e)=>{
 
             if(x.targAng > -0.6){ // if not pointed near target
               x.up(x.pitchDir)
-              
-
             } else {
-              x.downs.w = x.downs.s = false
+              x.AIdowns.w = x.AIdowns.s = false
             }
 
 
           } else {
-              x.downs.w = x.downs.s = false
+              x.AIdowns.w = x.AIdowns.s = false
             }
            if(dbg("precise",x.targAng < -0.6)){ // pointed near target, precise manuvers needed
               if(x.targAng < -0.8){
                 x.fire(x.dir)
               }
-              x.downs.w = x.downs.s = false
+              x.AIdowns.w = x.AIdowns.s = false
               if(x.controls.pitch>0.1 && x.pitchDir){
                 x.up(!x.pitchDir)
               } else if(x.controls.pitch < -0.1 && !x.pitchDir){
@@ -327,20 +376,23 @@ document.addEventListener("mousemove",(e)=>{
             }
 
           } else {
-            x.downs.a = x.downs.d = false
+            x.AIdowns.a = x.AIdowns.d = false
           }
 
 
           //panic
           if(x.paniced){
-              x.downs[" "] = false
+              x.AIdowns[" "] = false
             }
 
-          dbg("PITCH UP",x.downs.w)
-          dbg("PITCH DOWN",x.downs.s)
-          dbg("ROLL RIGHT",x.downs.d)
-          dbg("ROLL LEFT",x.downs.a)
-          dbg("ACCELERATE",x.downs[" "])
+          dbg("PITCH UP",x.AIdowns.w)
+          dbg("PITCH DOWN",x.AIdowns.s)
+          dbg("ROLL RIGHT",x.AIdowns.d)
+          dbg("ROLL LEFT",x.AIdowns.a)
+          dbg("ACCELERATE",x.AIdowns[" "])
+
+          x.downs.w = x.AIdowns.w
+          x.downs.s = x.AIdowns.s
 
         }
       }
@@ -348,15 +400,15 @@ document.addEventListener("mousemove",(e)=>{
 
       // PITCHER:
 
-      predictors: up velocity, current pitch angle
+      // predictors: up velocity, current pitch angle
 
-      current state: not failed
+      // current state: not failed
 
-      delta angle recorded each frame,
+      // delta angle recorded each frame,
 
-      if angle overshoots
-        while holding UP: overshoot
-      else: undershoot
+      // if angle overshoots
+      //   while holding UP: overshoot
+      // else: undershoot
 
 
 
@@ -429,8 +481,10 @@ document.addEventListener("mousemove",(e)=>{
           this.tailLength = 500
           this.tailCounter = 0;
           this.tail = instance(this.tailLength,undefined,new THREE.BoxGeometry(10, 0.1, 10))
+          scene.remove(this.tail)
           this.tail.frustumCulled = false
           this.raycaster = new THREE.Raycaster()
+
           this.downs = {}
 
 
@@ -472,6 +526,7 @@ document.addEventListener("mousemove",(e)=>{
 
         initAI(type="v1"){
           this.AI = true
+          this.AIdowns = {}
           this.memory = [];
           this.target = new THREE.Vector3(0,0,0)
           this.castFrequency = 1;
@@ -486,12 +541,12 @@ document.addEventListener("mousemove",(e)=>{
             this.target
           )
           this.up = (x=false)=>{
-            this.downs.w = x
-            this.downs.s = !x
+            this.AIdowns.w = x
+            this.AIdowns.s = !x
           }
           this.right = (x=false)=>{
-            this.downs.d = x
-            this.downs.a = !x
+            this.AIdowns.d = x
+            this.AIdowns.a = !x
           }
           return(this)
         }
@@ -550,9 +605,11 @@ document.addEventListener("mousemove",(e)=>{
         }  if(this.downs.a){
           this.controls.roll =  Math.min(1,this.controls.roll+dt*controlSpeed*rollMult)
         } if(this.downs[" "] || this.downs["/"]){
-          this.vel += dt
+          // this.vel += dt
+          this.vel += dt*5
         } if(this.downs["q"]){
-          this.vel *= 0.9 ** dt
+          this.vel *= 0.7 ** dt
+          // this.vel *= 0.9 ** dt
         }
 
 
@@ -594,7 +651,7 @@ document.addEventListener("mousemove",(e)=>{
         static timeMult = 1
         static cameraDrone = new fighter()
         static entities = [ 
-          new fighter().initAI(),
+          // new fighter().initAI(),
           this.cameraDrone, 
           // new fighter().initAI(),
 
@@ -732,8 +789,16 @@ document.addEventListener("mousemove",(e)=>{
       function onWindowResize() {
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
+        canvas.fitScreenSize()
 
         renderer.setSize(window.innerWidth, window.innerHeight);
+      }
+
+
+      function box(x,y,d,col){
+        d/=2
+        ctx.fillStyle = col
+        ctx.fillRect(x-d+Width/2,y-d+Height/2,d*2,d*2)
       }
 
 
@@ -765,6 +830,14 @@ document.addEventListener("mousemove",(e)=>{
           camera.rotateX(-0.02)
         }
 
+        if(downs["."]){
+          world.cameraDrone.controls.roll = world.cameraDrone.controls.pitch = world.cameraDrone.vel = 0
+        }
+
+
+        ctx.clearRect(0,0,Width,Height)
+
+        cameraGUI()
 
 
 
@@ -780,7 +853,53 @@ document.addEventListener("mousemove",(e)=>{
 
 
 
+
+
+
+
+
       }
+
+
+
+
+
+
+
+      function cameraGUI(){
+        box(0,0,10,"red")
+        let dr = world.cameraDrone
+
+        if(dr.AIdowns.w){
+          box(0,-20,10,"green")
+        }
+        if(dr.AIdowns.s){
+          box(0,20,10,"green")
+        }
+        if(dr.AIdowns.a){
+          box(-20,0,10,"green")
+        }
+        if(dr.AIdowns.d){
+          box(20,0,10,"green")
+        }
+
+        if(dr.controls.pitch > 0){
+          box(0,-30,10,"pink")
+        } else if(dr.controls.pitch < 0){
+          box(0,30,10,"pink")
+        }
+
+
+      }
+
+
+
+
+
+
+
+
+
 
 
        document.addEventListener("keydown",(e)=>{
