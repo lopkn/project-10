@@ -158,6 +158,22 @@
       var foggy = 0
       var downs = {}
 
+let Width = window.innerWidth
+let Height = window.innerHeight
+let mouseX = Width/2
+let mouseY = Height/2
+
+document.addEventListener("mousemove",(e)=>{
+
+    mouseX = e.clientX
+    mouseY = e.clientY
+})
+
+
+
+
+
+
       const camera = new THREE.PerspectiveCamera(
         50,
         window.innerWidth / window.innerHeight,
@@ -196,7 +212,7 @@
 
 
       // RENDERER
-      const renderer = new THREE.WebGLRenderer({ antialias: true, logarithmicDepthBuffer: true });
+      const renderer = new THREE.WebGLRenderer({ antialias: true, logarithmicDepthBuffer: false });
       renderer.shadowMap.enabled = true;
       renderer.setPixelRatio(window.devicePixelRatio);
       renderer.setSize(window.innerWidth, window.innerHeight);
@@ -218,6 +234,8 @@
         debugData[val] = str
         return(str)
       }
+
+      var particles = []
 
 
 
@@ -264,8 +282,13 @@
 
             dbg("pitch ang",x.targPitchAng)
             dbg("target ang",x.targAng)
+            dbg("target dist",x.targDist)
+            dbg("turn",x.turnDist)
+            dbg("pitch dir",x.pitchDir)
+          // console.log(x.turnDist === window.world.cameraDrone.turnDist)
 
-          if(dbg("far",x.targDist > 2000)){
+
+          if(dbg("far",x.targDist > x.turnDist)){
 
             if(x.targAng > -0.6){ // if not pointed near target
               x.up(x.pitchDir)
@@ -276,19 +299,26 @@
             }
 
 
-          } 
+          } else {
+              x.downs.w = x.downs.s = false
+            }
            if(dbg("precise",x.targAng < -0.6)){ // pointed near target, precise manuvers needed
+              if(x.targAng < -0.8){
+                x.fire(x.dir)
+              }
               x.downs.w = x.downs.s = false
               if(x.controls.pitch>0.1 && x.pitchDir){
                 x.up(!x.pitchDir)
-              } else if(x.controls.pitch<-0.1 && !x.pitchDir){
+              } else if(x.controls.pitch < -0.1 && !x.pitchDir){
                 x.up(!x.pitchDir)
+              } else {
+                x.up(x.pitchDir)
               }
             }
 
           // ROLL logic
 
-          if(Math.abs(x.targRollAng)<0.3){
+          if(Math.abs(x.targRollAng)>0.0001){
 
             if(x.targRollAng > 0){
               x.right(!x.pitchDir)
@@ -296,20 +326,37 @@
               x.right(x.pitchDir)
             }
 
+          } else {
+            x.downs.a = x.downs.d = false
           }
 
 
           //panic
-          if(x.targDist > 6000 || x.paniced){
+          if(x.paniced){
               x.downs[" "] = false
             }
 
           dbg("PITCH UP",x.downs.w)
           dbg("PITCH DOWN",x.downs.s)
+          dbg("ROLL RIGHT",x.downs.d)
+          dbg("ROLL LEFT",x.downs.a)
           dbg("ACCELERATE",x.downs[" "])
 
         }
       }
+
+
+      // PITCHER:
+
+      predictors: up velocity, current pitch angle
+
+      current state: not failed
+
+      delta angle recorded each frame,
+
+      if angle overshoots
+        while holding UP: overshoot
+      else: undershoot
 
 
 
@@ -329,11 +376,12 @@
       class liney{
         constructor(arr){
           this.pos = arr
+          this.life = 100
           let geometry = new LineGeometry();
-          geometry.setPositions( this.pos );
+          geometry.setPositions( new Float32Array(this.pos) );
           geometry.setColors([1,1,1,0,1,1]);
-          geometry.computeBoundingSphere()
-          geometry.boundingSphere.radius = Infinity
+          // geometry.computeBoundingSphere()
+          // geometry.boundingSphere.radius = Infinity
 
 
           let matLine = new LineMaterial( {
@@ -349,14 +397,24 @@
           } );
           
           let line = new Line2( geometry, matLine );
-          line.scale.set( 1, 1, 1 );
           line.frustumCulled = false
+          line.geometry.boundingSphere.radius = Infinity
           line.computeLineDistances()
           scene.add( line );
+          particles.push(this)
+
+          setTimeout(()=>{
+            scene.remove(line)
+          },2000)
+
+
         }
 
         update(dt){
-          
+          this.life -= dt
+          if(this.life <= 0 ){
+
+          }
         }
       }
 
@@ -402,6 +460,16 @@
             return(this)
         }
 
+        fire(vec3,scatter=0.1){
+
+          let rand = new THREE.Vector3(
+              Math.random() * 2 - 1,
+              Math.random() * 2 - 1,
+              Math.random() * 2 - 1
+          ).multiplyScalar(scatter)
+          new liney([...this.obj.position.toArray(),...this.obj.position.clone().add(vec3.clone().add(rand).multiplyScalar(5000)).toArray()])
+        }
+
         initAI(type="v1"){
           this.AI = true
           this.memory = [];
@@ -409,6 +477,7 @@
           this.castFrequency = 1;
           this.counter = 0;
 
+          this.turnDist = 2000
           this.AIupdate = AIs[type]
 
           this.targetBlock = outterObjectS(
@@ -434,7 +503,7 @@
               Math.random() * 2 - 1
           ).multiplyScalar(0.1)
 
-          this.raycaster.set(this.obj.position,this.dir.add(rand).normalize().negate())
+          this.raycaster.set(this.obj.position,this.dir.clone().add(rand).normalize())
           const intersects = this.raycaster.intersectObjects( world.collidables );
 
           if(intersects.length>0){
@@ -447,7 +516,9 @@
 
         updatePos(dt=1){
 
-          this.dir = this.obj.getWorldDirection(new THREE.Vector3())
+          dt *= world.timeMult
+
+          this.dir = this.obj.getWorldDirection(new THREE.Vector3()).negate()
 
           if(this.AI){
             this.counter += 1
@@ -463,8 +534,6 @@
 
           dt *= 0.04
           let adt = Math.abs(dt)
-
-
 
         let controlSpeed = 0.1
         let pitchMult = Math.max(Math.min(this.vel/20,0.5),0.1)
@@ -515,15 +584,19 @@
 
     this.dst = Infinity
  
-    this.obj.translateZ(-this.vel)
+    this.obj.translateZ(-this.vel*dt/0.04)
 
 
   }
 }
 
       class world{
+        static timeMult = 1
         static cameraDrone = new fighter()
-        static entities = [ this.cameraDrone, new fighter().initAI(),
+        static entities = [ 
+          new fighter().initAI(),
+          this.cameraDrone, 
+          // new fighter().initAI(),
 
         ]
         static init(){
@@ -630,7 +703,7 @@
         }
 
 
-        let s = instance(5000,(x)=>{
+        let s = instance(5,(x)=>{
           x.position.set(rand(10000)-5000,rand(10000)-5000,rand(10000)-5000)
           x.scale.set(rand(100),rand(100),rand(100))
         })
@@ -747,6 +820,19 @@
 
           downs[e.key] = false
         })
+
+
+
+      document.addEventListener("mousedown",(e)=>{
+          mouseX = event.clientX / window.innerWidth * 2 - 1;
+          mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+
+          world.cameraDrone.raycaster.setFromCamera({x:mouseX,y:mouseY},camera)
+          let dir = world.cameraDrone.obj.position.clone().add(world.cameraDrone.raycaster.ray.direction.clone().multiplyScalar(5000))
+            let ar = [...world.cameraDrone.obj.position.clone().add(camera.getWorldDirection(new THREE.Vector3()).multiplyScalar(400)).toArray(),...dir]
+          new liney(ar)
+          console.log(ar)
+      })
 
       init();
       animate();
