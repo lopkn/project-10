@@ -299,13 +299,57 @@ document.addEventListener("mousemove",(e)=>{
       var particles = []
 
 
+      class AIPID{
+
+        constructor(drone,d=0,v=0){
+          this.dFactor = d
+          this.drone = drone
+          this.velFactor = v
+        }
+
+
+        //when the error got bigger:
+        // 
+
+        predict(x){
+
+          // projected point
+
+
+          let AP = this.drone.target.clone().sub(this.drone.obj.position)
+          let dd = AP.dot(this.drone.rightVec)
+          this.drone.projPoint = this.drone.target.clone().sub(this.drone.rightVec.clone().multiplyScalar(dd))
+          let p = this.drone.dir.angleTo(this.drone.projPoint)
+
+
+
+
+          // let p = Math.acos(-this.drone.targAng)
+          // let p = (Math.acos(-this.drone.targAng))
+          let d = this.drone.controls.pitch*(x?1:-1)
+
+
+
+          this.result = (p-d*(this.dFactor+this.velFactor*Math.min(this.drone.vel,10)))>0
+          return(!x^this.result)
+        }
+
+        overshoot(){
+          this.dFactor += 0.01
+        }
+        undershoot(){
+          this.dFactor -= 0.02
+        }
+
+      }
+
 
 
 
       var AIs = { // target
         "v1":(x)=>{
 
-          x.target = new THREE.Vector3(0,2000,2000)
+          x.target = new THREE.Vector3(0,-2000,2000)
 
 
           x.AIdowns[" "]=true
@@ -325,9 +369,14 @@ document.addEventListener("mousemove",(e)=>{
           x.upVec = new THREE.Vector3(0, 1, 0).applyQuaternion(x.obj.quaternion)
           x.targRollAng = x.rightVec.clone().dot(x.targetDir)
           x.targPitchAng = x.upVec.clone().dot(x.targetDir) // 0 means perpendicular, -1 means head pointed toward target
-          x.pitchDir = !(x.targPitchAng>0)
+          x.pitchDir = !(x.targPitchAng>0) // true = we want to go up
 
-          x.targetBlock.position.copy(x.target)
+          if(Math.random()>0.5){
+
+            x.targetBlock.position.copy(x.target)
+          } else {
+            x.targetBlock.position.copy(x.projPoint)
+          }
 
           // PITCH logic (on same plane)
 
@@ -347,10 +396,12 @@ document.addEventListener("mousemove",(e)=>{
               x.AIdowns.w = x.AIdowns.s = false
             }
 
-
+            x.up(x.AIPID.predict(x.pitchDir))
           } else {
               x.AIdowns.w = x.AIdowns.s = false
             }
+
+
            if(dbg("precise",x.targAng < -0.6)){ // pointed near target, precise manuvers needed
               if(x.targAng < -0.8){
                 x.fire(x.dir)
@@ -363,6 +414,8 @@ document.addEventListener("mousemove",(e)=>{
               } else {
                 x.up(x.pitchDir)
               }
+            x.up(x.AIPID.predict(x.pitchDir))
+
             }
 
           // ROLL logic
@@ -409,6 +462,11 @@ document.addEventListener("mousemove",(e)=>{
       // if angle overshoots
       //   while holding UP: overshoot
       // else: undershoot
+
+
+
+
+      // [0 speed, !0 error: toward]
 
 
 
@@ -529,8 +587,12 @@ document.addEventListener("mousemove",(e)=>{
           this.AIdowns = {}
           this.memory = [];
           this.target = new THREE.Vector3(0,0,0)
+          this.projPoint = new THREE.Vector3(0,0,0)
           this.castFrequency = 1;
           this.counter = 0;
+
+          this.AIPID = new AIPID(this,2.8,-0.065)
+          // this.AIPID2 = new AIPID(this,0.1,0.03)
 
           this.turnDist = 2000
           this.AIupdate = AIs[type]
@@ -641,7 +703,7 @@ document.addEventListener("mousemove",(e)=>{
 
     this.dst = Infinity
  
-    this.obj.translateZ(-this.vel*dt/0.04)
+    // this.obj.translateZ(-this.vel*dt/0.04)
 
 
   }
