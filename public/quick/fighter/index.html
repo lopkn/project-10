@@ -180,7 +180,7 @@ document.addEventListener("mousemove",(e)=>{
         0.01,
         999999
       );
-      camera.position.set(0, 20, 50);
+      camera.position.set(0, 60, 150);
       camera.lookAt(0,0,0)
 
     
@@ -299,6 +299,13 @@ document.addEventListener("mousemove",(e)=>{
 
       var particles = []
 
+      function galacticAngle(xji,yji,zji,xjf,yjf,zjf,a,b,c,x,y,z){
+        let fatChunk = ( a*(x-xji)+b*(y-yji)+c*(z-zji) )/(a**2+b**2+c**2)
+        let chunky = (xjf-xji)*(x-a*fatChunk)+(yjf-yji)*(y-a*fatChunk)+(zjf-zji)*(z-a*fatChunk)
+        let allOver = Math.sqrt((xjf-xji)**2+(yjf-yji)**2+(zjf-zji)**2) * Math.sqrt((x-a*fatChunk)**2+(y-a*fatChunk)**2+(z-a*fatChunk)**2)
+        return(Math.acos(chunky/allOver))
+      }
+
 
       class AIPID{
 
@@ -319,6 +326,9 @@ document.addEventListener("mousemove",(e)=>{
           let dd = AP.dot(this.drone.rightVec)
           this.drone.projPoint = this.drone.target.clone().sub(this.drone.rightVec.clone().multiplyScalar(dd))
           this.drone.projPitchAng = this.drone.dir.clone().angleTo(this.drone.projPoint.clone().sub(this.drone.obj.position))
+
+          // this.drone.projPitchAng2 = galacticAngle(...this.drone.obj.position.toArray(),...this.drone.dir.toArray(),...this.drone.rightVec.toArray(),...this.drone.target.toArray())
+
 
           // let d = this.drone.controls.pitch*(x?1:-1)
           this.dPitch = this.lastPitch - this.drone.projPitchAng
@@ -446,13 +456,14 @@ document.addEventListener("mousemove",(e)=>{
           dbg("ROLL LEFT",x.AIdowns.a)
           dbg("ACCELERATE",x.AIdowns[" "])
 
-          x.downs.w = x.AIdowns.w
-          x.downs.s = x.AIdowns.s
-          
-          x.downs.a = x.AIdowns.a
-          x.downs.d = x.AIdowns.d
-          x.downs[" "] = x.AIdowns[" "]
-
+          if(!x.AIpassive){
+            x.downs.w = x.AIdowns.w
+            x.downs.s = x.AIdowns.s
+            
+            x.downs.a = x.AIdowns.a
+            x.downs.d = x.AIdowns.d
+            x.downs[" "] = x.AIdowns[" "]
+          }
 
 
         }
@@ -577,6 +588,25 @@ document.addEventListener("mousemove",(e)=>{
             this.obj.add(targ)
             this.light.target = targ
             this.obj.add(this.light)
+
+
+            const objectMat = new THREE.MeshStandardMaterial({ color: "#ff00ff" });
+            const wingMat = new THREE.MeshStandardMaterial({ color: "#ff88ff" });
+
+            this.body = new THREE.Mesh(new THREE.BoxGeometry(15,15,35), objectMat);
+            this.body .position.set(0,0,0);
+            this.obj.add(this.body );
+
+
+
+
+
+
+
+
+
+
+
 
             return(this)
         }
@@ -849,7 +879,7 @@ document.addEventListener("mousemove",(e)=>{
 
 
         world.cameraDrone.initAI()
-        world.cameraDrone.AI = false
+        world.cameraDrone.AIpassive = true
 
 
         window.THREE = THREE;
@@ -965,6 +995,7 @@ document.addEventListener("mousemove",(e)=>{
 
         box(0,40,10,dr.AIPID.dPitch>0?"yellow":"red",dr.AIPID.dPitch*1000)
         box(0,60,10,"orange",dr.projPitchAng*10)
+        box(0,70,10,"orange",dr.projPitchAng2*10)
 
 
       }
