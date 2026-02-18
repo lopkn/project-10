@@ -180,7 +180,8 @@ document.addEventListener("mousemove",(e)=>{
         0.01,
         999999
       );
-      camera.position.set(0, 0, 0);
+      camera.position.set(0, 20, 50);
+      camera.lookAt(0,0,0)
 
     
       function instance(count,mov=()=>{},geometry = new THREE.BoxGeometry(1, 1, 1)){
@@ -305,32 +306,30 @@ document.addEventListener("mousemove",(e)=>{
           this.dFactor = d
           this.drone = drone
           this.velFactor = v
+
+          this.lastPitch = 0
         }
 
 
         //when the error got bigger:
         // 
 
-        predict(x){
-
-          // projected point
-
-
+        calcPitch(){
           let AP = this.drone.target.clone().sub(this.drone.obj.position)
           let dd = AP.dot(this.drone.rightVec)
           this.drone.projPoint = this.drone.target.clone().sub(this.drone.rightVec.clone().multiplyScalar(dd))
-          let p = this.drone.dir.angleTo(this.drone.projPoint)
+          this.drone.projPitchAng = this.drone.dir.clone().angleTo(this.drone.projPoint.clone().sub(this.drone.obj.position))
 
+          // let d = this.drone.controls.pitch*(x?1:-1)
+          this.dPitch = this.lastPitch - this.drone.projPitchAng
+          this.lastPitch = this.drone.projPitchAng
+        }
 
+        predictPitch(x){
 
+          // projected point
 
-          // let p = Math.acos(-this.drone.targAng)
-          // let p = (Math.acos(-this.drone.targAng))
-          let d = this.drone.controls.pitch*(x?1:-1)
-
-
-
-          this.result = (p-d*(this.dFactor+this.velFactor*Math.min(this.drone.vel,10)))>0
+          this.result = (this.drone.projPitchAng-this.dPitch*(this.dFactor+this.velFactor*Math.min(this.drone.vel,10)))>0
           return(!x^this.result)
         }
 
@@ -388,6 +387,9 @@ document.addEventListener("mousemove",(e)=>{
           // console.log(x.turnDist === window.world.cameraDrone.turnDist)
 
 
+            x.AIPID.calcPitch()
+
+
           if(dbg("far",x.targDist > x.turnDist)){
 
             if(x.targAng > -0.6){ // if not pointed near target
@@ -396,7 +398,7 @@ document.addEventListener("mousemove",(e)=>{
               x.AIdowns.w = x.AIdowns.s = false
             }
 
-            x.up(x.AIPID.predict(x.pitchDir))
+            x.up(x.AIPID.predictPitch(x.pitchDir))
           } else {
               x.AIdowns.w = x.AIdowns.s = false
             }
@@ -414,7 +416,7 @@ document.addEventListener("mousemove",(e)=>{
               } else {
                 x.up(x.pitchDir)
               }
-            x.up(x.AIPID.predict(x.pitchDir))
+            x.up(x.AIPID.predictPitch(x.pitchDir))
 
             }
 
@@ -446,6 +448,12 @@ document.addEventListener("mousemove",(e)=>{
 
           x.downs.w = x.AIdowns.w
           x.downs.s = x.AIdowns.s
+          
+          x.downs.a = x.AIdowns.a
+          x.downs.d = x.AIdowns.d
+          x.downs[" "] = x.AIdowns[" "]
+
+
 
         }
       }
@@ -484,12 +492,12 @@ document.addEventListener("mousemove",(e)=>{
       }
 
       class liney{
-        constructor(arr){
+        constructor(arr,col=[0,1,1]){
           this.pos = arr
           this.life = 100
           let geometry = new LineGeometry();
           geometry.setPositions( new Float32Array(this.pos) );
-          geometry.setColors([1,1,1,0,1,1]);
+          geometry.setColors([1,1,1,...col]);
           // geometry.computeBoundingSphere()
           // geometry.boundingSphere.radius = Infinity
 
@@ -536,10 +544,11 @@ document.addEventListener("mousemove",(e)=>{
           this.obj.position.set(0,0,0);
           this.dir = new THREE.Vector3(0,0,1)
 
+          this.shotColor = [0,1,1]
+
           this.tailLength = 500
           this.tailCounter = 0;
           this.tail = instance(this.tailLength,undefined,new THREE.BoxGeometry(10, 0.1, 10))
-          scene.remove(this.tail)
           this.tail.frustumCulled = false
           this.raycaster = new THREE.Raycaster()
 
@@ -579,7 +588,7 @@ document.addEventListener("mousemove",(e)=>{
               Math.random() * 2 - 1,
               Math.random() * 2 - 1
           ).multiplyScalar(scatter)
-          new liney([...this.obj.position.toArray(),...this.obj.position.clone().add(vec3.clone().add(rand).multiplyScalar(5000)).toArray()])
+          new liney([...this.obj.position.toArray(),...this.obj.position.clone().add(vec3.clone().add(rand).multiplyScalar(5000)).toArray()],this.shotColor)
         }
 
         initAI(type="v1"){
@@ -591,7 +600,7 @@ document.addEventListener("mousemove",(e)=>{
           this.castFrequency = 1;
           this.counter = 0;
 
-          this.AIPID = new AIPID(this,2.8,-0.065)
+          this.AIPID = new AIPID(this,43,-0.065)
           // this.AIPID2 = new AIPID(this,0.1,0.03)
 
           this.turnDist = 2000
@@ -668,7 +677,7 @@ document.addEventListener("mousemove",(e)=>{
           this.controls.roll =  Math.min(1,this.controls.roll+dt*controlSpeed*rollMult)
         } if(this.downs[" "] || this.downs["/"]){
           // this.vel += dt
-          this.vel += dt*5
+          this.vel += dt
         } if(this.downs["q"]){
           this.vel *= 0.7 ** dt
           // this.vel *= 0.9 ** dt
@@ -703,7 +712,9 @@ document.addEventListener("mousemove",(e)=>{
 
     this.dst = Infinity
  
-    // this.obj.translateZ(-this.vel*dt/0.04)
+    if(!this.locked){
+      this.obj.translateZ(-this.vel*dt/0.04)
+    }
 
 
   }
@@ -838,6 +849,7 @@ document.addEventListener("mousemove",(e)=>{
 
 
         world.cameraDrone.initAI()
+        world.cameraDrone.AI = false
 
 
         window.THREE = THREE;
@@ -857,10 +869,10 @@ document.addEventListener("mousemove",(e)=>{
       }
 
 
-      function box(x,y,d,col){
+      function box(x,y,d,col,i=1,z=1){
         d/=2
         ctx.fillStyle = col
-        ctx.fillRect(x-d+Width/2,y-d+Height/2,d*2,d*2)
+        ctx.fillRect(x-d*i+Width/2,y-d*z+Height/2,d*2*i,d*2*z)
       }
 
 
@@ -950,6 +962,9 @@ document.addEventListener("mousemove",(e)=>{
         } else if(dr.controls.pitch < 0){
           box(0,30,10,"pink")
         }
+
+        box(0,40,10,dr.AIPID.dPitch>0?"yellow":"red",dr.AIPID.dPitch*1000)
+        box(0,60,10,"orange",dr.projPitchAng*10)
 
 
       }
