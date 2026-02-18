@@ -163,11 +163,7 @@ let Height = window.innerHeight
 let mouseX = Width/2
 let mouseY = Height/2
 
-document.addEventListener("mousemove",(e)=>{
 
-    mouseX = e.clientX
-    mouseY = e.clientY
-})
 
 
 
@@ -274,7 +270,7 @@ document.addEventListener("mousemove",(e)=>{
 
 
       // RENDERER
-      const renderer = new THREE.WebGLRenderer({ antialias: true, logarithmicDepthBuffer: false });
+      const renderer = new THREE.WebGLRenderer({ antialias: true, logarithmicDepthBuffer: true });
       renderer.shadowMap.enabled = true;
       renderer.setPixelRatio(window.devicePixelRatio);
       renderer.setSize(window.innerWidth, window.innerHeight);
@@ -353,6 +349,13 @@ document.addEventListener("mousemove",(e)=>{
       }
 
 
+      var weapons = {
+        "hold fire":{"reload":Infinity},
+        "spray":{"reload":0,"scatter":0.1,"AIcone":0.2,"direction":(x)=>{return(x.dir)}},
+        "railgun":{"reload":300,"scatter":0.02,"AIcone":0.1,"direction":(x)=>{return(x.targetVect.clone().normalize().negate())}},
+      }
+
+
 
 
       var AIs = { // target
@@ -415,8 +418,8 @@ document.addEventListener("mousemove",(e)=>{
 
 
            if(dbg("precise",x.targAng < -0.6)){ // pointed near target, precise manuvers needed
-              if(x.targAng < -0.8){
-                x.fire(x.dir)
+              if(x.targAng < -1+weapons[x.weapon].AIcone){
+                x.fire()
               }
               x.AIdowns.w = x.AIdowns.s = false
               if(x.controls.pitch>0.1 && x.pitchDir){
@@ -559,11 +562,15 @@ document.addEventListener("mousemove",(e)=>{
 
           this.tailLength = 500
           this.tailCounter = 0;
-          this.tail = instance(this.tailLength,undefined,new THREE.BoxGeometry(10, 0.1, 10))
+          this.tail = instance(this.tailLength,undefined,new THREE.BoxGeometry(80, 0.1, 10))
           this.tail.frustumCulled = false
           this.raycaster = new THREE.Raycaster()
 
+
           this.downs = {}
+
+          this.reload = Date.now()
+          this.weapon = "hold fire"
 
 
             this.controls = {
@@ -590,20 +597,34 @@ document.addEventListener("mousemove",(e)=>{
             this.obj.add(this.light)
 
 
-            const objectMat = new THREE.MeshStandardMaterial({ color: "#ff00ff" });
-            const wingMat = new THREE.MeshStandardMaterial({ color: "#ff88ff" });
+            let objectMat = new THREE.MeshStandardMaterial({ color: "#ff00ff", emissive: 0xaa00ff });
+            let wingMat = new THREE.MeshStandardMaterial({ color: "#ff88ff", emissive: 0xffaaff });
+
+            objectMat.emmissive = new THREE.Color().setRGB(0x8800ff)
+            wingMat.emmissive = new THREE.Color().setRGB(0x8800ff)
+            wingMat.emmissiveIntensity = 1
+
 
             this.body = new THREE.Mesh(new THREE.BoxGeometry(15,15,35), objectMat);
-            this.body .position.set(0,0,0);
+            this.body.position.set(0,0,0);
             this.obj.add(this.body );
 
+            let wingSize = 1.5
 
+            this.wingRight = new THREE.Mesh(new THREE.BoxGeometry(30*wingSize,5*wingSize,15*wingSize), wingMat);
+            this.wingRight.position.set(18*wingSize,0,0);
+            this.wingRight.rotateY(-0.2)
+            this.obj.add(this.wingRight);
 
+            this.wingLeft = new THREE.Mesh(new THREE.BoxGeometry(30*wingSize,5*wingSize,15*wingSize), wingMat);
+            this.wingLeft.position.set(-18*wingSize,0,0);
+            this.wingLeft.rotateY(0.2)
+            this.obj.add(this.wingLeft);
 
-
-
-
-
+            this.wingTail = new THREE.Mesh(new THREE.BoxGeometry(2.5*wingSize,15,10*wingSize), wingMat);
+            this.wingTail.position.set(0,2,-5);
+            this.wingTail.rotateX(-0.2)
+            this.obj.add(this.wingTail);
 
 
 
@@ -611,13 +632,22 @@ document.addEventListener("mousemove",(e)=>{
             return(this)
         }
 
-        fire(vec3,scatter=0.1){
+        fire(){
+          let wep = weapons[this.weapon]
+
+          if(frameTime-this.reload<wep.reload){
+            return
+          }
+          this.reload = frameTime
 
           let rand = new THREE.Vector3(
               Math.random() * 2 - 1,
               Math.random() * 2 - 1,
               Math.random() * 2 - 1
-          ).multiplyScalar(scatter)
+          ).multiplyScalar(wep.scatter)
+
+          let vec3 = wep.direction(this)
+
           new liney([...this.obj.position.toArray(),...this.obj.position.clone().add(vec3.clone().add(rand).multiplyScalar(5000)).toArray()],this.shotColor)
         }
 
@@ -759,8 +789,15 @@ document.addEventListener("mousemove",(e)=>{
           // new fighter().initAI(),
 
         ]
+
+        static cameraMount = new THREE.Object3D()
+        static cameraRotX = 0 
+        static cameraRotY = 0 
+
         static init(){
-          this.cameraDrone.obj.add(camera)
+          this.cameraDrone.obj.add(this.cameraMount)
+          this.cameraMount.rotation.order = "YXZ"
+          this.cameraMount.add(camera)
           this.cameraDrone.downs = downs
         }
         static collidables = []
@@ -887,6 +924,9 @@ document.addEventListener("mousemove",(e)=>{
         window.world = world;
         window.camera = camera;
         window.scene = scene
+
+        window.summonDrone = ()=>{world.entities.push(new fighter().initAI())}
+        window.target = (x)=>{world.cameraDrone.hunting = world.entities[x]}
       }
 
 
@@ -907,9 +947,11 @@ document.addEventListener("mousemove",(e)=>{
 
 
       var startDate = Date.now()
+      var frameTime = Date.now()
+
       function animate() {
         const delta = clock.getDelta();
-
+        frameTime = Date.now()
 
 
         requestAnimationFrame(animate);
@@ -918,6 +960,7 @@ document.addEventListener("mousemove",(e)=>{
         world.entities.forEach((e)=>{
           e.updatePos(delta*100)
         })
+
         world.starcloud.material.uniforms['time'].value = Math.sin((Date.now()-startDate) * 0.0005);
 
 
@@ -937,13 +980,17 @@ document.addEventListener("mousemove",(e)=>{
         if(downs["."]){
           world.cameraDrone.controls.roll = world.cameraDrone.controls.pitch = world.cameraDrone.vel = 0
         }
+        if(downs[","]){
+          if(world.timeMult == 0){world.timeMult = 1} else {
+            world.timeMult = 0
+          }
+        }
+
 
 
         ctx.clearRect(0,0,Width,Height)
 
         cameraGUI()
-
-
 
 
 
@@ -957,13 +1004,7 @@ document.addEventListener("mousemove",(e)=>{
 
 
 
-
-
-
-
-
       }
-
 
 
 
@@ -1005,7 +1046,9 @@ document.addEventListener("mousemove",(e)=>{
 
 
 
-
+      document.addEventListener("wheel",(e)=>{
+          camera.translateZ(e.deltaY)
+      })
 
 
 
@@ -1048,6 +1091,28 @@ document.addEventListener("mousemove",(e)=>{
           downs[e.key] = false
         })
 
+        document.addEventListener("contextmenu",(e)=>{
+          e.preventDefault()
+        })
+
+        document.addEventListener("mousemove",(e)=>{
+
+            mouseX = e.clientX
+            mouseY = e.clientY
+
+            if(downs["M2"]){
+
+              world.cameraRotY -= e.movementX/300
+              world.cameraRotX -= e.movementY/300
+
+              world.cameraMount.rotation.set(world.cameraRotX,world.cameraRotY,0)
+              // world.cameraMount.rotateOnAxis(new THREE.Vector3(1,0,0),e.movementY/100)
+              // world.cameraMount.rotateOnAxis(new THREE.Vector3(0,1,0),e.movementX/100)
+
+            }
+
+        })
+
 
 
       document.addEventListener("mousedown",(e)=>{
@@ -1060,6 +1125,9 @@ document.addEventListener("mousemove",(e)=>{
           new liney(ar)
           console.log(ar)
       })
+
+
+
 
       init();
       animate();
