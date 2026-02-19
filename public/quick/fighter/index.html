@@ -361,7 +361,7 @@ let mouseY = Height/2
       var AIs = { // target
         "v1":(x)=>{
 
-          x.target = new THREE.Vector3(0,-2000,2000)
+          // x.target = new THREE.Vector3(0,-2000,2000)
 
 
           x.AIdowns[" "]=true
@@ -537,7 +537,7 @@ let mouseY = Height/2
 
           setTimeout(()=>{
             scene.remove(line)
-          },2000)
+          },200)
 
 
         }
@@ -667,7 +667,7 @@ let mouseY = Height/2
           this.AIupdate = AIs[type]
 
           this.targetBlock = outterObjectS(
-            new THREE.BoxGeometry(15,15,15),
+            new THREE.BoxGeometry(10,10,10),
             "#ff00ff",
             this.target
           )
@@ -955,7 +955,6 @@ let mouseY = Height/2
 
 
         requestAnimationFrame(animate);
-        renderer.render(scene, camera);
 
         world.entities.forEach((e)=>{
           e.updatePos(delta*100)
@@ -990,7 +989,27 @@ let mouseY = Height/2
 
         ctx.clearRect(0,0,Width,Height)
 
-        cameraGUI()
+        // cameraGUI()
+
+        if(world.cameraLocked){
+
+          // world.cameraMount.lookAt(world.cameraDrone.targetDir.clone().negate())
+          world.cameraMount.lookAt(world.cameraDrone.targetVect.clone().multiplyScalar(2))
+          dbg("targetDir: ",JSON.stringify(world.cameraDrone.targetDir.clone().toArray()))
+          dbg("mountDir: ",JSON.stringify(world.cameraDrone.targetDir.clone().toArray()))
+          
+          // camera.lookAt(world.cameraDrone.obj.position)
+
+          world.cameraMount.rotateX(world.cameraRotX)
+          world.cameraMount.rotateY(world.cameraRotY)
+
+
+          // camera.position.set(...world.cameraDrone.targetDir.clone().multiplyScalar(600).toArray())
+          // camera.rotation.z = 0
+          // let upVec = new THREE.Vector3(0, 1, 0).applyQuaternion(camera.quaternion)
+          // camera.position.add(upVec.multiplyScalar(100))
+
+        }
 
 
 
@@ -1002,13 +1021,25 @@ let mouseY = Height/2
         })
         dbgdiv.innerText = dbgstr
 
+        debug();
 
+        renderer.render(scene, camera);
 
       }
 
+      window.debug = ()=>{}
 
 
+      window.scenario = (x)=>{
+        summonDrone(); target(1); world.cameraDrone.AIpassive = x; world.entities[1].controls.roll = 1;world.cameraDrone.weapon = "railgun";
+world.cameraLocked = world.entities[1]
+      }
 
+      window.lockCamera = ()=>{
+        world.cameraLocked = true;
+        // camera.position.set(0,0,200)
+        // camera.lookAt(0,0,0)
+      }
 
 
       function cameraGUI(){
