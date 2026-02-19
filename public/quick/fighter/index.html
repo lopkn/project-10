@@ -331,11 +331,11 @@ let mouseY = Height/2
           this.lastPitch = this.drone.projPitchAng
         }
 
-        predictPitch(x){
+        predictPitch(x,dt){
 
           // projected point
 
-          this.result = (this.drone.projPitchAng-this.dPitch*(this.dFactor+this.velFactor*Math.min(this.drone.vel,10)))>0
+          this.result = (this.drone.projPitchAng-this.dPitch/dt*(this.dFactor+this.velFactor* (this.drone.pitchMulter()-0.1) ))>0
           return(!x^this.result)
         }
 
@@ -359,7 +359,7 @@ let mouseY = Height/2
 
 
       var AIs = { // target
-        "v1":(x)=>{
+        "v1":(x,dt)=>{
 
           // x.target = new THREE.Vector3(0,-2000,2000)
 
@@ -384,7 +384,6 @@ let mouseY = Height/2
           x.pitchDir = !(x.targPitchAng>0) // true = we want to go up
 
           if(Math.random()>0.5){
-
             x.targetBlock.position.copy(x.target)
           } else {
             x.targetBlock.position.copy(x.projPoint)
@@ -411,7 +410,7 @@ let mouseY = Height/2
               x.AIdowns.w = x.AIdowns.s = false
             }
 
-            x.up(x.AIPID.predictPitch(x.pitchDir))
+            x.up(x.AIPID.predictPitch(x.pitchDir,dt))
           } else {
               x.AIdowns.w = x.AIdowns.s = false
             }
@@ -429,7 +428,7 @@ let mouseY = Height/2
               } else {
                 x.up(x.pitchDir)
               }
-            x.up(x.AIPID.predictPitch(x.pitchDir))
+            x.up(x.AIPID.predictPitch(x.pitchDir,dt))
 
             }
 
@@ -459,13 +458,22 @@ let mouseY = Height/2
           dbg("ROLL LEFT",x.AIdowns.a)
           dbg("ACCELERATE",x.AIdowns[" "])
 
+          if(x.AIdowns.w){
+            x.tail.setColorAt((x.tailCounter)%x.tailLength,new THREE.Color(0xff0000))
+          } else if(x.AIdowns.s){
+            x.tail.setColorAt((x.tailCounter)%x.tailLength,new THREE.Color(0x00ff00))
+          } else {
+            x.tail.setColorAt((x.tailCounter)%x.tailLength,new THREE.Color(0xffffff))
+          }
+
+
           if(!x.AIpassive){
             x.downs.w = x.AIdowns.w
             x.downs.s = x.AIdowns.s
             
             x.downs.a = x.AIdowns.a
             x.downs.d = x.AIdowns.d
-            x.downs[" "] = x.AIdowns[" "]
+            // x.downs[" "] = x.AIdowns[" "]
           }
 
 
@@ -557,10 +565,12 @@ let mouseY = Height/2
           this.vel = 0
           this.obj.position.set(0,0,0);
           this.dir = new THREE.Vector3(0,0,1)
+          this.controlSpeed = 0.1
+
 
           this.shotColor = [0,1,1]
 
-          this.tailLength = 500
+          this.tailLength = 3000
           this.tailCounter = 0;
           this.tail = instance(this.tailLength,undefined,new THREE.BoxGeometry(80, 0.1, 10))
           this.tail.frustumCulled = false
@@ -650,13 +660,35 @@ let mouseY = Height/2
 
           let dir = vec3.clone().add(rand).normalize()
 
-          this.raycaster.set(this.obj.position,dir)
-          const intersects = this.raycaster.intersectObjects( world.collidables )
+          this.fireVec(dir)
+        }
+
+        fireVec(dir){
+            if(this.hunting){
+            this.raycaster.set(this.obj.position,dir)
+            const intersects = this.raycaster.intersectObjects([this.hunting.obj] )
+
+            if(intersects.length>0){
+              // intersects[0].object.setColorAt(intersects[0].instanceId,new THREE.Color( 0xffff00 ))
+              console.log("hit")
+              this.hunting.forces.roll += Math.random()*2-1
+              this.hunting.forces.pitch += Math.random()*2-1
+              this.hunting.forces.yaw += Math.random()*2-1
+            }
+          }
+          
 
           new liney([...this.obj.position.toArray(),...this.obj.position.clone().add(dir.multiplyScalar(5000)).toArray()],this.shotColor)
         }
 
-        initAI(type="v1"){
+
+        delete(){
+          this.obj.clear()
+          this.tail.removeFromParent()
+        }
+
+
+        initAI(type="v1",aipidSettings=[73.5,-48.5]){
           this.AI = true
           this.AIdowns = {}
           this.memory = [];
@@ -665,7 +697,7 @@ let mouseY = Height/2
           this.castFrequency = 20;
           this.counter = 0;
 
-          this.AIPID = new AIPID(this,43,-0.065)
+          this.AIPID = new AIPID(this,...aipidSettings)
           // this.AIPID2 = new AIPID(this,0.1,0.03)
 
           this.turnDist = 2000
@@ -684,6 +716,10 @@ let mouseY = Height/2
             this.AIdowns.d = x
             this.AIdowns.a = !x
           }
+
+          this.pitchMulter = ()=>{return(Math.max(Math.min(this.vel/20,0.5),0.1))}
+          this.rollMulter = ()=>{return(Math.max(Math.min(this.vel/10,2),0.3))}
+
           return(this)
         }
 
@@ -705,7 +741,7 @@ let mouseY = Height/2
           }
         }
 
-        updatePos(dt=1){
+        updatePos(dt=1,debug=false){
 
           dt *= world.timeMult
 
@@ -716,7 +752,7 @@ let mouseY = Height/2
             if(this.counter%this.castFrequency==0){
               this.cast()
             }
-            this.AIupdate(this)
+            this.AIupdate(this,dt)
           }
 
             this.tail.setMatrixAt(this.tailCounter%this.tailLength,this.obj.matrix)
@@ -726,27 +762,27 @@ let mouseY = Height/2
           dt *= 0.04
           let adt = Math.abs(dt)
 
-        let controlSpeed = 0.1
-        let pitchMult = Math.max(Math.min(this.vel/20,0.5),0.1)
-        let rollMult = Math.max(Math.min(this.vel/10,2),0.3)
+        
+          let pitchMult = this.pitchMulter()
+          let rollMult = this.rollMulter()
 
-        if(this.downs.w){
-          this.controls.pitch =  Math.min(1,this.controls.pitch+dt*controlSpeed*pitchMult)
-        }  if(this.downs.s){
-          this.controls.pitch = Math.max(-1,this.controls.pitch-dt*controlSpeed*pitchMult)
-        }  
+          if(this.downs.w){
+            this.controls.pitch =  Math.min(1,this.controls.pitch+dt*this.controlSpeed*pitchMult)
+          }  if(this.downs.s){
+            this.controls.pitch = Math.max(-1,this.controls.pitch-dt*this.controlSpeed*pitchMult)
+          }  
 
-        if(this.downs.d){
-          this.controls.roll = Math.max(-1,this.controls.roll-dt*controlSpeed*rollMult)
-        }  if(this.downs.a){
-          this.controls.roll =  Math.min(1,this.controls.roll+dt*controlSpeed*rollMult)
-        } if(this.downs[" "] || this.downs["/"]){
-          // this.vel += dt
-          this.vel += dt
-        } if(this.downs["q"]){
-          this.vel *= 0.7 ** dt
-          // this.vel *= 0.9 ** dt
-        }
+          if(this.downs.d){
+            this.controls.roll = Math.max(-1,this.controls.roll-dt*this.controlSpeed*rollMult)
+          }  if(this.downs.a){
+            this.controls.roll =  Math.min(1,this.controls.roll+dt*this.controlSpeed*rollMult)
+          } if(this.downs[" "] || this.downs["/"]){
+            // this.vel += dt
+            this.vel += dt
+          } if(this.downs["q"]){
+            this.vel *= 0.7 ** dt
+            // this.vel *= 0.9 ** dt
+          }
 
 
 
@@ -763,9 +799,13 @@ let mouseY = Height/2
       //   this.forces[e] += Math.min(Math.abs(mns),Math.abs(mns/100)) * Math.sign(mns) * adt
       // })
 
-    this.obj.rotateY(this.controls.yaw* dt)
-    this.obj.rotateZ(this.controls.roll* dt)
-    this.obj.rotateX(this.controls.pitch* dt)
+      this.forces.roll *= 0.9** adt
+      this.forces.pitch *= 0.9** adt
+      this.forces.yaw *= 0.9** adt
+
+    this.obj.rotateY( (this.controls.yaw+this.forces.yaw) * dt)
+    this.obj.rotateZ( (this.controls.roll+this.forces.roll) * dt)
+    this.obj.rotateX( (this.controls.pitch+this.forces.pitch) * dt)
 
 
     // this.upVector = new THREE.Vector3(0, 1, 0).applyQuaternion(this.obj.quaternion)
@@ -905,7 +945,7 @@ let mouseY = Height/2
         }
 
 
-        let s = instance(5000,(x)=>{
+        let s = instance(5,(x)=>{
           x.position.set(rand(10000)-5000,rand(10000)-5000,rand(10000)-5000)
           x.scale.set(rand(100),rand(100),rand(100))
         })
@@ -1159,11 +1199,95 @@ world.cameraLocked = world.entities[1]
           mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
 
           world.cameraDrone.raycaster.setFromCamera({x:mouseX,y:mouseY},camera)
-          let dir = world.cameraDrone.obj.position.clone().add(world.cameraDrone.raycaster.ray.direction.clone().multiplyScalar(5000))
-            let ar = [...world.cameraDrone.obj.position.clone().add(camera.getWorldDirection(new THREE.Vector3()).multiplyScalar(400)).toArray(),...dir]
-          new liney(ar)
-          console.log(ar)
+          // let dir = world.cameraDrone.obj.position.clone().add(world.cameraDrone.raycaster.ray.direction.clone())
+            // let ar = [...world.cameraDrone.obj.position.clone().add(camera.getWorldDirection(new THREE.Vector3()).multiplyScalar(400)).toArray(),...dir]
+          // new liney(ar)
+          world.cameraDrone.fireVec(world.cameraDrone.raycaster.ray.direction.clone())
       })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      window.test = {
+        "1":(t=1,x=1000)=>{
+                let f1 = new fighter()
+                f1.downs.w = true
+                f1.downs.d = true
+                f1.downs[" "] = true
+                for(let i = 0; i < x; i++){
+                  f1.updatePos(t)
+                }
+                return(f1)
+            },
+        "2":()=>{
+                let f1 = new fighter()
+                f1.downs.w = true
+                  f1.updatePos(1,true)
+                return(f1)
+            },
+        "3":(t=1,x=1000,aip)=>{
+          if(window.deb3arr === undefined){window.deb3arr = []}
+                let f1 = new fighter()
+                f1.initAI("v1",aip)
+                f1.downs.w = true
+                f1.downs.d = true
+                f1.downs[" "] = true
+                for(let i = 0; i < x; i++){
+                  f1.updatePos(t)
+                }
+                window.deb3arr.push(f1)
+                return(f1)
+            },
+        "4":(d,v)=>{
+
+
+          world.cameraDrone.obj.quaternion.identity()
+          world.cameraDrone.AIpassive = false
+          world.cameraDrone.target.set(0,-2000,2000)
+          world.cameraDrone.AIPID.dFactor = d
+          world.cameraDrone.AIPID.velFactor = v
+          camera.position.set(0,0,0)
+          camera.lookAt(0,0,-1)
+          world.cameraDrone.locked= true
+
+        }
+      }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
