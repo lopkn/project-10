@@ -107,17 +107,17 @@
         {
         "imports": {
             "three": "../../../node_modules/three/build/three.module.js",
-            "three/examples/jsm/shaders/CopyShader.js": "https://unpkg.com/three@0.178.0/examples/jsm/shaders/CopyShader.js",
-            "three/examples/jsm/postprocessing/EffectComposer.js": "https://unpkg.com/three@0.178.0/examples/jsm/postprocessing/EffectComposer.js",
-            "three/examples/jsm/postprocessing/RenderPass.js": "https://unpkg.com/three@0.178.0/examples/jsm/postprocessing/RenderPass.js",
-            "three/examples/jsm/postprocessing/ShaderPass.js": "https://unpkg.com/three@0.178.0/examples/jsm/postprocessing/ShaderPass.js",
-            "three/examples/jsm/postprocessing/OutlinePass.js": "https://unpkg.com/three@0.178.0/examples/jsm/postprocessing/OutlinePass.js",
-            "three/examples/jsm/postprocessing/OutputPass.js": "https://unpkg.com/three@0.178.0/examples/jsm/postprocessing/OutputPass.js",
-            "three/examples/jsm/shaders/FXAAShader.js":"https://unpkg.com/three@0.178.0/examples/jsm/shaders/FXAAShader.js",
-            "three/examples/jsm/loaders/GLTFLoader.js":"https://unpkg.com/three@0.178.0/examples/jsm/loaders/GLTFLoader.js",
+            "three/examples/jsm/shaders/CopyShader.js": "../../../node_modules/three/examples/jsm/shaders/CopyShader.js",
+            "three/examples/jsm/postprocessing/EffectComposer.js": "../../../node_modules/three/examples/jsm/postprocessing/EffectComposer.js",
+            "three/examples/jsm/postprocessing/RenderPass.js": "../../../node_modules/three/examples/jsm/postprocessing/RenderPass.js",
+            "three/examples/jsm/postprocessing/ShaderPass.js": "../../../node_modules/three/examples/jsm/postprocessing/ShaderPass.js",
+            "three/examples/jsm/postprocessing/OutlinePass.js": "../../../node_modules/three/examples/jsm/postprocessing/OutlinePass.js",
+            "three/examples/jsm/postprocessing/OutputPass.js": "../../../node_modules/three/examples/jsm/postprocessing/OutputPass.js",
+            "three/examples/jsm/shaders/FXAAShader.js":"../../../node_modules/three/examples/jsm/shaders/FXAAShader.js",
+            "three/examples/jsm/loaders/GLTFLoader.js":"../../../node_modules/three/examples/jsm/loaders/GLTFLoader.js",
 
 
-            "three/addons/": "https://unpkg.com/three@0.178.0/examples/jsm/",
+            "three/addons/": "../../../node_modules/three/examples/jsm/",
 
             "three-mesh-bvh": "https://cdn.jsdelivr.net/npm/three-mesh-bvh@0.9.0/build/index.module.js",
 
@@ -141,12 +141,12 @@
         import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
         import { FXAAShader } from 'three/examples/jsm/shaders/FXAAShader.js';
         import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-        import { Line2 } from 'https://unpkg.com/three@0.178.0/examples/jsm/lines/Line2.js';
-        import { LineGeometry } from 'https://unpkg.com/three@0.178.0/examples/jsm/lines/LineGeometry.js';
-        // import { GeometryUtils } from 'https://unpkg.com/three@0.178.0/examples/jsm/utils/GeometryUtils.js';
-        import { LineMaterial } from 'https://unpkg.com/three@0.178.0/examples/jsm/lines/LineMaterial.js';
-        import { LineSegments2 } from 'https://unpkg.com/three@0.178.0/examples/jsm/lines/LineSegments2.js';
-        import { LineSegmentsGeometry } from 'https://unpkg.com/three@0.178.0/examples/jsm/lines/LineSegmentsGeometry.js';
+        import { Line2 } from '../../../node_modules/three/examples/jsm/lines/Line2.js';
+        import { LineGeometry } from '../../../node_modules/three/examples/jsm/lines/LineGeometry.js';
+        // import { GeometryUtils } from '../../../node_modules/three/examples/jsm/utils/GeometryUtils.js';
+        import { LineMaterial } from '../../../node_modules/three/examples/jsm/lines/LineMaterial.js';
+        import { LineSegments2 } from '../../../node_modules/three/examples/jsm/lines/LineSegments2.js';
+        import { LineSegmentsGeometry } from '../../../node_modules/three/examples/jsm/lines/LineSegmentsGeometry.js';
         import { acceleratedRaycast, computeBatchedBoundsTree } from 'three-mesh-bvh';
 
         import { InstancedMesh2 } from '@three.ez/instanced-mesh';
@@ -648,7 +648,12 @@ let mouseY = Height/2
 
           let vec3 = wep.direction(this)
 
-          new liney([...this.obj.position.toArray(),...this.obj.position.clone().add(vec3.clone().add(rand).multiplyScalar(5000)).toArray()],this.shotColor)
+          let dir = vec3.clone().add(rand).normalize()
+
+          this.raycaster.set(this.obj.position,dir)
+          const intersects = this.raycaster.intersectObjects( world.collidables )
+
+          new liney([...this.obj.position.toArray(),...this.obj.position.clone().add(dir.multiplyScalar(5000)).toArray()],this.shotColor)
         }
 
         initAI(type="v1"){
