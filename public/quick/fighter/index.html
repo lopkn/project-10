@@ -657,7 +657,7 @@ let mouseY = Height/2
           this.memory = [];
           this.target = new THREE.Vector3(0,0,0)
           this.projPoint = new THREE.Vector3(0,0,0)
-          this.castFrequency = 1;
+          this.castFrequency = 20;
           this.counter = 0;
 
           this.AIPID = new AIPID(this,43,-0.065)
@@ -919,6 +919,8 @@ let mouseY = Height/2
         world.cameraDrone.AIpassive = true
 
 
+
+
         window.THREE = THREE;
         window.fighter = fighter;
         window.world = world;
@@ -994,7 +996,7 @@ let mouseY = Height/2
         if(world.cameraLocked){
 
           // world.cameraMount.lookAt(world.cameraDrone.targetDir.clone().negate())
-          world.cameraMount.lookAt(world.cameraDrone.targetVect.clone().multiplyScalar(2))
+          world.cameraMount.lookAt(world.cameraDrone.targetVect.clone().add(world.cameraDrone.obj.position))
           dbg("targetDir: ",JSON.stringify(world.cameraDrone.targetDir.clone().toArray()))
           dbg("mountDir: ",JSON.stringify(world.cameraDrone.targetDir.clone().toArray()))
           
