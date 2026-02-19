@@ -29,28 +29,27 @@
 
 
      <script id="vertexShader" type="x-shader/x-vertex">
-    precision highp float;
+        precision highp float;
 
-    uniform float sineTime;
-    uniform float time;
+        uniform float sineTime;
+        uniform float time;
 
-    uniform vec3 cameraPos;
+        uniform vec3 cameraPos;
 
-    uniform mat4 modelViewMatrix;
-    uniform mat4 projectionMatrix;
+        uniform mat4 modelViewMatrix;
+        uniform mat4 projectionMatrix;
 
-    attribute vec3 position;
-    attribute vec3 offset;
-    attribute vec4 color;
-    attribute vec4 orientationStart;
-    attribute vec4 orientationEnd;
+        attribute vec3 position;
+        attribute vec3 offset;
+        attribute vec4 color;
+        attribute vec4 orientation;
 
-    varying vec3 vPosition;
-    varying vec4 vColor;
+        varying vec3 vPosition;
+        varying vec4 vColor;
 
-    vec3 quat_transform(vec4 q, vec3 v) {
-      return v + 2.0 * cross(q.xyz, cross(q.xyz, v) + q.w * v);
-    }
+        vec3 quat_transform(vec4 q, vec3 v) {
+          return v + 2.0 * cross(q.xyz, cross(q.xyz, v) + q.w * v);
+        }
 
     void main(){
 
@@ -60,15 +59,7 @@
       vPosition.y += floor((cameraPos.y-vPosition.y)/size + 0.5)*size;
       vPosition.z += floor((cameraPos.z-vPosition.z)/size + 0.5)*size;
 
-      //vec4 orientation = normalize( mix( orientationStart, orientationEnd, abs(0.5+(time*0.5)) ) );
-      vec4 orientation = orientationStart;
       vPosition = vPosition + quat_transform(orientation,position);
-      //cool Effect vPosition = offset + quat_transform(orientationStart,position);
-      // cool effect vPosition.x += vPosition.x-cameraPos.x;
-
-
-
-
       vec3 vcV = cross( orientation.xyz, vPosition );
 
 
@@ -83,7 +74,6 @@
   <script id="fragmentShader" type="x-shader/x-fragment">
 
     precision highp float;
-
     uniform float time;
 
     varying vec3 vPosition;
@@ -92,7 +82,6 @@
     void main() {
 
       vec4 color = vec4( vColor );
-      //color.r += sin( 1.0 * time  + 3.14) * 1200.5;
       color.r = time;
 
       gl_FragColor = color;
@@ -100,6 +89,111 @@
     }
 
   </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+     <script id="vertexShader2" type="x-shader/x-vertex">
+        precision highp float;
+
+        uniform float sineTime;
+        uniform float time;
+
+        uniform vec3 cameraPos;
+
+        uniform mat4 modelViewMatrix;
+        uniform mat4 projectionMatrix;
+
+        attribute vec3 position;
+        attribute vec3 offset;
+        attribute vec4 color;
+        attribute vec4 orientationStart;
+        attribute vec4 orientationEnd;
+
+        varying vec3 vPosition;
+        varying vec4 vColor;
+
+        vec3 quat_transform(vec4 q, vec3 v) {
+          return v + 2.0 * cross(q.xyz, cross(q.xyz, v) + q.w * v);
+        }
+
+    void main(){
+
+      float size = 5000.0;
+      vPosition = offset;
+      vPosition.x += floor((cameraPos.x-vPosition.x)/size + 0.5)*size;
+      vPosition.y += floor((cameraPos.y-vPosition.y)/size + 0.5)*size;
+      vPosition.z += floor((cameraPos.z-vPosition.z)/size + 0.5)*size;
+
+      vec4 orientation = normalize( mix( orientationStart, orientationEnd, abs(0.5+(time*0.5)) ) );
+      //vec4 orientation = orientationStart;
+      vPosition = vPosition + quat_transform(orientation,position);
+      vec3 vcV = cross( orientation.xyz, vPosition );
+
+
+      vColor = color;
+
+      gl_Position = projectionMatrix * modelViewMatrix * vec4( vPosition, 1.0 );
+
+    }
+
+  </script>
+
+  <script id="fragmentShader2" type="x-shader/x-fragment">
+
+    precision highp float;
+    uniform float time;
+
+    varying vec3 vPosition;
+    varying vec4 vColor;
+
+    void main() {
+
+      vec4 color = vec4( vColor );
+      color.r = time;
+
+      gl_FragColor = color;
+
+    }
+
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -859,8 +953,7 @@ let mouseY = Height/2
         const positions = [];
         const offsets = [];
         const colors = [];
-        const orientationsStart = [];
-        const orientationsEnd = [];
+        const orientations = [];
 
         let size = 225/100
 
@@ -880,14 +973,10 @@ let mouseY = Height/2
             offsets.push(x,y,z);
             // colors
             colors.push( Math.random(), Math.random(), Math.random(),1);
-            // orientation start
+            // orientation
             vector.set( Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1 );
             vector.normalize();
-            orientationsStart.push( vector.x, vector.y, vector.z, vector.w );
-            // orientation end
-            vector.set( Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1 );
-            vector.normalize();
-            orientationsEnd.push( vector.x, vector.y, vector.z, vector.w );
+            orientations.push( vector.x, vector.y, vector.z, vector.w );
         }
 
         // mesh.instanceMatrix.needsUpdate = true
@@ -898,8 +987,7 @@ let mouseY = Height/2
         geometry2.setAttribute( 'position', new THREE.Float32BufferAttribute( positions, 3 ) );
         geometry2.setAttribute( 'offset', new THREE.InstancedBufferAttribute( new Float32Array( offsets ), 3 ) );
         geometry2.setAttribute( 'color', new THREE.InstancedBufferAttribute( new Float32Array( colors ), 4 ) );
-        geometry2.setAttribute( 'orientationStart', new THREE.InstancedBufferAttribute( new Float32Array( orientationsStart ), 4 ) );
-        geometry2.setAttribute( 'orientationEnd', new THREE.InstancedBufferAttribute( new Float32Array( orientationsEnd ), 4 ) );
+        geometry2.setAttribute( 'orientation', new THREE.InstancedBufferAttribute( new Float32Array( orientations ), 4 ) );
         let mesh2 = new THREE.Mesh(geometry2, new THREE.RawShaderMaterial( {
 
         uniforms: {
