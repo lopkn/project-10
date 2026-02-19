@@ -323,7 +323,7 @@ let mouseY = Height/2
           this.drone.projPoint = this.drone.target.clone().sub(this.drone.rightVec.clone().multiplyScalar(dd))
           this.drone.projPitchAng = this.drone.dir.clone().angleTo(this.drone.projPoint.clone().sub(this.drone.obj.position))
 
-          // this.drone.projPitchAng2 = galacticAngle(...this.drone.obj.position.toArray(),...this.drone.dir.toArray(),...this.drone.rightVec.toArray(),...this.drone.target.toArray())
+          this.drone.projPitchAng2 = galacticAngle(...this.drone.obj.position.toArray(),...this.drone.dir.toArray(),...this.drone.rightVec.toArray(),...this.drone.target.toArray())
 
 
           // let d = this.drone.controls.pitch*(x?1:-1)
@@ -505,6 +505,15 @@ let mouseY = Height/2
         return(object)
       }
 
+          let lineyMat = new LineMaterial( {
+            color: 0xffffff,
+            linewidth: 5, // in world units with size attenuation, pixels otherwise
+            vertexColors: true,
+            dashed: false,
+            alphaToCoverage: false,
+            worldUnits: true
+          } );
+
       class liney{
         constructor(arr,col=[0,1,1]){
           this.pos = arr
@@ -516,19 +525,9 @@ let mouseY = Height/2
           // geometry.boundingSphere.radius = Infinity
 
 
-          let matLine = new LineMaterial( {
 
-            color: 0xffffff,
-            linewidth: 5, // in world units with size attenuation, pixels otherwise
-            vertexColors: true,
-
-            dashed: false,
-            alphaToCoverage: false,
-            worldUnits: true
-
-          } );
           
-          let line = new Line2( geometry, matLine );
+          let line = new Line2( geometry, lineyMat );
           line.frustumCulled = false
           line.geometry.boundingSphere.radius = Infinity
           line.computeLineDistances()
@@ -537,6 +536,7 @@ let mouseY = Height/2
 
           setTimeout(()=>{
             scene.remove(line)
+            line.geometry.dispose()
           },200)
 
 
@@ -900,7 +900,7 @@ let mouseY = Height/2
         }
 
 
-        let s = instance(5,(x)=>{
+        let s = instance(5000,(x)=>{
           x.position.set(rand(10000)-5000,rand(10000)-5000,rand(10000)-5000)
           x.scale.set(rand(100),rand(100),rand(100))
         })
@@ -989,7 +989,7 @@ let mouseY = Height/2
 
         ctx.clearRect(0,0,Width,Height)
 
-        // cameraGUI()
+        cameraGUI()
 
         if(world.cameraLocked){
 
@@ -1067,7 +1067,7 @@ world.cameraLocked = world.entities[1]
 
         box(0,40,10,dr.AIPID.dPitch>0?"yellow":"red",dr.AIPID.dPitch*1000)
         box(0,60,10,"orange",dr.projPitchAng*10)
-        box(0,70,10,"orange",dr.projPitchAng2*10)
+        box(0,70,10,"#FFFFAA",dr.projPitchAng2*10)
 
 
       }
@@ -1147,6 +1147,7 @@ world.cameraLocked = world.entities[1]
 
 
       document.addEventListener("mousedown",(e)=>{
+        if(e.button==2){return}
           mouseX = event.clientX / window.innerWidth * 2 - 1;
           mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
 
