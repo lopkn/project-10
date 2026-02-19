@@ -997,15 +997,25 @@ let mouseY = Height/2
       var startDate = Date.now()
       var frameTime = Date.now()
 
+
+      var fpsLimiter = Date.now()
+
       function animate() {
-        const delta = clock.getDelta();
+
         frameTime = Date.now()
-
-
         requestAnimationFrame(animate);
+        if(frameTime-fpsLimiter < 16){
+          return;
+        }
+        fpsLimiter = frameTime;
+
+        const delta = clock.getDelta();
+
+
 
         world.entities.forEach((e)=>{
-          e.updatePos(delta*100)
+          e.updatePos(1)
+          // e.updatePos(delta*100)
         })
 
         world.starcloud.material.uniforms['time'].value = Math.sin((Date.now()-startDate) * 0.0005);
@@ -1037,7 +1047,7 @@ let mouseY = Height/2
 
         ctx.clearRect(0,0,Width,Height)
 
-        cameraGUI()
+        cameraGUI(delta)
 
         if(world.cameraLocked){
 
@@ -1090,7 +1100,7 @@ world.cameraLocked = world.entities[1]
       }
 
 
-      function cameraGUI(){
+      function cameraGUI(dt){
         box(0,0,10,"red")
         let dr = world.cameraDrone
 
@@ -1116,6 +1126,7 @@ world.cameraLocked = world.entities[1]
         box(0,40,10,dr.AIPID.dPitch>0?"yellow":"red",dr.AIPID.dPitch*1000)
         box(0,60,10,"orange",dr.projPitchAng*10)
         box(0,70,10,"#FFFFAA",dr.projPitchAng2*10)
+        box(0,90,5,"#00FFFF",dt*1000)
 
 
       }
