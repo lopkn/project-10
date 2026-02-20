@@ -960,74 +960,133 @@ let mouseY = Height/2
         static collidables = []
       }
 
-           function starcloud(){
+      // function starcloud(){
 
 
-        let count = Math.floor(21400)
+      //   let count = Math.floor(21400)
 
-        const vector = new THREE.Vector4();
-        const positions = [];
-        const offsets = [];
-        const colors = [];
-        const orientations = []; 
-        const rotationDeltas = []; 
+      //   const vector = new THREE.Vector4();
+      //   const positions = [];
+      //   const offsets = [];
+      //   const colors = [];
+      //   const orientations = []; 
+      //   const rotationDeltas = [];
 
-        let size = 225/100
+      //   const v3 = new THREE.Vector3()
 
-        positions.push( 0, -size*2, 0 );
-        positions.push( 0, size*2, 0 );
-        positions.push( 0, size, size );
+      //   let size = 225/100
+
+      //   positions.push( 0, -size*2, 0 );
+      //   positions.push( 0, size*2, 0 );
+      //   positions.push( 0, size, size );
 
 
-        let galazyBoxSize = 5000
 
-        for ( let i = 0; i < count; i ++ ) {
+      //   for ( let i = 0; i < count; i ++ ) {
 
-            // offsets
-            let [x,y,z] = [Math.random()*galazyBoxSize, Math.random()*galazyBoxSize, Math.random()*galazyBoxSize];
-            offsets.push(x,y,z);
-            // colors
-            colors.push( Math.random(), Math.random(), Math.random(),1);
-            // orientation
-            vector.set( Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1 );
+      //       // offsets
+      //       let [x,y,z] = [Math.random()*galazyBoxSize, Math.random()*galazyBoxSize, Math.random()*galazyBoxSize];
+      //       offsets.push(x,y,z);
+      //       // colors
+      //       colors.push( Math.random(), Math.random(), Math.random(),1);
+      //       // orientation
+      //       vector.set( Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1 );
+      //       vector.normalize();
+      //       orientations.push( vector.x, vector.y, vector.z, vector.w );
+
+      //       let theta = Math.PI*2
+
+      //       v3.randomDirection()
+      //       vector.set(
+      //         v3.x * Math.sin(theta/2),
+      //         v3.y * Math.sin(theta/2),
+      //         v3.z * Math.sin(theta/2),
+      //         Math.cos(theta/2)
+      //       )
+
+      //       // vector.set( Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1, 1 );
+      //       vector.normalize();
+      //       rotationDeltas.push( vector.x, vector.y, vector.z, vector.w );
+      //   }
+
+      //   // mesh.instanceMatrix.needsUpdate = true
+
+      //   const geometry2 = new THREE.BufferGeometry();
+
+
+
+      //   geometry2.setAttribute( 'position', new THREE.Float32BufferAttribute( positions, 3 ) );
+      //   geometry2.setAttribute( 'offset', new THREE.InstancedBufferAttribute( new Float32Array( offsets ), 3 ) );
+      //   geometry2.setAttribute( 'color', new THREE.InstancedBufferAttribute( new Float32Array( colors ), 4 ) );
+      //   geometry2.setAttribute( 'orientationStart', new THREE.InstancedBufferAttribute( new Float32Array( orientations ), 4 ) );
+      //   geometry2.setAttribute( 'rotationDelta', new THREE.InstancedBufferAttribute( new Float32Array( rotationDeltas ), 4 ) );
+      //   let mesh2 = new InstancedMesh2(geometry2, new THREE.RawShaderMaterial( {
+      //     uniforms: {
+      //       'time': { value: 1.0 },
+      //       'sineTime': { value: 1.0 },
+      //       'cameraPos': { value: world.cameraDrone.obj.position },
+      //     },
+      //     vertexShader: document.getElementById( 'vertexShader2' ).textContent,
+      //     fragmentShader: document.getElementById( 'fragmentShader2' ).textContent,
+      //     side: THREE.DoubleSide,
+      //     forceSinglePass: true,
+      //     transparent: false
+
+      //   }))
+      //   geometry2.computeBoundingSphere()
+      //   geometry2.boundingSphere.radius = Infinity
+      //   window.gem = geometry2
+      //   mesh2.name = "starcloud"
+      //   scene.add( mesh2 );
+      //   world.starcloud = mesh2
+      // }
+
+
+      function starcloud(count=5000,mov=()=>{},geometry = new THREE.BoxGeometry(1, 1, 1)){
+
+          var materials = new THREE.MeshStandardMaterial({ color: "#FFFFFF",
+            vertexShader: document.getElementById( 'vertexShader2' ).textContent,
+            fragmentShader: document.getElementById( 'fragmentShader2' ).textContent
+          })
+
+          // geometry.computeVertexNormals() // delete if not found useful
+
+          let mesh = new InstancedMesh2( geometry, materials, count );
+          mesh.instanceMatrix.setUsage( THREE.DynamicDrawUsage ); // will be updated every frame
+          scene.add(mesh);
+          mesh.addInstances(count);
+          mesh.initUniformsPerInstance({ fragment: { orientationStart: 'vec4', rotationDelta: 'vec4'} });
+
+          let vector = new THREE.Vector4()
+          let v3 = new THREE.Vector3()
+
+          let dummy = new THREE.Object3D()
+          let theta = Math.PI/2
+          for ( let i = 0; i < count; i ++) {
+              mov(dummy,i)
+              dummy.updateMatrix();
+
+
+              vector.set( Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1 );
+              vector.normalize();
+
+              mesh.setUniformAt(i, 'orientationStart', vector);
+              v3.randomDirection()
+              vector.set(
+                v3.x * Math.sin(theta/2),
+                v3.y * Math.sin(theta/2),
+                v3.z * Math.sin(theta/2),
+                Math.cos(theta/2)
+              )
+
+            // vector.set( Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1, 1 );
             vector.normalize();
-            orientations.push( vector.x, vector.y, vector.z, vector.w );
 
-            vector.set( Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1, 1 );
-            vector.normalize();
-            rotationDeltas.push( vector.x, vector.y, vector.z, vector.w );
-        }
 
-        // mesh.instanceMatrix.needsUpdate = true
-
-        const geometry2 = new THREE.InstancedBufferGeometry();
-
-        geometry2.instanceCount = count; // set so its initialized for dat.GUI, will be set in first draw otherwise
-        geometry2.setAttribute( 'position', new THREE.Float32BufferAttribute( positions, 3 ) );
-        geometry2.setAttribute( 'offset', new THREE.InstancedBufferAttribute( new Float32Array( offsets ), 3 ) );
-        geometry2.setAttribute( 'color', new THREE.InstancedBufferAttribute( new Float32Array( colors ), 4 ) );
-        geometry2.setAttribute( 'orientationStart', new THREE.InstancedBufferAttribute( new Float32Array( orientations ), 4 ) );
-        geometry2.setAttribute( 'rotationDelta', new THREE.InstancedBufferAttribute( new Float32Array( rotationDeltas ), 4 ) );
-        let mesh2 = new THREE.Mesh(geometry2, new THREE.RawShaderMaterial( {
-
-        uniforms: {
-          'time': { value: 1.0 },
-          'sineTime': { value: 1.0 },
-          'cameraPos': { value: world.cameraDrone.obj.position },
-        },
-        vertexShader: document.getElementById( 'vertexShader2' ).textContent,
-        fragmentShader: document.getElementById( 'fragmentShader2' ).textContent,
-        side: THREE.DoubleSide,
-        forceSinglePass: true,
-        transparent: false
-
-        } ))
-        geometry2.computeBoundingSphere()
-        geometry2.boundingSphere.radius = Infinity
-        window.gem = geometry2
-        mesh2.name = "starcloud"
-        scene.add( mesh2 );
-        world.starcloud = mesh2
+              mesh.setUniformAt(i, 'rotationDelta', vector);
+              mesh.setMatrixAt( i, dummy.matrix );
+          }
+          return(mesh)
       }
       
       function starcloud2(){
@@ -1190,8 +1249,8 @@ let mouseY = Height/2
           // e.updatePos(delta*100)
         })
 
-        world.starcloud.material.uniforms['sineTime'].value = Math.sin((Date.now()-startDate) * 0.0005);
-        world.starcloud.material.uniforms['time'].value = (Date.now()-startDate)*0.005
+        // world.starcloud.material.uniforms['sineTime'].value = Math.sin((Date.now()-startDate) * 0.0005);
+        // world.starcloud.material.uniforms['time'].value = (Date.now()-startDate)*0.005
 
 
         if(downs.j){
