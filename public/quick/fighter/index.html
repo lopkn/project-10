@@ -32,7 +32,6 @@
         precision highp float;
 
         uniform float sineTime;
-        uniform float time;
 
         uniform vec3 cameraPos;
 
@@ -74,7 +73,7 @@
   <script id="fragmentShader" type="x-shader/x-fragment">
 
     precision highp float;
-    uniform float time;
+    uniform float sineTime;
 
     varying vec3 vPosition;
     varying vec4 vColor;
@@ -82,7 +81,7 @@
     void main() {
 
       vec4 color = vec4( vColor );
-      color.r = time;
+      color.r = sineTime;
 
       gl_FragColor = color;
 
@@ -120,7 +119,7 @@
         attribute vec3 offset;
         attribute vec4 color;
         attribute vec4 orientationStart;
-        attribute vec4 orientationEnd;
+        attribute vec4 rotationDelta;
 
         varying vec3 vPosition;
         varying vec4 vColor;
@@ -129,16 +128,38 @@
           return v + 2.0 * cross(q.xyz, cross(q.xyz, v) + q.w * v);
         }
 
+        vec4 multiplyQuaternions(vec4 q1, vec4 q2) {
+          return vec4(
+              q1.w * q2.x + q1.x * q2.w + q1.y * q2.z - q1.z * q2.y,
+              q1.w * q2.y - q1.x * q2.z + q1.y * q2.w + q1.z * q2.x,
+              q1.w * q2.z + q1.x * q2.y - q1.y * q2.x + q1.z * q2.w,
+              q1.w * q2.w - q1.x * q2.x - q1.y * q2.y - q1.z * q2.z
+          );
+      }
+
+      vec4 rotateQuatByDelta(vec4 Ccurrent, vec4 qDelta, float rotationPercentage) {
+          qDelta = normalize(qDelta);
+
+          float angle = acos(qDelta.w) * 2.0; // rotation angle from quaternion
+          float scaledAngle = angle * rotationPercentage; // scale by the percentage
+
+          vec4 qScaled;
+          qScaled.w = cos(scaledAngle / 2.0);
+          qScaled.xyz = sin(scaledAngle / 2.0) * normalize(qDelta.xyz);
+
+          vec3 rotatedVector = Ccurrent.xyz * (2.0 * dot(qScaled.xyz, Ccurrent.xyz) * qScaled.xyz 
+                           + (qScaled.w * qScaled.w - dot(qScaled.xyz, qScaled.xyz)) * Ccurrent.xyz 
+                           + 2.0 * qScaled.w * cross(qScaled.xyz, Ccurrent.xyz));
+
+          return vec4(rotatedVector, Ccurrent.w); // Return rotated vector with original w component
+      }
+
     void main(){
 
       float size = 5000.0;
       vPosition = offset;
-      vPosition.x += floor((cameraPos.x-vPosition.x)/size + 0.5)*size;
-      vPosition.y += floor((cameraPos.y-vPosition.y)/size + 0.5)*size;
-      vPosition.z += floor((cameraPos.z-vPosition.z)/size + 0.5)*size;
 
-      vec4 orientation = normalize( mix( orientationStart, orientationEnd, abs(0.5+(time*0.5)) ) );
-      //vec4 orientation = orientationStart;
+      vec4 orientation = normalize( rotateQuatByDelta( orientationStart, rotationDelta, time ));
       vPosition = vPosition + quat_transform(orientation,position);
       vec3 vcV = cross( orientation.xyz, vPosition );
 
@@ -745,11 +766,7 @@ let mouseY = Height/2
           }
           this.reload = frameTime
 
-          let rand = new THREE.Vector3(
-              Math.random() * 2 - 1,
-              Math.random() * 2 - 1,
-              Math.random() * 2 - 1
-          ).multiplyScalar(wep.scatter)
+          let rand = new THREE.Vector3().randomDirection().multiplyScalar(wep.scatter)
 
           let vec3 = wep.direction(this)
 
@@ -943,8 +960,7 @@ let mouseY = Height/2
         static collidables = []
       }
 
-
-      function starcloud(){
+           function starcloud(){
 
 
         let count = Math.floor(21400)
@@ -953,7 +969,8 @@ let mouseY = Height/2
         const positions = [];
         const offsets = [];
         const colors = [];
-        const orientations = [];
+        const orientations = []; 
+        const rotationDeltas = []; 
 
         let size = 225/100
 
@@ -962,6 +979,73 @@ let mouseY = Height/2
         positions.push( 0, size, size );
 
 
+        let galazyBoxSize = 5000
+
+        for ( let i = 0; i < count; i ++ ) {
+
+            // offsets
+            let [x,y,z] = [Math.random()*galazyBoxSize, Math.random()*galazyBoxSize, Math.random()*galazyBoxSize];
+            offsets.push(x,y,z);
+            // colors
+            colors.push( Math.random(), Math.random(), Math.random(),1);
+            // orientation
+            vector.set( Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1 );
+            vector.normalize();
+            orientations.push( vector.x, vector.y, vector.z, vector.w );
+
+            vector.set( Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1, 1 );
+            vector.normalize();
+            rotationDeltas.push( vector.x, vector.y, vector.z, vector.w );
+        }
+
+        // mesh.instanceMatrix.needsUpdate = true
+
+        const geometry2 = new THREE.InstancedBufferGeometry();
+
+        geometry2.instanceCount = count; // set so its initialized for dat.GUI, will be set in first draw otherwise
+        geometry2.setAttribute( 'position', new THREE.Float32BufferAttribute( positions, 3 ) );
+        geometry2.setAttribute( 'offset', new THREE.InstancedBufferAttribute( new Float32Array( offsets ), 3 ) );
+        geometry2.setAttribute( 'color', new THREE.InstancedBufferAttribute( new Float32Array( colors ), 4 ) );
+        geometry2.setAttribute( 'orientationStart', new THREE.InstancedBufferAttribute( new Float32Array( orientations ), 4 ) );
+        geometry2.setAttribute( 'rotationDelta', new THREE.InstancedBufferAttribute( new Float32Array( rotationDeltas ), 4 ) );
+        let mesh2 = new THREE.Mesh(geometry2, new THREE.RawShaderMaterial( {
+
+        uniforms: {
+          'time': { value: 1.0 },
+          'sineTime': { value: 1.0 },
+          'cameraPos': { value: world.cameraDrone.obj.position },
+        },
+        vertexShader: document.getElementById( 'vertexShader2' ).textContent,
+        fragmentShader: document.getElementById( 'fragmentShader2' ).textContent,
+        side: THREE.DoubleSide,
+        forceSinglePass: true,
+        transparent: false
+
+        } ))
+        geometry2.computeBoundingSphere()
+        geometry2.boundingSphere.radius = Infinity
+        window.gem = geometry2
+        mesh2.name = "starcloud"
+        scene.add( mesh2 );
+        world.starcloud = mesh2
+      }
+      
+      function starcloud2(){
+
+
+        let count = Math.floor(21400)
+
+        const vector = new THREE.Vector4();
+        const positions = [];
+        const offsets = [];
+        const colors = [];
+        const orientations = []; // wow! optimizable, later you can just rotate the positions at the start. right now the positions array is useless
+
+        let size = 225/100
+
+        positions.push( 0, -size*2, 0 );
+        positions.push( 0, size*2, 0 );
+        positions.push( 0, size, size );
 
 
         let galazyBoxSize = 5000
@@ -1106,7 +1190,8 @@ let mouseY = Height/2
           // e.updatePos(delta*100)
         })
 
-        world.starcloud.material.uniforms['time'].value = Math.sin((Date.now()-startDate) * 0.0005);
+        world.starcloud.material.uniforms['sineTime'].value = Math.sin((Date.now()-startDate) * 0.0005);
+        world.starcloud.material.uniforms['time'].value = (Date.now()-startDate)*0.005
 
 
         if(downs.j){
