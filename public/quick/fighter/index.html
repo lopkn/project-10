@@ -50,23 +50,23 @@
           return v + 2.0 * cross(q.xyz, cross(q.xyz, v) + q.w * v);
         }
 
-    void main(){
+      void main(){
 
-      float size = 5000.0;
-      vPosition = offset;
-      vPosition.x += floor((cameraPos.x-vPosition.x)/size + 0.5)*size;
-      vPosition.y += floor((cameraPos.y-vPosition.y)/size + 0.5)*size;
-      vPosition.z += floor((cameraPos.z-vPosition.z)/size + 0.5)*size;
+        float size = 5000.0;
+        vPosition = offset;
+        vPosition.x += floor((cameraPos.x-vPosition.x)/size + 0.5)*size;
+        vPosition.y += floor((cameraPos.y-vPosition.y)/size + 0.5)*size;
+        vPosition.z += floor((cameraPos.z-vPosition.z)/size + 0.5)*size;
 
-      vPosition = vPosition + quat_transform(orientation,position);
-      vec3 vcV = cross( orientation.xyz, vPosition );
+        vPosition = vPosition + quat_transform(orientation,position);
+        vec3 vcV = cross( orientation.xyz, vPosition );
 
 
-      vColor = color;
+        vColor = color;
 
-      gl_Position = projectionMatrix * modelViewMatrix * vec4( vPosition, 1.0 );
+        gl_Position = projectionMatrix * modelViewMatrix * vec4( vPosition, 1.0 );
 
-    }
+      }
 
   </script>
 
@@ -101,7 +101,7 @@
 
 
 
-
+<!--
 
 
      <script id="vertexShader2" type="x-shader/x-vertex">
@@ -115,14 +115,10 @@
         uniform mat4 modelViewMatrix;
         uniform mat4 projectionMatrix;
 
-        attribute vec3 position;
-        attribute vec3 offset;
-        attribute vec4 color;
-        attribute vec4 orientationStart;
-        attribute vec4 rotationDelta;
+        uniform vec4 orientationStart;
+        uniform vec4 rotationDelta;
 
-        varying vec3 vPosition;
-        varying vec4 vColor;
+
 
         vec3 quat_transform(vec4 q, vec3 v) {
           return v + 2.0 * cross(q.xyz, cross(q.xyz, v) + q.w * v);
@@ -154,21 +150,21 @@
           return vec4(rotatedVector, Ccurrent.w); // Return rotated vector with original w component
       }
 
-    void main(){
+      void main(){
 
-      float size = 5000.0;
-      vPosition = offset;
+        float size = 5000.0;
+        //vPosition = offset;
 
-      vec4 orientation = normalize( rotateQuatByDelta( orientationStart, rotationDelta, time ));
-      vPosition = vPosition + quat_transform(orientation,position);
-      vec3 vcV = cross( orientation.xyz, vPosition );
+        //vec4 orientation = normalize( rotateQuatByDelta( orientationStart, rotationDelta, time ));
+        //vPosition = vPosition + quat_transform(orientation,position);
+        //vec3 vcV = cross( orientation.xyz, vPosition );
 
 
-      vColor = color;
+        //vColor = color;
 
-      gl_Position = projectionMatrix * modelViewMatrix * vec4( vPosition, 1.0 );
+        gl_Position = vec4(position, 1.0)
 
-    }
+      }
 
   </script>
 
@@ -177,15 +173,42 @@
     precision highp float;
     uniform float time;
 
-    varying vec3 vPosition;
-    varying vec4 vColor;
+    uniform vec3 vPosition;
+    //uniform vec4 vColor;
 
     void main() {
 
-      vec4 color = vec4( vColor );
-      color.r = time;
+      //vec4 color = vec4( vColor );
+      //color.r = time;
 
       gl_FragColor = color;
+
+    }
+
+  </script>
+-->
+
+     <script id="vertexShader3" type="x-shader/x-vertex">
+
+
+
+
+
+      void main(){
+
+        gl_Position = vec4(1.0,1.0,1.0, 1.0);
+
+      }
+
+  </script>
+
+  <script id="fragmentShader3" type="x-shader/x-fragment">
+
+
+    void main() {
+
+
+      gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
 
     }
 
@@ -499,11 +522,11 @@ let mouseY = Height/2
           x.targPitchAng = x.upVec.clone().dot(x.targetDir) // 0 means perpendicular, -1 means head pointed toward target
           x.pitchDir = !(x.targPitchAng>0) // true = we want to go up
 
-          if(Math.random()>0.5){
+          // if(Math.random()>0.5){
             x.targetBlock.position.copy(x.target)
-          } else {
-            x.targetBlock.position.copy(x.projPoint)
-          }
+          // } else {
+            // x.targetBlock.position.copy(x.projPoint)
+          // }
 
           // PITCH logic (on same plane)
 
@@ -575,9 +598,9 @@ let mouseY = Height/2
           dbg("ACCELERATE",x.AIdowns[" "])
 
           if(x.AIdowns.w){
-            x.tail.setColorAt((x.tailCounter)%x.tailLength,new THREE.Color(0xff0000))
-          } else if(x.AIdowns.s){
             x.tail.setColorAt((x.tailCounter)%x.tailLength,new THREE.Color(0x00ff00))
+          } else if(x.AIdowns.s){
+            x.tail.setColorAt((x.tailCounter)%x.tailLength,new THREE.Color(0xff0000))
           } else {
             x.tail.setColorAt((x.tailCounter)%x.tailLength,new THREE.Color(0xffffff))
           }
@@ -629,50 +652,80 @@ let mouseY = Height/2
         return(object)
       }
 
-          let lineyMat = new LineMaterial( {
-            color: 0xffffff,
-            linewidth: 5, // in world units with size attenuation, pixels otherwise
-            vertexColors: true,
-            dashed: false,
-            alphaToCoverage: false,
-            worldUnits: true
-          } );
 
-      class liney{
-        constructor(arr,col=[0,1,1]){
-          this.pos = arr
-          this.life = 100
-          let geometry = new LineGeometry();
-          geometry.setPositions( new Float32Array(this.pos) );
-          geometry.setColors([1,1,1,...col]);
-          // geometry.computeBoundingSphere()
-          // geometry.boundingSphere.radius = Infinity
+      class missile{
 
+        static Mat = new THREE.MeshStandardMaterial({ color: "#77ff77", emissive: 0x779977 })
+        static Geom = new THREE.BoxGeometry(5,5,25)
+
+        constructor(parent,hunting){
+          this.obj = new THREE.Object3D()
+          this.obj.copy(parent.obj,false)
+          this.hunting = hunting
+          this.target = new THREE.Vector3()
+          this.dir = new THREE.Vector3()
+
+          this.acceleration = 0.01
+          this.vel = parent.vel
+
+          this.passiveInitial = Date.now() + 300
 
 
-          
-          let line = new Line2( geometry, lineyMat );
-          line.frustumCulled = false
-          line.geometry.boundingSphere.radius = Infinity
-          line.computeLineDistances()
-          scene.add( line );
-          particles.push(this)
-
-          setTimeout(()=>{
-            scene.remove(line)
-            line.geometry.dispose()
-          },200)
+          this.obj.add(new THREE.Mesh(missile.Geom,missile.Mat))
 
 
+          scene.add(this.obj)
         }
 
-        update(dt){
-          this.life -= dt
-          if(this.life <= 0 ){
+        updatePos(dt){
 
+
+          if(this.hunting){
+            this.target = this.hunting.obj.position.clone()
+          }
+          this.targetDir = this.target.clone().sub(this.obj.position).normalize()
+          this.obj.getWorldDirection(this.dir)
+
+
+          const m = new THREE.Matrix4();
+          m.lookAt(
+              this.obj.position,
+              this.target,
+              this.obj.up
+          );
+
+          const targetQuat = new THREE.Quaternion().setFromRotationMatrix(m);
+
+          // let rotQuat = new THREE.Quaternion().setFromUnitVectors(this.dir,this.targetDir)
+          // let targQuat = new THREE.Quaternion().setFromAxisAngle(this.targetDir,-Math.PI)
+
+          // this.obj.quaternion.rotateTowards( targQuat, 0.4)
+
+          if(frameTime > this.passiveInitial){
+            this.obj.quaternion.slerp(targetQuat, 0.05);
+          }
+
+
+
+
+
+          this.vel += this.acceleration * dt
+
+
+          if(!this.locked){
+            this.obj.translateZ(-this.vel*dt)
           }
         }
+
+
+
+
+
+        delete(){
+          scene.remove(this.obj)
+        }
       }
+
 
 
       class fighter{
@@ -783,8 +836,11 @@ let mouseY = Height/2
             if(intersects.length>0){
               // intersects[0].object.setColorAt(intersects[0].instanceId,new THREE.Color( 0xffff00 ))
               console.log("hit")
-              this.hunting.forces.roll += Math.random()*2-1
-              this.hunting.forces.pitch += Math.random()*2-1
+
+              particles.push(new explosion(intersects[0].point))
+
+              this.hunting.forces.roll += Math.random()*4-2
+              this.hunting.forces.pitch *= Math.random()
               this.hunting.forces.yaw += Math.random()*2-1
             }
           }
@@ -869,12 +925,10 @@ let mouseY = Height/2
 
             this.tail.setMatrixAt(this.tailCounter%this.tailLength,this.obj.matrix)
             this.tailCounter += 1
-          
 
           dt *= 0.04
           let adt = Math.abs(dt)
 
-        
           let pitchMult = this.pitchMulter()
           let rollMult = this.rollMulter()
 
@@ -911,9 +965,9 @@ let mouseY = Height/2
       //   this.forces[e] += Math.min(Math.abs(mns),Math.abs(mns/100)) * Math.sign(mns) * adt
       // })
 
-      this.forces.roll *= 0.9** adt
-      this.forces.pitch *= 0.9** adt
-      this.forces.yaw *= 0.9** adt
+      this.forces.roll *= 0.97** adt
+      this.forces.pitch *= 0.97** adt
+      this.forces.yaw *= 0.97** adt
 
     this.obj.rotateY( (this.controls.yaw+this.forces.yaw) * dt)
     this.obj.rotateZ( (this.controls.roll+this.forces.roll) * dt)
@@ -947,6 +1001,8 @@ let mouseY = Height/2
 
         ]
 
+        static otherEntities = []
+
         static cameraMount = new THREE.Object3D()
         static cameraRotX = 0 
         static cameraRotY = 0 
@@ -960,7 +1016,6 @@ let mouseY = Height/2
         static collidables = []
       }
 
-      // function starcloud(){
 
 
       //   let count = Math.floor(21400)
@@ -1042,20 +1097,108 @@ let mouseY = Height/2
       // }
 
 
-      function starcloud(count=5000,mov=()=>{},geometry = new THREE.BoxGeometry(1, 1, 1)){
+          let lineyMat = new LineMaterial( {
+            color: 0xffffff,
+            linewidth: 5, // in world units with size attenuation, pixels otherwise
+            vertexColors: true,
+            dashed: false,
+            alphaToCoverage: false,
+            worldUnits: true
+          } );
 
-          var materials = new THREE.MeshStandardMaterial({ color: "#FFFFFF",
-            vertexShader: document.getElementById( 'vertexShader2' ).textContent,
-            fragmentShader: document.getElementById( 'fragmentShader2' ).textContent
-          })
+          let explosionMat = new THREE.MeshStandardMaterial( {
+            color: 0xffffff,
+            emissive: 0xffff22
+          } );
+
+      class liney{
+        constructor(arr,col=[0,1,1]){
+          this.pos = arr
+          this.life = 100
+          let geometry = new LineGeometry();
+          geometry.setPositions( new Float32Array(this.pos) );
+          geometry.setColors([1,1,1,...col]);
+          // geometry.computeBoundingSphere()
+          // geometry.boundingSphere.radius = Infinity
+
+
+
+          
+          let line = new Line2( geometry, lineyMat );
+          line.frustumCulled = false
+          line.geometry.boundingSphere.radius = Infinity
+          line.computeLineDistances()
+          scene.add( line );
+          particles.push(this)
+
+          setTimeout(()=>{
+            scene.remove(line)
+            line.geometry.dispose()
+          },200)
+
+
+        }
+
+        update(dt){
+          this.life -= dt
+          if(this.life <= 0 ){
+
+          }
+        }
+      }
+
+      class explosion{
+        constructor(pos){
+          this.life = 1000
+          let geometry = new THREE.SphereGeometry(50,14,14);
+
+          this.obj = new THREE.Mesh(geometry,explosionMat)
+          this.obj.position.copy(pos)
+          scene.add(this.obj)
+
+        }
+
+        update(dt){
+          this.life -= dt*300
+          let mr = this.life/1000
+          this.obj.scale.set(mr,mr,mr)
+          if(this.life <= 0 ){
+            this.delete()
+            return('del')
+          }
+        }
+
+        delete(){
+          scene.remove(this.obj)
+          this.obj.geometry.dispose()
+        }
+      }
+
+
+
+      function starcloud2(count=5000,mov=()=>{},geometry = new THREE.BoxGeometry(1, 1, 1)){
+
+          var materials = new THREE.RawShaderMaterial( {
+
+            uniforms: {
+              'time': { value: 1.0 },
+              'sineTime': { value: 1.0 },
+              'cameraPos': { value: world.cameraDrone.obj.position },
+            },
+            vertexShader: document.getElementById( 'vertexShader3' ).textContent,
+            fragmentShader: document.getElementById( 'fragmentShader3' ).textContent,
+            side: THREE.DoubleSide,
+            // forceSinglePass: true,
+            transparent: false
+
+        } )
 
           // geometry.computeVertexNormals() // delete if not found useful
 
           let mesh = new InstancedMesh2( geometry, materials, count );
           mesh.instanceMatrix.setUsage( THREE.DynamicDrawUsage ); // will be updated every frame
-          scene.add(mesh);
+          mesh.initUniformsPerInstance({ fragment: { metalness: 'float'}});
           mesh.addInstances(count);
-          mesh.initUniformsPerInstance({ fragment: { orientationStart: 'vec4', rotationDelta: 'vec4'} });
 
           let vector = new THREE.Vector4()
           let v3 = new THREE.Vector3()
@@ -1070,7 +1213,7 @@ let mouseY = Height/2
               vector.set( Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1 );
               vector.normalize();
 
-              mesh.setUniformAt(i, 'orientationStart', vector);
+              mesh.setUniformAt(i, 'metalness', 1.0);
               v3.randomDirection()
               vector.set(
                 v3.x * Math.sin(theta/2),
@@ -1079,20 +1222,26 @@ let mouseY = Height/2
                 Math.cos(theta/2)
               )
 
-            // vector.set( Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1, 1 );
+            vector.set( Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1, 1 );
             vector.normalize();
 
 
-              mesh.setUniformAt(i, 'rotationDelta', vector);
+              // mesh.setUniformAt(i, 'rotationDelta', vector);
               mesh.setMatrixAt( i, dummy.matrix );
           }
+          scene.add(mesh);
+
+          console.log("hey")
+          world.starcloud = mesh
+
           return(mesh)
       }
       
-      function starcloud2(){
+      function starcloud(){
 
 
-        let count = Math.floor(21400)
+        // let count = Math.floor(21400)
+        let count = Math.floor(1)
 
         const vector = new THREE.Vector4();
         const positions = [];
@@ -1126,7 +1275,7 @@ let mouseY = Height/2
 
         const geometry2 = new THREE.InstancedBufferGeometry();
 
-        geometry2.instanceCount = count; // set so its initialized for dat.GUI, will be set in first draw otherwise
+        geometry2.instanceCount = count; 
         geometry2.setAttribute( 'position', new THREE.Float32BufferAttribute( positions, 3 ) );
         geometry2.setAttribute( 'offset', new THREE.InstancedBufferAttribute( new Float32Array( offsets ), 3 ) );
         geometry2.setAttribute( 'color', new THREE.InstancedBufferAttribute( new Float32Array( colors ), 4 ) );
@@ -1145,6 +1294,8 @@ let mouseY = Height/2
         transparent: false
 
         } ))
+
+
         geometry2.computeBoundingSphere()
         geometry2.boundingSphere.radius = Infinity
         window.gem = geometry2
@@ -1200,8 +1351,10 @@ let mouseY = Height/2
 
         window.THREE = THREE;
         window.fighter = fighter;
+        window.missile = missile;
         window.world = world;
         window.camera = camera;
+        window.renderer = renderer;
         window.scene = scene
 
         window.summonDrone = ()=>{world.entities.push(new fighter().initAI())}
@@ -1245,12 +1398,17 @@ let mouseY = Height/2
 
 
         world.entities.forEach((e)=>{
-          e.updatePos(1)
+          e.updatePos(2)
           // e.updatePos(delta*100)
         })
 
-        // world.starcloud.material.uniforms['sineTime'].value = Math.sin((Date.now()-startDate) * 0.0005);
-        // world.starcloud.material.uniforms['time'].value = (Date.now()-startDate)*0.005
+        world.otherEntities.forEach((e)=>{
+          e.updatePos(2)
+          // e.updatePos(delta*100)
+        })
+
+        world.starcloud.material.uniforms['sineTime'].value = Math.sin((Date.now()-startDate) * 0.0005);
+        world.starcloud.material.uniforms['time'].value = (Date.now()-startDate)*0.005
 
 
         if(downs.j){
@@ -1279,7 +1437,7 @@ let mouseY = Height/2
 
         ctx.clearRect(0,0,Width,Height)
 
-        cameraGUI(delta)
+        // cameraGUI(delta)
 
         if(world.cameraLocked){
 
@@ -1311,6 +1469,14 @@ let mouseY = Height/2
         })
         dbgdiv.innerText = dbgstr
 
+
+        for(let i = particles.length-1; i>-1; i--){
+          if(particles[i].update(delta) === 'del'){
+            particles.splice(i,1)
+          }
+        }
+
+
         debug();
 
         renderer.render(scene, camera);
@@ -1322,7 +1488,9 @@ let mouseY = Height/2
 
       window.scenario = (x)=>{
         summonDrone(); target(1); world.cameraDrone.AIpassive = x; world.entities[1].controls.roll = 1;world.cameraDrone.weapon = "railgun";
-world.cameraLocked = world.entities[1]
+        world.cameraLocked = world.entities[1]
+        world.entities[1].hunting = world.cameraDrone
+        world.entities[1].weapon = "railgun"
       }
 
       window.lockCamera = ()=>{
@@ -1369,8 +1537,9 @@ world.cameraLocked = world.entities[1]
 
 
       document.addEventListener("wheel",(e)=>{
+        e.preventDefault()
           camera.translateZ(e.deltaY)
-      })
+      },{passive:false})
 
 
 
