@@ -489,8 +489,9 @@ let mouseY = Height/2
 
       var weapons = {
         "hold fire":{"reload":Infinity},
-        "spray":{"reload":0,"scatter":0.1,"AIcone":0.2,"direction":(x)=>{return(x.dir)}},
+        "spray":{"reload":0,"scatter":0.05,"AIcone":0.2,"direction":(x)=>{return(x.dir)}},
         "railgun":{"reload":300,"scatter":0.02,"AIcone":0.1,"direction":(x)=>{return(x.targetVect.clone().normalize().negate())}},
+        "missile":{"reload":500,"AIcone":0.3,"scatter":0,"fireFunc":(x)=>{ world.otherEntities.push(new missile(x,x.hunting)); return(true) }}
       }
 
 
@@ -665,10 +666,11 @@ let mouseY = Height/2
           this.target = new THREE.Vector3()
           this.dir = new THREE.Vector3()
 
-          this.acceleration = 0.01
-          this.vel = parent.vel
+          this.acceleration = 0.1
+          this.vel = parent.vel + 2
 
-          this.passiveInitial = Date.now() + 300
+          this.passiveInitial = Date.now() + 500
+          this.fuse = Date.now() + 4000
 
 
           this.obj.add(new THREE.Mesh(missile.Geom,missile.Mat))
@@ -683,7 +685,7 @@ let mouseY = Height/2
           if(this.hunting){
             this.target = this.hunting.obj.position.clone()
           }
-          this.targetDir = this.target.clone().sub(this.obj.position).normalize()
+          this.targDist = this.obj.position.distanceTo(this.target)
           this.obj.getWorldDirection(this.dir)
 
 
@@ -702,8 +704,13 @@ let mouseY = Height/2
           // this.obj.quaternion.rotateTowards( targQuat, 0.4)
 
           if(frameTime > this.passiveInitial){
-            this.obj.quaternion.slerp(targetQuat, 0.05);
-          }
+            this.obj.quaternion.slerp(targetQuat, Math.min(this.vel/1500,0.1));
+            if(this.targDist < 300){
+              this.hunting.hit()
+              this.explode()
+              return("del")
+            }
+          }  
 
 
 
@@ -711,6 +718,10 @@ let mouseY = Height/2
 
           this.vel += this.acceleration * dt
 
+          if(frameTime > this.fuse){
+            this.explode()
+            return("del")
+          }
 
           if(!this.locked){
             this.obj.translateZ(-this.vel*dt)
@@ -718,7 +729,12 @@ let mouseY = Height/2
         }
 
 
+        explode(){
 
+          particles.push(new explosion(this.obj.position,3))
+
+          this.delete()
+        }
 
 
         delete(){
@@ -735,6 +751,8 @@ let mouseY = Height/2
           this.obj.position.set(0,0,0);
           this.dir = new THREE.Vector3(0,0,1)
           this.controlSpeed = 0.1
+
+          this.hp = 100
 
 
           this.shotColor = [0,1,1]
@@ -819,11 +837,18 @@ let mouseY = Height/2
           }
           this.reload = frameTime
 
+          if(wep.fireFunc){
+            if(wep.fireFunc(this)){return}
+          }
+
+
           let rand = new THREE.Vector3().randomDirection().multiplyScalar(wep.scatter)
 
           let vec3 = wep.direction(this)
 
           let dir = vec3.clone().add(rand).normalize()
+
+
 
           this.fireVec(dir)
         }
@@ -835,13 +860,10 @@ let mouseY = Height/2
 
             if(intersects.length>0){
               // intersects[0].object.setColorAt(intersects[0].instanceId,new THREE.Color( 0xffff00 ))
-              console.log("hit")
 
               particles.push(new explosion(intersects[0].point))
 
-              this.hunting.forces.roll += Math.random()*4-2
-              this.hunting.forces.pitch *= Math.random()
-              this.hunting.forces.yaw += Math.random()*2-1
+              this.hunting.hit()
             }
           }
           
@@ -849,8 +871,40 @@ let mouseY = Height/2
           new liney([...this.obj.position.toArray(),...this.obj.position.clone().add(dir.multiplyScalar(5000)).toArray()],this.shotColor)
         }
 
+        hit(dmg=10){
+          this.hp -= dmg
+          console.log("hit")
+          this.forces.roll += Math.random()*4-2
+          this.forces.pitch *= Math.random()
+          this.forces.yaw += Math.random()*2-1
+
+          if(this.hp < 0){
+            this.explode()
+          }
+        }
+
+
+        explode(){
+          if(this.dead){return}
+          this.dead = true
+          let mat = new THREE.MeshStandardMaterial( {
+            color: 0xff1111,
+            emissive: 0xff1111
+          } );
+          particles.push(new explosion(this.obj.position,6,2, mat, (x)=>{x.obj.material.emissiveIntensity = Math.random()*150}) )
+
+          for(let i = 0; i < 10; i++){
+            setTimeout(()=>{
+              particles.push(new explosion(new THREE.Vector3().randomDirection().multiplyScalar(Math.random()*600+200).add(this.obj.position),2.5+Math.random()))
+            },500+Math.random()*500)
+          }
+
+          this.delete()
+        }
+
 
         delete(){
+          this.updatePos = ()=>{}
           this.obj.clear()
           this.tail.removeFromParent()
         }
@@ -987,7 +1041,7 @@ let mouseY = Height/2
       this.obj.translateZ(-this.vel*dt/0.04)
     }
 
-
+    return(this.dead)
   }
 }
 
@@ -1106,10 +1160,7 @@ let mouseY = Height/2
             worldUnits: true
           } );
 
-          let explosionMat = new THREE.MeshStandardMaterial( {
-            color: 0xffffff,
-            emissive: 0xffff22
-          } );
+      
 
       class liney{
         constructor(arr,col=[0,1,1]){
@@ -1148,18 +1199,31 @@ let mouseY = Height/2
       }
 
       class explosion{
-        constructor(pos){
-          this.life = 1000
+        static Mat = new THREE.MeshStandardMaterial( {
+            color: 0xffffff,
+            emissive: 0xffff22
+          } );
+        constructor(pos,size=1,speed=1,mat=explosion.Mat,oud){
+
+          this.onUpdate = oud
+
+          this.life = 1000*size
+          this.speed = speed
           let geometry = new THREE.SphereGeometry(50,14,14);
 
-          this.obj = new THREE.Mesh(geometry,explosionMat)
+          this.obj = new THREE.Mesh(geometry,mat)
           this.obj.position.copy(pos)
           scene.add(this.obj)
 
         }
 
         update(dt){
-          this.life -= dt*300
+
+          if(this.onUpdate){
+            this.onUpdate(this)
+          }
+
+          this.life -= dt*300*this.speed
           let mr = this.life/1000
           this.obj.scale.set(mr,mr,mr)
           if(this.life <= 0 ){
@@ -1171,6 +1235,7 @@ let mouseY = Height/2
         delete(){
           scene.remove(this.obj)
           this.obj.geometry.dispose()
+          if(this.obj.material != explosion.Mat){this.obj.material.dispose()}
         }
       }
 
@@ -1351,6 +1416,8 @@ let mouseY = Height/2
 
         window.THREE = THREE;
         window.fighter = fighter;
+        window.particles = particles;
+        window.explosion = explosion;
         window.missile = missile;
         window.world = world;
         window.camera = camera;
@@ -1402,10 +1469,11 @@ let mouseY = Height/2
           // e.updatePos(delta*100)
         })
 
-        world.otherEntities.forEach((e)=>{
-          e.updatePos(2)
-          // e.updatePos(delta*100)
-        })
+        for(let i = world.otherEntities.length-1; i>-1; i--){
+          if(world.otherEntities[i].updatePos(2) === 'del'){
+            world.otherEntities.splice(i,1)
+          }
+        }
 
         world.starcloud.material.uniforms['sineTime'].value = Math.sin((Date.now()-startDate) * 0.0005);
         world.starcloud.material.uniforms['time'].value = (Date.now()-startDate)*0.005
