@@ -1530,6 +1530,19 @@ app.get("/temporal/:id",(req,res)=>{
 	res.send(responder.temporalStorage[responseId])
 })
 
+{
+	let test = 0
+app.get('/gify', (req, res) => {
+    // 1. Get the IP
+    const clientIp = req.socket.remoteAddress;
+    console.log(`Image viewed by: ${clientIp}`);
+    console.log(__dirname)
+    if(test > 1){res.sendFile(path.resolve(__dirname,'public','images','test3.gif'));;return;}
+    test += 1
+    res.sendFile(path.resolve(__dirname,'public','images','test2.gif'));
+});
+}
+
 
 
 app.post('/eval', (req, res) => {

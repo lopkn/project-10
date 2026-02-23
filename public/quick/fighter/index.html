@@ -506,6 +506,14 @@ let mouseY = Height/2
 
           x.AIdowns[" "]=true
 
+
+          // small updates do here
+
+          if(x.counter%20===0){
+            if(x.hunting?.dead){x.hunting = undefined;x.weapon = "hold fire"}
+          }
+
+
           if(x.hunting){
             x.target = x.hunting.obj.position.clone()
           }
@@ -905,8 +913,10 @@ let mouseY = Height/2
 
         delete(){
           this.updatePos = ()=>{}
+          this.updateAI = ()=>{}
           this.obj.clear()
           this.tail.removeFromParent()
+          this.targetBlock.removeFromParent()
         }
 
 
@@ -963,19 +973,22 @@ let mouseY = Height/2
           }
         }
 
+
+        updateAI(dt=1){
+            this.counter += 1
+            if(this.counter%this.castFrequency==0){
+              this.cast()
+            }
+            this.AIupdate(this,dt)
+        }
+
         updatePos(dt=1,debug=false){
 
           dt *= world.timeMult
 
           this.dir = this.obj.getWorldDirection(new THREE.Vector3()).negate()
 
-          if(this.AI){
-            this.counter += 1
-            if(this.counter%this.castFrequency==0){
-              this.cast()
-            }
-            this.AIupdate(this,dt)
-          }
+
 
             this.tail.setMatrixAt(this.tailCounter%this.tailLength,this.obj.matrix)
             this.tailCounter += 1
@@ -1041,7 +1054,7 @@ let mouseY = Height/2
       this.obj.translateZ(-this.vel*dt/0.04)
     }
 
-    return(this.dead)
+    if(this.dead){return("del")}
   }
 }
 
@@ -1305,8 +1318,8 @@ let mouseY = Height/2
       function starcloud(){
 
 
-        // let count = Math.floor(21400)
-        let count = Math.floor(1)
+        let count = Math.floor(21400)
+        // let count = Math.floor(1)
 
         const vector = new THREE.Vector4();
         const positions = [];
@@ -1464,10 +1477,21 @@ let mouseY = Height/2
 
 
 
-        world.entities.forEach((e)=>{
-          e.updatePos(2)
-          // e.updatePos(delta*100)
-        })
+        // world.entities.forEach((e)=>{
+        //   e.updatePos(2)
+        //   // e.updatePos(delta*100)
+        // })
+
+        for(let i = world.entities.length-1; i>-1; i--){
+          world.entities[i].updateAI(2)
+        }
+
+        for(let i = world.entities.length-1; i>-1; i--){
+          
+          if(world.entities[i].updatePos(2) === 'del'){
+            world.entities.splice(i,1)
+          } 
+        }
 
         for(let i = world.otherEntities.length-1; i>-1; i--){
           if(world.otherEntities[i].updatePos(2) === 'del'){
