@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+  <meta charset="UTF-8" />
+  <meta
+      name="viewport"
+      content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
+    />
+
+  <style>
+    html,
+      body {
+        margin: 0;
+        padding: 0;
+      }
+
+  </style>
+  <body>
+    <script type="importmap">
+        {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.178.0/build/three.module.js",
+            "three/examples/jsm/controls/OrbitControls.js":"https://unpkg.com/three@0.178.0/examples/jsm/controls/OrbitControls.js",
+            "three/addons/": "https://unpkg.com/three@0.178.0/examples/jsm/"
+
+        }
+    }
+    </script>
+
+
+    <script type="module">
+
+        import * as THREE from 'three';
+        import { Line2 } from 'https://unpkg.com/three@0.178.0/examples/jsm/lines/Line2.js';
+        import { LineGeometry } from 'https://unpkg.com/three@0.178.0/examples/jsm/lines/LineGeometry.js';
+        import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+
+
+        import { LineMaterial } from 'https://unpkg.com/three@0.178.0/examples/jsm/lines/LineMaterial.js';
+        import { LineSegments2 } from 'https://unpkg.com/three@0.178.0/examples/jsm/lines/LineSegments2.js';
+        import { LineSegmentsGeometry } from 'https://unpkg.com/three@0.178.0/examples/jsm/lines/LineSegmentsGeometry.js';
+
+
+      const scene = new THREE.Scene();
+
+
+      const camera = new THREE.PerspectiveCamera(
+        50,
+        window.innerWidth / window.innerHeight,
+        0.01,
+        999999
+      );
+      camera.position.set(0, 0, 0);
+
+    
+    
+
+
+
+      // RENDERER
+      const renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.shadowMap.enabled = true;
+      renderer.setPixelRatio(window.devicePixelRatio);
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setClearColor(0x110000);
+      window.addEventListener("resize", onWindowResize);
+      document.body.appendChild(renderer.domElement);
+
+      // CONTROLS
+      const controls = new OrbitControls(camera, renderer.domElement);
+      controls.minDistance = 2;
+      controls.maxDistance = 20;
+      controls.update();
+
+
+
+
+
+   
+
+      function line(arr){
+          let geometry = new LineGeometry();
+          geometry.setPositions( arr );
+          geometry.setColors([1,1,1,0,1,1]);
+          geometry.computeBoundingSphere()
+          geometry.boundingSphere.radius = Infinity
+
+
+          let matLine = new LineMaterial( {
+            color: 0xffffff,
+            linewidth: 5,
+            vertexColors: true,
+            worldUnits: true
+
+          } );
+          
+          let line = new Line2( geometry, matLine );
+          line.scale.set( 1, 1, 1 );
+          line.frustumCulled = false
+          scene.add( line );
+        }
+
+
+      function box(objectGeom, objectColor, objectPos) {
+        const objectMat = new THREE.MeshStandardMaterial({ color: objectColor });
+        const object = new THREE.Mesh(objectGeom, objectMat);
+        object.position.copy(objectPos);
+        scene.add(object);
+      }
+
+
+     window.rand = (x)=>{return(Math.random()*x)}
+
+      function init() {
+        scene.add(new THREE.AmbientLight(0xffffff, 1));
+        for(let i = 0; i< 100; i++){
+          line([rand(500)-250,rand(500)-250,rand(500)-250,rand(500)-250,rand(500)-250,rand(500)-250])
+          box(
+            new THREE.BoxGeometry(10, 125, 25),
+            "#ffffff",
+            new THREE.Vector3(rand(500)-250,rand(500)-250,rand(500)-250)
+          );
+        }
+      }
+
+
+
+      function onWindowResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      }
+
+
+      function animate() {
+        requestAnimationFrame(animate);
+        renderer.render(scene, camera);
+      }
+
+
+      
+
+      init();
+      animate();
+    </script>
+  </body>
+</html>
+
