@@ -101,7 +101,6 @@
 
 
 
-<!--
 
 
      <script id="vertexShader2" type="x-shader/x-vertex">
@@ -115,9 +114,14 @@
         uniform mat4 modelViewMatrix;
         uniform mat4 projectionMatrix;
 
-        uniform vec4 orientationStart;
-        uniform vec4 rotationDelta;
+        attribute vec3 position;
+        attribute vec3 offset;
+        attribute vec4 color;
+        attribute vec4 orientationStart;
+        attribute vec4 rotationDelta;
 
+        varying vec3 vPosition;
+        varying vec4 vColor;
 
 
         vec3 quat_transform(vec4 q, vec3 v) {
@@ -153,40 +157,47 @@
       void main(){
 
         float size = 5000.0;
-        //vPosition = offset;
+        vPosition = offset;
 
-        //vec4 orientation = normalize( rotateQuatByDelta( orientationStart, rotationDelta, time ));
-        //vPosition = vPosition + quat_transform(orientation,position);
-        //vec3 vcV = cross( orientation.xyz, vPosition );
+        vPosition.x += floor((cameraPos.x-vPosition.x)/size + 0.5)*size;
+        vPosition.y += floor((cameraPos.y-vPosition.y)/size + 0.5)*size;
+        vPosition.z += floor((cameraPos.z-vPosition.z)/size + 0.5)*size;
+
+        vec4 orientation = normalize( rotateQuatByDelta( orientationStart, rotationDelta, time ));
+        vPosition = vPosition + quat_transform(orientation,position);
+        vec3 vcV = cross( orientation.xyz, vPosition );
 
 
-        //vColor = color;
+        vColor = color;
 
-        gl_Position = vec4(position, 1.0)
+        gl_Position = projectionMatrix * modelViewMatrix * vec4( vPosition, 1.0 );
+        //gl_Position = vec4(position, 1.0);
 
       }
 
   </script>
 
-  <script id="fragmentShader2" type="x-shader/x-fragment">
+<!--   <script id="fragmentShader2" type="x-shader/x-fragment">
 
     precision highp float;
-    uniform float time;
+    uniform float sineTime;
 
     uniform vec3 vPosition;
-    //uniform vec4 vColor;
+    uniform vec4 vColor;
 
     void main() {
 
-      //vec4 color = vec4( vColor );
-      //color.r = time;
+      vec4 color = vec4( vColor );
+      color.r = sineTime;
 
       gl_FragColor = color;
 
     }
 
-  </script>
--->
+
+
+
+  </script> -->
 
      <script id="vertexShader3" type="x-shader/x-vertex">
 
@@ -1107,7 +1118,7 @@ let mouseY = Height/2
       //   for ( let i = 0; i < count; i ++ ) {
 
       //       // offsets
-      //       let [x,y,z] = [Math.random()*galazyBoxSize, Math.random()*galazyBoxSize, Math.random()*galazyBoxSize];
+      //       let [x,y,z] = [Math.random()*galaxyBoxSize, Math.random()*galaxyBoxSize, Math.random()*galaxyBoxSize];
       //       offsets.push(x,y,z);
       //       // colors
       //       colors.push( Math.random(), Math.random(), Math.random(),1);
@@ -1315,7 +1326,7 @@ let mouseY = Height/2
           return(mesh)
       }
       
-      function starcloud(){
+      function starcloud_orig(){
 
 
         let count = Math.floor(21400)
@@ -1326,7 +1337,6 @@ let mouseY = Height/2
         const offsets = [];
         const colors = [];
         const orientations = []; // wow! optimizable, later you can just rotate the positions at the start. right now the positions array is useless
-
         let size = 225/100
 
         positions.push( 0, -size*2, 0 );
@@ -1334,12 +1344,12 @@ let mouseY = Height/2
         positions.push( 0, size, size );
 
 
-        let galazyBoxSize = 5000
+        let galaxyBoxSize = 5000
 
         for ( let i = 0; i < count; i ++ ) {
 
             // offsets
-            let [x,y,z] = [Math.random()*galazyBoxSize, Math.random()*galazyBoxSize, Math.random()*galazyBoxSize];
+            let [x,y,z] = [Math.random()*galaxyBoxSize, Math.random()*galaxyBoxSize, Math.random()*galaxyBoxSize];
             offsets.push(x,y,z);
             // colors
             colors.push( Math.random(), Math.random(), Math.random(),1);
@@ -1384,6 +1394,149 @@ let mouseY = Height/2
       
 
 
+
+      function starcloud(){
+              let count = Math.floor(21400)
+
+        const vector = new THREE.Vector4();
+        const positions = [];
+        const offsets = [];
+        const colors = [];
+        const orientations = []; 
+        const rotationDeltas = [];
+
+        const v3 = new THREE.Vector3()
+
+        let size = 225/100
+
+        positions.push( 0, -size*2, 0 );
+        positions.push( 0, size*2, 0 );
+        positions.push( 0, size, size );
+        let galaxyBoxSize = 5000
+
+
+
+        for ( let i = 0; i < count; i ++ ) {
+
+            // offsets
+            let [x,y,z] = [Math.random()*galaxyBoxSize, Math.random()*galaxyBoxSize, Math.random()*galaxyBoxSize];
+            offsets.push(x,y,z);
+            // colors
+            colors.push( Math.random(), Math.random(), Math.random(),1);
+            // orientation
+            vector.set( Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1 );
+            vector.normalize();
+            orientations.push( vector.x, vector.y, vector.z, vector.w );
+
+            let theta = Math.PI*2
+
+            v3.randomDirection()
+            vector.set(
+              v3.x * Math.sin(theta/2),
+              v3.y * Math.sin(theta/2),
+              v3.z * Math.sin(theta/2),
+              Math.cos(theta/2)
+            )
+
+            // vector.set( Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1, 1 );
+            vector.normalize();
+            rotationDeltas.push( vector.x, vector.y, vector.z, vector.w );
+        }
+
+        // mesh.instanceMatrix.needsUpdate = true
+
+        const geometry2 = new THREE.InstancedBufferGeometry();
+
+        geometry2.instanceCount = count; 
+
+
+        geometry2.setAttribute( 'position', new THREE.Float32BufferAttribute( positions, 3 ) );
+        geometry2.setAttribute( 'offset', new THREE.InstancedBufferAttribute( new Float32Array( offsets ), 3 ) );
+        geometry2.setAttribute( 'color', new THREE.InstancedBufferAttribute( new Float32Array( colors ), 4 ) );
+        geometry2.setAttribute( 'orientationStart', new THREE.InstancedBufferAttribute( new Float32Array( orientations ), 4 ) );
+        geometry2.setAttribute( 'rotationDelta', new THREE.InstancedBufferAttribute( new Float32Array( rotationDeltas ), 4 ) );
+        let mesh2 = new THREE.Mesh(geometry2, new THREE.RawShaderMaterial( {
+          uniforms: {
+            'time': { value: 1.0 },
+            'sineTime': { value: 1.0 },
+            'cameraPos': { value: world.cameraDrone.obj.position },
+          },
+          vertexShader: document.getElementById( 'vertexShader2' ).textContent,
+          fragmentShader: document.getElementById( 'fragmentShader' ).textContent,
+          side: THREE.DoubleSide,
+          forceSinglePass: true,
+          transparent: false
+
+        }))
+        geometry2.computeBoundingSphere()
+        geometry2.boundingSphere.radius = Infinity
+        window.gem = geometry2
+        mesh2.name = "starcloud"
+        scene.add( mesh2 );
+        world.starcloud = mesh2
+      }
+
+
+
+
+function pointcloud(){
+  const numPoints = 21400;
+  const positions = new Float32Array(numPoints * 3);
+  const colors = new Float32Array(numPoints * 3);
+
+  // Fill positions and colors...
+  for(let i=0; i<numPoints; i++) {
+      positions[i*3] = Math.random() * 1000; // x
+      positions[i*3+1] = Math.random() * 1000; // y
+      positions[i*3+2] = Math.random() * 1000; // z
+      colors[i*3]=Math.random()
+      colors[i*3+1]=Math.random()
+      colors[i*3+2]=1
+      // ... y, z
+  }
+
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+  const material = new THREE.PointsMaterial({ size: 1, vertexColors: true });
+  const points = new THREE.Points(geometry, material);
+  scene.add(points);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
       var rand = (x)=>{
         if(x == undefined){return(Math.random())}
         if(x < 1){return(Math.random()<x)}
@@ -1419,6 +1572,7 @@ let mouseY = Height/2
 
         world.init()
         starcloud()
+        // pointcloud()
 
 
         world.cameraDrone.initAI()
