@@ -1474,7 +1474,7 @@ let mouseY = Height/2
         fpsLimiter = frameTime;
 
         const delta = clock.getDelta();
-
+        dbg("delta",Math.floor(delta*1000))
 
 
         // world.entities.forEach((e)=>{
@@ -1583,6 +1583,9 @@ let mouseY = Height/2
         world.cameraLocked = world.entities[1]
         world.entities[1].hunting = world.cameraDrone
         world.entities[1].weapon = "railgun"
+        world.entities[0].weapon = "missile"
+
+        world.entities[1].obj.rotateY(5)
       }
 
       window.lockCamera = ()=>{
@@ -1650,6 +1653,7 @@ let mouseY = Height/2
 
 
             if(e.key == "Enter"){
+              scenario()
             }
 
             if(e.key == "j"){

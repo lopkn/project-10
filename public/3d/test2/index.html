@@ -12,17 +12,8 @@
         margin: 0;
         padding: 0;
       }
-
-    #debug {
-      position: absolute;
-      top:0;
-      left:0;
-      color: #ff9999;
-    }
-
   </style>
   <body>
-
 
     <script id="vertexShader" type="x-shader/x-vertex">
       void main(){
@@ -35,7 +26,6 @@
 
   <script id="fragmentShader" type="x-shader/x-fragment">
 
-
     void main() {
 
 
@@ -44,11 +34,6 @@
     }
 
   </script>
-
-
-
-
-
     <script type="importmap">
         {
         "imports": {
@@ -79,66 +64,41 @@
 
         // RENDERER
         const renderer = new THREE.WebGLRenderer({ antialias: true, logarithmicDepthBuffer: true });
-        renderer.shadowMap.enabled = true;
         renderer.setPixelRatio(window.devicePixelRatio);
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setClearColor(0x103030);
-        window.addEventListener("resize", onWindowResize);
         document.body.appendChild(renderer.domElement);
 
 
 
 
 
-      function starcloud(count=5000,mov=()=>{},geometry = new THREE.BoxGeometry(1, 1, 1)){
+      function init(count=5000,mov=()=>{},geometry = new THREE.BoxGeometry(1, 1, 1)){
 
-            var materials = new THREE.RawShaderMaterial( {
-
-              uniforms: {
-                'test1': { value: 1.0 }
-              },
-              vertexShader: document.getElementById( 'vertexShader' ).textContent,
-              fragmentShader: document.getElementById( 'fragmentShader' ).textContent,
-              side: THREE.DoubleSide,
-              // forceSinglePass: true,
+          var material = new THREE.RawShaderMaterial({
+            uniforms: {
+              'test1': { value: 1.0 }
+            },
+            vertexShader: document.getElementById( 'vertexShader' ).textContent,
+            fragmentShader: document.getElementById( 'fragmentShader' ).textContent,
+            side: THREE.DoubleSide,
 
           } )
 
+          var material2 = new THREE.MeshStandardMaterial({color:0xffffff})
 
-          let mesh = new InstancedMesh2( geometry, materials, count );
-          mesh.instanceMatrix.setUsage( THREE.DynamicDrawUsage ); // will be updated every frame
-          mesh.initUniformsPerInstance({ fragment: { metalness: 'float'}});
+
+          let mesh = new InstancedMesh2( geometry, material2, {createEntities:true});
           mesh.addInstances(count);
-
-          let dummy = new THREE.Object3D()
-          for ( let i = 0; i < count; i ++) {
-              mov(dummy,i)
-              dummy.updateMatrix();
-              mesh.setUniformAt(i, 'metalness', 1.0);
-              mesh.setMatrixAt( i, dummy.matrix );
-          }
-
+          mesh.initUniformsPerInstance({ fragment: { metalness: 'float'}});
           scene.add(mesh);
-          console.log("hey")
-          return(mesh)
       }
       
  
 
 
 
-      function init() {
-        scene.add(new THREE.AmbientLight(0x888888, 1));
-        starcloud()
-      }
 
-
-      function onWindowResize() {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-
-        renderer.setSize(window.innerWidth, window.innerHeight);
-      }
 
       function animate() {
 
