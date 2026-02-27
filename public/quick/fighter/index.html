@@ -880,9 +880,11 @@ let mouseY = Height/2
             if(intersects.length>0){
               // intersects[0].object.setColorAt(intersects[0].instanceId,new THREE.Color( 0xffff00 ))
 
-              particles.push(new explosion(intersects[0].point))
 
-              this.hunting.hit()
+              if(intersects[0].point.distanceTo(this.obj.position) < 5000){
+                particles.push(new explosion(intersects[0].point))
+                this.hunting.hit()
+              }
             }
           }
           
