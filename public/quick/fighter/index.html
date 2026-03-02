@@ -29,16 +29,19 @@
 
 
      <script id="vertexShader" type="x-shader/x-vertex">
+
+      #include <common>
+      #include <logdepthbuf_pars_vertex>
         precision highp float;
 
         uniform float sineTime;
 
         uniform vec3 cameraPos;
 
-        uniform mat4 modelViewMatrix;
-        uniform mat4 projectionMatrix;
+        //uniform mat4 modelViewMatrix;
+        //uniform mat4 projectionMatrix;
 
-        attribute vec3 position;
+        //attribute vec3 position;
         attribute vec3 offset;
         attribute vec4 color;
         attribute vec4 orientation;
@@ -65,12 +68,17 @@
         vColor = color;
 
         gl_Position = projectionMatrix * modelViewMatrix * vec4( vPosition, 1.0 );
+      #include <logdepthbuf_vertex>
 
       }
 
   </script>
 
   <script id="fragmentShader" type="x-shader/x-fragment">
+
+
+    #include <common>
+    #include <logdepthbuf_pars_fragment>
 
     precision highp float;
     uniform float sineTime;
@@ -79,6 +87,7 @@
     varying vec4 vColor;
 
     void main() {
+    #include <logdepthbuf_fragment>
 
       vec4 color = vec4( vColor );
       color.r = sineTime;
@@ -727,6 +736,8 @@ let mouseY = Height/2
             if(this.targDist < 300){
               this.hunting.hit()
               this.explode()
+
+
               return("del")
             }
           }  
@@ -884,6 +895,7 @@ let mouseY = Height/2
               if(intersects[0].point.distanceTo(this.obj.position) < 5000){
                 particles.push(new explosion(intersects[0].point))
                 this.hunting.hit()
+                this.hunting.fireTrail(intersects[0].point)
               }
             }
           }
@@ -902,6 +914,80 @@ let mouseY = Height/2
           if(this.hp < 0){
             this.explode()
           }
+        }
+
+        fireTrail(pt){
+          let wtl = this.obj.worldToLocal(pt)
+          let count = Math.floor(200)
+
+        const vector = new THREE.Vector4();
+        const positions = [];
+        const offsets = [];
+        const colors = [];
+        const orientations = []; 
+        const rotationDeltas = [];
+
+        const v3 = new THREE.Vector3()
+
+        let size = 225/100
+
+        positions.push( 0, -size*2, 0 );
+        positions.push( 0, size*2, 0 );
+        positions.push( 0, size, size );
+
+
+
+        for ( let i = 0; i < count; i ++ ) {
+            // offsets
+
+
+            let [x,y,z] = [0,25,0];
+            offsets.push(x,y,z);
+            // colors
+            colors.push(Math.random(), Math.random(), 0,1);
+            // orientation
+            vector.set( Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1 );
+            vector.normalize();
+            orientations.push( vector.x, vector.y, vector.z, vector.w );
+            let theta = Math.PI*2
+            v3.randomDirection()
+            vector.set(
+              v3.x * Math.sin(theta/2),
+              v3.y * Math.sin(theta/2),
+              v3.z * Math.sin(theta/2),
+              Math.cos(theta/2)
+            )
+            vector.normalize();
+            rotationDeltas.push( vector.x, vector.y, vector.z, vector.w );
+
+            setTimeout(()=>{
+            geometry2.setDrawRange(0,Math.max(i,0))
+            },i*1000)
+        }
+        const geometry2 = new THREE.InstancedBufferGeometry();
+        geometry2.instanceCount = count; 
+        geometry2.setAttribute( 'position', new THREE.Float32BufferAttribute( positions, 3 ) );
+        geometry2.setAttribute( 'offset', new THREE.InstancedBufferAttribute( new Float32Array( offsets ), 3 ) );
+        geometry2.setAttribute( 'color', new THREE.InstancedBufferAttribute( new Float32Array( colors ), 4 ) );
+        geometry2.setAttribute( 'orientationStart', new THREE.InstancedBufferAttribute( new Float32Array( orientations ), 4 ) );
+        geometry2.setAttribute( 'rotationDelta', new THREE.InstancedBufferAttribute( new Float32Array( rotationDeltas ), 4 ) );
+        let mesh2 = new THREE.Mesh(geometry2, new THREE.RawShaderMaterial( {
+          uniforms: {
+            'time': { value: 1.0 },
+            'sineTime': { value: 1.0 },
+            'cameraPos': { value: world.cameraDrone.obj.position },
+          },
+          vertexShader: document.getElementById( 'vertexShader2' ).textContent,
+          fragmentShader: document.getElementById( 'fragmentShader' ).textContent,
+          side: THREE.DoubleSide,
+          forceSinglePass: true,
+          transparent: false
+        }))
+        geometry2.computeBoundingSphere()
+        geometry2.setDrawRange(0,0)
+        geometry2.boundingSphere.radius = Infinity
+        scene.add( mesh2 );
+        return(geometry2)
         }
 
 
@@ -1370,7 +1456,7 @@ let mouseY = Height/2
         geometry2.setAttribute( 'offset', new THREE.InstancedBufferAttribute( new Float32Array( offsets ), 3 ) );
         geometry2.setAttribute( 'color', new THREE.InstancedBufferAttribute( new Float32Array( colors ), 4 ) );
         geometry2.setAttribute( 'orientation', new THREE.InstancedBufferAttribute( new Float32Array( orientations ), 4 ) );
-        let mesh2 = new THREE.Mesh(geometry2, new THREE.RawShaderMaterial( {
+        let mesh2 = new THREE.Mesh(geometry2, new THREE.ShaderMaterial( {
 
         uniforms: {
           'time': { value: 1.0 },
@@ -1380,7 +1466,7 @@ let mouseY = Height/2
         vertexShader: document.getElementById( 'vertexShader' ).textContent,
         fragmentShader: document.getElementById( 'fragmentShader' ).textContent,
         side: THREE.DoubleSide,
-        forceSinglePass: true,
+        // forceSinglePass: true,
         transparent: false
 
         } ))
@@ -1573,7 +1659,7 @@ function pointcloud(){
         world.collidables.push(s)
 
         world.init()
-        starcloud()
+        starcloud_orig()
         // pointcloud()
 
 
