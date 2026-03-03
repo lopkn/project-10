@@ -30,9 +30,89 @@
 
      <script id="vertexShader" type="x-shader/x-vertex">
 
+      #define attribute in
+      #define varying out
+
+
+#define texture2D texture
+      precision highp float;
+      precision highp int;
+      precision highp sampler2D;
+      precision highp samplerCube;
+      precision highp sampler3D;
+      precision highp sampler2DArray;
+      precision highp sampler2DShadow;
+      precision highp samplerCubeShadow;
+      precision highp sampler2DArrayShadow;
+      precision highp isampler2D;
+      precision highp isampler3D;
+      precision highp isamplerCube;
+      precision highp isampler2DArray;
+      precision highp usampler2D;
+      precision highp usampler3D;
+      precision highp usamplerCube;
+      precision highp usampler2DArray;
+
+      #define HIGH_PRECISION
+      #define DOUBLE_SIDED
+
+
+      #define USE_LOGDEPTHBUF
+
+
+
+      uniform mat4 modelMatrix;
+uniform mat4 modelViewMatrix;
+uniform mat4 projectionMatrix;
+uniform mat4 viewMatrix;
+uniform mat3 normalMatrix;
+uniform vec3 cameraPosition;
+uniform bool isOrthographic;
+#ifdef USE_INSTANCING
+attribute mat4 instanceMatrix;
+#endif
+#ifdef USE_INSTANCING_COLOR
+attribute vec3 instanceColor;
+#endif
+#ifdef USE_INSTANCING_MORPH
+uniform sampler2D morphTexture;
+#endif
+attribute vec3 position;
+attribute vec3 normal;
+attribute vec2 uv;
+#ifdef USE_UV1
+attribute vec2 uv1;
+#endif
+#ifdef USE_UV2
+attribute vec2 uv2;
+#endif
+#ifdef USE_UV3
+attribute vec2 uv3;
+#endif
+#ifdef USE_TANGENT
+attribute vec4 tangent;
+#endif
+#if defined( USE_COLOR_ALPHA )
+attribute vec4 color;
+#elif defined( USE_COLOR )
+attribute vec3 color;
+#endif
+#ifdef USE_SKINNING
+attribute vec4 skinIndex;
+attribute vec4 skinWeight;
+#endif
+
+
+
+
+
+
+
+
+
+        precision highp float;
       #include <common>
       #include <logdepthbuf_pars_vertex>
-        precision highp float;
 
         uniform float sineTime;
 
@@ -40,14 +120,21 @@
 
         //uniform mat4 modelViewMatrix;
         //uniform mat4 projectionMatrix;
-
         //attribute vec3 position;
-        attribute vec3 offset;
-        attribute vec4 color;
-        attribute vec4 orientation;
 
-        varying vec3 vPosition;
-        varying vec4 vColor;
+
+        /*uniform mat4 viewMatrix;
+        uniform vec3 cameraPosition;
+        uniform mat3 normalMatrix;
+        attribute vec2 uv;
+        attribute vec3 normal;*/
+
+        in vec3 offset;
+        in vec4 color;
+        in vec4 orientation;
+
+        vec3 vPosition;
+        out vec4 vColor;
 
         vec3 quat_transform(vec4 q, vec3 v) {
           return v + 2.0 * cross(q.xyz, cross(q.xyz, v) + q.w * v);
@@ -77,14 +164,16 @@
   <script id="fragmentShader" type="x-shader/x-fragment">
 
 
+    precision highp float;
     #include <common>
     #include <logdepthbuf_pars_fragment>
 
-    precision highp float;
     uniform float sineTime;
 
-    varying vec3 vPosition;
-    varying vec4 vColor;
+    out vec4 vColor;
+
+    uniform mat4 viewMatrix;
+    uniform vec3 cameraPosition;
 
     void main() {
     #include <logdepthbuf_fragment>
@@ -92,7 +181,7 @@
       vec4 color = vec4( vColor );
       color.r = sineTime;
 
-      gl_FragColor = color;
+      vColor = color;
 
     }
 
@@ -1425,7 +1514,7 @@ let mouseY = Height/2
         const offsets = [];
         const colors = [];
         const orientations = []; // wow! optimizable, later you can just rotate the positions at the start. right now the positions array is useless
-        let size = 225/100
+        let size = 225 /100
 
         positions.push( 0, -size*2, 0 );
         positions.push( 0, size*2, 0 );
@@ -1456,13 +1545,16 @@ let mouseY = Height/2
         geometry2.setAttribute( 'offset', new THREE.InstancedBufferAttribute( new Float32Array( offsets ), 3 ) );
         geometry2.setAttribute( 'color', new THREE.InstancedBufferAttribute( new Float32Array( colors ), 4 ) );
         geometry2.setAttribute( 'orientation', new THREE.InstancedBufferAttribute( new Float32Array( orientations ), 4 ) );
-        let mesh2 = new THREE.Mesh(geometry2, new THREE.ShaderMaterial( {
+        
+
+        let mesh2 = new THREE.Mesh(geometry2, new THREE.RawShaderMaterial( {
 
         uniforms: {
           'time': { value: 1.0 },
           'sineTime': { value: 1.0 },
           'cameraPos': { value: world.cameraDrone.obj.position },
         },
+        glslVersion: THREE.GLSL3,
         vertexShader: document.getElementById( 'vertexShader' ).textContent,
         fragmentShader: document.getElementById( 'fragmentShader' ).textContent,
         side: THREE.DoubleSide,
@@ -1470,6 +1562,10 @@ let mouseY = Height/2
         transparent: false
 
         } ))
+
+        mesh2.material.onBeforeCompile = (s)=>{
+          // s.vertexShader = "#version 300 es\n"+s.vertexShader
+        }
 
 
         geometry2.computeBoundingSphere()
