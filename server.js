@@ -1517,6 +1517,8 @@ fetch('http://localhost:3000/temporal', {
 });
 */
 
+//GO TO /temporal/submit
+
 app.post('/temporal', (req, res) => {
     console.log('Got body2:', req.body);
 
