@@ -76,7 +76,6 @@
 
   <script id="fragmentShader" type="x-shader/x-fragment">
 
-
     precision highp float;
     #include <common>
     #include <logdepthbuf_pars_fragment>
@@ -100,6 +99,93 @@
 
 
 
+
+     <script id="vertexShader_orig" type="x-shader/x-vertex">
+
+        precision highp float;
+        precision highp int;
+
+        #define USE_LOGDEPTHBUF
+      #include <common>
+      #ifdef USE_LOGDEPTHBUF
+      out float vFragDepth;
+      out float vIsPerspective;
+      #endif
+
+        uniform float sineTime;
+
+        uniform vec3 cameraPos;
+
+        uniform mat4 modelViewMatrix;
+        uniform mat4 projectionMatrix;
+        in vec3 position;
+
+        in vec3 offset;
+        in vec4 color;
+        in vec4 orientation;
+
+        out vec3 vPosition;
+        out vec4 vColor;
+
+
+
+        vec3 quat_transform(vec4 q, vec3 v) {
+          return v + 2.0 * cross(q.xyz, cross(q.xyz, v) + q.w * v);
+        }
+
+      void main(){
+
+        float size = 5000.0;
+        vPosition = offset;
+        vPosition.x += floor((cameraPos.x-vPosition.x)/size + 0.5)*size;
+        vPosition.y += floor((cameraPos.y-vPosition.y)/size + 0.5)*size;
+        vPosition.z += floor((cameraPos.z-vPosition.z)/size + 0.5)*size;
+
+        vPosition = vPosition + quat_transform(orientation,position);
+        vec3 vcV = cross( orientation.xyz, vPosition );
+
+
+        vColor = color;
+
+        gl_Position = projectionMatrix * modelViewMatrix * vec4( vPosition, 1.0 );
+      #include <logdepthbuf_vertex>
+
+      }
+
+  </script>
+
+  <script id="fragmentShader_orig" type="x-shader/x-fragment">
+
+
+    precision highp float;
+    precision highp int;
+    #include <common>
+    #define USE_LOGDEPTHBUF
+    #ifdef USE_LOGDEPTHBUF
+      uniform float logDepthBufFC;
+      in float vFragDepth;
+      in float vIsPerspective;
+    #endif
+
+    uniform float sineTime;
+
+    in vec3 vPosition;
+    in vec4 vColor;
+
+    out vec4 FragColor;
+
+    void main() {
+    #include <logdepthbuf_fragment>
+
+      vec4 color = vec4( vColor );
+      color.r = sineTime;
+
+
+      FragColor = color;
+
+    }
+
+  </script>
 
 
 
@@ -1456,15 +1542,16 @@ let mouseY = Height/2
         geometry2.setAttribute( 'offset', new THREE.InstancedBufferAttribute( new Float32Array( offsets ), 3 ) );
         geometry2.setAttribute( 'color', new THREE.InstancedBufferAttribute( new Float32Array( colors ), 4 ) );
         geometry2.setAttribute( 'orientation', new THREE.InstancedBufferAttribute( new Float32Array( orientations ), 4 ) );
-        let mesh2 = new THREE.Mesh(geometry2, new THREE.ShaderMaterial( {
+        let mesh2 = new THREE.Mesh(geometry2, new THREE.RawShaderMaterial( {
 
         uniforms: {
           'time': { value: 1.0 },
           'sineTime': { value: 1.0 },
           'cameraPos': { value: world.cameraDrone.obj.position },
         },
-        vertexShader: document.getElementById( 'vertexShader' ).textContent,
-        fragmentShader: document.getElementById( 'fragmentShader' ).textContent,
+        glslVersion: THREE.GLSL3,
+        vertexShader: document.getElementById( 'vertexShader_orig' ).textContent,
+        fragmentShader: document.getElementById( 'fragmentShader_orig' ).textContent,
         side: THREE.DoubleSide,
         // forceSinglePass: true,
         transparent: false
