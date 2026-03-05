@@ -7,17 +7,28 @@ This is the central repository where I make random stuff
 Many fun projects are here, ran by one central server.js file
 
 visit the join link with suffixes for fun stuff:
+
+- https://game.lopkn.dev/quick/fighter 3d flight simulator with crazy good dynamic AI
+
 - https://game.lopkn.dev/quick/three 3d flight simulator
 
 - https://game.lopkn.dev/quick/FPV 3d FPV flight simulator
 
+- https://game.lopkn.dev/quick/lapple 3d grapple simulator with free camera spin & non-speed-limiting physics
+
+- https://game.lopkn.dev/quick/ball 2d multiplayer bonk but with HP instead of knockout
+
 - https://game.lopkn.dev/quick/particles 2d particle system universe (PWA)
+
+- https://game.lopkn.dev/quick/rec simple voice to text recorder without ads using your browser
 
 - https://game.lopkn.dev/quick/zchess 2d real time singleplayer chess (PWA)
 
 - https://game.lopkn.dev/quick/epcounter stare at random objects on your screen to pass time
 
-- https://game.lopkn.dev/quick/argAccel argument based online text channel
+- https://game.lopkn.dev/quick/epcut fruit ninja on steroids
+
+- https://game.lopkn.dev/quick/argAccel argument based online text channel (deprecated)
 
 - https://game.lopkn.dev/quick/flashing exploit your friends epilepsy to a whole new level
 
