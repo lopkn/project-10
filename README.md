@@ -8,6 +8,8 @@ Many fun projects are here, ran by one central server.js file
 
 visit the join link with suffixes for fun stuff:
 
+- https://game.lopkn.dev/quick/quantum game based multiplayer bell inequality violation demonstrator
+
 - https://game.lopkn.dev/quick/fighter 3d flight simulator with crazy good dynamic AI
 
 - https://game.lopkn.dev/quick/three 3d flight simulator
@@ -49,11 +51,11 @@ visit the join link with suffixes for fun stuff:
 
 
 
-other stuff that are served on the server but are still in this repo include:
+other stuff that are not served on the server but are still in this repo include:
 
 - **./CProject/keyReader/**  Is an X11 cpp script that has built in Anti-recoil for apex legends, transparent overlays, and kecords everything you type even when the window is not focused on. Also has many other functions
 
-- **./skript/** includers cpp script to help you win internet arguments. Every time you type "stupid" it will replace it with a stronger word combination that means practically the same thing
+- **./skript/** includes cpp script to help you win internet arguments. Every time you type "stupid" it will replace it with a stronger word combination that means practically the same thing
 
 
 
