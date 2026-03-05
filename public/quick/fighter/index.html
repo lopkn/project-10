@@ -200,6 +200,14 @@
 
      <script id="vertexShader2" type="x-shader/x-vertex">
         precision highp float;
+        precision highp int;
+
+        #define USE_LOGDEPTHBUF
+      #include <common>
+      #ifdef USE_LOGDEPTHBUF
+      out float vFragDepth;
+      out float vIsPerspective;
+      #endif
 
         uniform float sineTime;
         uniform float time;
@@ -208,15 +216,15 @@
 
         uniform mat4 modelViewMatrix;
         uniform mat4 projectionMatrix;
+        in vec3 position;
 
-        attribute vec3 position;
-        attribute vec3 offset;
-        attribute vec4 color;
-        attribute vec4 orientationStart;
-        attribute vec4 rotationDelta;
+        in vec3 offset;
+        in vec4 color;
+        in vec4 orientationStart;
+        in vec4 rotationDelta;
 
-        varying vec3 vPosition;
-        varying vec4 vColor;
+        out vec3 vPosition;
+        out vec4 vColor;
 
 
         vec3 quat_transform(vec4 q, vec3 v) {
@@ -266,7 +274,7 @@
         vColor = color;
 
         gl_Position = projectionMatrix * modelViewMatrix * vec4( vPosition, 1.0 );
-        //gl_Position = vec4(position, 1.0);
+        #include <logdepthbuf_vertex>
 
       }
 
@@ -1047,10 +1055,19 @@ let mouseY = Height/2
             rotationDeltas.push( vector.x, vector.y, vector.z, vector.w );
 
             setTimeout(()=>{
-            geometry2.setDrawRange(0,Math.max(i,0))
-            },i*1000)
+            // geometry2.setDrawRange(0,Math.max(i*3,0))
+              // let npt = this.obj.localToWorld(wtl)
+              console.log(wtl)
+
+              // geometry2.attributes.offset.setXYZ(i, npt.x, npt.y, npt.z)
+              geometry2.attributes.offset.needsUpdate = true
+
+              geometry2.instanceCount = i
+              if(i==count-1){console.log(done)}
+            },i*100)
         }
         const geometry2 = new THREE.InstancedBufferGeometry();
+            // geometry2.setIndex()
         geometry2.instanceCount = count; 
         geometry2.setAttribute( 'position', new THREE.Float32BufferAttribute( positions, 3 ) );
         geometry2.setAttribute( 'offset', new THREE.InstancedBufferAttribute( new Float32Array( offsets ), 3 ) );
@@ -1063,14 +1080,14 @@ let mouseY = Height/2
             'sineTime': { value: 1.0 },
             'cameraPos': { value: world.cameraDrone.obj.position },
           },
+          glslVersion: THREE.GLSL3,
           vertexShader: document.getElementById( 'vertexShader2' ).textContent,
-          fragmentShader: document.getElementById( 'fragmentShader' ).textContent,
+          fragmentShader: document.getElementById( 'fragmentShader_orig' ).textContent,
           side: THREE.DoubleSide,
           forceSinglePass: true,
           transparent: false
         }))
         geometry2.computeBoundingSphere()
-        geometry2.setDrawRange(0,0)
         geometry2.boundingSphere.radius = Infinity
         scene.add( mesh2 );
         return(geometry2)
