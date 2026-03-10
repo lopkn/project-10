@@ -551,6 +551,10 @@ let mouseY = Height/2
         return(Math.acos(chunky/allOver))
       }
 
+      function galacticAngle2(a,b){
+        return(a.angleTo(b))
+      }
+
 
       class AIPID{
 
@@ -572,7 +576,8 @@ let mouseY = Height/2
           this.drone.projPoint = this.drone.target.clone().sub(this.drone.rightVec.clone().multiplyScalar(dd))
           this.drone.projPitchAng = this.drone.dir.clone().angleTo(this.drone.projPoint.clone().sub(this.drone.obj.position))
 
-          this.drone.projPitchAng2 = galacticAngle(...this.drone.obj.position.toArray(),...this.drone.dir.toArray(),...this.drone.rightVec.toArray(),...this.drone.target.toArray())
+          // this.drone.projPitchAng2 = galacticAngle(...this.drone.obj.position.toArray(),...this.drone.dir.toArray(),...this.drone.rightVec.toArray(),...this.drone.target.toArray())
+          this.drone.projPitchAng2 = galacticAngle2(this.drone.rightVec,this.drone.targetDir)
 
 
           // let d = this.drone.controls.pitch*(x?1:-1)
@@ -1873,7 +1878,7 @@ function pointcloud(){
 
         ctx.clearRect(0,0,Width,Height)
 
-        // cameraGUI(delta)
+        cameraGUI(delta)
 
         if(world.cameraLocked){
 
