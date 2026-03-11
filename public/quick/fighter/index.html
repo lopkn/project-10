@@ -414,6 +414,7 @@ let mouseY = Height/2
 
 
 
+      var gameTime = 0;
 
 
 
@@ -629,7 +630,12 @@ let mouseY = Height/2
           // small updates do here
 
           if(x.counter%20===0){
-            if(x.hunting?.dead){x.hunting = undefined;x.weapon = "hold fire"}
+            if(x.hunting?.dead){
+              x.hunting = x.huntNext()
+              if(x.hunting == undefined){
+                x.weapon = "hold fire"
+              }
+            }
           }
 
 
@@ -796,8 +802,8 @@ let mouseY = Height/2
           this.acceleration = 0.1
           this.vel = parent.vel + 2
 
-          this.passiveInitial = Date.now() + 500
-          this.fuse = Date.now() + 4000
+          this.passiveInitial = gameTime + 500
+          this.fuse = gameTime + 4000
 
 
           this.obj.add(new THREE.Mesh(missile.Geom,missile.Mat))
@@ -805,6 +811,8 @@ let mouseY = Height/2
 
           scene.add(this.obj)
         }
+
+
 
         updatePos(dt){
 
@@ -895,7 +903,7 @@ let mouseY = Height/2
 
           this.downs = {}
 
-          this.reload = Date.now()
+          this.reload = gameTime
           this.weapon = "hold fire"
 
 
@@ -958,13 +966,24 @@ let mouseY = Height/2
             return(this)
         }
 
+
+
+        huntNext(){
+          for(let i = 0; i < entities.length; i++){
+            if(entities[i] !== this){
+              return(entities[i])
+            }
+          }
+          return(undefined)
+        }
+
         fire(){
           let wep = weapons[this.weapon]
 
-          if(frameTime-this.reload<wep.reload){
+          if(gameTime-this.reload<wep.reload){
             return
           }
-          this.reload = frameTime
+          this.reload = gameTime
 
           if(wep.fireFunc){
             if(wep.fireFunc(this)){return}
@@ -1813,6 +1832,7 @@ function pointcloud(){
 
       var fpsLimiter = Date.now()
 
+
       function animate() {
 
         frameTime = Date.now()
@@ -1823,6 +1843,7 @@ function pointcloud(){
         fpsLimiter = frameTime;
 
         const delta = clock.getDelta();
+        gameTime += delta * world.timeMult
         dbg("delta",Math.floor(delta*1000))
 
 
@@ -1878,7 +1899,7 @@ function pointcloud(){
 
         ctx.clearRect(0,0,Width,Height)
 
-        cameraGUI(delta)
+        // cameraGUI(delta)
 
         if(world.cameraLocked){
 
@@ -1938,6 +1959,8 @@ function pointcloud(){
         world.entities[indx].hunting = world.cameraDrone
         world.entities[indx].weapon = "railgun"
         world.entities[0].weapon = "laser storm"
+
+        world.entities[0].shotColor = [1,1,0]
 
         world.entities[indx].obj.rotateY(5)
       }
