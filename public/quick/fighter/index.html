@@ -789,7 +789,7 @@ let mouseY = Height/2
 
       class missile{
 
-        static Mat = new THREE.MeshStandardMaterial({ color: "#77ff77", emissive: 0x779977 })
+        static Mat = new THREE.MeshStandardMaterial({ color: "#77ff77", emissive: 0x77ff77 })
         static Geom = new THREE.BoxGeometry(5,5,25)
 
         constructor(parent,hunting){
@@ -838,7 +838,7 @@ let mouseY = Height/2
 
           // this.obj.quaternion.rotateTowards( targQuat, 0.4)
 
-          if(frameTime > this.passiveInitial){
+          if(gameTime > this.passiveInitial){
             this.obj.quaternion.slerp(targetQuat, Math.min(this.vel/1500,0.1));
             if(this.targDist < 300){
               this.hunting.hit()
@@ -855,7 +855,7 @@ let mouseY = Height/2
 
           this.vel += this.acceleration * dt
 
-          if(frameTime > this.fuse){
+          if(gameTime > this.fuse){
             this.explode()
             return("del")
           }
@@ -899,6 +899,13 @@ let mouseY = Height/2
           this.tail = instance(this.tailLength,undefined,new THREE.BoxGeometry(80, 0.1, 10))
           this.tail.frustumCulled = false
           this.raycaster = new THREE.Raycaster()
+
+
+          this.knockbackMultiplier = {
+            "roll":1,
+            "pitch":1,
+            "yaw":1
+          }
 
 
           this.downs = {}
@@ -969,8 +976,14 @@ let mouseY = Height/2
 
 
         huntNext(){
+          let entities = world.entities
           for(let i = 0; i < entities.length; i++){
-            if(entities[i] !== this){
+            if(entities[i].dead){continue}
+            if(this.team === undefined){
+              if(entities[i] !== this){
+                return(entities[i])
+              }
+            } else if(entities[i].team != this.team){
               return(entities[i])
             }
           }
@@ -1025,9 +1038,9 @@ let mouseY = Height/2
         hit(dmg=10){
           this.hp -= dmg
           console.log("hit")
-          this.forces.roll += Math.random()*4-2
+          this.forces.roll += Math.random()*4-2 * this.knockbackMultiplier.roll
           this.forces.pitch *= Math.random()
-          this.forces.yaw += Math.random()*2-1
+          this.forces.yaw += Math.random()*2-1 * this.knockbackMultiplier.yaw
 
           if(this.hp < 0){
             this.explode()
@@ -1279,7 +1292,6 @@ let mouseY = Height/2
       this.obj.translateZ(-this.vel*dt/0.04)
     }
 
-    if(this.dead){return("del")}
   }
 }
 
@@ -1843,8 +1855,9 @@ function pointcloud(){
         fpsLimiter = frameTime;
 
         const delta = clock.getDelta();
-        gameTime += delta * world.timeMult
+        gameTime += delta * world.timeMult * 1000
         dbg("delta",Math.floor(delta*1000))
+        dbg("game time",Math.floor(gameTime))
 
 
         // world.entities.forEach((e)=>{
@@ -1857,8 +1870,8 @@ function pointcloud(){
         }
 
         for(let i = world.entities.length-1; i>-1; i--){
-          
-          if(world.entities[i].updatePos(2) === 'del'){
+          world.entities[i].updatePos(2)
+          if(world.entities[i].dead){
             world.entities.splice(i,1)
           } 
         }
@@ -1957,8 +1970,8 @@ function pointcloud(){
         world.entities[indx].controls.roll = 1;
         world.cameraLocked = world.entities[indx]
         world.entities[indx].hunting = world.cameraDrone
-        world.entities[indx].weapon = "railgun"
-        world.entities[0].weapon = "laser storm"
+        world.entities[indx].weapon = Math.random()>0.5?"missile":"railgun"
+        world.entities[0].weapon = "missile storm"
 
         world.entities[0].shotColor = [1,1,0]
 
