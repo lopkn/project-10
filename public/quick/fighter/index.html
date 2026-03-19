@@ -803,7 +803,7 @@ let mouseY = Height/2
           this.vel = parent.vel + 2
 
           this.passiveInitial = gameTime + 500
-          this.fuse = gameTime + 4000
+          this.fuse = gameTime + 4000 + Math.random()*1000
 
 
           this.obj.add(new THREE.Mesh(missile.Geom,missile.Mat))
