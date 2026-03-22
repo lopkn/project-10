@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+
+<style>
+  html, body {
+    margin: 0;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  #container {
+    display: flex;
+    height: 100%;
+    width: 100%;
+  }
+
+  .pane {
+    flex: 1;
+    min-width: 150px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .editor {
+    flex: 1;
+  }
+
+  .divider {
+    width: 6px;
+    z-index: 5;
+    background: #ccc;
+    flex-shrink: 0;
+    cursor: col-resize;
+  }
+
+  #addBtn {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 100;
+  }
+</style>
+</head>
+
+<body>
+
+<button id="addBtn">+ Add Editor</button>
+
+<div id="container"></div>
+
+<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+
+<script>
+const container = document.getElementById('container');
+
+const options = {
+  theme: 'snow',
+  modules: {
+    toolbar: [
+      [{ 'font': [] }, { 'size': [] }],
+      ['bold', 'italic', 'underline'],
+      [{ 'color': [] }, { 'background': [] }],
+      [{ 'header': [1,2,3,false] }],
+      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+      ['clean']
+    ]
+  }
+};
+
+let editors = [];
+
+// --- create editor pane ---
+function createPane() {
+  const pane = document.createElement('div');
+  pane.className = 'pane';
+
+  const editorDiv = document.createElement('div');
+  editorDiv.className = 'editor';
+
+  pane.appendChild(editorDiv);
+  container.appendChild(pane);
+
+  const q = new Quill(editorDiv, options);
+  editors.push(q);
+}
+
+// --- create divider ---
+function createDivider() {
+  const divider = document.createElement('div');
+  divider.className = 'divider';
+
+  let dragging = false;
+  let leftPane, rightPane;
+
+  divider.addEventListener('mousedown', (e) => {
+    dragging = true;
+
+    leftPane = divider.previousElementSibling;
+    rightPane = divider.nextElementSibling;
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!dragging) return;
+
+    const dx = e.movementX;
+
+    const leftWidth = leftPane.offsetWidth + dx;
+    const rightWidth = rightPane.offsetWidth - dx;
+
+    if (leftWidth < 100 || rightWidth < 100) return;
+
+    leftPane.style.flex = 'none';
+    rightPane.style.flex = 'none';
+
+    leftPane.style.width = leftWidth + 'px';
+    rightPane.style.width = rightWidth + 'px';
+  });
+
+  document.addEventListener('mouseup', () => dragging = false);
+
+  container.appendChild(divider);
+}
+
+// --- add editor ---
+function addEditor() {
+  if (container.children.length > 0) {
+    createDivider();
+  }
+  createPane();
+}
+
+// initial editors
+addEditor();
+addEditor();
+
+// button
+document.getElementById('addBtn').onclick = addEditor;
+</script>
+
+</body>
+</html>
