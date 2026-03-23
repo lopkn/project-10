@@ -69,48 +69,6 @@ function setup() {
 }
 
 
-function intersects(a,b,c,d,p,q,r,s) {
-  var det, gamma, lambda;
-  det = (c - a) * (s - q) - (r - p) * (d - b);
-  if (det === 0) {
-    return false;
-  } else {
-    lambda = ((s - q) * (r - a) + (p - r) * (s - b)) / det;
-    gamma = ((b - d) * (r - a) + (c - a) * (s - b)) / det;
-    if ( (0 < lambda && lambda < 1) && (0 < gamma && gamma < 1) ) {
-      return([a+lambda*(c-a),b+lambda*(d-b)])
-    };
-    return(false)
-  }
-};
-
-class phys{
-  constructor(x=Width/2,y=Height/2){
-    this.x = x
-    this.y = y
-    this.vx = 0
-    this.vy = 0
-  }
-  update(me,dt=1){
-    this.x += this.vx*dt
-    this.y += this.vy*dt
-
-    // let d = dist(this.x,this.y,w2,h2)
-    // this.vx -= (this.x-w2)/(d+1)*0.5
-    // this.vy -= (this.y-h2)/(d+1)*0.5
-
-  }
-
-  draw(){
-    circle(this.x,this.y,10)
-  }
-}
-
-var rand = (x)=>{
-  if(x == undefined){return(Math.random())}
-  if(x < 1){return(Math.random()<x)}
-  return(Math.random()*x)
-}
 
 
 var particles = []
@@ -120,21 +78,68 @@ var bird ={
   vy:0
 }
 
-var dist = 0
+
+
+var distt = 0
+
+var pillars = []
+for(i = 0; i < 2000; i++){
+  pillars.push(Math.random()*Height)
+}
+
+var colliding =false
+var collisions =0
 
 function draw() {
   background(255,255,255);
 
   //draw bird
-  ellipse(150,bird.y,100,50)
-  bird.vy += 0.02
+  bird.vy += 0.04
   bird.y += bird.vy
+
+  distt += 2
+  noStroke()
+  
+  fill(0)
+  pillars.forEach((e,i)=>{
+    rect(i*400-distt+Width,0,120,height)
+  })
+  fill(255)
+  pillars.forEach((e,i)=>{
+    rect(i*400-distt+Width,e-60,120,120)
+  })
+  fill(0,255,0)
+  ellipse(150,bird.y,50,50)
+
+  var a = (distt-Width+50+130)%400
+  if(a < 160 && a > 0){
+    if(colliding == false){
+      colliding = true
+      collisions +=1 
+    }
+
+      if(Math.abs(bird.y-pillars[collisions-1]) < 36 && collisions > 0){
+
+      } else {
+        // background(255,0,0)
+        die()
+      }
+
+  } else {
+      colliding = false
+  }
 
 }
 
+function die(){
+  noLoop()
+}
+
 document.addEventListener("keydown",(e)=>{
-  if(e.key ==" "){
-    bird.vy = -1
+  if(e.key ==" " && !e.repeat){
+    bird.vy = min(0,bird.vy)
+    bird.vy -= 2
+    bird.vy = max(bird.vy,-4)
   }
 })
 </script>
