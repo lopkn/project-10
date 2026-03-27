@@ -85,9 +85,21 @@ class phys{
     this.life = 2000
     this.txt = motiv()
 
-    this.timely = 100 - Math.random()*80
+    this.timely = 100 - Math.random()*80 - (Math.random()>0.9?Math.random()*20:0)
     this.timeAdd = Math.random()*2*Math.PI
-    this.size = 26 + Math.random()*20
+    this.size = 16 + Math.random()*20 + (Math.random()>0.9?Math.random()*40:0)
+
+    this.func = ()=>{
+       return(Math.sin(this.life/this.timely+this.timeAdd)/1.8)
+    }
+
+    if(Math.random() > 0.9){
+      let left = Math.random()>0.5?1:-1
+      this.func = ()=>{
+       return(this.life/this.timely*left)
+      }
+      
+    }
 
   }
   update(me,dt=1){
@@ -112,9 +124,9 @@ class phys{
     textSize(this.size)
 
 
-    let a = Math.sin(this.life/this.timely+this.timeAdd)/1.8
+    let a = this.func()
 
-    fill(Math.random()*360,100,50)
+    fill(Math.random()*360,100,50,(2000-this.life)*2)
     translate(this.x,this.y)
     rotate(a)
     text(this.txt,0,0)
@@ -158,9 +170,9 @@ function draw() {
 
 // console.log(JSON.stringify(`You pitiful stupid autistic retarded fucking smelly crippled circus-running ugly castrated slutty rotten unintellegent low-class obese disturbingly impaired fraudulant homophilic repulsive drooling inbred syphilitic bald malformed turbid degenrate clown ass mumbling delusional delinquent hypocritical malignant nihilistic pathetic depraved protohominid woke liberal Facist`.split(" ")))
 
-let chancers = ["canverous","rancid","dumb","pitiful","stupid","autistic","retarded","fucking","smelly","crippled","circus-running","ugly","castrated","slutty","twunk","rotten","unintellegent","low-class","obese","disturbingly","impaired","fraudulant","homophilic","repulsive","drooling","inbred","syphilitic","bald","malformed","turbid","degenrate","mumbling","delusional","delinquent","hypocritical","malignant","nihilistic","pathetic","depraved","protohominid","woke","liberal","CHANCER"]
+let chancers = ["capitulant","congested","STD","turbid","disgusting","revolting","disappointment","failure","loser","druggie","addict","slow","unaesthetic","horrid","nasty","ill","depressed","assylum","cancerous","rancid","dumb","pitiful","stupid","autistic","retarded","fucking","smelly","crippled","circus-running","ugly","castrated","slutty","twunk","rotten","unintellegent","low-class","obese","disturbingly","impaired","fraudulant","homophilic","repulsive","drooling","inbred","syphilitic","bald","malformed","turbid","degenrate","mumbling","delusional","delinquent","hypocritical","malignant","nihilistic","pathetic","depraved","protohominid","woke","liberal","CHANCER"]
 
-let requisites = ["facist","mule","clown","donkey"]
+let requisites = ["facist","mule","clown","donkey","turd","reprobate"]
 
 function motiv(arr=chancers){
   let total = 0
