@@ -70,6 +70,11 @@ function setup() {
 }
 
 
+function ranArr(arr){
+  return(arr[Math.floor(Math.random()*arr.length)])
+}
+
+
 function intersects(a,b,c,d,p,q,r,s) {
   var det, gamma, lambda;
   det = (c - a) * (s - q) - (r - p) * (d - b);
