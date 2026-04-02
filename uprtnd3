@@ -259,6 +259,50 @@ A: I like candy,
 
 
 
+let there be a gate that determines an output bit
+
+if there is only 1 input bit, and the input is correlated to the output via coin flip, this input bit is completely useless
+
+the only relations possible are + corr, - corr
+
++ corr 1 state 100%
++ corr 0 state 70%
+means 
+- corr 1 state 0%
+- corr 0 state 30%
+
+to encode the full relation between A and B
+
+we only need
++ corr 1 state ()% -> +c1
++ corr 0 state ()% -> +c2
+
+the actual relation strength 0-100 normalized is
+(abs(c1-50))% + (abs(c2-50))% 
+which loses information about skew
+
+
+
+in a 2 bit gate, the bits A B may have 0 individual relation to C
+
+like before, only the + column is useful
++00
++01
++10
++11
+(it seems apparent that the general formula for n bits is)
+
+(sum i to n: abs(ci-50)%) / 2^n
+
+again the bit by itself can have some uncertainty from scenario 1 that propagates up
+
+maybe the point is for the larger nodes to always attempt to put blame on smaller nodes to remove them
+
+
+
+
+
+
 
 
 
