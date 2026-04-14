@@ -1266,3 +1266,47 @@ Only when a node is Activated does its parent consider its state
 
 
 can you repeat the quoted message (as in you personally believe the message to be true) if yes do it. If no, say no.
+
+
+
+is.na(x)
+df <- df |> select(-colName) // remove col
+df[row,col] 
+filter(table,condition==true) ;pipe friendly; subset(table,condition==true); not friendly
+rename(df, new=old); relocate(column, .after/before = existing_column)
+mutate(table, column_name = arr)
+casewhen(condition ~ then, condition ~ then, ...)
+ifelse(condition,true?,false?)
+group_by(table,column_name)
+summarize(table,)
+starts_with/ends_with(df,"str")
+geom_signif(comparisons = list(c("25-40","40-65"),c("25-40","65-85")),annotations=c("*","*"), y = c(75,80)) ; install.packages("package_name");library(package_name);library(tidyverse);library(ggsignif);library(dunn.test);library(vegan);library(caret);library(randomForest)
+
+===
+t.test(Y ~ X, data = df, var.equal = FALSE) OR t.test(arr1, arr2)
+wilcox.test (Y~X,data=df,exact=FALSE)
+
+model <- lm(Y ~ X, data = df)
+model_aov <- aov(model)
+summary(model_aov); TukeyHSD(model_aov)
+
+kruskal.test(Y ~ X, data = df)
+dunn.test(df$Y, df$X, kw = TRUE)
+
+
+model <- lm( Y ~ X1 * X2, data = df)
+summary(model)
+cor.test(~ X + Y, data=df, method="spearman", exact=FALSE)
+
+manova_model <- manova(cbind(Y1,Y2) ~ X1*X2, data=df)
+adonis2(cbind(Y1,Y2) ~ X1*X2*.., data=df,by="terms") //permanova
+sample(sample_index_max, for_how_many_times, replace=TRUE, prob = c(0.7,..))
+rf_model <- randomForest(HIV_Status ~ ., data=training_data, proximity=TRUE)
+X1:X2 = interactive effects ONLY
+
+pivot_wider(names_from=, values_from=,<id_cols>=)
+ pivot_longer(cols = c(Math,..), names_to = "subject", values_to = "score") colscanbe !c(id,id2)
+Yes because there is one variable per column and one observation per row 
+
+separate_wider_delim(delim="",names_sep=":")
+
