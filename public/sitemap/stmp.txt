@@ -1,7 +1,7 @@
-https://game.lopkn.dev/quick/epcounter
-https://game.lopkn.dev/quick/three
-https://game.lopkn.dev/quick/FPV
-https://game.lopkn.dev/quick/lapple
-https://game.lopkn.dev/quick/zchess
-https://game.lopkn.dev/shooter2
-https://game.lopkn.dev/quick/ball
+https://game.lopkn.dev/quick/epcounter/
+https://game.lopkn.dev/quick/three/
+https://game.lopkn.dev/quick/FPV/
+https://game.lopkn.dev/quick/lapple/
+https://game.lopkn.dev/quick/zchess/
+https://game.lopkn.dev/shooter2/
+https://game.lopkn.dev/quick/ball/
