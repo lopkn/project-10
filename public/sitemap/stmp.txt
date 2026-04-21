@@ -6,3 +6,4 @@ https://game.lopkn.dev/quick/zchess/
 https://game.lopkn.dev/shooter2/
 https://game.lopkn.dev/quick/ball/
 https://game.lopkn.dev/timer/
+https://game.lopkn.dev/quick/fighter/
