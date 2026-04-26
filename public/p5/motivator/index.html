@@ -83,7 +83,7 @@ class phys{
     this.vy = -0.5 - Math.random()
 
     this.life = 2000
-    this.txt = motiv()
+    this.txt = (()=>{let x=motiv(); while(x.includes("undefined")){x=motiv()}return(x)})()
 
     this.timely = 100 - Math.random()*80 - (Math.random()>0.9?Math.random()*20:0)
     this.timeAdd = Math.random()*2*Math.PI
