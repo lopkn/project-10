@@ -16,6 +16,15 @@
 
 	  <script src="../p5.js"></script>
 
+<style>body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* Prevents scrollbars */
+}
+canvas {
+  display: block; /* Removes bottom margin gap */
+} </style>
+
 <!--TONE JS STUFF-->
 
 <!-- 
@@ -81,6 +90,7 @@ var rand = (x)=>{
 
 let particles = []
 
+let seed = Math.random()
 
 class explosion{
   constructor(x,y,s){
@@ -101,7 +111,17 @@ class explosion{
   
   draw(){
     noStroke()
-    fill(0,this.colrand,255,(this.life)*2.55)
+    let alp;
+    if(seed>0.5){
+       alp = (this.life)**1.20327
+       if(seed>0.9){
+       alp = (this.life)**0.8 * 6.40531
+       }
+    }else{
+      alp = this.life*2.55
+    }
+
+    fill(0,this.colrand,255,alp)
     circle(this.x,this.y,((100-this.life))**0.5*this.size)
   }
 }
@@ -115,7 +135,7 @@ function draw() {
     if(e.update()=="del"){particles.splice(i,1);continue;}
     e.draw()
   }
-  if(Math.random()>1-Width*Height/1600000){
+  if(Math.random()>1-Width*Height/1600000 && Date.now()%120000 > 8000){
     particles.push(new explosion(rand(Width),rand(Height),rand(400/10)))
   }
 }
