@@ -15,6 +15,7 @@
   <div draggable="false" ondragstart="return false">
 
 	  <script src="../p5.js"></script>
+
 <style>body {
   margin: 0;
   padding: 0;
@@ -68,55 +69,8 @@ canvas {
   var w2 = Width/2
   var h2 = Height/2
 
-
 function setup() {
-  createCanvas(window.innerWidth, window.innerHeight);
-  frameRate(60)
-  colorMode(HSL,100,100,100,255)
-
-}
-
-
-function ranArr(arr){
-  return(arr[Math.floor(Math.random()*arr.length)])
-}
-
-
-function intersects(a,b,c,d,p,q,r,s) {
-  var det, gamma, lambda;
-  det = (c - a) * (s - q) - (r - p) * (d - b);
-  if (det === 0) {
-    return false;
-  } else {
-    lambda = ((s - q) * (r - a) + (p - r) * (s - b)) / det;
-    gamma = ((b - d) * (r - a) + (c - a) * (s - b)) / det;
-    if ( (0 < lambda && lambda < 1) && (0 < gamma && gamma < 1) ) {
-      return([a+lambda*(c-a),b+lambda*(d-b)])
-    };
-    return(false)
-  }
-};
-
-class phys{
-  constructor(x=Width/2,y=Height/2){
-    this.x = x
-    this.y = y
-    this.vx = 0
-    this.vy = 0
-  }
-  update(me,dt=1){
-    this.x += this.vx*dt
-    this.y += this.vy*dt
-
-    // let d = dist(this.x,this.y,w2,h2)
-    // this.vx -= (this.x-w2)/(d+1)*0.5
-    // this.vy -= (this.y-h2)/(d+1)*0.5
-
-  }
-
-  draw(){
-    circle(this.x,this.y,10)
-  }
+  createCanvas(Width, Height);
 }
 
 var rand = (x)=>{
@@ -125,21 +79,69 @@ var rand = (x)=>{
   return(Math.random()*x)
 }
 
+class liney{
+  constructor(x,y){
+    this.x = x; this.y = y;
+    this.vx = this.vy = 0;
+    this.life = 100+rand(2000);
+    this.tail = []
+    this.tailLength = 200
 
-var particles = []
-
-
-function draw() {
-  background(120,0,0);
-
-  for(let i = particles.length-1; i>-1; i--){
-    if(particles[i].update(particles[i])=="delete"){
-      particles.splice(i,1)
-      continue;
-    }
-    particles[i].draw(particles[i])
+    this.size = rand(3)+1
   }
   
+  update(){
+    if(this.life <= 0){
+      this.tail.splice(0,1)
+      if(this.tail.length==0){
+        return("del")
+      }
+      return;
+    }
+
+    this.life -= 1
+    
+    //make tail
+    
+    this.tail.push([this.x,this.y])
+    
+    //update phys
+    this.x += this.vx
+    this.y += this.vy
+    
+    this.vx += Math.random()-0.5
+    this.vy += Math.random()-0.5
+    
+    while(this.tail.length>this.tailLength){
+      this.tail.splice(0,1)
+    }
+  }
+  
+  draw(){
+    strokeWeight(this.size)
+    for(let i = this.tail.length-2; i > -1; i--){
+      let e = this.tail[i]
+      let t = this.tail[i+1]
+
+      let l = (i+1)/this.tail.length*255
+      stroke(0,l,l)
+      line(e[0],e[1],t[0],t[1])
+    }
+  }
+}
+
+let particles = []
+
+function draw() {
+    background(220);
+  for(let i = particles.length-1; i > -1; i--){
+    let e = particles[i]
+    if(e.update()=="del"){particles.splice(i,1);continue;}
+    e.draw()
+  }
+  if(Math.random()>0.9){
+    particles.push(new liney(rand(Width),rand(Height)))
+  }
 }
 </script>
 
