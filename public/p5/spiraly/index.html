@@ -160,7 +160,7 @@ function draw() {
     if(e.update()=="del"){particles.splice(i,1);continue;}
     e.draw()
   }
-  if(Math.random()>0.96){
+  if(Math.random()>0.96&& Date.now()%120000 > 13000){
     particles.push(new liney(rand(Width),Height))
   }
 }
