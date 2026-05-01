@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="icon" href="../../images/psim2.png">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable = no, maximum-scale=1, minimum-scale=1">
+  <title>LTPT</title>
+
+</head>
+<body style="padding:0;margin:0;background-color: black;">
+  
+<!--     <script src="/socket.io/socket.io.js"></script>
+ <script src="https://cdn.socket.io/3.1.3/socket.io.min.js" integrity="sha384-cPwlPLvBTa3sKAgddT6krw0cJat7egBga3DJepJyrLl4Q9/5WLra3rrnMcyTyOnh" crossorigin="anonymous"></script> -->
+
+  <div draggable="false" ondragstart="return false">
+
+	  <script src="../p5.js"></script>
+<style>body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* Prevents scrollbars */
+}
+canvas {
+  display: block; /* Removes bottom margin gap */
+} </style>
+<!--TONE JS STUFF-->
+
+<!-- 
+
+    <button id = "wow" top="0px" left = "0px" style = "z-index:20; color: rgba(0,150,255,0.2);background-color: transparent;font-size: 50px;width:100%;height:100%;border-radius: 1px;position:absolute" onclick = "
+      // window.navigator.vibrate(200)
+      const player = new Tone.Player('./start.wav').toDestination();
+    Tone.loaded().then(() => {
+      player.start();
+      player.stop()
+    });
+      
+
+      console.log('tone start');
+
+      soundInit()
+      document.getElementById('wow').remove()
+    ">click to start..</button>
+    <script src="tone.js"></script> 
+
+-->
+<!--TONE JS STUFF-->
+
+<!-- <script src="../../library/gpu-browser.min.js"></script> -->
+
+<script>
+
+
+
+
+  /// gpu things
+  // const gpu = new window.GPU.GPU()
+  //   const kernel = gpu.createKernel(function(x,y) {
+  //     return x[this.thread.x];
+  //   }, {output: {x: 100}});
+
+  //console.log(kernel([1,2,100]))
+  /// gpu things
+
+  var Width = window.innerWidth
+  var Height = window.innerHeight
+  var scrMax = Math.max(Width,Height)
+  var w2 = Width/2
+  var h2 = Height/2
+
+
+function setup() {
+  createCanvas(window.innerWidth, window.innerHeight);
+
+}
+
+let size = Math.min(Math.floor(Width/7),Math.floor(Height/5))
+
+
+let dict = {}
+  for(let i = 0; i < 7; i++){
+    for(let j = 0; j < 5; j++){
+      dict[i+","+j] = Math.random()>0.5
+    }
+  }
+
+let md = 0
+
+function draw() {
+  stroke(0,120,40)
+  background(220);
+    for(let i = 0; i < 7; i++){
+    for(let j = 0; j < 5; j++){
+      fill(dict[i+","+j]?255:0)
+      rect(i*size,j*size,size,size)
+    }
+  }
+  if(mouseIsPressed){
+    if(md == 0){md = 1;
+      let x = Math.floor(mouseX/size)           
+      let y = Math.floor(mouseY/size)     
+      
+      let arr = [[x,y],[x+1,y],[x-1,y],[x,y+1],[x,y-1]]
+      arr.forEach((e)=>{
+        if(dict[e[0]+","+e[1]] !== undefined){
+          dict[e[0]+","+e[1]] = !dict[e[0]+","+e[1]]
+        }
+      })
+      
+    }
+  } else {md = 0}
+}
+</script>
+
+<!--script src="sketch.js"></script-->
+</body>
+</html>
