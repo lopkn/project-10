@@ -69,6 +69,18 @@ canvas {
   var h2 = Height/2
 
 
+  var hist = []
+
+  function solve(){
+    let d = {}
+    hist.forEach((e)=>{
+      if(d[e]==undefined){d[e]=false}
+        d[e] = !d[e]
+    })
+    return(d)
+  }
+
+
 function setup() {
   createCanvas(window.innerWidth, window.innerHeight);
 
@@ -83,6 +95,14 @@ let dict = {}
       dict[i+","+j] = Math.random()>0.5
     }
   }
+
+function clearBoard(){
+    for(let i = 0; i < 7; i++){
+    for(let j = 0; j < 5; j++){
+      dict[i+","+j] = 0
+    }
+  }
+}
 
 let md = 0
 
@@ -101,6 +121,9 @@ function draw() {
       let y = Math.floor(mouseY/size)     
       
       let arr = [[x,y],[x+1,y],[x-1,y],[x,y+1],[x,y-1]]
+      if(dict[x+","+y]===undefined){return} else {
+        hist.push(x+","+y)
+      }
       arr.forEach((e)=>{
         if(dict[e[0]+","+e[1]] !== undefined){
           dict[e[0]+","+e[1]] = !dict[e[0]+","+e[1]]
