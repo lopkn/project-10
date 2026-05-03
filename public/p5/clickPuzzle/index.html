@@ -133,6 +133,16 @@ function draw() {
     }
   } else {md = 0}
 }
+
+function cli(x,y){    
+  dict[x+","+y]=true
+}
+
+clearBoard()
+cli(0,0)
+cli(0,2)
+cli(0,4)
+
 </script>
 
 <!--script src="sketch.js"></script-->
