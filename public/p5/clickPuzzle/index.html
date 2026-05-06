@@ -90,15 +90,20 @@ let size = Math.min(Math.floor(Width/7),Math.floor(Height/5))
 
 
 let dict = {}
-  for(let i = 0; i < 7; i++){
-    for(let j = 0; j < 5; j++){
+let game = [5,7]
+function init(){
+  x = game[0]
+  y = game[1]
+  for(let i = 0; i < x; i++){
+    for(let j = 0; j < y; j++){
       dict[i+","+j] = Math.random()>0.5
     }
   }
+}
 
 function clearBoard(){
-    for(let i = 0; i < 7; i++){
-    for(let j = 0; j < 5; j++){
+    for(let i = 0; i < game[0]; i++){
+    for(let j = 0; j < game[1]; j++){
       dict[i+","+j] = 0
     }
   }
@@ -142,6 +147,12 @@ clearBoard()
 cli(0,0)
 cli(0,2)
 cli(0,4)
+
+document.addEventListener("keydown",(e)=>{
+  if(e.key=="Enter"){
+    init()
+  }
+})
 
 </script>
 
