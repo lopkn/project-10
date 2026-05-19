@@ -1597,11 +1597,11 @@ var mouseTrail = [[0,0,"white"],[0,0,"white"],[0,0,"white"]]
 onmousemove = (e)=>{mouseX = (e.clientX); mouseY = (e.clientY);
 
 	let dd = distance(0,0,e.movementX,e.movementY)
-if(Math.random()>1-dd*0.005*events.varbs.conjureStrength){
-		let a = new liner(mouseX+Math.random()-0.5,mouseY+Math.random()-0.5,Math.floor(Math.random()*1/*turned from 3 to 2 ,march 2025*/),4+Math.floor(Math.random()*2))
-		a.following = true
-		parr.push(a)
-	}
+// if(Math.random()>1-dd*0.005*events.varbs.conjureStrength){
+// 		let a = new liner(mouseX+Math.random()-0.5,mouseY+Math.random()-0.5,Math.floor(Math.random()*1/*turned from 3 to 2 ,march 2025*/),4+Math.floor(Math.random()*2))
+// 		a.following = true
+// 		parr.push(a)
+// 	}
 }
 
 document.addEventListener("mousedown",()=>{

@@ -2,6 +2,9 @@
 let Width = window.innerWidth
 let Height = window.innerHeight
 
+let WidthM = Width/2
+let HeightM = Height/2
+
 // let myCanvas = document.getElementById("myCanvas")
 
 //   myCanvas.width = Math.floor(Width)
@@ -16,7 +19,10 @@ let Height = window.innerHeight
 
 var rand = (x)=>{
   if(x == undefined){return(Math.random())}
-  if(x < 1){return(Math.random()<x)}
+  if(x < 1){
+    if(x < 0){return(Math.random()*x-x/2)}
+    return(Math.random()<x)
+  }
   return(Math.random()*x)
 }
 
@@ -44,7 +50,7 @@ class LCanvas{ //lopkns template canvas
     this.canvas.style.position = "absolute"
     this.canvas.style.top = "0px"
     this.canvas.style.left = "0px"
-    this.canvas.zIndex = "1500"
+    this.canvas.zIndex = "1"
     this.canvas.width = w
     this.canvas.height = h
     this.ctx.fillStyle = "black"
@@ -87,8 +93,9 @@ var frameFuncs = []
 function mainLoop(time){
   let dt= (time-gameWorld.lastTime)
   gameWorld.lastTime = time
+  let date = Date.now()
   frameFuncs.forEach((e)=>{
-    e(time,dt)
+    e(time,dt,date)
   })
   requestAnimationFrame(mainLoop)
 }
@@ -180,14 +187,18 @@ function normalRandom(mean, stderr) {
 
 
 
-document.addEventListener("keydown",(e)=>{
-})
 
 can = new LCanvas()
 can.clear()
 can.fitScreenSize()
 can.canvas.style.pointerEvents = "none"
 
+
+let overlayCan = new LCanvas()
+overlayCan.clear()
+overlayCan.fitScreenSize()
+overlayCan.canvas.style.pointerEvents = "none"
+overlayCan.canvas.style.zIndex = 2
 
 
 
@@ -298,18 +309,17 @@ function point_to_line_distance(x, y, x1, y1, x2, y2) {
     return Math.sqrt(distX * distX + distY * distY);
 }
 
-function line_to_line_collision_pt(x1,y1,x2,y2,x3,y3,x4,y4){
-
-    var det, gamma, lambda;
-  det = (x2 - x1) * (y4 - y3) - (x4 - x3) * (y2 - y1);
+function line_to_line_collision_pt(a,b,c,d,p,q,r,s) {
+  var det, gamma, lambda;
+  det = (c - a) * (s - q) - (r - p) * (d - b);
   if (det === 0) {
     return false;
   } else {
-    lambda = ((y4 - y3) * (x3 - x1) + (x4 - x3) * (y3 - y1)) / det;
-    gamma = ((y2 - y1) * (x3 - x1) + (x2 - x1) * (y3 - y1)) / det;
+    lambda = ((s - q) * (r - a) + (p - r) * (s - b)) / det;
+    gamma = ((b - d) * (r - a) + (c - a) * (s - b)) / det;
     return (0 < lambda && lambda < 1) && (0 < gamma && gamma < 1);
   }
-}
+};
 
 
 
@@ -335,11 +345,11 @@ function Lrotate(x,y,d){
 
 
 class ball{
-  constructor(x,y,r,ctx){
+  constructor(x,y,r,ctx,AI=true){
     this.x = x
     this.y = y
-    this.ax = 0
-    this.ay = 0
+    // this.ax = 0
+    // this.ay = 0
 
     this.mass = 1
 
@@ -348,11 +358,51 @@ class ball{
     this.vx = 0
     this.vy = 0
 
-    this.color = "white"
+    this.color = "rgb(170,40,40)"
     this.ctx = ctx
 
     this.name = "dummy" 
     this.updateFuncs = []
+
+    this.tags = new Set()
+    
+    this.hp = 100
+    this.maxHp = 100
+    this.hpRegen = 0.002
+
+    this.lastCollideTime = 0
+    this.collideTime = 0
+
+    this.collisionInitiative = 1500
+
+    this.wallBreakMultiplier = 0.1
+
+    this.energy = 100
+    this.maxEnergy = 100
+    this.energyRegen = 0.01
+
+    this.lastJumpTime = 0
+    if(AI){
+      this.AIinit()
+    }
+
+  }
+
+  jump(vx,vy,mag){
+    if(this.tags.has("isDead")){return}
+    let actualForce = distance(vx,vy)*mag
+    let spentEnergy = actualForce*30
+    this.energy -= spentEnergy
+    if(this.energy<0){
+
+      let energyPenalty = (spentEnergy+this.energy)/spentEnergy
+      mag*=energyPenalty
+      this.energy = 0
+
+    }
+
+    this.force(vx,vy,mag)
+    this.lastJumpTime = gameWorld.lastTime
   }
 
   force(x,y,mag){
@@ -364,12 +414,95 @@ class ball{
     return(distance(this.vx,this.vy))
   }
 
+  damage(dmg){
+
+    let lastCollideTime = gameWorld.lastTime==this.collideTime?this.lastCollideTime:this.collideTime
+
+    let damagePercentage = Math.min((gameWorld.lastTime-lastCollideTime)/this.collisionInitiative,1)
+
+    this.hp -= dmg * damagePercentage
+
+
+
+    if(this.hp <= 0){
+      this.die()
+      return(true)
+    }
+    return(false)
+  }
+
+  die(){
+    this.tags.add("isDead")
+    this.tags.add("noCollideWall")
+    this.tags.add("noCollideBall")
+    this.deathTime = Date.now()
+    this.color = "gray"
+  }
+
+  collided(time,by){
+    if(time != this.collideTime){
+      this.lastCollideTime = this.collideTime;
+      this.collideTime = time
+    }
+  }
+
+  AIupdate(dt){
+
+    if(gameWorld.lastTime - this.AIlastUpdate < 1000){
+      return;
+    }
+
+
+
+    this.AIlastUpdate = gameWorld.lastTime
+    let player = entityList.player
+    if(this.energy > 50 && gameWorld.lastTime - this.lastJumpTime > this.AInextUpdateTime){
+      // jump towards player
+      this.AInextUpdateTime = rand(1000)+1000
+
+      let los = true;
+      entityList.walls.forEach((w)=>{
+        let not_blocked = line_to_line_collision_pt(this.x,this.y,player.x,player.y,w.x,w.y,w.x2,w.y2)
+        if(not_blocked!==false){los=false}
+      })
+
+      if(los){
+        this.jump(player.x-this.x,player.y-this.y,0.003)
+      }
+    }
+  }
+
+  AIinit(){
+    this.AIlastUpdate = 0
+    this.AInextUpdateTime = 1000
+    this.tags.add("AI")
+  }
+
+
   update(dt){
+
+
+    if(this.tags.has("AI") && !this.tags.has("isDead")){
+      this.AIupdate(dt)
+    }
+
+    this.energy += this.energyRegen*dt
+    if(this.energy > this.maxEnergy){
+      this.energy = this.maxEnergy
+    }
+
+    //natural hp regen
+    if(gameWorld.lastTime - this.collideTime > 2000){ // 2 seconds after battle      
+      this.hp += this.hpRegen*dt
+      if(this.hp > this.maxHp){
+        this.hp = this.maxHp
+    }
+    }
 
     this.vy += gameWorld.gravity*dt
 
-    this.vx += this.ax*dt
-    this.vy += this.ay*dt
+    // this.vx += this.ax*dt
+    // this.vy += this.ay*dt
 
 
     let lastX = this.x
@@ -379,100 +512,63 @@ class ball{
     this.y += this.vy*dt
 
     let speed = this.speed()
-    this.vx *= (1-gameWorld.airFriction*speed)
-    this.vy *= (1-gameWorld.airFriction*speed)
+    this.vx *= (1-gameWorld.airFriction*speed)**dt
+    this.vy *= (1-gameWorld.airFriction*speed)**dt
+
+    this.wallBreakMultiplier -= (this.wallBreakMultiplier-0.1)*0.0009*dt
 
     //check collisions
-    entityList.walls.forEach((w)=>{
-      if(check_collision_ball_line(this.x,this.y,this.r,w.x,w.y,w.x2,w.y2)){
+    if(!this.tags.has("noCollideWall")){
 
-        let closest = point_on_line(this.x,this.y,w.x,w.y,w.x2,w.y2)
-        let dist = distance(this.x,this.y,closest.x,closest.y)
-        let fellback = false
+      entityList.walls.forEach((w)=>{
+        if(check_collision_ball_line(this.x,this.y,this.r,w.x,w.y,w.x2,w.y2)){
 
-        let normalizedDirectionToWall;
-        if(dist!==0){
-          normalizedDirectionToWall = {x:(closest.x-this.x)/dist,y:(closest.y-this.y)/dist}
-        } else {
-          // fallback to last position if ball center is exactly on the wall, not perfect but should work in most cases and prevents NaN errors
-          fellback = true;
-          dist = distance(lastX,lastY,closest.x,closest.y)
-          normalizedDirectionToWall = {x:(closest.x-lastX)/dist,y:(closest.y-lastY)/dist}
-        }
+          let closest = point_on_line(this.x,this.y,w.x,w.y,w.x2,w.y2)
+          let dist = distance(this.x,this.y,closest.x,closest.y)
+          let fellback = false
 
-        this.color = "red"
-
-        let reflectionVector = normalizedDirectionToWall
-
-
-        let reflection = reflect(this.vx,this.vy,reflectionVector.x,reflectionVector.y)
-        this.vx = reflection.x
-        this.vy = reflection.y
-
-
-
-        //push ball out of wall (good enough for now, fix later, bleeding E)
-
-
-        let overlap = this.r - dist
-        if(overlap > 0){
-          let pushX = -normalizedDirectionToWall.x * overlap
-          let pushY = -normalizedDirectionToWall.y * overlap
-          this.x += pushX
-          this.y += pushY
-        }
-
-      }
-    })
-
-    entityList.balls.forEach((b)=>{
-      if(b != this){
-
-        // only do anything if the balls are moving towards each other
-
-        let towards = dot(this.vx,this.vy,b.x-this.x,b.y-this.y) <= 0
-        if(!towards){
-          // return
-        }
-
-
-        if(check_collision_circles(this.x,this.y,this.r,b.x,b.y,b.r)){
-          console.log("collision",this.name)
-
-          this.color = "green"
-          b.color = "green"
-
-          let dist = distance(this.x,this.y,b.x,b.y)
-
-          let normalizedVectorTo = {x:(b.x-this.x)/dist, y:(b.y-this.y)/dist}
-
-          let forceMultiplier = dot(this.vx,this.vy,normalizedVectorTo.x,normalizedVectorTo.y) - dot(b.vx,b.vy,normalizedVectorTo.x,normalizedVectorTo.y)
-          // let forceMultiplier2 = dot(b.vx,b.vy,normalizedVectorTo.x,normalizedVectorTo.y)
-          
-          let forceTo = {x:forceMultiplier * normalizedVectorTo.x,y:forceMultiplier * normalizedVectorTo.y}
-          this.force(normalizedVectorTo.x,normalizedVectorTo.y,-forceMultiplier)
-          // counterforce
-          b.force(normalizedVectorTo.x,normalizedVectorTo.y,forceMultiplier)
-
-
-
-
-          //push balls out of each other (good enough for now, fix later, bleeding E)
-
-          let overlap = this.r + b.r - dist
-          if(overlap > 0){
-            overlap += 0.001
-            let pushX = normalizedVectorTo.x * overlap / 2
-            let pushY = normalizedVectorTo.y * overlap / 2
-            this.x -= pushX
-            this.y -= pushY
-            b.x += pushX
-            b.y += pushY
+          let normalizedDirectionToWall;
+          if(dist!==0){
+            normalizedDirectionToWall = {x:(closest.x-this.x)/dist,y:(closest.y-this.y)/dist}
+          } else {
+            // fallback to last position if ball center is exactly on the wall, not perfect but should work in most cases and prevents NaN errors
+            fellback = true;
+            dist = distance(lastX,lastY,closest.x,closest.y)
+            normalizedDirectionToWall = {x:(closest.x-lastX)/dist,y:(closest.y-lastY)/dist}
           }
 
+
+          let forceToWall = dot(this.vx,this.vy,normalizedDirectionToWall.x,normalizedDirectionToWall.y)
+          let wallBroken = w.damage(forceToWall*this.wallBreakMultiplier, this, closest)
+
+          if(wallBroken){this.vx*=0.7;this.vy*=0.5;return}
+
+          let reflectionVector = normalizedDirectionToWall
+
+
+          let reflection = reflect(this.vx,this.vy,reflectionVector.x,reflectionVector.y)
+          this.vx = reflection.x
+          this.vy = reflection.y
+
+
+
+          //push ball out of wall (good enough for now, fix later, bleeding E)
+
+
+          let overlap = this.r - dist
+          if(overlap > 0){
+            let pushX = -normalizedDirectionToWall.x * overlap
+            let pushY = -normalizedDirectionToWall.y * overlap
+            this.x += pushX
+            this.y += pushY
+          }
+
+
         }
-      }
-    })
+      })
+    }
+
+
 
     this.updateFuncs.forEach((f)=>{
       f(dt)
@@ -480,12 +576,18 @@ class ball{
 
   }
   draw(){
+    this.ctx.lineWidth = 7
+    this.ctx.strokeStyle = "rgb("+this.hp/this.maxHp*255+",20,40)"
     this.ctx.fillStyle = this.color
     this.ctx.beginPath()
     this.ctx.arc(this.x,this.y,this.r,0,Math.PI*2)
     this.ctx.fill()
+    if(this !== entityList.player){
+      this.ctx.stroke()
+    }
 
     //debug
+    this.ctx.lineWidth = 1
     this.ctx.beginPath()
     this.ctx.moveTo(this.x,this.y)
     this.ctx.lineTo(this.x+this.vx*50,this.y+this.vy*50)
@@ -503,15 +605,51 @@ class wall{
     this.ctx = ctx
     this.length = distance(x1,y1,x2,y2)
 
+    this.hp = 10 
+
     this.name = "default wall" 
+    this.tags = new Set()
 
     this.normalized = {x:(y2-y1)/this.length,y:(x2-x1)/this.length}
     this.normal = Lrotate(this.normalized.x,this.normalized.y,Math.PI/2)
     this.midpoint = {x:(x1+x2)/2,y:(y1+y2)/2}
 
+    this.hp = this.hp + this.hp*Math.abs(dot(this.normal.x,this.normal.y,1,0)) // floors should have more HP
+
+
+    this.damageThreshold = 1
+
+  }
+
+  damage(d,by,impactPt){
+    if(d < this.damageThreshold){return}
+    this.hp -= d
+    if(this.hp <= 0){
+      this.break(by,impactPt)
+      return(true)
+    }
+    return(false)
+  }
+
+  break(by,impactPt){
+    this.tags.add("isBroken")
+    let dx = this.x2 - this.x
+    let dy = this.y2 - this.y
+    let seg = 0
+    let nextSeg = Math.random()*0.2
+
+    while(nextSeg < 1){
+      particles.push(new shatteredWallParticle(this,this.x+dx*seg,this.y+dy*seg,this.x+dx*nextSeg,this.y+dy*nextSeg,by.vx,by.vy,impactPt,nextSeg-seg))
+      seg = nextSeg
+      nextSeg = seg + Math.random()*0.2
+    }
+    particles.push(new shatteredWallParticle(this,this.x+dx*seg,this.y+dy*seg,this.x2,this.y2,by.vx,by.vy,impactPt,1-seg))
+
   }
 
   draw(){
+
+    this.ctx.lineWidth = Math.max(this.hp**0.5,5)
     this.ctx.strokeStyle = this.color
     this.ctx.beginPath()
     this.ctx.moveTo(this.x,this.y)
@@ -520,25 +658,299 @@ class wall{
   }
 }
 
-class entityList{
-  static balls = []
-  static walls = []
+class particle{
+  constructor(x,y,vx,vy,life=1000){
+
+    this.z=1
+
+    this.x = x
+    this.y = y
+    this.vx = vx
+    this.vy = vy
+    this.ay = gameWorld.gravity/2
+    this.color = [140+rand(60),0,0]
+    this.size = 5 + rand(10)
+    this.life = life + rand()*life
+    this.maxLife = this.life
+    this.ctx = can.ctx
+  }
+  update(dt){
+    this.vy += this.ay*dt
+
+    this.vx *= 0.999**dt
+    this.vy *= 0.999**dt
+
+    this.x += this.vx*dt
+    this.y += this.vy*dt
+    this.life -= dt
+    if(this.life <= 0){
+      return("del")
+    }
+  }
+  draw(){
+    this.ctx.fillStyle = "rgba("+this.color[0]+","+this.color[1]+","+this.color[2]+","+(this.life/this.maxLife)+")"
+    this.ctx.beginPath()
+    this.ctx.arc(this.x,this.y,this.size,0,Math.PI*2)
+    this.ctx.fill()
+  }
 }
 
 
+class sparkleParticle{
+  constructor(x,y,life=1000){
+
+    this.z = 2
+
+    this.x = x
+    this.y = y
+    this.color = [255,255,255]
+    this.size = 15
+    this.life = life
+    this.maxLife = this.life
+    this.ctx = can.ctx
+    this.rotation = 0
+    this.rotSpeed = rand(-0.1)
+  }
+  update(dt){
+    this.life -= dt
+    this.size *= 1.002 ** dt
+    if(this.life <= 0){
+      return("del")
+    }
+  }
+  draw(){
+    this.ctx.fillStyle = "rgba("+this.color[0]+","+this.color[1]+","+this.color[2]+","+(this.life/this.maxLife)+")"
+    this.ctx.beginPath()
+    // 4 corner star
+
+    let cornerSize = this.size/4
+
+    //translate
+    this.rotation += this.rotSpeed
+    this.ctx.translate(this.x,this.y)
+
+    this.ctx.rotate(this.rotation)
+
+    this.ctx.moveTo(0,0-this.size)
+    this.ctx.lineTo(0+cornerSize,0-cornerSize)
+    this.ctx.lineTo(0+this.size,0)
+    this.ctx.lineTo(0+cornerSize,0+cornerSize)
+    this.ctx.lineTo(0,0+this.size)
+    this.ctx.lineTo(0-cornerSize,0+cornerSize)
+    this.ctx.lineTo(0-this.size,0)
+    this.ctx.lineTo(0-cornerSize,0-cornerSize)
+    this.ctx.fill()
+    this.ctx.rotate(-this.rotation)
+    this.ctx.translate(-this.x,-this.y)
+
+  }
+}
+
+
+class shatteredWallParticle{
+  constructor(wall,x1,y1,x2,y2,vx,vy,impactPt,lengthPers,life=4000){
+    this.z = 1
+
+    this.x = (x1+x2)/2
+    this.y = (y1+y2)/2
+    this.dx = (x2-this.x)
+    this.dy = (y2-this.y)
+
+    this.length = lengthPers*wall.length
+
+    this.distToShatteringPt = Math.max(distance(this.x,this.y,impactPt.x,impactPt.y),20)
+
+    this.vx = vx / this.distToShatteringPt * 20
+    this.vy = vy / this.distToShatteringPt * 20
+
+    this.color = wall.color
+    this.lineWidth = 5
+
+    this.ctx = can.ctx
+    this.rotation = rand(-12.5/this.length)
+    this.life = life
+  }
+
+  update(dt){
+    this.vy += gameWorld.gravity*dt
+
+    this.vx *= 0.999 ** dt
+    this.vy *= 0.999 ** dt
+
+    this.x += this.vx * dt
+    this.y += this.vy * dt
+
+    this.life -= dt
+
+    //rotate
+      let rotated = Lrotate(this.dx,this.dy,this.rotation)
+      this.dx = rotated.x
+      this.dy = rotated.y
+
+
+    if(this.life <= 0){
+      return("del")
+    }
+  }
+
+  draw(){
+    this.ctx.lineWidth = this.lineWidth
+    this.ctx.strokeStyle = this.color
+
+    let mult = Math.min(1,this.life/1000)
+
+    let dx = this.dx*mult
+    let dy = this.dy*mult
+    
+    this.ctx.beginPath()
+    this.ctx.moveTo(this.x-dx,this.y-dy)
+    this.ctx.lineTo(this.x+dx,this.y+dy)
+    this.ctx.stroke()
+  }
+}
+
+
+class entityList{
+  static balls = []
+  static walls = []
+
+}
+
+class particles{
+  static list = []
+  static update(dt){
+    for(let i = this.list.length-1; i >= 0; i--){
+      let p = this.list[i]
+      let res = p.update(dt)
+      if(res == "del"){
+        this.list.splice(i,1)
+      }
+    }
+  }
+  static draw(layer){
+    this.list.forEach((p)=>{
+      let l = p.z?p.z:1
+      if(p.z!==layer){return}
+      p.draw()
+    })
+  }
+
+  static push(p){
+    this.list.push(p)
+  }
+}
+
 class gameWorld{
     static gravity = 0.001
-    static airFriction = 0.01
+    static airFriction = 0.0005
     static lastTime = 0
+
+    static timeWarp = 1
 }
 
 class controller{
   static mouseDownPos = {x:0,y:0}
   static mouseIsDown = false
+
+  static keys = {}
+
   static dv = {x:0,y:0}
+
+
 }
 
+class camera{
+  static pos = {x:-WidthM,y:-HeightM}
+}
 
+function allBallsCollide(time){
+
+
+  for(let i = 0; i < entityList.balls.length; i++){
+    for(let j = i+1; j < entityList.balls.length; j++){
+
+        let a = entityList.balls[i]
+        let b = entityList.balls[j]
+
+        if(a.tags.has("noCollideBall") || b.tags.has("noCollideBall")){continue}
+
+        // only do anything if the balls are moving towards each other
+
+        let towards = dot(a.vx,a.vy,b.x-a.x,b.y-a.y) <= 0
+        if(!towards){
+          // return
+        }
+
+
+        if(check_collision_circles(a.x,a.y,a.r,b.x,b.y,b.r)){
+          console.log("collision",a.name)
+
+
+          let dist = distance(a.x,a.y,b.x,b.y)
+          let contactPoint = {x:(a.x+b.x)/2,y:(a.y+b.y)/2}
+
+          let normalizedVectorTo = {x:(b.x-a.x)/dist, y:(b.y-a.y)/dist}
+
+          let dmgA = dot(a.vx,a.vy,normalizedVectorTo.x,normalizedVectorTo.y)
+          let dmgB = - dot(b.vx,b.vy,normalizedVectorTo.x,normalizedVectorTo.y)
+
+          dmgA = Math.max(dmgA*50,0)
+          dmgB = Math.max(dmgB*50,0)
+
+          console.log(dmgA,dmgB)
+          let killed_b = 1+b.damage(dmgA)
+          let killed_a = 1+a.damage(dmgB)
+
+          //particles A
+          let spread = -0.6
+          let spread2 = -0.3
+          let mult = 0.25
+          for(let i = 0; i < dmgB*mult*killed_b; i++){
+            let rnd = rand(1.1)
+            setTimeout(()=>{
+              particles.push(new particle(contactPoint.x,contactPoint.y,a.vx*rnd*(1+rand(spread))+rand(spread2),a.vy*rnd*(1+rand(spread))+rand(spread2)))
+            },rand(100))
+          }
+
+          //particles B
+          for(let i = 0; i < dmgA*mult*killed_a; i++){
+            let rnd = rand(1.1)
+            setTimeout(()=>{
+              particles.push(new particle(contactPoint.x,contactPoint.y,b.vx*rnd*(1+rand(spread))+rand(spread2),b.vy*rnd*(1+rand(spread))+rand(spread2)))
+            },rand(100))
+          }
+
+          let forceMultiplier = dot(a.vx,a.vy,normalizedVectorTo.x,normalizedVectorTo.y) - dot(b.vx,b.vy,normalizedVectorTo.x,normalizedVectorTo.y)
+          // let forceMultiplier2 = dot(b.vx,b.vy,normalizedVectorTo.x,normalizedVectorTo.y)
+          
+          let forceTo = {x:forceMultiplier * normalizedVectorTo.x,y:forceMultiplier * normalizedVectorTo.y}
+          a.force(normalizedVectorTo.x,normalizedVectorTo.y,-forceMultiplier)
+          // counterforce
+          b.force(normalizedVectorTo.x,normalizedVectorTo.y,forceMultiplier)
+
+
+
+
+          //push balls out of each other (good enough for now, fix later, bleeding E)
+
+          let overlap = a.r + b.r - dist
+          if(overlap > 0){
+            overlap += 0.001
+            let pushX = normalizedVectorTo.x * overlap / 2
+            let pushY = normalizedVectorTo.y * overlap / 2
+            a.x -= pushX
+            a.y -= pushY
+            b.x += pushX
+            b.y += pushY
+          }
+
+          a.collided(time,b)
+          b.collided(time,a)
+
+        }
+      }
+    }
+}
 
 
 /////// game setup
@@ -546,25 +958,46 @@ class controller{
 
 //initialize player
 
-  entityList.player = new ball(100,100,50,can.ctx)
+  entityList.player = new ball(-100,400,50,can.ctx,false)
+  entityList.player.color = "rgb(40,170,60)"
   entityList.player.name = "player"
   entityList.balls.push(entityList.player)
+  entityList.player.tags.delete("AI")
+
 
   //initialize walls
-  entityList.walls.push(new wall(0,0,800,0,can.ctx))
-  entityList.walls.push(new wall(0,0,0,600,can.ctx))
-  entityList.walls.push(new wall(800,0,800,600,can.ctx))
+  entityList.walls.push(new wall(-200,0,800,0,can.ctx))
+  entityList.walls.push(new wall(-200,0,-200,600,can.ctx))
+  let firstBreakableWall = new wall(800,0,800,600,can.ctx)
+  firstBreakableWall.hp *= 0.5
+  firstBreakableWall.color = "brown"
+  entityList.walls.push(firstBreakableWall)
 
-  entityList.walls.push(new wall(0,600,800,600,can.ctx)) // floor
+  entityList.walls.push(new wall(-200,600,800,600,can.ctx)) // floor
   entityList.walls.push(new wall(110,500,110,1600,can.ctx)) // beam
+  entityList.walls.push(new wall(110,500,150,450,can.ctx)) // beam
+  entityList.walls.push(new wall(110,500,70,450,can.ctx)) // beam
 
 
-  entityList.balls.push(new ball(150,100,50,can.ctx))
+  entityList.balls.push(new ball(280,450,50,can.ctx))
+
+
+  /// initialize rest of level
+  let x = 800, y = 600
+  let vx = 1000; vy = 400
+  for(let i = 0; i < 10; i++){
+    vx += rand(-400)
+    vy += rand(-400)
+    entityList.walls.push(new wall(x,y,x+vx,y+vy,can.ctx))
+    x+=vx
+    y+=vy
+  }
+
 
 
   //// Debugging
 
-  entityList.player.energy = ()=>{
+  entityList.player.calcEnergy = ()=>{
     let mgh = -gameWorld.gravity*entityList.player.y
     let ke = 0.5*(entityList.player.vx*entityList.player.vx + entityList.player.vy*entityList.player.vy)
     let E = mgh + ke
@@ -585,40 +1018,115 @@ requestAnimationFrame(mainLoop)
 
 
 setTimeout(()=>{
-  frameFuncs.push((time,dt)=>{
+  frameFuncs.push((time,dt,date)=>{
   
 
   // dt = 16.6 // debugging
+    dt = Math.min(100,dt)
+
+  //move camera
 
   can.clear()
-  entityList.balls.forEach((e)=>{
-    e.update(dt)
-    e.draw()
-  })
-  entityList.walls.forEach((e)=>{
-    e.draw()
-  })
+  camera.pos.x += (entityList.player.x-WidthM-camera.pos.x)*0.03
+  camera.pos.y += (entityList.player.y-HeightM-camera.pos.y)*0.03
+  can.ctx.translate(-camera.pos.x,-camera.pos.y)
 
-  drawShootAngle()
+
+  particles.update(dt)
+  particles.draw(1)
+
+  for(let i = entityList.balls.length-1; i>-1; i--){
+    let e = entityList.balls[i]
+    if(e.tags.has("isDead") && date-e.deathTime > 5000){
+      entityList.balls.splice(i,1)
+      continue;
+    }
+
+    e.update(dt*gameWorld.timeWarp)
+    e.draw()
+  }
+
+  allBallsCollide(time)
+
+
+  for(let i = entityList.walls.length-1; i>-1; i--){
+    let e = entityList.walls[i]
+    if(e.tags.has("isBroken")){
+      entityList.walls.splice(i,1)
+      continue;
+    }
+    e.draw()
+  }
+  particles.draw(2)
+
+
+
+  drawShootAngle(date)
+
+  controlBall()
+
+  gameWorld.timeWarp += (1-gameWorld.timeWarp)*0.1
+  if(controller.mouseIsDown){gameWorld.timeWarp*=0.90}
+
+
+  can.ctx.translate(camera.pos.x,camera.pos.y)
+  drawPlayerGUI()
+
+
 
   })
 },400) // wait for website to stabalize
 
 
 
-function drawShootAngle(){
+function drawShootAngle(date){
   if(controller.mouseIsDown){
 
     controller.dv = {x:controller.mouseDownPos.x-mouseX,y:controller.mouseDownPos.y-mouseY}
 
+    can.ctx.lineWidth = 1
     can.ctx.strokeStyle = "yellow"
     can.ctx.beginPath()
     can.ctx.moveTo(entityList.player.x,entityList.player.y)
-    can.ctx.lineTo(entityList.player.x+controller.dv.x*0.5,entityList.player.y+controller.dv.y*0.5)
+    can.ctx.lineTo(entityList.player.x-controller.dv.x*0.5,entityList.player.y-controller.dv.y*0.5)
     can.ctx.stroke()
+
+    if(!controller.mouseDownPos.charged && date-controller.mouseDownPos.time>700){
+      controller.mouseDownPos.charged = true
+      console.log("charged")
+      particles.push(new sparkleParticle(entityList.player.x,entityList.player.y))
+    }
+
   }
 }
 
+function drawPlayerGUI(){
+  // health and energy bars on top left of screen
+  let barWidth = 200
+  let barHeight = 20
+  let padding = 10
+
+  // health bar
+  can.ctx.fillStyle = "red"
+  can.ctx.fillRect(0, padding, barWidth, barHeight)
+  can.ctx.fillStyle = "rgb(40,170,60)"
+  can.ctx.fillRect(0, padding, barWidth*(entityList.player.hp/entityList.player.maxHp), barHeight)
+
+  // energy bar
+  can.ctx.fillStyle = "gray"
+  can.ctx.fillRect(0, padding+padding+barHeight, barWidth, barHeight)
+  can.ctx.fillStyle = "rgb(40,170,250)"
+  can.ctx.fillRect(0, padding+padding+barHeight, barWidth*(entityList.player.energy/entityList.player.maxEnergy), barHeight)
+}
+
+function controlBall(){
+  let movement = 0.005
+  let player = entityList.player
+  if(controller.keys.w){player.vy -= 0.005}
+  if(controller.keys.s){player.vy += 0.005}
+  if(controller.keys.a){player.vx -= 0.005}
+  if(controller.keys.d){player.vx += 0.005}
+}
 
 
 
@@ -626,7 +1134,7 @@ function drawShootAngle(){
 
 
 document.addEventListener("mousedown",(e)=>{
-  controller.mouseDownPos = {x:e.clientX,y:e.clientY}
+  controller.mouseDownPos = {x:e.clientX,y:e.clientY,time:Date.now()}
   controller.mouseIsDown = true
 })
 
@@ -635,14 +1143,25 @@ document.addEventListener("mouseup",(e)=>{
   
   //last update for good measure
   controller.dv = {x:controller.mouseDownPos.x-mouseX,y:controller.mouseDownPos.y-mouseY}
-  entityList.player.force(controller.dv.x,controller.dv.y,-0.001)
+
+  entityList.player.jump(controller.dv.x,controller.dv.y,0.001)
+  if(controller.mouseDownPos.charged){
+    entityList.player.wallBreakMultiplier += 4    
+  }
 })
 
 
 
 
 
+document.addEventListener("keydown",(e)=>{
+  controller.keys[e.key.toLowerCase()]=true
+})
 
+
+document.addEventListener("keyup",(e)=>{
+  controller.keys[e.key.toLowerCase()]=false
+})
 
 
 
