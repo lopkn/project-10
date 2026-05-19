@@ -353,8 +353,9 @@ class ball{
 
     this.mass = 1
 
+    this.team = "enemy"
 
-    this.r = r
+    this.r = r/1.25
     this.vx = 0
     this.vy = 0
 
@@ -369,6 +370,7 @@ class ball{
     this.hp = 100
     this.maxHp = 100
     this.hpRegen = 0.002
+    this.damageMultiplier = 1
 
     this.lastCollideTime = 0
     this.collideTime = 0
@@ -385,6 +387,7 @@ class ball{
     if(AI){
       this.AIinit()
     }
+
 
   }
 
@@ -462,19 +465,20 @@ class ball{
 
       let los = true;
       entityList.walls.forEach((w)=>{
+        if(w.tags.has("AIdamage")){return}
         let not_blocked = line_to_line_collision_pt(this.x,this.y,player.x,player.y,w.x,w.y,w.x2,w.y2)
         if(not_blocked!==false){los=false}
       })
 
       if(los){
-        this.jump(player.x-this.x,player.y-this.y,0.003)
+        this.jump(player.x-this.x,player.y-this.y-rand(200),0.003)
       }
     }
   }
 
   AIinit(){
     this.AIlastUpdate = 0
-    this.AInextUpdateTime = 1000
+    this.AInextUpdateTime = 4000
     this.tags.add("AI")
   }
 
@@ -498,6 +502,8 @@ class ball{
         this.hp = this.maxHp
     }
     }
+
+    this.damageMultiplier += Math.min((1-this.damageMultiplier)*0.002,0.0001)*dt
 
     this.vy += gameWorld.gravity*dt
 
@@ -539,7 +545,9 @@ class ball{
 
 
           let forceToWall = dot(this.vx,this.vy,normalizedDirectionToWall.x,normalizedDirectionToWall.y)
-          let wallBroken = w.damage(forceToWall*this.wallBreakMultiplier, this, closest)
+          let mult;
+          if(this.tags.has("AI")){mult = w.tags.has("AIdamage")?3:0.2} else {mult = this.wallBreakMultiplier}
+          let wallBroken = w.damage(forceToWall,mult, this, closest)
 
           if(wallBroken){this.vx*=0.7;this.vy*=0.5;return}
 
@@ -547,8 +555,8 @@ class ball{
 
 
           let reflection = reflect(this.vx,this.vy,reflectionVector.x,reflectionVector.y)
-          this.vx = reflection.x
-          this.vy = reflection.y
+          this.vx = reflection.x * w.bounce
+          this.vy = reflection.y * w.bounce
 
 
 
@@ -619,9 +627,16 @@ class wall{
 
     this.damageThreshold = 1
 
+    this.bounce = 0.9
+
   }
 
-  damage(d,by,impactPt){
+  damage(d,mult,by,impactPt){
+
+    if(this.tags.has("breakable")){mult=Math.max(1,mult)}
+    d*=mult
+
+
     if(d < this.damageThreshold){return}
     this.hp -= d
     if(this.hp <= 0){
@@ -842,7 +857,7 @@ class particles{
 
 class gameWorld{
     static gravity = 0.001
-    static airFriction = 0.0005
+    static airFriction = 0.0003
     static lastTime = 0
 
     static timeWarp = 1
@@ -863,6 +878,21 @@ class camera{
   static pos = {x:-WidthM,y:-HeightM}
 }
 
+function makeWooden(wall,mult=0.5){
+  wall.color = "brown"
+  wall.hp *= mult
+  wall.tags.add("breakable")
+  wall.tags.add("wooden")
+  wall.damageThreshold *= 0.1
+  return(wall)
+}
+
+function makeAIbreakable(wall){
+  wall.tags.add("AIdamage")
+  return(wall)
+}
+
+
 function allBallsCollide(time){
 
 
@@ -872,7 +902,7 @@ function allBallsCollide(time){
         let a = entityList.balls[i]
         let b = entityList.balls[j]
 
-        if(a.tags.has("noCollideBall") || b.tags.has("noCollideBall")){continue}
+        if(a.tags.has("noCollideBall") || b.tags.has("noCollideBall") || b.team==a.team){continue}
 
         // only do anything if the balls are moving towards each other
 
@@ -891,11 +921,20 @@ function allBallsCollide(time){
 
           let normalizedVectorTo = {x:(b.x-a.x)/dist, y:(b.y-a.y)/dist}
 
-          let dmgA = dot(a.vx,a.vy,normalizedVectorTo.x,normalizedVectorTo.y)
-          let dmgB = - dot(b.vx,b.vy,normalizedVectorTo.x,normalizedVectorTo.y)
+          let dmgA = dot(a.vx,a.vy,normalizedVectorTo.x,normalizedVectorTo.y) * a.mass
+          let dmgB = - dot(b.vx,b.vy,normalizedVectorTo.x,normalizedVectorTo.y) * b.mass
 
-          dmgA = Math.max(dmgA*50,0)
-          dmgB = Math.max(dmgB*50,0)
+          dmgA = Math.max(dmgA*50,0) 
+          dmgB = Math.max(dmgB*50,0) 
+
+          if(dmgA>dmgB){
+            dmgB*=0.5
+          } else {
+            dmgA*=0.5
+          }
+          dmgA *= a.damageMultiplier
+          dmgB *= b.damageMultiplier
+
 
           console.log(dmgA,dmgB)
           let killed_b = 1+b.damage(dmgA)
@@ -959,8 +998,11 @@ function allBallsCollide(time){
 //initialize player
 
   entityList.player = new ball(-100,400,50,can.ctx,false)
+  entityList.player.team = "player"
+  entityList.player.mass = 1.5
   entityList.player.color = "rgb(40,170,60)"
   entityList.player.name = "player"
+  entityList.player.hpRegen *= 2
   entityList.balls.push(entityList.player)
   entityList.player.tags.delete("AI")
 
@@ -969,29 +1011,32 @@ function allBallsCollide(time){
   entityList.walls.push(new wall(-200,0,800,0,can.ctx))
   entityList.walls.push(new wall(-200,0,-200,600,can.ctx))
   let firstBreakableWall = new wall(800,0,800,600,can.ctx)
-  firstBreakableWall.hp *= 0.5
-  firstBreakableWall.color = "brown"
-  entityList.walls.push(firstBreakableWall)
+  entityList.walls.push(makeWooden(new wall(800,0,800,600,can.ctx)))
 
   entityList.walls.push(new wall(-200,600,800,600,can.ctx)) // floor
-  entityList.walls.push(new wall(110,500,110,1600,can.ctx)) // beam
-  entityList.walls.push(new wall(110,500,150,450,can.ctx)) // beam
-  entityList.walls.push(new wall(110,500,70,450,can.ctx)) // beam
+  // entityList.walls.push(new wall(110,500,110,1600,can.ctx)) // beam
+  // entityList.walls.push(new wall(110,500,150,450,can.ctx)) // beam
+  // entityList.walls.push(new wall(110,500,70,450,can.ctx)) // beam
+
+  entityList.walls.push( makeAIbreakable(makeWooden(new wall(50,500,150,500,can.ctx),0.1)))
+  entityList.walls.push( makeAIbreakable(makeWooden(new wall(100,600,100,500,can.ctx),0.1))) //table
 
 
-  entityList.balls.push(new ball(280,450,50,can.ctx))
+  entityList.balls.push(new ball(380,450,50,can.ctx))
 
 
   /// initialize rest of level
   let x = 800, y = 600
   let vx = 1000; vy = 400
-  for(let i = 0; i < 10; i++){
+  for(let i = 0; i < 4; i++){
     vx += rand(-400)
     vy += rand(-400)
     entityList.walls.push(new wall(x,y,x+vx,y+vy,can.ctx))
     x+=vx
     y+=vy
   }
+
+  generateLevels(x,y)
 
 
 
@@ -1073,7 +1118,6 @@ setTimeout(()=>{
   drawPlayerGUI()
 
 
-
   })
 },400) // wait for website to stabalize
 
@@ -1095,6 +1139,7 @@ function drawShootAngle(date){
       controller.mouseDownPos.charged = true
       console.log("charged")
       particles.push(new sparkleParticle(entityList.player.x,entityList.player.y))
+      entityList.player.damageMultiplier = 2
     }
 
   }
@@ -1119,6 +1164,81 @@ function drawPlayerGUI(){
   can.ctx.fillRect(0, padding+padding+barHeight, barWidth*(entityList.player.energy/entityList.player.maxEnergy), barHeight)
 }
 
+
+
+
+
+
+//// level generator
+
+
+function segWalls(x1,y1,x2,y2,div){
+  let dx = (x2-x1)/div
+  let dy = (y2-y1)/div
+  for(let i = 0; i < div; i++){
+    entityList.walls.push(new wall(x1+i*dx,y1+i*dy,x1+i*dx+dx,y1+i*dy+dy,can.ctx))
+  }
+}
+
+
+function generateLevels(x,y){
+  // entityList.walls.push(new wall(x,y,x+vx,y+vy,can.ctx))
+  // entityList.walls.push( makeAIbreakable(makeWooden(new wall(50,500,150,500,can.ctx),0.1)))
+
+  let floorLength = 800+rand(1800)
+  let heightDiff = floorLength * (0.6+rand(5))
+  let height = y-heightDiff
+
+  let heightDiv = Math.floor(heightDiff/300)
+
+  let wallX = {"a":x+floorLength*(0.2+rand(-0.1)),"b":x+floorLength*(0.7+rand(-0.2))}
+
+  entityList.walls.push(new wall(x,y,x+floorLength,y,can.ctx))
+  let doorHeight = y-150-rand(50)
+  entityList.walls.push(makeWooden(new wall(wallX.a,y,wallX.a,doorHeight,can.ctx),0.2))
+  segWalls(wallX.a,doorHeight,wallX.a,height,heightDiv)
+  segWalls(wallX.b,y,wallX.b,height,heightDiv)
+  entityList.walls.push(new wall(wallX.a,height,wallX.b,height,can.ctx)) // roof
+
+
+  let floor = doorHeight - rand(150)
+  let floorWidth = wallX.b-wallX.a
+  while(floor > height){
+
+    let floorX = 40+rand(floorWidth-180)
+    let start = wallX.a
+    if(Math.random()>0.5){floorX*=-1;start=wallX.b} //left or right
+    entityList.walls.push(new wall(start,floor,start+floorX,floor,can.ctx))
+    if(Math.random()>0.5){ // spawn rate
+      entityList.balls.push(new ball(start+floorX*0.5,floor-60,50,can.ctx))
+    }
+
+
+    floor -= 130+rand(200)
+  }
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/// main game controls
+
+
 function controlBall(){
   let movement = 0.005
   let player = entityList.player
@@ -1127,11 +1247,6 @@ function controlBall(){
   if(controller.keys.a){player.vx -= 0.005}
   if(controller.keys.d){player.vx += 0.005}
 }
-
-
-
-/// main game controls
-
 
 document.addEventListener("mousedown",(e)=>{
   controller.mouseDownPos = {x:e.clientX,y:e.clientY,time:Date.now()}
@@ -1148,6 +1263,7 @@ document.addEventListener("mouseup",(e)=>{
   if(controller.mouseDownPos.charged){
     entityList.player.wallBreakMultiplier += 4    
   }
+  gameWorld.timeWarp += (1-gameWorld.timeWarp)*0.5
 })
 
 
