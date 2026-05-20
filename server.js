@@ -1525,6 +1525,18 @@ app.post('/temporal', (req, res) => {
     responder.process2(req.body,res)
 })
 
+app.post('/getIP', (req, res) => {
+    console.log("gotIP:"+req.headers['x-forwarded-for']?.split(',')[0]?.trim()+"or"+
+    req.ip);
+
+     const rawIp = req.socket.remoteAddress;
+    const forwardedIp = req.headers['x-forwarded-for']?.split(',')[0]?.trim();
+
+    console.log(`Raw Socket IP: ${rawIp} | Forwarded For: ${forwardedIp}`);
+    
+
+})
+
 
 app.get("/temporal/:id",(req,res)=>{
 	const responseId = req.params.id;

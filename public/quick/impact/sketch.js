@@ -1,5 +1,5 @@
 
-let debug = 0;
+let debug = 1;
 let Width = window.innerWidth
 let Height = window.innerHeight
 
@@ -458,6 +458,8 @@ class ball{
     this.tags.add("isDead")
     this.tags.add("noCollideWall")
     this.tags.add("noCollideBall")
+    this.vx *= 0.8
+    this.vy *= 0.8
     this.deathTime = Date.now()
   }
 
@@ -537,7 +539,7 @@ class ball{
 
     let speed = this.speed()
 
-    if(speed*dt > this.r/2){console.log("warning: ball too fast")}
+    if(speed*dt > this.r/2){} /// BALL MOVING TOO FAST!!!!!! FIX
 
     this.vx *= (1-gameWorld.airFriction*speed)**dt
     this.vy *= (1-gameWorld.airFriction*speed)**dt
@@ -546,6 +548,8 @@ class ball{
 
     //check wall collisions
     if(!this.tags.has("noCollideWall")){
+
+      let collisionData = {"collided":false,"minDist":Infinity,"velocityUpdate":[0,0],"posUpdate":[0,0]}
 
       entityList.walls.forEach((w)=>{
 
@@ -557,6 +561,10 @@ class ball{
 
           let closest = point_on_line(this.x,this.y,w.x,w.y,w.x2,w.y2)
           let dist = distance(this.x,this.y,closest.x,closest.y)
+          if(dist<collisionData.minDist){
+            collisionData.collided = true
+            collisionData.minDist = dist
+          } else {return}
 
 
           let fellback = false
@@ -582,12 +590,18 @@ class ball{
           let reflectionVector = normalizedDirectionToWall
 
 
-          this.energy += this.wallJumpEnergy
 
           let reflection = reflect(this.vx,this.vy,reflectionVector.x,reflectionVector.y)
-          this.vx = reflection.x * w.bounce
-          this.vy = reflection.y * w.bounce
+          // this.vx = reflection.x * w.bounce
+          // this.vy = reflection.y * w.bounce
 
+          let refBounce = dot(reflection.x,reflection.y,w.normal.x,w.normal.y) * w.bounce
+          let refFriction = dot(reflection.x,reflection.y,w.normalized.x,w.normalized.y) * w.friction
+
+
+          let nvx = refBounce * w.normal.x + refFriction * w.normalized.x
+          let nvy = refBounce * w.normal.y + refFriction * w.normalized.y
+          collisionData.velocityUpdate = [nvx,nvy]
 
 
           //push ball out of wall (good enough for now, fix later, bleeding E)
@@ -597,13 +611,21 @@ class ball{
           if(overlap > 0){
             let pushX = -normalizedDirectionToWall.x * overlap
             let pushY = -normalizedDirectionToWall.y * overlap
-            this.x += pushX
-            this.y += pushY
+            collisionData.posUpdate = [pushX,pushY]
           }
 
 
         }
       })
+
+      if(collisionData.collided){
+        this.energy += this.wallJumpEnergy
+        this.vx = collisionData.velocityUpdate[0]
+        this.vy = collisionData.velocityUpdate[1]
+        this.x += collisionData.posUpdate[0]
+        this.y += collisionData.posUpdate[1]
+      }
+
     }
 
     this.energy += this.energyRegen*dt
@@ -662,7 +684,7 @@ class wall{
     this.name = "default wall" 
     this.tags = new Set()
 
-    this.normal = {x:(y2-y1)/this.length,y:(x2-x1)/this.length}
+    this.normal = {x:-(y2-y1)/this.length,y:(x2-x1)/this.length}
     this.normalized = {y:(y2-y1)/this.length,x:(x2-x1)/this.length}
     this.midpoint = {x:(x1+x2)/2,y:(y1+y2)/2}
 
@@ -671,7 +693,8 @@ class wall{
 
     this.damageThreshold = 1
 
-    this.bounce = 0.9
+    this.bounce = 0.8
+    this.friction = 1
 
   }
 
@@ -935,9 +958,11 @@ class camera{
 }
 
 class settings{
-  static speedZoom = 5 // works anywhere from 3 (insane) to 12 (mild)
+  static speedZoom = 5 // works anywhere from 2 (insane) to 12 (mild)
   static mobile = 0
   static relativeSize = (Height+Width)/3723
+  static dragSensitivity = 1.5
+  static mobileSensMultiplier = 1.333
 }
 
 function makeWooden(wall,mult=0.5){
@@ -971,7 +996,7 @@ function allBallsCollide(time){
         // let towards = dot(a.vx-b.vx,a.vy-b.vy,b.x-a.x,b.y-a.y) <= 0 // note to self: SUPER FUN
         let towards = dot(b.vx-a.vx,b.vy-a.vy,b.x-a.x,b.y-a.y) <= 0
         if(!towards){
-          return
+          // return
         }
 
 
@@ -1071,9 +1096,14 @@ class test{
   }
 
   static debug(){
-    entityList.walls.push(new wall(-200,440,800,440,can.ctx));
-    entityList.walls.push(new wall(-200,440,-200,0,can.ctx));
-    entityList.balls.push(new ball(-140,400,50,can.ctx))
+    newWall(-200,490,800,490);
+    // newWall(1200,490,800,790);
+    // newWall(1200,490,800,790);
+    // newWall(1200,490,1800,790);
+
+    for(let i = 0; i < 10; i++){
+      newWall(-200,490-i*10,-200,480-i*10)
+    }
 
     this.still()
   }
@@ -1083,7 +1113,7 @@ class test{
 
   entityList.player = new ball(-100,400,50,can.ctx,false)
   entityList.player.team = "player"
-  entityList.player.mass = 1.5
+  entityList.player.mass = 1.2
   entityList.player.color = [129,62,41] //129 62 41
   entityList.player.name = "player"
   entityList.player.hpRegen *= 2
@@ -1097,11 +1127,18 @@ class test{
   // }) // implement player trail
 
 
+  function newWall(a,b,c,d,ctx=can.ctx){
+    let w = new wall(a,b,c,d,ctx)
+    entityList.walls.push(w)
+    return(w)
+  }
+
+
   function normalGenerate(){
       //initialize walls
-    entityList.walls.push(new wall(-200,0,800,0,can.ctx))
-    entityList.walls.push(new wall(-200,0,-200,600,can.ctx))
-    entityList.walls.push(makeWooden(new wall(800,0,800,600,can.ctx)))
+    newWall(-200,0,800,0,can.ctx)
+    newWall(-200,0,-200,600,can.ctx)
+    makeWooden(newWall(800,0,800,600,can.ctx))
 
     entityList.walls.push(new wall(-200,600,800,600,can.ctx)) // floor
     // entityList.walls.push(new wall(110,500,110,1600,can.ctx)) // beam
@@ -1178,7 +1215,7 @@ setTimeout(()=>{
   camera.pos.x += (entityList.player.x-WidthM/camera.scale-camera.pos.x)*0.03
   camera.pos.y += (entityList.player.y-HeightM/camera.scale-camera.pos.y)*0.03
 
-  can.ctx.fillText(settings.relativeSize,100,100)
+  // can.ctx.fillText(settings.relativeSize,100,100)
   can.ctx.save()
   can.ctx.translate(-camera.pos.x*camera.scale,-camera.pos.y*camera.scale)
   can.ctx.scale(camera.scale,camera.scale)
@@ -1233,7 +1270,7 @@ setTimeout(()=>{
 function drawShootAngle(date){
   if(controller.mouseIsDown){
 
-    controller.dv = {x:(controller.mouseDownPos.x-mouseX)*(1+3*settings.mobile),y:(controller.mouseDownPos.y-mouseY)*(1+3*settings.mobile)}
+    controller.dv = {x:(controller.mouseDownPos.x-mouseX)*(settings.dragSensitivity+settings.mobileSensMultiplier*settings.mobile)/settings.relativeSize,y:(controller.mouseDownPos.y-mouseY)*(settings.dragSensitivity+settings.mobileSensMultiplier*settings.mobile)/settings.relativeSize}
 
     can.ctx.lineWidth = 1
     can.ctx.strokeStyle = "yellow"
@@ -1292,8 +1329,8 @@ function generateLevels(x,y){
   // entityList.walls.push(new wall(x,y,x+vx,y+vy,can.ctx))
   // entityList.walls.push( makeAIbreakable(makeWooden(new wall(50,500,150,500,can.ctx),0.1)))
 
-  let floorLength = 800+rand(1800)
-  let heightDiff = floorLength * (0.6+rand(5))
+  let floorLength = 1800+rand(1800)
+  let heightDiff = floorLength * (1.6+rand(7))
   let height = y-heightDiff
 
   let heightDiv = Math.floor(heightDiff/300)
@@ -1314,14 +1351,31 @@ function generateLevels(x,y){
 
     let floorX = 40+rand(floorWidth-180)
     let start = wallX.a
-    if(Math.random()>0.5){floorX*=-1;start=wallX.b} //left or right
+    let end = wallX.b
+    let flipped = false
+    if(Math.random()>0.5){floorX*=-1;start=wallX.b;end=wallX.a;flipped=true} //left or right
     entityList.walls.push(new wall(start,floor,start+floorX,floor,can.ctx))
+
+
+    if(rand(0.3)){
+      let floorBoard = new wall(end,floor,start+floorX,floor,can.ctx)
+      if(!flipped){
+      floorBoard.normal.x *=-1
+      floorBoard.normal.y *=-1
+      }
+      floorBoard.tags.add("sided")
+      makeWooden(floorBoard)
+      entityList.walls.push(floorBoard)
+    }
+
+
+
     if(Math.random()>0.5){ // spawn rate
       entityList.balls.push(new ball(start+floorX*0.5,floor-60,50,can.ctx))
     }
 
 
-    floor -= 130+rand(200)
+    floor -= 230+rand(200)
   }
 
 
@@ -1366,7 +1420,7 @@ document.addEventListener("mouseup",(e)=>{
   controller.mouseIsDown = false
   
   //last update for good measure
-  controller.dv = {x:(controller.mouseDownPos.x-mouseX)*(1+2*settings.mobile)/settings.relativeSize,y:(controller.mouseDownPos.y-mouseY)*(1+2*settings.mobile)/settings.relativeSize}
+    controller.dv = {x:(controller.mouseDownPos.x-mouseX)*(settings.dragSensitivity+settings.mobileSensMultiplier*settings.mobile)/settings.relativeSize,y:(controller.mouseDownPos.y-mouseY)*(settings.dragSensitivity+settings.mobileSensMultiplier*settings.mobile)/settings.relativeSize}
 
   entityList.player.jump(controller.dv.x,controller.dv.y,0.001)
   if(controller.mouseDownPos.charged){
@@ -1510,5 +1564,15 @@ if(settings.mobile){
 
 
 
+// unbreakable walls
+// player trail
+// height advantage
 
+// bounciness for wall
+// scrolling background
 
+fetch('/getIP', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({}),
+});
