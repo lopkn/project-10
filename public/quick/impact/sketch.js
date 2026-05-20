@@ -1,4 +1,5 @@
 
+let debug = 0;
 let Width = window.innerWidth
 let Height = window.innerHeight
 
@@ -93,6 +94,7 @@ var frameFuncs = []
 function mainLoop(time){
   let dt= (time-gameWorld.lastTime)
   gameWorld.lastTime = time
+  gameWorld.frame += 1
   let date = Date.now()
   frameFuncs.forEach((e)=>{
     e(time,dt,date)
@@ -340,6 +342,12 @@ function Lrotate(x,y,d){
 }
 
 
+class id{
+  static count=0;
+  static gen(){return(this.count++)}
+}
+
+
 
 ////////// end game engine functions
 
@@ -359,14 +367,15 @@ class ball{
     this.vx = 0
     this.vy = 0
 
-    this.color = "rgb(170,40,40)"
+    this.color = [0,62,41] // 0 62 41
     this.ctx = ctx
 
     this.name = "dummy" 
     this.updateFuncs = []
+    this.drawFuncs = []
 
     this.tags = new Set()
-    
+    this.id = id.gen()
     this.hp = 100
     this.maxHp = 100
     this.hpRegen = 0.002
@@ -383,11 +392,14 @@ class ball{
     this.maxEnergy = 100
     this.energyRegen = 0.01
 
+    this.wallJumpEnergy = 1
+
     this.lastJumpTime = 0
     if(AI){
       this.AIinit()
     }
 
+    this.sidedWallEntryFrame = {}
 
   }
 
@@ -409,6 +421,11 @@ class ball{
   }
 
   force(x,y,mag){
+    this.vx += x * mag
+    this.vy += y * mag
+  }
+  forceM(x,y,mag){
+    mag /= this.mass
     this.vx += x * mag
     this.vy += y * mag
   }
@@ -439,7 +456,6 @@ class ball{
     this.tags.add("noCollideWall")
     this.tags.add("noCollideBall")
     this.deathTime = Date.now()
-    this.color = "gray"
   }
 
   collided(time,by){
@@ -476,6 +492,8 @@ class ball{
     }
   }
 
+
+
   AIinit(){
     this.AIlastUpdate = 0
     this.AInextUpdateTime = 4000
@@ -490,10 +508,7 @@ class ball{
       this.AIupdate(dt)
     }
 
-    this.energy += this.energyRegen*dt
-    if(this.energy > this.maxEnergy){
-      this.energy = this.maxEnergy
-    }
+
 
     //natural hp regen
     if(gameWorld.lastTime - this.collideTime > 2000){ // 2 seconds after battle      
@@ -523,14 +538,21 @@ class ball{
 
     this.wallBreakMultiplier -= (this.wallBreakMultiplier-0.1)*0.0009*dt
 
-    //check collisions
+    //check wall collisions
     if(!this.tags.has("noCollideWall")){
 
       entityList.walls.forEach((w)=>{
+
+        let awaySide = dot(this.vx,this.vy,w.normal.x,w.normal.y) < 0 // might use midpoint? but i think any point on the line works
+
         if(check_collision_ball_line(this.x,this.y,this.r,w.x,w.y,w.x2,w.y2)){
+        if(w.tags.has("sided") && (awaySide || this.sidedWallEntryFrame[w.id] === gameWorld.frame-1 )){this.sidedWallEntryFrame[w.id] = gameWorld.frame;return}
+
 
           let closest = point_on_line(this.x,this.y,w.x,w.y,w.x2,w.y2)
           let dist = distance(this.x,this.y,closest.x,closest.y)
+
+
           let fellback = false
 
           let normalizedDirectionToWall;
@@ -554,6 +576,8 @@ class ball{
           let reflectionVector = normalizedDirectionToWall
 
 
+          this.energy += this.wallJumpEnergy
+
           let reflection = reflect(this.vx,this.vy,reflectionVector.x,reflectionVector.y)
           this.vx = reflection.x * w.bounce
           this.vy = reflection.y * w.bounce
@@ -576,7 +600,10 @@ class ball{
       })
     }
 
-
+    this.energy += this.energyRegen*dt
+    if(this.energy > this.maxEnergy){
+      this.energy = this.maxEnergy
+    }
 
     this.updateFuncs.forEach((f)=>{
       f(dt)
@@ -586,13 +613,21 @@ class ball{
   draw(){
     this.ctx.lineWidth = 7
     this.ctx.strokeStyle = "rgb("+this.hp/this.maxHp*255+",20,40)"
-    this.ctx.fillStyle = this.color
+    let hpPers = Math.min(Math.max(this.hp/this.maxHp,0),1.4)
+    let l = (50+(this.color[2]-50)*hpPers)
+    let s = this.color[1]*(hpPers*0.7+0.3)
+    if(this.tags.has("isDead")){l*=0.5; s=0}
+    this.ctx.fillStyle = "hsl("+this.color[0]+ "," + s + "%," + l + "%)"
     this.ctx.beginPath()
     this.ctx.arc(this.x,this.y,this.r,0,Math.PI*2)
     this.ctx.fill()
     if(this !== entityList.player){
       this.ctx.stroke()
     }
+
+    this.drawFuncs.forEach((e)=>{
+      e()
+    })
 
     //debug
     this.ctx.lineWidth = 1
@@ -603,6 +638,8 @@ class ball{
   }
 }
 
+//@wall
+
 class wall{
   constructor(x1,y1,x2,y2,ctx){
     this.x = x1
@@ -612,17 +649,18 @@ class wall{
     this.color = "white"
     this.ctx = ctx
     this.length = distance(x1,y1,x2,y2)
+    this.id = id.gen()
 
     this.hp = 10 
 
     this.name = "default wall" 
     this.tags = new Set()
 
-    this.normalized = {x:(y2-y1)/this.length,y:(x2-x1)/this.length}
-    this.normal = Lrotate(this.normalized.x,this.normalized.y,Math.PI/2)
+    this.normal = {x:(y2-y1)/this.length,y:(x2-x1)/this.length}
+    this.normalized = {y:(y2-y1)/this.length,x:(x2-x1)/this.length}
     this.midpoint = {x:(x1+x2)/2,y:(y1+y2)/2}
 
-    this.hp = this.hp + this.hp*Math.abs(dot(this.normal.x,this.normal.y,1,0)) // floors should have more HP
+    this.hp = this.hp + this.hp*Math.abs(dot(this.normalized.x,this.normalized.y,1,0)) // floors should have more HP
 
 
     this.damageThreshold = 1
@@ -670,6 +708,15 @@ class wall{
     this.ctx.moveTo(this.x,this.y)
     this.ctx.lineTo(this.x2,this.y2)
     this.ctx.stroke()
+
+    if(this.tags.has("sided")){
+      this.ctx.lineWidth = 1
+      this.ctx.beginPath()
+      this.ctx.moveTo(this.midpoint.x,this.midpoint.y)
+      this.ctx.lineTo(this.midpoint.x+this.normal.x*10,this.midpoint.y+this.normal.y*10)
+      this.ctx.stroke()
+    }
+
   }
 }
 
@@ -861,6 +908,7 @@ class gameWorld{
     static lastTime = 0
 
     static timeWarp = 1
+    static frame = 0
 }
 
 class controller{
@@ -875,7 +923,13 @@ class controller{
 }
 
 class camera{
+  static scale = 1
   static pos = {x:-WidthM,y:-HeightM}
+
+}
+
+class settings{
+  static speedZoom = 5 // works anywhere from 3 (insane) to 12 (mild)
 }
 
 function makeWooden(wall,mult=0.5){
@@ -959,13 +1013,13 @@ function allBallsCollide(time){
             },rand(100))
           }
 
-          let forceMultiplier = dot(a.vx,a.vy,normalizedVectorTo.x,normalizedVectorTo.y) - dot(b.vx,b.vy,normalizedVectorTo.x,normalizedVectorTo.y)
+          let forceMultiplier = dot(a.vx,a.vy,normalizedVectorTo.x,normalizedVectorTo.y) * a.mass - dot(b.vx,b.vy,normalizedVectorTo.x,normalizedVectorTo.y)* b.mass
           // let forceMultiplier2 = dot(b.vx,b.vy,normalizedVectorTo.x,normalizedVectorTo.y)
           
           let forceTo = {x:forceMultiplier * normalizedVectorTo.x,y:forceMultiplier * normalizedVectorTo.y}
-          a.force(normalizedVectorTo.x,normalizedVectorTo.y,-forceMultiplier)
+          a.forceM(normalizedVectorTo.x,normalizedVectorTo.y,-forceMultiplier)
           // counterforce
-          b.force(normalizedVectorTo.x,normalizedVectorTo.y,forceMultiplier)
+          b.forceM(normalizedVectorTo.x,normalizedVectorTo.y,forceMultiplier)
 
 
 
@@ -995,48 +1049,61 @@ function allBallsCollide(time){
 /////// game setup
 
 
-//initialize player
+//initialize player @ip
 
   entityList.player = new ball(-100,400,50,can.ctx,false)
   entityList.player.team = "player"
   entityList.player.mass = 1.5
-  entityList.player.color = "rgb(40,170,60)"
+  entityList.player.color = [129,62,41] //129 62 41
   entityList.player.name = "player"
   entityList.player.hpRegen *= 2
+  entityList.player.wallJumpEnergy = 5
+  entityList.player.energyRegen *= 2
   entityList.balls.push(entityList.player)
   entityList.player.tags.delete("AI")
 
+  // entityList.player.drawFuncs.push(()=>{
 
-  //initialize walls
-  entityList.walls.push(new wall(-200,0,800,0,can.ctx))
-  entityList.walls.push(new wall(-200,0,-200,600,can.ctx))
-  let firstBreakableWall = new wall(800,0,800,600,can.ctx)
-  entityList.walls.push(makeWooden(new wall(800,0,800,600,can.ctx)))
-
-  entityList.walls.push(new wall(-200,600,800,600,can.ctx)) // floor
-  // entityList.walls.push(new wall(110,500,110,1600,can.ctx)) // beam
-  // entityList.walls.push(new wall(110,500,150,450,can.ctx)) // beam
-  // entityList.walls.push(new wall(110,500,70,450,can.ctx)) // beam
-
-  entityList.walls.push( makeAIbreakable(makeWooden(new wall(50,500,150,500,can.ctx),0.1)))
-  entityList.walls.push( makeAIbreakable(makeWooden(new wall(100,600,100,500,can.ctx),0.1))) //table
+  // }) // implement player trail
 
 
-  entityList.balls.push(new ball(380,450,50,can.ctx))
+  function normalGenerate(){
+      //initialize walls
+    entityList.walls.push(new wall(-200,0,800,0,can.ctx))
+    entityList.walls.push(new wall(-200,0,-200,600,can.ctx))
+    entityList.walls.push(makeWooden(new wall(800,0,800,600,can.ctx)))
+
+    entityList.walls.push(new wall(-200,600,800,600,can.ctx)) // floor
+    // entityList.walls.push(new wall(110,500,110,1600,can.ctx)) // beam
+    // entityList.walls.push(new wall(110,500,150,450,can.ctx)) // beam
+    // entityList.walls.push(new wall(110,500,70,450,can.ctx)) // beam
+
+    entityList.walls.push( makeAIbreakable(makeWooden(new wall(50,500,150,500,can.ctx),0.1)))
+    entityList.walls.push( makeAIbreakable(makeWooden(new wall(100,600,100,500,can.ctx),0.1))) //table
 
 
-  /// initialize rest of level
-  let x = 800, y = 600
-  let vx = 1000; vy = 400
-  for(let i = 0; i < 4; i++){
-    vx += rand(-400)
-    vy += rand(-400)
-    entityList.walls.push(new wall(x,y,x+vx,y+vy,can.ctx))
-    x+=vx
-    y+=vy
+    entityList.balls.push(new ball(380,450,50,can.ctx))
+
+
+    /// initialize rest of level
+    let x = 800, y = 600
+    let vx = 1000; vy = 400
+    for(let i = 0; i < 4; i++){
+      vx += rand(-400)
+      vy += rand(-400)
+      entityList.walls.push(new wall(x,y,x+vx,y+vy,can.ctx))
+      x+=vx
+      y+=vy
   }
 
   generateLevels(x,y)
+  }
+
+  if(!debug ){
+    normalGenerate()    
+  } else {entityList.walls.push(new wall(-200,600,800,600,can.ctx)); entityList.walls[0].tags.add("sided")}
+
+
 
 
 
@@ -1059,7 +1126,7 @@ requestAnimationFrame(mainLoop)
 
 
 
-/////// main game loop & drawing
+/////// main game @loop & drawing
 
 
 setTimeout(()=>{
@@ -1071,10 +1138,14 @@ setTimeout(()=>{
 
   //move camera
 
-  can.clear()
-  camera.pos.x += (entityList.player.x-WidthM-camera.pos.x)*0.03
-  camera.pos.y += (entityList.player.y-HeightM-camera.pos.y)*0.03
-  can.ctx.translate(-camera.pos.x,-camera.pos.y)
+
+  can.ctx.clearRect(0,0,can.canvas.width,can.canvas.height)
+  camera.scale += (settings.speedZoom/(entityList.player.speed()+settings.speedZoom)-camera.scale)*0.03
+  camera.pos.x += (entityList.player.x-WidthM/camera.scale-camera.pos.x)*0.03
+  camera.pos.y += (entityList.player.y-HeightM/camera.scale-camera.pos.y)*0.03
+  can.ctx.save()
+  can.ctx.translate(-camera.pos.x*camera.scale,-camera.pos.y*camera.scale)
+  can.ctx.scale(camera.scale,camera.scale)
 
 
   particles.update(dt)
@@ -1114,7 +1185,7 @@ setTimeout(()=>{
   if(controller.mouseIsDown){gameWorld.timeWarp*=0.90}
 
 
-  can.ctx.translate(camera.pos.x,camera.pos.y)
+  can.ctx.restore()
   drawPlayerGUI()
 
 
@@ -1216,6 +1287,8 @@ function generateLevels(x,y){
 
     floor -= 130+rand(200)
   }
+
+
 
 
 }
