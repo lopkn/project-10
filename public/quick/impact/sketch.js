@@ -47,6 +47,9 @@ class LCanvas{ //lopkns template canvas
   constructor(w=100,h=100,id=("LCanvas-"+Math.random())){
     this.canvas = document.createElement("canvas")
     this.canvas.id = id
+
+    this.canvas.classList.add("mobile")
+
     this.ctx = this.canvas.getContext("2d")
     this.canvas.style.position = "absolute"
     this.canvas.style.top = "0px"
@@ -533,6 +536,9 @@ class ball{
     this.y += this.vy*dt
 
     let speed = this.speed()
+
+    if(speed*dt > this.r/2){console.log("warning: ball too fast")}
+
     this.vx *= (1-gameWorld.airFriction*speed)**dt
     this.vy *= (1-gameWorld.airFriction*speed)**dt
 
@@ -702,7 +708,7 @@ class wall{
 
   draw(){
 
-    this.ctx.lineWidth = Math.max(this.hp**0.5,5)
+    this.ctx.lineWidth = Math.min(Math.max(this.hp**0.5,5),10)
     this.ctx.strokeStyle = this.color
     this.ctx.beginPath()
     this.ctx.moveTo(this.x,this.y)
@@ -930,6 +936,8 @@ class camera{
 
 class settings{
   static speedZoom = 5 // works anywhere from 3 (insane) to 12 (mild)
+  static mobile = 0
+  static relativeSize = (Height+Width)/3723
 }
 
 function makeWooden(wall,mult=0.5){
@@ -960,9 +968,10 @@ function allBallsCollide(time){
 
         // only do anything if the balls are moving towards each other
 
-        let towards = dot(a.vx,a.vy,b.x-a.x,b.y-a.y) <= 0
+        // let towards = dot(a.vx-b.vx,a.vy-b.vy,b.x-a.x,b.y-a.y) <= 0 // note to self: SUPER FUN
+        let towards = dot(b.vx-a.vx,b.vy-a.vy,b.x-a.x,b.y-a.y) <= 0
         if(!towards){
-          // return
+          return
         }
 
 
@@ -990,7 +999,6 @@ function allBallsCollide(time){
           dmgB *= b.damageMultiplier
 
 
-          console.log(dmgA,dmgB)
           let killed_b = 1+b.damage(dmgA)
           let killed_a = 1+a.damage(dmgB)
 
@@ -1049,6 +1057,28 @@ function allBallsCollide(time){
 /////// game setup
 
 
+class test{
+  static still(){
+    entityList.balls.forEach((e)=>{e.hp=e.maxHp=400000;e.tags.delete("AI")});entityList.walls.forEach((e)=>{e.hp=e.maxHp=400000});entityList.player.energyRegen = 400
+  }
+
+  static nextPushDebug(){
+    document.addEventListener("mouseup",(e)=>{debugger},{once:true})
+  }
+
+  static onFrameDebug(){
+    frameFuncs.splice(0,0,()=>{debugger})
+  }
+
+  static debug(){
+    entityList.walls.push(new wall(-200,440,800,440,can.ctx));
+    entityList.walls.push(new wall(-200,440,-200,0,can.ctx));
+    entityList.balls.push(new ball(-140,400,50,can.ctx))
+
+    this.still()
+  }
+}
+
 //initialize player @ip
 
   entityList.player = new ball(-100,400,50,can.ctx,false)
@@ -1101,7 +1131,10 @@ function allBallsCollide(time){
 
   if(!debug ){
     normalGenerate()    
-  } else {entityList.walls.push(new wall(-200,600,800,600,can.ctx)); entityList.walls[0].tags.add("sided")}
+  } else {
+    console.log('hey')
+    test.debug()
+  }
 
 
 
@@ -1133,16 +1166,19 @@ setTimeout(()=>{
   frameFuncs.push((time,dt,date)=>{
   
 
-  // dt = 16.6 // debugging
+  // dt = 1.6 // debugging
     dt = Math.min(100,dt)
 
   //move camera
 
 
   can.ctx.clearRect(0,0,can.canvas.width,can.canvas.height)
-  camera.scale += (settings.speedZoom/(entityList.player.speed()+settings.speedZoom)-camera.scale)*0.03
+
+  camera.scale += (settings.speedZoom/(entityList.player.speed()+settings.speedZoom)*settings.relativeSize-camera.scale)*0.03
   camera.pos.x += (entityList.player.x-WidthM/camera.scale-camera.pos.x)*0.03
   camera.pos.y += (entityList.player.y-HeightM/camera.scale-camera.pos.y)*0.03
+
+  can.ctx.fillText(settings.relativeSize,100,100)
   can.ctx.save()
   can.ctx.translate(-camera.pos.x*camera.scale,-camera.pos.y*camera.scale)
   can.ctx.scale(camera.scale,camera.scale)
@@ -1197,7 +1233,7 @@ setTimeout(()=>{
 function drawShootAngle(date){
   if(controller.mouseIsDown){
 
-    controller.dv = {x:controller.mouseDownPos.x-mouseX,y:controller.mouseDownPos.y-mouseY}
+    controller.dv = {x:(controller.mouseDownPos.x-mouseX)*(1+3*settings.mobile),y:(controller.mouseDownPos.y-mouseY)*(1+3*settings.mobile)}
 
     can.ctx.lineWidth = 1
     can.ctx.strokeStyle = "yellow"
@@ -1330,7 +1366,7 @@ document.addEventListener("mouseup",(e)=>{
   controller.mouseIsDown = false
   
   //last update for good measure
-  controller.dv = {x:controller.mouseDownPos.x-mouseX,y:controller.mouseDownPos.y-mouseY}
+  controller.dv = {x:(controller.mouseDownPos.x-mouseX)*(1+2*settings.mobile)/settings.relativeSize,y:(controller.mouseDownPos.y-mouseY)*(1+2*settings.mobile)/settings.relativeSize}
 
   entityList.player.jump(controller.dv.x,controller.dv.y,0.001)
   if(controller.mouseDownPos.charged){
@@ -1353,6 +1389,123 @@ document.addEventListener("keyup",(e)=>{
 })
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/////// touch handler
+
+
+function touchHandler(event)
+{
+
+  // console.log(event.type)
+    var touches = event.changedTouches,
+        first = touches[0],
+        type = "";
+
+    switch(event.type)
+    {
+        case "touchstart": type = "mousedown"; break;
+        case "touchmove":  type = "mousemove"; break;        
+        case "touchend":   type = "mouseup";   break;
+        case "touchcancel":   type = "mouseup";   break;
+        default:           return;
+    }
+
+    if(event.type == 'touchmove' && event.touches.length == 2){
+      let newDist = Math.hypot(
+        event.touches[0].pageX - event.touches[1].pageX,
+        event.touches[0].pageY - event.touches[1].pageY);
+      let md = [(event.touches[0].clientX+event.touches[1].clientX)/2,(event.touches[0].clientY+event.touches[1].clientY)/2]
+
+      if(pinchDist != -1){
+        // mobileScale(pinchDist - newDist,md)
+        // camera.x -= (md[0]-pinchMdx)/tileSize*mobileInverse
+        // camera.y -= (md[1]-pinchMdy)/tileSize*mobileInverse
+      }
+      return;
+    }
+
+
+    if(type !== "mouseup"){
+      mouseX = event.touches[0].clientX
+      mouseY = event.touches[0].clientY
+    }
+
+
+    var simulatedEvent = document.createEvent("MouseEvent");
+
+    if(event.type == "touchend"){
+        console.log("t4")
+       }
+
+    simulatedEvent.initMouseEvent(type, true, true, window, 1, 
+                                  first.screenX, first.screenY, 
+                                  first.clientX, first.clientY, false, 
+                                  false, false, false, 0/*left*/, null);
+
+    if(event.type == "touchend"){
+        console.log("t5")
+       }
+
+
+    document.body.dispatchEvent(simulatedEvent);
+    
+    if (event.cancelable) {
+      event.preventDefault();
+    }
+}
+
+
+function init() 
+{
+
+    document.addEventListener("touchstart", touchHandler, true);
+    document.addEventListener("touchmove", (e)=>{touchHandler(e)}, true);
+    document.addEventListener("touchend", touchHandler, true);
+    document.addEventListener("touchcancel", touchHandler, true);    
+    // document.addEventListener('touchmove', function() { e.preventDefault();GI.debuggingInfo = "cancled" }, { passive:false });
+}
+
+init()
+
+
+const isMobile = () => {
+  // Checks for touch support and imprecise pointer (finger)
+  return (
+    ('ontouchstart' in window) ||
+    (navigator.maxTouchPoints > 0) ||
+    (window.matchMedia("(any-pointer: coarse)").matches)
+  );
+};
+
+settings.mobile = isMobile()
+if(settings.mobile){
+  settings.relativeSize*=1.2
+}
 
 
 
