@@ -1,5 +1,5 @@
 
-let debug = 1;
+let debug = 0;
 let Width = window.innerWidth
 let Height = window.innerHeight
 
@@ -352,6 +352,61 @@ class id{
 
 
 
+
+
+class tree{
+  static dict = {"level":1,"stuff":{k:[set,child]}} // the first one is in the middle
+  static masterKey = 0
+
+  static keyify(x,y){
+    return(((x + y) * (x + y + 1)) / 2 + y)
+  }
+
+  static addToDict(d,key,item){
+    if(dict[key]===undefined){dict[key] = [new Set()]}
+    dict[key].add(item)
+  }
+
+  static add(x,y,l,i){
+    let dict = this.dict
+    if(l === dict.level){
+      this.addToDict(dict.stuff,this.keyify(x,y),i)
+      return
+    }
+
+    if(l > dict.level){
+
+    }
+
+  }
+
+  static expand(){
+    let childDict = this.dict
+    this.dict = {"level":this.dict.level+1,"stuff":{this.masterKey:[]}}
+    this.masterKey[1]
+  }
+
+
+  static query(x,y,l){
+
+  }
+
+  static returnChildren(d,s=new Set()){
+
+    for(let i = 1; i < d.stuff.length; i++){
+      if(d.stuff[i]!==undefined){
+        s = s.union(returnChildren(d.stuff[i]))
+      }
+    }
+
+    return(s.union(d.stuff[0]))
+  }
+
+}
+
+
+
+
 ////////// end game engine functions
 
 
@@ -393,6 +448,7 @@ class ball{
 
     this.energy = 100
     this.maxEnergy = 100
+    this.maxEnergySpend = 40
     this.energyRegen = 0.01
 
     this.wallJumpEnergy = 1
@@ -410,6 +466,12 @@ class ball{
     if(this.tags.has("isDead")){return}
     let actualForce = distance(vx,vy)*mag
     let spentEnergy = actualForce*30
+
+    if(spentEnergy>this.maxEnergySpend){
+      mag *= this.maxEnergySpend/spentEnergy
+      spentEnergy = this.maxEnergySpend
+    }
+
     this.energy -= spentEnergy
     if(this.energy<0){
 
@@ -458,8 +520,8 @@ class ball{
     this.tags.add("isDead")
     this.tags.add("noCollideWall")
     this.tags.add("noCollideBall")
-    this.vx *= 0.8
-    this.vy *= 0.8
+    this.vx *= 0.5
+    this.vy *= 0.5
     this.deathTime = Date.now()
   }
 
@@ -472,7 +534,7 @@ class ball{
 
   AIupdate(dt){
 
-    if(gameWorld.lastTime - this.AIlastUpdate < 1000){
+    if(gameWorld.lastTime - this.AIlastUpdate < this.AInextUpdateTime){
       return;
     }
 
@@ -480,7 +542,8 @@ class ball{
 
     this.AIlastUpdate = gameWorld.lastTime
     let player = entityList.player
-    if(this.energy > 50 && gameWorld.lastTime - this.lastJumpTime > this.AInextUpdateTime){
+    // if(this.energy > 50 && gameWorld.lastTime - this.lastJumpTime > this.AInextJumpTime){
+    if(this.energy > 40 ){
       // jump towards player
       this.AInextUpdateTime = rand(1000)+1000
 
@@ -501,7 +564,7 @@ class ball{
 
   AIinit(){
     this.AIlastUpdate = 0
-    this.AInextUpdateTime = 4000
+    this.AInextUpdateTime = 4000 + rand(1000)
     this.tags.add("AI")
   }
 
@@ -549,7 +612,7 @@ class ball{
     //check wall collisions
     if(!this.tags.has("noCollideWall")){
 
-      let collisionData = {"collided":false,"minDist":Infinity,"velocityUpdate":[0,0],"posUpdate":[0,0]}
+      let collisionData = {"collided":false,"minDist":Infinity}
 
       entityList.walls.forEach((w)=>{
 
@@ -562,10 +625,26 @@ class ball{
           let closest = point_on_line(this.x,this.y,w.x,w.y,w.x2,w.y2)
           let dist = distance(this.x,this.y,closest.x,closest.y)
           if(dist<collisionData.minDist){
-            collisionData.collided = true
+            collisionData.collided = w
             collisionData.minDist = dist
+            collisionData.closest=closest
+            collisionData.awaySide=awaySide
           } else {return}
 
+
+        }
+      })
+
+
+      // after finding the wall that collides
+
+      if(collisionData.collided){
+
+        this.energy += 5
+        let awaySide = collisionData.awaySide
+        let closest = collisionData.closest
+        let dist = collisionData.minDist
+        let w = collisionData.collided
 
           let fellback = false
 
@@ -599,9 +678,9 @@ class ball{
           let refFriction = dot(reflection.x,reflection.y,w.normalized.x,w.normalized.y) * w.friction
 
 
-          let nvx = refBounce * w.normal.x + refFriction * w.normalized.x
-          let nvy = refBounce * w.normal.y + refFriction * w.normalized.y
-          collisionData.velocityUpdate = [nvx,nvy]
+          this.vx = refBounce * w.normal.x + refFriction * w.normalized.x
+          this.vy = refBounce * w.normal.y + refFriction * w.normalized.y
+          
 
 
           //push ball out of wall (good enough for now, fix later, bleeding E)
@@ -611,19 +690,11 @@ class ball{
           if(overlap > 0){
             let pushX = -normalizedDirectionToWall.x * overlap
             let pushY = -normalizedDirectionToWall.y * overlap
-            collisionData.posUpdate = [pushX,pushY]
+            this.x += pushX
+            this.y += pushY
           }
 
 
-        }
-      })
-
-      if(collisionData.collided){
-        this.energy += this.wallJumpEnergy
-        this.vx = collisionData.velocityUpdate[0]
-        this.vy = collisionData.velocityUpdate[1]
-        this.x += collisionData.posUpdate[0]
-        this.y += collisionData.posUpdate[1]
       }
 
     }
@@ -1338,7 +1409,7 @@ function generateLevels(x,y){
   let wallX = {"a":x+floorLength*(0.2+rand(-0.1)),"b":x+floorLength*(0.7+rand(-0.2))}
 
   entityList.walls.push(new wall(x,y,x+floorLength,y,can.ctx))
-  let doorHeight = y-150-rand(50)
+  let doorHeight = y-250-rand(150)
   entityList.walls.push(makeWooden(new wall(wallX.a,y,wallX.a,doorHeight,can.ctx),0.2))
   segWalls(wallX.a,doorHeight,wallX.a,height,heightDiv)
   segWalls(wallX.b,y,wallX.b,height,heightDiv)
@@ -1568,8 +1639,9 @@ if(settings.mobile){
 // player trail
 // height advantage
 
-// bounciness for wall
+// bounciness for wall //
 // scrolling background
+// trace through once side walls
 
 fetch('/getIP', {
   method: 'POST',
