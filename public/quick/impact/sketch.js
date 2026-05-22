@@ -96,6 +96,7 @@ var frameFuncs = []
 
 function mainLoop(time){
   let dt= (time-gameWorld.lastTime)
+  if(dt < 15){requestAnimationFrame(mainLoop);return}
   gameWorld.lastTime = time
   gameWorld.frame += 1
   let date = Date.now()
@@ -205,7 +206,11 @@ overlayCan.fitScreenSize()
 overlayCan.canvas.style.pointerEvents = "none"
 overlayCan.canvas.style.zIndex = 2
 
-
+let underCan = new LCanvas()
+underCan.clear()
+underCan.fitScreenSize()
+underCan.canvas.style.pointerEvents = "none"
+underCan.canvas.style.zIndex = -1
 
 
 ////////// game engine functions
@@ -354,53 +359,153 @@ class id{
 
 
 
-class tree{
-  static dict = {"level":1,"stuff":{k:[set,child]}} // the first one is in the middle
-  static masterKey = 0
+class grid{ //Spatial Hash Grid
+  static size = 2400
+  static grid = {}
+
+  static findCell(x,y){
+    return([Math.floor(x/this.size),Math.floor(y/this.size)])
+  }
+
+  static mapIntToNat(n) {
+    return n >= 0 ? 2 * n : -2 * n - 1;
+  }
 
   static keyify(x,y){
+    x = this.mapIntToNat(x)
+    y = this.mapIntToNat(y)
     return(((x + y) * (x + y + 1)) / 2 + y)
   }
 
-  static addToDict(d,key,item){
-    if(dict[key]===undefined){dict[key] = [new Set()]}
-    dict[key].add(item)
-  }
 
-  static add(x,y,l,i){
-    let dict = this.dict
-    if(l === dict.level){
-      this.addToDict(dict.stuff,this.keyify(x,y),i)
-      return
+  static traceLineCells(startX, startY, endX, endY) { // might phase! does not have leeway
+    let cellSize = this.size
+    // 1. Find the starting cell coordinates
+    let cx = Math.floor(startX / cellSize);
+    let cy = Math.floor(startY / cellSize);
+
+    // Find the end cell coordinates so we know when to stop
+    const endCx = Math.floor(endX / cellSize);
+    const endCy = Math.floor(endY / cellSize);
+
+    const dx = endX - startX;
+    const dy = endY - startY;
+
+    // 2. Determine step direction (+1 or -1 cell)
+    const stepX = dx >= 0 ? 1 : -1;
+    const stepY = dy >= 0 ? 1 : -1;
+
+    // 3. Calculate distance to the next cell boundary in world units
+    const nextBoundaryX = (stepX > 0 ? cx + 1 : cx) * cellSize;
+    const nextBoundaryY = (stepY > 0 ? cy + 1 : cy) * cellSize;
+
+    // How far along the line (t parameter from 0 to 1) to hit the next X or Y boundary
+    let tMaxX = dx !== 0 ? (nextBoundaryX - startX) / dx : Infinity;
+    let tMaxY = dy !== 0 ? (nextBoundaryY - startY) / dy : Infinity;
+
+    // How far along the line we travel to cross an entire cell width/height
+    const tDeltaX = dx !== 0 ? Math.abs(cellSize / dx) : Infinity;
+    const tDeltaY = dy !== 0 ? Math.abs(cellSize / dy) : Infinity;
+
+    const cells = [];
+
+    // 4. Trace the grid
+    while (true) {
+        cells.push(this.keyify(cx,cy));
+
+        if (cx === endCx && cy === endCy) break;
+
+        // Move to the next closest cell boundary
+        if (tMaxX < tMaxY) {
+            tMaxX += tDeltaX;
+            cx += stepX;
+        } else {
+            tMaxY += tDeltaY;
+            cy += stepY;
+        }
     }
 
-    if(l > dict.level){
+    return cells;
+}
 
-    }
-
-  }
-
-  static expand(){
-    let childDict = this.dict
-    this.dict = {"level":this.dict.level+1,"stuff":{this.masterKey:[]}}
-    this.masterKey[1]
-  }
-
-
-  static query(x,y,l){
-
-  }
-
-  static returnChildren(d,s=new Set()){
-
-    for(let i = 1; i < d.stuff.length; i++){
-      if(d.stuff[i]!==undefined){
-        s = s.union(returnChildren(d.stuff[i]))
+  static query(x1,y1,x2,y2){ //directionall!!!
+    let cell1 = grid.findCell(x1,y1)
+    let cell2 = grid.findCell(x2,y2)
+    // let results = []
+    let items = new Set()
+    for(let i = cell1[0]; i <= cell2[0]; i++){
+      for(let j = cell1[1]; j <= cell2[1]; j++){
+        let key = grid.keyify(i,j)
+        if(this.grid[key]){
+          // results.push(this.grid[key])
+          items = items.union(this.grid[key])
+        }
       }
     }
 
-    return(s.union(d.stuff[0]))
+    // return({array:results,items:items})
+    return(items)
   }
+
+  static add(x1,y1,x2,y2,entity){
+    let cell1 = grid.findCell(x1,y1)
+    let cell2 = grid.findCell(x2,y2)
+    let results = []
+    let items = new Set()
+    for(let i = cell1[0]; i <= cell2[0]; i++){
+      for(let j = cell1[1]; j <= cell2[1]; j++){
+        let key = grid.keyify(i,j)
+        if(this.grid[key]===undefined){
+          this.grid[key] = new Set()
+        }
+        this.grid[key].add(entity)
+        results.push(this.grid[key])
+      }
+    }
+    return(results)
+
+    // let arr = this.traceLineCells(x1,y1,x2,y2)
+    // for(let i = 0; i < arr.length; i++){
+    //   let key = arr[i]
+    //   if(this.grid[key]===undefined){
+    //     this.grid[key] = new Set()
+    //   }
+    //   this.grid[key].add(entity)
+    // }
+
+    // return(arr)
+  }
+
+  static addWall(wall){
+    let x1 = Math.min(wall.x,wall.x2)
+    let y1 = Math.min(wall.y,wall.y2)
+    let x2 = Math.max(wall.x,wall.x2)
+    let y2 = Math.max(wall.y,wall.y2)
+    return(this.add(x1,y1,x2,y2,wall))
+  }
+
+
+  static draw(){
+    let k = 0
+    for(let i = -10; i < 10; i++){
+      for(let j = -10; j < 11; j++){
+        k++
+        can.ctx.fillStyle = "rgb("+(k%2)*125+",0,0)"
+        can.ctx.fillRect(i*this.size,j*this.size,this.size,this.size)
+      }
+    }
+  }
+
+  static dbg(){
+    let arr = []
+    for(let i = -10; i < 10; i++){
+      for(let j = -10; j < 11; j++){
+        arr.push(this.keyify(i,j))
+      }
+    }
+    return(arr)
+  } 
+
 
 }
 
@@ -431,6 +536,7 @@ class ball{
     this.name = "dummy" 
     this.updateFuncs = []
     this.drawFuncs = []
+    this.onDeath = []
 
     this.tags = new Set()
     this.id = id.gen()
@@ -438,6 +544,7 @@ class ball{
     this.maxHp = 100
     this.hpRegen = 0.002
     this.damageMultiplier = 1
+    this.maxTakenDamagePercentage = 1
 
     this.lastCollideTime = 0
     this.collideTime = 0
@@ -483,6 +590,9 @@ class ball{
 
     this.force(vx,vy,mag)
     this.lastJumpTime = gameWorld.lastTime
+
+    this.onJump?this.onJump(this,spentEnergy):0
+
   }
 
   force(x,y,mag){
@@ -498,6 +608,10 @@ class ball{
   speed(){
     return(distance(this.vx,this.vy))
   }
+  speedSq(){
+    return(this.vx*this.vx+this.vy*this.vy)
+  }
+
 
   damage(dmg){
 
@@ -505,7 +619,10 @@ class ball{
 
     let damagePercentage = Math.min((gameWorld.lastTime-lastCollideTime)/this.collisionInitiative,1)
 
-    this.hp -= dmg * damagePercentage
+    dmg *= damagePercentage
+    dmg = Math.min(dmg*damagePercentage,this.maxHp*this.maxTakenDamagePercentage)
+
+    this.hp -= dmg 
 
 
 
@@ -520,9 +637,12 @@ class ball{
     this.tags.add("isDead")
     this.tags.add("noCollideWall")
     this.tags.add("noCollideBall")
-    this.vx *= 0.5
-    this.vy *= 0.5
+    this.vx *= 0.7
+    this.vy *= 0.7
     this.deathTime = Date.now()
+    this.onDeath.forEach((f)=>{
+      f()
+    })
   }
 
   collided(time,by){
@@ -542,7 +662,6 @@ class ball{
 
     this.AIlastUpdate = gameWorld.lastTime
     let player = entityList.player
-    // if(this.energy > 50 && gameWorld.lastTime - this.lastJumpTime > this.AInextJumpTime){
     if(this.energy > 40 ){
       // jump towards player
       this.AInextUpdateTime = rand(1000)+1000
@@ -581,9 +700,12 @@ class ball{
     //natural hp regen
     if(gameWorld.lastTime - this.collideTime > 2000){ // 2 seconds after battle      
       this.hp += this.hpRegen*dt
+      if(gameWorld.lastTime - this.collideTime > 10000 || this.speedSq() < 0.02){
+        this.hp += this.hpRegen*dt*3
+      }
       if(this.hp > this.maxHp){
         this.hp = this.maxHp
-    }
+      } 
     }
 
     this.damageMultiplier += Math.min((1-this.damageMultiplier)*0.002,0.0001)*dt
@@ -725,7 +847,7 @@ class ball{
     }
 
     this.drawFuncs.forEach((e)=>{
-      e()
+      e(this,s,l)
     })
 
     //debug
@@ -748,6 +870,9 @@ class wall{
     this.color = "white"
     this.ctx = ctx
     this.length = distance(x1,y1,x2,y2)
+
+    this.gridPos = grid.addWall(this)
+
     this.id = id.gen()
 
     this.hp = 10 
@@ -798,6 +923,11 @@ class wall{
     }
     particles.push(new shatteredWallParticle(this,this.x+dx*seg,this.y+dy*seg,this.x2,this.y2,by.vx,by.vy,impactPt,1-seg))
 
+    //remove from grid
+    this.gridPos.forEach((cell)=>{
+      cell.delete(this)
+    })
+
   }
 
   draw(){
@@ -830,11 +960,12 @@ class particle{
     this.vx = vx
     this.vy = vy
     this.ay = gameWorld.gravity/2
-    this.color = [140+rand(60),0,0]
+    this.color = [100+rand(120),0,0]
     this.size = 5 + rand(10)
     this.life = life + rand()*life
     this.maxLife = this.life
-    this.ctx = can.ctx
+    this.ctx = underCan.ctx
+
   }
   update(dt){
     this.vy += this.ay*dt
@@ -853,7 +984,13 @@ class particle{
     this.ctx.fillStyle = "rgba("+this.color[0]+","+this.color[1]+","+this.color[2]+","+(this.life/this.maxLife)+")"
     this.ctx.beginPath()
     this.ctx.arc(this.x,this.y,this.size,0,Math.PI*2)
-    this.ctx.fill()
+    if(!this.noFill){
+      this.ctx.fill()
+    } else{
+      this.ctx.strokeStyle = this.ctx.fillStyle
+      this.ctx.lineWidth = 3
+      this.ctx.stroke()
+    }
   }
 }
 
@@ -936,8 +1073,8 @@ class shatteredWallParticle{
   update(dt){
     this.vy += gameWorld.gravity*dt
 
-    this.vx *= 0.999 ** dt
-    this.vy *= 0.999 ** dt
+    this.vx *= (1-0.006/this.length) ** dt
+    this.vy *= (1-0.006/this.length) ** dt
 
     this.x += this.vx * dt
     this.y += this.vy * dt
@@ -1080,8 +1217,10 @@ function allBallsCollide(time){
 
           let normalizedVectorTo = {x:(b.x-a.x)/dist, y:(b.y-a.y)/dist}
 
-          let dmgA = dot(a.vx,a.vy,normalizedVectorTo.x,normalizedVectorTo.y) * a.mass
-          let dmgB = - dot(b.vx,b.vy,normalizedVectorTo.x,normalizedVectorTo.y) * b.mass
+          let massRatio = 2/(1/a.mass+1/b.mass)
+
+          let dmgA = dot(a.vx,a.vy,normalizedVectorTo.x,normalizedVectorTo.y) * massRatio
+          let dmgB = - dot(b.vx,b.vy,normalizedVectorTo.x,normalizedVectorTo.y) * massRatio
 
           dmgA = Math.max(dmgA*50,0) 
           dmgB = Math.max(dmgB*50,0) 
@@ -1095,13 +1234,23 @@ function allBallsCollide(time){
           dmgB *= b.damageMultiplier
 
 
-          let killed_b = 1+b.damage(dmgA)
-          let killed_a = 1+a.damage(dmgB)
+
 
           //particles A
           let spread = -0.6
           let spread2 = -0.3
           let mult = 0.25
+
+          let forceMultiplier = dot(a.vx,a.vy,normalizedVectorTo.x,normalizedVectorTo.y) * a.mass - dot(b.vx,b.vy,normalizedVectorTo.x,normalizedVectorTo.y)* b.mass
+          let forceTo = {x:forceMultiplier * normalizedVectorTo.x,y:forceMultiplier * normalizedVectorTo.y}
+          a.forceM(normalizedVectorTo.x,normalizedVectorTo.y,-forceMultiplier)
+          // counterforce
+          b.forceM(normalizedVectorTo.x,normalizedVectorTo.y,forceMultiplier)
+
+          let killed_b = 1+b.damage(dmgA)
+          let killed_a = 1+a.damage(dmgB)
+
+          // @blood
           for(let i = 0; i < dmgB*mult*killed_b; i++){
             let rnd = rand(1.1)
             setTimeout(()=>{
@@ -1117,13 +1266,23 @@ function allBallsCollide(time){
             },rand(100))
           }
 
-          let forceMultiplier = dot(a.vx,a.vy,normalizedVectorTo.x,normalizedVectorTo.y) * a.mass - dot(b.vx,b.vy,normalizedVectorTo.x,normalizedVectorTo.y)* b.mass
-          // let forceMultiplier2 = dot(b.vx,b.vy,normalizedVectorTo.x,normalizedVectorTo.y)
+          let p = new particle(b.x,b.y,0,0)
+          p.life = 15*dmgB
+          p.color = [255,10,12]
+          p.ay = 0
+          p.size = b.r+2
+          p.noFill = 1
+          particles.push(p)
+
+          p = new particle(a.x,a.y,0,0)
+          p.life = 15*dmgA
+          p.color = [255,10,12]
+          p.ay = 0
+          p.size = a.r+2
+          p.noFill = 1
+          particles.push(p)
           
-          let forceTo = {x:forceMultiplier * normalizedVectorTo.x,y:forceMultiplier * normalizedVectorTo.y}
-          a.forceM(normalizedVectorTo.x,normalizedVectorTo.y,-forceMultiplier)
-          // counterforce
-          b.forceM(normalizedVectorTo.x,normalizedVectorTo.y,forceMultiplier)
+          
 
 
 
@@ -1178,6 +1337,18 @@ class test{
 
     this.still()
   }
+
+  static balls(){
+    for(let i = 0; i < 100; i++){newBall(player.x+rand()-70,player.y-60,50)}
+  }
+
+  static particles(){
+    setInterval((e)=>{
+      let p = new particle(player.x,player.y-200,1,0)
+      particles.push(p)
+      p.life *= 5
+    },200)
+  }
 }
 
 //initialize player @ip
@@ -1192,16 +1363,65 @@ class test{
   entityList.player.energyRegen *= 2
   entityList.balls.push(entityList.player)
   entityList.player.tags.delete("AI")
+  entityList.player.onJump = (b,spentEnergy)=>{
+    let p = new particle(b.x,b.y,0,0)
+    p.life = 1500/b.maxEnergySpend*spentEnergy
+    p.color = [120,245,230]
+    p.ay = 0
+    p.size = b.r+2
+    p.noFill = 1
+    particles.push(p)
+  }
 
-  // entityList.player.drawFuncs.push(()=>{
+  entityList.player.trail = []
+  entityList.player.drawFuncs.push((p,s,l)=>{
 
-  // }) // implement player trail
+    p.ctx.save()
+    p.ctx.globalCompositeOperation = "destination-over"
+
+    p.trail.forEach((e,i)=>{
+      p.ctx.fillStyle = "hsla("+(p.color[0])+ "," + s + "%," + l + "%,"+Math.min(0.5,0.01*i*e[2] - 0.5)+")"
+      p.ctx.beginPath()
+      p.ctx.arc(e[0],e[1],p.r*0.97,0,Math.PI*2)
+      p.ctx.fill()
+    })
+
+    p.trail.push([p.x,p.y,p.speed()])
+    if(p.trail.length>50){
+      p.trail.splice(0,1)
+    }
+    p.ctx.globalCompositeOperation = "source-over"
+    p.ctx.restore()
+
+  }) // implement player trail
 
 
   function newWall(a,b,c,d,ctx=can.ctx){
     let w = new wall(a,b,c,d,ctx)
     entityList.walls.push(w)
     return(w)
+  }
+  function newBall(x,y,r,ctx=can.ctx){
+    let b = new ball(x,y,r,ctx)
+    entityList.balls.push(b)
+    return(b)
+  }
+
+  function newWallTo(a,b,c,d,ctx){
+    return(newWall(a,b,a+c,b+d,ctx))
+  }
+
+  function mirror(f,a,b,c,d,x,flip=false){
+    let w1 = f(a,b,c,d)
+
+    let w2;
+    if(flip){
+      w2 = f(x+(x-c),b,x+(x-a),d)
+    } else {
+      w2 = f(x+(x-a),b,x+(x-c),d)
+    }
+
+    return([w1,w2])
   }
 
 
@@ -1229,7 +1449,8 @@ class test{
     for(let i = 0; i < 4; i++){
       vx += rand(-400)
       vy += rand(-400)
-      entityList.walls.push(new wall(x,y,x+vx,y+vy,can.ctx))
+      let w = newWall(x,y,x+vx,y+vy,can.ctx)
+      w.hp*=10
       x+=vx
       y+=vy
   }
@@ -1269,11 +1490,14 @@ requestAnimationFrame(mainLoop)
 
 /////// main game @loop & drawing
 
+underCan.ctx.fillStyle = "rgba(0,0,0,1)"
+underCan.ctx.globalCompositeOperation = 'destination-out';
+underCan.ctx.save()
 
 setTimeout(()=>{
   frameFuncs.push((time,dt,date)=>{
   
-
+    let pn = performance.now()
   // dt = 1.6 // debugging
     dt = Math.min(100,dt)
 
@@ -1283,21 +1507,34 @@ setTimeout(()=>{
   can.ctx.clearRect(0,0,can.canvas.width,can.canvas.height)
 
   camera.scale += (settings.speedZoom/(entityList.player.speed()+settings.speedZoom)*settings.relativeSize-camera.scale)*0.03
-  camera.pos.x += (entityList.player.x-WidthM/camera.scale-camera.pos.x)*0.03
-  camera.pos.y += (entityList.player.y-HeightM/camera.scale-camera.pos.y)*0.03
+  let camDx = (entityList.player.x-WidthM/camera.scale-camera.pos.x)*0.03
+  let camDy = (entityList.player.y-HeightM/camera.scale-camera.pos.y)*0.03
+  camera.pos.x += camDx
+  camera.pos.y += camDy
 
-  // can.ctx.fillText(settings.relativeSize,100,100)
   can.ctx.save()
   can.ctx.translate(-camera.pos.x*camera.scale,-camera.pos.y*camera.scale)
   can.ctx.scale(camera.scale,camera.scale)
 
+  underCan.ctx.restore()
+  underCan.ctx.save()
+  underCan.ctx.globalCompositeOperation = 'copy';
+  // underCan.ctx.fillRect(0,0,underCan.canvas.width,underCan.canvas.height)
+  underCan.ctx.drawImage(underCan.ctx.canvas, -camDx*camera.scale, -camDy*camera.scale); // should fix later: sudden zooming does not get adjusted for
+  underCan.ctx.globalCompositeOperation = 'destination-out';
+  underCan.ctx.fillRect(0,0,underCan.canvas.width,underCan.canvas.height)
+  underCan.ctx.globalCompositeOperation = 'source-over';
+
+  underCan.ctx.setTransform(can.ctx.getTransform());
+
+  // grid.draw()
 
   particles.update(dt)
   particles.draw(1)
 
   for(let i = entityList.balls.length-1; i>-1; i--){
     let e = entityList.balls[i]
-    if(e.tags.has("isDead") && date-e.deathTime > 5000){
+    if(e.tags.has("isDead") && date-e.deathTime > 5000 && e !== entityList.player){
       entityList.balls.splice(i,1)
       continue;
     }
@@ -1332,6 +1569,8 @@ setTimeout(()=>{
   can.ctx.restore()
   drawPlayerGUI()
 
+  can.ctx.fillStyle = "pink"
+  can.ctx.fillText(Math.floor(dt)+" "+Math.round(performance.now()-pn),100,100)
 
   })
 },400) // wait for website to stabalize
@@ -1400,6 +1639,7 @@ function generateLevels(x,y){
   // entityList.walls.push(new wall(x,y,x+vx,y+vy,can.ctx))
   // entityList.walls.push( makeAIbreakable(makeWooden(new wall(50,500,150,500,can.ctx),0.1)))
 
+  let tmp;
   let floorLength = 1800+rand(1800)
   let heightDiff = floorLength * (1.6+rand(7))
   let height = y-heightDiff
@@ -1407,18 +1647,24 @@ function generateLevels(x,y){
   let heightDiv = Math.floor(heightDiff/300)
 
   let wallX = {"a":x+floorLength*(0.2+rand(-0.1)),"b":x+floorLength*(0.7+rand(-0.2))}
+  let floorWidth = wallX.b-wallX.a
+  let midX = wallX.a + floorWidth/2
 
-  entityList.walls.push(new wall(x,y,x+floorLength,y,can.ctx))
+
+  tmp = newWall(x,y,x+floorLength,y,can.ctx)//base floor
+  tmp.hp*=10
+
   let doorHeight = y-250-rand(150)
   entityList.walls.push(makeWooden(new wall(wallX.a,y,wallX.a,doorHeight,can.ctx),0.2))
   segWalls(wallX.a,doorHeight,wallX.a,height,heightDiv)
   segWalls(wallX.b,y,wallX.b,height,heightDiv)
-  entityList.walls.push(new wall(wallX.a,height,wallX.b,height,can.ctx)) // roof
+  // entityList.walls.push(new wall(wallX.a,height,wallX.b,height,can.ctx)) // old roof
+  mirror(newWall,wallX.a,height,wallX.a+floorWidth/3,height,midX,1).forEach((e)=>{makeWooden(e).tags.add("sided")}) // roof
+  newWall(wallX.a+floorWidth/3,height,wallX.b-floorWidth/3,height)
 
 
   let floor = doorHeight - rand(150)
-  let floorWidth = wallX.b-wallX.a
-  while(floor > height){
+  while(floor > height + 200){
 
     let floorX = 40+rand(floorWidth-180)
     let start = wallX.a
@@ -1449,8 +1695,37 @@ function generateLevels(x,y){
     floor -= 230+rand(200)
   }
 
+  /// boss level
 
 
+  // newWallTo(wallX.a,height,200-floorWidth,-300)
+  // newWallTo(wallX.b,height,-(200-floorWidth),-300)
+
+  mirror(newWall,wallX.a,height,wallX.a,height-300,midX)
+  height -= 300
+  mirror(newWall,wallX.a,height,midX-180,height,midX)
+  makeWooden(newWall(midX-180,height,midX+180,height)).tags.add("sided")
+  mirror(newWall,wallX.a,height,midX-900,height-300,midX)
+  height -= 300
+  mirror(newWall,midX-900,height,midX-900,height-2300,midX)
+
+  height -= 400
+      
+  mirror(newWall,midX-900,height,midX-500,height,midX).forEach((e)=>{entityList.balls.push(new ball(e.midpoint.x,e.midpoint.y-60,50,can.ctx))})
+  height -= 200
+  mirror(newWall,midX-900,height,midX-600,height,midX).forEach((e)=>{entityList.balls.push(new ball(e.midpoint.x,e.midpoint.y-60,50,can.ctx))})
+  height -= 200
+  mirror(newWall,midX-900,height,midX-700,height,midX).forEach((e)=>{entityList.balls.push(new ball(e.midpoint.x,e.midpoint.y-60,50,can.ctx))})
+  height -= 400
+  newWall(midX-200,height,midX+200,height)
+  let boss = newBall(midX,height-60,80,can.ctx)
+  boss.hp *= 5
+  boss.maxHp *= 5
+  boss.onDeath.push(()=>{boss.vx*=0.8;boss.vy*=0.8})
+
+
+  // entityList.player.y = height
+  // entityList.player.x = midX
 
 }
 
@@ -1476,10 +1751,10 @@ function generateLevels(x,y){
 function controlBall(){
   let movement = 0.005
   let player = entityList.player
-  if(controller.keys.w){player.vy -= 0.005}
-  if(controller.keys.s){player.vy += 0.005}
-  if(controller.keys.a){player.vx -= 0.005}
-  if(controller.keys.d){player.vx += 0.005}
+  if(controller.keys.w){player.vy -= movement}
+  if(controller.keys.s){player.vy += movement}
+  if(controller.keys.a){player.vx -= movement}
+  if(controller.keys.d){player.vx += movement}
 }
 
 document.addEventListener("mousedown",(e)=>{
@@ -1648,3 +1923,6 @@ fetch('/getIP', {
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({}),
 });
+
+
+var player = entityList.player
