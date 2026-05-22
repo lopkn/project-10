@@ -205,6 +205,7 @@ overlayCan.clear()
 overlayCan.fitScreenSize()
 overlayCan.canvas.style.pointerEvents = "none"
 overlayCan.canvas.style.zIndex = 2
+overlayCan.canvas.classList.add("mobile")
 
 let underCan = new LCanvas()
 underCan.clear()
@@ -219,9 +220,10 @@ function dot(x1,y1,x2,y2){
   return(x1*x2+y1*y2)
 }
 
-
-
-
+function normalize(x,y){
+  let len = Math.sqrt(x*x+y*y)
+  return {x: x/len, y: y/len}
+}
 
 
 function check_collision_circles(x1,y1,r1,x2,y2,r2){
@@ -561,6 +563,7 @@ class ball{
     this.wallJumpEnergy = 1
 
     this.lastJumpTime = 0
+    this.lastCollideWallTime = 0
     if(AI){
       this.AIinit()
     }
@@ -584,6 +587,7 @@ class ball{
 
       let energyPenalty = (spentEnergy+this.energy)/spentEnergy
       mag*=energyPenalty
+      spentEnergy += this.energy
       this.energy = 0
 
     }
@@ -816,12 +820,15 @@ class ball{
             this.y += pushY
           }
 
+          this.lastCollideWallTime = gameWorld.lastTime
 
       }
 
     }
 
-    this.energy += this.energyRegen*dt
+    if(this.lastJumpTime < this.lastCollideWallTime){
+      this.energy += this.energyRegen*dt
+    }
     if(this.energy > this.maxEnergy){
       this.energy = this.maxEnergy
     }
@@ -1156,6 +1163,22 @@ class controller{
 
   static dv = {x:0,y:0}
 
+  static activeTouches = {}
+  static movement = {down:false}
+
+  static updateJump(x,y){
+    controller.dv = {x:(controller.mouseDownPos.x-x)*(settings.dragSensitivity+settings.mobileSensMultiplier*settings.mobile)/settings.relativeSize,y:(controller.mouseDownPos.y-y)*(settings.dragSensitivity+settings.mobileSensMultiplier*settings.mobile)/settings.relativeSize}
+  }
+
+  static endJump(x,y){
+    controller.dv = {x:(controller.mouseDownPos.x-x)*(settings.dragSensitivity+settings.mobileSensMultiplier*settings.mobile)/settings.relativeSize,y:(controller.mouseDownPos.y-y)*(settings.dragSensitivity+settings.mobileSensMultiplier*settings.mobile)/settings.relativeSize}
+    entityList.player.jump(this.dv.x,this.dv.y,0.001)
+    if(this.mouseDownPos.charged){
+      entityList.player.wallBreakMultiplier += 4    
+    }
+    gameWorld.timeWarp += (1-gameWorld.timeWarp)*0.5
+    this.mouseIsDown = false
+  }
 
 }
 
@@ -1580,7 +1603,9 @@ setTimeout(()=>{
 function drawShootAngle(date){
   if(controller.mouseIsDown){
 
-    controller.dv = {x:(controller.mouseDownPos.x-mouseX)*(settings.dragSensitivity+settings.mobileSensMultiplier*settings.mobile)/settings.relativeSize,y:(controller.mouseDownPos.y-mouseY)*(settings.dragSensitivity+settings.mobileSensMultiplier*settings.mobile)/settings.relativeSize}
+    if(!settings.mobile){
+      controller.updateJump(mouseX,mouseY)
+    }
 
     can.ctx.lineWidth = 1
     can.ctx.strokeStyle = "yellow"
@@ -1616,6 +1641,18 @@ function drawPlayerGUI(){
   can.ctx.fillRect(0, padding+padding+barHeight, barWidth, barHeight)
   can.ctx.fillStyle = "rgb(40,170,250)"
   can.ctx.fillRect(0, padding+padding+barHeight, barWidth*(entityList.player.energy/entityList.player.maxEnergy), barHeight)
+
+  if(settings.mobile){
+    if(controller.movement.down){
+      can.ctx.lineWidth =3 
+      can.ctx.strokeStyle = "#F0F0F0"
+      can.ctx.beginPath()
+      can.ctx.moveTo(controller.movement.x,controller.movement.y)
+      can.ctx.lineTo(controller.movement.x+controller.movement.dx,controller.movement.y+controller.movement.dy)
+      can.ctx.stroke()
+    }
+  }
+
 }
 
 
@@ -1749,12 +1786,27 @@ function generateLevels(x,y){
 
 
 function controlBall(){
-  let movement = 0.005
+  let movement = 0.055
   let player = entityList.player
+  if(player.tags.has("isDead")){return}
   if(controller.keys.w){player.vy -= movement}
   if(controller.keys.s){player.vy += movement}
   if(controller.keys.a){player.vx -= movement}
   if(controller.keys.d){player.vx += movement}
+
+  if(settings.mobile && controller.movement.down){
+    let norm = distance(controller.movement.dx,controller.movement.dy)
+
+    let lim = Math.max(1,norm) / movement
+    let size = 100
+    if(norm < size && norm !== 0){
+      lim *= size/norm
+    }
+
+
+    player.vx += controller.movement.dx / lim 
+    player.vy += controller.movement.dy / lim
+  }
 }
 
 document.addEventListener("mousedown",(e)=>{
@@ -1763,16 +1815,7 @@ document.addEventListener("mousedown",(e)=>{
 })
 
 document.addEventListener("mouseup",(e)=>{
-  controller.mouseIsDown = false
-  
-  //last update for good measure
-    controller.dv = {x:(controller.mouseDownPos.x-mouseX)*(settings.dragSensitivity+settings.mobileSensMultiplier*settings.mobile)/settings.relativeSize,y:(controller.mouseDownPos.y-mouseY)*(settings.dragSensitivity+settings.mobileSensMultiplier*settings.mobile)/settings.relativeSize}
-
-  entityList.player.jump(controller.dv.x,controller.dv.y,0.001)
-  if(controller.mouseDownPos.charged){
-    entityList.player.wallBreakMultiplier += 4    
-  }
-  gameWorld.timeWarp += (1-gameWorld.timeWarp)*0.5
+  controller.endJump(mouseX,mouseY)
 })
 
 
@@ -1835,18 +1878,36 @@ function touchHandler(event)
         default:           return;
     }
 
-    if(event.type == 'touchmove' && event.touches.length == 2){
-      let newDist = Math.hypot(
-        event.touches[0].pageX - event.touches[1].pageX,
-        event.touches[0].pageY - event.touches[1].pageY);
-      let md = [(event.touches[0].clientX+event.touches[1].clientX)/2,(event.touches[0].clientY+event.touches[1].clientY)/2]
 
-      if(pinchDist != -1){
-        // mobileScale(pinchDist - newDist,md)
-        // camera.x -= (md[0]-pinchMdx)/tileSize*mobileInverse
-        // camera.y -= (md[1]-pinchMdy)/tileSize*mobileInverse
+    for(let i = 0; i < touches.length; i++){
+        let E = touches[i]
+        if(!controller.activeTouches[E.identifier]){
+          controller.activeTouches[E.identifier] = {"type":"unidentified"}
+        }
+    }
+    if(event.type == "touchstart"){
+      let E = touches[touches.length-1]
+      if(E.pageX < can.canvas.width/2){
+        controller.activeTouches[E.identifier].type = "movement"
+        controller.movement = {down:true,x:E.clientX,y:E.clientY,time:Date.now(),dx:0,dy:0}
+      } else {
+        controller.activeTouches[E.identifier].type = "jump"
+        controller.mouseDownPos = {x:E.clientX,y:E.clientY,time:Date.now()}
+        controller.updateJump(E.clientX,E.clientY)
+        controller.mouseIsDown = true
       }
-      return;
+    }
+
+    if(event.type == 'touchmove'){
+      for(let i = 0; i < touches.length; i++){
+        let E = touches[i]
+        if(controller.activeTouches[E.identifier].type == "movement"){
+          controller.movement.dx = E.clientX - controller.movement.x
+          controller.movement.dy = E.clientY - controller.movement.y
+        } else if(controller.activeTouches[E.identifier].type == "jump"){
+          controller.updateJump(E.clientX,E.clientY)
+        }
+      }
     }
 
 
@@ -1856,23 +1917,31 @@ function touchHandler(event)
     }
 
 
-    var simulatedEvent = document.createEvent("MouseEvent");
+    // var simulatedEvent = document.createEvent("MouseEvent");
 
     if(event.type == "touchend"){
-        console.log("t4")
-       }
+        for(let i = 0; i < touches.length; i++){
+          let E = touches[i]
+          if(controller.activeTouches[E.identifier].type == "movement"){
+            controller.movement.dx = 0
+            controller.movement.dy = 0
+            controller.movement.down = false
+          } else if(controller.activeTouches[E.identifier].type == "jump"){
+            controller.endJump(E.clientX,E.clientY)
+          }
+          delete controller.activeTouches[E.identifier]
+        }
+    }
 
-    simulatedEvent.initMouseEvent(type, true, true, window, 1, 
-                                  first.screenX, first.screenY, 
-                                  first.clientX, first.clientY, false, 
-                                  false, false, false, 0/*left*/, null);
-
-    if(event.type == "touchend"){
-        console.log("t5")
-       }
+    // simulatedEvent.initMouseEvent(type, true, true, window, 1, 
+    //                               first.screenX, first.screenY, 
+    //                               first.clientX, first.clientY, false, 
+    //                               false, false, false, 0/*left*/, null);
 
 
-    document.body.dispatchEvent(simulatedEvent);
+
+
+    // document.body.dispatchEvent(simulatedEvent);
     
     if (event.cancelable) {
       event.preventDefault();
@@ -1888,6 +1957,11 @@ function init()
     document.addEventListener("touchend", touchHandler, true);
     document.addEventListener("touchcancel", touchHandler, true);    
     // document.addEventListener('touchmove', function() { e.preventDefault();GI.debuggingInfo = "cancled" }, { passive:false });
+
+
+    document.addEventListener('gesturestart', function (e) {
+      e.preventDefault();
+    });
 }
 
 init()
