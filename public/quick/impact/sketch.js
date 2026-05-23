@@ -1220,6 +1220,7 @@ class settings{
   static relativeSize = (Height+Width)/3723
   static dragSensitivity = 1.5
   static mobileSensMultiplier = 1.333
+  static offline = true
 }
 
 function makeWooden(wall,mult=0.5){
@@ -2017,11 +2018,22 @@ if(settings.mobile){
 // scrolling background
 // trace through once side walls
 
-fetch('/getIP', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({}),
-});
+const navigationEntry = performance.getEntriesByType("navigation")[0];
+const isCached = navigationEntry.transferSize === 0;
+console.log(isCached ? "Served from cache" : "Served from network");
+settings.offline = isCached
+
+if(!settings.offline){
+
+  fetch('/getIP', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({}),
+  });
+}
+
 
 
 var player = entityList.player
+
+//test gay ray

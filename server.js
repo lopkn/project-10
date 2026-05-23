@@ -1533,6 +1533,7 @@ app.post('/getIP', (req, res) => {
     const forwardedIp = req.headers['x-forwarded-for']?.split(',')[0]?.trim();
 
     console.log(`Raw Socket IP: ${rawIp} | Forwarded For: ${forwardedIp}`);
+    res.send("hey")
     
 
 })
