@@ -570,6 +570,8 @@ class ball{
 
     this.sidedWallEntryFrame = {}
 
+    this.movementSpeed = 0
+
   }
 
   jump(vx,vy,mag){
@@ -655,6 +657,30 @@ class ball{
       this.collideTime = time
     }
   }
+
+
+  movement(){
+    if(ball.tags.has("isDead")){return}
+    if(controller.keys.w){ball.vy -= this.movementSpeed}
+    if(controller.keys.s){ball.vy += movement}
+    if(controller.keys.a){ball.vx -= movement}
+    if(controller.keys.d){ball.vx += movement}
+
+    if(settings.mobile && controller.movement.down){
+      let norm = distance(controller.movement.dx,controller.movement.dy)
+
+      let lim = Math.max(1,norm) / movement
+      let size = 100
+      if(norm < size && norm !== 0){
+        lim *= size/norm
+      }
+
+
+      ball.vx += controller.movement.dx / lim 
+      ball.vy += controller.movement.dy / lim
+    }
+  }
+
 
   AIupdate(dt){
 
@@ -1583,7 +1609,7 @@ setTimeout(()=>{
 
   drawShootAngle(date)
 
-  controlBall()
+  controlBall(entityList.player)
 
   gameWorld.timeWarp += (1-gameWorld.timeWarp)*0.1
   if(controller.mouseIsDown){gameWorld.timeWarp*=0.90}
@@ -1785,14 +1811,13 @@ function generateLevels(x,y){
 /// main game controls
 
 
-function controlBall(){
-  let movement = 0.055
-  let player = entityList.player
-  if(player.tags.has("isDead")){return}
-  if(controller.keys.w){player.vy -= movement}
-  if(controller.keys.s){player.vy += movement}
-  if(controller.keys.a){player.vx -= movement}
-  if(controller.keys.d){player.vx += movement}
+function controlBall(ball){
+  let movement = 0.005
+  if(ball.tags.has("isDead")){return}
+  if(controller.keys.w){ball.vy -= movement}
+  if(controller.keys.s){ball.vy += movement}
+  if(controller.keys.a){ball.vx -= movement}
+  if(controller.keys.d){ball.vx += movement}
 
   if(settings.mobile && controller.movement.down){
     let norm = distance(controller.movement.dx,controller.movement.dy)
@@ -1804,8 +1829,8 @@ function controlBall(){
     }
 
 
-    player.vx += controller.movement.dx / lim 
-    player.vy += controller.movement.dy / lim
+    ball.vx += controller.movement.dx / lim 
+    ball.vy += controller.movement.dy / lim
   }
 }
 

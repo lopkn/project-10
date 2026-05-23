@@ -1,0 +1,17 @@
+{
+  "name": "LIPT Impact",
+  "short_name": "LIPT",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#151515",
+  "theme_color": "#151515",
+  "scope": "./",
+  "description": "Offline-capable LIPT sketch.",
+  "icons": [
+    {
+      "src": "../../images/psim2.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}
