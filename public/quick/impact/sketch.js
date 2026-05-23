@@ -925,6 +925,9 @@ class wall{
     this.bounce = 0.8
     this.friction = 1
 
+    this.events = {
+      "onBreak":[]
+    }
   }
 
   damage(d,mult,by,impactPt){
@@ -943,11 +946,16 @@ class wall{
   }
 
   break(by,impactPt){
+    if(this.tags.has("isBroken")){return}
     this.tags.add("isBroken")
     let dx = this.x2 - this.x
     let dy = this.y2 - this.y
     let seg = 0
     let nextSeg = Math.random()*0.2
+
+    this.events.onBreak.forEach((e)=>{
+      e(this,by,impactPt)
+    })
 
     while(nextSeg < 1){
       particles.push(new shatteredWallParticle(this,this.x+dx*seg,this.y+dy*seg,this.x+dx*nextSeg,this.y+dy*nextSeg,by.vx,by.vy,impactPt,nextSeg-seg))
@@ -1486,8 +1494,11 @@ class test{
     // entityList.walls.push(new wall(110,500,150,450,can.ctx)) // beam
     // entityList.walls.push(new wall(110,500,70,450,can.ctx)) // beam
 
-    entityList.walls.push( makeAIbreakable(makeWooden(new wall(50,500,150,500,can.ctx),0.1)))
-    entityList.walls.push( makeAIbreakable(makeWooden(new wall(100,600,100,500,can.ctx),0.1))) //table
+    let tmp = makeAIbreakable(makeWooden(new wall(50,500,150,500,can.ctx),0.1))
+    entityList.walls.push(tmp)
+    let tmp2 = makeAIbreakable(makeWooden(new wall(100,600,100,500,can.ctx),0.1))
+    tmp2.events.onBreak.push((a,b,c)=>{tmp.break(b,c)})
+    entityList.walls.push(tmp2) //table
 
 
     entityList.balls.push(new ball(380,450,50,can.ctx))
@@ -1621,6 +1632,10 @@ setTimeout(()=>{
 
   can.ctx.fillStyle = "pink"
   can.ctx.fillText(Math.floor(dt)+" "+Math.round(performance.now()-pn),100,100)
+  if(settings.offline){
+    can.ctx.fillStyle = "red"
+    can.ctx.fillText("OFFLINE. SERVED OFFLINE. DEBUG NOT WORK BECAUSE OFFLINE",100,120)
+  }
 
   })
 },400) // wait for website to stabalize
