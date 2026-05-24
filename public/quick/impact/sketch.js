@@ -1782,19 +1782,22 @@ function generateLevels(x,y){
 
   mirror(newWall,wallX.a,height,wallX.a,height-300,midX)
   height -= 300
+  let fat = 900
+
   mirror(newWall,wallX.a,height,midX-180,height,midX)
   makeWooden(newWall(midX-180,height,midX+180,height)).tags.add("sided")
-  mirror(newWall,wallX.a,height,midX-900,height-300,midX)
+  mirror(newWall,wallX.a,height,midX-fat,height-300,midX)
   height -= 300
-  mirror(newWall,midX-900,height,midX-900,height-2300,midX)
+  mirror(newWall,midX-fat,height,midX-fat,height-2300,midX) // wall
+  let top = height-2300
 
   height -= 400
       
-  mirror(newWall,midX-900,height,midX-500,height,midX).forEach((e)=>{entityList.balls.push(new ball(e.midpoint.x,e.midpoint.y-60,50,can.ctx))})
+  mirror(newWall,midX-fat,height,midX-500,height,midX).forEach((e)=>{entityList.balls.push(new ball(e.midpoint.x,e.midpoint.y-60,50,can.ctx))})
   height -= 200
-  mirror(newWall,midX-900,height,midX-600,height,midX).forEach((e)=>{entityList.balls.push(new ball(e.midpoint.x,e.midpoint.y-60,50,can.ctx))})
+  mirror(newWall,midX-fat,height,midX-600,height,midX).forEach((e)=>{entityList.balls.push(new ball(e.midpoint.x,e.midpoint.y-60,50,can.ctx))})
   height -= 200
-  mirror(newWall,midX-900,height,midX-700,height,midX).forEach((e)=>{entityList.balls.push(new ball(e.midpoint.x,e.midpoint.y-60,50,can.ctx))})
+  mirror(newWall,midX-fat,height,midX-700,height,midX).forEach((e)=>{entityList.balls.push(new ball(e.midpoint.x,e.midpoint.y-60,50,can.ctx))})
   height -= 400
   newWall(midX-200,height,midX+200,height)
   let boss = newBall(midX,height-60,80,can.ctx)
@@ -1803,8 +1806,14 @@ function generateLevels(x,y){
   boss.onDeath.push(()=>{boss.vx*=0.8;boss.vy*=0.8})
 
 
+
   // entityList.player.y = height
   // entityList.player.x = midX
+
+
+  height = top
+  newWall(midX-fat,height,midX+fat,height,midX) // roof
+
 
 }
 
