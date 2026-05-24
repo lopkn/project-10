@@ -1812,7 +1812,7 @@ function generateLevels(x,y){
 
 
   height = top
-  newWall(midX-fat,height,midX+fat,height,midX) // roof
+  newWall(midX-fat,height,midX+fat,height) // roof
 
 
 }
