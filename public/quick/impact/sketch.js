@@ -1432,6 +1432,15 @@ class test{
   }
 
   entityList.player.trail = []
+  entityList.player.onDeath.push(()=>{
+    if(settings.mobile){
+      setTimeout(()=>{
+        document.addEventListener("touchstart",()=>{location.reload()})
+      },2000)
+
+    }
+  })
+
   entityList.player.drawFuncs.push((p,s,l)=>{
 
     p.ctx.save()
