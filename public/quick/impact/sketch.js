@@ -329,10 +329,95 @@ function line_to_line_collision_pt(a,b,c,d,p,q,r,s) {
   } else {
     lambda = ((s - q) * (r - a) + (p - r) * (s - b)) / det;
     gamma = ((b - d) * (r - a) + (c - a) * (s - b)) / det;
-    return (0 < lambda && lambda < 1) && (0 < gamma && gamma < 1);
+    if ((0 < lambda && lambda < 1) && (0 < gamma && gamma < 1)){
+      return({x: a + lambda * (c - a), y: b + lambda * (d - b)});
+    };
   }
+  return false
 };
 
+function swept_ball_to_line_collision(bx1, by1, vx, vy, r, x1, y1, x2, y2) { // assume dt = 1
+    // We can treat the ball's movement as a capsule from (x, y) to (x + vx, y + vy) with radius r
+    // Check if this capsule intersects the line segment from (x1, y1) to (x2, y2)
+    // 1. Check if the line segment intersects the capsule's central line (ignoring radius)
+    let bx2 = bx1 + vx;
+    let by2 = by1 + vy;
+  
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    const len = distance(dx,dy); 
+  
+    let speed = distance(vx,vy)
+    let nvx = vx / speed
+    let nvy = vy / speed
+
+    let n = { x: -dy / len, y: dx / len };
+
+    let collision = false
+  
+    let temp1 = line_to_line_collision_pt(bx1, by1, bx2, by2, x1, y1, x2, y2)
+    if (temp1) {
+      let res = temp1
+      let d = Math.abs(dot(n.x,n.y,nvx,nvy))
+      let p = {x:res.x-r/d*nvx,y:res.y-r/d*nvy}
+      collision = {p:p,res:res,dist:distance(res.x,res.y,bx1,by1)}
+    }
+    // // 2. Check if the distance from the line segment to either endpoint of the capsule is less than r
+    // if (point_to_line_distance(bx1, by1, x1, y1, x2, y2) <= r) {
+    //   // the start of the capsule collided
+    //   return(2);
+    // }
+    // if (point_to_line_distance(bx2, by2, x1, y1, x2, y2) <= r) {
+    //   return(3);
+    // } // we dont need this just yet
+
+    // 3. Check if distance from endpoints of line segment to the capsule's path is less than r (for cases where line is short and ball passes over it)
+    // if (point_to_line_distance(x1, y1, bx1, by1, bx2, by2) <= r) {
+    //   let d = point_to_line_distance(x1, y1, bx1, by1, bx2, by2)
+    //   let pol = point_on_line(x1, y1, bx1, by1, bx2, by2)
+    //   let res = {x:x1, y:y1}
+    //   d=Math.sqrt(r*r-d*d)
+    //   p = {x:pol.x-nvx*d,y:pol.y-nvy*d}
+    //   let dist = distance(res.x,res.y,bx1,by1)
+    //   if(!collision || dist <= collision.dist){
+    //     collision = {p:p,res:res,dist:dist}
+    //   }
+    // }
+    // if (point_to_line_distance(x2, y2, bx1, by1, bx2, by2) <= r) {
+    //   let d = point_to_line_distance(x2, y2, bx1, by1, bx2, by2)
+    //   let pol = point_on_line(x2, y2, bx1, by1, bx2, by2)
+    //   let res = {x:x2, y:y2}
+    //   d=Math.sqrt(r*r-d*d)
+    //   p = {x:pol.x-nvx*d,y:pol.y-nvy*d}
+    //   let dist = distance(res.x,res.y,bx1,by1)
+    //   if(!collision || dist <= collision.dist){
+    //     collision = {p:p,res:res,dist:dist}
+    //   }
+    // }
+    return(collision);
+}
+
+
+function find_parabola(A, B, C, D, E,d) {
+  // Rename parameters internally to match your loop variables:
+  // A = initial x, B = initial y, C = vx, D = vy, E = gravity
+  const dt = d; 
+
+  // Guard against division by zero if vx is 0 (vertical drop)
+  if (C === 0) {
+    return function(x) {
+      return NaN; // Or handle purely vertical fallback logic if needed
+    };
+  }
+
+  // Pre-calculate the quadratic coefficients: y = ax^2 + bx + c
+  const a = E / (2 * (C ** 2));
+  const b = (D / C) + ((E * dt) / (2 * C)) - ((E * A) / (C ** 2));
+  const c = B - ((D * A) / C) - ((E * A * dt) / (2 * C)) + ((E * (A ** 2)) / (2 * (C ** 2)));
+
+  // Return the evaluation function
+  return [a,b,c]
+}
 
 
 function reflect(vx,vy, x,y) {
@@ -531,6 +616,7 @@ class ball{
     this.r = r/1.25
     this.vx = 0
     this.vy = 0
+    this.push = {x:0,y:0}
 
     this.color = [0,62,41] // 0 62 41
     this.ctx = ctx
@@ -749,26 +835,58 @@ class ball{
     let lastX = this.x
     let lastY = this.y
     
-    this.x += this.vx*dt
-    this.y += this.vy*dt
+    this.x += this.vx*dt + this.push.x
+    this.y += this.vy*dt + this.push.y
+    if(distance(this.push.x,this.push.y)>20){
+      console.log("what?")
+    }
+    this.push = {x:0,y:0}
 
     let speed = this.speed()
+    let dleng = distance(lastX,lastY,this.x,this.y)
 
-    if(speed*dt > this.r/2){} /// BALL MOVING TOO FAST!!!!!! FIX
+    if(dleng > this.r/2 && !this.tags.has("noCollideWall") ){
+      let pseudovx = this.x-lastX
+      let pseudovy = this.y-lastY
+      // particles.push(new lineParticle(this.x,this.y,lastX,lastY))
+      let collisionData = {"collided":false,"minDist":Infinity}
+      entityList.walls.forEach((w)=>{
+
+
+        let awaySide = dot(pseudovx,pseudovy,w.normal.x,w.normal.y) < 0
+
+        let sweep = swept_ball_to_line_collision(lastX,lastY,pseudovx,pseudovy,this.r, w.x,w.y,w.x2,w.y2)
+        if(sweep){
+        // if(w.tags.has("sided") && (awaySide || this.sidedWallEntryFrame[w.id] === gameWorld.frame-1 )){return} // comment out to test
+          if(sweep.dist < collisionData.minDist){
+            collisionData.collided = w
+            collisionData.minDist = this.r
+            collisionData.sweepDist = sweep.dist
+            collisionData.closest = sweep.res
+            collisionData.awaySide=awaySide
+            collisionData.p = sweep.p
+          }
+        }
+      })
+      if(collisionData.collided){
+        console.log('too fast wall collision')
+        wall_collision_handler(this,collisionData,"swept")
+      }
+    } /// BALL MOVING TOO FAST!!!!!! FIX
 
     this.vx *= (1-gameWorld.airFriction*speed)**dt
     this.vy *= (1-gameWorld.airFriction*speed)**dt
 
     this.wallBreakMultiplier -= (this.wallBreakMultiplier-0.1)*0.0009*dt
 
-    //check wall collisions
+    //check wall collisions collide wall
     if(!this.tags.has("noCollideWall")){
 
       let collisionData = {"collided":false,"minDist":Infinity}
 
       entityList.walls.forEach((w)=>{
 
-        let awaySide = dot(this.vx,this.vy,w.normal.x,w.normal.y) < 0 // might use midpoint? but i think any point on the line works
+        let awaySide = dot(this.vx,this.vy,w.normal.x,w.normal.y) < 0
 
         if(check_collision_ball_line(this.x,this.y,this.r,w.x,w.y,w.x2,w.y2)){
         if(w.tags.has("sided") && (awaySide || this.sidedWallEntryFrame[w.id] === gameWorld.frame-1 )){this.sidedWallEntryFrame[w.id] = gameWorld.frame;return}
@@ -791,63 +909,8 @@ class ball{
       // after finding the wall that collides
 
       if(collisionData.collided){
-
-        this.energy += 5
-        let awaySide = collisionData.awaySide
-        let closest = collisionData.closest
-        let dist = collisionData.minDist
-        let w = collisionData.collided
-
-          let fellback = false
-
-          let normalizedDirectionToWall;
-          if(dist!==0){
-            normalizedDirectionToWall = {x:(closest.x-this.x)/dist,y:(closest.y-this.y)/dist}
-          } else {
-            // fallback to last position if ball center is exactly on the wall, not perfect but should work in most cases and prevents NaN errors
-            fellback = true;
-            dist = distance(lastX,lastY,closest.x,closest.y)
-            normalizedDirectionToWall = {x:(closest.x-lastX)/dist,y:(closest.y-lastY)/dist}
-          }
-
-
-          let forceToWall = dot(this.vx,this.vy,normalizedDirectionToWall.x,normalizedDirectionToWall.y)
-          let mult;
-          if(this.tags.has("AI")){mult = w.tags.has("AIdamage")?3:0.2} else {mult = this.wallBreakMultiplier}
-          let wallBroken = w.damage(forceToWall,mult, this, closest)
-
-          if(wallBroken){this.vx*=0.7;this.vy*=0.5;return}
-
-          let reflectionVector = normalizedDirectionToWall
-
-
-
-          let reflection = reflect(this.vx,this.vy,reflectionVector.x,reflectionVector.y)
-          // this.vx = reflection.x * w.bounce
-          // this.vy = reflection.y * w.bounce
-
-          let refBounce = dot(reflection.x,reflection.y,w.normal.x,w.normal.y) * w.bounce
-          let refFriction = dot(reflection.x,reflection.y,w.normalized.x,w.normalized.y) * w.friction
-
-
-          this.vx = refBounce * w.normal.x + refFriction * w.normalized.x
-          this.vy = refBounce * w.normal.y + refFriction * w.normalized.y
-          
-
-
-          //push ball out of wall (good enough for now, fix later, bleeding E)
-
-
-          let overlap = this.r - dist
-          if(overlap > 0){
-            let pushX = -normalizedDirectionToWall.x * overlap
-            let pushY = -normalizedDirectionToWall.y * overlap
-            this.x += pushX
-            this.y += pushY
-          }
-
-          this.lastCollideWallTime = gameWorld.lastTime
-
+        collisionData.p = {x:this.x,y:this.y}
+        wall_collision_handler(this,collisionData)
       }
 
     }
@@ -990,6 +1053,72 @@ class wall{
 
   }
 }
+
+function wall_collision_handler(ball,collisionData,type="normal"){
+
+  ball.energy += 5
+  let awaySide = collisionData.awaySide // not used
+  let closest = collisionData.closest // the point of the wall that was hit
+  let dist = collisionData.minDist // the distance from the ball to the point of the wall that was hit
+  let w = collisionData.collided // the wall collided on
+  let p = collisionData.p // the position of the ball when it hit the wall
+
+    let fellback = false
+
+    let normalizedDirectionToWall;
+    if(dist!==0){
+      normalizedDirectionToWall = {x:(closest.x-p.x)/dist,y:(closest.y-p.y)/dist} // the normalized vector from the wall to the ball's position when colliding
+    } else {
+      // fallback to last position if ball center is exactly on the wall, not perfect but should work in most cases and prevents NaN errors
+      fellback = true;
+      dist = distance(ball.lastX,ball.lastY,closest.x,closest.y)
+      normalizedDirectionToWall = {x:(closest.x-ball.lastX)/dist,y:(closest.y-ball.lastY)/dist}
+    }
+
+
+    // let forceToWall = dot(ball.vx,ball.vy,normalizedDirectionToWall.x,normalizedDirectionToWall.y)
+    let forceToWall = Math.abs(dot(ball.vx,ball.vy,w.normal.x,w.normal.y))
+    let mult;
+    if(ball.tags.has("AI")){mult = w.tags.has("AIdamage")?3:0.2} else {mult = ball.wallBreakMultiplier}
+    let wallBroken = w.damage(forceToWall,mult, ball, closest)
+
+    if(wallBroken){ball.vx*=0.7;ball.vy*=0.5;return}
+
+    let reflectionVector = normalizedDirectionToWall
+
+    let reflection = reflect(ball.vx,ball.vy,reflectionVector.x,reflectionVector.y)
+    // ball.vx = reflection.x * w.bounce
+    // ball.vy = reflection.y * w.bounce
+
+    let refBounce = dot(reflection.x,reflection.y,w.normal.x,w.normal.y) * w.bounce
+    let refFriction = dot(reflection.x,reflection.y,w.normalized.x,w.normalized.y) * w.friction
+
+    ball.vx = refBounce * w.normal.x + refFriction * w.normalized.x
+    ball.vy = refBounce * w.normal.y + refFriction * w.normalized.y
+    if(type!=="normal"){
+      console.log(reflectionVector)
+    }
+
+
+    //push ball out of wall (good enough for now, fix later, bleeding E)
+
+    if(type==="normal"){
+      let overlap = ball.r - dist
+      if(overlap > 0){
+        let pushX = -normalizedDirectionToWall.x * overlap
+        let pushY = -normalizedDirectionToWall.y * overlap
+        ball.x += pushX
+        ball.y += pushY
+      }
+    } else if(type === "swept"){
+      ball.x = collisionData.p.x
+      ball.y = collisionData.p.y
+    }
+
+    ball.lastCollideWallTime = gameWorld.lastTime
+
+}
+
 
 class particle{
   constructor(x,y,vx,vy,life=1000){
@@ -1149,6 +1278,38 @@ class shatteredWallParticle{
   }
 }
 
+class lineParticle{
+  constructor(x,y,x2,y2,life=1000){
+    this.z = 2
+
+    this.x = x
+    this.y = y
+    this.x2 = x2
+    this.y2 = y2
+
+    this.color = [255,255,255]
+    this.lineWidth = 3
+
+    this.ctx = can.ctx
+    this.life = life
+    this.maxLife = life
+  }
+  update(dt){
+    this.life -= dt
+    if(this.life <= 0){
+      return("del")
+    }
+  }
+  draw(){
+    this.ctx.lineWidth = this.lineWidth
+    this.ctx.strokeStyle = "rgba("+this.color[0]+","+this.color[1]+","+this.color[2]+","+(this.life/this.maxLife)+")"
+    this.ctx.beginPath()
+    this.ctx.moveTo(this.x,this.y)
+    this.ctx.lineTo(this.x2,this.y2)
+    this.ctx.stroke()
+  }
+}
+
 
 class entityList{
   static balls = []
@@ -1246,11 +1407,11 @@ function makeAIbreakable(wall){
 }
 
 
-function allBallsCollide(time){
+function allBallsCollide(time,i){
 
 
-  for(let i = 0; i < entityList.balls.length; i++){
-    for(let j = i+1; j < entityList.balls.length; j++){
+  // for(let i = entityList.balls.length-1; i > -1 ; i--){
+    for(let j = i-1; j > -1; j--){
 
         let a = entityList.balls[i]
         let b = entityList.balls[j]
@@ -1267,10 +1428,11 @@ function allBallsCollide(time){
 
 
         if(check_collision_circles(a.x,a.y,a.r,b.x,b.y,b.r)){
-          console.log("collision",a.name)
+          // console.log("collision",a.name)
 
 
           let dist = distance(a.x,a.y,b.x,b.y)
+          dist = Math.max(dist,0.0000001)
           let contactPoint = {x:(a.x+b.x)/2,y:(a.y+b.y)/2}
 
           let normalizedVectorTo = {x:(b.x-a.x)/dist, y:(b.y-a.y)/dist}
@@ -1352,10 +1514,15 @@ function allBallsCollide(time){
             overlap += 0.001
             let pushX = normalizedVectorTo.x * overlap / 2
             let pushY = normalizedVectorTo.y * overlap / 2
-            a.x -= pushX
-            a.y -= pushY
-            b.x += pushX
-            b.y += pushY
+            // a.x -= pushX
+            // a.y -= pushY
+            // b.x += pushX
+            // b.y += pushY
+
+            a.push.x -= pushX
+            a.push.y -= pushY
+            b.push.x += pushX
+            b.push.y += pushY
           }
 
           a.collided(time,b)
@@ -1363,7 +1530,7 @@ function allBallsCollide(time){
 
         }
       }
-    }
+    // }
 }
 
 
@@ -1385,19 +1552,25 @@ class test{
 
   static debug(){
     newWall(-200,490,800,490);
+    newWall(-140,490,-140,0);
+    newWall(-200,0*400,800,0*400).tags.add("sided");
     // newWall(1200,490,800,790);
     // newWall(1200,490,800,790);
     // newWall(1200,490,1800,790);
 
-    for(let i = 0; i < 10; i++){
-      newWall(-200,490-i*10,-200,480-i*10)
-    }
+    // for(let i = 0; i < 10; i++){
+    //   newWall(-200,490-i*10,-200,480-i*10)
+    // }
 
     this.still()
   }
 
   static balls(){
     for(let i = 0; i < 100; i++){newBall(player.x+rand()-70,player.y-60,50)}
+  }
+
+  static ballTop(){
+    for(let i = 0; i < 100; i++){newBall(player.x,player.y-160,50)}
   }
 
   static particles(){
@@ -1568,7 +1741,9 @@ setTimeout(()=>{
   frameFuncs.push((time,dt,date)=>{
   
     let pn = performance.now()
-  // dt = 1.6 // debugging
+    if(test.dtLock){
+      dt = test.dtLock
+    }
     dt = Math.min(100,dt)
 
   //move camera
@@ -1609,11 +1784,11 @@ setTimeout(()=>{
       continue;
     }
 
+    allBallsCollide(time,i)
     e.update(dt*gameWorld.timeWarp)
     e.draw()
   }
 
-  allBallsCollide(time)
 
 
   for(let i = entityList.walls.length-1; i>-1; i--){
