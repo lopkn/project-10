@@ -314,6 +314,27 @@ function point_on_line(x, y, x1, y1, x2, y2) {
 
 }
 
+function point_on_infinite_line(x, y, x1, y1, x2, y2) {
+    const abx = x2 - x1;
+    const aby = y2 - y1;
+    const acx = x - x1;
+    const acy = y - y1;
+
+    const ab2 = abx * abx + aby * aby;
+
+    // If the line segment is a single point
+    if (ab2 === 0) {
+        return Math.sqrt(acx * acx + acy * acy);
+    }
+
+    // Project AC onto AB, clamping to the segment bounds [0, 1]
+    let t = (acx * abx + acy * aby) / ab2;
+    // Find the closest point
+
+    return({x: x1 + t * abx, y: y1 + t * aby})
+
+}
+
 function point_to_line_distance(x, y, x1, y1, x2, y2) {
     const closest = point_on_line(x, y, x1, y1, x2, y2);
     const distX = x - closest.x;
@@ -360,7 +381,8 @@ function swept_ball_to_line_collision(bx1, by1, vx, vy, r, x1, y1, x2, y2) { // 
       let res = temp1
       let d = Math.abs(dot(n.x,n.y,nvx,nvy))
       let p = {x:res.x-r/d*nvx,y:res.y-r/d*nvy}
-      collision = {p:p,res:res,dist:distance(res.x,res.y,bx1,by1)}
+      // collision = {p:p,res:res,dist:distance(res.x,res.y,bx1,by1),type:1} // wrong!
+      collision = {p:p,closest:point_on_line(p.x,p.y,x1,y1,x2,y2),dist:distance(res.x,res.y,bx1,by1),type:1}
     }
     // // 2. Check if the distance from the line segment to either endpoint of the capsule is less than r
     // if (point_to_line_distance(bx1, by1, x1, y1, x2, y2) <= r) {
@@ -372,29 +394,29 @@ function swept_ball_to_line_collision(bx1, by1, vx, vy, r, x1, y1, x2, y2) { // 
     // } // we dont need this just yet
 
     // 3. Check if distance from endpoints of line segment to the capsule's path is less than r (for cases where line is short and ball passes over it)
-    // if (point_to_line_distance(x1, y1, bx1, by1, bx2, by2) <= r) {
-    //   let d = point_to_line_distance(x1, y1, bx1, by1, bx2, by2)
-    //   let pol = point_on_line(x1, y1, bx1, by1, bx2, by2)
-    //   let res = {x:x1, y:y1}
-    //   d=Math.sqrt(r*r-d*d)
-    //   p = {x:pol.x-nvx*d,y:pol.y-nvy*d}
-    //   let dist = distance(res.x,res.y,bx1,by1)
-    //   if(!collision || dist <= collision.dist){
-    //     collision = {p:p,res:res,dist:dist}
-    //   }
-    // }
-    // if (point_to_line_distance(x2, y2, bx1, by1, bx2, by2) <= r) {
-    //   let d = point_to_line_distance(x2, y2, bx1, by1, bx2, by2)
-    //   let pol = point_on_line(x2, y2, bx1, by1, bx2, by2)
-    //   let res = {x:x2, y:y2}
-    //   d=Math.sqrt(r*r-d*d)
-    //   p = {x:pol.x-nvx*d,y:pol.y-nvy*d}
-    //   let dist = distance(res.x,res.y,bx1,by1)
-    //   if(!collision || dist <= collision.dist){
-    //     collision = {p:p,res:res,dist:dist}
-    //   }
-    // }
-    return(collision);
+    if (point_to_line_distance(x1, y1, bx1, by1, bx2, by2) <= r) {
+      let d = point_to_line_distance(x1, y1, bx1, by1, bx2, by2)
+      let pol = point_on_infinite_line(x1, y1, bx1, by1, bx2, by2)
+      let res = {x:x1, y:y1}
+      d=Math.sqrt(r*r-d*d)
+      let p = {x:pol.x-nvx*d,y:pol.y-nvy*d}
+      let dist = distance(res.x,res.y,bx1,by1)
+      if(!collision || dist <= collision.dist){
+        collision = {p:p,closest:res,dist:dist,type:4}
+      }
+    }
+    if (point_to_line_distance(x2, y2, bx1, by1, bx2, by2) <= r) {
+      let d = point_to_line_distance(x2, y2, bx1, by1, bx2, by2)
+      let pol = point_on_infinite_line(x2, y2, bx1, by1, bx2, by2)
+      let res = {x:x2, y:y2}
+      d=Math.sqrt(r*r-d*d)
+      let p = {x:pol.x-nvx*d,y:pol.y-nvy*d}
+      let dist = distance(res.x,res.y,bx1,by1)
+      if(!collision || dist <= collision.dist){
+        collision = {p:p,closest:res,dist:dist,type:5}
+      }
+    }
+
 }
 
 
@@ -857,14 +879,16 @@ class ball{
 
         let sweep = swept_ball_to_line_collision(lastX,lastY,pseudovx,pseudovy,this.r, w.x,w.y,w.x2,w.y2)
         if(sweep){
-        // if(w.tags.has("sided") && (awaySide || this.sidedWallEntryFrame[w.id] === gameWorld.frame-1 )){return} // comment out to test
+        if(w.tags.has("sided") && (awaySide || this.sidedWallEntryFrame[w.id] === gameWorld.frame-1 )){return} // comment out to test
           if(sweep.dist < collisionData.minDist){
             collisionData.collided = w
             collisionData.minDist = this.r
             collisionData.sweepDist = sweep.dist
-            collisionData.closest = sweep.res
-            collisionData.awaySide=awaySide
+            collisionData.closest = sweep.closest
+            collisionData.awaySide = awaySide
             collisionData.p = sweep.p
+
+            if(Math.abs(distance(collisionData.closest.x,collisionData.closest.y,sweep.p.x,sweep.p.y)-this.r)>0.1){console.log("energen "+sweep.type)}
           }
         }
       })
@@ -1095,9 +1119,7 @@ function wall_collision_handler(ball,collisionData,type="normal"){
 
     ball.vx = refBounce * w.normal.x + refFriction * w.normalized.x
     ball.vy = refBounce * w.normal.y + refFriction * w.normalized.y
-    if(type!=="normal"){
-      console.log(reflectionVector)
-    }
+
 
 
     //push ball out of wall (good enough for now, fix later, bleeding E)
@@ -1552,6 +1574,7 @@ class test{
 
   static debug(){
     newWall(-200,490,800,490);
+    newWall(800,490-60,400,490-60);
     newWall(-140,490,-140,0);
     newWall(-200,0*400,800,0*400).tags.add("sided");
     // newWall(1200,490,800,790);
