@@ -938,7 +938,7 @@ class ball{
 
 
     //natural hp regen
-    if(gameWorld.lastTime - this.damageTime > 2000){ // 2 seconds after battle      
+    if(gameWorld.lastTime - this.damageTime > 2000 && !this.tags.has("isDead")){ // 2 seconds after battle      
       this.hp += this.hpRegen*dt
       if(gameWorld.lastTime - this.damageTime > 10000 || this.speedSq() < 0.02){
         this.hp += this.hpRegen*dt*3
@@ -1144,6 +1144,7 @@ class wall{
     this.friction = 1
 
 
+
     this.events = {
       "onBreak":[],
       "onCollide":[],
@@ -1177,6 +1178,12 @@ class wall{
     w1.hp = 10
     w2.hp = 10
 
+    if(this.splitting.minLength > w1.length){
+      w1.break()
+    }
+    if(this.splitting.minLength > w2.length){
+      w2.break()
+    }
 
 
     this.setPos(w1.x2,w1.y2,w2.x,w2.y,true)
@@ -1185,7 +1192,7 @@ class wall{
 
   }
 
-  damage(d,mult,by,impactPt){
+  damage(d,mult,by={vx:0,vy:0},impactPt={x:0,y:0}){
 
     this.events.onCollide.forEach((e)=>{
       e(this,d,mult,by,impactPt)
@@ -1198,7 +1205,13 @@ class wall{
     if(d < this.damageThreshold){return}
     this.hp -= d
     if(this.hp <= 0){
-      this.break(by,impactPt)
+
+      if(this.splitting && this.length > this.splitting.minLength){
+
+      } else {
+        this.break(by,impactPt)
+      }
+
       return(true)
     }
     return(false)
@@ -2568,8 +2581,8 @@ function generateLevels(x,y){
 
 
   // @generate
-  entityList.player.y = height-60
-  entityList.player.x = midX
+  // entityList.player.y = height-60
+  // entityList.player.x = midX
 
 
 
