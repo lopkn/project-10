@@ -2514,7 +2514,7 @@ function drawPlayerGUI(){
   if(settings.mobile){
     if(controller.movement.down){
       can.ctx.lineWidth =3 
-      can.ctx.strokeStyle = "#F0F0F0"
+      can.ctx.strokeStyle = "rgb(255,"+255*(1-entityList.player.movementScalar)+",255)"
       can.ctx.beginPath()
       can.ctx.moveTo(controller.movement.x,controller.movement.y)
       can.ctx.lineTo(controller.movement.x+controller.movement.dx,controller.movement.y+controller.movement.dy)
@@ -2580,7 +2580,7 @@ function controlBall(ball){
       let norm = distance(controller.movement.dx,controller.movement.dy)
       ball.movementVector.x = controller.movement.dx
       ball.movementVector.y = controller.movement.dy
-      ball.movementScalar = Math.min(1,200/(1+norm))
+      ball.movementScalar = Math.min(1,norm/200)
     } else {
       ball.movementVector = {x:0,y:0}
     }
