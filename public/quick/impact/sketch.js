@@ -495,6 +495,7 @@ class id{
 class grid{ //Spatial Hash Grid
   static size = 2400
   static grid = {}
+  static activationGrid = {}
 
   static findCell(x,y){
     return([Math.floor(x/this.size),Math.floor(y/this.size)])
@@ -561,52 +562,96 @@ class grid{ //Spatial Hash Grid
     return cells;
 }
 
-  static query(x1,y1,x2,y2){ //directionall!!!
-    let cell1 = grid.findCell(x1,y1)
-    let cell2 = grid.findCell(x2,y2)
+  static queryCells(x1,y1,x2,y2,grid=this.grid){ //directionall!!!
+    let cell1 = this.findCell(x1,y1)
+    let cell2 = this.findCell(x2,y2)
+    let results = []
+    for(let i = cell1[0]; i <= cell2[0]; i++){
+      for(let j = cell1[1]; j <= cell2[1]; j++){
+        let key = this.keyify(i,j)
+        if(grid[key]){
+          results.push(grid[key])
+        }
+      }
+    }
+
+    return(results)
+  }
+
+  static query(x1,y1,x2,y2,grid=this.grid){ //directionall!!!
+    let cell1 = this.findCell(x1,y1)
+    let cell2 = this.findCell(x2,y2)
     // let results = []
     let items = new Set()
     for(let i = cell1[0]; i <= cell2[0]; i++){
       for(let j = cell1[1]; j <= cell2[1]; j++){
-        let key = grid.keyify(i,j)
-        if(this.grid[key]){
-          // results.push(this.grid[key])
-          items = items.union(this.grid[key])
+        let key = this.keyify(i,j)
+        if(grid[key]){
+          items = items.union(grid[key])
         }
       }
     }
 
-    // return({array:results,items:items})
     return(items)
   }
 
   static add(x1,y1,x2,y2,entity){
-    let cell1 = grid.findCell(x1,y1)
-    let cell2 = grid.findCell(x2,y2)
+    // let cell1 = grid.findCell(x1,y1)
+    // let cell2 = grid.findCell(x2,y2)
+    // let results = []
+    // let items = new Set()
+    // for(let i = cell1[0]; i <= cell2[0]; i++){
+    //   for(let j = cell1[1]; j <= cell2[1]; j++){
+    //     let key = grid.keyify(i,j)
+    //     if(this.grid[key]===undefined){
+    //       this.grid[key] = new Set()
+    //     }
+    //     this.grid[key].add(entity)
+    //     results.push(this.grid[key])
+    //   }
+    // }
+    // return(results)
+
     let results = []
-    let items = new Set()
-    for(let i = cell1[0]; i <= cell2[0]; i++){
-      for(let j = cell1[1]; j <= cell2[1]; j++){
-        let key = grid.keyify(i,j)
-        if(this.grid[key]===undefined){
-          this.grid[key] = new Set()
-        }
-        this.grid[key].add(entity)
-        results.push(this.grid[key])
+    let arr = this.traceLineCells(x1,y1,x2,y2)
+    for(let i = 0; i < arr.length; i++){
+      let key = arr[i]
+      if(this.grid[key]===undefined){
+        this.grid[key] = new Set()
+      }
+      this.grid[key].add(entity)
+      results.push(this.grid[key])
+    }
+
+    return(results)
+  }
+
+  static addPt(x,y,e,grid=this.grid){
+    let cell = this.findCell(x,y)
+    let key = this.keyify(cell[0],cell[1])
+    if(grid[key]===undefined){
+        grid[key] = new Set()
+      }
+      grid[key].add(e)
+    return(grid[key])
+  }
+
+  static activate(x,y){
+    let cell = this.findCell(x,y)
+    let ret = []
+    for(let i = -1; i < 2; i++){
+      for(let j = -1; j < 2; j++){
+        let key = this.keyify(cell[0]+i,cell[1]+j)
+        if(!this.activationGrid[key]){continue;}
+        this.activationGrid[key].forEach((activationFunction)=>{
+          activationFunction()
+        })
+        ret.push(this.activationGrid[key])
+        delete this.activationGrid[key]
       }
     }
-    return(results)
-
-    // let arr = this.traceLineCells(x1,y1,x2,y2)
-    // for(let i = 0; i < arr.length; i++){
-    //   let key = arr[i]
-    //   if(this.grid[key]===undefined){
-    //     this.grid[key] = new Set()
-    //   }
-    //   this.grid[key].add(entity)
-    // }
-
-    // return(arr)
+    
+    return(ret)
   }
 
   static addWall(wall){
@@ -706,6 +751,8 @@ class ball{
     this.movementSpeed = 0.005
 
 
+
+    grid.addPt(this.x,this.y,()=>{this.tags.add("activated")},grid.activationGrid)
 
   }
 
@@ -846,6 +893,7 @@ class ball{
 
   update(dt){
 
+    if(!this.tags.has("activated")){return}
 
     if(this.tags.has("AI") && !this.tags.has("isDead")){
       this.AIupdate(dt)
@@ -1706,6 +1754,11 @@ class test{
   entityList.player.tags.add("moves")
   entityList.player.movementVector = {x:0,y:0}
   entityList.player.movementScalar = 1
+
+  entityList.player.tags.add("activated")
+  entityList.player.updateFuncs.push(()=>{
+    grid.activate(entityList.player.x,entityList.player.y)
+  })
 
   entityList.player.onDeath.push(()=>{
     if(settings.mobile){
