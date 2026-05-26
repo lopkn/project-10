@@ -937,6 +937,11 @@ class ball{
 
     let sweptWallHit = false
 
+    let collidableWalls;
+    if(!this.tags.has("noCollideWall")){
+      collidableWalls = grid.query(this.x-3000,this.y-3000,this.x+3000,this.y+3000)
+    }
+
     if(dleng > this.r/2 && !this.tags.has("noCollideWall") ){
       let pseudovx = this.x-lastX
       let pseudovy = this.y-lastY
@@ -944,7 +949,9 @@ class ball{
         particles.push(new lineParticle(this.x,this.y,lastX,lastY))
       }
       let collisionData = {"collided":false,"minDist":Infinity}
-      entityList.walls.forEach((w)=>{
+
+
+      collidableWalls.forEach((w)=>{
 
 
         let awaySide = dot(pseudovx,pseudovy,w.normal.x,w.normal.y) < 0
@@ -984,7 +991,7 @@ class ball{
 
       let collisionData = {"collided":false,"minDist":Infinity}
 
-      entityList.walls.forEach((w)=>{
+      collidableWalls.forEach((w)=>{
 
         if(w === sweptWallHit){return}
 
@@ -2248,16 +2255,10 @@ function controlBall(ball){
 
   if(settings.mobile && controller.movement.down){
     let norm = distance(controller.movement.dx,controller.movement.dy)
+    ball.movementVector.x = controller.movement.dx
+    ball.movementVector.y = controller.movement.dy
 
-    let lim = Math.max(1,norm) / movement
-    let size = 100
-    if(norm < size && norm !== 0){
-      lim *= size/norm
-    }
-
-
-    ball.vx += controller.movement.dx / lim 
-    ball.vy += controller.movement.dy / lim
+    ball.movementScalar = Math.min(1,200/(1+norm))
   }
 }
 
