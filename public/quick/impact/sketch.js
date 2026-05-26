@@ -1102,6 +1102,16 @@ class ball{
 
 //@wall
 
+var wallDontCopy = new Set(["id","tags","events"])
+function copyWall(w,w2){
+  Object.keys(w).forEach((e)=>{
+      if(wallDontCopy.has(e)){return}
+      w2[e] = w[e]
+    })
+  w2.tags = new Set(w.tags)
+  w2.events = {...w.events}
+}
+
 class wall{
   constructor(x1,y1,x2,y2,ctx){
     this.x = x1
@@ -1118,7 +1128,7 @@ class wall{
 
     this.hp = 10 
 
-    this.name = "default wall" 
+    this.name = "normal" 
     this.tags = new Set()
 
     this.normal = {x:-(y2-y1)/this.length,y:(x2-x1)/this.length}
@@ -1140,6 +1150,41 @@ class wall{
     }
   }
 
+  setPos(x1,y1,x2,y2,move=false){
+    this.x = x1
+    this.y = y1
+    this.x2 = x2
+    this.y2 = y2
+    this.length = distance(x1,y1,x2,y2)
+    this.normal = {x:-(y2-y1)/this.length,y:(x2-x1)/this.length}
+    this.normalized = {y:(y2-y1)/this.length,x:(x2-x1)/this.length}
+    this.midpoint = {x:(x1+x2)/2,y:(y1+y2)/2}
+    if(move){
+      this.gridPos.push(...grid.addWall(this))
+    } else {
+      this.gridPos = grid.addWall(this)
+    }
+  }
+
+  split(s1,s2,by,impactPt){
+    let w1 = newWall(this.x,this.y,this.x+this.length*s1*this.normalized.x,this.y+this.length*s1*this.normalized.y)
+    let w2 = newWall(this.x+this.length*s2*this.normalized.x,this.y+this.length*s2*this.normalized.y,this.x2,this.y2) // useless other than not impacting gridpos
+
+    copyWall(this,w1)
+    copyWall(this,w2)
+    w1.setPos(this.x,this.y,this.x+this.length*s1*this.normalized.x,this.y+this.length*s1*this.normalized.y)
+    w2.setPos(this.x+this.length*s2*this.normalized.x,this.y+this.length*s2*this.normalized.y,this.x2,this.y2)
+    w1.hp = 10
+    w2.hp = 10
+
+
+
+    this.setPos(w1.x2,w1.y2,w2.x,w2.y,true)
+    shatterWall(this,by,impactPt)
+    this.remove()
+
+  }
+
   damage(d,mult,by,impactPt){
 
     this.events.onCollide.forEach((e)=>{
@@ -1159,30 +1204,26 @@ class wall{
     return(false)
   }
 
-  break(by,impactPt){
+  break(by={vx:0,vy:0},impactPt={x:0,y:0}){
     if(this.tags.has("isBroken")){return}
-    this.tags.add("isBroken")
-    let dx = this.x2 - this.x
-    let dy = this.y2 - this.y
-    let seg = 0
-    let nextSeg = Math.random()*0.2
 
     this.events.onBreak.forEach((e)=>{
       e(this,by,impactPt)
     })
 
-    while(nextSeg < 1){
-      particles.push(new shatteredWallParticle(this,this.x+dx*seg,this.y+dy*seg,this.x+dx*nextSeg,this.y+dy*nextSeg,by.vx,by.vy,impactPt,nextSeg-seg))
-      seg = nextSeg
-      nextSeg = seg + Math.random()*0.2
-    }
-    particles.push(new shatteredWallParticle(this,this.x+dx*seg,this.y+dy*seg,this.x2,this.y2,by.vx,by.vy,impactPt,1-seg))
+    shatterWall(this,by,impactPt)
 
     //remove from grid
+    this.remove()
+
+  }
+
+
+  remove(){
+    this.tags.add("isBroken")
     this.gridPos.forEach((cell)=>{
       cell.delete(this)
     })
-
   }
 
   draw(){
@@ -1491,6 +1532,19 @@ class sparkleParticle{
   }
 }
 
+
+function shatterWall(wall,by,impactPt){
+    let dx = wall.x2 - wall.x
+    let dy = wall.y2 - wall.y
+    let seg = 0
+    let nextSeg = Math.random()*0.2
+    while(nextSeg < 1){
+      particles.push(new shatteredWallParticle(wall,wall.x+dx*seg,wall.y+dy*seg,wall.x+dx*nextSeg,wall.y+dy*nextSeg,by.vx,by.vy,impactPt,nextSeg-seg))
+      seg = nextSeg
+      nextSeg = seg + Math.random()*0.2
+    }
+    particles.push(new shatteredWallParticle(wall,wall.x+dx*seg,wall.y+dy*seg,wall.x2,wall.y2,by.vx,by.vy,impactPt,1-seg))
+}
 
 class shatteredWallParticle{
   constructor(wall,x1,y1,x2,y2,vx,vy,impactPt,lengthPers,life=4000){
@@ -1982,17 +2036,44 @@ class test{
     return(b)
   }
 
+
+  function mirror(f,a,b,c,d,x,flip=false){
+    let w1 = f(a,b,c,d)
+
+    let w2;
+    if(flip){
+      w2 = f(x+(x-c),b,x+(x-a),d)
+    } else {
+      w2 = f(x+(x-a),b,x+(x-c),d)
+    }
+
+    return([w1,w2])
+  }
   function build(x,y,x1,y1,type="normal",options={}){
     let w = newWall(x,y,x1,y1)
+    w.name = type
+    if(options.reverse){w=newWall(x1,y1,x,y)}
+    if(options.mirrorX){
+      let midX = options.mirrorX
+      build(midX+midX-x,y,midX+midX-x1,y1)
+    }
     let types = {
       "magma":()=>{
         w.color = "orange"
         w.size = 16
         w.events.onCollide.push((w,d,mult,b,impactPt)=>{b.damage(45)})
+      },
+      "wood":()=>{
+        makeWooden(w)
       }
+    }
+    if(options.sided){
+      w.tags.add("sided")
     }
 
     if(types[type]){types[type]()}
+
+
   }
 
 
@@ -2478,12 +2559,18 @@ function generateLevels(x,y){
 
 
 
-  // entityList.player.y = height
-  // entityList.player.x = midX
+  
 
 
   height = top
   newWall(midX-fat,height,midX+fat,height) // roof
+
+
+
+  // @generate
+  entityList.player.y = height-60
+  entityList.player.x = midX
+
 
 
 }
