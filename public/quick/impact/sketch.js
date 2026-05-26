@@ -682,6 +682,7 @@ class ball{
 
     this.lastCollideTime = 0
     this.collideTime = 0
+    this.damageTime = 0
 
     this.collisionInitiative = 1500
 
@@ -702,7 +703,9 @@ class ball{
 
     this.sidedWallEntryFrame = {}
 
-    this.movementSpeed = 0
+    this.movementSpeed = 0.005
+
+
 
   }
 
@@ -761,7 +764,7 @@ class ball{
     dmg = Math.min(dmg*damagePercentage,this.maxHp*this.maxTakenDamagePercentage)
 
     this.hp -= dmg 
-
+    this.damageTime = gameWorld.lastTime
 
 
     if(this.hp <= 0){
@@ -792,25 +795,12 @@ class ball{
 
 
   movement(){
-    if(ball.tags.has("isDead")){return}
-    if(controller.keys.w){ball.vy -= this.movementSpeed}
-    if(controller.keys.s){ball.vy += movement}
-    if(controller.keys.a){ball.vx -= movement}
-    if(controller.keys.d){ball.vx += movement}
+    if(!this.tags.has("moves") || this.tags.has("isDead")){return}
 
-    if(settings.mobile && controller.movement.down){
-      let norm = distance(controller.movement.dx,controller.movement.dy)
-
-      let lim = Math.max(1,norm) / movement
-      let size = 100
-      if(norm < size && norm !== 0){
-        lim *= size/norm
-      }
-
-
-      ball.vx += controller.movement.dx / lim 
-      ball.vy += controller.movement.dy / lim
-    }
+    let ml = distance(this.movementVector.x,this.movementVector.y)
+    if(ml===0){return}
+    this.vx += this.movementVector.x/ml*this.movementSpeed*this.movementScalar
+    this.vy += this.movementVector.y/ml*this.movementSpeed*this.movementScalar
   }
 
 
@@ -819,10 +809,14 @@ class ball{
     if(gameWorld.lastTime - this.AIlastUpdate < this.AInextUpdateTime){
       return;
     }
-
-
-
     this.AIlastUpdate = gameWorld.lastTime
+
+    if(this.AICustomUpdate){
+      this.AICustomUpdate(this,dt)
+      return
+    }
+
+    /// default behaviour
     let player = entityList.player
     if(this.energy > 40 ){
       // jump towards player
@@ -860,9 +854,9 @@ class ball{
 
 
     //natural hp regen
-    if(gameWorld.lastTime - this.collideTime > 2000){ // 2 seconds after battle      
+    if(gameWorld.lastTime - this.damageTime > 2000){ // 2 seconds after battle      
       this.hp += this.hpRegen*dt
-      if(gameWorld.lastTime - this.collideTime > 10000 || this.speedSq() < 0.02){
+      if(gameWorld.lastTime - this.damageTime > 10000 || this.speedSq() < 0.02){
         this.hp += this.hpRegen*dt*3
       }
       if(this.hp > this.maxHp){
@@ -877,6 +871,8 @@ class ball{
     // this.vx += this.ax*dt
     // this.vy += this.ay*dt
 
+
+    this.movement()
 
     let lastX = this.x
     let lastY = this.y
@@ -1046,12 +1042,18 @@ class wall{
     this.bounce = 0.8
     this.friction = 1
 
+
     this.events = {
-      "onBreak":[]
+      "onBreak":[],
+      "onCollide":[],
     }
   }
 
   damage(d,mult,by,impactPt){
+
+    this.events.onCollide.forEach((e)=>{
+      e(this,d,mult,by,impactPt)
+    })
 
     if(this.tags.has("breakable")){mult=Math.max(1,mult)}
     d*=mult
@@ -1094,7 +1096,7 @@ class wall{
 
   draw(){
 
-    this.ctx.lineWidth = Math.min(Math.max(this.hp**0.5,5),10)
+    this.ctx.lineWidth = this.size?this.size:Math.min(Math.max(this.hp**0.5,5),10)
     this.ctx.strokeStyle = this.color
     this.ctx.beginPath()
     this.ctx.moveTo(this.x,this.y)
@@ -1624,6 +1626,9 @@ function allBallsCollide(time,i){
 
 
 class test{
+
+  static perf = 0;
+
   static still(){
     entityList.balls.forEach((e)=>{e.hp=e.maxHp=400000;e.tags.delete("AI")});entityList.walls.forEach((e)=>{e.hp=e.maxHp=400000});entityList.player.energyRegen = 400
   }
@@ -1677,7 +1682,7 @@ class test{
   static slower = 1;
 }
 
-//initialize player @ip
+//initialize player @ip @player
 
   entityList.player = new ball(-100,400,50,can.ctx,false)
   entityList.player.team = "player"
@@ -1698,8 +1703,10 @@ class test{
     p.noFill = 1
     particles.push(p)
   }
+  entityList.player.tags.add("moves")
+  entityList.player.movementVector = {x:0,y:0}
+  entityList.player.movementScalar = 1
 
-  entityList.player.trail = []
   entityList.player.onDeath.push(()=>{
     if(settings.mobile){
       setTimeout(()=>{
@@ -1709,7 +1716,61 @@ class test{
     }
   })
 
-  entityList.player.drawFuncs.push((p,s,l)=>{
+  trailify(entityList.player)
+  // implement player trail
+
+
+  function newWall(a,b,c,d,ctx=can.ctx){
+    let w = new wall(a,b,c,d,ctx)
+    entityList.walls.push(w)
+    return(w)
+  }
+  function newBall(x,y,r=50,ctx=can.ctx){
+    let b = new ball(x,y,r,ctx)
+    entityList.balls.push(b)
+    return(b)
+  }
+
+  function build(x,y,x1,y1,type="normal",options={}){
+    let w = newWall(x,y,x1,y1)
+    let types = {
+      "magma":()=>{
+        w.color = "orange"
+        w.size = 16
+        w.events.onCollide.push((w,d,mult,b,impactPt)=>{b.damage(45)})
+      }
+    }
+
+    if(types[type]){types[type]()}
+  }
+
+
+  function summon(x,y,type="normal",options={}){
+
+    let b = newBall(x,y)
+    let p = entityList.player
+    let AIs = {
+      "mover":()=>{
+        b.tags.add("moves")
+        b.movementVector = {x:0,y:0}
+        b.movementSpeed = 0.03
+        b.movementScalar = 1
+        b.color = [30,62,41]
+        trailify(b)
+
+        b.AICustomUpdate = (b,dt)=>{
+          b.movementVector = {x:p.x-b.x,y:p.y-b.y}
+          b.AInextUpdateTime = 500
+        }
+      }
+    }
+    if(AIs[type]){AIs[type]()}
+    return(b)
+  }
+
+  function trailify(ball,leng=50){
+    ball.trail = []
+    ball.drawFuncs.push((p,s,l)=>{
 
     p.ctx.save()
     p.ctx.globalCompositeOperation = "destination-over"
@@ -1722,25 +1783,15 @@ class test{
     })
 
     p.trail.push([p.x,p.y,p.speed()])
-    if(p.trail.length>50){
+    if(p.trail.length>leng){
       p.trail.splice(0,1)
     }
     p.ctx.globalCompositeOperation = "source-over"
     p.ctx.restore()
 
-  }) // implement player trail
-
-
-  function newWall(a,b,c,d,ctx=can.ctx){
-    let w = new wall(a,b,c,d,ctx)
-    entityList.walls.push(w)
-    return(w)
+  }) 
   }
-  function newBall(x,y,r,ctx=can.ctx){
-    let b = new ball(x,y,r,ctx)
-    entityList.balls.push(b)
-    return(b)
-  }
+
 
   function newWallTo(a,b,c,d,ctx){
     return(newWall(a,b,a+c,b+d,ctx))
@@ -1872,6 +1923,7 @@ setTimeout(()=>{
   particles.update(dt)
   particles.draw(1)
 
+  let pn2 = performance.now()
   for(let i = entityList.balls.length-1; i>-1; i--){
     let e = entityList.balls[i]
     if(e.tags.has("isDead") && date-e.deathTime > 5000 && e !== entityList.player){
@@ -1894,6 +1946,8 @@ setTimeout(()=>{
     }
     e.draw()
   }
+  test.perf = (performance.now()-pn2) * 0.1 + test.perf*0.9
+
   particles.draw(2)
 
 
@@ -1910,7 +1964,7 @@ setTimeout(()=>{
   drawPlayerGUI()
 
   can.ctx.fillStyle = "pink"
-  can.ctx.fillText(Math.floor(dt)+" "+Math.round(performance.now()-pn),100,100)
+  can.ctx.fillText(Math.floor(dt)+" "+(Math.round(performance.now()-pn)+" "+Math.floor(test.perf*100)),100,100)
   if(settings.offline){
     can.ctx.fillStyle = "red"
     can.ctx.fillText("OFFLINE. SERVED OFFLINE. DEBUG NOT WORK BECAUSE OFFLINE",100,120)
@@ -1996,6 +2050,17 @@ function segWalls(x1,y1,x2,y2,div){
 function generateLevels(x,y){
   // entityList.walls.push(new wall(x,y,x+vx,y+vy,can.ctx))
   // entityList.walls.push( makeAIbreakable(makeWooden(new wall(50,500,150,500,can.ctx),0.1)))
+
+
+  /// hell
+
+  for(let i = 0; i < 15; i++){
+    build(-18000+i*4000,y+4000+rand(2000),-4000+i*14000,y+4000+rand(2000),"magma")
+    build(-16000+i*4000,y+4000+rand(2000),-2000+i*14000,y+4000+rand(2000),"magma")
+  }
+
+  /// end hell
+
 
   let tmp;
   let floorLength = 1800+rand(1800)
@@ -2116,12 +2181,17 @@ function generateLevels(x,y){
 
 
 function controlBall(ball){
-  let movement = 0.005
-  if(ball.tags.has("isDead")){return}
-  if(controller.keys.w){ball.vy -= movement}
-  if(controller.keys.s){ball.vy += movement}
-  if(controller.keys.a){ball.vx -= movement}
-  if(controller.keys.d){ball.vx += movement}
+
+  
+
+  if(!settings.mobile){
+    ball.movementVector = {x:0,y:0}
+    if(controller.keys.w){ball.movementVector.y -= 1}
+    if(controller.keys.s){ball.movementVector.y += 1}
+    if(controller.keys.a){ball.movementVector.x -= 1}
+    if(controller.keys.d){ball.movementVector.x += 1}
+  }
+
 
   if(settings.mobile && controller.movement.down){
     let norm = distance(controller.movement.dx,controller.movement.dy)
@@ -2340,3 +2410,6 @@ if(!settings.offline){
 var player = entityList.player
 
 //test gay ray
+
+
+// summon(0,0,"mover")
