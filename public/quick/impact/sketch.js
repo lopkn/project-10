@@ -2010,8 +2010,35 @@ class test{
         trailify(b)
 
         b.AICustomUpdate = (b,dt)=>{
-          b.movementVector = {x:p.x-b.x,y:p.y-b.y}
+          if(b.target){
+            b.movementVector = {x:b.target.x-b.x,y:b.target.y-b.y-50}
+          } else if(AIlos(b.x,b.y,p.x,p.y)){
+            b.target = p
+          }
           b.AInextUpdateTime = 500
+        }
+      },
+      "apprentice":()=>{
+        b.tags.add("moves")
+        b.movementVector = {x:0,y:0}
+        b.movementSpeed = 0.003
+        b.movementScalar = 1
+        b.damageMultiplier = 0.7
+        b.color = [15,62,41]
+
+        b.AICustomUpdate = (b,dt)=>{
+          let los = AIlos(b.x,b.y,p.x,p.y)
+          if(b.target){
+            b.movementVector = {x:b.target.x-b.x,y:b.target.y-b.y-50}
+          }
+          if(los){
+            b.target = p
+            if(b.energy > 30 ){
+              // jump towards player
+              b.AInextUpdateTime = rand(1000)+950
+              b.jump(b.target.x-b.x,b.target.y-b.y-rand(200)-30,0.003)
+            }
+          }
         }
       }
     }
