@@ -1,6 +1,24 @@
 class sprites{
 	static dict={
 		"dmg+":[[133,-144],[-120,20],[-113,74],[-146,120],[-121,142]],
-		"armor+":[[200,77],[16,55],[25,193],[111,215],[200,358],[200,358],[289,215],[375,193],[384,55],[200,77]] 
+		"armor+old":[[0,-123],[-184,-145],[-175,-7],[-89,15],[0,158],[0,158],[89,15],[175,-7],[184,-145]],
+		"armor+":[[0,-116],[-69,-117],[-160,-134],[-158,-14],[-96,18],[-71,153],[0,153],[0,153],[71,153],[96,18],[158,-14],[160,-134],[69,-117]] 
 	}
+	static derail(n,x,y){
+		let a = this.dict[n]
+		a.forEach((e)=>{e[1] += y; e[0] += x})
+		return(JSON.stringify(a))
+		this.sprites[n] = a
+	}
+	static convert(x){
+		let a = this.dict[x]
+		a.forEach((e)=>{e[1]-=200})
+		return(JSON.stringify(a))
+	}
+	static convertX(x,d=-100){
+		let a = this.dict[x]
+		a.forEach((e)=>{e[0]+=d})
+		return(JSON.stringify(a))
+	}
+
 }

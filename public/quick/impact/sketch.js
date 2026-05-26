@@ -37,6 +37,10 @@ let mouseY = 0
 onmousemove = (e)=>{mouseX = (e.clientX); mouseY = (e.clientY)}
 
 
+function minMax(low,x,high){
+  return(Math.min(high,Math.max(low,x)))
+}
+
 // const socket = io.connect('/')
 function readCSV(str,del=","){
   let arr = str.split("\n")
@@ -783,7 +787,7 @@ class ball{
 
 
 
-    grid.addPt(this.x,this.y,()=>{this.tags.add("activated")},grid.activationGrid)
+    grid.addPt(this.x,this.y,()=>{this.activate()},grid.activationGrid)
 
   }
 
@@ -841,13 +845,14 @@ class ball{
     dmg *= damagePercentage
     dmg = Math.min(dmg*damagePercentage,this.maxHp*this.maxTakenDamagePercentage)
 
-    if(this.armor){
+    if(this.armor && !this.armor.broken){
       let blocked = this.armor.protection*dmg
       this.armor.hp -= blocked
       if(this.armor.hp <= 0){
         blocked += this.armor.hp
+        this.armor.broken = true
       }
-
+      if(blocked < 0 ){debugger}
       dmg -= blocked
     }
 
@@ -899,6 +904,10 @@ class ball{
     }
     this.AIlastUpdate = gameWorld.lastTime
 
+    if(distance(this.x,this.y,entityList.player.x,entityList.player.y)>grid.size*3){
+      this.deactivate()
+    }
+
     if(this.AICustomUpdate){
       this.AICustomUpdate(this,dt)
       return
@@ -928,8 +937,6 @@ class ball{
 
 
   update(dt){
-
-    if(!this.tags.has("activated")){return}
 
     if(this.tags.has("AI") && !this.tags.has("isDead")){
       this.AIupdate(dt)
@@ -1068,10 +1075,22 @@ class ball{
     }
 
     this.updateFuncs.forEach((f)=>{
-      f(dt)
+      f(this,dt)
     })
 
   }
+
+  activate(){
+    entityList.activatedBalls.add(this)
+    this.tags.add("activated")
+  }
+
+  deactivate(){
+    entityList.activatedBalls.delete(this)
+    this.tags.delete("activated")
+    grid.addPt(this.x,this.y,()=>{this.activate()},grid.activationGrid)
+  }
+
   draw(){
     this.ctx.lineWidth = 7
     this.ctx.strokeStyle = "rgb("+this.hp/this.maxHp*255+",20,40)"
@@ -1163,6 +1182,9 @@ class wall{
     if(move){
       this.gridPos.push(...grid.addWall(this))
     } else {
+      this.gridPos.forEach((cell)=>{
+        cell.delete(this)
+      })
       this.gridPos = grid.addWall(this)
     }
   }
@@ -1179,10 +1201,10 @@ class wall{
     w2.hp = 10
 
     if(this.splitting.minLength > w1.length){
-      w1.break()
+      w1.break(by,impactPt)
     }
     if(this.splitting.minLength > w2.length){
-      w2.break()
+      w2.break(by,impactPt)
     }
 
 
@@ -1207,7 +1229,18 @@ class wall{
     if(this.hp <= 0){
 
       if(this.splitting && this.length > this.splitting.minLength){
+        let pt = distance(impactPt.x,impactPt.y,this.x,this.y)/this.length
+        let breakLength = this.splitting.breakLength?this.splitting.breakLength:this.splitting.minLength
 
+        let pers1 = breakLength/this.length
+        let pers2 = breakLength/this.length
+        if(this.splitting.breakVariability){
+          pers1 *= this.splitting.breakVariability(breakLength)
+          pers2 *= this.splitting.breakVariability(breakLength)
+        }
+        let s1 = minMax(0,pt-pers1,1)
+        let s2 = minMax(0,pt+pers2,1)
+        this.split(s1,s2,by,impactPt)
       } else {
         this.break(by,impactPt)
       }
@@ -1363,7 +1396,7 @@ class item{
     this.rounding = 8
 
     this.pickupProgress = 0
-    this.color = [150,190,170]
+    this.color = [150,190,190]
 
   }
 
@@ -1713,8 +1746,10 @@ function crossParticle(x,y,color = [255,0,0]){
 
 
 class entityList{
-  static balls = []
+  static balls = new Set()
   static walls = []
+
+  static activatedBalls = new Set()
 
 }
 
@@ -1808,14 +1843,13 @@ function makeAIbreakable(wall){
 }
 
 
-function allBallsCollide(time,i){
+function allBallsCollide(time,i,ballList){
 
 
-  // for(let i = entityList.balls.length-1; i > -1 ; i--){
     for(let j = i-1; j > -1; j--){
 
-        let a = entityList.balls[i]
-        let b = entityList.balls[j]
+        let a = ballList[i]
+        let b = ballList[j]
 
         if(a.tags.has("noCollideBall") || b.tags.has("noCollideBall") || b.team==a.team){continue}
 
@@ -2005,7 +2039,7 @@ class test{
   entityList.player.hpRegen *= 2
   entityList.player.wallJumpEnergy = 5
   entityList.player.energyRegen *= 2
-  entityList.balls.push(entityList.player)
+  entityList.balls.add(entityList.player)
   entityList.player.tags.delete("AI")
   entityList.player.onJump = (b,spentEnergy)=>{
     let p = new particle(b.x,b.y,0,0)
@@ -2020,7 +2054,7 @@ class test{
   entityList.player.movementVector = {x:0,y:0}
   entityList.player.movementScalar = 1
 
-  entityList.player.tags.add("activated")
+  entityList.player.activate()
   entityList.player.updateFuncs.push(()=>{
     grid.activate(entityList.player.x,entityList.player.y)
   })
@@ -2045,7 +2079,7 @@ class test{
   }
   function newBall(x,y,r=50,ctx=can.ctx){
     let b = new ball(x,y,r,ctx)
-    entityList.balls.push(b)
+    entityList.balls.add(b)
     return(b)
   }
 
@@ -2063,13 +2097,15 @@ class test{
     return([w1,w2])
   }
   function build(x,y,x1,y1,type="normal",options={}){
-    let w = newWall(x,y,x1,y1)
+    let w = newWall(x,y,x1,y1,options.ctx)
     w.name = type
     if(options.reverse){w=newWall(x1,y1,x,y)}
     if(options.mirrorX){
       let midX = options.mirrorX
-      build(midX+midX-x,y,midX+midX-x1,y1)
+      options.mirrorX = undefined
+      build(midX+midX-x1,y1,midX+midX-x,y,type,options)
     }
+    w.splitting = options.splitting
     let types = {
       "magma":()=>{
         w.color = "orange"
@@ -2115,16 +2151,21 @@ class test{
       "apprentice":()=>{
         b.tags.add("moves")
         b.movementVector = {x:0,y:0}
-        b.movementSpeed = 0.003
+        b.movementSpeed = 0.02
         b.movementScalar = 1
         b.damageMultiplier = 0.7
         b.color = [15,62,41]
 
+        b.updateFuncs.push((b,dt)=>{
+          b.movementScalar = Math.min(1, (gameWorld.lastTime - b.lastCollideWallTime)/2000)
+          if(b.target){
+            b.movementVector = {x:b.target.x-b.x,y:Math.min(0,b.target.y-b.y-250)}
+          }
+        })
+
         b.AICustomUpdate = (b,dt)=>{
           let los = AIlos(b.x,b.y,p.x,p.y)
-          if(b.target){
-            b.movementVector = {x:b.target.x-b.x,y:b.target.y-b.y-50}
-          }
+          
           if(los){
             b.target = p
             if(b.energy > 30 ){
@@ -2136,6 +2177,14 @@ class test{
         }
       }
     }
+
+
+    if(options.grunt){
+      b.tags.add("grunt")
+      b.hp *= 2
+      b.r *= 1.1
+    }
+
     if(AIs[type]){AIs[type]()}
     return(b)
   }
@@ -2164,7 +2213,13 @@ class test{
             by.permanentDamageMultiplier += 0.05
             notify("your patience is rewarded: +5% damage")
           })
-        }
+        },
+        "armor+":()=>{
+          i.onPickup.push((by)=>{
+            by.armor = {hp:50,protection:0.5,maxHp:50}
+            notify("picked up armor: +50 armor hp")
+          })
+        },
       }
 
       if(dict[type]){dict[type]()}
@@ -2234,7 +2289,7 @@ class test{
     entityList.walls.push(tmp2) //table
 
 
-    entityList.balls.push(new ball(380,450,50,can.ctx))
+    entityList.balls.add(new ball(380,450,50,can.ctx))
 
 
     /// initialize rest of level
@@ -2345,29 +2400,38 @@ setTimeout(()=>{
   })
 
   let pn2 = performance.now()
-  for(let i = entityList.balls.length-1; i>-1; i--){
-    let e = entityList.balls[i]
+
+  let ballList = [...entityList.activatedBalls]
+
+  for(let i = ballList.length-1; i>-1; i--){
+    let e = ballList[i]
     if(e.tags.has("isDead") && date-e.deathTime > 5000 && e !== entityList.player){
-      entityList.balls.splice(i,1)
+      entityList.activatedBalls.delete(e)
+      entityList.balls.delete(e)
       continue;
     }
 
-    allBallsCollide(time,i)
+    allBallsCollide(time,i,ballList)
     e.update(dt*gameWorld.timeWarp)
     e.draw()
   }
 
-
-
-  for(let i = entityList.walls.length-1; i>-1; i--){
-    let e = entityList.walls[i]
-    if(e.tags.has("isBroken")){
-      entityList.walls.splice(i,1)
-      continue;
-    }
-    e.draw()
-  }
   test.perf = (performance.now()-pn2) * 0.1 + test.perf*0.9
+
+
+  let walls = grid.getNearby(entityList.player.x,entityList.player.y,2,grid.grid)
+  walls.forEach((e)=>{
+    e.draw()
+  })
+
+  // for(let i = entityList.walls.length-1; i>-1; i--){
+  //   let e = entityList.walls[i]
+  //   if(e.tags.has("isBroken")){
+  //     entityList.walls.splice(i,1)
+  //     continue;
+  //   }
+  //   e.draw()
+  // }
 
   particles.draw(2)
 
@@ -2431,6 +2495,15 @@ function drawPlayerGUI(){
   can.ctx.fillRect(0, padding, barWidth, barHeight)
   can.ctx.fillStyle = "rgb(40,170,60)"
   can.ctx.fillRect(0, padding, barWidth*(entityList.player.hp/entityList.player.maxHp), barHeight)
+  if(entityList.player.armor){
+    can.ctx.strokeStyle = "#606060"
+    can.ctx.fillStyle = "rgba(170,170,170,0.4)"
+    can.ctx.lineWidth = 5
+    can.ctx.beginPath()
+    can.ctx.roundRect(0, padding, barWidth*(entityList.player.armor.hp/entityList.player.armor.maxHp), barHeight)
+    can.ctx.fill()
+    can.ctx.stroke()
+  }
 
   // energy bar
   can.ctx.fillStyle = "gray"
@@ -2468,125 +2541,7 @@ function segWalls(x1,y1,x2,y2,div){
 }
 
 
-function generateLevels(x,y){
-  // entityList.walls.push(new wall(x,y,x+vx,y+vy,can.ctx))
-  // entityList.walls.push( makeAIbreakable(makeWooden(new wall(50,500,150,500,can.ctx),0.1)))
 
-
-  /// hell
-
-  for(let i = 0; i < 15; i++){
-    build(-18000+i*4000,y+4000+rand(2000),-4000+i*14000,y+4000+rand(2000),"magma")
-    build(-16000+i*4000,y+4000+rand(2000),-2000+i*14000,y+4000+rand(2000),"magma")
-  }
-
-  /// end hell
-
-
-  let tmp;
-  let floorLength = 1800+rand(1800)
-  let heightDiff = floorLength * (1.6+rand(7))
-  let height = y-heightDiff
-
-  let heightDiv = Math.floor(heightDiff/300)
-
-  let wallX = {"a":x+floorLength*(0.2+rand(-0.1)),"b":x+floorLength*(0.7+rand(-0.2))}
-  let floorWidth = wallX.b-wallX.a
-  let midX = wallX.a + floorWidth/2
-
-
-  tmp = newWall(x,y,x+floorLength,y,can.ctx)//base floor
-  tmp.hp*=10
-
-  let doorHeight = y-250-rand(150)
-  entityList.walls.push(makeWooden(new wall(wallX.a,y,wallX.a,doorHeight,can.ctx),0.2))
-  segWalls(wallX.a,doorHeight,wallX.a,height,heightDiv)
-  segWalls(wallX.b,y,wallX.b,height,heightDiv)
-  // entityList.walls.push(new wall(wallX.a,height,wallX.b,height,can.ctx)) // old roof
-  mirror(newWall,wallX.a,height,wallX.a+floorWidth/3,height,midX,1).forEach((e)=>{makeWooden(e).tags.add("sided")}) // roof
-  newWall(wallX.a+floorWidth/3,height,wallX.b-floorWidth/3,height)
-
-
-  let floor = doorHeight - rand(150)
-  while(floor > height + 200){
-
-    let floorX = 40+rand(floorWidth-180)
-    let start = wallX.a
-    let end = wallX.b
-    let flipped = false
-    if(Math.random()>0.5){floorX*=-1;start=wallX.b;end=wallX.a;flipped=true} //left or right
-    entityList.walls.push(new wall(start,floor,start+floorX,floor,can.ctx))
-
-
-    if(rand(0.3)){
-      let floorBoard = new wall(end,floor,start+floorX,floor,can.ctx)
-      if(!flipped){
-      floorBoard.normal.x *=-1
-      floorBoard.normal.y *=-1
-      }
-      floorBoard.tags.add("sided")
-      makeWooden(floorBoard)
-      entityList.walls.push(floorBoard)
-    }
-
-
-
-    if(Math.random()>0.5){ // spawn rate
-      entityList.balls.push(new ball(start+floorX*0.5,floor-60,50,can.ctx))
-    }
-
-
-    floor -= 230+rand(200)
-  }
-
-  /// boss level
-
-
-  // newWallTo(wallX.a,height,200-floorWidth,-300)
-  // newWallTo(wallX.b,height,-(200-floorWidth),-300)
-
-  mirror(newWall,wallX.a,height,wallX.a,height-300,midX)
-  height -= 300
-  let fat = 900
-
-  mirror(newWall,wallX.a,height,midX-180,height,midX)
-  makeWooden(newWall(midX-180,height,midX+180,height)).tags.add("sided")
-  mirror(newWall,wallX.a,height,midX-fat,height-300,midX)
-  height -= 300
-  mirror(newWall,midX-fat,height,midX-fat,height-2300,midX) // wall
-  let top = height-2300
-
-  height -= 400
-      
-  mirror(newWall,midX-fat,height,midX-500,height,midX).forEach((e)=>{entityList.balls.push(new ball(e.midpoint.x,e.midpoint.y-60,50,can.ctx))})
-  height -= 200
-  mirror(newWall,midX-fat,height,midX-600,height,midX).forEach((e)=>{entityList.balls.push(new ball(e.midpoint.x,e.midpoint.y-60,50,can.ctx))})
-  height -= 200
-  mirror(newWall,midX-fat,height,midX-700,height,midX).forEach((e)=>{entityList.balls.push(new ball(e.midpoint.x,e.midpoint.y-60,50,can.ctx))})
-  height -= 400
-  newWall(midX-200,height,midX+200,height)
-  let boss = newBall(midX,height-60,80,can.ctx)
-  boss.hp *= 5
-  boss.maxHp *= 5
-  boss.onDeath.push(()=>{boss.vx*=0.8;boss.vy*=0.8})
-
-
-
-  
-
-
-  height = top
-  newWall(midX-fat,height,midX+fat,height) // roof
-
-
-
-  // @generate
-  // entityList.player.y = height-60
-  // entityList.player.x = midX
-
-
-
-}
 
 
 
@@ -2849,3 +2804,171 @@ function notify(str,x=10){
   },x*1000)
 }
 
+
+
+function generateLevels(x,y){
+  // entityList.walls.push(new wall(x,y,x+vx,y+vy,can.ctx))
+  // entityList.walls.push( makeAIbreakable(makeWooden(new wall(50,500,150,500,can.ctx),0.1)))
+
+
+  /// hell
+
+  for(let i = 0; i < 15; i++){
+    build(-18000+i*4000,y+4000+rand(2000),-4000+i*14000,y+4000+rand(2000),"magma")
+    build(-16000+i*4000,y+4000+rand(2000),-2000+i*14000,y+4000+rand(2000),"magma")
+  }
+
+  /// end hell
+
+
+  let tmp;
+  let floorLength = 1800+rand(1800)
+  let heightDiff = floorLength * (1.6+rand(7))
+  let height = y-heightDiff
+
+  let heightDiv = Math.floor(heightDiff/300)
+
+  let wallX = {"a":x+floorLength*(0.2+rand(-0.1)),"b":x+floorLength*(0.7+rand(-0.2))}
+  let floorWidth = wallX.b-wallX.a
+  let midX = wallX.a + floorWidth/2
+
+
+  tmp = newWall(x,y,x+floorLength,y,can.ctx)//base floor
+  tmp.hp*=10
+
+  let doorHeight = y-250-rand(150)
+  entityList.walls.push(makeWooden(new wall(wallX.a,y,wallX.a,doorHeight,can.ctx),0.2))
+  newWall(wallX.a,doorHeight,wallX.a,height).splitting = {minLength:50,breakLength:100,breakVariability:()=>{return(rand(3))}}
+  newWall(wallX.b,y,wallX.b,height).splitting = {minLength:50,breakLength:100,breakVariability:()=>{return(rand(3))}}
+  // entityList.walls.push(new wall(wallX.a,height,wallX.b,height,can.ctx)) // old roof
+  mirror(newWall,wallX.a,height,wallX.a+floorWidth/3,height,midX,1).forEach((e)=>{makeWooden(e).tags.add("sided")}) // roof
+  newWall(wallX.a+floorWidth/3,height,wallX.b-floorWidth/3,height)
+  dropItem("armor+",midX,height)
+
+
+  let floor = doorHeight - rand(150)
+  while(floor > height + 200){
+
+    let floorX = 40+rand(floorWidth-180)
+    let start = wallX.a
+    let end = wallX.b
+    let flipped = false
+    if(Math.random()>0.5){floorX*=-1;start=wallX.b;end=wallX.a;flipped=true} //left or right
+    entityList.walls.push(new wall(start,floor,start+floorX,floor,can.ctx))
+
+
+    if(rand(0.3)){
+      let floorBoard = new wall(end,floor,start+floorX,floor,can.ctx)
+      if(!flipped){
+      floorBoard.normal.x *=-1
+      floorBoard.normal.y *=-1
+      }
+      floorBoard.tags.add("sided")
+      makeWooden(floorBoard)
+      entityList.walls.push(floorBoard)
+    }
+
+
+
+    if(Math.random()>0.5){ // spawn rate
+      entityList.balls.add(new ball(start+floorX*0.5,floor-60,50,can.ctx))
+    }
+
+
+    floor -= 230+rand(200)
+  }
+
+  /// boss level
+
+
+  // newWallTo(wallX.a,height,200-floorWidth,-300)
+  // newWallTo(wallX.b,height,-(200-floorWidth),-300)
+
+  mirror(newWall,wallX.a,height,wallX.a,height-300,midX)
+  height -= 300
+  let fat = 900
+
+  mirror(newWall,wallX.a,height,midX-180,height,midX)
+  makeWooden(newWall(midX-180,height,midX+180,height)).tags.add("sided")
+  mirror(newWall,wallX.a,height,midX-fat,height-300,midX)
+  height -= 300
+  mirror(newWall,midX-fat,height,midX-fat,height-2300,midX).forEach((e)=>{e.splitting = {minLength:50,breakLength:100}}) // wall
+  let top = height-2300
+
+  height -= 400
+      
+  mirror(newWall,midX-fat,height,midX-500,height,midX).forEach((e)=>{entityList.balls.add(new ball(e.midpoint.x,e.midpoint.y-60,50,can.ctx))})
+  height -= 200
+  mirror(newWall,midX-fat,height,midX-600,height,midX).forEach((e)=>{entityList.balls.add(new ball(e.midpoint.x,e.midpoint.y-60,50,can.ctx))})
+  height -= 200
+  mirror(newWall,midX-fat,height,midX-700,height,midX).forEach((e)=>{entityList.balls.add(new ball(e.midpoint.x,e.midpoint.y-60,50,can.ctx))})
+  height -= 400
+  newWall(midX-200,height,midX+200,height)
+  let boss = newBall(midX,height-60,80,can.ctx)
+  boss.hp *= 5
+  boss.maxHp *= 5
+  boss.onDeath.push(()=>{boss.vx*=0.8;boss.vy*=0.8})
+
+
+
+  
+
+
+  height = top
+  build(midX-fat,height,midX+fat,height,"wood",{splitting:{minLength:50,breakLength:100}}) // roof
+
+
+
+  // @generate
+  // entityList.player.y = height-60
+  // entityList.player.x = midX
+  // camera.pos.x = entityList.player.x
+  // camera.pos.y = entityList.player.y
+  // entityList.player.movementScalar *= 10
+
+
+  build(midX-fat,height,midX,height-250,"wood",{splitting:{minLength:50,breakLength:500},mirrorX:midX,sided:1}) // roof triangle
+  build(midX-fat,height,midX-fat-400,height-450,"normal",{splitting:{minLength:50,breakLength:100},mirrorX:midX})
+  fat += 400
+  height -= 450
+  build(midX-fat,height,midX-fat-900,height-250,"normal",{splitting:{minLength:50,breakLength:100},mirrorX:midX})
+  fat += 900
+  height -= 250
+
+  build(midX-fat,height,midX-fat-600,height-1250,"normal",{splitting:{minLength:50,breakLength:100,breakVariability:()=>{return(rand(3))}},mirrorX:midX})
+  height -= 1250
+  fat+=600
+
+  let aheight = 11250
+  build(midX-fat,height,midX-fat-100,height-aheight,"normal",{splitting:{minLength:50,breakLength:100,breakVariability:()=>{return(rand(3))}},mirrorX:midX})
+
+  for(let i = 0; i < aheight; i+=rand(400)+100){
+    let l = rand(600)+300
+    let f = rand(fat*2-l)
+    let h = height-i
+    build(midX-fat+f,h,midX-fat+f+l,h,"normal",{splitting:{minLength:50,breakLength:100,breakVariability:()=>{return(rand(3))}}})
+    let mx = midX-fat+f+l/2
+    if(rand(0.6)){
+      let options = {}
+      if(rand(0.3)){options.grunt=true}
+      summon(rand(0.6)?"normal":"apprentice",mx,h-60,options)
+    }
+  }
+
+  for(let i = 0; i < 5; i++){
+    let h = height+i*400
+    build(midX-fat+1800,h,midX-fat+2100,h,"normal",{splitting:{minLength:50,breakLength:100,breakVariability:()=>{return(rand(3))}},mirrorX:midX})
+  }
+
+  for(let i = 0; i < 4; i++){
+    let h = height+i*500
+    build(midX-300,h,midX+300,h,"normal",{splitting:{minLength:50,breakLength:100,breakVariability:()=>{return(rand(3))}}})
+  }
+
+  for(let i = -2; i < 7; i++){
+    let h = height-i*250
+    build(midX-fat+500,h,midX-fat+700,h,"normal",{splitting:{minLength:50,breakLength:100,breakVariability:()=>{return(rand(3))}},mirrorX:midX})
+  }
+
+
+}
