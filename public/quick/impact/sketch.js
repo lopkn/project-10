@@ -96,7 +96,7 @@ var frameFuncs = []
 
 function mainLoop(time){
   let dt= (time-gameWorld.lastTime)
-  if(dt < 15){requestAnimationFrame(mainLoop);return}
+  if(dt < 15*test.slower){requestAnimationFrame(mainLoop);return}
   gameWorld.lastTime = time
   gameWorld.frame += 1
   let date = Date.now()
@@ -342,6 +342,14 @@ function point_to_line_distance(x, y, x1, y1, x2, y2) {
     return Math.sqrt(distX * distX + distY * distY);
 }
 
+function point_to_infinite_line_distance(x, y, x1, y1, x2, y2) {
+    const closest = point_on_infinite_line(x, y, x1, y1, x2, y2);
+    const distX = x - closest.x;
+    const distY = y - closest.y;
+    return Math.sqrt(distX * distX + distY * distY);
+}
+
+
 function line_to_line_collision_pt(a,b,c,d,p,q,r,s) {
   var det, gamma, lambda;
   det = (c - a) * (s - q) - (r - p) * (d - b);
@@ -384,18 +392,13 @@ function swept_ball_to_line_collision(bx1, by1, vx, vy, r, x1, y1, x2, y2) { // 
       // collision = {p:p,res:res,dist:distance(res.x,res.y,bx1,by1),type:1} // wrong!
       collision = {p:p,closest:point_on_line(p.x,p.y,x1,y1,x2,y2),dist:distance(res.x,res.y,bx1,by1),type:1}
     }
-    // // 2. Check if the distance from the line segment to either endpoint of the capsule is less than r
-    // if (point_to_line_distance(bx1, by1, x1, y1, x2, y2) <= r) {
-    //   // the start of the capsule collided
-    //   return(2);
-    // }
-    // if (point_to_line_distance(bx2, by2, x1, y1, x2, y2) <= r) {
-    //   return(3);
-    // } // we dont need this just yet
+
 
     // 3. Check if distance from endpoints of line segment to the capsule's path is less than r (for cases where line is short and ball passes over it)
-    if (point_to_line_distance(x1, y1, bx1, by1, bx2, by2) <= r) {
-      let d = point_to_line_distance(x1, y1, bx1, by1, bx2, by2)
+    if (point_to_line_distance(x1, y1, bx1, by1, bx2, by2) <= r && dot(vx,vy,bx1-x1,by1-y1) < 0) {
+
+
+      let d = point_to_infinite_line_distance(x1, y1, bx1, by1, bx2, by2)
       let pol = point_on_infinite_line(x1, y1, bx1, by1, bx2, by2)
       let res = {x:x1, y:y1}
       d=Math.sqrt(r*r-d*d)
@@ -405,17 +408,38 @@ function swept_ball_to_line_collision(bx1, by1, vx, vy, r, x1, y1, x2, y2) { // 
         collision = {p:p,closest:res,dist:dist,type:4}
       }
     }
-    if (point_to_line_distance(x2, y2, bx1, by1, bx2, by2) <= r) {
-      let d = point_to_line_distance(x2, y2, bx1, by1, bx2, by2)
+    if (point_to_line_distance(x2, y2, bx1, by1, bx2, by2) <= r && dot(vx,vy,bx1-x1,by1-y1) < 0) {
+      let d = point_to_infinite_line_distance(x2, y2, bx1, by1, bx2, by2)
       let pol = point_on_infinite_line(x2, y2, bx1, by1, bx2, by2)
       let res = {x:x2, y:y2}
       d=Math.sqrt(r*r-d*d)
       let p = {x:pol.x-nvx*d,y:pol.y-nvy*d}
       let dist = distance(res.x,res.y,bx1,by1)
+      if(test.expect(distance(p.x,p.y,res.x,res.y),r)){debugger} // energen
       if(!collision || dist <= collision.dist){
-        collision = {p:p,closest:res,dist:dist,type:5}
+        collision = {p:p,closest:res,dist:dist,type:5} // p = the pos of ball when collide, closest = the point of collision
       }
     }
+
+    
+
+
+
+        // 2. Check if the distance from the line segment to either endpoint of the capsule is less than r
+    // if (point_to_line_distance(bx1, by1, x1, y1, x2, y2) <= r) {
+    //   // the start of the capsule collided
+    //   return(2);
+    // } // dont need this yet
+    if (point_to_line_distance(bx2, by2, x1, y1, x2, y2) <= r) {
+      let pol = point_on_line(bx2, by2, x1, y1, x2, y2)
+      let p = {x:bx2,y:by2}
+      let dist = distance(bx1,by1,pol.x,pol.y)
+      if(!collision || dist <= collision.dist){
+        collision = {p:p,closest:pol,dist:dist,passDist:distance(bx2,by2,pol.x,pol.y),type:3}
+      }
+    } 
+
+    return(collision)
 
 }
 
@@ -859,7 +883,7 @@ class ball{
     
     this.x += this.vx*dt + this.push.x
     this.y += this.vy*dt + this.push.y
-    if(distance(this.push.x,this.push.y)>20){
+    if(distance(this.push.x,this.push.y)>this.r){
       console.log("what?")
     }
     this.push = {x:0,y:0}
@@ -867,10 +891,14 @@ class ball{
     let speed = this.speed()
     let dleng = distance(lastX,lastY,this.x,this.y)
 
+    let sweptWallHit = false
+
     if(dleng > this.r/2 && !this.tags.has("noCollideWall") ){
       let pseudovx = this.x-lastX
       let pseudovy = this.y-lastY
-      // particles.push(new lineParticle(this.x,this.y,lastX,lastY))
+      if(debug){
+        particles.push(new lineParticle(this.x,this.y,lastX,lastY))
+      }
       let collisionData = {"collided":false,"minDist":Infinity}
       entityList.walls.forEach((w)=>{
 
@@ -882,19 +910,23 @@ class ball{
         if(w.tags.has("sided") && (awaySide || this.sidedWallEntryFrame[w.id] === gameWorld.frame-1 )){return} // comment out to test
           if(sweep.dist < collisionData.minDist){
             collisionData.collided = w
-            collisionData.minDist = this.r
-            collisionData.sweepDist = sweep.dist
+            collisionData.minDist = sweep.dist
             collisionData.closest = sweep.closest
             collisionData.awaySide = awaySide
             collisionData.p = sweep.p
+            collisionData.sweepType = sweep.type
+            collisionData.sweepResponse = sweep
 
-            if(Math.abs(distance(collisionData.closest.x,collisionData.closest.y,sweep.p.x,sweep.p.y)-this.r)>0.1){console.log("energen "+sweep.type)}
+            if(sweep.type!==3&&Math.abs(distance(collisionData.closest.x,collisionData.closest.y,sweep.p.x,sweep.p.y)-this.r)>0.1){console.log("energen "+sweep.type)}
           }
         }
       })
       if(collisionData.collided){
-        console.log('too fast wall collision')
-        wall_collision_handler(this,collisionData,"swept")
+        if(debug){console.log('too fast wall collision '+collisionData.sweepType)}
+        collisionData.sweepDist = collisionData.minDist
+        collisionData.minDist = collisionData.sweepType===3?collisionData.sweepResponse.passDist:this.r
+        wall_collision_handler(this,collisionData,dt,collisionData.sweepType==3?"swept normal":"swept")
+        sweptWallHit = collisionData.collided
       }
     } /// BALL MOVING TOO FAST!!!!!! FIX
 
@@ -909,6 +941,8 @@ class ball{
       let collisionData = {"collided":false,"minDist":Infinity}
 
       entityList.walls.forEach((w)=>{
+
+        if(w === sweptWallHit){return}
 
         let awaySide = dot(this.vx,this.vy,w.normal.x,w.normal.y) < 0
 
@@ -934,7 +968,7 @@ class ball{
 
       if(collisionData.collided){
         collisionData.p = {x:this.x,y:this.y}
-        wall_collision_handler(this,collisionData)
+        wall_collision_handler(this,collisionData,dt)
       }
 
     }
@@ -1078,7 +1112,7 @@ class wall{
   }
 }
 
-function wall_collision_handler(ball,collisionData,type="normal"){
+function wall_collision_handler(ball,collisionData,dt,type="normal"){
 
   ball.energy += 5
   let awaySide = collisionData.awaySide // not used
@@ -1086,6 +1120,8 @@ function wall_collision_handler(ball,collisionData,type="normal"){
   let dist = collisionData.minDist // the distance from the ball to the point of the wall that was hit
   let w = collisionData.collided // the wall collided on
   let p = collisionData.p // the position of the ball when it hit the wall
+
+  let old = {vx:ball.vx,vy:ball.vy} // not needed, debug only.
 
     let fellback = false
 
@@ -1095,6 +1131,7 @@ function wall_collision_handler(ball,collisionData,type="normal"){
     } else {
       // fallback to last position if ball center is exactly on the wall, not perfect but should work in most cases and prevents NaN errors
       fellback = true;
+      console.log("fellback")
       dist = distance(ball.lastX,ball.lastY,closest.x,closest.y)
       normalizedDirectionToWall = {x:(closest.x-ball.lastX)/dist,y:(closest.y-ball.lastY)/dist}
     }
@@ -1124,7 +1161,12 @@ function wall_collision_handler(ball,collisionData,type="normal"){
 
     //push ball out of wall (good enough for now, fix later, bleeding E)
 
-    if(type==="normal"){
+    if(type === "swept" && collisionData.sweepResponse.type===1){
+      ball.x = collisionData.p.x
+      ball.y = collisionData.p.y
+      console.log(ball.speed())
+
+    } else { // normal
       let overlap = ball.r - dist
       if(overlap > 0){
         let pushX = -normalizedDirectionToWall.x * overlap
@@ -1132,10 +1174,23 @@ function wall_collision_handler(ball,collisionData,type="normal"){
         ball.x += pushX
         ball.y += pushY
       }
-    } else if(type === "swept"){
-      ball.x = collisionData.p.x
-      ball.y = collisionData.p.y
     }
+    if(debug){
+        let lp = new lineParticle(ball.x,ball.y,ball.x+ball.vx*200,ball.y+ball.vy*200)
+        lp.color = [255,0,255]
+        particles.push(lp)
+        crossParticle(p.x,p.y)
+        crossParticle(closest.x,closest.y,[255,255,0])
+
+        lp = new lineParticle(p.x,p.y,p.x-reflectionVector.x*200,p.y-reflectionVector.y*200)
+        lp.color = [255,255,0]
+        particles.push(lp)
+
+        lp = new lineParticle(p.x,p.y,p.x-old.vx*200,p.y-old.vy*200)
+        lp.color = [0,255,0]
+        particles.push(lp)
+        if(test.expect(distance(reflectionVector.x,reflectionVector.y),1)){debugger}
+      }
 
     ball.lastCollideWallTime = gameWorld.lastTime
 
@@ -1330,6 +1385,15 @@ class lineParticle{
     this.ctx.lineTo(this.x2,this.y2)
     this.ctx.stroke()
   }
+}
+
+function crossParticle(x,y,color = [255,0,0]){
+  let size = 15
+  let lp1 = new lineParticle(x+25,y+25,x-25,y-25)
+  let lp2 = new lineParticle(x+25,y-25,x-25,y+25)
+  lp1.color = lp2.color = color
+  particles.push(lp1)
+  particles.push(lp2)
 }
 
 
@@ -1572,11 +1636,18 @@ class test{
     frameFuncs.splice(0,0,()=>{debugger})
   }
 
+  static expect(x,y,margin=0.1){
+    return(Math.abs(x-y)>0.1 && debug)
+  }
+
   static debug(){
+    newWall(-100,890,100,4190);
+    
     newWall(-200,490,800,490);
-    newWall(800,490-60,400,490-60);
+    newWall(1800,490-60,1000,490-60);
     newWall(-140,490,-140,0);
-    newWall(-200,0*400,800,0*400).tags.add("sided");
+    
+    // newWall(-200,0*400,800,0*400).tags.add("sided");
     // newWall(1200,490,800,790);
     // newWall(1200,490,800,790);
     // newWall(1200,490,1800,790);
@@ -1603,6 +1674,7 @@ class test{
       p.life *= 5
     },200)
   }
+  static slower = 1;
 }
 
 //initialize player @ip
