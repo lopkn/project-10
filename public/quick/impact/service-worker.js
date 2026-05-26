@@ -1,10 +1,11 @@
-const CACHE_NAME = 'impact-pwa-v2'+ Date.now();
+const CACHE_NAME = 'impact-pwa-v3'+ Date.now();
 const ASSETS = [
   './',
   './index.html',
   './sketch.js',
   './tests.js',
   './manifest.json',
+  './sprites.js',
   '../../images/impact.png'
 ];
 

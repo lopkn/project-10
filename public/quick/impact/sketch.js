@@ -17,7 +17,11 @@ let HeightM = Height/2
 
 // let ctx = document.getElementById("myCanvas").getContext("2d")
 
-
+function DCC(el,par){
+  el = document.createElement(el)
+  if(par){par.appendChild(el)}
+    return(el)
+}
 var rand = (x)=>{
   if(x == undefined){return(Math.random())}
   if(x < 1){
@@ -96,7 +100,7 @@ var frameFuncs = []
 
 function mainLoop(time){
   let dt= (time-gameWorld.lastTime)
-  if(dt < 15*test.slower){requestAnimationFrame(mainLoop);return}
+  if(dt < 14*test.slower){requestAnimationFrame(mainLoop);return}
   gameWorld.lastTime = time
   gameWorld.frame += 1
   let date = Date.now()
@@ -496,6 +500,7 @@ class grid{ //Spatial Hash Grid
   static size = 2400
   static grid = {}
   static activationGrid = {}
+  static miscGrid = {}
 
   static findCell(x,y){
     return([Math.floor(x/this.size),Math.floor(y/this.size)])
@@ -654,6 +659,20 @@ class grid{ //Spatial Hash Grid
     return(ret)
   }
 
+  static getNearby(x,y,size=1,grid=this.grid){
+    let cell = this.findCell(x,y)
+    let items = new Set()
+    for(let i = -size; i < size+1; i++){
+      for(let j = -size; j < size+1; j++){
+        let key = this.keyify(cell[0]+i,cell[1]+j)
+        if(!grid[key]){continue;}
+        items = items.union(grid[key])
+      }
+    }
+    
+    return(items)
+  }
+
   static addWall(wall){
     let x1 = Math.min(wall.x,wall.x2)
     let y1 = Math.min(wall.y,wall.y2)
@@ -685,6 +704,17 @@ class grid{ //Spatial Hash Grid
   } 
 
 
+}
+
+
+function AIlos(x,y,ox,oy){
+  let los = true;
+  entityList.walls.forEach((w)=>{
+    if(w.tags.has("AIdamage")){return}
+    let not_blocked = line_to_line_collision_pt(x,y,ox,oy,w.x,w.y,w.x2,w.y2)
+    if(not_blocked!==false){los=false}
+  })
+  return(los)
 }
 
 
@@ -723,6 +753,7 @@ class ball{
     this.maxHp = 100
     this.hpRegen = 0.002
     this.damageMultiplier = 1
+    this.permanentDamageMultiplier = 1
     this.maxTakenDamagePercentage = 1
 
     this.lastCollideTime = 0
@@ -810,6 +841,16 @@ class ball{
     dmg *= damagePercentage
     dmg = Math.min(dmg*damagePercentage,this.maxHp*this.maxTakenDamagePercentage)
 
+    if(this.armor){
+      let blocked = this.armor.protection*dmg
+      this.armor.hp -= blocked
+      if(this.armor.hp <= 0){
+        blocked += this.armor.hp
+      }
+
+      dmg -= blocked
+    }
+
     this.hp -= dmg 
     this.damageTime = gameWorld.lastTime
 
@@ -869,14 +910,9 @@ class ball{
       // jump towards player
       this.AInextUpdateTime = rand(1000)+1000
 
-      let los = true;
-      entityList.walls.forEach((w)=>{
-        if(w.tags.has("AIdamage")){return}
-        let not_blocked = line_to_line_collision_pt(this.x,this.y,player.x,player.y,w.x,w.y,w.x2,w.y2)
-        if(not_blocked!==false){los=false}
-      })
 
-      if(los){
+
+      if(AIlos(this.x,this.y,player.x,player.y)){
         this.jump(player.x-this.x,player.y-this.y-rand(200),0.003)
       }
     }
@@ -1254,6 +1290,112 @@ function wall_collision_handler(ball,collisionData,dt,type="normal"){
 }
 
 
+
+
+class item{
+  constructor(x,y,name="default item",ctx=can.ctx){
+    this.x = x
+    this.y = y
+    this.ctx = ctx
+    this.type="item"
+
+    this.name = name
+
+    this.onPickup = []
+
+    this.chunk = grid.addPt(x,y,this,grid.miscGrid)
+    this.size = 40
+    this.size2 = this.size*2
+    this.rounding = 8
+
+    this.pickupProgress = 0
+    this.color = [150,190,170]
+
+  }
+
+  pickup(by){
+    this.onPickup.forEach((f)=>{
+      f(by)
+    })
+
+    particles.push(new itemShellParticle(this))
+
+    this.chunk.delete(this)
+  }
+
+  draw(dt){
+
+    this.pickupProgress -= 0.05*dt
+    if(this.pickupProgress < 0){this.pickupProgress = 0}
+
+    this.ctx.fillStyle = "rgba("+this.color[0]+","+this.color[1]+","+this.color[2]+","+(0.2+0.8*(1-this.pickupProgress/100))+")"
+    this.ctx.beginPath()
+    let y = this.y + Math.sin(gameWorld.lastTime/400)*5
+    this.ctx.roundRect(this.x-this.size,y-this.size,this.size2,this.size2,this.rounding)
+    this.ctx.fill()
+    if(sprites.dict[this.name]){ // optimizable
+      let s = sprites.dict[this.name]
+      this.ctx.save()
+      this.ctx.translate(this.x,y)
+      this.ctx.beginPath()
+      let ratio = this.size2/400
+      this.ctx.moveTo(s[0][0]*ratio,s[0][1]*ratio)
+      for(let i = 1; i < s.length; i++){
+        this.ctx.lineTo(s[i][0]*ratio,s[i][1]*ratio)
+      }
+      this.ctx.closePath()
+
+      this.ctx.lineWidth = 4
+      this.ctx.strokeStyle = "hsl("+((gameWorld.lastTime/100 )%360)+",50%,30%)"
+      this.ctx.stroke()
+
+      this.ctx.restore()
+    }
+  }
+}
+
+
+
+class orb{
+  constructor(x,y,name="default orb",ctx=can.ctx){
+    this.x = x
+    this.y = y
+    this.ctx = ctx
+    this.type="orb"
+
+    this.name = name
+
+    this.onPickup = []
+
+    this.chunk = grid.addPt(x,y,this,grid.miscGrid)
+
+  }
+
+  pickup(by){
+    this.onPickup.forEach((f)=>{
+      f(by)
+    })
+    this.chunk.delete(this)
+  }
+
+  draw(dt){
+    this.ctx.fillStyle = "rgb(255,255,0)"
+    this.ctx.beginPath()
+    this.ctx.arc(this.x,this.y+Math.sin(gameWorld.lastTime/200)*12,10,0,Math.PI*2)
+    this.ctx.fill()
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
 class particle{
   constructor(x,y,vx,vy,life=1000){
 
@@ -1412,6 +1554,54 @@ class shatteredWallParticle{
   }
 }
 
+class itemShellParticle{
+  constructor(item,life=4000){
+    this.z = 1
+    this.item = item
+    this.life = life
+    this.maxLife = this.life
+    this.lineWidth = 5
+    this.pickupTime = gameWorld.lastTime
+
+    this.item.y = this.item.y + Math.sin(gameWorld.lastTime/400)*5
+    this.ctx = this.item.ctx
+  }
+  update(dt){
+    this.life -= dt
+    if(this.life <= 0){
+      return("del")
+    }
+  }
+  draw(){
+    this.ctx.lineWidth = this.lineWidth
+    this.ctx.strokeStyle = "hsla("+rand(260)+",100%,50%,"+(this.life/this.maxLife)+")"
+    this.ctx.beginPath()
+    this.ctx.roundRect(this.item.x-this.item.size,this.item.y-this.item.size,this.item.size2,this.item.size2,this.item.rounding)
+    this.ctx.stroke()
+
+
+    if(sprites.dict[this.item.name]){ // optimizable
+      let s = sprites.dict[this.item.name]
+      this.ctx.save()
+      this.ctx.translate(this.item.x,this.item.y)
+      this.ctx.beginPath()
+      let ratio = this.item.size2/400
+      this.ctx.moveTo(s[0][0]*ratio,s[0][1]*ratio)
+      for(let i = 1; i < s.length; i++){
+        this.ctx.lineTo(s[i][0]*ratio,s[i][1]*ratio)
+      }
+      this.ctx.closePath()
+
+      this.ctx.lineWidth = 4
+      this.ctx.strokeStyle = "hsla("+rand(260)+",100%,50%,"+(this.life/this.maxLife)+")"
+      this.ctx.stroke()
+
+      this.ctx.restore()
+    }
+
+  }
+}
+
 class lineParticle{
   constructor(x,y,x2,y2,life=1000){
     this.z = 2
@@ -1441,6 +1631,7 @@ class lineParticle{
     this.ctx.moveTo(this.x,this.y)
     this.ctx.lineTo(this.x2,this.y2)
     this.ctx.stroke()
+
   }
 }
 
@@ -1474,7 +1665,7 @@ class particles{
   static draw(layer){
     this.list.forEach((p)=>{
       let l = p.z?p.z:1
-      if(p.z!==layer){return}
+      if(l!==layer){return}
       p.draw()
     })
   }
@@ -1593,8 +1784,8 @@ function allBallsCollide(time,i){
           } else {
             dmgA*=0.5
           }
-          dmgA *= a.damageMultiplier
-          dmgB *= b.damageMultiplier
+          dmgA *= a.damageMultiplier * a.permanentDamageMultiplier
+          dmgB *= b.damageMultiplier * b.permanentDamageMultiplier
 
 
 
@@ -1805,8 +1996,7 @@ class test{
   }
 
 
-  function summon(x,y,type="normal",options={}){
-
+  function summon(type="normal",x=entityList.player.x,y=(entityList.player.y-160),options={}){
     let b = newBall(x,y)
     let p = entityList.player
     let AIs = {
@@ -1815,6 +2005,7 @@ class test{
         b.movementVector = {x:0,y:0}
         b.movementSpeed = 0.03
         b.movementScalar = 1
+        b.damageMultiplier = 0.5
         b.color = [30,62,41]
         trailify(b)
 
@@ -1826,6 +2017,36 @@ class test{
     }
     if(AIs[type]){AIs[type]()}
     return(b)
+  }
+
+  function dropOrb(type,x=entityList.player.x,y=(entityList.player.y-160),options={}){
+    let i = new orb(x,y,type,can.ctx)
+     i.onPickup.push((by)=>{
+      if(type=="moverSummon"){
+        summon("mover",i.x,i.y)
+      }
+    })
+  }
+
+  function dropItem(type,x=entityList.player.x,y=(entityList.player.y),options={}){
+    y -= 50
+    let i = new item(x,y,type,can.ctx)
+      let dict = {
+        "moverSummon":()=>{
+          i.onPickup.push((by)=>{
+            let mv = summon("mover",i.x,i.y)
+            mv.vy -= 2
+          })
+        },
+        "dmg+":()=>{
+          i.onPickup.push((by)=>{
+            by.permanentDamageMultiplier += 0.05
+            notify("your patience is rewarded: +5% damage")
+          })
+        }
+      }
+
+      if(dict[type]){dict[type]()}
   }
 
   function trailify(ball,leng=50){
@@ -1873,6 +2094,9 @@ class test{
 
   function normalGenerate(){
       //initialize walls
+
+    dropItem("dmg+",-150,0)
+
     newWall(-200,0,800,0,can.ctx)
     newWall(-200,0,-200,600,can.ctx)
     makeWooden(newWall(800,0,800,600,can.ctx))
@@ -1982,6 +2206,22 @@ setTimeout(()=>{
 
   particles.update(dt)
   particles.draw(1)
+
+  //draw items
+
+  let items = grid.getNearby(entityList.player.x,entityList.player.y,1,grid.miscGrid)
+  items.forEach((e)=>{
+    e.draw(dt)
+    if(e.type==="orb"&&distance(e.x,e.y,entityList.player.x,entityList.player.y)<entityList.player.r+10){
+      e.pickup(entityList.player)
+    }
+    if(e.type==="item"&&distance(e.x,e.y,entityList.player.x,entityList.player.y)<entityList.player.r+e.size){
+      e.pickupProgress += 0.1*dt
+      if(e.pickupProgress > 100){
+        e.pickup(entityList.player)
+      }
+    }
+  })
 
   let pn2 = performance.now()
   for(let i = entityList.balls.length-1; i>-1; i--){
@@ -2253,12 +2493,15 @@ function controlBall(ball){
   }
 
 
-  if(settings.mobile && controller.movement.down){
-    let norm = distance(controller.movement.dx,controller.movement.dy)
-    ball.movementVector.x = controller.movement.dx
-    ball.movementVector.y = controller.movement.dy
-
-    ball.movementScalar = Math.min(1,200/(1+norm))
+  if(settings.mobile){
+    if(controller.movement.down){
+      let norm = distance(controller.movement.dx,controller.movement.dy)
+      ball.movementVector.x = controller.movement.dx
+      ball.movementVector.y = controller.movement.dy
+      ball.movementScalar = Math.min(1,200/(1+norm))
+    } else {
+      ball.movementVector = {x:0,y:0}
+    }
   }
 }
 
@@ -2466,4 +2709,16 @@ var player = entityList.player
 //test gay ray
 
 
-// summon(0,0,"mover")
+// summon("mover",0,0)
+
+
+
+function notify(str,x=10){
+  let notif = document.getElementById("notification_center")
+  let n = DCC("div",notif)
+  n.innerText = str
+  setTimeout(()=>{
+    n.remove()
+  },x*1000)
+}
+
