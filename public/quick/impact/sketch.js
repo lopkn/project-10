@@ -2247,7 +2247,7 @@ class test{
             if(b.energy > 30 ){
               // jump towards player
               b.AInextUpdateTime = rand(1000)+950
-              b.jump(b.target.x-b.x,b.target.y-b.y-rand(200)-30,0.003)
+              b.jump(b.target.x-b.x,b.target.y-b.y-rand(200)-60,0.003)
             }
           }
         }
@@ -2295,6 +2295,12 @@ class test{
             by.armor = {hp:50,protection:0.5,maxHp:50}
             // particles.push(new sparkParticle(by.x,by.y,15))
             notify(options.msg?options.msg:"picked up armor: +50 armor hp")
+          })
+        },
+        "hp+":()=>{
+          i.onPickup.push((by)=>{
+            by.maxHp += 20
+            notify(options.msg?options.msg:"Buffed: +20 max hp")
           })
         },
       }
@@ -2985,7 +2991,7 @@ function generateLevels(x,y){
   let boss = newBall(midX,height-60,80,can.ctx)
   boss.hp *= 5
   boss.maxHp *= 5
-  boss.onDeath.push(()=>{boss.vx*=0.8;boss.vy*=0.8})
+  boss.onDeath.push(()=>{boss.vx*=0.8;boss.vy*=0.8; dropItem("hp+",boss.x,boss.y)})
 
 
 
