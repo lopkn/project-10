@@ -1397,6 +1397,7 @@ class item{
 
     this.pickupProgress = 0
     this.color = [150,190,190]
+    this.links = new Set()
 
   }
 
@@ -1406,8 +1407,18 @@ class item{
     })
 
     particles.push(new itemShellParticle(this))
-
+    this.remove()
+  }
+  remove(l){
     this.chunk.delete(this)
+    if(!l){this.links.forEach((e)=>{
+      e.remove(true)
+    })}
+  }
+
+  link(item){
+    this.links.add(item)
+    item.links.add(this)
   }
 
   draw(dt){
@@ -1527,6 +1538,71 @@ class particle{
   }
 }
 
+
+class sparkParticle{
+    constructor(x,y,corners=10,life=1500){
+
+    this.z = 1
+
+    this.x = x
+    this.y = y
+    this.color = [255,255,255]
+    this.size = 15
+    this.radius = 23
+    this.life = life
+    this.maxLife = this.life
+    this.ctx = can.ctx
+    this.rotation = 0
+    this.rotSpeed = rand(-0.1)
+
+    this.star = []
+    for(let i = 0; i < corners-1; i++){
+      this.star.push(rand()*Math.PI*2)
+    }
+    //sort
+    this.star.sort((a,b)=>{return a-b})
+    // let ratio = Math.PI*2/this.star[this.star.length-1]
+    this.star.forEach((e,i)=>{
+      this.star[i] = {ang:e,len:this.radius+rand(this.radius*3)}
+    })
+  }
+  update(dt){
+    this.life -= dt
+    this.size *= 1.002 ** dt
+    if(this.life <= 0){
+      return("del")
+    }
+  }
+  draw(){
+    this.ctx.fillStyle = "rgba("+this.color[0]+","+this.color[1]+","+this.color[2]+","+(this.life/this.maxLife)+")"
+    this.ctx.beginPath()
+    this.ctx.save()
+    this.ctx.translate(this.x,this.y)
+    this.ctx.rotate(this.rotation)
+
+    let ang = 0
+    this.ctx.moveTo(0,-this.radius)
+    for(let i = 0; i < this.star.length; i++){
+      let s = this.star[i]
+      let wid = Math.max(s.ang-ang,1)
+      let rot = Lrotate(0,-this.radius-s.len*wid,(s.ang+ang)/2)
+      this.ctx.lineTo(rot.x,rot.y)
+      rot = Lrotate(0,-this.radius,s.ang)
+      this.ctx.lineTo(rot.x,rot.y)
+      ang=s.ang
+    }
+    let s = this.star[this.star.length-1]
+    let wid = Math.max(Math.PI*2-s.ang,1)
+    let rot = Lrotate(0,-this.radius-s.len*wid,(s.ang)/2+Math.PI)
+    this.ctx.lineTo(rot.x,rot.y)
+
+    this.ctx.closePath()
+    
+    this.ctx.fill()
+    this.ctx.restore()
+
+  }
+}
 
 class sparkleParticle{
   constructor(x,y,life=1000){
@@ -2211,18 +2287,20 @@ class test{
         "dmg+":()=>{
           i.onPickup.push((by)=>{
             by.permanentDamageMultiplier += 0.05
-            notify("your patience is rewarded: +5% damage")
+            notify(options.msg?options.msg:"your patience is rewarded: +5% damage")
           })
         },
         "armor+":()=>{
           i.onPickup.push((by)=>{
             by.armor = {hp:50,protection:0.5,maxHp:50}
-            notify("picked up armor: +50 armor hp")
+            // particles.push(new sparkParticle(by.x,by.y,15))
+            notify(options.msg?options.msg:"picked up armor: +50 armor hp")
           })
         },
       }
 
       if(dict[type]){dict[type]()}
+      return(i)
   }
 
   function trailify(ball,leng=50){
@@ -2271,7 +2349,6 @@ class test{
   function normalGenerate(){
       //initialize walls
 
-    dropItem("dmg+",-150,0)
 
     newWall(-200,0,800,0,can.ctx)
     newWall(-200,0,-200,600,can.ctx)
@@ -2461,6 +2538,7 @@ setTimeout(()=>{
 
 
 function drawShootAngle(date){
+  if(entityList.player.tags.has("isDead")){return}
   if(controller.mouseIsDown){
 
     if(!settings.mobile){
@@ -2916,6 +2994,7 @@ function generateLevels(x,y){
 
   height = top
   build(midX-fat,height,midX+fat,height,"wood",{splitting:{minLength:50,breakLength:100}}) // roof
+  dropItem("dmg+",midX,height,{msg:"raw dog bonus: +5% dmg"}).link(dropItem("dmg+",-150,0))
 
 
 
