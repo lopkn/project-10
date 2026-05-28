@@ -102,16 +102,27 @@ function distance(x1,y1,x2=0,y2=0) {
 
 var frameFuncs = []
 
-function mainLoop(time){
-  let dt= (time-gameWorld.lastTime)
-  if(dt < 14*test.slower){requestAnimationFrame(mainLoop);return}
-  gameWorld.lastTime = time
+function mainLoop(raf){
+  if(settings.RAF||raf){
+    requestAnimationFrame(mainLoop,true)
+  }
+  let time = performance.now()-settings.startDate
+  let dt = (time-gameWorld.lastTime)
+
+  if(settings.RAF){
+    dt = (time-gameWorld.lastDrawTime)
+    gameWorld.lastDrawTime = time
+  } else {
+    gameWorld.lastTime = time
+  }
+
+  // if(settings.RAF && dt < 14*test.slower){requestAnimationFrame(mainLoop);return}
   gameWorld.frame += 1
   let date = Date.now()
   frameFuncs.forEach((e)=>{
     e(time,dt,date)
   })
-  requestAnimationFrame(mainLoop)
+
 }
 
 function oneTimeTrustedButton(f){
@@ -232,6 +243,38 @@ function normalize(x,y){
   let len = Math.sqrt(x*x+y*y)
   return {x: x/len, y: y/len}
 }
+
+
+
+function f(p1, p2, x) { // kind of trust. not really? works with negatives
+  p1 = [p1.x,p1.y]
+  p2 = [p2.x,p2.y]
+    const mx = (p1[0] + p2[0]) / 2.0;
+    const my = (p1[1] + p2[1]) / 2.0;
+    
+    const vx = p1[0] - p2[0];
+    const vy = p1[1] - p2[1];
+    const d = Math.hypot(vx, vy);
+    
+    if (d === 0) {
+        throw new Error("p1 and p2 cannot be the same point.");
+    }
+        
+    if (Math.abs(Math.cos(x)) < 1e-9) {
+         return [mx, my];
+    }
+
+    const ux_perp = -vy / d;
+    const uy_perp = vx / d;
+    
+    const dist_from_midpoint = (d / 2.0) * Math.tan(x);
+    
+    const p3_x = mx + ux_perp * dist_from_midpoint;
+    const p3_y = my + uy_perp * dist_from_midpoint;
+    
+    return [p3_x, p3_y];
+}
+
 
 
 function check_collision_circles(x1,y1,r1,x2,y2,r2){
@@ -786,10 +829,39 @@ class ball{
     this.movementSpeed = 0.005
 
 
-
     grid.addPt(this.x,this.y,()=>{this.activate()},grid.activationGrid)
 
   }
+
+
+
+  initPath(){
+    // this.path = {at:0, trail:[{x:this.x,y:this.y}],lastVisiblePathPt:{x:this.x,y:this.y}}
+    this.path = {x:this.x,y:this.y,to:[]}
+    this.lastVisiblePathPt = {x:this.x,y:this.y}
+  } // the problem is that this branches.
+
+
+  pathTo(){
+    let at = this.path
+    let los = AIlos(at.x,at.y,this.x,this.y)
+
+    if(los){
+      this.path.lastVisiblePathPt = {x:this.x,y:this.y}
+      return
+    } // not here anymore. otherwise: where am i
+
+
+    /// otherwise: generate new path
+    let lastAt = this.path.lastVisiblePathPt
+    let fallbackLos = AIlos(lastAt.x,lastAt.y,this.x,this.y)
+    if(fallbackLos){
+      this.path.trail.push(lastAt)
+      this.path.at = this.path.trail.length-1
+    }
+  }
+
+
 
   jump(vx,vy,mag){
     if(this.tags.has("isDead")){return}
@@ -1077,6 +1149,7 @@ class ball{
     this.updateFuncs.forEach((f)=>{
       f(this,dt)
     })
+
 
   }
 
@@ -1857,6 +1930,7 @@ class gameWorld{
     static gravity = 0.001
     static airFriction = 0.0003
     static lastTime = 0
+    static lastDrawTime = 0
 
     static timeWarp = 1
     static frame = 0
@@ -1896,12 +1970,16 @@ class camera{
 }
 
 class settings{
+  static startDate = performance.now()
   static speedZoom = 5 // works anywhere from 2 (insane) to 12 (mild)
   static mobile = 0
   static relativeSize = (Height+Width)/3723
   static dragSensitivity = 1.5
   static mobileSensMultiplier = 1.333
   static offline = true
+
+  static RAF = false;
+
 }
 
 function makeWooden(wall,mult=0.5){
@@ -2051,6 +2129,7 @@ function allBallsCollide(time,i,ballList){
 class test{
 
   static perf = 0;
+
 
   static still(){
     entityList.balls.forEach((e)=>{e.hp=e.maxHp=400000;e.tags.delete("AI")});entityList.walls.forEach((e)=>{e.hp=e.maxHp=400000});entityList.player.energyRegen = 400
@@ -2334,6 +2413,45 @@ class test{
   }
 
 
+  // function trailify(ball,dtmin=60){
+  //   ball.trail = []
+  //   ball.trailTime = gameWorld.lastTime
+  //   ball.lastTrailPos = {x:ball.x,y:ball.y,time:gameWorld.lastTime}
+
+  //   ball.drawFuncs.push((p,s,l)=>{
+  //   let dt = gameWorld.lastTime - ball.trailTime
+  //   if(dt>dtmin){
+  //     let s = p.speed()
+  //     while((timeAgo=gameWorld.lastTime - p.trailTime)>dtmin){
+  //     ball.trailTime+=dtmin
+
+  //     let scalar = gameWorld.lastTime-p.lastTrailPos.time
+  //     let dx = p.x-p.lastTrailPos.x
+  //     let dy = p.y-p.lastTrailPos.y
+  //     scalar = timeAgo/scalar
+  //     p.trail.push([p.x-dx*scalar,p.y-dy*scalar,s])
+
+  //     }
+  //     ball.lastTrailPos = {x:ball.x,y:ball.y,time:gameWorld.lastTime}
+
+  //   }
+  //     p.ctx.save()
+  //     p.ctx.globalCompositeOperation = "destination-over"
+  //     p.trail.forEach((e,i)=>{
+  //       p.ctx.fillStyle = "hsla("+(p.color[0])+ "," + s + "%," + l + "%,"+Math.min(0.5,0.01*i*e[2] - 0.5)+")"
+  //       p.ctx.beginPath()
+  //       p.ctx.arc(e[0],e[1],p.r*0.97,0,Math.PI*2)
+  //       p.ctx.fill()
+  //     })
+  //     if(p.trail.length>50){
+  //       p.trail.splice(0,1)
+  //     }
+  //     p.ctx.globalCompositeOperation = "source-over"
+  //     p.ctx.restore()
+  // }) 
+  // }
+
+
   function newWallTo(a,b,c,d,ctx){
     return(newWall(a,b,a+c,b+d,ctx))
   }
@@ -2414,9 +2532,28 @@ class test{
 
 
 
+class engineComms{
+  static toDraw=0;
+  static toPhys=0;
+
+  static resetDraw(){
+    engineComms.toDraw={
+    "camDx":0,
+    "camDy":0
+  }
+  }
+  static resetPhys(){}
+}
 
 
-requestAnimationFrame(mainLoop)
+if(settings.RAF){
+  requestAnimationFrame(mainLoop)
+  seperateMainStart()
+} else {
+  // setInterval(mainLoop,16)
+  requestAnimationFrame(mainLoop,true)
+  dualMainStart()
+}
 
 
 
@@ -2426,6 +2563,29 @@ underCan.ctx.fillStyle = "rgba(0,0,0,1)"
 underCan.ctx.globalCompositeOperation = 'destination-out';
 underCan.ctx.save()
 
+
+
+function seperateMainStart(){
+
+  engineComms.resetDraw()
+  engineComms.resetPhys()
+
+  setTimeout(()=>{
+    frameFuncs.push(gameDraw)
+    frameFuncs.push(engineComms.resetDraw)
+  },400)
+
+  setInterval(()=>{
+    let time = performance.now()-settings.startDate
+    let dt= (time-gameWorld.lastTime)
+    gameWorld.lastTime = time
+    let date = Date.now()
+    gamePhysicsUpdate(time,dt,date)
+    engineComms.resetPhys()
+  },106)
+}
+
+function dualMainStart(){
 setTimeout(()=>{
   frameFuncs.push((time,dt,date)=>{
   
@@ -2453,16 +2613,11 @@ setTimeout(()=>{
   underCan.ctx.restore()
   underCan.ctx.save()
   underCan.ctx.globalCompositeOperation = 'copy';
-  // underCan.ctx.fillRect(0,0,underCan.canvas.width,underCan.canvas.height)
   underCan.ctx.drawImage(underCan.ctx.canvas, -camDx*camera.scale, -camDy*camera.scale); // should fix later: sudden zooming does not get adjusted for
   underCan.ctx.globalCompositeOperation = 'destination-out';
   underCan.ctx.fillRect(0,0,underCan.canvas.width,underCan.canvas.height)
   underCan.ctx.globalCompositeOperation = 'source-over';
-
   underCan.ctx.setTransform(can.ctx.getTransform());
-
-  // grid.draw()
-
   particles.update(dt)
   particles.draw(1)
 
@@ -2507,14 +2662,6 @@ setTimeout(()=>{
     e.draw()
   })
 
-  // for(let i = entityList.walls.length-1; i>-1; i--){
-  //   let e = entityList.walls[i]
-  //   if(e.tags.has("isBroken")){
-  //     entityList.walls.splice(i,1)
-  //     continue;
-  //   }
-  //   e.draw()
-  // }
 
   particles.draw(2)
 
@@ -2540,6 +2687,115 @@ setTimeout(()=>{
 
   })
 },400) // wait for website to stabalize
+
+}
+
+
+function gamePhysicsUpdate(time,dt,date){
+
+  camera.scale += (settings.speedZoom/(entityList.player.speed()+settings.speedZoom)*settings.relativeSize-camera.scale)*0.03
+  let camDx = (entityList.player.x-WidthM/camera.scale-camera.pos.x)*0.03
+  let camDy = (entityList.player.y-HeightM/camera.scale-camera.pos.y)*0.03
+  camera.pos.x += camDx
+  camera.pos.y += camDy
+  engineComms.toDraw.camDx+=camDx
+  engineComms.toDraw.camDy+=camDy
+  particles.update(dt)
+
+  //item functions
+  let items = grid.getNearby(entityList.player.x,entityList.player.y,1,grid.miscGrid)
+  items.forEach((e)=>{
+    if(e.type==="orb"&&distance(e.x,e.y,entityList.player.x,entityList.player.y)<entityList.player.r+10){
+      e.pickup(entityList.player)
+    }
+    if(e.type==="item"&&distance(e.x,e.y,entityList.player.x,entityList.player.y)<entityList.player.r+e.size){
+      e.pickupProgress += 0.1*dt
+      if(e.pickupProgress > 100){
+        e.pickup(entityList.player)
+      }
+    }
+  })
+
+
+  let ballList = [...entityList.activatedBalls]
+
+  for(let i = ballList.length-1; i>-1; i--){
+    let e = ballList[i]
+    if(e.tags.has("isDead") && date-e.deathTime > 5000 && e !== entityList.player){
+      entityList.activatedBalls.delete(e)
+      entityList.balls.delete(e)
+      continue;
+    }
+
+    allBallsCollide(time,i,ballList)
+    e.update(dt*gameWorld.timeWarp)
+  }
+
+  controlBall(entityList.player)
+  gameWorld.timeWarp += (1-gameWorld.timeWarp)*0.1
+  if(controller.mouseIsDown){gameWorld.timeWarp*=0.90}
+
+
+}
+
+function gameDraw(time,dt,date){
+
+  let pn = performance.now()
+    if(test.dtLock){
+      dt = test.dtLock
+    }
+    dt = Math.min(100,dt)
+
+  //move camera
+
+
+  can.ctx.clearRect(0,0,can.canvas.width,can.canvas.height)
+  can.ctx.save()
+  can.ctx.translate(-camera.pos.x*camera.scale,-camera.pos.y*camera.scale)
+  can.ctx.scale(camera.scale,camera.scale)
+  underCan.ctx.restore()
+  underCan.ctx.save()
+  underCan.ctx.globalCompositeOperation = 'copy';
+  underCan.ctx.drawImage(underCan.ctx.canvas, -engineComms.toDraw.camDx*camera.scale, -engineComms.toDraw.camDy*camera.scale); // should fix later: sudden zooming does not get adjusted for
+  underCan.ctx.globalCompositeOperation = 'destination-out';
+  underCan.ctx.fillRect(0,0,underCan.canvas.width,underCan.canvas.height)
+  underCan.ctx.globalCompositeOperation = 'source-over';
+  underCan.ctx.setTransform(can.ctx.getTransform());
+  particles.draw(1)
+
+  //draw items
+
+  let items = grid.getNearby(entityList.player.x,entityList.player.y,1,grid.miscGrid)
+  items.forEach((e)=>{
+    e.draw(dt)
+  })
+
+  let pn2 = performance.now()
+
+  let ballList = [...entityList.activatedBalls]
+
+  for(let i = ballList.length-1; i>-1; i--){
+    let e = ballList[i]
+    e.draw()
+  }
+  test.perf = (performance.now()-pn2) * 0.1 + test.perf*0.9
+
+  let walls = grid.getNearby(entityList.player.x,entityList.player.y,2,grid.grid)
+  walls.forEach((e)=>{
+    e.draw()
+  })
+  particles.draw(2)
+  drawShootAngle(date) // this is fine to be in draw update, not physics, because it updates at the last second anyway
+  can.ctx.restore()
+  drawPlayerGUI()
+
+  can.ctx.fillStyle = "pink"
+  can.ctx.fillText(Math.floor(dt)+" "+(Math.round(performance.now()-pn)+" "+Math.floor(test.perf*100)),100,100)
+  if(settings.offline){
+    can.ctx.fillStyle = "red"
+    can.ctx.fillText("OFFLINE. SERVED OFFLINE. DEBUG NOT WORK BECAUSE OFFLINE",100,120)
+  }
+}
 
 
 
@@ -2570,9 +2826,9 @@ function drawShootAngle(date){
 
 function drawPlayerGUI(){
   // health and energy bars on top left of screen
-  let barWidth = 200
-  let barHeight = 20
-  let padding = 10
+  let barWidth = Width/7
+  let barHeight = barWidth/10
+  let padding = barHeight/2
 
   // health bar
   can.ctx.fillStyle = "red"
@@ -2846,13 +3102,7 @@ if(settings.mobile){
 
 
 
-// unbreakable walls
-// player trail
-// height advantage
 
-// bounciness for wall //
-// scrolling background
-// trace through once side walls
 
 const navigationEntry = performance.getEntriesByType("navigation")[0];
 const isCached = navigationEntry.transferSize === 0;
@@ -3057,3 +3307,19 @@ function generateLevels(x,y){
 
 
 }
+
+
+
+
+
+
+
+// unbreakable walls
+// player trail //
+// height advantage
+
+// bounciness for wall //
+// scrolling background
+// trace through one side walls
+// mobile rotation fix
+// mobile movement fix
