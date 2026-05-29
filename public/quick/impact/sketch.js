@@ -3089,10 +3089,11 @@ function drawPlayerGUI(){
     can.ctx.fillStyle = "rgba(170,170,170,0.4)"
     can.ctx.lineWidth = 5
     can.ctx.beginPath()
-    can.ctx.roundRect(0, padding, barWidth*(entityList.player.armor.hp/entityList.player.armor.maxHp), barHeight)
+    can.ctx.roundRect(0, padding, barWidth*(entityList.player.armor.hp/entityList.player.armor.maxHp), barHeight,5)
     can.ctx.fill()
     can.ctx.stroke()
   }
+
 
   // energy bar
   can.ctx.fillStyle = "gray"
@@ -3531,6 +3532,7 @@ function generateLevels(x,y){
 
   // @generate
   // entityList.player.y = height-60
+  // entityList.player.y = height+2860
   // entityList.player.x = midX
   // camera.pos.x = entityList.player.x
   // camera.pos.y = entityList.player.y
