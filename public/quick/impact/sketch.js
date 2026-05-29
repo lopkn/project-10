@@ -2063,7 +2063,7 @@ class settings{
   static mobile = 0
   static relativeSize = (Height+Width)/3723
   static dragSensitivity = 1.5
-  static mobileSensMultiplier = 1.333
+  static mobileSensMultiplier = 1.6
   static offline = true
 
   static RAF = false;
