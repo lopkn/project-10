@@ -840,6 +840,7 @@ class ball{
     this.updateFuncs = []
     this.drawFuncs = []
     this.onDeath = []
+    this.onJump = []
 
     this.tags = new Set()
     this.id = id.gen()
@@ -912,6 +913,9 @@ class ball{
 
   jump(vx,vy,mag){
     if(this.tags.has("isDead")){return}
+
+    let origSpeed = this.speedSq()
+
     let actualForce = distance(vx,vy)*mag
     let spentEnergy = actualForce*30
 
@@ -933,7 +937,8 @@ class ball{
     this.force(vx,vy,mag)
     this.lastJumpTime = gameWorld.lastTime
 
-    this.onJump?this.onJump(this,spentEnergy):0
+
+    this.onJump?this.onJump.forEach((f)=>{f(this,spentEnergy,origSpeed)}):0
 
   }
 
@@ -1610,7 +1615,41 @@ class orb{
 
 
 
+class explosionParticle{
+  constructor(x,y,size=()=>{return(25)},width=()=>{return(2)},color=()=>{return("rgb(255,0,255")},life=1000){
 
+    this.z=1
+
+    this.x = x
+    this.y = y
+    this.color = color
+    this.size = size
+    this.width = width
+    this.life = life
+    this.maxLife = this.life
+    this.ctx = underCan.ctx
+    this.noFill = true
+
+  }
+  update(dt){
+    this.life -= dt
+    if(this.life <= 0){
+      return("del")
+    }
+  }
+  draw(){
+    let lifePers = this.life/this.maxLife
+    this.ctx.strokeStyle = this.color(lifePers,this)
+    this.ctx.lineWidth = this.width(lifePers,this)
+    this.ctx.beginPath()
+    this.ctx.arc(this.x,this.y,this.size(lifePers,this),0,Math.PI*2)
+    this.ctx.stroke()
+    if(this.fill){
+      this.ctx.fillStyle = this.fill(lifePers,this)
+      this.ctx.fill()
+    }
+  }
+}
 
 
 
@@ -2013,6 +2052,7 @@ class controller{
 
 class camera{
   static scale = 1
+  static shake = 1
   static pos = {x:-WidthM,y:-HeightM}
 
 }
@@ -2244,7 +2284,7 @@ class test{
   entityList.player.energyRegen *= 2
   entityList.balls.add(entityList.player)
   entityList.player.tags.delete("AI")
-  entityList.player.onJump = (b,spentEnergy)=>{
+  entityList.player.onJump.push((b,spentEnergy)=>{
     let p = new particle(b.x,b.y,0,0)
     p.life = 1500/b.maxEnergySpend*spentEnergy
     p.color = [120,245,230]
@@ -2252,7 +2292,7 @@ class test{
     p.size = b.r+2
     p.noFill = 1
     particles.push(p)
-  }
+  })
   entityList.player.tags.add("moves")
   entityList.player.movementVector = {x:0,y:0}
   entityList.player.movementScalar = 1
@@ -2471,10 +2511,28 @@ class test{
             notify(options.msg?options.msg:"energetic: +20 max energy")
           })
         },
+        "momentum profligacy":()=>{
+          by.tags.add("momentum profligacy")
+          by.onJump.push((b,nrg,v)=>{
+            if(Math.sqrt(v)-b.speed() > 0.15){
+              particleFuncs.explosion2(b.x,b.y)
+              camera.shake += 12
+            }
+          })
+        }
       }
 
       if(dict[type]){dict[type]()}
       return(i)
+  }
+
+  var particleFuncs = {
+    "explosion":(x,y,s=1,l)=>{particles.push(new explosionParticle(x,y,(t)=>{return((1-t)*315*s)},(t)=>{return(t*75*s)},colorFuncs.explosion,l))},
+    "explosion2":(x,y,s=1)=>{for(let i =0; i < 5; i++){particleFuncs.explosion(x,y,s,3000/(i**1.5))}}
+  }
+
+  var colorFuncs = {
+    "explosion":(t)=>{let x=rand(255);return("rgba(255,"+x+",0,"+t*2+")")}
   }
 
   function trailify(ball,leng=50){
@@ -2797,6 +2855,9 @@ setTimeout(()=>{
   can.ctx.translate(-camera.pos.x*camera.scale,-camera.pos.y*camera.scale)
   can.ctx.scale(camera.scale,camera.scale)
 
+  can.ctx.translate(rand(-camera.shake),rand(-camera.shake))
+
+
   underCan.ctx.restore()
   underCan.ctx.save()
   underCan.ctx.globalCompositeOperation = 'copy';
@@ -2859,6 +2920,7 @@ setTimeout(()=>{
   controlBall(entityList.player)
 
   gameWorld.timeWarp += (1-gameWorld.timeWarp)*0.1
+  camera.shake += (0-camera.shake)*0.05
   if(controller.mouseIsDown){gameWorld.timeWarp*=0.90}
 
 
