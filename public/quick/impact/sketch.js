@@ -342,6 +342,53 @@ function check_collision_ball_line(x, y, r, x1, y1, x2, y2) {
     return distanceSq <= r * r;
 }
 
+function check_collision_AABB_line(x1, y1, x2, y2, x3, y3, x4, y4) {
+    // Ensure AABB coordinates are properly ordered as min/max
+    const minX = Math.min(x1, x2);
+    const maxX = Math.max(x1, x2);
+    const minY = Math.min(y1, y2);
+    const maxY = Math.max(y1, y2);
+
+    // Delta X and Delta Y of the line segment
+    const dx = x4 - x3;
+    const dy = y4 - y3;
+
+    // t0 and t1 represent the parametric overlap interval [0, 1]
+    let t0 = 0.0;
+    let t1 = 1.0;
+
+    // Array of pairs: [denominator, numerator] for the 4 edges
+    // Liang-Barsky p and q values
+    const checks = [
+        [-dx, x3 - minX], // Left edge
+        [ dx, maxX - x3], // Right edge
+        [-dy, y3 - minY], // Top edge
+        [ dy, maxY - y3]  // Bottom edge
+    ];
+
+    for (const [p, q] of checks) {
+        if (p === 0) {
+            // Line is parallel to this edge. 
+            // If it's outside the boundary, no intersection is possible.
+            if (q < 0) return false;
+        } else {
+            const t = q / p;
+            if (p < 0) {
+                // Line is entering the AABB volume
+                if (t > t1) return false;
+                if (t > t0) t0 = t;
+            } else {
+                // Line is leaving the AABB volume
+                if (t < t0) return false;
+                if (t < t1) t1 = t;
+            }
+        }
+    }
+
+    // If the entering time is less than or equal to the exiting time, 
+    // a collision occurs within the segment length.
+    return t0 <= t1;
+}
 function point_on_line(x, y, x1, y1, x2, y2) {
     const abx = x2 - x1;
     const aby = y2 - y1;
@@ -2252,12 +2299,17 @@ class test{
     return([w1,w2])
   }
   function build(x,y,x1,y1,type="normal",options={}){
-    let w = newWall(x,y,x1,y1,options.ctx)
+
+    let w;
+    if(!options.reverse){
+      w = newWall(x,y,x1,y1,options.ctx)
+     } else {
+      w = newWall(x1,y1,x,y,options.ctx)
+     }
     w.name = type
-    if(options.reverse){w=newWall(x1,y1,x,y)}
-    if(options.mirrorX){
+    if(options.mirrorX !== undefined && !options.alreadyMirrored){
       let midX = options.mirrorX
-      options.mirrorX = undefined
+      options.alreadyMirrored = true
       build(midX+midX-x1,y1,midX+midX-x,y,type,options)
     }
     w.splitting = options.splitting
@@ -2303,6 +2355,36 @@ class test{
           b.AInextUpdateTime = 500
         }
       },
+      "levitator":()=>{
+        b.tags.add("moves")
+        b.movementVector = {x:0,y:0}
+        b.movementSpeed = 0.03
+        b.movementScalar = 1
+        b.damageMultiplier = 0.5
+        b.color = [30,62,41]
+        trailify(b)
+
+        b.updateFuncs.push((b)=>{
+          if(b.target){
+            if(b.target.y-40<b.y){
+              b.movementVector = {x:rand(-50),y:Math.min(0,b.target.y-b.y-250)}
+            } else {
+              b.movementVector = {x:b.target.x-b.x,y:b.target.y-b.y-50}
+            }
+          } else {
+            b.movementVector = {x:0,y:0}
+          }
+        })
+
+        b.AICustomUpdate = (b,dt)=>{
+          if(AIlos(b.x,b.y,p.x,p.y)){
+            b.target = p
+          } else {
+            b.target = undefined
+          }
+          b.AInextUpdateTime = 500
+        }
+      },
       "apprentice":()=>{
         b.tags.add("moves")
         b.movementVector = {x:0,y:0}
@@ -2314,7 +2396,7 @@ class test{
         b.updateFuncs.push((b,dt)=>{
           b.movementScalar = Math.min(1, (gameWorld.lastTime - b.lastCollideWallTime)/2000)
           if(b.target){
-            b.movementVector = {x:b.target.x-b.x,y:Math.min(0,b.target.y-b.y-250)}
+              b.movementVector = {x:b.target.x-b.x,y:Math.min(0,b.target.y-b.y-250)}
           }
         })
 
@@ -2452,6 +2534,77 @@ class test{
   // }
 
 
+
+
+
+
+
+
+
+
+
+class structureGenerator{
+  static dict={
+    "zento":{arr:[
+      { x1: 40, y1: 300, x2: 360, y2: 300, type: 'normal', mirrored: false },
+      { x1: 20, y1: 80, x2: 60, y2: 120, type: 'normal', mirrored: true },
+      { x1: 60, y1: 120, x2: 340, y2: 120, type: 'normal', mirrored: false },
+      { x1: 80, y1: 120, x2: 80, y2: 300, type: 'wood', mirrored: true},
+      { x1: 160, y1: 300, x2: 180, y2: 260, type: 'wood', mirrored: true },
+      { x1: 160, y1: 260, x2: 240, y2: 260, type: 'wood', mirrored: false }
+    ],off:{x:-200,y:-300},scale:3,boundingBox:[-200,-300,200,0],genFunc:(x,y,options)=>{
+      summon("mover",x,y-options.scale*60)
+    }}
+  }
+
+  static boundingBox(struct,x,y,scale){
+    let d = this.dict[struct]
+    if(scale===undefined){scale=d.scale}
+    return([d.boundingBox[0]*scale+x,d.boundingBox[1]*scale+y,d.boundingBox[2]*scale+x,d.boundingBox[3]*scale+y])
+  }
+
+
+  static build(struct,x,y,options={}){
+    if(this.dict[struct]){
+      let d = this.dict[struct]
+      if(!d.off){d.off={x:0,y:0}}
+
+      if(!options.scale){
+        options.scale = d.scale
+      }
+      if(!options.noIntersectionCheck){
+        let otherWalls = grid.query(...this.boundingBox(struct,x,y,options.scale))
+        let intersected = false;
+        otherWalls.forEach((w)=>{
+          if(check_collision_AABB_line(...this.boundingBox(struct,x,y,options.scale),w.x1,w.y1,w.x2,w.y2)){
+            intersected = true
+          }
+        })
+        if(intersected){return(false)}
+      }
+
+
+      d.arr.forEach((e)=>{
+        if(e.mirrored){e.mirrorX = x}
+        build(
+          options.scale*(e.x1+d.off.x)+x,
+          options.scale*(e.y1+d.off.y)+y,
+          options.scale*(e.x2+d.off.x)+x,
+          options.scale*(e.y2+d.off.y)+y,
+          e.type,{...e})
+      })
+
+      if(d.genFunc){
+          d.genFunc(x,y,options,struct)
+      }
+    }
+    return(true)
+  }
+}
+
+
+
+
   function newWallTo(a,b,c,d,ctx){
     return(newWall(a,b,a+c,b+d,ctx))
   }
@@ -2582,7 +2735,7 @@ function seperateMainStart(){
     let date = Date.now()
     gamePhysicsUpdate(time,dt,date)
     engineComms.resetPhys()
-  },106)
+  },16)
 }
 
 function dualMainStart(){
@@ -2942,6 +3095,11 @@ document.addEventListener("mouseup",(e)=>{
 
 document.addEventListener("keydown",(e)=>{
   controller.keys[e.key.toLowerCase()]=true
+
+  if(e.key === "t"){
+    player.movementSpeed = 0.05
+    player.y -= 4000
+  }
 })
 
 
@@ -3290,6 +3448,7 @@ function generateLevels(x,y){
     }
   }
 
+
   for(let i = 0; i < 5; i++){
     let h = height+i*400
     build(midX-fat+1800,h,midX-fat+2100,h,"normal",{splitting:{minLength:50,breakLength:100,breakVariability:()=>{return(rand(3))}},mirrorX:midX})
@@ -3304,6 +3463,21 @@ function generateLevels(x,y){
     let h = height-i*250
     build(midX-fat+500,h,midX-fat+700,h,"normal",{splitting:{minLength:50,breakLength:100,breakVariability:()=>{return(rand(3))}},mirrorX:midX})
   }
+
+  height-=aheight
+
+  let zentoBB = structureGenerator.boundingBox("zento",0,0)
+  for(let i = 0; i < aheight;){
+    let h = height-i
+    structureGenerator.build("zento",midX,h,{noIntersectionCheck:true})
+    let lr = rand()>0.5?1:-1
+    let dx = (1600+rand(3800))*lr
+    let dy = rand(600)+400
+    build(midX+480*lr,h,midX + dx-480*lr,h-dy,"wood",{reverse:lr<0,sided:true,splitting:{minLength:50,breakLength:100,breakVariability:()=>{return(rand(3))}}})
+    midX += dx
+    i += dy
+  }
+
 
 
 }
