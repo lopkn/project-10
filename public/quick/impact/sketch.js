@@ -2979,7 +2979,7 @@ function drawShootAngle(date){
 
 function drawPlayerGUI(){
   // health and energy bars on top left of screen
-  let barWidth = Width/7
+  let barWidth = Math.min(Width/7,Height/4)
   let barHeight = barWidth/10
   let padding = barHeight/2
 
@@ -3090,13 +3090,32 @@ document.addEventListener("mouseup",(e)=>{
 })
 
 
+window.addEventListener("resize",(e)=>{
+  Width = window.innerWidth
+  Height = window.innerHeight
+
+  WidthM = Width/2
+  HeightM = Height/2
+
+  can.canvas.width = Width
+  can.canvas.height = Height
+
+  underCan.canvas.width = Width
+  underCan.canvas.height = Height
+
+  settings.relativeSize = (Height+Width)/3723
+  if(settings.mobile){
+    settings.relativeSize*=1.2
+  }
+
+})
 
 
 
 document.addEventListener("keydown",(e)=>{
   controller.keys[e.key.toLowerCase()]=true
 
-  if(e.key === "t"){
+  if(e.key === "T"){
     player.movementSpeed = 0.05
     player.y -= 4000
   }
