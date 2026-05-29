@@ -1516,6 +1516,7 @@ class item{
     this.rounding = 8
 
     this.pickupProgress = 0
+    this.pickupSpeed = 1
     this.color = [150,190,190]
     this.links = new Set()
 
@@ -2464,6 +2465,12 @@ class test{
             notify(options.msg?options.msg:"Buffed: +20 max hp")
           })
         },
+        "energetic":()=>{
+          i.onPickup.push((by)=>{
+            by.maxEnergy += 20
+            notify(options.msg?options.msg:"energetic: +20 max energy")
+          })
+        },
       }
 
       if(dict[type]){dict[type]()}
@@ -2709,6 +2716,33 @@ if(settings.RAF){
 }
 
 
+// check cookies - if this is first game notify with help
+let storage = localStorage.getItem("played")
+if(storage){
+  storage = JSON.parse(storage)
+  storage.times++
+  if(storage.lastDate > Date.now()+1000*60*60*24){
+    starterNotify()
+  }
+  storage.lastDate = Date.now()
+  localStorage.setItem("played",JSON.stringify(storage))
+} else {
+  starterNotify()
+  storage = {times:1,lastDate:Date.now()}
+  localStorage.setItem("played",JSON.stringify(storage))
+}
+function starterNotify(){
+  setTimeout(()=>{
+    notify("Jump by dragging in the opposite direction\nrelease mouse/finger to jump\nuse WASD to move slowly without using energy")
+  },5000)
+    setTimeout(()=>{
+    notify("Break walls by jumping into them\nWait for the sparkle to deal extra damage")
+  },15000)
+}
+
+
+
+
 
 /////// main game @loop & drawing
 
@@ -2783,7 +2817,7 @@ setTimeout(()=>{
       e.pickup(entityList.player)
     }
     if(e.type==="item"&&distance(e.x,e.y,entityList.player.x,entityList.player.y)<entityList.player.r+e.size){
-      e.pickupProgress += 0.1*dt
+      e.pickupProgress += 0.1*dt*e.pickupSpeed
       if(e.pickupProgress > 100){
         e.pickup(entityList.player)
       }
@@ -3427,7 +3461,9 @@ function generateLevels(x,y){
 
   height = top
   build(midX-fat,height,midX+fat,height,"wood",{splitting:{minLength:50,breakLength:100}}) // roof
-  dropItem("dmg+",midX,height,{msg:"raw dog bonus: +5% dmg"}).link(dropItem("dmg+",-150,0))
+  let starterDmg = dropItem("dmg+",-150,0)
+  starterDmg.pickupSpeed *= 4
+  dropItem("dmg+",midX,height,{msg:"raw dog bonus: +5% dmg"}).link(starterDmg)
 
 
 
@@ -3489,6 +3525,9 @@ function generateLevels(x,y){
   for(let i = 0; i < aheight;){
     let h = height-i
     structureGenerator.build("zento",midX,h,{noIntersectionCheck:true})
+    if(i===0){
+      dropItem("energetic",midX,h)
+    }
     let lr = rand()>0.5?1:-1
     let dx = (1600+rand(3800))*lr
     let dy = rand(600)+400
