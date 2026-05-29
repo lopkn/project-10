@@ -1,4 +1,4 @@
-const CACHE_NAME = 'impact-pwa-v3'+ Date.now();
+const CACHE_NAME = 'impact-pwa-v4'+ Date.now();
 const ASSETS = [
   './',
   './index.html',
