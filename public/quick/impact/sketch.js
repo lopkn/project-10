@@ -2110,7 +2110,7 @@ class settings{
   static mobile = 0
   static relativeSize = (Height+Width)/3723
   static dragSensitivity = 1.5
-  static mobileSensMultiplier = 1.6
+  static mobileSensMultiplier = 1.9
   static offline = true
 
   static RAF = false;
@@ -2544,6 +2544,17 @@ class test{
         })
         i.color = "rgb(0,125,240)"
       },
+      "health":()=>{
+        i.onPickup.push((by)=>{
+          by.hp += 40
+          let spark = new sparkleParticle(x,y)
+          spark.color = [240,50,40]
+          spark.size = 25
+          spark.z = 1
+          particles.push(spark)
+        })
+        i.color = "rgb(240,50,40)"
+      },
 
     } 
     
@@ -2731,7 +2742,11 @@ class structureGenerator{
       { x1: 60, y1: 400, x2: 0, y2: 360, type: 'wood', mirrored: false },
       { x1: 60, y1: 360, x2: 60, y2: 400, type: 'wood', mirrored: false }
       ],off:{x:-30,y:-400},scale:1.3,boundingBox:[0,280,60,400],genFunc:(x,y,options)=>{
-        dropOrb("energy",x,y-options.scale*80)
+        if(rand(0.5)){
+          dropOrb("energy",x,y-options.scale*80)
+        } else {
+          dropOrb("health",x,y-options.scale*80)
+        }
       }
     }
   }
