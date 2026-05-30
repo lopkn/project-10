@@ -3172,9 +3172,12 @@ function drawShootAngle(date){
 
     // let d = distance(controller.dv.x,controller.dv.y)
     // can.ctx.lineCap = "round"
-    // can.ctx.strokeStyle = "rgba(255,255,0,0.9)"
-    // can.ctx.beginPath()
-    // can.ctx.moveTo(entityList.player.x,entityList.player.y)
+    can.ctx.strokeStyle = "rgba(255,255,0,0.9)"
+    can.ctx.beginPath()
+    can.ctx.moveTo(entityList.player.x,entityList.player.y)
+    let mul1 = 0.5
+    can.ctx.lineWidth = 1
+    can.ctx.lineTo(entityList.player.x-controller.dv.x*mul1,entityList.player.y-controller.dv.y*mul1)
     // let mul1 = 0.1
     // let mul2 = 0.005
 
@@ -3192,7 +3195,7 @@ function drawShootAngle(date){
     // can.ctx.lineTo(entityList.player.x+controller.dv.x*mul1-r1.x*mul2,entityList.player.y+controller.dv.y*mul1-r1.y*mul2)
     // can.ctx.moveTo(entityList.player.x+controller.dv.x*mul1,entityList.player.y+controller.dv.y*mul1)
     // can.ctx.lineTo(entityList.player.x+controller.dv.x*mul1-r2.x*mul2,entityList.player.y+controller.dv.y*mul1-r2.y*mul2)
-    // can.ctx.stroke()
+    can.ctx.stroke()
     // can.ctx.lineCap = "butt"
 
     if(!controller.mouseDownPos.charged && date-controller.mouseDownPos.time>700){
@@ -3207,7 +3210,7 @@ function drawShootAngle(date){
 
 function drawPlayerGUI(){
 
-  if(controller.mouseIsDown){
+  if(controller.mouseIsDown && false){ // turn off for now
   can.ctx.strokeStyle = "rgba(255,255,0,0.8)"
   can.ctx.lineWidth = 1
   can.ctx.beginPath()
