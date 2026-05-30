@@ -2568,7 +2568,7 @@ class test{
         },
         "armor+":()=>{
           i.onPickup.push((by)=>{
-            by.armor = {hp:50,protection:0.5,maxHp:50}
+            by.armor = {hp:80,protection:0.8,maxHp:80}
             // particles.push(new sparkParticle(by.x,by.y,15))
             notify(options.msg?options.msg:"picked up armor: +50 armor hp")
           })
@@ -3365,6 +3365,8 @@ document.addEventListener("keydown",(e)=>{
   if(e.key === "T"){
     player.movementSpeed = 0.05
     player.y -= 4000
+  } else if(e.key==="t"){
+    player.movementSpeed = 0.005
   }
 })
 
@@ -3657,11 +3659,11 @@ function generateLevels(x,y){
 
   height -= 400
       
-  mirror(newWall,midX-fat,height,midX-500,height,midX).forEach((e)=>{entityList.balls.add(new ball(e.midpoint.x,e.midpoint.y-60,50,can.ctx))})
+  mirror(newWall,midX-fat,height,midX-500,height,midX).forEach((e)=>{if(rand(0.1)){return};entityList.balls.add(new ball(e.midpoint.x,e.midpoint.y-60,50,can.ctx))})
   height -= 200
-  mirror(newWall,midX-fat,height,midX-600,height,midX).forEach((e)=>{entityList.balls.add(new ball(e.midpoint.x,e.midpoint.y-60,50,can.ctx))})
+  mirror(newWall,midX-fat,height,midX-600,height,midX).forEach((e)=>{if(rand(0.15)){return};entityList.balls.add(new ball(e.midpoint.x,e.midpoint.y-60,50,can.ctx))})
   height -= 200
-  mirror(newWall,midX-fat,height,midX-700,height,midX).forEach((e)=>{entityList.balls.add(new ball(e.midpoint.x,e.midpoint.y-60,50,can.ctx))})
+  mirror(newWall,midX-fat,height,midX-700,height,midX).forEach((e)=>{if(rand(0.2)){return};entityList.balls.add(new ball(e.midpoint.x,e.midpoint.y-60,50,can.ctx))})
   height -= 400
   newWall(midX-200,height,midX+200,height)
   let boss = newBall(midX,height-60,80,can.ctx)
