@@ -960,7 +960,7 @@ class ball{
   }
 
 
-  damage(dmg){
+  damage(dmg,options={}){
 
     let lastCollideTime = gameWorld.lastTime==this.collideTime?this.lastCollideTime:this.collideTime
 
@@ -982,6 +982,23 @@ class ball{
 
     this.hp -= dmg 
     this.damageTime = gameWorld.lastTime
+
+
+    if(options.vel===undefined){options.vel=this}
+    if(options.contact===undefined){options.contact={x:this.x,y:this.y}; }
+      
+
+    let spread = -0.6
+    let spread2 = -0.3
+    let mult = 0.25
+
+
+    for(let i = 0; i < mult*dmg*(this.hp<=0?2:1); i++){
+      let rnd = rand(1.1)
+      setTimeout(()=>{
+        particles.push(new particle(options.contact.x,options.contact.y,options.vel.vx*rnd*(1+rand(spread))+rand(spread2),options.vel.vy*rnd*(1+rand(spread))+rand(spread2)))
+      },rand(100))
+    }
 
 
     if(this.hp <= 0){
@@ -1275,6 +1292,8 @@ class wall{
     this.name = "normal" 
     this.tags = new Set()
 
+    this.brokenVelocityMult = {vx:0.7,vy:0.5}
+
     this.normal = {x:-(y2-y1)/this.length,y:(x2-x1)/this.length}
     this.normalized = {y:(y2-y1)/this.length,x:(x2-x1)/this.length}
     this.midpoint = {x:(x1+x2)/2,y:(y1+y2)/2}
@@ -1442,13 +1461,13 @@ function wall_collision_handler(ball,collisionData,dt,type="normal"){
     }
 
 
-    // let forceToWall = dot(ball.vx,ball.vy,normalizedDirectionToWall.x,normalizedDirectionToWall.y)
-    let forceToWall = Math.abs(dot(ball.vx,ball.vy,w.normal.x,w.normal.y))
+    // let forceToWall = dot(ball.vx,ball.vy,normalizedDirectionToWall.x,normalizedDirectionToWall.y) // cant be this because then edges deal 0 damage
+    let forceToWall = Math.abs(dot(ball.vx,ball.vy,normalizedDirectionToWall.x,normalizedDirectionToWall.y))
     let mult;
     if(ball.tags.has("AI")){mult = w.tags.has("AIdamage")?3:0.2} else {mult = ball.wallBreakMultiplier}
     let wallBroken = w.damage(forceToWall,mult, ball, closest)
 
-    if(wallBroken){ball.vx*=0.7;ball.vy*=0.5;return}
+    if(wallBroken){ball.vx*=w.brokenVelocityMult.vx;ball.vy*=w.brokenVelocityMult.vy;ball.lastCollideWallTime = gameWorld.lastTime;return}
 
     let reflectionVector = normalizedDirectionToWall
 
@@ -1590,6 +1609,7 @@ class orb{
     this.name = name
 
     this.onPickup = []
+    this.color = "rgb(225,205,0)"
 
     this.chunk = grid.addPt(x,y,this,grid.miscGrid)
 
@@ -1603,7 +1623,7 @@ class orb{
   }
 
   draw(dt){
-    this.ctx.fillStyle = "rgb(255,255,0)"
+    this.ctx.fillStyle = this.color
     this.ctx.beginPath()
     this.ctx.arc(this.x,this.y+Math.sin(gameWorld.lastTime/200)*12,10,0,Math.PI*2)
     this.ctx.fill()
@@ -1666,7 +1686,7 @@ class particle{
     this.ay = gameWorld.gravity/2
     this.color = [100+rand(120),0,0]
     this.size = 5 + rand(10)
-    this.life = life + rand()*life
+    this.life = life + rand(3)*life
     this.maxLife = this.life
     this.ctx = underCan.ctx
 
@@ -1938,6 +1958,33 @@ class itemShellParticle{
   }
 }
 
+class rectParticle{
+  constructor(x,y,x2,y2,life=5000){
+    this.z = 2
+
+    this.x = x
+    this.y = y
+    this.w = x2-x
+    this.h = y2-y
+
+    this.color = [255,255,255]
+
+    this.ctx = can.ctx
+    this.life = life
+    this.maxLife = life
+  }
+  update(dt){
+    this.life -= dt
+    if(this.life <= 0){
+      return("del")
+    }
+  }
+  draw(){
+    this.ctx.fillStyle = "rgba("+this.color[0]+","+this.color[1]+","+this.color[2]+","+(this.life/this.maxLife)+")"
+    this.ctx.fillRect(this.x,this.y,this.w,this.h)
+  }
+}
+
 class lineParticle{
   constructor(x,y,x2,y2,life=1000){
     this.z = 2
@@ -2144,24 +2191,27 @@ function allBallsCollide(time,i,ballList){
           // counterforce
           b.forceM(normalizedVectorTo.x,normalizedVectorTo.y,forceMultiplier)
 
-          let killed_b = 1+b.damage(dmgA)
-          let killed_a = 1+a.damage(dmgB)
+          b.damage(dmgA,{contact:contactPoint,vel:b})
+          a.damage(dmgB,{contact:contactPoint,vel:a})
 
-          // @blood
-          for(let i = 0; i < dmgB*mult*killed_b; i++){
-            let rnd = rand(1.1)
-            setTimeout(()=>{
-              particles.push(new particle(contactPoint.x,contactPoint.y,a.vx*rnd*(1+rand(spread))+rand(spread2),a.vy*rnd*(1+rand(spread))+rand(spread2)))
-            },rand(100))
-          }
+          // let killed_b = 1+b.damage(dmgA)
+          // let killed_a = 1+a.damage(dmgB)
 
-          //particles B
-          for(let i = 0; i < dmgA*mult*killed_a; i++){
-            let rnd = rand(1.1)
-            setTimeout(()=>{
-              particles.push(new particle(contactPoint.x,contactPoint.y,b.vx*rnd*(1+rand(spread))+rand(spread2),b.vy*rnd*(1+rand(spread))+rand(spread2)))
-            },rand(100))
-          }
+          // // @blood
+          // for(let i = 0; i < dmgB*mult*killed_b; i++){
+          //   let rnd = rand(1.1)
+          //   setTimeout(()=>{
+          //     particles.push(new particle(contactPoint.x,contactPoint.y,a.vx*rnd*(1+rand(spread))+rand(spread2),a.vy*rnd*(1+rand(spread))+rand(spread2)))
+          //   },rand(100))
+          // }
+
+          // //particles B
+          // for(let i = 0; i < dmgA*mult*killed_a; i++){
+          //   let rnd = rand(1.1)
+          //   setTimeout(()=>{
+          //     particles.push(new particle(contactPoint.x,contactPoint.y,b.vx*rnd*(1+rand(spread))+rand(spread2),b.vy*rnd*(1+rand(spread))+rand(spread2)))
+          //   },rand(100))
+          // }
 
           let p = new particle(b.x,b.y,0,0)
           p.life = 15*dmgB
@@ -2362,7 +2412,14 @@ class test{
       },
       "wood":()=>{
         makeWooden(w)
-      }
+      },
+      "glass":()=>{
+        w.color = "rgba(40,140,220,0.6)"
+        w.size = 10
+        w.hp = 1
+        w.damageThreshold = 0
+        w.brokenVelocityMult = {vx:0.9,vy:0.9}
+      },
     }
     if(options.sided){
       w.tags.add("sided")
@@ -2469,11 +2526,28 @@ class test{
 
   function dropOrb(type,x=entityList.player.x,y=(entityList.player.y-160),options={}){
     let i = new orb(x,y,type,can.ctx)
-     i.onPickup.push((by)=>{
-      if(type=="moverSummon"){
-        summon("mover",i.x,i.y)
-      }
-    })
+
+    let dict = {
+      "moverSummon":()=>{
+        i.onPickup.push((by)=>{
+          summon("mover",i.x,i.y)
+        })
+      },
+      "energy":()=>{
+        i.onPickup.push((by)=>{
+          by.energy += 40
+          let spark = new sparkleParticle(x,y)
+          spark.color = [0,125,240]
+          spark.size = 25
+          spark.z = 1
+          particles.push(spark)
+        })
+        i.color = "rgb(0,125,240)"
+      },
+
+    } 
+    
+    if(dict[type]){dict[type]()}
   }
 
   function dropItem(type,x=entityList.player.x,y=(entityList.player.y),options={}){
@@ -2512,18 +2586,44 @@ class test{
           })
         },
         "momentum profligacy":()=>{
-          by.tags.add("momentum profligacy")
-          by.onJump.push((b,nrg,v)=>{
-            if(Math.sqrt(v)-b.speed() > 0.15){
-              particleFuncs.explosion2(b.x,b.y)
-              camera.shake += 12
-            }
+          i.onPickup.push((by)=>{
+            by.tags.add("momentum profligacy")
+            by.onJump.push((b,nrg,v)=>{
+              if(Math.sqrt(v)-b.speed() > 0.15){
+                gameFuncs.explosion(b.x,b.y,b)
+              }
+            })
           })
         }
       }
 
       if(dict[type]){dict[type]()}
       return(i)
+  }
+
+  var gameFuncs = {
+    "explosion":(x,y,by)=>{
+      particleFuncs.explosion2(x,y)
+      camera.shake += 12
+      entityList.activatedBalls.forEach((e)=>{if(e===by){return};
+        // explosion push
+        let los = true
+        
+
+        if(los){
+          let dist = Math.max(100,distance(x,y,e.x,e.y))
+          if(dist<400){
+            console.log(dist)
+            let dv = {vx:(e.x-x)/(dist**1.4)*10,vy:(e.y-y)/(dist**1.4)*10}
+            e.vx += dv.vx
+            e.vy += dv.vy
+            dv.vx *= 1.2
+            dv.vy *= 1.2
+            e.damage(30000/dist,{vel:dv})
+          }
+        }
+      })
+    }
   }
 
   var particleFuncs = {
@@ -2617,15 +2717,29 @@ class structureGenerator{
       { x1: 80, y1: 120, x2: 80, y2: 300, type: 'wood', mirrored: true},
       { x1: 160, y1: 300, x2: 180, y2: 260, type: 'wood', mirrored: true },
       { x1: 160, y1: 260, x2: 240, y2: 260, type: 'wood', mirrored: false }
-    ],off:{x:-200,y:-300},scale:3,boundingBox:[-200,-300,200,0],genFunc:(x,y,options)=>{
+    ],off:{x:-200,y:-300},scale:3,boundingBox:[20,80,380,300],genFunc:(x,y,options)=>{
       summon("mover",x,y-options.scale*60)
-    }}
+      }
+    },
+    "container":{arr:[
+      { x1: 60, y1: 360, x2: 60, y2: 280, type: 'glass', mirrored: false },
+      { x1: 60, y1: 280, x2: 0, y2: 280, type: 'glass', mirrored: false },
+      { x1: 0, y1: 280, x2: 0, y2: 360, type: 'glass', mirrored: false },
+      { x1: 0, y1: 360, x2: 60, y2: 360, type: 'glass', mirrored: false },
+      { x1: 0, y1: 360, x2: 0, y2: 400, type: 'wood', mirrored: false },
+      { x1: 0, y1: 400, x2: 60, y2: 360, type: 'wood', mirrored: false },
+      { x1: 60, y1: 400, x2: 0, y2: 360, type: 'wood', mirrored: false },
+      { x1: 60, y1: 360, x2: 60, y2: 400, type: 'wood', mirrored: false }
+      ],off:{x:-30,y:-400},scale:1.3,boundingBox:[0,280,60,400],genFunc:(x,y,options)=>{
+        dropOrb("energy",x,y-options.scale*80)
+      }
+    }
   }
 
   static boundingBox(struct,x,y,scale){
     let d = this.dict[struct]
     if(scale===undefined){scale=d.scale}
-    return([d.boundingBox[0]*scale+x,d.boundingBox[1]*scale+y,d.boundingBox[2]*scale+x,d.boundingBox[3]*scale+y])
+    return([(d.off.x+d.boundingBox[0])*scale+x,(d.off.y+d.boundingBox[1])*scale+y,(d.off.x+d.boundingBox[2])*scale+x,(d.off.y+d.boundingBox[3])*scale+y])
   }
 
 
@@ -2641,7 +2755,7 @@ class structureGenerator{
         let otherWalls = grid.query(...this.boundingBox(struct,x,y,options.scale))
         let intersected = false;
         otherWalls.forEach((w)=>{
-          if(check_collision_AABB_line(...this.boundingBox(struct,x,y,options.scale),w.x1,w.y1,w.x2,w.y2)){
+          if(check_collision_AABB_line(...this.boundingBox(struct,x,y,options.scale),w.x,w.y,w.x2,w.y2)){
             intersected = true
           }
         })
@@ -3056,12 +3170,30 @@ function drawShootAngle(date){
       controller.updateJump(mouseX,mouseY)
     }
 
-    can.ctx.lineWidth = 1
-    can.ctx.strokeStyle = "yellow"
-    can.ctx.beginPath()
-    can.ctx.moveTo(entityList.player.x,entityList.player.y)
-    can.ctx.lineTo(entityList.player.x-controller.dv.x*0.5,entityList.player.y-controller.dv.y*0.5)
-    can.ctx.stroke()
+    // let d = distance(controller.dv.x,controller.dv.y)
+    // can.ctx.lineCap = "round"
+    // can.ctx.strokeStyle = "rgba(255,255,0,0.9)"
+    // can.ctx.beginPath()
+    // can.ctx.moveTo(entityList.player.x,entityList.player.y)
+    // let mul1 = 0.1
+    // let mul2 = 0.005
+
+    // if(d>2000){
+    //   mul1 = 200/d
+    //   mul2 = 10/d
+    // }
+    // can.ctx.lineWidth = Math.max(2,d/400)
+
+    // can.ctx.lineTo(entityList.player.x+controller.dv.x*mul1,entityList.player.y+controller.dv.y*mul1)
+    // let ang = 0.5
+    // let r1 = Lrotate(controller.dv.x,controller.dv.y,ang)
+    // let r2 = Lrotate(controller.dv.x,controller.dv.y,-ang)
+    // can.ctx.moveTo(entityList.player.x+controller.dv.x*mul1,entityList.player.y+controller.dv.y*mul1)
+    // can.ctx.lineTo(entityList.player.x+controller.dv.x*mul1-r1.x*mul2,entityList.player.y+controller.dv.y*mul1-r1.y*mul2)
+    // can.ctx.moveTo(entityList.player.x+controller.dv.x*mul1,entityList.player.y+controller.dv.y*mul1)
+    // can.ctx.lineTo(entityList.player.x+controller.dv.x*mul1-r2.x*mul2,entityList.player.y+controller.dv.y*mul1-r2.y*mul2)
+    // can.ctx.stroke()
+    // can.ctx.lineCap = "butt"
 
     if(!controller.mouseDownPos.charged && date-controller.mouseDownPos.time>700){
       controller.mouseDownPos.charged = true
@@ -3074,6 +3206,24 @@ function drawShootAngle(date){
 }
 
 function drawPlayerGUI(){
+
+  if(controller.mouseIsDown){
+  can.ctx.strokeStyle = "rgba(255,255,0,0.8)"
+  can.ctx.lineWidth = 1
+  can.ctx.beginPath()
+  can.ctx.moveTo(controller.mouseDownPos.x,controller.mouseDownPos.y)
+  can.ctx.lineTo(mouseX,mouseY) 
+    let d = distance(controller.dv.x,controller.dv.y)
+    let ang = 0.5
+    let mul2 = 20/(1+d)
+    let r1 = Lrotate(controller.dv.x,controller.dv.y,ang)
+    let r2 = Lrotate(controller.dv.x,controller.dv.y,-ang)
+    can.ctx.moveTo(controller.mouseDownPos.x,controller.mouseDownPos.y)
+    can.ctx.lineTo(controller.mouseDownPos.x-r1.x*mul2,controller.mouseDownPos.y-r1.y*mul2)
+    can.ctx.moveTo(controller.mouseDownPos.x,controller.mouseDownPos.y)
+    can.ctx.lineTo(controller.mouseDownPos.x-r2.x*mul2,controller.mouseDownPos.y-r2.y*mul2)
+  can.ctx.stroke()
+  }
   // health and energy bars on top left of screen
   let barWidth = Math.min(Width/7,Height/4)
   let barHeight = barWidth/10
@@ -3480,6 +3630,8 @@ function generateLevels(x,y){
 
     if(Math.random()>0.5){ // spawn rate
       entityList.balls.add(new ball(start+floorX*0.5,floor-60,50,can.ctx))
+    } else if(rand(0.3) && floorX > 300){
+      structureGenerator.build("container",start+floorX*0.5,floor-1)
     }
 
 
