@@ -3338,7 +3338,7 @@ function controlBall(ball){
       let norm = distance(controller.movement.dx,controller.movement.dy)
       ball.movementVector.x = controller.movement.dx
       ball.movementVector.y = controller.movement.dy
-      ball.movementScalar = Math.min(1,norm/200)
+      ball.movementScalar = Math.min(1,norm/100)
     } else {
       ball.movementVector = {x:0,y:0}
     }
