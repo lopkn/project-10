@@ -99,6 +99,12 @@ function distance(x1,y1,x2=0,y2=0) {
   return(Math.sqrt(a*a+b*b))
 }
 
+function distanceSq(x1,y1,x2=0,y2=0) {
+    let a = x2-x1
+    let b = y2-y1
+  return(a*a+b*b)
+}
+
 
 var frameFuncs = []
 
@@ -336,10 +342,10 @@ function check_collision_ball_line(x, y, r, x1, y1, x2, y2) {
     // 6. Calculate the squared distance from the ball center to this closest point
     const distX = x - closestX;
     const distY = y - closestY;
-    const distanceSq = distX * distX + distY * distY;
+    const distSq = distX * distX + distY * distY;
 
     // 7. If squared distance is less than or equal to squared radius, they collide
-    return distanceSq <= r * r;
+    return distSq <= r * r;
 }
 
 function check_collision_AABB_line(x1, y1, x2, y2, x3, y3, x4, y4) {
@@ -801,8 +807,13 @@ class grid{ //Spatial Hash Grid
 }
 
 
-function AIlos(x,y,ox,oy){
+function AIlos(x,y,ox,oy,ball){
   let los = true;
+
+  if(ball && ball.losDistanceSq && distanceSq(x,y,ox,oy) > ball.losDistanceSq){
+    return(false)
+  }
+
   entityList.walls.forEach((w)=>{
     if(w.tags.has("AIdamage")){return}
     let not_blocked = line_to_line_collision_pt(x,y,ox,oy,w.x,w.y,w.x2,w.y2)
@@ -868,6 +879,9 @@ class ball{
 
     this.lastJumpTime = 0
     this.lastCollideWallTime = 0
+
+    this.losDistanceSq = 2000**2
+
     if(AI){
       this.AIinit()
     }
@@ -1062,7 +1076,7 @@ class ball{
 
 
 
-      if(AIlos(this.x,this.y,player.x,player.y)){
+      if(AIlos(this.x,this.y,player.x,player.y,this)){
         this.jump(player.x-this.x,player.y-this.y-rand(200),0.003)
       }
     }
@@ -2068,6 +2082,8 @@ class gameWorld{
 
     static timeWarp = 1
     static frame = 0
+
+    static viewAABB = [0,0,Width,Height]
 }
 
 class controller{
@@ -2447,7 +2463,7 @@ class test{
         b.AICustomUpdate = (b,dt)=>{
           if(b.target){
             b.movementVector = {x:b.target.x-b.x,y:b.target.y-b.y-50}
-          } else if(AIlos(b.x,b.y,p.x,p.y)){
+          } else if(AIlos(b.x,b.y,p.x,p.y,b)){
             b.target = p
           }
           b.AInextUpdateTime = 500
@@ -2475,7 +2491,7 @@ class test{
         })
 
         b.AICustomUpdate = (b,dt)=>{
-          if(AIlos(b.x,b.y,p.x,p.y)){
+          if(AIlos(b.x,b.y,p.x,p.y,b)){
             b.target = p
           } else {
             b.target = undefined
@@ -2499,7 +2515,7 @@ class test{
         })
 
         b.AICustomUpdate = (b,dt)=>{
-          let los = AIlos(b.x,b.y,p.x,p.y)
+          let los = AIlos(b.x,b.y,p.x,p.y,b)
           
           if(los){
             b.target = p
@@ -2639,7 +2655,8 @@ class test{
 
   var particleFuncs = {
     "explosion":(x,y,s=1,l)=>{particles.push(new explosionParticle(x,y,(t)=>{return((1-t)*315*s)},(t)=>{return(t*75*s)},colorFuncs.explosion,l))},
-    "explosion2":(x,y,s=1)=>{for(let i =0; i < 5; i++){particleFuncs.explosion(x,y,s,3000/(i**1.5))}}
+    "explosion2":(x,y,s=1)=>{for(let i =0; i < 5; i++){particleFuncs.explosion(x,y,s,3000/(i**1.5))}},
+    "rect":(x,y,x2,y2)=>{particles.push(new rectParticle(x,y,x2,y2))}
   }
 
   var colorFuncs = {
@@ -2995,6 +3012,32 @@ setTimeout(()=>{
   underCan.ctx.fillRect(0,0,underCan.canvas.width,underCan.canvas.height)
   underCan.ctx.globalCompositeOperation = 'source-over';
   underCan.ctx.setTransform(can.ctx.getTransform());
+
+
+  // calculate screen positions
+  const inv = can.ctx.getTransform().inverse();
+
+  let screenToWorld = (x, y) => {
+      const p = new DOMPoint(x, y).matrixTransform(inv);
+      return { x: p.x, y: p.y };
+  }
+
+  // get all corners of the screen in world coordinates
+  let topLeft = screenToWorld(0, 0);
+  let topRight = screenToWorld(can.canvas.width, 0);
+  let bottomLeft = screenToWorld(0, can.canvas.height);
+  let bottomRight = screenToWorld(can.canvas.width, can.canvas.height);
+  
+  // calculate the bounding box of the visible area in world coordinates as AABB
+
+  let minX = Math.min(topLeft.x, topRight.x, bottomLeft.x, bottomRight.x);
+  let maxX = Math.max(topLeft.x, topRight.x, bottomLeft.x, bottomRight.x);
+  let minY = Math.min(topLeft.y, topRight.y, bottomLeft.y, bottomRight.y);
+  let maxY = Math.max(topLeft.y, topRight.y, bottomLeft.y, bottomRight.y);
+
+  gameWorld.viewAABB = [minX,minY,maxX,maxY]
+
+
   particles.update(dt)
   particles.draw(1)
 
