@@ -2351,7 +2351,9 @@ class test{
   entityList.balls.add(entityList.player)
   entityList.player.tags.delete("AI")
   entityList.player.onJump.push((b,spentEnergy)=>{
+    console.log(spentEnergy)
     let p = new particle(b.x,b.y,0,0)
+    p.maxLife = 1500
     p.life = 1500/b.maxEnergySpend*spentEnergy
     p.color = [120,245,230]
     p.ay = 0
@@ -3627,6 +3629,15 @@ function notify(str,x=10){
 
 
 
+function generateFloor(x,y){
+  let rx = 2000 + rand(18000)
+  let ry = rand(-2500)
+  build(x,y,x+rx,y+ry,"normal")
+  grid.addPt(x+rx,y+ry,()=>{generateFloor(x+rx,y+ry)},grid.activationGrid)
+}
+
+
+
 function generateLevels(x,y){
   // entityList.walls.push(new wall(x,y,x+vx,y+vy,can.ctx))
   // entityList.walls.push( makeAIbreakable(makeWooden(new wall(50,500,150,500,can.ctx),0.1)))
@@ -3655,6 +3666,12 @@ function generateLevels(x,y){
 
 
   tmp = newWall(x,y,x+floorLength,y,can.ctx)//base floor
+
+
+  grid.addPt(x+floorLength,y,()=>{generateFloor(x+floorLength,y)},grid.activationGrid)
+
+
+
   tmp.hp*=10
 
   let doorHeight = y-250-rand(150)
