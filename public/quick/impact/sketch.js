@@ -2439,6 +2439,11 @@ class test{
         w.brokenVelocityMult = {vx:0.9,vy:0.9}
       },
     }
+
+    if(options.hpMult){
+      w.hp *= options.hpMult
+    }
+
     if(options.sided){
       w.tags.add("sided")
     }
@@ -2583,6 +2588,13 @@ class test{
     y -= 50
     let i = new item(x,y,type,can.ctx)
       let dict = {
+        "cheats":()=>{
+          i.onPickup.push((by)=>{
+            by.maxHp *= 8
+            notify("picked up cheats\npussy/nevaeh mode: x800% hp")
+          })
+        },
+
         "moverSummon":()=>{
           i.onPickup.push((by)=>{
             let mv = summon("mover",i.x,i.y)
@@ -3632,7 +3644,7 @@ function notify(str,x=10){
 function generateFloor(x,y){
   let rx = 2000 + rand(18000)
   let ry = rand(-2500)
-  build(x,y,x+rx,y+ry,"normal")
+  build(x,y,x+rx,y+ry,"normal",{hpMult:10})
   grid.addPt(x+rx,y+ry,()=>{generateFloor(x+rx,y+ry)},grid.activationGrid)
 }
 
@@ -3756,6 +3768,11 @@ function generateLevels(x,y){
 
   height = top
   build(midX-fat,height,midX+fat,height,"wood",{splitting:{minLength:50,breakLength:100}}) // roof
+
+  let cheatHeight = -500
+  dropItem("cheats",0,cheatHeight)
+  build(-100,cheatHeight,100,cheatHeight)
+
   let starterDmg = dropItem("dmg+",-150,0)
   starterDmg.pickupSpeed *= 4
   dropItem("dmg+",midX,height,{msg:"raw dog bonus: +5% dmg"}).link(starterDmg)
