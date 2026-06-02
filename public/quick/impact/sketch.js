@@ -1126,8 +1126,10 @@ class ball{
     let lastX = this.x
     let lastY = this.y
     
+
     this.x += this.vx*dt + this.push.x
     this.y += this.vy*dt + this.push.y
+
     if(distance(this.push.x,this.push.y)>this.r){
       console.log("what?")
     }
@@ -1182,8 +1184,11 @@ class ball{
       }
     } /// BALL MOVING TOO FAST!!!!!! FIX
 
+
     this.vx *= (1-gameWorld.airFriction*speed)**dt
     this.vy *= (1-gameWorld.airFriction*speed)**dt
+
+
 
     this.wallBreakMultiplier -= (this.wallBreakMultiplier-0.1)*0.0009*dt
 
@@ -2288,6 +2293,7 @@ function allBallsCollide(time,i,ballList){
 class test{
 
   static perf = 0;
+  static smoothnessIndicator = false
 
 
   static still(){
@@ -3136,9 +3142,9 @@ setTimeout(()=>{
   can.ctx.restore()
   drawPlayerGUI()
 
-  can.ctx.fillStyle = dt>20?"red":"pink"
+  can.ctx.fillStyle = dt>18?"red":"green"
   can.ctx.font = "bold 48px arial"
-  can.ctx.fillText(Math.floor(dt)+" "+(Math.round(performance.now()-pn)+" "+Math.floor(test.perf*100)),0,Height)
+  can.ctx.fillText(Math.floor(dt)+" "+(Math.round(performance.now()-pn)+" "+Math.floor(test.perf*100)),0,0)
   if(settings.offline){
     can.ctx.fillStyle = "red"
     can.ctx.fillText("OFFLINE. SERVED OFFLINE. DEBUG NOT WORK BECAUSE OFFLINE",100,120)
@@ -3360,6 +3366,11 @@ function drawPlayerGUI(){
     }
   }
 
+  if(test.smoothnessIndicator){
+    can.ctx.fillStyle = `rgb(${gameWorld.frame % 255 },255,255)`
+    can.ctx.fillRect(Math.sin(gameWorld.lastTime/400)*WidthM+WidthM,300,100,100)
+  }
+
 }
 
 
@@ -3434,7 +3445,7 @@ document.addEventListener("mouseup",(e)=>{
   controller.endJump(mouseX,mouseY)
 })
 
-document.addEventListener("wheel",(e)=>{e.preventDefault()},{passive: false})
+// document.addEventListener("wheel",(e)=>{e.preventDefault()},{passive: false})
 
 
 window.addEventListener("resize",(e)=>{
@@ -3467,7 +3478,14 @@ document.addEventListener("keydown",(e)=>{
     player.y -= 4000
   } else if(e.key==="t"){
     player.movementSpeed = 0.005
+  } else if(e.key ==="g"){
+    test.smoothnessIndicator = !test.smoothnessIndicator
+  } else if(e.key==="q"){
+    gameWorld.timeWarp = -1
+  }else if(e.key==="Q"){
+    gameWorld.timeWarp += 1
   }
+  // e.preventDefault()
 })
 
 
