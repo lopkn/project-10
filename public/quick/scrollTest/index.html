@@ -3,7 +3,7 @@
 <style>
   body, html {
   overflow: hidden;
-  overscroll-behavior: none;
+  overscroll-behavior: auto;
 }
 </style>
 <head>
@@ -60,6 +60,9 @@ function mainLoop(){
 
 
 requestAnimationFrame(mainLoop)
+
+document.addEventListener("scroll",(e)=>{e.preventDefault()})
+document.addEventListener("wheel",(e)=>{e.preventDefault()},{passive: false})
 
 
 

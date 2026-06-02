@@ -112,6 +112,8 @@ var frameFuncs = []
 function mainLoop(){
   if(settings.RAF || settings.dualRAF){
     requestAnimationFrame(mainLoop)
+  } else {
+    console.log("hey")
   }
   let time = performance.now()-settings.startDate
   let dt = (time-gameWorld.lastTime)
@@ -2121,6 +2123,7 @@ class camera{
 
 }
 
+
 class settings{
   static startDate = performance.now()
   static speedZoom = 5 // works anywhere from 2 (insane) to 12 (mild)
@@ -2131,7 +2134,7 @@ class settings{
   static offline = true
 
   static RAF = false;
-  static dualRAF = false;
+  static dualRAF = true;
 
 }
 
@@ -2929,8 +2932,8 @@ if(settings.RAF){
   requestAnimationFrame(mainLoop)
   seperateMainStart()
 } else {
-  setInterval(mainLoop,16)
-  // requestAnimationFrame(mainLoop,true)
+  // setInterval(mainLoop,16)
+  requestAnimationFrame(mainLoop,true)
   dualMainStart()
 
 
@@ -3021,9 +3024,9 @@ setTimeout(()=>{
   // can.ctx.fillStyle = "rgba(0,0,0,0.01)"
   // can.ctx.fillRect(0,0,can.canvas.width,can.canvas.height)
 
-  camera.scale += (settings.speedZoom/(entityList.player.speed()+settings.speedZoom)*settings.relativeSize-camera.scale)*0.03
-  let camDx = (entityList.player.x-WidthM/camera.scale-camera.pos.x)*0.03
-  let camDy = (entityList.player.y-HeightM/camera.scale-camera.pos.y)*0.03
+  camera.scale += (settings.speedZoom/(entityList.player.speed()+settings.speedZoom)*settings.relativeSize-camera.scale)*(0.03*dt/16)
+  let camDx = (entityList.player.x-WidthM/camera.scale-camera.pos.x)*(0.03*dt/16)
+  let camDy = (entityList.player.y-HeightM/camera.scale-camera.pos.y)*(0.03*dt/16)
   camera.pos.x += camDx
   camera.pos.y += camDy
 
@@ -3430,6 +3433,8 @@ document.addEventListener("mousedown",(e)=>{
 document.addEventListener("mouseup",(e)=>{
   controller.endJump(mouseX,mouseY)
 })
+
+document.addEventListener("wheel",(e)=>{e.preventDefault()},{passive: false})
 
 
 window.addEventListener("resize",(e)=>{
