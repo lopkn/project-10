@@ -109,9 +109,9 @@ function distanceSq(x1,y1,x2=0,y2=0) {
 
 var frameFuncs = []
 
-function mainLoop(raf){
-  if(settings.RAF||raf){
-    requestAnimationFrame(mainLoop,true)
+function mainLoop(){
+  if(settings.RAF || settings.dualRAF){
+    requestAnimationFrame(mainLoop)
   }
   let time = performance.now()-settings.startDate
   let dt = (time-gameWorld.lastTime)
@@ -2131,6 +2131,7 @@ class settings{
   static offline = true
 
   static RAF = false;
+  static dualRAF = false;
 
 }
 
@@ -2928,8 +2929,8 @@ if(settings.RAF){
   requestAnimationFrame(mainLoop)
   seperateMainStart()
 } else {
-  // setInterval(mainLoop,16)
-  requestAnimationFrame(mainLoop,true)
+  setInterval(mainLoop,16)
+  // requestAnimationFrame(mainLoop,true)
   dualMainStart()
 
 
@@ -3017,6 +3018,8 @@ setTimeout(()=>{
     // entityList.player.x = -500 
 
   can.ctx.clearRect(0,0,can.canvas.width,can.canvas.height)
+  // can.ctx.fillStyle = "rgba(0,0,0,0.01)"
+  // can.ctx.fillRect(0,0,can.canvas.width,can.canvas.height)
 
   camera.scale += (settings.speedZoom/(entityList.player.speed()+settings.speedZoom)*settings.relativeSize-camera.scale)*0.03
   let camDx = (entityList.player.x-WidthM/camera.scale-camera.pos.x)*0.03
@@ -3026,7 +3029,11 @@ setTimeout(()=>{
 
   can.ctx.save()
   can.ctx.translate(-camera.pos.x*camera.scale,-camera.pos.y*camera.scale)
+
+
+  can.ctx.translate(WidthM,HeightM)
   can.ctx.scale(camera.scale,camera.scale)
+  can.ctx.translate(-WidthM,-HeightM)
 
   can.ctx.translate(rand(-camera.shake),rand(-camera.shake))
 
