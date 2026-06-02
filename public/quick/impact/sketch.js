@@ -57,6 +57,7 @@ class LCanvas{ //lopkns template canvas
     this.canvas.id = id
 
     this.canvas.classList.add("mobile")
+    this.canvas.classList.add("screen")
 
     this.ctx = this.canvas.getContext("2d")
     this.canvas.style.position = "absolute"
@@ -1432,6 +1433,7 @@ class wall{
 
   draw(){
 
+
     this.ctx.lineWidth = this.size?this.size:Math.min(Math.max(this.hp**0.5,5),10)
     this.ctx.strokeStyle = this.color
     this.ctx.beginPath()
@@ -1502,7 +1504,6 @@ function wall_collision_handler(ball,collisionData,dt,type="normal"){
     if(type === "swept" && collisionData.sweepResponse.type===1){
       ball.x = collisionData.p.x
       ball.y = collisionData.p.y
-      console.log(ball.speed())
 
     } else { // normal
       let overlap = ball.r - dist
@@ -2351,7 +2352,6 @@ class test{
   entityList.balls.add(entityList.player)
   entityList.player.tags.delete("AI")
   entityList.player.onJump.push((b,spentEnergy)=>{
-    console.log(spentEnergy)
     let p = new particle(b.x,b.y,0,0)
     p.maxLife = 1500
     p.life = 1500/b.maxEnergySpend*spentEnergy
@@ -2931,6 +2931,14 @@ if(settings.RAF){
   // setInterval(mainLoop,16)
   requestAnimationFrame(mainLoop,true)
   dualMainStart()
+
+
+  // frameFuncs.push((t,dt)=>{
+  //   can.clear()
+  //   can.ctx.fillStyle = dt>20?"red":"pink"
+  //   can.ctx.fillText(dt,100,100)
+  //   can.ctx.fillRect(100,100,dt*50,100)
+  // })
 }
 
 
@@ -3002,6 +3010,11 @@ setTimeout(()=>{
 
   //move camera
 
+
+    // can.ctx.setLineDash([20,20])
+    can.ctx.lineDashOffset = gameWorld.frame
+    // entityList.player.y = -500 + Math.sin(gameWorld.frame/60)*700
+    // entityList.player.x = -500 
 
   can.ctx.clearRect(0,0,can.canvas.width,can.canvas.height)
 
@@ -3113,8 +3126,9 @@ setTimeout(()=>{
   can.ctx.restore()
   drawPlayerGUI()
 
-  can.ctx.fillStyle = "pink"
-  can.ctx.fillText(Math.floor(dt)+" "+(Math.round(performance.now()-pn)+" "+Math.floor(test.perf*100)),100,100)
+  can.ctx.fillStyle = dt>20?"red":"pink"
+  can.ctx.font = "bold 48px arial"
+  can.ctx.fillText(Math.floor(dt)+" "+(Math.round(performance.now()-pn)+" "+Math.floor(test.perf*100)),0,Height)
   if(settings.offline){
     can.ctx.fillStyle = "red"
     can.ctx.fillText("OFFLINE. SERVED OFFLINE. DEBUG NOT WORK BECAUSE OFFLINE",100,120)
@@ -3272,7 +3286,6 @@ function drawShootAngle(date){
 
     if(!controller.mouseDownPos.charged && date-controller.mouseDownPos.time>700){
       controller.mouseDownPos.charged = true
-      console.log("charged")
       particles.push(new sparkleParticle(entityList.player.x,entityList.player.y))
       entityList.player.damageMultiplier = 2
     }
@@ -3449,10 +3462,6 @@ document.addEventListener("keydown",(e)=>{
 document.addEventListener("keyup",(e)=>{
   controller.keys[e.key.toLowerCase()]=false
 })
-
-
-
-
 
 
 

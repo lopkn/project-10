@@ -15,6 +15,8 @@
     position: fixed;
     top:0px;
     left:0px;
+    will-change: transform;
+  transform: translateZ(0);
   }
 
   .notification > * {
@@ -55,6 +57,7 @@
         0% {top: -50px; }
         100% { top:0px }
     }
+
 </style>
 
 <html class="mobile">
@@ -67,14 +70,12 @@
   <title>LTPT</title>
 
 </head>
-<body style="padding:0;margin:0;background-color: #151515;" class="mobile">
+<body style="padding:0;margin:0;background-color: #151515;" class="mobile screen">
   
 
 <div draggable="false" ondragstart="return false">
 
-<canvas id="myCanvas" disabled="true" style = "z-index: 1;touch-action: none; user-select: none;
--webkit-user-select: none;
--moz-user-select: none;"></canvas>
+
 
 
 <div class="screen mobile notification" id="notification_center"></div>
