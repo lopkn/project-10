@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sinusoidal Canvas Zoom</title>
+    <style>
+        /* Remove default margins and hide scrollbars */
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #f5f6fa;
+        }
+
+        /* Make the canvas fill the entire screen viewport */
+        canvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="myCanvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('myCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Dynamically resize canvas to fill the screen on load and window resize
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        function animate() {
+            // 1. Clear the previous animation frame
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 2. Setup screen center screen coordinates
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            
+            // 3. Calculate sinusoidal zoom scale based on Date.now()
+            // Adjust 0.002 to change the animation speed
+            const time = Date.now() * 0.002; 
+            // Bounces smoothly between 0.3 (zoomed out) and 1.5 (zoomed in)
+            const currentZoom = 0.9 + Math.sin(time) * 0.6; 
+            
+            ctx.save(); 
+
+            // 4. STEP 1: Zoom on the screen center point
+            ctx.translate(centerX, centerY);
+            ctx.scale(currentZoom, currentZoom);
+            ctx.translate(-centerX, -centerY);
+
+            // 5. STEP 2: Translate so the canvas origin (0,0) sits at screen center
+            ctx.translate(centerX, centerY);
+
+            // 6. DRAW THE CIRCLE (Anchored at global coordinate 0,0)
+            ctx.beginPath();
+            ctx.arc(0, 0, 50, 0, Math.PI * 2); // 50px radius
+            ctx.fillStyle = '#3498db';
+            ctx.fill();
+            ctx.lineWidth = 5;
+            ctx.strokeStyle = '#2980b9';
+            ctx.stroke();
+            
+            // Optional Reference Axes: Shows the expansion/contraction around (0,0)
+            ctx.beginPath();
+            ctx.moveTo(-150, 0); ctx.lineTo(150, 0);
+            ctx.moveTo(0, -150); ctx.lineTo(0, 150);
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.15)';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            ctx.restore();
+
+            // Continuously request the next frame loop
+            requestAnimationFrame(animate);
+        }
+
+        // Initialize the animation loop
+        requestAnimationFrame(animate);
+    </script>
+</body>
+</html>

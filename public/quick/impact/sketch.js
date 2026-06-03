@@ -59,7 +59,7 @@ class LCanvas{ //lopkns template canvas
     this.canvas.id = id
 
     this.canvas.classList.add("mobile")
-    this.canvas.classList.add("screen")
+    // this.canvas.classList.add("screen")
 
     this.ctx = this.canvas.getContext("2d")
     this.canvas.style.position = "absolute"
@@ -3032,19 +3032,24 @@ setTimeout(()=>{
   // can.ctx.fillStyle = "rgba(0,0,0,0.01)"
   // can.ctx.fillRect(0,0,can.canvas.width,can.canvas.height)
 
-  camera.scale += (settings.speedZoom/(entityList.player.speed()+settings.speedZoom)*settings.relativeSize-camera.scale)*(0.03*dt/16)
-  let camDx = (entityList.player.x-WidthM/camera.scale-camera.pos.x)*(0.03*dt/16)
-  let camDy = (entityList.player.y-HeightM/camera.scale-camera.pos.y)*(0.03*dt/16)
+  camera.scale += (settings.speedZoom/(entityList.player.speed()+settings.speedZoom)*settings.relativeSize -camera.scale)*(0.03*dt/16)
+  // camera.scale = 0.9 + Math.sin(Date.now()*0.002) * 0.6
+  let camDx = (entityList.player.x-WidthM-camera.pos.x)*(0.03*dt/16)
+  let camDy = (entityList.player.y-HeightM-camera.pos.y)*(0.03*dt/16)
   camera.pos.x += camDx
   camera.pos.y += camDy
 
   can.ctx.save()
-  can.ctx.translate(-camera.pos.x*camera.scale,-camera.pos.y*camera.scale)
 
 
-  // can.ctx.translate(WidthM,HeightM)
+  can.ctx.translate(can.canvas.width/2,can.canvas.height/2)
   can.ctx.scale(camera.scale,camera.scale)
-  // can.ctx.translate(-WidthM,-HeightM)
+  can.ctx.translate(-can.canvas.width/2,-can.canvas.height/2)
+
+  can.ctx.translate(-camera.pos.x,-camera.pos.y)
+
+
+
 
   can.ctx.translate(rand(-camera.shake),rand(-camera.shake))
 
