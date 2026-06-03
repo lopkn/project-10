@@ -3151,7 +3151,7 @@ setTimeout(()=>{
 
   can.ctx.fillStyle = dt>18?"red":"green"
   can.ctx.font = "bold 48px arial"
-  can.ctx.fillText(Math.floor(dt)+" "+(Math.round(performance.now()-pn)+" "+Math.floor(test.perf*100)),0,0)
+  can.ctx.fillText(Math.floor(dt)+" "+(Math.round(performance.now()-pn)+" "+Math.floor(test.perf*100)),0,Height)
   if(settings.offline){
     can.ctx.fillStyle = "red"
     can.ctx.fillText("OFFLINE. SERVED OFFLINE. DEBUG NOT WORK BECAUSE OFFLINE",100,120)
@@ -3342,15 +3342,18 @@ function drawPlayerGUI(){
 
   // health bar
   can.ctx.fillStyle = "red"
-  can.ctx.fillRect(0, padding, barWidth, barHeight)
+  can.ctx.fillRect(padding, padding, barWidth, barHeight)
   can.ctx.fillStyle = "rgb(40,170,60)"
-  can.ctx.fillRect(0, padding, barWidth*(entityList.player.hp/entityList.player.maxHp), barHeight)
+
+  let hpPers = Math.max(0,(entityList.player.hp/entityList.player.maxHp))
+
+  can.ctx.fillRect(padding, padding, barWidth*hpPers, barHeight)
   if(entityList.player.armor){
     can.ctx.strokeStyle = "#606060"
     can.ctx.fillStyle = "rgba(170,170,170,0.4)"
     can.ctx.lineWidth = 5
     can.ctx.beginPath()
-    can.ctx.roundRect(0, padding, barWidth*(entityList.player.armor.hp/entityList.player.armor.maxHp), barHeight,5)
+    can.ctx.roundRect(padding, padding, barWidth*(entityList.player.armor.hp/entityList.player.armor.maxHp), barHeight,5)
     can.ctx.fill()
     can.ctx.stroke()
   }
@@ -3358,9 +3361,9 @@ function drawPlayerGUI(){
 
   // energy bar
   can.ctx.fillStyle = "gray"
-  can.ctx.fillRect(0, padding+padding+barHeight, barWidth, barHeight)
+  can.ctx.fillRect(padding, padding+padding+barHeight, barWidth, barHeight)
   can.ctx.fillStyle = "rgb(40,170,250)"
-  can.ctx.fillRect(0, padding+padding+barHeight, barWidth*(entityList.player.energy/entityList.player.maxEnergy), barHeight)
+  can.ctx.fillRect(padding, padding+padding+barHeight, barWidth*(entityList.player.energy/entityList.player.maxEnergy), barHeight)
 
   if(settings.mobile){
     if(controller.movement.down){
