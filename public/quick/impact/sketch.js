@@ -882,10 +882,12 @@ class ball{
 
     this.wallJumpEnergy = 1
 
+    this.jumpForceMultiplier = 1
+
     this.lastJumpTime = 0
     this.lastCollideWallTime = 0
 
-    this.losDistanceSq = 2000**2
+    this.losDistanceSq = 1000**2
 
     if(AI){
       this.AIinit()
@@ -934,6 +936,8 @@ class ball{
     if(this.tags.has("isDead")){return}
 
     let origSpeed = this.speedSq()
+
+    mag*= this.jumpForceMultiplier
 
     let actualForce = distance(vx,vy)*mag
     let spentEnergy = actualForce*30
@@ -1264,7 +1268,11 @@ class ball{
     let l = (50+(this.color[2]-50)*hpPers)
     let s = this.color[1]*(hpPers*0.7+0.3)
     if(this.tags.has("isDead")){l*=0.5; s=0}
-    this.ctx.fillStyle = "hsl("+this.color[0]+ "," + s + "%," + l + "%)"
+    let col = "hsl("+this.color[0]+ "," + s + "%," + l + "%)"
+    if(this.colorFunc){
+      col = this.colorFunc(this,this.color,s,l)
+    }
+    this.ctx.fillStyle = col
     this.ctx.beginPath()
     this.ctx.arc(this.x,this.y,this.r,0,Math.PI*2)
     this.ctx.fill()
@@ -1603,6 +1611,12 @@ class item{
     if(sprites.dict[this.name]){ // optimizable
       let s = sprites.dict[this.name]
       this.ctx.save()
+
+      if(this.dash){
+        this.ctx.setLineDash(this.dash.ld)
+        this.ctx.lineDashOffset = gameWorld.frame*this.dash.offset
+      }
+
       this.ctx.translate(this.x,y)
       this.ctx.beginPath()
       let ratio = this.size2/400
@@ -1963,6 +1977,11 @@ class itemShellParticle{
     if(sprites.dict[this.item.name]){ // optimizable
       let s = sprites.dict[this.item.name]
       this.ctx.save()
+      if(this.item.dash){
+        this.ctx.setLineDash(this.item.dash.ld)
+        this.ctx.lineDashOffset = gameWorld.frame*this.item.dash.offset
+      }
+
       this.ctx.translate(this.item.x,this.item.y)
       this.ctx.beginPath()
       let ratio = this.item.size2/400
@@ -2467,7 +2486,7 @@ class test{
 
   }
 
-
+  //@summon
   function summon(type="normal",x=entityList.player.x,y=(entityList.player.y-160),options={}){
     let b = newBall(x,y)
     let p = entityList.player
@@ -2556,6 +2575,12 @@ class test{
       b.hp *= 2
       b.r *= 1.1
     }
+    if(options.brute){
+      b.tags.add("brute")
+      b.jumpForceMultiplier = 23
+      b.maxEnergySpend = 45
+      b.colorFunc = (b,c,s,l)=>{return(`hsl(${c[0]},${s}%,${l+rand(-10)-20}%)`)}
+    }
 
     if(AIs[type]){AIs[type]()}
     return(b)
@@ -2603,6 +2628,7 @@ class test{
     let i = new item(x,y,type,can.ctx)
       let dict = {
         "cheats":()=>{
+          i.dash = {ld:[20,20],offset:1}
           i.onPickup.push((by)=>{
             by.maxHp *= 8
             notify("picked up cheats\npussy/nevaeh mode: x800% hp")
@@ -2882,7 +2908,8 @@ class structureGenerator{
     entityList.walls.push(tmp2) //table
 
 
-    entityList.balls.add(new ball(380,450,50,can.ctx))
+    // entityList.balls.add(new ball(380,450,50,can.ctx))
+    summon("normal",380,450)
 
 
     /// initialize rest of level
@@ -3025,8 +3052,6 @@ setTimeout(()=>{
   //move camera
 
 
-    // can.ctx.setLineDash([20,20])
-    can.ctx.lineDashOffset = gameWorld.frame
     // entityList.player.y = -500 + Math.sin(gameWorld.frame/60)*700
     // entityList.player.x = -500 
 
@@ -3152,7 +3177,7 @@ setTimeout(()=>{
   drawPlayerGUI()
 
   can.ctx.fillStyle = dt>18?"red":"green"
-  can.ctx.font = "bold 48px arial"
+  can.ctx.font = `bold ${Math.floor(48* settings.relativeSize )}px arial`
   can.ctx.fillText(Math.floor(dt)+" "+(Math.round(performance.now()-pn)+" "+Math.floor(test.perf*100)),0,Height)
   if(settings.offline){
     can.ctx.fillStyle = "red"
@@ -3800,7 +3825,7 @@ function generateLevels(x,y){
 
 
     if(Math.random()>0.5){ // spawn rate
-      entityList.balls.add(new ball(start+floorX*0.5,floor-60,50,can.ctx))
+      summon("normal",start+floorX*0.5,floor-60,{brute:rand(0.03)})
     } else if(rand(0.3) && floorX > 300){
       structureGenerator.build("container",start+floorX*0.5,floor-1)
     }
@@ -3947,3 +3972,11 @@ function generateLevels(x,y){
 // trace through one side walls
 // mobile rotation fix
 // mobile movement fix
+
+// brutes
+// balconies
+// rain and particles
+// explosives
+// vases
+// effects
+// game timeout manager
