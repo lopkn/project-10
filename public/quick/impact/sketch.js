@@ -1,7 +1,9 @@
 
 let debug = 0;
-let Width = window.innerWidth
-let Height = window.innerHeight
+// let Width = window.innerWidth
+// let Height = window.innerHeight
+let  Width = document.documentElement.clientWidth
+let  Height = document.documentElement.clientHeight
 
 let WidthM = Width/2
 let HeightM = Height/2
@@ -3040,9 +3042,9 @@ setTimeout(()=>{
   can.ctx.translate(-camera.pos.x*camera.scale,-camera.pos.y*camera.scale)
 
 
-  can.ctx.translate(WidthM,HeightM)
+  // can.ctx.translate(WidthM,HeightM)
   can.ctx.scale(camera.scale,camera.scale)
-  can.ctx.translate(-WidthM,-HeightM)
+  // can.ctx.translate(-WidthM,-HeightM)
 
   can.ctx.translate(rand(-camera.shake),rand(-camera.shake))
 
@@ -3449,8 +3451,10 @@ document.addEventListener("mouseup",(e)=>{
 
 
 window.addEventListener("resize",(e)=>{
-  Width = window.innerWidth
-  Height = window.innerHeight
+  // Width = window.innerWidth
+  // Height = window.innerHeight
+  Width = document.documentElement.clientWidth
+  Height = document.documentElement.clientHeight
 
   WidthM = Width/2
   HeightM = Height/2
