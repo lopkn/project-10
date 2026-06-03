@@ -2143,6 +2143,8 @@ class settings{
   static RAF = false;
   static dualRAF = true;
 
+  static insets = {top:0,right:0,bottom:0,left:0}
+
 }
 
 function makeWooden(wall,mult=0.5){
@@ -3342,18 +3344,18 @@ function drawPlayerGUI(){
 
   // health bar
   can.ctx.fillStyle = "red"
-  can.ctx.fillRect(padding, padding, barWidth, barHeight)
+  can.ctx.fillRect(padding+settings.insets.left, padding, barWidth, barHeight)
   can.ctx.fillStyle = "rgb(40,170,60)"
 
   let hpPers = Math.max(0,(entityList.player.hp/entityList.player.maxHp))
 
-  can.ctx.fillRect(padding, padding, barWidth*hpPers, barHeight)
+  can.ctx.fillRect(padding+settings.insets.left, padding, barWidth*hpPers, barHeight)
   if(entityList.player.armor){
     can.ctx.strokeStyle = "#606060"
     can.ctx.fillStyle = "rgba(170,170,170,0.4)"
     can.ctx.lineWidth = 5
     can.ctx.beginPath()
-    can.ctx.roundRect(padding, padding, barWidth*(entityList.player.armor.hp/entityList.player.armor.maxHp), barHeight,5)
+    can.ctx.roundRect(padding+settings.insets.left, padding, barWidth*(entityList.player.armor.hp/entityList.player.armor.maxHp), barHeight,5)
     can.ctx.fill()
     can.ctx.stroke()
   }
@@ -3361,9 +3363,9 @@ function drawPlayerGUI(){
 
   // energy bar
   can.ctx.fillStyle = "gray"
-  can.ctx.fillRect(padding, padding+padding+barHeight, barWidth, barHeight)
+  can.ctx.fillRect(padding+settings.insets.left, padding+padding+barHeight, barWidth, barHeight)
   can.ctx.fillStyle = "rgb(40,170,250)"
-  can.ctx.fillRect(padding, padding+padding+barHeight, barWidth*(entityList.player.energy/entityList.player.maxEnergy), barHeight)
+  can.ctx.fillRect(padding+settings.insets.left, padding+padding+barHeight, barWidth*(entityList.player.energy/entityList.player.maxEnergy), barHeight)
 
   if(settings.mobile){
     if(controller.movement.down){
@@ -3674,10 +3676,36 @@ if(!settings.offline){
 
 var player = entityList.player
 
-//test gay ray
 
 
-// summon("mover",0,0)
+
+function getSafeAreaInsets() {
+  // Get the computed styles of the document root
+  const styles = window.getComputedStyle(document.documentElement);
+  
+  // Parse the pixel values (removing 'px' and converting to integers)
+  return {
+    top: parseInt(styles.getPropertyValue('--safe-top')) || 0,
+    right: parseInt(styles.getPropertyValue('--safe-right')) || 0,
+    bottom: parseInt(styles.getPropertyValue('--safe-bottom')) || 0,
+    left: parseInt(styles.getPropertyValue('--safe-left')) || 0
+  };
+}
+
+// Example usage inside your canvas render loop:
+settings.insets = getSafeAreaInsets();
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
