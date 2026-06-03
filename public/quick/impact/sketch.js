@@ -2133,7 +2133,7 @@ class camera{
 
 class settings{
   static startDate = performance.now()
-  static speedZoom = 5 // works anywhere from 2 (insane) to 12 (mild)
+  static speedZoom = 2 // works anywhere from 2 (insane) to 12 (mild)
   static mobile = 0
   static relativeSize = (Height+Width)/3723
   static dragSensitivity = 1.5
@@ -3032,7 +3032,7 @@ setTimeout(()=>{
   // can.ctx.fillStyle = "rgba(0,0,0,0.01)"
   // can.ctx.fillRect(0,0,can.canvas.width,can.canvas.height)
 
-  camera.scale += (settings.speedZoom/(entityList.player.speed()+settings.speedZoom)*settings.relativeSize -camera.scale)*(0.03*dt/16)
+  camera.scale += (settings.speedZoom/(entityList.player.speed()+settings.speedZoom)*settings.relativeSize*1.4-camera.scale)*(0.02*dt/16)
   // camera.scale = 0.9 + Math.sin(Date.now()*0.002) * 0.6
   let camDx = (entityList.player.x-WidthM-camera.pos.x)*(0.03*dt/16)
   let camDy = (entityList.player.y-HeightM-camera.pos.y)*(0.03*dt/16)
