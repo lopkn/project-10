@@ -1339,6 +1339,7 @@ class wall{
     this.friction = 1
 
 
+    this.shatteringDistanceCap = 20
 
     this.events = {
       "onBreak":[],
@@ -1428,12 +1429,13 @@ class wall{
 
   break(by={vx:0,vy:0},impactPt={x:0,y:0}){
     if(this.tags.has("isBroken")){return}
+    this.tags.add("isBroken")
+    shatterWall(this,by,impactPt)
 
     this.events.onBreak.forEach((e)=>{
       e(this,by,impactPt)
     })
 
-    shatterWall(this,by,impactPt)
 
     //remove from grid
     this.remove()
@@ -1897,17 +1899,31 @@ class shatteredWallParticle{
 
     this.length = lengthPers*wall.length
 
-    this.distToShatteringPt = Math.max(distance(this.x,this.y,impactPt.x,impactPt.y),20)
+    let dp = distance(this.x,this.y,impactPt.x,impactPt.y)
+
+    if(wall.shatterDistanceMultiplier){
+      dp *= wall.shatterDistanceMultiplier
+    }
+
+    let sdc = wall.shatteringDistanceCap
+
+    this.distToShatteringPt = Math.max(dp,sdc)
 
     this.vx = vx / this.distToShatteringPt * 20
     this.vy = vy / this.distToShatteringPt * 20
 
+
+
     this.color = wall.color
-    this.lineWidth = 5
+    this.lineWidth = wall.size?wall.size:5
 
     this.ctx = can.ctx
     this.rotation = rand(-12.5/this.length)
     this.life = life
+
+    if(wall.shatteringFunc){
+      let r = wall.shatteringFunc(this)
+    }
   }
 
   update(dt){
@@ -2443,16 +2459,20 @@ class test{
   function build(x,y,x1,y1,type="normal",options={}){
 
     let w;
+
+    let out = []
+
     if(!options.reverse){
       w = newWall(x,y,x1,y1,options.ctx)
      } else {
       w = newWall(x1,y1,x,y,options.ctx)
      }
     w.name = type
+    out.push(w)
     if(options.mirrorX !== undefined && !options.alreadyMirrored){
       let midX = options.mirrorX
       options.alreadyMirrored = true
-      build(midX+midX-x1,y1,midX+midX-x,y,type,options)
+      out = out.concat(build(midX+midX-x1,y1,midX+midX-x,y,type,options))
     }
     w.splitting = options.splitting
     let types = {
@@ -2470,6 +2490,9 @@ class test{
         w.hp = 1
         w.damageThreshold = 0
         w.brokenVelocityMult = {vx:0.9,vy:0.9}
+        w.shatterDistanceMultiplier = 0.05
+        w.shatteringDistanceCap = 19
+        w.shatteringFunc = (part)=>{let r = rand();part.vx *= r; part.vy *= r}
       },
     }
 
@@ -2483,6 +2506,8 @@ class test{
 
     if(types[type]){types[type]()}
 
+
+    return(out)
 
   }
 
@@ -2812,20 +2837,35 @@ class structureGenerator{
       { x1: 0, y1: 400, x2: 60, y2: 360, type: 'wood', mirrored: false },
       { x1: 60, y1: 400, x2: 0, y2: 360, type: 'wood', mirrored: false },
       { x1: 60, y1: 360, x2: 60, y2: 400, type: 'wood', mirrored: false }
-      ],off:{x:-30,y:-400},scale:1.3,boundingBox:[0,280,60,400],genFunc:(x,y,options)=>{
+      ],off:{x:-30,y:-401},scale:1.3,boundingBox:[0,280,60,400],genFunc:(x,y,options)=>{
         if(rand(0.5)){
           dropOrb("energy",x,y-options.scale*80)
         } else {
           dropOrb("health",x,y-options.scale*80)
         }
       }
-    }
+    },
+    "vase":{arr:[
+  { x1: 40, y1: 300, x2: 40, y2: 320, type: 'glass', mirrored: false },
+  { x1: 40, y1: 320, x2: 20, y2: 380, type: 'glass', mirrored: false },
+  { x1: 20, y1: 380, x2: 40, y2: 400, type: 'glass', mirrored: false },
+  { x1: 40, y1: 400, x2: 60, y2: 400, type: 'glass', mirrored: false },
+  { x1: 60, y1: 400, x2: 80, y2: 380, type: 'glass', mirrored: false },
+  { x1: 80, y1: 380, x2: 60, y2: 320, type: 'glass', mirrored: false },
+  { x1: 60, y1: 320, x2: 60, y2: 300, type: 'glass', mirrored: false }
+],off:{x:-50,y:-405}, scale:1.4, boundingBox:[20,300,80,400], oneBody:true}
   }
 
   static boundingBox(struct,x,y,scale){
     let d = this.dict[struct]
     if(scale===undefined){scale=d.scale}
     return([(d.off.x+d.boundingBox[0])*scale+x,(d.off.y+d.boundingBox[1])*scale+y,(d.off.x+d.boundingBox[2])*scale+x,(d.off.y+d.boundingBox[3])*scale+y])
+  }
+
+  static dimensions(struct,scale){
+    let d = this.dict[struct]
+    if(scale===undefined){scale=d.scale}
+      return({w:(d.boundingBox[2]-d.boundingBox[0])*scale, h:(d.boundingBox[3]-d.boundingBox[1])*scale })
   }
 
 
@@ -2846,24 +2886,38 @@ class structureGenerator{
           }
         })
         if(intersected){return(false)}
+
+        //debug 
+        // particles.push(new rectParticle(...this.boundingBox(struct,x,y,options.scale)))
+
       }
 
+      let out = []
 
       d.arr.forEach((e)=>{
         if(e.mirrored){e.mirrorX = x}
-        build(
+        out = out.concat(build(
           options.scale*(e.x1+d.off.x)+x,
           options.scale*(e.y1+d.off.y)+y,
           options.scale*(e.x2+d.off.x)+x,
           options.scale*(e.y2+d.off.y)+y,
-          e.type,{...e})
+          e.type,{...e}))
+      
+
       })
+
+
+      if(d.oneBody){
+        let breakAll = (a,b,c)=>{out.forEach((e)=>{e.break(b,c)})}
+        out.forEach((e)=>{e.events.onBreak.push(breakAll)})
+      }
 
       if(d.genFunc){
           d.genFunc(x,y,options,struct)
       }
+    return(out)
     }
-    return(true)
+    return(false)
   }
 }
 
@@ -2890,6 +2944,11 @@ class structureGenerator{
 
   function normalGenerate(){
       //initialize walls
+
+
+
+    //@gentest
+    // structureGenerator.build("vase",0,0)
 
 
     newWall(-200,0,800,0,can.ctx)
@@ -3375,7 +3434,7 @@ function drawPlayerGUI(){
   let hpPers = Math.max(0,(entityList.player.hp/entityList.player.maxHp))
 
   can.ctx.fillRect(padding+settings.insets.left, padding, barWidth*hpPers, barHeight)
-  if(entityList.player.armor){
+  if(entityList.player.armor && !entityList.player.armor.broken){
     can.ctx.strokeStyle = "#606060"
     can.ctx.fillStyle = "rgba(170,170,170,0.4)"
     can.ctx.lineWidth = 5
@@ -3826,8 +3885,8 @@ function generateLevels(x,y){
 
     if(Math.random()>0.5){ // spawn rate
       summon("normal",start+floorX*0.5,floor-60,{brute:rand(0.03)})
-    } else if(rand(0.3) && floorX > 300){
-      structureGenerator.build("container",start+floorX*0.5,floor-1)
+    } else if(rand(0.6) && floorX > 200){
+      structureGenerator.build(rand(0.5)?"container":"vase",start+floorX*rand()*0.9,floor)
     }
 
 
