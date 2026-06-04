@@ -3464,7 +3464,8 @@ function drawPlayerGUI(){
 
   if(test.smoothnessIndicator){
     can.ctx.fillStyle = `rgb(${gameWorld.frame % 255 },255,255)`
-    can.ctx.fillRect(Math.sin(gameWorld.lastTime/400)*WidthM+WidthM,300,100,100)
+    can.ctx.fillRect(Math.sin(gameWorld.lastTime/400)*WidthM+WidthM,Height-200,100,100)
+    can.ctx.fillRect(100*(gameWorld.frame%2),Height-100,100,100)
   }
 
 }
