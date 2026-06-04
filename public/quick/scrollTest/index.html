@@ -44,7 +44,9 @@ can.fitScreenSize()
 
 
 var lastTime = 0
+var frame = 0
 function mainLoop(){
+  frame++
   requestAnimationFrame(mainLoop)
   let now = performance.now()
   let dt = now-lastTime
@@ -54,6 +56,8 @@ function mainLoop(){
   can.ctx.fillStyle = dt>20?"red":"pink"
   can.ctx.fillText(dt,100,100)
   can.ctx.fillRect(400,100,dt*50,100)
+  can.ctx.fillRect(100*(frame%2),200,100,100)
+  can.ctx.fillRect(Math.sin(frame/50)*400+400,300,100,100)
 
 }
 
