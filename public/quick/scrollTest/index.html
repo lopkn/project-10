@@ -16,7 +16,7 @@
 class LCanvas{ 
   constructor(){
     this.canvas = document.createElement("canvas")
-    this.ctx = this.canvas.getContext("2d")
+    this.ctx = this.canvas.getContext("2d",{desynchronized:true})
     this.canvas.style.position = "fixed"
     this.canvas.style.top = "0px"
     this.canvas.style.left = "0px"
@@ -56,8 +56,18 @@ function mainLoop(){
   can.ctx.fillStyle = dt>20?"red":"pink"
   can.ctx.fillText(dt,100,100)
   can.ctx.fillRect(400,100,dt*50,100)
+
+  can.ctx.fillStyle = "red"
   can.ctx.fillRect(100*(frame%2),200,100,100)
+  can.ctx.fillStyle = "blue"
+  can.ctx.fillRect(100*((frame+1)%2),200,100,100)
+
+
   can.ctx.fillRect(Math.sin(frame/50)*400+400,300,100,100)
+  can.ctx.fillStyle = "red"
+  can.ctx.fillRect(100*(frame%Math.floor(window.innerWidth/100)),400,100,100)
+  can.ctx.fillStyle = "blue"
+  can.ctx.fillRect(100*((1+frame)%Math.floor(window.innerWidth/100)),400,100,100)
 
 }
 

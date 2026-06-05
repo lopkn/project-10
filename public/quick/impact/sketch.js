@@ -401,6 +401,7 @@ function check_collision_AABB_line(x1, y1, x2, y2, x3, y3, x4, y4) {
     return t0 <= t1;
 }
 function point_on_line(x, y, x1, y1, x2, y2) {
+// returns the closest point on the line segment to (x, y) and the t value along the segment (0 at start, 1 at end)
     const abx = x2 - x1;
     const aby = y2 - y1;
     const acx = x - x1;
@@ -419,7 +420,7 @@ function point_on_line(x, y, x1, y1, x2, y2) {
 
     // Find the closest point
 
-    return({x: x1 + t * abx, y: y1 + t * aby})
+    return({x: x1 + t * abx, y: y1 + t * aby, t: t})
 
 }
 
@@ -1337,6 +1338,7 @@ class wall{
 
     this.bounce = 0.8
     this.friction = 1
+    this.damageMinMult = -Infinity
 
 
     this.shatteringDistanceCap = 20
@@ -1391,6 +1393,24 @@ class wall{
 
   }
 
+  silentSplit(p1x,p1y,p2x,p2y){
+    let pt1 = point_on_line(p1x,p1y,this.x,this.y,this.x2,this.y2)
+    let pt2 = point_on_line(p2x,p2y,this.x,this.y,this.x2,this.y2)
+    let minT = Math.min(pt1.t,pt2.t)
+    let maxT = Math.max(pt1.t,pt2.t)
+    if(minT === maxT){
+      return;
+    }
+
+
+    let w2 = newWall(this.x+this.length*maxT*this.normalized.x,this.y+this.length*maxT*this.normalized.y,this.x2,this.y2)
+    copyWall(this,w2)
+    w2.setPos(this.x+this.length*maxT*this.normalized.x,this.y+this.length*maxT*this.normalized.y,this.x2,this.y2)
+    this.setPos(this.x,this.y,this.x+this.length*minT*this.normalized.x,this.y+this.length*minT*this.normalized.y,true)
+
+    return(w2)
+  }
+
   damage(d,mult,by={vx:0,vy:0},impactPt={x:0,y:0}){
 
     this.events.onCollide.forEach((e)=>{
@@ -1398,7 +1418,9 @@ class wall{
     })
 
     if(this.tags.has("breakable")){mult=Math.max(1,mult)}
-    d*=mult
+    mult = Math.max(mult,this.damageMinMult)
+    d*= mult
+
 
 
     if(d < this.damageThreshold){return}
@@ -2489,6 +2511,7 @@ class test{
         w.size = 10
         w.hp = 1
         w.damageThreshold = 0
+        w.damageMinMult = 1
         w.brokenVelocityMult = {vx:0.9,vy:0.9}
         w.shatterDistanceMultiplier = 0.05
         w.shatteringDistanceCap = 19
@@ -2502,6 +2525,10 @@ class test{
 
     if(options.sided){
       w.tags.add("sided")
+    }
+
+    if(options.tags){
+      options.tags.forEach((e)=>{w.tags.add(e)})
     }
 
     if(types[type]){types[type]()}
@@ -2853,7 +2880,11 @@ class structureGenerator{
   { x1: 60, y1: 400, x2: 80, y2: 380, type: 'glass', mirrored: false },
   { x1: 80, y1: 380, x2: 60, y2: 320, type: 'glass', mirrored: false },
   { x1: 60, y1: 320, x2: 60, y2: 300, type: 'glass', mirrored: false }
-],off:{x:-50,y:-405}, scale:1.4, boundingBox:[20,300,80,400], oneBody:true}
+],off:{x:-50,y:-405}, scale:1.4, boundingBox:[20,300,80,400], oneBody:true},
+    "table":{arr:[
+  { x1: 40, y1: 340, x2: 40, y2: 400, type: 'wood', mirrored: false, tags:["breakable","AIdamage"],hpMult:0.2 },
+  { x1: 0, y1: 340, x2: 80, y2: 340, type: 'wood', mirrored: false, tags:["breakable","AIdamage"],hpMult:0.2}
+],off:{x:-20,y:-401}, scale:1.2, boundingBox:[0,340,80,400] }
   }
 
   static boundingBox(struct,x,y,scale){
@@ -3852,8 +3883,10 @@ function generateLevels(x,y){
 
   let doorHeight = y-250-rand(150)
   entityList.walls.push(makeWooden(new wall(wallX.a,y,wallX.a,doorHeight,can.ctx),0.2))
-  newWall(wallX.a,doorHeight,wallX.a,height).splitting = {minLength:50,breakLength:100,breakVariability:()=>{return(rand(3))}}
-  newWall(wallX.b,y,wallX.b,height).splitting = {minLength:50,breakLength:100,breakVariability:()=>{return(rand(3))}}
+  let rightWall = newWall(wallX.a,doorHeight,wallX.a,height)
+  rightWall.splitting = {minLength:50,breakLength:100,breakVariability:()=>{return(rand(3))}}
+  let leftWall = newWall(wallX.b,y,wallX.b,height)
+  leftWall.splitting = {minLength:50,breakLength:100,breakVariability:()=>{return(rand(3))}}
   // entityList.walls.push(new wall(wallX.a,height,wallX.b,height,can.ctx)) // old roof
   mirror(newWall,wallX.a,height,wallX.a+floorWidth/3,height,midX,1).forEach((e)=>{makeWooden(e).tags.add("sided")}) // roof
   newWall(wallX.a+floorWidth/3,height,wallX.b-floorWidth/3,height)
@@ -3863,11 +3896,14 @@ function generateLevels(x,y){
   let floor = doorHeight - rand(150)
   while(floor > height + 200){
 
+    let floorHeight = 230+rand(200)
+
     let floorX = 40+rand(floorWidth-180)
     let start = wallX.a
     let end = wallX.b
     let flipped = false
-    if(Math.random()>0.5){floorX*=-1;start=wallX.b;end=wallX.a;flipped=true} //left or right
+    let flipInt = 1
+    if(Math.random()>0.5){floorX*=-1;start=wallX.b;end=wallX.a;flipped=true;flipInt=-1} //left or right
     entityList.walls.push(new wall(start,floor,start+floorX,floor,can.ctx))
 
 
@@ -3883,15 +3919,40 @@ function generateLevels(x,y){
     }
 
 
+    if(Math.abs(floorX) > 400 && rand(0.3)){ // balcony
+      let wall = flipped?leftWall:rightWall
+      let balconyHeight = -200-rand(30)
+      let newWall = wall.silentSplit(start,floor,start,floor+balconyHeight)
+      let balconyEnd = start-(300+rand(100))*flipInt
+      build(start,floor+40,(start+balconyEnd)/2,floor,"wood")
+      build(start,floor,balconyEnd,floor)
+      build(balconyEnd,floor,balconyEnd,floor-40-rand(30))
+
+      if(rand(0.9)){
+        build(start,floor,start,floor+balconyHeight,"glass",{tags:["AIdamage"]})
+      }
+
+      if(rand(0.1)){
+        structureGenerator.build("table",(start+(balconyEnd-start)/1.5),floor)
+      }
+
+
+      if(newWall.midpoint.y < wall.midpoint.y){
+        flipped?(leftWall=newWall):(rightWall=newWall)
+      }
+
+    }
+
+
 
     if(Math.random()>0.5){ // spawn rate
       summon("normal",start+floorX*0.5,floor-60,{brute:rand(0.03)})
-    } else if(rand(0.6) && floorX > 200){
+    } else if(rand(0.6) && Math.abs(floorX) > 200){
       structureGenerator.build(rand(0.5)?"container":"vase",start+floorX*rand()*0.9,floor)
     }
 
 
-    floor -= 230+rand(200)
+    floor -= floorHeight
   }
 
   /// boss level
@@ -4023,20 +4084,21 @@ function generateLevels(x,y){
 
 
 
-// unbreakable walls
+// unbreakable walls //
 // player trail //
 // height advantage
 
 // bounciness for wall //
 // scrolling background
 // trace through one side walls
-// mobile rotation fix
-// mobile movement fix
+// mobile rotation fix //
+// mobile movement fix //
 
-// brutes
-// balconies
+// brutes //
+// balconies //
 // rain and particles
 // explosives
 // vases
 // effects
 // game timeout manager
+// wall collateral chain
