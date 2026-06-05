@@ -888,7 +888,7 @@ class ball{
     this.lastJumpTime = 0
     this.lastCollideWallTime = 0
 
-    this.losDistanceSq = 1000**2
+    this.losDistanceSq = 1400**2
 
     if(AI){
       this.AIinit()
@@ -2039,6 +2039,78 @@ class itemShellParticle{
   }
 }
 
+class lineyParticle{
+  constructor(x,y,life=1000,colorFunc=(l)=>{return(`rgb(0,${255*l},${255*l})`)},ctx=can.ctx){
+    this.x = x; this.y = y;
+    this.vx = this.vy = 0;
+    this.life = life
+    this.tail = []
+    this.tailLength = 200
+
+    this.colorFunc = colorFunc
+
+    this.ctx = ctx
+
+    this.size = 4
+
+    this.updateStall = 0
+    this.nextUpdate = 0
+
+    this.speed = 1
+  }
+  
+  update(dt){
+    if(this.life <= 0){
+      this.tail.splice(0,1)
+      if(this.tail.length==0){
+        return("del")
+      }
+      return;
+    }
+
+    this.life -= dt/16 // must be here
+
+    if(gameWorld.lastTime > this.nextUpdate){
+      this.lastUpdate = gameWorld.lastTime + this.updateStall
+    } else {
+      return
+    }
+
+    
+    //make tail
+    
+    this.tail.push([this.x,this.y])
+    
+    //update phys
+    this.x += this.vx
+    this.y += this.vy
+    
+    this.vx += rand(-this.speed)
+    this.vy += rand(-this.speed)
+    
+    while(this.tail.length>this.tailLength){
+      this.tail.splice(0,1)
+    }
+  }
+  
+  draw(){
+    this.ctx.lineWidth = this.size
+    for(let i = this.tail.length-2; i > -1; i--){
+      let e = this.tail[i]
+      let t = this.tail[i+1]
+
+      let l = 1-(i+1)/this.tail.length
+      this.ctx.strokeStyle = this.colorFunc(l)
+      this.ctx.beginPath()
+      this.ctx.moveTo(e[0],e[1])
+      this.ctx.lineTo(t[0],t[1])
+      this.ctx.stroke()
+    }
+  }
+}
+
+
+
 class rectParticle{
   constructor(x,y,x2,y2,life=5000){
     this.z = 2
@@ -2666,6 +2738,7 @@ class test{
           spark.size = 25
           spark.z = 1
           particles.push(spark)
+          particleFuncs["hp particles"](x,y)
         })
         i.color = "rgb(240,50,40)"
       },
@@ -2708,8 +2781,9 @@ class test{
         },
         "hp+":()=>{
           i.onPickup.push((by)=>{
-            by.maxHp += 20
-            notify(options.msg?options.msg:"Buffed: +20 max hp")
+            by.maxHp += 40
+            notify(options.msg?options.msg:"Buffed: +40 max hp")
+            particleFuncs["hp particles"](by.x,by.y,9)
           })
         },
         "energetic":()=>{
@@ -2762,11 +2836,14 @@ class test{
   var particleFuncs = {
     "explosion":(x,y,s=1,l)=>{particles.push(new explosionParticle(x,y,(t)=>{return((1-t)*315*s)},(t)=>{return(t*75*s)},colorFuncs.explosion,l))},
     "explosion2":(x,y,s=1)=>{for(let i =0; i < 5; i++){particleFuncs.explosion(x,y,s,3000/(i**1.5))}},
-    "rect":(x,y,x2,y2)=>{particles.push(new rectParticle(x,y,x2,y2))}
+    "rect":(x,y,x2,y2)=>{particles.push(new rectParticle(x,y,x2,y2))},
+    "hp particle":(x,y)=>{let p = new lineyParticle(x,y,80+rand(80),colorFuncs.hp); p.speed = 3; particles.push(p)},
+    "hp particles":(x,y,n=5)=>{for(let i =0; i < n; i++){particleFuncs["hp particle"](x,y)}}
   }
 
   var colorFuncs = {
-    "explosion":(t)=>{let x=rand(255);return("rgba(255,"+x+",0,"+t*2+")")}
+    "explosion":(t)=>{let x=rand(255);return("rgba(255,"+x+",0,"+t*2+")")},
+    "hp":(l)=>{return(`rgba(255,40,40,${1-l})`)}
   }
 
   function trailify(ball,leng=50){
@@ -4089,16 +4166,19 @@ function generateLevels(x,y){
 // height advantage
 
 // bounciness for wall //
-// scrolling background
-// trace through one side walls
 // mobile rotation fix //
 // mobile movement fix //
-
 // brutes //
 // balconies //
+
+
+// trace through one side walls
+// scrolling background
 // rain and particles
 // explosives
 // vases
 // effects
 // game timeout manager
 // wall collateral chain
+// onebody objects / decorators
+// blood update
