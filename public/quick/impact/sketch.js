@@ -934,6 +934,18 @@ class ball{
   }
 
 
+  respawn(){
+    let check = this.effects.checkpoint.pop()
+        this.tags.delete("isDead")
+        this.tags.delete("noCollideWall")
+        this.tags.delete("noCollideBall")
+        this.hp = this.maxHp
+        this.x = check.x
+        this.y = check.y
+        this.vx = 0
+        this.vy = -0.5
+  }
+
 
   jump(vx,vy,mag){
     if(this.tags.has("isDead")){return}
@@ -2516,12 +2528,22 @@ class test{
   })
 
   entityList.player.onDeath.push(()=>{
-    if(settings.mobile){
+
+    if(entityList.player.effects.checkpoint){
+      if(entityList.player.effects.checkpoint.length>0){
+        setTimeout(()=>{
+        document.addEventListener("click",()=>{entityList.player.respawn()},{once:true})
+        },2000)
+        
+        return
+      }
+    }
+
+
       setTimeout(()=>{
-        document.addEventListener("touchstart",()=>{location.reload()})
+        document.addEventListener("click",()=>{location.reload()})
       },2000)
 
-    }
   })
 
   trailify(entityList.player)
