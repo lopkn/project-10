@@ -2803,7 +2803,13 @@ class test{
               }
             })
           })
-        }
+        },
+        "checkpoint":()=>{
+          i.onPickup.push((by)=>{
+            if(!by.effects["checkpoint"]){by.effects.checkpoint = []}
+            by.effects.checkpoint.push({x:by.x,y:by.y})
+          })
+        },
       }
 
       if(dict[type]){dict[type]()}
