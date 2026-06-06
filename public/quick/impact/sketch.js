@@ -898,6 +898,8 @@ class ball{
 
     this.movementSpeed = 0.005
 
+    this.effects = {}
+
 
     grid.addPt(this.x,this.y,()=>{this.activate()},grid.activationGrid)
 
@@ -3226,7 +3228,11 @@ setTimeout(()=>{
   // can.ctx.fillStyle = "rgba(0,0,0,0.01)"
   // can.ctx.fillRect(0,0,can.canvas.width,can.canvas.height)
 
-  camera.scale += (settings.speedZoom/(entityList.player.speed()+settings.speedZoom)*settings.relativeSize*1.4-camera.scale)*(0.02*dt/16)
+  let destScale = settings.speedZoom/(entityList.player.speed()+settings.speedZoom)*settings.relativeSize*1.4
+
+
+
+  camera.scale += (destScale-camera.scale)*(0.02*dt/16) * (destScale>camera.scale?0.5:1)
   // camera.scale = 0.9 + Math.sin(Date.now()*0.002) * 0.6
   let camDx = (entityList.player.x-WidthM-camera.pos.x)*(0.03*dt/16)
   let camDy = (entityList.player.y-HeightM-camera.pos.y)*(0.03*dt/16)
@@ -3346,7 +3352,7 @@ setTimeout(()=>{
   can.ctx.fillStyle = dt>18?"red":"green"
   can.ctx.font = `bold ${Math.floor(48* settings.relativeSize )}px arial`
   can.ctx.fillText(Math.floor(dt)+" "+(Math.round(performance.now()-pn)+" "+Math.floor(test.perf*100)),0,Height)
-  if(settings.offline){
+  if(settings.offline && !settings.mobile){
     can.ctx.fillStyle = "red"
     can.ctx.fillText("OFFLINE. SERVED OFFLINE. DEBUG NOT WORK BECAUSE OFFLINE",100,120)
   }
@@ -4182,3 +4188,4 @@ function generateLevels(x,y){
 // wall collateral chain
 // onebody objects / decorators
 // blood update
+// checkpoints
