@@ -2539,6 +2539,8 @@ class test{
       }
     }
 
+    console.log("hey")
+
 
       setTimeout(()=>{
         document.addEventListener("click",()=>{location.reload()})
@@ -2830,6 +2832,7 @@ class test{
           i.onPickup.push((by)=>{
             if(!by.effects["checkpoint"]){by.effects.checkpoint = []}
             by.effects.checkpoint.push({x:by.x,y:by.y})
+            notify("checkpoint set")
           })
         },
       }
