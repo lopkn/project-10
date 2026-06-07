@@ -4164,6 +4164,13 @@ function generateLevels(x,y){
   for(let i = 0; i < 4; i++){
     let h = height+i*500
     build(midX-300,h,midX+300,h,"normal",{splitting:{minLength:50,breakLength:100,breakVariability:()=>{return(rand(3))}}})
+    if(i==3){
+      let tmp1 = h
+      let tmp2 = midX
+      boss.onDeath.push(()=>{
+        dropItem("checkpoint",tmp2,tmp1)
+      })
+    }
   }
 
   for(let i = -2; i < 7; i++){
