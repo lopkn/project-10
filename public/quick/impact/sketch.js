@@ -3763,6 +3763,18 @@ document.addEventListener("keyup",(e)=>{
 /////// touch handler
 
 
+function mobileClick() {
+
+    const clickEvent = new MouseEvent('click', {
+        view: window,
+        bubbles: true,      // Crucial: Allows the event to travel up to document/window
+        cancelable: true    // Allows preventDefault() to work if needed
+    });
+
+    document.dispatchEvent(clickEvent);
+}
+
+
 function touchHandler(event)
 {
 
@@ -3798,6 +3810,8 @@ function touchHandler(event)
         controller.updateJump(E.clientX,E.clientY)
         controller.mouseIsDown = true
       }
+
+      mobileClick()
     }
 
     if(event.type == 'touchmove'){
