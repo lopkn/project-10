@@ -1180,9 +1180,9 @@ class ball{
     this.x += this.vx*dt + this.push.x
     this.y += this.vy*dt + this.push.y
 
-    if(distance(this.push.x,this.push.y)>this.r){
-      console.log("what?")
-    }
+    // if(distance(this.push.x,this.push.y)>this.r){
+    //   console.log("what?")
+    // }
     this.push = {x:0,y:0}
 
     let speed = this.speed()
@@ -2727,6 +2727,8 @@ class test{
       "enerjitsuist":()=>{
         b.damageMultiplier = 0.7
         b.r *= 0.96
+        b.maxHp *= 2
+        b.hp *= 2
         b.energyRegen = 0
         b.wallJumpEnergy = 500
         b.maxEnergy *= 3
@@ -2751,6 +2753,8 @@ class test{
       "enerjitsuist hopper":()=>{
         b.damageMultiplier = 0.7
         b.r *= 0.96
+        b.maxHp *= 2
+        b.hp *= 2
         b.energyRegen = 0.5
         b.wallJumpEnergy = 50
         b.maxEnergySpend = b.minEnergySpend = 20
@@ -2966,10 +2970,12 @@ class test{
         
 
         if(los){
-          let dist = Math.max(100,distance(x,y,e.x,e.y))
+          // let dist = Math.max(50,distance(x,y,e.x,e.y))
+          let dist = Math.max(distance(x,y,e.x,e.y),4)
+          console.log(dist)
           if(dist<400){
             console.log(dist)
-            let dv = {vx:(e.x-x)/(dist**1.4)*10,vy:(e.y-y)/(dist**1.4)*10}
+            let dv = {vx:(e.x-x)/(dist**1.6)*15,vy:(e.y-y)/(dist**1.6)*15}
             e.vx += dv.vx
             e.vy += dv.vy
             dv.vx *= 1.2
@@ -4436,6 +4442,8 @@ function generateLevels(x,y){
       let options = {}
       if(rand(0.3)){options.grunt=true}
       summon(rand(0.6)?"normal":"apprentice",mx,h-60,options)
+    } else if(rand(0.3)){
+      structureGenerator.build(rand(0.6)?"bottle":"vase",mx,h)
     }
   }
 
