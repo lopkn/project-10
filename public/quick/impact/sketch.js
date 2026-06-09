@@ -1627,12 +1627,13 @@ class item{
 
   }
 
-  pickup(by){
+  pickup(by,nodraw){
     this.onPickup.forEach((f)=>{
       f(by)
     })
-
-    particles.push(new itemShellParticle(this))
+    if(!nodraw){
+      particles.push(new itemShellParticle(this))
+    }
     this.remove()
   }
   remove(l){
@@ -2613,6 +2614,9 @@ class test{
   })
 
   trailify(entityList.player)
+
+  grantItem("checkpoint")
+
   // implement player trail
 
 
@@ -2808,7 +2812,7 @@ class test{
 
   function grantItem(type,options){
     let item = dropItem(type,options)
-    item.pickup(entityList.player)
+    item.pickup(entityList.player,true)
   }
 
 
@@ -3692,6 +3696,18 @@ function drawPlayerGUI(){
       can.ctx.stroke()
     }
   }
+
+
+  if(entityList.player.effects.checkpoint && entityList.player.effects.checkpoint.length>0){
+    can.ctx.save()
+    can.ctx.fillStyle = "lime"
+    can.ctx.shadowColor = "green"
+    can.ctx.font = `bold ${Math.floor(27*settings.relativeSize)}px arial`
+    can.ctx.shadowOffsetX = -settings.relativeSize*3
+    can.ctx.shadowOffsetY = settings.relativeSize*4
+    can.ctx.fillText("Remaining checkpoints: "+entityList.player.effects.checkpoint.length, padding+settings.insets.left+barWidth+5, padding+barHeight)
+  }
+  can.ctx.restore()
 
   if(test.smoothnessIndicator){
     can.ctx.fillStyle = `rgb(${gameWorld.frame % 255 },255,255)`
