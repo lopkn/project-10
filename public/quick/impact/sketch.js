@@ -1492,7 +1492,7 @@ class wall{
     return(false)
   }
 
-  break(by={vx:0,vy:0},impactPt={x:0,y:0}){
+  break(by={vx:0,vy:0},impactPt={x:0,y:0},collateral){
     if(this.tags.has("isBroken")){return}
     this.tags.add("isBroken")
     shatterWall(this,by,impactPt)
@@ -1500,6 +1500,12 @@ class wall{
     this.events.onBreak.forEach((e)=>{
       e(this,by,impactPt)
     })
+
+    if(this.collateral && !collateral){
+      this.collateral.forEach((e)=>{
+        e.break(by,impactPt,collateral)
+      })
+    }
 
 
     //remove from grid
@@ -2622,8 +2628,28 @@ class test{
         w.brokenVelocityMult = {vx:0.9,vy:0.9}
         w.shatterDistanceMultiplier = 0.05
         w.shatteringDistanceCap = 19
+        w.bounce = 0.2
+        w.friction = 1
         w.shatteringFunc = (part)=>{let r = rand();part.vx *= r; part.vy *= r}
       },
+      "sturdy glass":()=>{
+        w.color = "rgba(40,140,220,0.6)"
+        w.size = 10
+        w.hp = 1
+        w.damageMinMult = 0.2
+        w.damageThreshold = 0.1
+        w.brokenVelocityMult = {vx:0.9,vy:0.9}
+        w.shatterDistanceMultiplier = 0.05
+        w.shatteringDistanceCap = 19
+        w.bounce = 0.2
+        w.friction = 1
+        w.shatteringFunc = (part)=>{let r = rand();part.vx *= r; part.vy *= r}
+      },
+      "brick":()=>{
+        w.color = "#f29188"
+        w.bounce = 0.4
+        w.friction = 0.94
+      }
     }
 
     if(options.hpMult){
@@ -3178,7 +3204,8 @@ class structureGenerator{
       { x1: 0, y1: 400, x2: 60, y2: 360, type: 'wood', mirrored: false },
       { x1: 60, y1: 400, x2: 0, y2: 360, type: 'wood', mirrored: false },
       { x1: 60, y1: 360, x2: 60, y2: 400, type: 'wood', mirrored: false }
-      ],off:{x:-30,y:-401},scale:1.3,boundingBox:[0,280,60,400],genFunc:(x,y,options)=>{
+      ],off:{x:-30,y:-401},scale:1.3,boundingBox:[0,280,60,400],genFunc:(x,y,options,walls)=>{
+        walls[0].collateral = walls[2].collateral = [walls[1]]
         if(rand(0.5)){
           dropOrb("energy",x,y-options.scale*80)
         } else {
@@ -3198,7 +3225,29 @@ class structureGenerator{
     "table":{arr:[
   { x1: 40, y1: 340, x2: 40, y2: 400, type: 'wood', mirrored: false, tags:["breakable","AIdamage"],hpMult:0.2 },
   { x1: 0, y1: 340, x2: 80, y2: 340, type: 'wood', mirrored: false, tags:["breakable","AIdamage"],hpMult:0.2}
-],off:{x:-20,y:-401}, scale:1.2, boundingBox:[0,340,80,400] }
+  ],off:{x:-20,y:-401}, scale:1.2, boundingBox:[0,340,80,400], },
+
+    "bottle":{arr:[
+  { x1: 160, y1: 60, x2: 160, y2: 180, type: 'sturdy glass', mirrored: false },
+  { x1: 160, y1: 180, x2: 120, y2: 200, type: 'sturdy glass', mirrored: false },
+  { x1: 120, y1: 200, x2: 100, y2: 240, type: 'sturdy glass', mirrored: false },
+  { x1: 100, y1: 240, x2: 100, y2: 280, type: 'sturdy glass', mirrored: false },
+  { x1: 100, y1: 280, x2: 120, y2: 320, type: 'sturdy glass', mirrored: false },
+  { x1: 120, y1: 320, x2: 160, y2: 340, type: 'sturdy glass', mirrored: false },
+  { x1: 160, y1: 340, x2: 200, y2: 340, type: 'sturdy glass', mirrored: false },
+  { x1: 200, y1: 340, x2: 240, y2: 320, type: 'sturdy glass', mirrored: false },
+  { x1: 240, y1: 320, x2: 260, y2: 280, type: 'sturdy glass', mirrored: false },
+  { x1: 260, y1: 280, x2: 260, y2: 240, type: 'sturdy glass', mirrored: false },
+  { x1: 260, y1: 240, x2: 240, y2: 200, type: 'sturdy glass', mirrored: false },
+  { x1: 240, y1: 200, x2: 200, y2: 180, type: 'sturdy glass', mirrored: false },
+  { x1: 200, y1: 180, x2: 200, y2: 60, type: 'sturdy glass', mirrored: false },
+  { x1: 110, y1: 300, x2: 80, y2: 345, type: 'wood', mirrored: false },
+  { x1: 250, y1: 300, x2: 280, y2: 345, type: 'wood', mirrored: false }
+],off:{x:-180,y:-346}, scale:1, boundingBox:[80,60,280,345], genFunc:(x,y,options,walls)=>{
+    // let glasses = []
+    // walls.forEach((e)=>{if(e.name === "glass"){e.collateral = glasses; glasses.push(e)}})    
+  }
+}
   }
 
   static boundingBox(struct,x,y,scale){
@@ -3253,12 +3302,13 @@ class structureGenerator{
 
 
       if(d.oneBody){
-        let breakAll = (a,b,c)=>{out.forEach((e)=>{e.break(b,c)})}
-        out.forEach((e)=>{e.events.onBreak.push(breakAll)})
+        // let breakAll = (a,b,c)=>{out.forEach((e)=>{e.break(b,c)})}
+        // out.forEach((e)=>{e.events.onBreak.push(breakAll)})
+        out.forEach((e)=>{e.collateral = out})
       }
 
       if(d.genFunc){
-          d.genFunc(x,y,options,struct)
+          d.genFunc(x,y,options,out)
       }
     return(out)
     }
@@ -4376,11 +4426,11 @@ function generateLevels(x,y){
   let aheight = 11250
   build(midX-fat,height,midX-fat-100,height-aheight,"normal",{splitting:{minLength:50,breakLength:100,breakVariability:()=>{return(rand(3))}},mirrorX:midX})
 
-  for(let i = 0; i < aheight; i+=rand(400)+100){
-    let l = rand(600)+300
+  for(let i = aheight-100; i > 0; i-=rand(300)+100){
+    let l = rand(600)+600
     let f = rand(fat*2-l)
     let h = height-i
-    build(midX-fat+f,h,midX-fat+f+l,h,"normal",{splitting:{minLength:50,breakLength:100,breakVariability:()=>{return(rand(3))}}})
+    build(midX-fat+f,h,midX-fat+f+l,h,"brick",{sided:true,splitting:{minLength:50,breakLength:100,breakVariability:()=>{return(rand(3))}}})
     let mx = midX-fat+f+l/2
     if(rand(0.6)){
       let options = {}
@@ -4409,7 +4459,7 @@ function generateLevels(x,y){
 
   for(let i = -2; i < 7; i++){
     let h = height-i*250
-    build(midX-fat+500,h,midX-fat+700,h,"normal",{splitting:{minLength:50,breakLength:100,breakVariability:()=>{return(rand(3))}},mirrorX:midX})
+    build(midX-fat+500,h,midX-fat+700,h,"normal",{sided:true,splitting:{minLength:50,breakLength:100,breakVariability:()=>{return(rand(3))}},mirrorX:midX})
   }
 
   height-=aheight
