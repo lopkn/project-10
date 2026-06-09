@@ -820,7 +820,7 @@ function AIlos(x,y,ox,oy,ball){
     return(false)
   }
 
-  entityList.walls.forEach((w)=>{
+  entityList.activatedWalls.forEach((w)=>{
     if(w.tags.has("AIdamage")){return}
     let not_blocked = line_to_line_collision_pt(x,y,ox,oy,w.x,w.y,w.x2,w.y2)
     if(not_blocked!==false){los=false}
@@ -881,7 +881,7 @@ class ball{
     this.maxEnergySpend = 40
     this.energyRegen = 0.01
 
-    this.wallJumpEnergy = 1
+    this.wallJumpEnergy = 5
 
     this.jumpForceMultiplier = 1
 
@@ -965,12 +965,21 @@ class ball{
 
     mag*= this.jumpForceMultiplier
 
+
+    let norm = normalize(vx,vy)
     let actualForce = distance(vx,vy)*mag
     let spentEnergy = actualForce*30
 
     if(spentEnergy>this.maxEnergySpend){
       mag *= this.maxEnergySpend/spentEnergy
       spentEnergy = this.maxEnergySpend
+    }
+
+    if(this.minEnergySpend && spentEnergy < this.minEnergySpend){
+      if(this.energy < this.minEnergySpend){return}
+
+      spentEnergy = this.minEnergySpend
+      mag *= spentEnergy/this.minEnergySpend
     }
 
     this.energy -= spentEnergy
@@ -982,6 +991,15 @@ class ball{
       this.energy = 0
 
     }
+
+    if(this.tags.has("enerjitsu")){
+      let d = dot(this.vx,this.vy,norm.x,norm.y)
+      if(d<0){
+        this.vx -= norm.x * d
+        this.vy -= norm.y * d
+      }
+    }
+
 
     this.force(vx,vy,mag)
     this.lastJumpTime = gameWorld.lastTime
@@ -1302,7 +1320,7 @@ class ball{
     this.ctx.beginPath()
     this.ctx.arc(this.x,this.y,this.r,0,Math.PI*2)
     this.ctx.fill()
-    if(this !== entityList.player){
+    if(!this.tags.has("noDefaultArc")){
       this.ctx.stroke()
     }
 
@@ -1520,7 +1538,7 @@ class wall{
 
 function wall_collision_handler(ball,collisionData,dt,type="normal"){
 
-  ball.energy += 5
+  ball.energy += ball.wallJumpEnergy
   let awaySide = collisionData.awaySide // not used
   let closest = collisionData.closest // the point of the wall that was hit
   let dist = collisionData.minDist // the distance from the ball to the point of the wall that was hit
@@ -2212,6 +2230,7 @@ class entityList{
   static walls = []
 
   static activatedBalls = new Set()
+  static activatedWalls = new Set()
 
 }
 
@@ -2555,96 +2574,18 @@ class test{
   static slower = 1;
 }
 
-//initialize player @ip @player
-
-  entityList.player = new ball(-100,400,50,can.ctx,false)
-  entityList.player.team = "player"
-  entityList.player.mass = 1.2
-  entityList.player.color = [129,62,41] //129 62 41
-  entityList.player.name = "player"
-  entityList.player.hpRegen *= 2
-  entityList.player.wallJumpEnergy = 5
-  entityList.player.energyRegen *= 2
-  entityList.balls.add(entityList.player)
-  entityList.player.tags.delete("AI")
-  entityList.player.onJump.push((b,spentEnergy)=>{
-    let p = new particle(b.x,b.y,0,0)
-    p.maxLife = 1500
-    p.life = 1500/b.maxEnergySpend*spentEnergy
-    p.color = [120,245,230]
-    p.ay = 0
-    p.size = b.r+2
-    p.noFill = 1
-    particles.push(p)
-  })
-  entityList.player.tags.add("moves")
-  entityList.player.movementVector = {x:0,y:0}
-  entityList.player.movementScalar = 1
-
-  entityList.player.activate()
-  entityList.player.updateFuncs.push(()=>{
-    grid.activate(entityList.player.x,entityList.player.y)
-  })
-
-  entityList.player.onDeath.push(()=>{
-
-    if(entityList.player.effects.checkpoint){
-      if(entityList.player.effects.checkpoint.length>0){
-        setTimeout(()=>{
-        document.addEventListener("click",()=>{
-          let check = entityList.player.effects.checkpoint
-          check = check[check.length-1]
-          let cd = camera.addDestination(check.x,check.y,30)
-          cd.arrive.push( ()=>{entityList.player.respawn()})
-
-        },{once:true})
-        },2000)
-        
-        return
-      }
-    }
-
-    console.log("hey")
 
 
-      setTimeout(()=>{
-        document.addEventListener("click",()=>{location.reload()})
-      },2000)
-
-  })
-
-  trailify(entityList.player)
-
-  grantItem("checkpoint")
-
-  // implement player trail
 
 
-  function newWall(a,b,c,d,ctx=can.ctx){
-    let w = new wall(a,b,c,d,ctx)
-    entityList.walls.push(w)
-    return(w)
-  }
-  function newBall(x,y,r=50,ctx=can.ctx){
-    let b = new ball(x,y,r,ctx)
-    entityList.balls.add(b)
-    return(b)
-  }
 
 
-  function mirror(f,a,b,c,d,x,flip=false){
-    let w1 = f(a,b,c,d)
 
-    let w2;
-    if(flip){
-      w2 = f(x+(x-c),b,x+(x-a),d)
-    } else {
-      w2 = f(x+(x-a),b,x+(x-c),d)
-    }
 
-    return([w1,w2])
-  }
-  function build(x,y,x1,y1,type="normal",options={}){
+
+
+
+ function build(x,y,x1,y1,type="normal",options={}){
 
     let w;
 
@@ -2757,6 +2698,69 @@ class test{
           b.AInextUpdateTime = 500
         }
       },
+      "enerjitsuist":()=>{
+        b.damageMultiplier = 0.7
+        b.r *= 0.96
+        b.energyRegen = 0
+        b.wallJumpEnergy = 500
+        b.maxEnergy *= 3
+        b.maxEnergySpend = b.minEnergySpend = 20
+        b.color = [205,62,41]
+        b.tags.add("noDefaultArc")
+        grantItem("enerjitsu",b)
+        b.onJump.push(particleFuncs.jumpIndicator)
+        b.AInextUpdateTime = 500
+
+        b.AICustomUpdate = (b,dt)=>{
+          let los = AIlos(b.x,b.y,p.x,p.y,b)
+          if(los){
+            b.target = p
+            if(b.energy > 30 ){
+              b.AInextUpdateTime = rand(0.05)?rand(1000)+950:rand(400)+400
+              b.jump(b.target.x-b.x,b.target.y-b.y-60,0.003)
+            }
+          }
+        }
+      },
+      "enerjitsuist hopper":()=>{
+        b.damageMultiplier = 0.7
+        b.r *= 0.96
+        b.energyRegen = 0.5
+        b.wallJumpEnergy = 50
+        b.maxEnergySpend = b.minEnergySpend = 20
+        b.color = [225,62,41]
+        b.tags.add("noDefaultArc")
+        grantItem("enerjitsu",b)
+        b.onJump.push(particleFuncs.jumpIndicator)
+        b.AInextUpdateTime = 500
+        b.enerjitsuistLR = 0
+        b.enerjitsuistTurn = 0.8
+
+        b.losDistanceSq *= 1.5
+
+        b.AICustomUpdate = (b,dt)=>{
+          let los = AIlos(b.x,b.y,p.x,p.y,b)
+          if(los){
+            b.target = p
+            if(b.energy > 30 ){
+              b.AInextUpdateTime = rand(0.01)?rand(1000)+950:rand(200)+(options.insane?200:600)
+
+              let enerAngle = b.enerjitsuistTurn
+              let towardsDir = dot(b.target.x-b.x,b.target.y-b.y,b.vx,b.vy)
+
+              // 20 -> Math.PI/2
+
+              if(towardsDir > 20){
+                enerAngle = Math.PI/2
+              }
+
+              let lr = Lrotate(b.target.x-b.x,b.target.y-b.y, b.enerjitsuistLR%2?-enerAngle:enerAngle)
+              b.jump(lr.x,lr.y-60,0.003)
+              b.enerjitsuistLR += 1
+            }
+          }
+        }
+      },
       "apprentice":()=>{
         b.tags.add("moves")
         b.movementVector = {x:0,y:0}
@@ -2810,9 +2814,9 @@ class test{
 
 
 
-  function grantItem(type,options){
+  function grantItem(type,p=entityList.player,options){
     let item = dropItem(type,options)
-    item.pickup(entityList.player,true)
+    item.pickup(p,true)
   }
 
 
@@ -2862,7 +2866,7 @@ class test{
           i.dash = {ld:[20,20],offset:1}
           i.onPickup.push((by)=>{
             by.maxHp *= 8
-            notify("picked up cheats\npussy/nevaeh mode: x800% hp")
+            by===entityList.player?notify("picked up cheats\npussy/nevaeh mode: x800% hp"):0
           })
         },
 
@@ -2875,27 +2879,27 @@ class test{
         "dmg+":()=>{
           i.onPickup.push((by)=>{
             by.permanentDamageMultiplier += 0.05
-            notify(options.msg?options.msg:"your patience is rewarded: +5% damage")
+            by===entityList.player?notify(options.msg?options.msg:"your patience is rewarded: +5% damage"):0
           })
         },
         "armor+":()=>{
           i.onPickup.push((by)=>{
             by.armor = {hp:80,protection:0.8,maxHp:80}
             // particles.push(new sparkParticle(by.x,by.y,15))
-            notify(options.msg?options.msg:"picked up armor: +50 armor hp")
+            by===entityList.player?notify(options.msg?options.msg:"picked up armor: +80 armor hp"):0
           })
         },
         "hp+":()=>{
           i.onPickup.push((by)=>{
             by.maxHp += 40
-            notify(options.msg?options.msg:"Buffed: +40 max hp")
+            by===entityList.player?notify(options.msg?options.msg:"Buffed: +40 max hp"):0
             particleFuncs["hp particles"](by.x,by.y,9)
           })
         },
         "energetic":()=>{
           i.onPickup.push((by)=>{
             by.maxEnergy += 20
-            notify(options.msg?options.msg:"energetic: +20 max energy")
+            by===entityList.player?notify(options.msg?options.msg:"energetic: +20 max energy"):0
           })
         },
         "momentum profligacy":()=>{
@@ -2908,11 +2912,16 @@ class test{
             })
           })
         },
+        "enerjitsu":()=>{
+          i.onPickup.push((by)=>{
+            by.tags.add("enerjitsu")
+          })
+        },
         "checkpoint":()=>{
           i.onPickup.push((by)=>{
             if(!by.effects["checkpoint"]){by.effects.checkpoint = []}
             by.effects.checkpoint.push({x:by.x,y:by.y})
-            notify("checkpoint set")
+            by===entityList.player?notify("checkpoint set"):0
           })
         },
       }
@@ -2957,7 +2966,18 @@ class test{
       for(let i = 0; i < 5; i++){
         particles.push(new explosionParticle(x,y,(t)=>{return((t**0.4)*315)},(t)=>{return(4)},()=>{return(colorFuncs.respawn(b))},1000+200*i))
       }
-    }
+    },
+
+    "jumpIndicator":(b,spentEnergy)=>{
+        let p = new particle(b.x,b.y,0,0)
+        p.maxLife = 1500
+        p.life = 1500/b.maxEnergySpend*spentEnergy
+        p.color = [120,245,230]
+        p.ay = 0
+        p.size = b.r+2
+        p.noFill = 1
+        particles.push(p)
+      }
   }
 
   var colorFuncs = {
@@ -2990,6 +3010,103 @@ class test{
   }) 
   }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//initialize player @ip @player
+
+  entityList.player = new ball(-100,400,50,can.ctx,false)
+  entityList.player.team = "player"
+  entityList.player.mass = 1.2
+  entityList.player.color = [129,62,41] //129 62 41
+  entityList.player.name = "player"
+  entityList.player.hpRegen *= 2
+  entityList.player.wallJumpEnergy = 5
+  entityList.player.energyRegen *= 2
+  entityList.balls.add(entityList.player)
+  entityList.player.tags.delete("AI")
+  entityList.player.tags.add("noDefaultArc")
+  entityList.player.onJump.push(particleFuncs.jumpIndicator)
+  entityList.player.tags.add("moves")
+  entityList.player.movementVector = {x:0,y:0}
+  entityList.player.movementScalar = 1
+
+  entityList.player.activate()
+  entityList.player.updateFuncs.push(()=>{
+    grid.activate(entityList.player.x,entityList.player.y)
+  })
+
+  entityList.player.onDeath.push(()=>{
+
+    if(entityList.player.effects.checkpoint){
+      if(entityList.player.effects.checkpoint.length>0){
+        setTimeout(()=>{
+        document.addEventListener("click",()=>{
+          let check = entityList.player.effects.checkpoint
+          check = check[check.length-1]
+          let cd = camera.addDestination(check.x,check.y,30)
+          cd.arrive.push( ()=>{entityList.player.respawn()})
+
+        },{once:true})
+        },2000)
+        
+        return
+      }
+    }
+
+    console.log("hey")
+
+
+      setTimeout(()=>{
+        document.addEventListener("click",()=>{location.reload()})
+      },2000)
+
+  })
+
+  trailify(entityList.player)
+
+  grantItem("checkpoint")
+
+  // implement player trail
+
+
+  function newWall(a,b,c,d,ctx=can.ctx){
+    let w = new wall(a,b,c,d,ctx)
+    entityList.walls.push(w)
+    return(w)
+  }
+  function newBall(x,y,r=50,ctx=can.ctx){
+    let b = new ball(x,y,r,ctx)
+    entityList.balls.add(b)
+    return(b)
+  }
+
+
+  function mirror(f,a,b,c,d,x,flip=false){
+    let w1 = f(a,b,c,d)
+
+    let w2;
+    if(flip){
+      w2 = f(x+(x-c),b,x+(x-a),d)
+    } else {
+      w2 = f(x+(x-a),b,x+(x-c),d)
+    }
+
+    return([w1,w2])
+  }
+ 
 
   // function trailify(ball,dtmin=60){
   //   ball.trail = []
@@ -3449,6 +3566,7 @@ setTimeout(()=>{
 
 
   let walls = grid.getNearby(camera.pos.x,camera.pos.y,2,grid.grid)
+  entityList.activatedWalls = walls
   walls.forEach((e)=>{
     e.draw()
   })
