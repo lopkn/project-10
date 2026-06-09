@@ -935,15 +935,26 @@ class ball{
 
 
   respawn(){
+
+
     let check = this.effects.checkpoint.pop()
-        this.tags.delete("isDead")
-        this.tags.delete("noCollideWall")
-        this.tags.delete("noCollideBall")
-        this.hp = this.maxHp
-        this.x = check.x
-        this.y = check.y
-        this.vx = 0
-        this.vy = -0.5
+    particleFuncs.respawn(check.x,check.y,this)
+
+    let d = camera.addDestination(check.x,check.y,0)
+    
+    gameWorld.TO(1000,(e)=>{
+      this.tags.delete("isDead")
+      this.tags.delete("noCollideWall")
+      this.tags.delete("noCollideBall")
+      this.hp = this.maxHp
+      this.x = check.x
+      this.y = check.y
+      this.vx = 0
+      this.vy = -0.1
+      d.done=true
+      e.done=true
+    })
+        
   }
 
 
@@ -2237,6 +2248,25 @@ class gameWorld{
     static frame = 0
 
     static viewAABB = [0,0,Width,Height]
+
+    static timeOuts = []
+
+    static TO(time,func){
+      time = this.lastTime + time
+      this.timeOuts.push({t:time,f:func})
+    }
+
+    static tick(){
+      for(let i = this.timeOuts.length - 1; i>-1; i--){
+        let e = this.timeOuts[i]
+        if(this.lastTime < e.t){return} // not running yet
+        e.f(e)
+        if(e.done){
+          this.timeOuts.splice(i,1)
+        }
+      }
+    }
+
 }
 
 class controller{
@@ -2269,7 +2299,35 @@ class controller{
 class camera{
   static scale = 1
   static shake = 1
-  static pos = {x:-WidthM,y:-HeightM}
+  static pos = {x:0,y:0}
+  static destination = {x:0,y:0}
+
+  static destinations = []
+
+  static getDestination(){
+    if(this.destinations.length < 1){
+      this.destination = {x:entityList.player.x,y:entityList.player.y}
+    } else {
+      this.destination = this.destinations[this.destinations.length-1]
+
+      let d = distance(this.destination.x,this.destination.y,this.pos.x,this.pos.y)
+      if(d < this.destination.r || this.destination.done){
+        this.destinations.pop()
+        if(this.destination.arrive){
+          this.destination.arrive.forEach((f)=>{
+            f()
+          })
+        }
+      }
+
+    }
+  }
+
+  static addDestination(x,y,r=30){
+    let dest = {x:x,y:y,r:r,arrive:[]}
+    this.destinations.push(dest)
+    return(dest)
+  }
 
 }
 
@@ -2532,7 +2590,13 @@ class test{
     if(entityList.player.effects.checkpoint){
       if(entityList.player.effects.checkpoint.length>0){
         setTimeout(()=>{
-        document.addEventListener("click",()=>{entityList.player.respawn()},{once:true})
+        document.addEventListener("click",()=>{
+          let check = entityList.player.effects.checkpoint
+          check = check[check.length-1]
+          let cd = camera.addDestination(check.x,check.y,30)
+          cd.arrive.push( ()=>{entityList.player.respawn()})
+
+        },{once:true})
         },2000)
         
         return
@@ -2736,6 +2800,18 @@ class test{
     return(b)
   }
 
+
+
+
+
+
+
+  function grantItem(type,options){
+    let item = dropItem(type,options)
+    item.pickup(entityList.player)
+  }
+
+
   function dropOrb(type,x=entityList.player.x,y=(entityList.player.y-160),options={}){
     let i = new orb(x,y,type,can.ctx)
 
@@ -2867,16 +2943,23 @@ class test{
   }
 
   var particleFuncs = {
-    "explosion":(x,y,s=1,l)=>{particles.push(new explosionParticle(x,y,(t)=>{return((1-t)*315*s)},(t)=>{return(t*75*s)},colorFuncs.explosion,l))},
+    "explosion":(x,y,s=1,l=1000)=>{particles.push(new explosionParticle(x,y,(t)=>{return((1-t)*315*s)},(t)=>{return(t*75*s)},colorFuncs.explosion,l))},
     "explosion2":(x,y,s=1)=>{for(let i =0; i < 5; i++){particleFuncs.explosion(x,y,s,3000/(i**1.5))}},
     "rect":(x,y,x2,y2)=>{particles.push(new rectParticle(x,y,x2,y2))},
     "hp particle":(x,y)=>{let p = new lineyParticle(x,y,80+rand(80),colorFuncs.hp); p.speed = 3; particles.push(p)},
-    "hp particles":(x,y,n=5)=>{for(let i =0; i < n; i++){particleFuncs["hp particle"](x,y)}}
+    "hp particles":(x,y,n=5)=>{for(let i =0; i < n; i++){particleFuncs["hp particle"](x,y)}},
+
+    "respawn":(x,y,b)=>{
+      for(let i = 0; i < 5; i++){
+        particles.push(new explosionParticle(x,y,(t)=>{return((t**0.4)*315)},(t)=>{return(4)},()=>{return(colorFuncs.respawn(b))},1000+200*i))
+      }
+    }
   }
 
   var colorFuncs = {
     "explosion":(t)=>{let x=rand(255);return("rgba(255,"+x+",0,"+t*2+")")},
-    "hp":(l)=>{return(`rgba(255,40,40,${1-l})`)}
+    "hp":(l)=>{return(`rgba(255,40,40,${1-l})`)},
+    "respawn":(b)=>{return(`hsl(${b.color[0]},50%,60%)`)}
   }
 
   function trailify(ball,leng=50){
@@ -3265,26 +3348,20 @@ setTimeout(()=>{
 
   camera.scale += (destScale-camera.scale)*(0.02*dt/16) * (destScale>camera.scale?0.5:1)
   // camera.scale = 0.9 + Math.sin(Date.now()*0.002) * 0.6
-  let camDx = (entityList.player.x-WidthM-camera.pos.x)*(0.03*dt/16)
-  let camDy = (entityList.player.y-HeightM-camera.pos.y)*(0.03*dt/16)
+
+  camera.getDestination()
+
+  let camDx = (camera.destination.x-camera.pos.x)*(0.03*dt/16)
+  let camDy = (camera.destination.y-camera.pos.y)*(0.03*dt/16)
   camera.pos.x += camDx
   camera.pos.y += camDy
-
   can.ctx.save()
-
-
   can.ctx.translate(can.canvas.width/2,can.canvas.height/2)
   can.ctx.scale(camera.scale,camera.scale)
   can.ctx.translate(-can.canvas.width/2,-can.canvas.height/2)
-
+  can.ctx.translate(WidthM,HeightM)
   can.ctx.translate(-camera.pos.x,-camera.pos.y)
-
-
-
-
   can.ctx.translate(rand(-camera.shake),rand(-camera.shake))
-
-
   underCan.ctx.restore()
   underCan.ctx.save()
   underCan.ctx.globalCompositeOperation = 'copy';
@@ -3322,9 +3399,15 @@ setTimeout(()=>{
   particles.update(dt)
   particles.draw(1)
 
+
+  // update game TOs
+
+  gameWorld.tick()
+
+
   //draw items
 
-  let items = grid.getNearby(entityList.player.x,entityList.player.y,1,grid.miscGrid)
+  let items = grid.getNearby(camera.pos.x,camera.pos.y,1,grid.miscGrid)
   items.forEach((e)=>{
     e.draw(dt)
     if(e.type==="orb"&&distance(e.x,e.y,entityList.player.x,entityList.player.y)<entityList.player.r+10){
@@ -3339,6 +3422,9 @@ setTimeout(()=>{
   })
 
   let pn2 = performance.now()
+
+  // we already activate everything around the player. but we should also activate around camera
+    grid.activate(camera.pos.x,camera.pos.y)
 
   let ballList = [...entityList.activatedBalls]
 
@@ -3358,7 +3444,7 @@ setTimeout(()=>{
   test.perf = (performance.now()-pn2) * 0.1 + test.perf*0.9
 
 
-  let walls = grid.getNearby(entityList.player.x,entityList.player.y,2,grid.grid)
+  let walls = grid.getNearby(camera.pos.x,camera.pos.y,2,grid.grid)
   walls.forEach((e)=>{
     e.draw()
   })
@@ -3406,7 +3492,7 @@ function gamePhysicsUpdate(time,dt,date){
   particles.update(dt)
 
   //item functions
-  let items = grid.getNearby(entityList.player.x,entityList.player.y,1,grid.miscGrid)
+  let items = grid.getNearby(camera.pos.x,camera.pos.y,1,grid.miscGrid)
   items.forEach((e)=>{
     if(e.type==="orb"&&distance(e.x,e.y,entityList.player.x,entityList.player.y)<entityList.player.r+10){
       e.pickup(entityList.player)
@@ -3468,7 +3554,7 @@ function gameDraw(time,dt,date){
 
   //draw items
 
-  let items = grid.getNearby(entityList.player.x,entityList.player.y,1,grid.miscGrid)
+  let items = grid.getNearby(camera.pos.x,camera.pos.y,1,grid.miscGrid)
   items.forEach((e)=>{
     e.draw(dt)
   })
@@ -3483,7 +3569,7 @@ function gameDraw(time,dt,date){
   }
   test.perf = (performance.now()-pn2) * 0.1 + test.perf*0.9
 
-  let walls = grid.getNearby(entityList.player.x,entityList.player.y,2,grid.grid)
+  let walls = grid.getNearby(camera.pos.x,camera.pos.y,2,grid.grid)
   walls.forEach((e)=>{
     e.draw()
   })
@@ -4228,6 +4314,7 @@ function generateLevels(x,y){
 // mobile movement fix //
 // brutes //
 // balconies //
+// checkpoints //
 
 
 // trace through one side walls
@@ -4240,4 +4327,6 @@ function generateLevels(x,y){
 // wall collateral chain
 // onebody objects / decorators
 // blood update
-// checkpoints
+// sounds
+
+// fast ball fix
