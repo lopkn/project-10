@@ -866,7 +866,7 @@ class ball{
     this.hpRegen = 0.002
     this.damageMultiplier = 1
     this.permanentDamageMultiplier = 1
-    this.maxTakenDamagePercentage = 1
+    this.maxTakenDamagePercentage = 1.1 // so that overkills are allowed
 
     this.lastCollideTime = 0
     this.collideTime = 0
@@ -1059,12 +1059,29 @@ class ball{
     let spread2 = -0.3
     let mult = 0.25
 
+    // // @blood
 
-    for(let i = 0; i < mult*dmg*(this.hp<=0?2:1); i++){
+    let bloody = mult*dmg*(this.hp<=0?2:1)
+
+    for(let i = 0; i < bloody; i++){
       let rnd = rand(1.1)
       setTimeout(()=>{
         particles.push(new particle(options.contact.x,options.contact.y,options.vel.vx*rnd*(1+rand(spread))+rand(spread2),options.vel.vy*rnd*(1+rand(spread))+rand(spread2)))
       },rand(100))
+    }
+
+    if(this.hp<0){ // blood spews ONLY on overkill (which is almost always)
+      bloody *= 50
+      gameWorld.TIL(bloody,(e)=>{
+        let timeLeft = e.til - gameWorld.lastTime
+        if(timeLeft < 0){e.done=1;return}
+          let ratio = timeLeft/bloody
+          if(Math.random()>(ratio**6)*0.9+0.1){return}
+
+        let rnd = rand(1.1)
+        particles.push(new particle(this.x,this.y,this.vx*rnd+rand(-0.3*ratio),this.vy*rnd+rand(-0.3*ratio)))
+
+      })
     }
 
 
@@ -1077,7 +1094,10 @@ class ball{
 
   die(){
     this.tags.add("isDead")
-    this.tags.add("noCollideWall")
+
+    gameWorld.TO(300,(e)=>{ // might cause some issues
+      this.tags.add("noCollideWall")
+      e.done=true})
     this.tags.add("noCollideBall")
     this.vx *= 0.7
     this.vy *= 0.7
@@ -1759,7 +1779,7 @@ class explosionParticle{
     this.width = width
     this.life = life
     this.maxLife = this.life
-    this.ctx = underCan.ctx
+    this.ctx = can.ctx
     this.noFill = true
 
   }
@@ -1795,12 +1815,12 @@ class particle{
     this.y = y
     this.vx = vx
     this.vy = vy
-    this.ay = gameWorld.gravity/2
+    this.ay = gameWorld.gravity/2 * (1+rand(-0.25))
     this.color = [100+rand(120),0,0]
     this.size = 5 + rand(10)
     this.life = life + rand(3)*life
     this.maxLife = this.life
-    this.ctx = underCan.ctx
+    this.ctx = can.ctx
 
   }
   update(dt){
@@ -2279,13 +2299,24 @@ class gameWorld{
 
     static TO(time,func){
       time = this.lastTime + time
-      this.timeOuts.push({t:time,f:func})
+      let p = {t:time,f:func}
+      this.timeOuts.push(p)
+      return(p)
     }
+
+    static TIL(time,func){
+      time = this.lastTime + time
+      let p = {t:0,f:func,til:time}
+      this.timeOuts.push(p)
+      return(p)
+    }
+
+
 
     static tick(){
       for(let i = this.timeOuts.length - 1; i>-1; i--){
         let e = this.timeOuts[i]
-        if(this.lastTime < e.t){return} // not running yet
+        if(this.lastTime < e.t){continue} // not running yet
         e.f(e)
         if(e.done){
           this.timeOuts.splice(i,1)
@@ -2454,21 +2485,7 @@ function allBallsCollide(time,i,ballList){
           // let killed_b = 1+b.damage(dmgA)
           // let killed_a = 1+a.damage(dmgB)
 
-          // // @blood
-          // for(let i = 0; i < dmgB*mult*killed_b; i++){
-          //   let rnd = rand(1.1)
-          //   setTimeout(()=>{
-          //     particles.push(new particle(contactPoint.x,contactPoint.y,a.vx*rnd*(1+rand(spread))+rand(spread2),a.vy*rnd*(1+rand(spread))+rand(spread2)))
-          //   },rand(100))
-          // }
 
-          // //particles B
-          // for(let i = 0; i < dmgA*mult*killed_a; i++){
-          //   let rnd = rand(1.1)
-          //   setTimeout(()=>{
-          //     particles.push(new particle(contactPoint.x,contactPoint.y,b.vx*rnd*(1+rand(spread))+rand(spread2),b.vy*rnd*(1+rand(spread))+rand(spread2)))
-          //   },rand(100))
-          // }
 
           let p = new particle(b.x,b.y,0,0)
           p.life = 15*dmgB
@@ -2630,7 +2647,7 @@ class test{
         w.shatteringDistanceCap = 19
         w.bounce = 0.2
         w.friction = 1
-        w.shatteringFunc = (part)=>{let r = rand();part.vx *= r; part.vy *= r}
+        w.shatteringFunc = (part)=>{let r = rand();part.vx+=rand(-0.5);part.vy+=rand(-0.5);part.vx *= r; part.vy *= r}
       },
       "sturdy glass":()=>{
         w.color = "rgba(40,140,220,0.6)"
@@ -3532,13 +3549,14 @@ setTimeout(()=>{
   let camDy = (camera.destination.y-camera.pos.y)*(0.03*dt/16)
   camera.pos.x += camDx
   camera.pos.y += camDy
-  can.ctx.save()
-  can.ctx.translate(can.canvas.width/2,can.canvas.height/2)
-  can.ctx.scale(camera.scale,camera.scale)
-  can.ctx.translate(-can.canvas.width/2,-can.canvas.height/2)
-  can.ctx.translate(WidthM,HeightM)
-  can.ctx.translate(-camera.pos.x,-camera.pos.y)
-  can.ctx.translate(rand(-camera.shake),rand(-camera.shake))
+
+
+
+
+
+
+
+
   underCan.ctx.restore()
   underCan.ctx.save()
   underCan.ctx.globalCompositeOperation = 'copy';
@@ -3546,6 +3564,44 @@ setTimeout(()=>{
   underCan.ctx.globalCompositeOperation = 'destination-out';
   underCan.ctx.fillRect(0,0,underCan.canvas.width,underCan.canvas.height)
   underCan.ctx.globalCompositeOperation = 'source-over';
+
+
+  can.ctx.save()
+  // backgrounds tech
+  // // can.ctx.translate(can.canvas.width/2,can.canvas.height/2)
+  // // can.ctx.scale(camera.scale/2,camera.scale/2)
+  // // can.ctx.translate(-can.canvas.width/2,-can.canvas.height/2)
+
+  // can.ctx.translate(-camera.pos.x/40,-camera.pos.y/14)
+  // underCan.ctx.setTransform(can.ctx.getTransform());
+
+
+  // let gradient = underCan.ctx.createLinearGradient(0,0,0,1400)
+  // gradient.addColorStop(0,"rgba(48,48,64,1)")
+  // gradient.addColorStop(1,"rgba(48,48,64,0)")
+  // underCan.ctx.fillStyle = gradient
+  // underCan.ctx.beginPath()
+  // let tx = -600
+  // underCan.ctx.moveTo(tx,400+300+700)
+  // for(let i = 0; i < 20; i++){
+  //   underCan.ctx.lineTo(tx+i*400,(i%2)*400+300)
+  // }
+  // underCan.ctx.lineTo(tx+20*400,400+300+700)
+
+  // underCan.ctx.closePath()
+  // underCan.ctx.fill()
+  // can.ctx.restore() // background end
+
+  can.ctx.save()
+  can.ctx.translate(can.canvas.width/2,can.canvas.height/2)
+  can.ctx.scale(camera.scale,camera.scale)
+  can.ctx.translate(-can.canvas.width/2,-can.canvas.height/2)
+  can.ctx.translate(WidthM,HeightM)
+
+
+
+  can.ctx.translate(-camera.pos.x,-camera.pos.y)
+  can.ctx.translate(rand(-camera.shake),rand(-camera.shake))
   underCan.ctx.setTransform(can.ctx.getTransform());
 
 
