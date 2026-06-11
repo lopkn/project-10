@@ -129,6 +129,7 @@ function mainLoop(){
 
   // if(settings.RAF && dt < 14*test.slower){requestAnimationFrame(mainLoop);return}
   gameWorld.frame += 1
+  gameWorld.dt = dt
   let date = Date.now()
   frameFuncs.forEach((e)=>{
     e(time,dt,date)
@@ -2289,6 +2290,7 @@ class gameWorld{
     static airFriction = 0.0003
     static lastTime = 0
     static lastDrawTime = 0
+    static dt = 16
 
     static timeWarp = 1
     static frame = 0
@@ -2336,6 +2338,9 @@ class controller{
 
   static activeTouches = {}
   static movement = {down:false}
+
+
+  static UI = {"shotDashOffset":0}
 
   static updateJump(x,y){
     controller.dv = {x:(controller.mouseDownPos.x-x)*(settings.dragSensitivity+settings.mobileSensMultiplier*settings.mobile)/settings.relativeSize,y:(controller.mouseDownPos.y-y)*(settings.dragSensitivity+settings.mobileSensMultiplier*settings.mobile)/settings.relativeSize}
@@ -3826,18 +3831,30 @@ function drawShootAngle(date){
   if(entityList.player.tags.has("isDead")){return}
   if(controller.mouseIsDown){
 
+    can.ctx.save()
+
     if(!settings.mobile){
       controller.updateJump(mouseX,mouseY)
     }
 
-    // let d = distance(controller.dv.x,controller.dv.y)
+    let d = distance(controller.dv.x,controller.dv.y)
     // can.ctx.lineCap = "round"
+
+    can.ctx.setLineDash([150*settings.relativeSize,55*settings.relativeSize])
+    let speed = Math.max(2,d/100)
+    can.ctx.lineDashOffset = controller.UI.shotDashOffset
+    controller.UI.shotDashOffset += gameWorld.dt/25*speed
+
     can.ctx.strokeStyle = "rgba(255,255,0,0.9)"
     can.ctx.beginPath()
-    can.ctx.moveTo(entityList.player.x,entityList.player.y)
     let mul1 = 0.5
     can.ctx.lineWidth = 1
+
+    // can.ctx.moveTo(entityList.player.x-controller.dv.x*mul1,entityList.player.y-controller.dv.y*mul1)
+    // can.ctx.lineTo(entityList.player.x,entityList.player.y)
+    can.ctx.moveTo(entityList.player.x,entityList.player.y)
     can.ctx.lineTo(entityList.player.x-controller.dv.x*mul1,entityList.player.y-controller.dv.y*mul1)
+
     // let mul1 = 0.1
     // let mul2 = 0.005
 
@@ -3864,6 +3881,7 @@ function drawShootAngle(date){
       entityList.player.damageMultiplier = 2
     }
 
+    can.ctx.restore()
   }
 }
 
@@ -3923,6 +3941,11 @@ function drawPlayerGUI(){
       can.ctx.beginPath()
       can.ctx.moveTo(controller.movement.x,controller.movement.y)
       can.ctx.lineTo(controller.movement.x+controller.movement.dx,controller.movement.y+controller.movement.dy)
+      can.ctx.stroke()
+
+      can.ctx.lineWidth = 1 
+      can.ctx.beginPath()
+      can.ctx.arc(controller.movement.x,controller.movement.y,100,0,Math.PI*2)
       can.ctx.stroke()
     }
   }
