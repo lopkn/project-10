@@ -1062,7 +1062,7 @@ class ball{
 
     // // @blood
 
-    let bloody = mult*dmg*(this.hp<=0?2:1)
+    let bloody = mult*dmg
 
     for(let i = 0; i < bloody; i++){
       let rnd = rand(1.1)
@@ -1072,7 +1072,7 @@ class ball{
     }
 
     if(this.hp<0){ // blood spews ONLY on overkill (which is almost always)
-      bloody *= 50
+      bloody *= 100
       gameWorld.TIL(bloody,(e)=>{
         let timeLeft = e.til - gameWorld.lastTime
         if(timeLeft < 0){e.done=1;return}
