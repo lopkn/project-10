@@ -839,6 +839,7 @@ class ball{
   constructor(x,y,r,ctx,AI=true){
     this.x = x
     this.y = y
+
     // this.ax = 0
     // this.ay = 0
 
@@ -852,6 +853,7 @@ class ball{
     this.push = {x:0,y:0}
 
     this.color = [0,62,41] // 0 62 41
+    this.colorDest = [0,18.6,50]
     this.ctx = ctx
 
     this.name = "dummy" 
@@ -900,6 +902,10 @@ class ball{
     this.movementSpeed = 0.005
 
     this.effects = {}
+
+
+    this.friction = 1
+    this.bounce = 1
 
 
     grid.addPt(this.x,this.y,()=>{this.activate()},grid.activationGrid)
@@ -1104,7 +1110,7 @@ class ball{
     this.vy *= 0.7
     this.deathTime = Date.now()
     this.onDeath.forEach((f)=>{
-      f()
+      f(this)
     })
   }
 
@@ -1161,6 +1167,7 @@ class ball{
   AIinit(){
     this.AIlastUpdate = 0
     this.AInextUpdateTime = 4000 + rand(1000)
+    this.home = {x:this.x,y:this.y}
     this.tags.add("AI")
   }
 
@@ -1326,12 +1333,14 @@ class ball{
     grid.addPt(this.x,this.y,()=>{this.activate()},grid.activationGrid)
   }
 
-  draw(){
+  draw(){ // @ball draw ball
     this.ctx.lineWidth = 7
     this.ctx.strokeStyle = "rgb("+this.hp/this.maxHp*255+",20,40)"
     let hpPers = Math.min(Math.max(this.hp/this.maxHp,0),1.4)
-    let l = (50+(this.color[2]-50)*hpPers)
-    let s = this.color[1]*(hpPers*0.7+0.3)
+    // let l = (50+(this.color[2]-50)*hpPers)
+    // let s = this.color[1]*(hpPers*0.7+0.3)
+    let l = this.colorDest[2] + (this.color[2] - this.colorDest[2])*hpPers
+    let s = this.colorDest[1] + (this.color[1] - this.colorDest[1])*hpPers
     if(this.tags.has("isDead")){l*=0.5; s=0}
     let col = "hsl("+this.color[0]+ "," + s + "%," + l + "%)"
     if(this.colorFunc){
@@ -1605,8 +1614,8 @@ function wall_collision_handler(ball,collisionData,dt,type="normal"){
     let refBounce = dot(reflection.x,reflection.y,w.normal.x,w.normal.y) * w.bounce
     let refFriction = dot(reflection.x,reflection.y,w.normalized.x,w.normalized.y) * w.friction
 
-    ball.vx = refBounce * w.normal.x + refFriction * w.normalized.x
-    ball.vy = refBounce * w.normal.y + refFriction * w.normalized.y
+    ball.vx = refBounce * ball.bounce * w.normal.x + refFriction * ball.friction * w.normalized.x
+    ball.vy = refBounce * ball.bounce * w.normal.y + refFriction * ball.friction * w.normalized.y
 
 
 
@@ -2840,6 +2849,37 @@ class test{
             }
           }
         }
+      },
+      "zombie":()=>{
+        b.damageMultiplier = 0.2
+        b.maxHp *= 5
+        b.hp *= 5
+        b.color = [115,62,21]
+        b.colorDest[2] = 21
+        b.minEnergySpend = 20
+        b.energyRegen = 0
+        b.maxEnergy = 20
+        b.tags.add("noDefaultArc")
+        b.bounce = 0.6
+        b.friction = 0.95
+        // b.onDeath.push((b)=>{
+          // gameFuncs.explosion(b.x,b.y,b)
+        // })
+        b.mass = 1.5
+        b.r *= 1+rand(-0.3)
+        b.AICustomUpdate = (b,dt)=>{
+          let los = AIlos(b.x,b.y,p.x,p.y,b)
+          
+          if(los){
+            b.target = p
+          }
+          let target = b.target?b.target:b.home
+          if(b.energy > 15 ){
+            // jump towards player
+            b.AInextUpdateTime = rand(2000)+950
+            b.jump(target.x-b.x,target.y-b.y-rand(200)-60,0.003)
+          }
+        }
       }
     }
 
@@ -3120,7 +3160,6 @@ class test{
       }
     }
 
-    console.log("hey")
 
 
       setTimeout(()=>{
@@ -4586,18 +4625,20 @@ function generateLevels(x,y){
 // brutes //
 // balconies //
 // checkpoints //
+// wall collateral chain // 
+// vases //
+// game timeout manager //
+// blood update (1) //
 
 
 // trace through one side walls
 // scrolling background
 // rain and particles
 // explosives
-// vases
 // effects
-// game timeout manager
-// wall collateral chain
 // onebody objects / decorators
-// blood update
 // sounds
+// mob mechanics (ball remembers when it was hit by what, so no invulnerability in mobs)
+// AI movement
 
 // fast ball fix
