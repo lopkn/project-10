@@ -1402,6 +1402,7 @@ class wall{
 
     this.normal = {x:-(y2-y1)/this.length,y:(x2-x1)/this.length}
     this.normalized = {y:(y2-y1)/this.length,x:(x2-x1)/this.length}
+    this.dir = {y:(y2-y1),x:(x2-x1)}
     this.midpoint = {x:(x1+x2)/2,y:(y1+y2)/2}
 
     this.hp = this.hp + this.hp*Math.abs(dot(this.normalized.x,this.normalized.y,1,0)) // floors should have more HP
@@ -1429,6 +1430,7 @@ class wall{
     this.y2 = y2
     this.length = distance(x1,y1,x2,y2)
     this.normal = {x:-(y2-y1)/this.length,y:(x2-x1)/this.length}
+    this.dir = {y:(y2-y1),x:(x2-x1)}
     this.normalized = {y:(y2-y1)/this.length,x:(x2-x1)/this.length}
     this.midpoint = {x:(x1+x2)/2,y:(y1+y2)/2}
     if(move){
@@ -1442,13 +1444,13 @@ class wall{
   }
 
   split(s1,s2,by,impactPt){
-    let w1 = newWall(this.x,this.y,this.x+this.length*s1*this.normalized.x,this.y+this.length*s1*this.normalized.y)
-    let w2 = newWall(this.x+this.length*s2*this.normalized.x,this.y+this.length*s2*this.normalized.y,this.x2,this.y2) // useless other than not impacting gridpos
+    let w1 = newWall(this.x,this.y,this.x+s1*this.dir.x,this.y+s1*this.dir.y)
+    let w2 = newWall(this.x+s2*this.dir.x,this.y+s2*this.dir.y,this.x2,this.y2) // useless other than not impacting gridpos
 
     copyWall(this,w1)
     copyWall(this,w2)
-    w1.setPos(this.x,this.y,this.x+this.length*s1*this.normalized.x,this.y+this.length*s1*this.normalized.y)
-    w2.setPos(this.x+this.length*s2*this.normalized.x,this.y+this.length*s2*this.normalized.y,this.x2,this.y2)
+    w1.setPos(this.x,this.y,this.x+s1*this.dir.x,this.y+s1*this.dir.y)
+    w2.setPos(this.x+s2*this.dir.x,this.y+s2*this.dir.y,this.x2,this.y2)
     w1.hp = 10
     w2.hp = 10
 
@@ -1476,10 +1478,10 @@ class wall{
     }
 
 
-    let w2 = newWall(this.x+this.length*maxT*this.normalized.x,this.y+this.length*maxT*this.normalized.y,this.x2,this.y2)
+    let w2 = newWall(this.x+maxT*this.dir.x,this.y+maxT*this.dir.y,this.x2,this.y2)
     copyWall(this,w2)
-    w2.setPos(this.x+this.length*maxT*this.normalized.x,this.y+this.length*maxT*this.normalized.y,this.x2,this.y2)
-    this.setPos(this.x,this.y,this.x+this.length*minT*this.normalized.x,this.y+this.length*minT*this.normalized.y,true)
+    w2.setPos(this.x+maxT*this.dir.x,this.y+maxT*this.dir.y,this.x2,this.y2)
+    this.setPos(this.x,this.y,this.x+minT*this.dir.x,this.y+minT*this.dir.y,true)
 
     return(w2)
   }
@@ -1559,17 +1561,33 @@ class wall{
     this.ctx.beginPath()
     this.ctx.moveTo(this.x,this.y)
     this.ctx.lineTo(this.x2,this.y2)
-    this.ctx.stroke()
 
     if(this.tags.has("sided")){
+      this.ctx.save()
+
+      this.ctx.shadowOffsetX = this.normal.x*-1
+      this.ctx.shadowOffsetY = this.normal.y*-1
+      // this.ctx.shadowColor = `color-mix(in srgb, ${this.ctx.strokeStyle}, white 50%)`
+      this.ctx.shadowColor = `hsl(from ${this.ctx.strokeStyle} h s calc(100 - l))`
+      // this.ctx.shadowColor = `rgb(255,25,0)`
+      this.ctx.stroke() // matching stroke here
+
       this.ctx.lineWidth = 1
       this.ctx.beginPath()
       this.ctx.moveTo(this.midpoint.x,this.midpoint.y)
       this.ctx.lineTo(this.midpoint.x+this.normal.x*10,this.midpoint.y+this.normal.y*10)
       this.ctx.stroke()
+
+      this.ctx.restore()
+    } else {
+      this.ctx.stroke() // matching stroke here
     }
 
   }
+}
+
+function pointOnWall(w,percentage=0.5,off=0){
+  return({x:w.x+w.dir.x*percentage  + w.normal.x*off  ,y:w.y+w.dir.y*percentage + w.normal.y*off})
 }
 
 function wall_collision_handler(ball,collisionData,dt,type="normal"){
@@ -2857,8 +2875,14 @@ class test{
         b.color = [115,62,21]
         b.colorDest[2] = 21
         b.minEnergySpend = 20
-        b.energyRegen = 0
         b.maxEnergy = 20
+        if(rand(0.9)){
+          b.minEnergySpend = b.maxEnergy = 35
+          trailify(b,15,9)
+        }
+
+        b.energyRegen = 0
+        b.hpRegen = 0
         b.tags.add("noDefaultArc")
         b.bounce = 0.6
         b.friction = 0.95
@@ -3080,7 +3104,7 @@ class test{
     "respawn":(b)=>{return(`hsl(${b.color[0]},50%,60%)`)}
   }
 
-  function trailify(ball,leng=50){
+  function trailify(ball,leng=50,mult=1){
     ball.trail = []
     ball.drawFuncs.push((p,s,l)=>{
 
@@ -3094,7 +3118,7 @@ class test{
       p.ctx.fill()
     })
 
-    p.trail.push([p.x,p.y,p.speed()])
+    p.trail.push([p.x,p.y,p.speed()*mult])
     if(p.trail.length>leng){
       p.trail.splice(0,1)
     }
@@ -4361,7 +4385,16 @@ function notify(str,x=10){
 function generateFloor(x,y){
   let rx = 2000 + rand(18000)
   let ry = rand(-2500)
-  build(x,y,x+rx,y+ry,"normal",{hpMult:10})
+  let wall = build(x,y,x+rx,y+ry,"normal",{hpMult:10})[0]
+
+  if(x > 8000){
+    let zombies = normalRandom(3,3)
+    for(let i = 0; i < zombies; i++){
+      let p = pointOnWall(wall,rand(), -30)
+      summon("zombie",p.x,p.y)
+    }
+  }
+
   grid.addPt(x+rx,y+ry,()=>{generateFloor(x+rx,y+ry)},grid.activationGrid)
 }
 
@@ -4631,14 +4664,15 @@ function generateLevels(x,y){
 // blood update (1) //
 
 
+// effects
 // trace through one side walls
 // scrolling background
 // rain and particles
 // explosives
-// effects
 // onebody objects / decorators
 // sounds
 // mob mechanics (ball remembers when it was hit by what, so no invulnerability in mobs)
 // AI movement
+// acceleration update
 
 // fast ball fix
