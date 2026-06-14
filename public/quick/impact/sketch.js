@@ -519,14 +519,14 @@ function swept_ball_to_line_collision(bx1, by1, vx, vy, r, x1, y1, x2, y2) { // 
         collision = {p:p,closest:res,dist:dist,type:4}
       }
     }
-    if (point_to_line_distance(x2, y2, bx1, by1, bx2, by2) <= r && dot(vx,vy,bx1-x1,by1-y1) < 0) {
+    if (point_to_line_distance(x2, y2, bx1, by1, bx2, by2) <= r && dot(vx,vy,bx1-x1,by1-y1) < 0) { // if the end of wall PT is overlapping the sweeping ball
       let d = point_to_infinite_line_distance(x2, y2, bx1, by1, bx2, by2)
       let pol = point_on_infinite_line(x2, y2, bx1, by1, bx2, by2)
       let res = {x:x2, y:y2}
       d=Math.sqrt(r*r-d*d)
       let p = {x:pol.x-nvx*d,y:pol.y-nvy*d}
       let dist = distance(res.x,res.y,bx1,by1)
-      if(test.expect(distance(p.x,p.y,res.x,res.y),r)){debugger} // energen
+      if(test.expect(distance(p.x,p.y,res.x,res.y),r)){if(!settings.mobile){debugger}} // energen
       if(!collision || dist <= collision.dist){
         collision = {p:p,closest:res,dist:dist,type:5} // p = the pos of ball when collide, closest = the point of collision
       }
@@ -541,7 +541,9 @@ function swept_ball_to_line_collision(bx1, by1, vx, vy, r, x1, y1, x2, y2) { // 
     //   // the start of the capsule collided
     //   return(2);
     // } // dont need this yet
-    if (point_to_line_distance(bx2, by2, x1, y1, x2, y2) <= r) {
+
+
+    if (point_to_line_distance(bx2, by2, x1, y1, x2, y2) <= r) { // the ball's end point overlaps the wall
       let pol = point_on_line(bx2, by2, x1, y1, x2, y2)
       let p = {x:bx2,y:by2}
       let dist = distance(bx1,by1,pol.x,pol.y)
@@ -549,7 +551,6 @@ function swept_ball_to_line_collision(bx1, by1, vx, vy, r, x1, y1, x2, y2) { // 
         collision = {p:p,closest:pol,dist:dist,passDist:distance(bx2,by2,pol.x,pol.y),type:3}
       }
     } 
-
     return(collision)
 
 }
@@ -1232,6 +1233,7 @@ class ball{
       let collisionData = {"collided":false,"minDist":Infinity}
 
 
+
       collidableWalls.forEach((w)=>{
 
 
@@ -1590,6 +1592,7 @@ function pointOnWall(w,percentage=0.5,off=0){
   return({x:w.x+w.dir.x*percentage  + w.normal.x*off  ,y:w.y+w.dir.y*percentage + w.normal.y*off})
 }
 
+//@col handler
 function wall_collision_handler(ball,collisionData,dt,type="normal"){
 
   ball.energy += ball.wallJumpEnergy
@@ -1644,7 +1647,7 @@ function wall_collision_handler(ball,collisionData,dt,type="normal"){
       ball.y = collisionData.p.y
 
     } else { // normal
-      let overlap = ball.r - dist
+      let overlap = ball.r - dist + 0.000005 // brute fix // refer to note about collision types 3
       if(overlap > 0){
         let pushX = -normalizedDirectionToWall.x * overlap
         let pushY = -normalizedDirectionToWall.y * overlap
@@ -2598,6 +2601,9 @@ class test{
     newWall(-200,490,800,490);
     newWall(1800,490-60,1000,490-60);
     newWall(-140,490,-140,0);
+
+    newWall(-140,0,240,0);
+
     
     // newWall(-200,0*400,800,0*400).tags.add("sided");
     // newWall(1200,490,800,790);
@@ -4147,6 +4153,15 @@ document.addEventListener("keydown",(e)=>{
   }else if(e.key==="Q"){
     gameWorld.timeWarp += 1
   }
+
+  if(e.key == "r"){
+    player.x = 0
+    player.y = 400
+    player.vx = 2
+    player.vy = -0.3
+    test.dtLock = 30
+  }
+
   // e.preventDefault()
 })
 
@@ -4550,7 +4565,7 @@ function generateLevels(x,y){
   build(midX-fat,height,midX+fat,height,"wood",{splitting:{minLength:50,breakLength:100}}) // roof
 
   let cheatHeight = -500
-  dropItem("cheats",0,cheatHeight)
+  // dropItem("cheats",0,cheatHeight)
   build(-100,cheatHeight,100,cheatHeight)
 
   let starterDmg = dropItem("dmg+",-150,0)
@@ -4643,6 +4658,24 @@ function generateLevels(x,y){
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//notes
+// debug is DT based: dont mousedown (or fix)
+// collision type 3 does not place the ball to the proper place and instead resolves like a non sweep collision (the ball gets pushed AFTER, so mindist may be much smaller than r)
 
 
 
