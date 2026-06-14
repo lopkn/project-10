@@ -2331,7 +2331,7 @@ class gameWorld{
 
     static TO(time,func){
       time = this.lastTime + time
-      let p = {t:time,f:func}
+      let p = {t:time,f:func,til:Infinity}
       this.timeOuts.push(p)
       return(p)
     }
@@ -3561,6 +3561,17 @@ function starterNotify(){
 
 
 
+//// drawterrain
+
+function drawTerrain(){
+  // if(rand(0.001)){
+  //   let dbs = document.body.style
+  //   dbs.backgroundColor = "rgb(220,220,140)"
+  //   let rnd = 50+rand(200)
+  //   gameWorld.TIL(rnd,(e)=>{let pers = (e.til-gameWorld.lastTime)/rnd; if(pers<=0){e.done=1;dbs.backgroundColor="rgb(21,21,21)";return;}; console.log(pers*100); dbs.backgroundColor = `color-mix(in hsl, rgb(21,21,21), rgb(220,220,140) ${pers*100}%)`})
+  // }
+}
+
 
 /////// main game @loop & drawing
 
@@ -3666,6 +3677,7 @@ setTimeout(()=>{
   // underCan.ctx.fill()
   // can.ctx.restore() // background end
 
+
   can.ctx.save()
   can.ctx.translate(can.canvas.width/2,can.canvas.height/2)
   can.ctx.scale(camera.scale,camera.scale)
@@ -3677,6 +3689,8 @@ setTimeout(()=>{
   can.ctx.translate(-camera.pos.x,-camera.pos.y)
   can.ctx.translate(rand(-camera.shake),rand(-camera.shake))
   underCan.ctx.setTransform(can.ctx.getTransform());
+
+  drawTerrain()
 
 
   // calculate screen positions
@@ -4695,6 +4709,8 @@ function generateLevels(x,y){
 // vases //
 // game timeout manager //
 // blood update (1) //
+// fast ball fix (1 - brute force push away) //
+
 
 
 // effects
@@ -4707,5 +4723,6 @@ function generateLevels(x,y){
 // mob mechanics (ball remembers when it was hit by what, so no invulnerability in mobs)
 // AI movement
 // acceleration update
-
-// fast ball fix
+// enerjitsu temple
+// rotatable buildings
+// zombie endless
