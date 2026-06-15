@@ -1632,11 +1632,21 @@ function wall_collision_handler(ball,collisionData,dt,type="normal"){
     // ball.vx = reflection.x * w.bounce
     // ball.vy = reflection.y * w.bounce
 
-    let refBounce = dot(reflection.x,reflection.y,w.normal.x,w.normal.y) * w.bounce
-    let refFriction = dot(reflection.x,reflection.y,w.normalized.x,w.normalized.y) * w.friction
+    let normalizedDirectionToWall90d = {x:normalizedDirectionToWall.y,y:-normalizedDirectionToWall.x}
 
-    ball.vx = refBounce * ball.bounce * w.normal.x + refFriction * ball.friction * w.normalized.x
-    ball.vy = refBounce * ball.bounce * w.normal.y + refFriction * ball.friction * w.normalized.y
+    // let refBounce = dot(reflection.x,reflection.y,w.normal.x,w.normal.y) * w.bounce
+    // let refFriction = dot(reflection.x,reflection.y,w.normalized.x,w.normalized.y) * w.friction
+
+    // ball.vx = refBounce * ball.bounce * w.normal.x + refFriction * ball.friction * w.normalized.x
+    // ball.vy = refBounce * ball.bounce * w.normal.y + refFriction * ball.friction * w.normalized.y
+
+
+    let refBounce = dot(reflection.x,reflection.y,normalizedDirectionToWall.x,normalizedDirectionToWall.y) * w.bounce
+    let refFriction = dot(reflection.x,reflection.y,normalizedDirectionToWall90d.x,normalizedDirectionToWall90d.y) * w.friction
+
+    ball.vx = refBounce * ball.bounce * normalizedDirectionToWall.x + refFriction * ball.friction * normalizedDirectionToWall90d.x
+    ball.vy = refBounce * ball.bounce * normalizedDirectionToWall.y + refFriction * ball.friction * normalizedDirectionToWall90d.y
+
 
 
 
@@ -3605,6 +3615,7 @@ function dualMainStart(){
 setTimeout(()=>{
   frameFuncs.push((time,dt,date)=>{
   
+  let pn2 = performance.now()
     let pn = performance.now()
     if(test.dtLock){
       dt = test.dtLock
@@ -3742,7 +3753,6 @@ setTimeout(()=>{
     }
   })
 
-  let pn2 = performance.now()
 
   // we already activate everything around the player. but we should also activate around camera
     grid.activate(camera.pos.x,camera.pos.y)
@@ -3762,7 +3772,6 @@ setTimeout(()=>{
     e.draw()
   }
 
-  test.perf = (performance.now()-pn2) * 0.1 + test.perf*0.9
 
 
   let walls = grid.getNearby(camera.pos.x,camera.pos.y,2,grid.grid)
@@ -3787,6 +3796,7 @@ setTimeout(()=>{
 
   can.ctx.restore()
   drawPlayerGUI()
+  test.perf = (performance.now()-pn2) * 0.1 + test.perf*0.9
 
   can.ctx.fillStyle = dt>18?"red":"green"
   can.ctx.font = `bold ${Math.floor(48* settings.relativeSize )}px arial`
@@ -4050,6 +4060,26 @@ function drawPlayerGUI(){
     can.ctx.fillRect(Math.sin(gameWorld.lastTime/400)*WidthM+WidthM,Height-200,100,100)
     can.ctx.fillRect(100*(gameWorld.frame%2),Height-100,100,100)
   }
+
+
+  //draw status effects on top right of screen
+  let effectX = Width - padding - settings.insets.right
+  let effectY = padding + settings.insets.top
+    can.ctx.save()
+  // can.ctx.textAlign = "right"
+  // entityList.player.effects.list.forEach((e)=>{
+  //   if(!e.draw){return}
+  //   if(e.type === "checkpoint"){
+  //     can.ctx.fillStyle = "lime"
+  //     can.ctx.shadowColor = "green"
+  //     can.ctx.font = `bold ${Math.floor(27*settings.relativeSize)}px arial`
+  //     can.ctx.shadowOffsetX = -settings.relativeSize*3
+  //     can.ctx.shadowOffsetY = settings.relativeSize*4
+  //     can.ctx.fillText("Checkpoint: "+Math.floor(e.time/1000)+"s", effectX, effectY)
+  //     effectY += 30
+  //   }
+  // })
+  can.ctx.restore()
 
 }
 
