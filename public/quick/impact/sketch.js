@@ -1687,6 +1687,39 @@ function wall_collision_handler(ball,collisionData,dt,type="normal"){
 }
 
 
+class iconDrawer{
+  static draw(sprite,x,y,ctx=can.ctx,options={}){
+      if(sprites.dict[sprite]){ // optimizable
+      let s = sprites.dict[sprite]
+      ctx.save()
+
+      if(options.dash){
+        ctx.setLineDash(options.dash.ld)
+        ctx.lineDashOffset = gameWorld.frame*options.dash.offset
+      }
+
+      ctx.translate(x,y)
+      if(!s.type){
+        ctx.beginPath()
+        let ratio = options.size2/400
+        ctx.moveTo(s[0][0]*ratio,s[0][1]*ratio)
+        for(let i = 1; i < s.length; i++){
+          ctx.lineTo(s[i][0]*ratio,s[i][1]*ratio)
+        }
+        ctx.closePath()
+
+
+        ctx.stroke()
+      } else if(s.type === "svg"){
+        let path = new Path2D(s.svg)
+        ctx.stroke(path)
+      }
+
+      ctx.restore()
+    }
+  }
+}
+
 
 
 class item{
@@ -1744,28 +1777,9 @@ class item{
     this.ctx.roundRect(this.x-this.size,y-this.size,this.size2,this.size2,this.rounding)
     this.ctx.fill()
     if(sprites.dict[this.name]){ // optimizable
-      let s = sprites.dict[this.name]
-      this.ctx.save()
-
-      if(this.dash){
-        this.ctx.setLineDash(this.dash.ld)
-        this.ctx.lineDashOffset = gameWorld.frame*this.dash.offset
-      }
-
-      this.ctx.translate(this.x,y)
-      this.ctx.beginPath()
-      let ratio = this.size2/400
-      this.ctx.moveTo(s[0][0]*ratio,s[0][1]*ratio)
-      for(let i = 1; i < s.length; i++){
-        this.ctx.lineTo(s[i][0]*ratio,s[i][1]*ratio)
-      }
-      this.ctx.closePath()
-
       this.ctx.lineWidth = 4
       this.ctx.strokeStyle = "hsl("+((gameWorld.lastTime/100 )%360)+",50%,30%)"
-      this.ctx.stroke()
-
-      this.ctx.restore()
+      iconDrawer.draw(this.name,this.x,y,this.ctx,this)
     }
   }
 }
@@ -2124,27 +2138,9 @@ class itemShellParticle{
 
 
     if(sprites.dict[this.item.name]){ // optimizable
-      let s = sprites.dict[this.item.name]
-      this.ctx.save()
-      if(this.item.dash){
-        this.ctx.setLineDash(this.item.dash.ld)
-        this.ctx.lineDashOffset = gameWorld.frame*this.item.dash.offset
-      }
-
-      this.ctx.translate(this.item.x,this.item.y)
-      this.ctx.beginPath()
-      let ratio = this.item.size2/400
-      this.ctx.moveTo(s[0][0]*ratio,s[0][1]*ratio)
-      for(let i = 1; i < s.length; i++){
-        this.ctx.lineTo(s[i][0]*ratio,s[i][1]*ratio)
-      }
-      this.ctx.closePath()
-
       this.ctx.lineWidth = 4
       this.ctx.strokeStyle = "hsla("+rand(260)+",100%,50%,"+(this.life/this.maxLife)+")"
-      this.ctx.stroke()
-
-      this.ctx.restore()
+      iconDrawer.draw(this.item.name,this.item.x,this.item.y,this.ctx,this.item)
     }
 
   }
@@ -2182,7 +2178,7 @@ class lineyParticle{
     this.life -= dt/16 // must be here
 
     if(gameWorld.lastTime > this.nextUpdate){
-      this.lastUpdate = gameWorld.lastTime + this.updateStall
+      this.nextUpdate = gameWorld.lastTime + this.updateStall
     } else {
       return
     }
@@ -3055,6 +3051,16 @@ class test{
             by.effects.checkpoint.push({x:by.x,y:by.y})
             by===entityList.player?notify("checkpoint set"):0
           })
+        },"endless":()=>{
+          i.dash = {ld:[20,5],offset:1}
+          i.onPickup.push((by)=>{
+            if(!by.effects["checkpoint"]){by.effects.checkpoint = []}
+            for(let i = 0; i<50;i++){
+              by.effects.checkpoint.push({x:by.x,y:by.y})
+            }
+            by===entityList.player?notify("picked up cheats\npussy/nevaeh mode: +50 checkpoints"):0
+            gameWorld.TIL(0,()=>{if(rand(0.01)){particleFuncs["cheating particle"](by.x,by.y,1)}})
+          })
         },
       }
 
@@ -3094,6 +3100,7 @@ class test{
     "explosion2":(x,y,s=1)=>{for(let i =0; i < 5; i++){particleFuncs.explosion(x,y,s,3000/(i**1.5))}},
     "rect":(x,y,x2,y2)=>{particles.push(new rectParticle(x,y,x2,y2))},
     "hp particle":(x,y)=>{let p = new lineyParticle(x,y,80+rand(80),colorFuncs.hp); p.speed = 3; particles.push(p)},
+    "cheating particle":(x,y)=>{let p = new lineyParticle(x,y,280+rand(2380),colorFuncs.cheater); p.speed = 30; p.updateStall = 300; p.tailLength = 20; particles.push(p)},
     "hp particles":(x,y,n=5)=>{for(let i =0; i < n; i++){particleFuncs["hp particle"](x,y)}},
 
     "respawn":(x,y,b)=>{
@@ -3117,6 +3124,7 @@ class test{
   var colorFuncs = {
     "explosion":(t)=>{let x=rand(255);return("rgba(255,"+x+",0,"+t*2+")")},
     "hp":(l)=>{return(`rgba(255,40,40,${1-l})`)},
+    "cheater":(l)=>{return(`rgba(0,${rand(40)+40},0,${1-l})`)},
     "respawn":(b)=>{return(`hsl(${b.color[0]},50%,60%)`)}
   }
 
@@ -4609,7 +4617,7 @@ function generateLevels(x,y){
   build(midX-fat,height,midX+fat,height,"wood",{splitting:{minLength:50,breakLength:100}}) // roof
 
   let cheatHeight = -500
-  // dropItem("cheats",0,cheatHeight)
+  dropItem("endless",0,cheatHeight)
   build(-100,cheatHeight,100,cheatHeight)
 
   let starterDmg = dropItem("dmg+",-150,0)
