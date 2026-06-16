@@ -824,6 +824,11 @@ function AIlos(x,y,ox,oy,ball){
 
   entityList.activatedWalls.forEach((w)=>{
     if(w.tags.has("AIdamage")){return}
+    if(w.tags.has("sided")){
+      let vx = ox-x
+      let vy = oy-y
+      if(dot(w.normal.x,w.normal.y,vx,y,vy)<0){return}
+    }
     let not_blocked = line_to_line_collision_pt(x,y,ox,oy,w.x,w.y,w.x2,w.y2)
     if(not_blocked!==false){los=false}
   })
@@ -884,6 +889,7 @@ class ball{
     this.maxEnergy = 100
     this.maxEnergySpend = 40
     this.energyRegen = 0.01
+    this.energenin = 0
 
     this.wallJumpEnergy = 5
 
@@ -902,7 +908,7 @@ class ball{
 
     this.movementSpeed = 0.005
 
-    this.effects = {}
+    this.effects = new effects(this)
 
 
     this.friction = 1
@@ -942,10 +948,8 @@ class ball{
   }
 
 
-  respawn(){
+  respawn(check){
 
-
-    let check = this.effects.checkpoint.pop()
     particleFuncs.respawn(check.x,check.y,this)
 
     let d = camera.addDestination(check.x,check.y,0)
@@ -1310,6 +1314,9 @@ class ball{
 
     }
 
+
+
+    this.energy += this.energenin*dt
     if(this.lastJumpTime < this.lastCollideWallTime){
       this.energy += this.energyRegen*dt
     }
@@ -1686,6 +1693,54 @@ function wall_collision_handler(ball,collisionData,dt,type="normal"){
 
 }
 
+
+class effects{
+
+  static effectOptions = {
+    checkpoint:{
+      "stackable":true,
+      "triggerFunc":(data,entity)=>{
+          let check = data
+          let camDest = camera.addDestination(check.x,check.y,30)
+          camDest.arrive.push( ()=>{entity.respawn(check)} )
+      }
+    },
+  }
+
+  constructor(entity){
+    this.active = {}
+    this.entity = entity
+  }
+
+  addEffect(name,data={}){
+    if(!this.active[name]){
+      this.active[name] = {}
+    }
+    if(effects.effectOptions[name].stackable){
+      if(!this.active[name].stacks){
+        this.active[name].stacks = []
+      }
+      this.active[name].stacks.push(data)
+    }
+
+  }
+
+  trigger(name){
+    if(!this.active[name]){return}
+    if(this.active[name].stacks){
+      if(this.active[name].stacks.length === 0){return}
+      let data = this.active[name].stacks.pop()
+      effects.effectOptions[name].triggerFunc(data,this.entity)
+    }
+  }
+
+  getValue(name){
+    if(!this.active[name]){return}
+    if(this.active[name].stacks){
+      return this.active[name].stacks.length
+    }
+  }
+}
 
 class iconDrawer{
   static draw(sprite,x,y,ctx=can.ctx,options={}){
@@ -3030,6 +3085,12 @@ class test{
             by===entityList.player?notify(options.msg?options.msg:"energetic: +20 max energy"):0
           })
         },
+        "energenin":()=>{
+          i.onPickup.push((by)=>{
+            by.energenin += 0.002
+            by===entityList.player?notify(options.msg?options.msg:"picked up energenin\n slow energy regen midair"):0
+          })
+        },
         "momentum profligacy":()=>{
           i.onPickup.push((by)=>{
             by.tags.add("momentum profligacy")
@@ -3047,19 +3108,17 @@ class test{
         },
         "checkpoint":()=>{
           i.onPickup.push((by)=>{
-            if(!by.effects["checkpoint"]){by.effects.checkpoint = []}
-            by.effects.checkpoint.push({x:by.x,y:by.y})
+            by.effects.addEffect("checkpoint", {x:by.x,y:by.y})
             by===entityList.player?notify("checkpoint set"):0
           })
         },"endless":()=>{
           i.dash = {ld:[20,5],offset:1}
           i.onPickup.push((by)=>{
-            if(!by.effects["checkpoint"]){by.effects.checkpoint = []}
             for(let i = 0; i<50;i++){
-              by.effects.checkpoint.push({x:by.x,y:by.y})
+              by.effects.addEffect("checkpoint", {x:by.x,y:by.y})
             }
             by===entityList.player?notify("picked up cheats\npussy/nevaeh mode: +50 checkpoints"):0
-            gameWorld.TIL(0,()=>{if(rand(0.01)){particleFuncs["cheating particle"](by.x,by.y,1)}})
+            gameWorld.TIL(0,()=>{if(rand(0.003)){particleFuncs["cheating particle"](by.x,by.y,1)}})
           })
         },
       }
@@ -3192,20 +3251,14 @@ class test{
 
   entityList.player.onDeath.push(()=>{
 
-    if(entityList.player.effects.checkpoint){
-      if(entityList.player.effects.checkpoint.length>0){
+    if(entityList.player.effects.getValue("checkpoint")){
         setTimeout(()=>{
         document.addEventListener("click",()=>{
-          let check = entityList.player.effects.checkpoint
-          check = check[check.length-1]
-          let cd = camera.addDestination(check.x,check.y,30)
-          cd.arrive.push( ()=>{entityList.player.respawn()})
-
+          entityList.player.effects.trigger("checkpoint")
         },{once:true})
         },2000)
         
         return
-      }
     }
 
 
@@ -4052,14 +4105,14 @@ function drawPlayerGUI(){
   }
 
 
-  if(entityList.player.effects.checkpoint && entityList.player.effects.checkpoint.length>0){
+  if(entityList.player.effects.getValue("checkpoint")){
     can.ctx.save()
     can.ctx.fillStyle = "lime"
     can.ctx.shadowColor = "green"
     can.ctx.font = `bold ${Math.floor(27*settings.relativeSize)}px arial`
     can.ctx.shadowOffsetX = -settings.relativeSize*3
     can.ctx.shadowOffsetY = settings.relativeSize*4
-    can.ctx.fillText("Remaining checkpoints: "+entityList.player.effects.checkpoint.length, padding+settings.insets.left+barWidth+5, padding+barHeight)
+    can.ctx.fillText("Remaining checkpoints: "+entityList.player.effects.getValue("checkpoint"), padding+settings.insets.left+barWidth+5, padding+barHeight)
   }
   can.ctx.restore()
 
@@ -4071,22 +4124,19 @@ function drawPlayerGUI(){
 
 
   //draw status effects on top right of screen
-  let effectX = Width - padding - settings.insets.right
+  let effectX = Width - padding - settings.insets.right - 30
   let effectY = padding + settings.insets.top
-    can.ctx.save()
-  // can.ctx.textAlign = "right"
-  // entityList.player.effects.list.forEach((e)=>{
-  //   if(!e.draw){return}
-  //   if(e.type === "checkpoint"){
-  //     can.ctx.fillStyle = "lime"
-  //     can.ctx.shadowColor = "green"
-  //     can.ctx.font = `bold ${Math.floor(27*settings.relativeSize)}px arial`
-  //     can.ctx.shadowOffsetX = -settings.relativeSize*3
-  //     can.ctx.shadowOffsetY = settings.relativeSize*4
-  //     can.ctx.fillText("Checkpoint: "+Math.floor(e.time/1000)+"s", effectX, effectY)
-  //     effectY += 30
-  //   }
-  // })
+  
+  can.ctx.save()
+  let effectArr = Object.keys(entityList.player.effects.active)
+  effectArr.forEach((k)=>{
+    let e = entityList.player.effects.active[k]
+    if(!e.draw){return}
+      can.ctx.fillStyle = "lime"
+
+      can.ctx.fillRect(effectX, effectY, 30, 30)
+      effectY += 30 + padding
+  })
   can.ctx.restore()
 
 }
@@ -4606,6 +4656,8 @@ function generateLevels(x,y){
   let boss = newBall(midX,height-60,80,can.ctx)
   boss.hp *= 5
   boss.maxHp *= 5
+  boss.mass = 2
+  boss.damageMultiplier = 0.7
   boss.onDeath.push(()=>{boss.vx*=0.8;boss.vy*=0.8; dropItem("hp+",boss.x,boss.y)})
 
 
@@ -4626,13 +4678,7 @@ function generateLevels(x,y){
 
 
 
-  // @generate
-  // entityList.player.y = height-60
-  // entityList.player.y = height+2860
-  // entityList.player.x = midX
-  // camera.pos.x = entityList.player.x
-  // camera.pos.y = entityList.player.y
-  // entityList.player.movementScalar *= 10
+
 
 
   build(midX-fat,height,midX,height-250,"wood",{splitting:{minLength:50,breakLength:500},mirrorX:midX,sided:1}) // roof triangle
@@ -4703,8 +4749,18 @@ function generateLevels(x,y){
     build(midX+480*lr,h,midX + dx-480*lr,h-dy,"wood",{reverse:lr<0,sided:true,splitting:{minLength:50,breakLength:100,breakVariability:()=>{return(rand(3))}}})
     midX += dx
     i += dy
+    tmp = i
+    tmp2 = lr
   }
+  height = height-tmp
+  build(midX+2400*tmp2,height,midX-480*tmp2,height,"wood",{hpMult:50,splitting:{minLength:50,breakLength:100,breakVariability:()=>{return(rand(3))}}})
 
+  //   // @generate
+  // entityList.player.y = height-60
+  // entityList.player.x = midX
+  // camera.pos.x = entityList.player.x
+  // camera.pos.y = entityList.player.y
+  // entityList.player.movementScalar *= 10
 
 
 }
@@ -4748,11 +4804,11 @@ function generateLevels(x,y){
 // game timeout manager //
 // blood update (1) //
 // fast ball fix (1 - brute force push away) //
+// trace through one side walls //
 
 
 
 // effects
-// trace through one side walls
 // scrolling background
 // rain and particles
 // explosives
