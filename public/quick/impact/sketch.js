@@ -1186,11 +1186,16 @@ class ball{
 
 
     //natural hp regen
-    if(gameWorld.lastTime - this.damageTime > 2000 && !this.tags.has("isDead")){ // 2 seconds after battle      
-      this.hp += this.hpRegen*dt
-      if(gameWorld.lastTime - this.damageTime > 10000 || this.speedSq() < 0.02){
-        this.hp += this.hpRegen*dt*3
+    if(!this.tags.has("isDead")){
+      let regenAmt = 0
+      regenAmt += this.effects.getValue("regenerative",0)
+      if(gameWorld.lastTime - this.damageTime > 2000){// 2 seconds after battle  
+        regenAmt += this.hpRegen
+        if(gameWorld.lastTime - this.damageTime > 10000 || this.speedSq() < 0.02){
+          regenAmt += this.hpRegen*3
+        }
       }
+      this.hp += regenAmt*dt
       if(this.hp > this.maxHp){
         this.hp = this.maxHp
       } 
@@ -1316,7 +1321,7 @@ class ball{
 
 
 
-    this.energy += this.energenin*dt
+    this.energy += (this.energenin + this.effects.getValue("energenerative",0))*dt
     if(this.lastJumpTime < this.lastCollideWallTime){
       this.energy += this.energyRegen*dt
     }
@@ -1699,10 +1704,23 @@ class effects{
   static effectOptions = {
     checkpoint:{
       "stackable":true,
+      "nodraw":true,
       "triggerFunc":(data,entity)=>{
           let check = data
           let camDest = camera.addDestination(check.x,check.y,30)
           camDest.arrive.push( ()=>{entity.respawn(check)} )
+      }
+    },
+    energenerative:{
+      "backgroundColor":"#4090A0",
+      "timeToValue":(timeLeft)=>{
+        return 0.00001*timeLeft
+      }
+    },
+    regenerative:{
+      "backgroundColor":"#A02040",
+      "timeToValue":(timeLeft)=>{
+        return 0.0001*(timeLeft**0.5)
       }
     },
   }
@@ -1713,15 +1731,29 @@ class effects{
   }
 
   addEffect(name,data={}){
+
+    if(!effects.effectOptions[name]){console.warn("effect doesnt exist");return("doesnt exist")}
+
+    if(effects.effectOptions[name].stackable){
     if(!this.active[name]){
       this.active[name] = {}
     }
-    if(effects.effectOptions[name].stackable){
       if(!this.active[name].stacks){
         this.active[name].stacks = []
       }
       this.active[name].stacks.push(data)
+      return
     }
+    // if its not stackable, its a timed effect
+    if(!this.active[name]){
+      this.active[name] = {duration:0,maxDuration:0}
+    }
+      let {duration=1000,start=gameWorld.lastTime,...extraData} = data
+      let effect = this.active[name]
+      effect.duration += duration
+      effect.start = effect.start===undefined?start:effect.start
+      effect.maxDuration = Math.max(effect.maxDuration, effect.start+effect.duration-gameWorld.lastTime)
+      effect.data = extraData
 
   }
 
@@ -1734,13 +1766,40 @@ class effects{
     }
   }
 
-  getValue(name){
-    if(!this.active[name]){return}
-    if(this.active[name].stacks){
-      return this.active[name].stacks.length
+  getValue(name,noEffect=1){
+    let effect = this.active[name]
+    if(effects.effectOptions[name].stackable){
+      if(!effect){return} // dont return noeffect; stack logic is different from timed logic, maybe change later;
+      if(effect.stacks){
+        return effect.stacks.length
+      }
     }
+    if(!effect){return noEffect}
+    let timeLeft = effect.start + effect.duration - gameWorld.lastTime
+    if(timeLeft <= 0){
+      this.remove(name)
+      return noEffect
+    }
+    if(effects.effectOptions[name].timeToValue){
+      return effects.effectOptions[name].timeToValue(timeLeft)
+    } else {
+      return(timeLeft)
+    }
+  } 
+  getValueRatio(name){
+    let effect = this.active[name]
+    if(!effect){return 0}
+    if(effects.effectOptions[name].stackable){return(1)}
+    let timeLeft = (effect.start + effect.duration - gameWorld.lastTime)/effect.maxDuration
+    if(timeLeft <= 0){ this.remove(name);return 0}
+    return timeLeft
+  }
+
+  remove(name){
+    delete this.active[name]
   }
 }
+
 
 class iconDrawer{
   static draw(sprite,x,y,ctx=can.ctx,options={}){
@@ -2994,7 +3053,9 @@ class test{
 
 
 
-
+  function grantEffect(type,p=entityList.player,options){
+    p.effects.addEffect(type,options)
+  }
 
 
   function grantItem(type,p=entityList.player,options){
@@ -3020,6 +3081,7 @@ class test{
           spark.size = 25
           spark.z = 1
           particles.push(spark)
+          by.effects.addEffect("energenerative",{duration:5000})
         })
         i.color = "rgb(0,125,240)"
       },
@@ -3032,6 +3094,7 @@ class test{
           spark.z = 1
           particles.push(spark)
           particleFuncs["hp particles"](x,y)
+          by.effects.addEffect("regenerative",{duration:12000})
         })
         i.color = "rgb(240,50,40)"
       },
@@ -3723,8 +3786,8 @@ setTimeout(()=>{
   underCan.ctx.globalCompositeOperation = 'source-over';
 
 
-  can.ctx.save()
   // backgrounds tech
+  // can.ctx.save()
   // // can.ctx.translate(can.canvas.width/2,can.canvas.height/2)
   // // can.ctx.scale(camera.scale/2,camera.scale/2)
   // // can.ctx.translate(-can.canvas.width/2,-can.canvas.height/2)
@@ -4127,14 +4190,16 @@ function drawPlayerGUI(){
   let effectX = Width - padding - settings.insets.right - 30
   let effectY = padding + settings.insets.top
   
+  //@draw effect
   can.ctx.save()
   let effectArr = Object.keys(entityList.player.effects.active)
   effectArr.forEach((k)=>{
-    let e = entityList.player.effects.active[k]
-    if(!e.draw){return}
-      can.ctx.fillStyle = "lime"
-
+    let effect = entityList.player.effects.active[k]
+    if(effects.effectOptions[k].nodraw){return}
+      can.ctx.fillStyle = effects.effectOptions[k].backgroundColor?effects.effectOptions[k].backgroundColor:"lime"
       can.ctx.fillRect(effectX, effectY, 30, 30)
+      can.ctx.fillStyle = "black"
+      can.ctx.fillRect(effectX, effectY, 30, (1-entityList.player.effects.getValueRatio(k))*30)
       effectY += 30 + padding
   })
   can.ctx.restore()
