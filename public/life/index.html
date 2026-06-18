@@ -99,11 +99,14 @@ button{
 }
 
 .nodeTitle{
-    min-width:150px;
+    flex:0 0 150px;
+    white-space:wrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
 }
 
 .yearsLabel{
-    width:70px;
+    width:90px;
     text-align:right;
 }
 
@@ -177,10 +180,10 @@ button{
 
     <div id="tree" class="tree"></div>
 
-    <div class="finalMessage">
+    <!-- <div class="finalMessage">
         You may discover that your ambitions require
         far more time than you originally thought.
-    </div>
+    </div> -->
 
 </div>
 
@@ -192,45 +195,133 @@ const data = [
 {
     name:"Interests",
     years:0,
+    defaultSpendable:100,
     children:[
-        {
-            name:"Piano",
-            years:0,
-            children:[
-                {name:"Learn Basics",years:0,children:[]},
-                {name:"Become Proficient",years:0,children:[]},
-                {name:"Perform Publicly",years:0,children:[]}
-            ]
-        },
-        {
-            name:"Painting",
-            years:0,
-            children:[]
-        }
+        // {
+        //     name:"Piano",
+        //     years:0,
+        //     children:[
+        //         {name:"Learn Basics",years:0,children:[]},
+        //         {name:"Become Proficient",years:0,children:[]},
+        //         {name:"Perform Publicly",years:0,children:[]}
+        //     ]
+        // },
+        // {
+        //     name:"Painting",
+        //     years:0,
+        //     children:[]
+        // }
     ]
 },
 {
     name:"Career",
+    defaultSpendable:100,
     years:0,
-    children:[
-        {
-            name:"Software",
-            years:0,
-            children:[
-                {name:"Build Startup",years:0,children:[]},
-                {name:"Lead Company",years:0,children:[]}
-            ]
-        }
-    ]
+    children:[]
 },
 {
     name:"Travel",
+    defaultSpendable:100,
     years:0,
-    children:[
-        {name:"World Tour",years:0,children:[]}
-    ]
+    children:[]
 }
 ];
+
+function attemptGet(name){
+    name = name.toLowerCase();
+    let search = data
+    for(let i = 0; i < search.length; i++){
+        const node = search[i];
+        if(node.name.toLowerCase() === name){
+            return node;
+        }
+        search = search.concat(node.children);
+    }
+}
+
+
+let mode = "push"
+
+function addChild(node,name){
+    if(typeof node === "string"){
+        node = attemptGet(node);
+    }
+    let child = {
+        name,
+        years:0,
+        children:[]
+    };
+    if(mode === "push"){
+        node.children.push(child);
+    } else if(mode === "unshift"){
+        node.children.unshift(child);
+    }
+    return child;
+}
+Object.prototype.addChild = function(...name){
+    if(Array.isArray(name)){
+        let arr = [];
+        for(const n of name){
+            last = arr.push(addChild(this,n));
+        }
+        return arr;
+    }
+    throw new Error("addChild only accepts array of names");
+}
+
+Array.prototype.addChild = function(...name){
+    let arr = [];
+    for(const n of this){
+        arr = arr.concat(n.addChild(...name));
+    }
+    return arr;
+}
+
+let system = attemptGet("travel").addChild("Solar system").addChild("moon","mars","mercury","titan","venus","ceres","ganymede","europa","callisto");
+system.addChild("visit")
+t = system.addChild("build")
+t.addChild("biodome","hotel","spaceport")
+t = t.addChild("low gravity pool");
+t.addChild("wave pool","space volleyball court")
+// t = temp
+mode = "unshift";
+t = attemptGet("travel").addChild("Earth tour")
+t=t.addChild("asia","europe","america","africa","australia","arctic","antarctica");
+t.addChild("settle","build")
+t = t.addChild("visit")
+
+
+mode = "push";
+
+
+t = attemptGet("interests").addChild("Arts")
+t.addChild("Drawing").addChild("oil","watercolor","digital");
+t=t.addChild("Music").addChild("Piano","Guitar","Singing","Composing");
+t.addChild("Learn basics","Become proficient","Perform publicly")
+t = attemptGet("interests").addChild("Programming").addChild("Web","Mobile","Game","AI");
+t.addChild("Build projects","Contribute to open source","Lead a team","Start a company")
+t = attemptGet("interests").addChild("Sports").addChild("Basketball","Soccer","Tennis","baseball");
+t.addChild("Learn basics","Join amateur league","Go pro")
+t = attemptGet("interests").addChild("Cooking").addChild("Baking","Grilling","Gourmet");
+t.addChild("Learn basics","Start a restaurant")
+
+
+
+t = attemptGet("career").addChild("Tech").addChild("Software Engineer","Data Scientist","Product Manager","UX Designer");
+t.addChild("Learn basics","Join a company","Lead a team","Start a company")
+t = attemptGet("career").addChild("Medicine").addChild("Doctor");
+t.addChild("pre-med","medical school","residency","fellowship")
+t = attemptGet("career").addChild("Education").addChild("Teacher","Professor","Education Researcher");
+
+
+class game{
+    static locked = false;
+}
+
+
+
+
+
 
 function start(){
 
@@ -267,12 +358,61 @@ function renderTree(){
     });
 }
 
-function createNode(node){
+function getParentNodeElm(node){
+    if(node.parentNode?.parentNode?.classList.contains("node")){
+        return node.parentNode.parentNode;
+    }
+    return null;
+}
 
+
+function spended(node){
+    let total = 0;
+    node.children.forEach(child=>{
+        total += child.years;
+    });
+    return(total)
+}
+
+function spendCascade(val,node){
+    node.years += val;
+    node.elm.querySelector("div.yearsLabel").textContent = node.years + " yrs";
+
+    let range = node.elm.querySelector("input");
+    range.max = Math.max(node.years,range.max);
+    range.value = node.years;
+
+    let parent = node.parent;
+    if(!parent){
+        return;
+    }
+    spendCascade(val,parent)
+}
+
+function attemptSpend(node,val){
+    let parent = node.parent;
+    if(parent){
+        let spendable = parent.years - spended(parent);
+        if(spendable < 0){
+            spendCascade(-spendable,parent);
+        }
+    }
+
+    let notSpended = node.years - spended(node)
+
+    return(-Math.min(0, notSpended))
+}
+
+
+function createNode(node,parent){
+
+
+    node.parent = parent
     const div =
         document.createElement("div");
 
     div.className = "node";
+    node.elm = div;
 
     const header =
         document.createElement("div");
@@ -301,7 +441,7 @@ function createNode(node){
 
     range.type = "range";
     range.min = 0;
-    range.max = 100;
+    range.max = node.defaultSpendable?node.defaultSpendable:20;
     range.value = node.years;
     range.className = "range";
 
@@ -315,13 +455,16 @@ function createNode(node){
         node.years + " yrs";
 
     range.oninput = ()=>{
+        node.years = Number(range.value)
+        let as = attemptSpend(node,range.value);
+        range.value = Number(range.value) + as;
         node.years =
             Number(range.value);
 
         label.textContent =
             node.years + " yrs";
 
-        updateTotals();
+        updateTotals(range);
     };
 
     header.appendChild(range);
@@ -336,12 +479,17 @@ function createNode(node){
 
     node.children.forEach(child=>{
         children.appendChild(
-            createNode(child)
+            createNode(child,node)
         );
     });
     children.style.display = "none";
 
     if(node.children.length){toggle.onclick = ()=>{
+
+        if(game.locked){
+            if(node.years === 0){alert("Spend time on " + node.name + " to see its details");return}
+        }
+
         children.style.display =
             children.style.display==="none"
             ? "block"
