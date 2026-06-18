@@ -913,6 +913,7 @@ class ball{
 
     this.friction = 1
     this.bounce = 1
+    this.elasticity = 0.9
 
 
     grid.addPt(this.x,this.y,()=>{this.activate()},grid.activationGrid)
@@ -1038,9 +1039,8 @@ class ball{
     return(this.vx*this.vx+this.vy*this.vy)
   }
 
-
+  //@damage ball
   damage(dmg,options={}){
-
     let lastCollideTime = gameWorld.lastTime==this.collideTime?this.lastCollideTime:this.collideTime
 
     let damagePercentage = Math.min((gameWorld.lastTime-lastCollideTime)/this.collisionInitiative,1)
@@ -1073,17 +1073,23 @@ class ball{
 
     // // @blood
 
+
+    let splatter = dmg>this.hp*0.7 && distance(options.vel.vx,options.vel.vy)>2.4
+
     let bloody = mult*dmg
+    if(this.hp < 0 && splatter){bloody*=3}
 
     for(let i = 0; i < bloody; i++){
       let rnd = rand(1.1)
       setTimeout(()=>{
-        particles.push(new particle(options.contact.x,options.contact.y,options.vel.vx*rnd*(1+rand(spread))+rand(spread2),options.vel.vy*rnd*(1+rand(spread))+rand(spread2)))
+        particles.push(new particle(options.contact.x,options.contact.y,this.vx*rnd*(1+rand(spread))+rand(spread2),this.vy*rnd*(1+rand(spread))+rand(spread2)))
       },rand(100))
     }
 
     if(this.hp<0){ // blood spews ONLY on overkill (which is almost always)
-      bloody *= 100
+      bloody = mult*dmg*100
+      let contactV = {x:options.vel.vx,y:options.vel.vy}
+
       gameWorld.TIL(bloody,(e)=>{
         let timeLeft = e.til - gameWorld.lastTime
         if(timeLeft < 0){e.done=1;return}
@@ -1093,13 +1099,39 @@ class ball{
         let rnd = rand(1.1)
         particles.push(new particle(this.x,this.y,this.vx*rnd+rand(-0.3*ratio),this.vy*rnd+rand(-0.3*ratio)))
 
+        if(rand(0.5) && splatter){
+          particleFuncs["bloody explosion"](this.x+rand(-80),this.y+rand(-80),1,rand(500)+1000)
+        }
       })
+
+
+      if(splatter){
+      gameWorld.TIL(300,(e)=>{
+        let timeLeft = e.til - gameWorld.lastTime
+        if(timeLeft < 0){e.done=1;return}
+          let ratio = timeLeft/300
+
+        for(let i = 0; i < 3; i++){
+          let ang = rand(Math.PI*2)
+          let r = Lrotate(contactV.x,contactV.y,ang)
+          let d = Math.cos(ang)+1.3
+          // particles.push(new particle(options.contact.x + r.x*(1-ratio)*250,options.contact.y + r.y*(1-ratio)*250,r.x/4,r.y/4))
+          particles.push(new particle(options.contact.x +contactV.x*(1-ratio),options.contact.y+contactV.y*(1-ratio),r.x*ratio/3*d,r.y*ratio/3*d))
+        }
+
+
+      })
+
+          particleFuncs["bloody explosion2"](this.x,this.y)
+          this.tags.add("nodraw")
+          camera.shake += 13
+        }
     }
 
 
     if(this.hp <= 0){
       this.die()
-      return(true)
+      return(splatter?"splatter":"normal")
     }
     return(false)
   }
@@ -1111,8 +1143,8 @@ class ball{
       this.tags.add("noCollideWall")
       e.done=true})
     this.tags.add("noCollideBall")
-    this.vx *= 0.7
-    this.vy *= 0.7
+    // this.vx *= 0.7
+    // this.vy *= 0.7
     this.deathTime = Date.now()
     this.onDeath.forEach((f)=>{
       f(this)
@@ -1348,6 +1380,7 @@ class ball{
   }
 
   draw(){ // @ball draw ball
+    if(this.tags.has("nodraw")){return}
     this.ctx.lineWidth = 7
     this.ctx.strokeStyle = "rgb("+this.hp/this.maxHp*255+",20,40)"
     let hpPers = Math.min(Math.max(this.hp/this.maxHp,0),1.4)
@@ -1699,6 +1732,47 @@ function wall_collision_handler(ball,collisionData,dt,type="normal"){
 }
 
 
+class iconDrawer{
+  static draw(sprite,x,y,ctx=can.ctx,options={}){
+      if(sprites.dict[sprite]){ // optimizable
+      let s = sprites.dict[sprite]
+      ctx.save()
+
+      if(options.dash){
+        ctx.setLineDash(options.dash.ld)
+        ctx.lineDashOffset = gameWorld.frame*options.dash.offset
+      }
+
+      ctx.translate(x,y)
+      let path = this.getPath(sprite,options)
+      ctx.stroke(path)
+
+      ctx.restore()
+    }
+  }
+
+  static getPath(sprite,options={size2:80}){
+    if(sprites.dict[sprite]){
+      let s = sprites.dict[sprite]
+      if(!s.type){
+        let p = new Path2D()
+        let ratio = options.size2/400
+        p.moveTo(s[0][0]*ratio,s[0][1]*ratio)
+        for(let i = 1; i < s.length; i++){
+          p.lineTo(s[i][0]*ratio,s[i][1]*ratio)
+        }
+        p.closePath()
+        return(p)
+      } else if(s.type === "svg"){
+        return(new Path2D(s.svg))
+      }
+
+    }
+  }
+}
+
+
+
 class effects{
 
   static effectOptions = {
@@ -1713,6 +1787,7 @@ class effects{
     },
     energenerative:{
       "backgroundColor":"#4090A0",
+      "sprite":{path:iconDrawer.getPath("energenin"),color:"blue"},
       "timeToValue":(timeLeft)=>{
         return 0.00001*timeLeft
       }
@@ -1800,39 +1875,6 @@ class effects{
   }
 }
 
-
-class iconDrawer{
-  static draw(sprite,x,y,ctx=can.ctx,options={}){
-      if(sprites.dict[sprite]){ // optimizable
-      let s = sprites.dict[sprite]
-      ctx.save()
-
-      if(options.dash){
-        ctx.setLineDash(options.dash.ld)
-        ctx.lineDashOffset = gameWorld.frame*options.dash.offset
-      }
-
-      ctx.translate(x,y)
-      if(!s.type){
-        ctx.beginPath()
-        let ratio = options.size2/400
-        ctx.moveTo(s[0][0]*ratio,s[0][1]*ratio)
-        for(let i = 1; i < s.length; i++){
-          ctx.lineTo(s[i][0]*ratio,s[i][1]*ratio)
-        }
-        ctx.closePath()
-
-
-        ctx.stroke()
-      } else if(s.type === "svg"){
-        let path = new Path2D(s.svg)
-        ctx.stroke(path)
-      }
-
-      ctx.restore()
-    }
-  }
-}
 
 
 
@@ -2458,7 +2500,7 @@ class gameWorld{
 
     static TIL(time,func){
       time = this.lastTime + time
-      let p = {t:0,f:func,til:time}
+      let p = {t:0,f:func,til:time,wait:true}
       this.timeOuts.push(p)
       return(p)
     }
@@ -2470,7 +2512,7 @@ class gameWorld{
         let e = this.timeOuts[i]
         if(this.lastTime < e.t){continue} // not running yet
         e.f(e)
-        if(e.done){
+        if(!e.wait || e.done){
           this.timeOuts.splice(i,1)
         }
       }
@@ -2612,10 +2654,14 @@ function allBallsCollide(time,i,ballList){
           dmgA = Math.max(dmgA*50,0) 
           dmgB = Math.max(dmgB*50,0) 
 
+          let initiator;
+
           if(dmgA>dmgB){
             dmgB*=0.5
+            initiator = a
           } else {
             dmgA*=0.5
+            initiator = b
           }
           dmgA *= a.damageMultiplier * a.permanentDamageMultiplier
           dmgB *= b.damageMultiplier * b.permanentDamageMultiplier
@@ -2628,17 +2674,53 @@ function allBallsCollide(time,i,ballList){
           let spread2 = -0.3
           let mult = 0.25
 
-          let forceMultiplier = dot(a.vx,a.vy,normalizedVectorTo.x,normalizedVectorTo.y) * a.mass - dot(b.vx,b.vy,normalizedVectorTo.x,normalizedVectorTo.y)* b.mass
+          // let forceMultiplier = dot(a.vx,a.vy,normalizedVectorTo.x,normalizedVectorTo.y) * a.mass - dot(b.vx,b.vy,normalizedVectorTo.x,normalizedVectorTo.y)* b.mass
+          let forceMultiplier = dot(a.vx,a.vy,normalizedVectorTo.x,normalizedVectorTo.y) * massRatio - dot(b.vx,b.vy,normalizedVectorTo.x,normalizedVectorTo.y)* massRatio
+          forceMultiplier *= initiator.elasticity
           let forceTo = {x:forceMultiplier * normalizedVectorTo.x,y:forceMultiplier * normalizedVectorTo.y}
-          a.forceM(normalizedVectorTo.x,normalizedVectorTo.y,-forceMultiplier)
-          // counterforce
-          b.forceM(normalizedVectorTo.x,normalizedVectorTo.y,forceMultiplier)
+          
 
-          b.damage(dmgA,{contact:contactPoint,vel:b})
-          a.damage(dmgB,{contact:contactPoint,vel:a})
 
-          // let killed_b = 1+b.damage(dmgA)
-          // let killed_a = 1+a.damage(dmgB)
+
+          // a.forceM(normalizedVectorTo.x,normalizedVectorTo.y,-forceMultiplier)
+          // b.forceM(normalizedVectorTo.x,normalizedVectorTo.y,forceMultiplier)
+
+          // let killed_a = killed_b = false
+          let killed_b = b.damage(dmgA,{contact:contactPoint,vel:a})
+          let killed_a = a.damage(dmgB,{contact:contactPoint,vel:b}) // super skeptical if blood is effected by order of forceM and damage
+          // console.log(normalizedVectorTo.x,forceMultiplier,a.vx,b.vx,a.x,b.x)
+
+
+
+
+          let killed = killed_a||killed_b
+
+          if(!killed || killed_a && killed_b){
+            a.forceM(normalizedVectorTo.x,normalizedVectorTo.y,-forceMultiplier)
+            b.forceM(normalizedVectorTo.x,normalizedVectorTo.y,forceMultiplier)
+          } else { // only one ball died
+            let dead = killed_a?a:b
+            if(killed==="normal"){
+              a.forceM(normalizedVectorTo.x,normalizedVectorTo.y,-forceMultiplier)
+              b.forceM(normalizedVectorTo.x,normalizedVectorTo.y,forceMultiplier)
+              dead.vx *= 0.7
+              dead.vy *= 0.7
+            }else{
+              if(killed_a){
+                a.forceM(normalizedVectorTo.x,normalizedVectorTo.y,-forceMultiplier * 0.7)
+                // b.forceM(normalizedVectorTo.x,normalizedVectorTo.y,forceMultiplier/1.5)
+                b.vx *= 1/(1+forceMultiplier/1.6) // higher num = less friction
+                b.vy *= 1/(1+forceMultiplier/1.6)
+              }
+              if(killed_b){
+                // a.forceM(normalizedVectorTo.x,normalizedVectorTo.y,-forceMultiplier/1.5)
+                b.forceM(normalizedVectorTo.x,normalizedVectorTo.y,forceMultiplier * 0.7)
+                a.vx *= 1/(1+forceMultiplier/1.5)
+                a.vy *= 1/(1+forceMultiplier/1.5)
+              }
+            }
+          }
+
 
 
 
@@ -2666,7 +2748,7 @@ function allBallsCollide(time,i,ballList){
           //push balls out of each other (good enough for now, fix later, bleeding E)
 
           let overlap = a.r + b.r - dist
-          if(overlap > 0){
+          if(overlap > 0 && !killed){
             overlap += 0.001
             let pushX = normalizedVectorTo.x * overlap / 2
             let pushY = normalizedVectorTo.y * overlap / 2
@@ -3002,7 +3084,7 @@ class test{
         b.colorDest[2] = 21
         b.minEnergySpend = 20
         b.maxEnergy = 20
-        if(rand(0.9)){
+        if(rand(0.1)){
           b.minEnergySpend = b.maxEnergy = 35
           trailify(b,15,9)
         }
@@ -3220,6 +3302,8 @@ class test{
   var particleFuncs = {
     "explosion":(x,y,s=1,l=1000)=>{particles.push(new explosionParticle(x,y,(t)=>{return((1-t)*315*s)},(t)=>{return(t*75*s)},colorFuncs.explosion,l))},
     "explosion2":(x,y,s=1)=>{for(let i =0; i < 5; i++){particleFuncs.explosion(x,y,s,3000/(i**1.5))}},
+    "bloody explosion":(x,y,s=1,l=1000)=>{particles.push(new explosionParticle(x,y,(t)=>{return((1-t)*35*s)},(t)=>{return(t*15*s)},colorFuncs["bloody explosion"],l))},
+    "bloody explosion2":(x,y,r=80,n=3)=>{for(let i =0; i < n; i++){gameWorld.TO(rand(250),()=>{particleFuncs["bloody explosion"](x+rand(-r),y+rand(-r),rand()+2,rand(400)+800)} )}},
     "rect":(x,y,x2,y2)=>{particles.push(new rectParticle(x,y,x2,y2))},
     "hp particle":(x,y)=>{let p = new lineyParticle(x,y,80+rand(80),colorFuncs.hp); p.speed = 3; particles.push(p)},
     "cheating particle":(x,y)=>{let p = new lineyParticle(x,y,280+rand(2380),colorFuncs.cheater); p.speed = 30; p.updateStall = 300; p.tailLength = 20; particles.push(p)},
@@ -3245,6 +3329,7 @@ class test{
 
   var colorFuncs = {
     "explosion":(t)=>{let x=rand(255);return("rgba(255,"+x+",0,"+t*2+")")},
+    "bloody explosion":(t)=>{let x=rand(255);return("rgba(95,0,0,"+t+")")},
     "hp":(l)=>{return(`rgba(255,40,40,${1-l})`)},
     "cheater":(l)=>{return(`rgba(0,${rand(40)+40},0,${1-l})`)},
     "respawn":(b)=>{return(`hsl(${b.color[0]},50%,60%)`)}
@@ -3502,6 +3587,9 @@ class structureGenerator{
       if(!options.scale){
         options.scale = d.scale
       }
+      if(!options.rotation){
+        options.rotation = 0
+      }
       if(!options.noIntersectionCheck){
         let otherWalls = grid.query(...this.boundingBox(struct,x,y,options.scale))
         let intersected = false;
@@ -3521,14 +3609,15 @@ class structureGenerator{
 
       d.arr.forEach((e)=>{
         if(e.mirrored){e.mirrorX = x}
-        out = out.concat(build(
-          options.scale*(e.x1+d.off.x)+x,
-          options.scale*(e.y1+d.off.y)+y,
-          options.scale*(e.x2+d.off.x)+x,
-          options.scale*(e.y2+d.off.y)+y,
-          e.type,{...e}))
-      
 
+        let pt1 = Lrotate(options.scale*(e.x1+d.off.x),options.scale*(e.y1+d.off.y),options.rotation)
+        let pt2 = Lrotate(options.scale*(e.x2+d.off.x),options.scale*(e.y2+d.off.y),options.rotation)
+        out = out.concat(build(
+          pt1.x+x,
+          pt1.y+y,
+          pt2.x+x,
+          pt2.y+y,
+          e.type,{...e}))
       })
 
 
@@ -3573,7 +3662,7 @@ class structureGenerator{
 
 
 
-    //@gentest
+    //@gentest @starter room
     // structureGenerator.build("vase",0,0)
 
 
@@ -4195,12 +4284,20 @@ function drawPlayerGUI(){
   let effectArr = Object.keys(entityList.player.effects.active)
   effectArr.forEach((k)=>{
     let effect = entityList.player.effects.active[k]
-    if(effects.effectOptions[k].nodraw){return}
+    let effectOptions = effects.effectOptions[k]
+    if(effectOptions.nodraw){return}
       can.ctx.fillStyle = effects.effectOptions[k].backgroundColor?effects.effectOptions[k].backgroundColor:"lime"
       can.ctx.fillRect(effectX, effectY, 30, 30)
       can.ctx.fillStyle = "black"
       can.ctx.fillRect(effectX, effectY, 30, (1-entityList.player.effects.getValueRatio(k))*30)
       effectY += 30 + padding
+    if(effectOptions.sprite){
+      can.ctx.save()
+      can.ctx.strokeStyle = effectOptions.sprite.color
+      can.ctx.translate(effectX,effectY)
+      can.ctx.stroke(effectOptions.sprite.path)
+      can.ctx.restore()
+    }
   })
   can.ctx.restore()
 
@@ -4324,9 +4421,12 @@ document.addEventListener("keydown",(e)=>{
   if(e.key == "r"){
     player.x = 0
     player.y = 400
-    player.vx = 2
+    player.vx = 3
     player.vy = -0.3
-    test.dtLock = 30
+    player.damageMultiplier = 0.1
+    // test.dtLock = 30
+
+    summon("normal",400,370)
   }
 
   // e.preventDefault()
@@ -4519,6 +4619,7 @@ if(!settings.offline){
 
 
 var player = entityList.player
+var TO = gameWorld.TO
 
 
 
@@ -4703,7 +4804,7 @@ function generateLevels(x,y){
   let fat = 900
 
   mirror(newWall,wallX.a,height,midX-180,height,midX)
-  makeWooden(newWall(midX-180,height,midX+180,height)).tags.add("sided")
+  build(midX-180,height,midX+180,height,"wood",{sided:true,hpMult:3})
   mirror(newWall,wallX.a,height,midX-fat,height-300,midX)
   height -= 300
   mirror(newWall,midX-fat,height,midX-fat,height-2300,midX).forEach((e)=>{e.splitting = {minLength:50,breakLength:100}}) // wall
@@ -4849,7 +4950,7 @@ function generateLevels(x,y){
 //notes
 // debug is DT based: dont mousedown (or fix)
 // collision type 3 does not place the ball to the proper place and instead resolves like a non sweep collision (the ball gets pushed AFTER, so mindist may be much smaller than r)
-
+// super skeptical if blood is effected by order of forceM and damage
 
 
 
@@ -4870,11 +4971,11 @@ function generateLevels(x,y){
 // blood update (1) //
 // fast ball fix (1 - brute force push away) //
 // trace through one side walls //
+// effects (1 - brute boxes) //
+// scrolling background (1 - doesnt work, dizzy) //
 
 
 
-// effects
-// scrolling background
 // rain and particles
 // explosives
 // onebody objects / decorators
@@ -4885,3 +4986,6 @@ function generateLevels(x,y){
 // enerjitsu temple
 // rotatable buildings
 // zombie endless
+// effects ui update
+// teleport
+// ball sweep physics

@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How Long Would You Live?</title>
+
+<style>
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+    font-family:system-ui,sans-serif;
+}
+
+body{
+    background:
+        radial-gradient(circle at top,#29416f,#10131b 60%);
+    color:white;
+    min-height:100vh;
+}
+
+.page{
+    max-width:1000px;
+    margin:auto;
+    padding:40px;
+}
+
+.center{
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+}
+
+h1{
+    font-size:3rem;
+    margin-bottom:20px;
+}
+
+.subtitle{
+    opacity:.75;
+    margin-bottom:40px;
+}
+
+input[type=number]{
+    font-size:2rem;
+    padding:15px;
+    width:250px;
+    text-align:center;
+    border:none;
+    border-radius:12px;
+}
+
+button{
+    margin-top:20px;
+    padding:15px 30px;
+    border:none;
+    border-radius:12px;
+    cursor:pointer;
+    font-size:1.1rem;
+}
+
+.hidden{
+    display:none;
+}
+
+.stats{
+    display:flex;
+    gap:20px;
+    margin-bottom:30px;
+    flex-wrap:wrap;
+}
+
+.card{
+    background:rgba(255,255,255,.08);
+    padding:15px 20px;
+    border-radius:12px;
+}
+
+.tree{
+    margin-top:20px;
+}
+
+.node{
+    margin-left:25px;
+    border-left:1px solid rgba(255,255,255,.15);
+    padding-left:15px;
+    margin-top:10px;
+}
+
+.nodeHeader{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:10px;
+}
+
+.nodeTitle{
+    min-width:150px;
+}
+
+.yearsLabel{
+    width:70px;
+    text-align:right;
+}
+
+.children{
+    margin-top:10px;
+}
+
+.finalMessage{
+    margin-top:40px;
+    padding:20px;
+    border-radius:12px;
+    background:rgba(255,255,255,.08);
+}
+
+.toggle{
+    cursor:pointer;
+    opacity:.8;
+}
+
+.range{
+    width:220px;
+}
+
+.yearsLabel{
+    background:rgba(255,255,255,.08);
+    padding:5px 10px;
+    border-radius:8px;
+    margin-left:auto;
+}
+</style>
+</head>
+<body>
+
+<div id="landing" class="center">
+
+    <h1>How Long Would You Live?</h1>
+
+    <div class="subtitle">
+        If a pill safely extended your life by one year,<br>
+        how many would you buy?
+    </div>
+
+    <input id="wishInput" type="number" value="100">
+
+    <button onclick="start()">
+        Commit
+    </button>
+
+</div>
+
+<div id="planner" class="page hidden">
+
+    <div class="stats">
+        <div class="card">
+            Years Purchased:
+            <span id="purchasedYears"></span>
+        </div>
+
+        <div class="card">
+            Years Planned:
+            <span id="allocatedYears"></span>
+        </div>
+
+        <div class="card">
+            Years Remaining:
+            <span id="remainingYears"></span>
+        </div>
+    </div>
+
+    <h2>Your Life Plan</h2>
+
+    <div id="tree" class="tree"></div>
+
+    <div class="finalMessage">
+        You may discover that your ambitions require
+        far more time than you originally thought.
+    </div>
+
+</div>
+
+<script>
+
+let purchasedYears = 0;
+
+const data = [
+{
+    name:"Interests",
+    years:0,
+    children:[
+        {
+            name:"Piano",
+            years:0,
+            children:[
+                {name:"Learn Basics",years:0,children:[]},
+                {name:"Become Proficient",years:0,children:[]},
+                {name:"Perform Publicly",years:0,children:[]}
+            ]
+        },
+        {
+            name:"Painting",
+            years:0,
+            children:[]
+        }
+    ]
+},
+{
+    name:"Career",
+    years:0,
+    children:[
+        {
+            name:"Software",
+            years:0,
+            children:[
+                {name:"Build Startup",years:0,children:[]},
+                {name:"Lead Company",years:0,children:[]}
+            ]
+        }
+    ]
+},
+{
+    name:"Travel",
+    years:0,
+    children:[
+        {name:"World Tour",years:0,children:[]}
+    ]
+}
+];
+
+function start(){
+
+    purchasedYears =
+        parseInt(
+            document.getElementById("wishInput").value
+        ) || 0;
+
+    document
+        .getElementById("landing")
+        .classList
+        .add("hidden");
+
+    document
+        .getElementById("planner")
+        .classList
+        .remove("hidden");
+
+    renderTree();
+    updateTotals();
+}
+
+function renderTree(){
+
+    const root =
+        document.getElementById("tree");
+
+    root.innerHTML = "";
+
+    data.forEach(node=>{
+        root.appendChild(
+            createNode(node)
+        );
+    });
+}
+
+function createNode(node){
+
+    const div =
+        document.createElement("div");
+
+    div.className = "node";
+
+    const header =
+        document.createElement("div");
+
+    header.className = "nodeHeader";
+
+    const toggle =
+        document.createElement("span");
+
+    toggle.className = "toggle";
+    toggle.textContent =
+        node.children.length ? "▶" : "•";
+
+    header.appendChild(toggle);
+
+    const title =
+        document.createElement("div");
+
+    title.className = "nodeTitle";
+    title.textContent = node.name;
+
+    header.appendChild(title);
+
+    const range =
+        document.createElement("input");
+
+    range.type = "range";
+    range.min = 0;
+    range.max = 100;
+    range.value = node.years;
+    range.className = "range";
+
+    const label =
+        document.createElement("div");
+
+    label.classList.add("yearsLabel");
+
+    label.className = "yearsLabel";
+    label.textContent =
+        node.years + " yrs";
+
+    range.oninput = ()=>{
+        node.years =
+            Number(range.value);
+
+        label.textContent =
+            node.years + " yrs";
+
+        updateTotals();
+    };
+
+    header.appendChild(range);
+    header.appendChild(label);
+
+    div.appendChild(header);
+
+    const children =
+        document.createElement("div");
+
+    children.className = "children";
+
+    node.children.forEach(child=>{
+        children.appendChild(
+            createNode(child)
+        );
+    });
+    children.style.display = "none";
+
+    if(node.children.length){toggle.onclick = ()=>{
+        children.style.display =
+            children.style.display==="none"
+            ? "block"
+            : "none";
+
+        toggle.textContent =
+            children.style.display==="none"
+            ? "▶"
+            : "▼";
+    };
+}
+
+    div.appendChild(children);
+
+    return div;
+}
+
+function sumYears(node){
+
+    let total = node.years;
+
+    for(const child of node.children){
+        total += sumYears(child);
+    }
+
+    return total;
+}
+
+function totalYears(){
+
+    let total = 0;
+
+    for(const node of data){
+        total += sumYears(node);
+    }
+
+    return total;
+}
+
+function updateTotals(){
+
+    const used =
+        totalYears();
+
+    document
+        .getElementById("purchasedYears")
+        .textContent =
+        purchasedYears;
+
+    document
+        .getElementById("allocatedYears")
+        .textContent =
+        used;
+
+    document
+        .getElementById("remainingYears")
+        .textContent =
+        purchasedYears - used;
+}
+
+</script>
+
+</body>
+</html>
