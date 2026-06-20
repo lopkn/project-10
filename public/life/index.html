@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>How Long Would You Live?</title>
+<meta name="description" content="Realize that your ambitions require far more time than you originally thought.">
 
 <style>
 *{
@@ -63,9 +64,7 @@ button{
     font-size:1.1rem;
 }
 
-.hidden{
-    display:none;
-}
+
 
 .stats{
     display:flex;
@@ -130,15 +129,63 @@ button{
     width:220px;
 }
 
+.description{
+    opacity:.8;
+    font-size:14px;
+    margin-top:5px;
+}
+
 .yearsLabel{
-    background:rgba(255,255,255,.08);
+    background:rgba(161, 89, 89, 0.08);
     padding:5px 10px;
     border-radius:8px;
     margin-left:auto;
 }
+
+    .newsTicker{
+        position:sticky;
+        top:0;
+        left:0;
+        width:100%;
+        display:flex;
+        align-items:center;
+        gap:12px;
+        padding:14px 24px;
+        background:rgba(0,0,0,.35);
+        backdrop-filter:blur(10px);
+        border-bottom:1px solid rgba(255,255,255,.12);
+        z-index:10;
+    }
+
+    .tickerLabel{
+        opacity:.75;
+        text-transform:uppercase;
+        letter-spacing:.12em;
+        font-size:.85rem;
+        white-space:nowrap;
+    }
+
+    .tickerText{
+        flex:1;
+        opacity:0;
+        transition:opacity .8s ease;
+    }
+
+    .tickerText.visible{
+        opacity:1;
+    }
+
+    .hidden{
+    display:none;
+    }
 </style>
 </head>
 <body>
+
+<div id="newsTicker" class="newsTicker hidden">
+    <div class="tickerLabel">REMINDER:</div>
+    <div id="tickerText" class="tickerText"></div>
+</div>
 
 <div id="landing" class="center">
 
@@ -193,7 +240,7 @@ let purchasedYears = 0;
 
 const data = [
 {
-    name:"Interests",
+    name:"Interests/Careers",
     years:0,
     defaultSpendable:100,
     children:[
@@ -213,12 +260,12 @@ const data = [
         // }
     ]
 },
-{
-    name:"Career",
-    defaultSpendable:100,
-    years:0,
-    children:[]
-},
+// {
+//     name:"Career",
+//     defaultSpendable:100,
+//     years:0,
+//     children:[]
+// },
 {
     name:"Travel",
     defaultSpendable:100,
@@ -277,6 +324,72 @@ Array.prototype.addChild = function(...name){
     return arr;
 }
 
+Object.prototype.require = function(node,years){
+    if(typeof node === "string"){
+        node = attemptGet(node);
+    }
+    
+    if(this.requires === undefined){
+        this.requires = new Map();
+    }
+    this.requires.set(node,years);
+
+    return(this)
+
+}
+
+Object.prototype.describe = function(func){
+    this.dynamicDescription = func;
+    return(this);
+}
+
+Array.prototype.describe = function(func){
+    for(const node of this){
+        node.describe(func);
+    }
+    return(this);
+}
+
+Object.prototype.maxRange = function(val){
+    this.defaultSpendable = val;
+    return(this);
+}
+
+Array.prototype.maxRange = function(val){
+    for(const node of this){
+        node.maxRange(val);
+    }
+    return(this);
+}
+
+
+
+
+var descriptionFuncs = {
+    "general skill":(node)=>{
+        let years = node.years;
+        if(years === 0){return("Not started")}
+        if(years === 1){return("Dog water")}
+        if(years === 2){return("Novice")}
+        if(years === 3){return("Intermediate")}
+        if(years === 4){return("pretty good")}
+        if(years === 5){return("Expert")}
+        if(years < 9){return("Mastery, except you spent years mastering a skill but then only spent a total of "+years+" years on it in your lifetime")}
+        return("Mastery")
+    },
+    "language":(node)=>{
+        let years = node.years;
+        if(years === 0){return("Not started")}
+        if(years === 1){return("Dog water")}
+        if(years === 2){return("Novice")}
+        if(years === 3){return("Intermediate")}
+        if(years === 4){return("pretty good")}
+        if(years < 8){return("Fluent")}
+        return("Linguistic virtuoso")
+    }
+}
+
+
 let system = attemptGet("travel").addChild("Solar system").addChild("moon","mars","mercury","titan","venus","ceres","ganymede","europa","callisto");
 system.addChild("visit")
 t = system.addChild("build")
@@ -294,32 +407,46 @@ t = t.addChild("visit")
 mode = "push";
 
 
-t = attemptGet("interests").addChild("Arts")
-t.addChild("Drawing").addChild("oil","watercolor","digital");
-t=t.addChild("Music").addChild("Piano","Guitar","Singing","Composing");
-t.addChild("Learn basics","Become proficient","Perform publicly")
-t = attemptGet("interests").addChild("Programming").addChild("Web","Mobile","Game","AI");
+t = attemptGet("interests/careers").addChild("Arts/music")
+t.addChild("Drawing").addChild("oil","watercolor","digital").describe(descriptionFuncs["general skill"]);
+t=t.addChild("Music").addChild("Piano","Guitar","Singing","Composing").describe(descriptionFuncs["general skill"]);
+t.addChild("performing","composing")
+t = attemptGet("interests/careers").addChild("Programming").addChild("Web","Mobile","Game","AI");
 t.addChild("Build projects","Contribute to open source","Lead a team","Start a company")
-t = attemptGet("interests").addChild("Sports").addChild("Basketball","Soccer","Tennis","baseball");
-t.addChild("Learn basics","Join amateur league","Go pro")
-t = attemptGet("interests").addChild("Cooking").addChild("Baking","Grilling","Gourmet");
-t.addChild("Learn basics","Start a restaurant")
+t = attemptGet("interests/careers").addChild("Sports").addChild("Basketball","Soccer","Tennis","baseball").describe(descriptionFuncs["general skill"]);
+t = attemptGet("interests/careers").addChild("Cooking").addChild("Baking","Grilling","Gourmet").describe(descriptionFuncs["general skill"]);
 
 
 
-t = attemptGet("career").addChild("Tech").addChild("Software Engineer","Data Scientist","Product Manager","UX Designer");
+t = attemptGet("interests/careers").addChild("Tech").addChild("Software Engineer","Data Scientist","Product Manager","UX Designer");
 t.addChild("Learn basics","Join a company","Lead a team","Start a company")
-t = attemptGet("career").addChild("Medicine").addChild("Doctor");
+t = attemptGet("interests/careers").addChild("Medicine").addChild("Doctor");
 t.addChild("pre-med","medical school","residency","fellowship")
-t = attemptGet("career").addChild("Education").addChild("Teacher","Professor","Education Researcher");
+
+attemptGet("medical school").require("pre-med",4)
+attemptGet("residency").require("medical school",8)
+
+attemptGet("medical school").dynamicDescription = (node)=>{
+    if(node.years === 8){
+        return "Completed med school. Ever thought of maybe spending more than 8 years so you arent so stressed during those 8 years?";
+    } else if(node.years > 8){
+        return "Completed med school";
+    }
+    return "Years left in med school: " + (8-node.years);
+}
+
+t = attemptGet("interests/careers").addChild("Education").addChild("Teacher","Professor","Education Researcher");
+
+mode = "unshift";
+t = attemptGet("interests/careers").addChild("Languages").addChild("Spanish","French","Mandarin","Japanese").describe(descriptionFuncs["language"]).maxRange(14);
+t = attemptGet("interests/careers").addChild("Fun & entertainment")
+mode = "push";
+t.addChild("Video Games","Movies/TV","Books","Paintball","Airsoft","Trampolines","Tabletop games","Gambling")
 
 
 class game{
     static locked = false;
 }
-
-
-
 
 
 
@@ -339,6 +466,10 @@ function start(){
         .getElementById("planner")
         .classList
         .remove("hidden");
+
+    document.getElementById("newsTicker").classList.remove("hidden")
+    setTimeout(updateTicker,100)
+    setInterval(updateTicker, 15000);
 
     renderTree();
     updateTotals();
@@ -376,11 +507,7 @@ function spended(node){
 
 function spendCascade(val,node){
     node.years += val;
-    node.elm.querySelector("div.yearsLabel").textContent = node.years + " yrs";
-
-    let range = node.elm.querySelector("input");
-    range.max = Math.max(node.years,range.max);
-    range.value = node.years;
+    valueUpdate(node)
 
     let parent = node.parent;
     if(!parent){
@@ -389,7 +516,33 @@ function spendCascade(val,node){
     spendCascade(val,parent)
 }
 
+function valueUpdate(node){
+    let range = node.elm.querySelector("input");
+    range.max = Math.max(node.years,range.max);
+    range.value = node.years;
+
+    node.elm.querySelector("div.yearsLabel").textContent = node.years + " yrs";
+
+    if(node.dynamicDescription){
+        node.descriptionElm.textContent = node.dynamicDescription(node);
+    }
+
+}
+
+
 function attemptSpend(node,val){
+
+    //requirements
+    if(node.requires){
+        for(const [requireNode,requireYears] of node.requires.entries()){
+            if(requireNode.years < requireYears){
+                console.log("Requires " + requireYears + " years on " + requireNode.name);
+                return -val;
+            }
+        }
+    }
+
+
     let parent = node.parent;
     if(parent){
         let spendable = parent.years - spended(parent);
@@ -457,19 +610,29 @@ function createNode(node,parent){
     range.oninput = ()=>{
         node.years = Number(range.value)
         let as = attemptSpend(node,range.value);
-        range.value = Number(range.value) + as;
-        node.years =
-            Number(range.value);
+        // range.value = Number(range.value) + as;
+        node.years = Number(range.value) + as;
+        // node.years = Number(range.value);
 
-        label.textContent =
-            node.years + " yrs";
+
+        valueUpdate(node);
 
         updateTotals(range);
     };
 
-    header.appendChild(range);
-    header.appendChild(label);
 
+    let tempDiv = document.createElement("div");
+    tempDiv.style.display = "flex";
+    tempDiv.style.flexDirection = "column";
+    tempDiv.appendChild(range);
+    let description = document.createElement("label");
+    description.className = "description";
+    tempDiv.appendChild(description);
+    header.appendChild(tempDiv);
+    node.descriptionElm = description;
+
+    
+    header.appendChild(label);
     div.appendChild(header);
 
     const children =
@@ -511,9 +674,9 @@ function sumYears(node){
 
     let total = node.years;
 
-    for(const child of node.children){
-        total += sumYears(child);
-    }
+    // for(const child of node.children){
+    //     total += sumYears(child);
+    // }
 
     return total;
 }
@@ -549,6 +712,28 @@ function updateTotals(){
         .textContent =
         purchasedYears - used;
 }
+
+const tickerMessages = [
+    "No one is going after you just because you live long. But wouldnt you want to build a private bunker just for fun?",
+    "That's the amount of years you will spend TOTAL in your lifetime. Not just learning it",
+    "You can still kill yourself anytime you feel truely bored with life",
+    "Put a couple years into stuff you havent even tried. You might like it.",
+    ""
+];
+let tickerIndex = 0;
+
+function updateTicker(){
+    const ticker = document.getElementById("tickerText");
+    ticker.classList.remove("visible");
+    void ticker.offsetWidth;
+    setTimeout(()=>{
+        ticker.textContent = tickerMessages[tickerIndex];
+        ticker.classList.add("visible");
+
+    },1000)
+    tickerIndex = (tickerIndex + 1) % tickerMessages.length;
+}
+
 
 </script>
 
