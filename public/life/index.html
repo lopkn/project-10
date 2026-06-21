@@ -332,7 +332,13 @@ Object.prototype.require = function(node,years){
     if(this.requires === undefined){
         this.requires = new Map();
     }
+
     this.requires.set(node,years);
+
+    if(node.requiredBy === undefined){
+        node.requiredBy = new Map();
+    }
+    node.requiredBy.set(this,years);
 
     return(this)
 
@@ -443,6 +449,8 @@ t = attemptGet("interests/careers").addChild("Fun & entertainment")
 mode = "push";
 t.addChild("Video Games","Movies/TV","Books","Paintball","Airsoft","Trampolines","Tabletop games","Gambling")
 
+
+t = attemptGet("interests/careers").addChild("Research & knowledge").addChild("Biology","Physics","Math","Agriculture","Tech")
 
 class game{
     static locked = false;
