@@ -827,7 +827,7 @@ function AIlos(x,y,ox,oy,ball){
     if(w.tags.has("sided")){
       let vx = ox-x
       let vy = oy-y
-      if(dot(w.normal.x,w.normal.y,vx,y,vy)<0){return}
+      if(dot(w.normal.x,w.normal.y,vx,y,vy)>0){return}
     }
     let not_blocked = line_to_line_collision_pt(x,y,ox,oy,w.x,w.y,w.x2,w.y2)
     if(not_blocked!==false){los=false}
@@ -1074,7 +1074,7 @@ class ball{
     // // @blood
 
 
-    let splatter = dmg>this.hp*0.7 && distance(options.vel.vx,options.vel.vy)>2.4
+    let splatter = dmg>this.hp*0.7 && distance(options.vel.vx,options.vel.vy)>2.2
 
     let bloody = mult*dmg
     if(this.hp < 0 && splatter){bloody*=3}
@@ -4989,3 +4989,4 @@ function generateLevels(x,y){
 // effects ui update
 // teleport
 // ball sweep physics
+
