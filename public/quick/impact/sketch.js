@@ -2835,6 +2835,14 @@ class test{
     },200)
   }
   static slower = 1;
+
+  static toGen(){
+      entityList.player.x = this.generateEnd.x
+      entityList.player.y = this.generateEnd.y
+      camera.pos.x = entityList.player.x
+      camera.pos.y = entityList.player.y
+      entityList.player.movementScalar *= 10
+  }
 }
 
 
@@ -4276,7 +4284,10 @@ function drawPlayerGUI(){
 
 
   //draw status effects on top right of screen
-  let effectX = Width - padding - settings.insets.right - 30
+
+  let effectSize = 50
+
+  let effectX = Width - padding - settings.insets.right - effectSize
   let effectY = padding + settings.insets.top
   
   //@draw effect
@@ -4287,10 +4298,10 @@ function drawPlayerGUI(){
     let effectOptions = effects.effectOptions[k]
     if(effectOptions.nodraw){return}
       can.ctx.fillStyle = effects.effectOptions[k].backgroundColor?effects.effectOptions[k].backgroundColor:"lime"
-      can.ctx.fillRect(effectX, effectY, 30, 30)
+      can.ctx.fillRect(effectX, effectY, effectSize, effectSize)
       can.ctx.fillStyle = "black"
-      can.ctx.fillRect(effectX, effectY, 30, (1-entityList.player.effects.getValueRatio(k))*30)
-      effectY += 30 + padding
+      can.ctx.fillRect(effectX, effectY, effectSize, (1-entityList.player.effects.getValueRatio(k))*effectSize)
+      effectY += effectSize + padding
     if(effectOptions.sprite){
       can.ctx.save()
       can.ctx.strokeStyle = effectOptions.sprite.color
@@ -4416,6 +4427,8 @@ document.addEventListener("keydown",(e)=>{
     gameWorld.timeWarp = -1
   }else if(e.key==="Q"){
     gameWorld.timeWarp += 1
+  } else if(e.key==="E"){
+    test.toGen()
   }
 
   if(e.key == "r"){
@@ -4921,12 +4934,7 @@ function generateLevels(x,y){
   height = height-tmp
   build(midX+2400*tmp2,height,midX-480*tmp2,height,"wood",{hpMult:50,splitting:{minLength:50,breakLength:100,breakVariability:()=>{return(rand(3))}}})
 
-  //   // @generate
-  // entityList.player.y = height-60
-  // entityList.player.x = midX
-  // camera.pos.x = entityList.player.x
-  // camera.pos.y = entityList.player.y
-  // entityList.player.movementScalar *= 10
+
 
   build(midX+2400*tmp2,height,midX+8400*tmp2,height,"normal",{hpMult:50,splitting:{minLength:50,breakLength:100,breakVariability:()=>{return(rand(3))}}})
 
@@ -4947,6 +4955,10 @@ function generateLevels(x,y){
     height -= floorHeight
     floorHeight -= 10
   }
+
+    // @generate
+
+  test.generateEnd = {x:midX,y:height-60}
 
 
 
@@ -5011,4 +5023,5 @@ function generateLevels(x,y){
 // effects ui update
 // teleport
 // ball sweep physics
-
+// wall sweep physics fix 2
+// fix notifications
