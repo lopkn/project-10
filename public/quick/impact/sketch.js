@@ -4928,6 +4928,28 @@ function generateLevels(x,y){
   // camera.pos.y = entityList.player.y
   // entityList.player.movementScalar *= 10
 
+  build(midX+2400*tmp2,height,midX+8400*tmp2,height,"normal",{hpMult:50,splitting:{minLength:50,breakLength:100,breakVariability:()=>{return(rand(3))}}})
+
+  midX = (midX+2400*tmp2 + midX+8400*tmp2)/2
+
+  let templeWid = 1500
+  let floorHeight = 900
+
+  while(templeWid > 500){
+    let extrude = 80
+    build(midX+templeWid,height,midX+templeWid,height-floorHeight,"wood",{mirrorX:midX,splitting:{minLength:50,breakLength:100}})
+    build(midX+templeWid+extrude,height-floorHeight,midX+templeWid+extrude*2,height-floorHeight-extrude,"normal",{mirrorX:midX})
+    build(midX+templeWid+extrude,height-floorHeight,midX-templeWid-extrude,height-floorHeight,"normal",{splitting:{minLength:50,breakLength:100}})
+    if(rand(0.1)){
+      summon("enerjitsuist hopper",midX,height-60,{insane:1})
+    }else{summon("enerjitsuist",midX,height-60)}
+    templeWid -= 100
+    height -= floorHeight
+    floorHeight -= 10
+  }
+
+
+
 
 }
 
