@@ -102,6 +102,10 @@ function distance(x1,y1,x2=0,y2=0) {
   return(Math.sqrt(a*a+b*b))
 }
 
+function dist(a,b={x:0,y:0}){
+  return(distance(a.x,a.y,b.x,b.y))
+}
+
 function distanceSq(x1,y1,x2=0,y2=0) {
     let a = x2-x1
     let b = y2-y1
@@ -827,7 +831,7 @@ function AIlos(x,y,ox,oy,ball){
     if(w.tags.has("sided")){
       let vx = ox-x
       let vy = oy-y
-      if(dot(w.normal.x,w.normal.y,vx,y,vy)>0){return}
+      if(dot(w.normal.x,w.normal.y,vx,vy)<0){return}
     }
     let not_blocked = line_to_line_collision_pt(x,y,ox,oy,w.x,w.y,w.x2,w.y2)
     if(not_blocked!==false){los=false}
@@ -2782,7 +2786,7 @@ class test{
 
 
   static still(){
-    entityList.balls.forEach((e)=>{e.hp=e.maxHp=400000;e.tags.delete("AI")});entityList.walls.forEach((e)=>{e.hp=e.maxHp=400000});entityList.player.energyRegen = 400
+    entityList.balls.forEach((e)=>{e.hp=e.maxHp=400000;e.tags.delete("AI")});entityList.activatedWalls.forEach((e)=>{e.hp=e.maxHp=400000});entityList.player.energyRegen = 400
   }
 
   static nextPushDebug(){
@@ -3678,6 +3682,9 @@ class structureGenerator{
     newWall(-200,0,-200,600,can.ctx)
     makeWooden(newWall(800,0,800,600,can.ctx))
 
+    // build(400,0,400,600,"normal",{sided:1})
+
+
     entityList.walls.push(new wall(-200,600,800,600,can.ctx)) // floor
     // entityList.walls.push(new wall(110,500,110,1600,can.ctx)) // beam
     // entityList.walls.push(new wall(110,500,150,450,can.ctx)) // beam
@@ -3756,12 +3763,6 @@ if(settings.RAF){
   dualMainStart()
 
 
-  // frameFuncs.push((t,dt)=>{
-  //   can.clear()
-  //   can.ctx.fillStyle = dt>20?"red":"pink"
-  //   can.ctx.fillText(dt,100,100)
-  //   can.ctx.fillRect(100,100,dt*50,100)
-  // })
 }
 
 
@@ -4019,9 +4020,11 @@ setTimeout(()=>{
   drawPlayerGUI()
   test.perf = (performance.now()-pn2) * 0.1 + test.perf*0.9
 
+  let tmp = `${entityList.activatedBalls.size }-${entityList.activatedWalls.size}-${particles.list.length}`
+
   can.ctx.fillStyle = dt>18?"red":"green"
   can.ctx.font = `bold ${Math.floor(48* settings.relativeSize )}px arial`
-  can.ctx.fillText(Math.floor(dt)+" "+(Math.round(performance.now()-pn)+" "+Math.floor(test.perf*100)),0,Height)
+  can.ctx.fillText(Math.floor(dt)+" "+(Math.round(performance.now()-pn)+" "+Math.floor(test.perf*100))+" "+tmp,0,Height)
   if(settings.offline && !settings.mobile){
     can.ctx.fillStyle = "red"
     can.ctx.fillText("OFFLINE. SERVED OFFLINE. DEBUG NOT WORK BECAUSE OFFLINE",100,120)
