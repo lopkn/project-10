@@ -224,6 +224,137 @@ function normalRandom(mean, stderr) {
 
 
 
+
+
+
+
+// function stupidCtxPatch(ctx) {
+//   // Initialize the 2D matrix state: [a, b, c, d, e, f]
+//   // Starts as an identity matrix: [1, 0, 0, 1, 0, 0]
+//   ctx._matrixStack = [[1, 0, 0, 1, 0, 0]];
+//   ctx._currentMatrix = [1, 0, 0, 1, 0, 0];
+
+//   // 1. Save references to the original native functions
+//   const nativeTranslate = ctx.translate;
+//   const nativeScale = ctx.scale;
+//   const nativeRotate = ctx.rotate;
+//   const nativeTransform = ctx.transform;
+//   const nativeSetTransform = ctx.setTransform;
+//   const nativeSave = ctx.save;
+//   const nativeRestore = ctx.restore;
+//   const nativeResetTransform = ctx.resetTransform || function() { this.setTransform(1, 0, 0, 1, 0, 0); };
+
+//   // ctx.myGetTransform = ()=>{return(ctx._currentMatrix)}
+
+//   // 2. Override Transformation Functions with Matrix Math
+//   ctx.translate = function(x, y) {
+//     const m = this._currentMatrix;
+//     m[4] += x * m[0] + y * m[2];
+//     m[5] += x * m[1] + y * m[3];
+//     nativeTranslate.call(this, x, y);
+//   };
+
+//   ctx.scale = function(sx, sy) {
+//     const m = this._currentMatrix;
+//     m[0] *= sx; m[1] *= sx;
+//     m[2] *= sy; m[3] *= sy;
+//     nativeScale.call(this, sx, sy);
+//   };
+
+//   ctx.rotate = function(rad) {
+//     const m = this._currentMatrix;
+//     const c = Math.cos(rad);
+//     const s = Math.sin(rad);
+//     const m0 = m[0], m1 = m[1], m2 = m[2], m3 = m[3];
+//     m[0] = m0 * c + m2 * s;   m[1] = m1 * c + m3 * s;
+//     m[2] = m0 * -s + m2 * c;  m[3] = m1 * -s + m3 * c;
+//     nativeRotate.call(this, rad);
+//   };
+
+//   ctx.transform = function(a, b, c, d, e, f) {
+//     const m = this._currentMatrix;
+//     const m0 = m[0], m1 = m[1], m2 = m[2], m3 = m[3];
+//     m[0] = a * m0 + b * m2;       m[1] = a * m1 + b * m3;
+//     m[2] = c * m0 + d * m2;       m[3] = c * m1 + d * m3;
+//     m[4] += e * m0 + f * m2;      m[5] += e * m1 + f * m3;
+//     nativeTransform.call(this, a, b, c, d, e, f);
+//   };
+
+//   ctx.setTransform = function(a, b, c, d, e, f) {
+//     // If called with a DOMMatrix object argument, handle fallback
+//     if (typeof a === 'object') {
+//       this._currentMatrix = [a.a, a.b, a.c, a.d, a.e, a.f];
+//       nativeSetTransform.call(this, a);
+//     } else {
+//       this._currentMatrix = [a, b, c, d, e, f];
+//       nativeSetTransform.call(this, a, b, c, d, e, f);
+//     }
+//   };
+
+//   ctx.resetTransform = function() {
+//     this._currentMatrix = [1, 0, 0, 1, 0, 0];
+//     nativeResetTransform.call(this);
+//   };
+
+//   // 3. Keep track of ctx.save() and ctx.restore() context state rules
+//   ctx.save = function() {
+//     this._matrixStack.push([...this._currentMatrix]);
+//     nativeSave.call(this);
+//   };
+
+//   ctx.restore = function() {
+//     if (this._matrixStack.length > 1) {
+//       this._currentMatrix = this._matrixStack.pop();
+//     }
+//     nativeRestore.call(this);
+//   };
+
+//   // 4. Expose the lightning fast matrix getter
+//   ctx.myGetTransform = function() {
+//     return this._currentMatrix; // Returns raw [a, b, c, d, e, f] array instantly
+//   };
+
+//   ctx.getInversedTransform = function() {
+//     const m = this._currentMatrix; // [a, b, c, d, e, f]
+    
+//     // 1. Calculate the determinant
+//     const det = m[0] * m[3] - m[1] * m[2];
+    
+//     // 2. Handle edge case: if scale is zero, matrix cannot be inverted
+//     if (det === 0) {
+//       return this._currentMatrix; 
+//     }
+    
+//     // 3. Compute the inverse values
+//     const invDet = 1.0 / det;
+    
+//     return [
+//        m[3] * invDet,                             // new a
+//       -m[1] * invDet,                             // new b
+//       -m[2] * invDet,                             // new c
+//        m[0] * invDet,                             // new d
+//       (m[2] * m[5] - m[3] * m[4]) * invDet,       // new e
+//       (m[1] * m[4] - m[0] * m[5]) * invDet        // new f
+//     ];
+//   };
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /// ======== NOT TEMPLATE ANYMORE. BUILDING AREA ============
 
 
@@ -233,6 +364,8 @@ can = new LCanvas()
 can.clear()
 can.fitScreenSize()
 can.canvas.style.pointerEvents = "none"
+
+// stupidCtxPatch(can.ctx)
 
 
 let overlayCan = new LCanvas()
@@ -821,7 +954,6 @@ class grid{ //Spatial Hash Grid
 
 function AIlos(x,y,ox,oy,ball){
   let los = true;
-
   if(ball && ball.losDistanceSq && distanceSq(x,y,ox,oy) > ball.losDistanceSq){
     return(false)
   }
@@ -2065,6 +2197,40 @@ class particle{
   }
 }
 
+class crazyParticle{
+      constructor(x,y,life=25000){
+
+    this.z = 1
+    this.life = life
+    this.ctx = can.ctx
+  }
+  update(dt){
+    this.life -= dt
+    if(this.life <= 0){
+      return("del")
+    }
+  }
+  draw(){
+    let aabb = gameWorld.viewAABB
+
+    for(let i = 0; i < 200; i++){
+      this.ctx.save()
+      let pos = {x:aabb[0]+rand(aabb[2]-aabb[0]),y:aabb[1]+rand(aabb[3]-aabb[1])}
+      let d = dist(entityList.player,pos)
+      // pos.x -= (pos.x%150)
+      // pos.y -= (pos.y%150)
+      this.ctx.translate(pos.x,pos.y)
+      this.ctx.rotate(rand(Math.PI*2))
+      this.ctx.fillStyle = `rgba(${Math.floor(d/15)},0,0,${Math.min(0.2,this.life/50000)})`
+
+      this.ctx.fillRect(0,0,200+rand(350),200+rand(350))
+
+      this.ctx.restore()
+    }
+
+  }
+}
+
 
 class sparkParticle{
     constructor(x,y,corners=10,life=1500){
@@ -2381,6 +2547,10 @@ class lineyParticle{
 class rectParticle{
   constructor(x,y,x2,y2,life=5000){
     this.z = 2
+
+    // if(x===undefined){
+    //   [x,y,x2,y2] = gameWorld.viewAABB
+    // }
 
     this.x = x
     this.y = y
@@ -3878,7 +4048,7 @@ setTimeout(()=>{
   underCan.ctx.restore()
   underCan.ctx.save()
   underCan.ctx.globalCompositeOperation = 'copy';
-  underCan.ctx.drawImage(underCan.ctx.canvas, -camDx*camera.scale, -camDy*camera.scale); // should fix later: sudden zooming does not get adjusted for
+  // underCan.ctx.drawImage(underCan.ctx.canvas, -camDx*camera.scale, -camDy*camera.scale); // should fix later: sudden zooming does not get adjusted for // temporarily disabled as its not used
   underCan.ctx.globalCompositeOperation = 'destination-out';
   underCan.ctx.fillRect(0,0,underCan.canvas.width,underCan.canvas.height)
   underCan.ctx.globalCompositeOperation = 'source-over';
@@ -3921,13 +4091,16 @@ setTimeout(()=>{
 
   can.ctx.translate(-camera.pos.x,-camera.pos.y)
   can.ctx.translate(rand(-camera.shake),rand(-camera.shake))
-  underCan.ctx.setTransform(can.ctx.getTransform());
+
+  can.transform = can.ctx.getTransform()
+
+  underCan.ctx.setTransform(can.transform);
 
   drawTerrain()
 
 
   // calculate screen positions
-  const inv = can.ctx.getTransform().inverse();
+  const inv = can.transform.inverse();
 
   let screenToWorld = (x, y) => {
       const p = new DOMPoint(x, y).matrixTransform(inv);
