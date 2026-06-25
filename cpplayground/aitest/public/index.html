@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Float Stream Client</title>
+</head>
+<body>
+    <h1>Real-time Float Stream</h1>
+    <div id="output">Waiting for data...</div>
+
+    <script>
+        // Connect to the WebSocket server sharing the same host/port
+
+        var c = document.createElement("canvas")
+        c.width = 32*10;
+        c.height = 32*10
+        document.body.appendChild(c)
+
+        let ctx = c.getContext("2d")
+        let lastFloat = []
+
+
+        const ws = new WebSocket(`ws://${window.location.host}`);
+        
+        // Crucial: Tell the browser to receive binary data as ArrayBuffer, not Blobs
+        ws.binaryType = 'arraybuffer';
+
+        const output = document.getElementById('output');
+
+        ws.onmessage = (event) => {
+            const arrayBuffer = event.data;
+            
+            // Re-interpret the incoming binary data back into 32-bit floats
+            const floats = new Float32Array(arrayBuffer);
+            
+            // output.innerText = `Received batch of ${floats.length} floats. ${JSON.stringify(floats).replaceAll(":"," ")}`;
+
+            ctx.fillStyle = "black"
+            ctx.fillRect(0,0,c.width,c.height)
+            for(let i = 0; i < floats.length; i++){
+                let x = i%32
+                let y = Math.floor(i/32)
+                ctx.fillStyle = `rgb(${128+(floats[i]-lastFloat[i])*80},0,0)`
+                ctx.fillRect(x*10,y*10,10,10)
+            }
+            lastFloat = floats
+
+        };
+
+        ws.onopen = () => { output.innerText = 'Connected to stream. Awaiting data...'; };
+        ws.onclose = () => { output.innerText = 'Disconnected from server.'; };
+
+
+
+
+    </script>
+</body>
+</html>
