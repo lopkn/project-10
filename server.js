@@ -1809,7 +1809,12 @@ function joinGame(game,socket){
 		let clientIp = socket.request.connection.remoteAddress
 		socket.onAny((e,n)=>{ericBlast.handle(Date.now(),e,n,socket)})
 		socket.on('disconnect',()=>{ericBlast.disconnect(socket)})
-	} else if(game == "connector"){
+	}else if(game == "G10.11"){
+		socket.join("G10.11")
+		io.to(socket.id).emit("acknowledge G10.11",socket.id)
+		let clientIp = socket.request.connection.remoteAddress
+		socket.onAny((e,n)=>{io.to("G10.11").emit(e,n)})
+	}  else if(game == "connector"){
 		socket.on("connectTo",(e)=>{
 			socket.join(e)
 
