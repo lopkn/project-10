@@ -148,6 +148,7 @@ function commitStrings(){
 
 function submitStrings() {
     socket.emit("DM",str)
+    document.getElementById("underlings").innerText += "\n DM gave command: "+str
 }
 
 

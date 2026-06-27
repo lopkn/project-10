@@ -51,6 +51,11 @@
   -webkit-text-fill-color: transparent;
 }
 
+*, *::before, *::after {
+  -webkit-user-select: none; /* Safari */
+  user-select: none;         /* Standard */
+}
+
 .fancy-title-bar .window-controls {
   display: flex;
   gap: 8px;
@@ -140,6 +145,15 @@ div {
   opacity: 0.7;
   -webkit-transition: .2s;
   transition: opacity .2s;
+}
+
+.slider-labels {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 5px; /* Adjusts for the slider thumb radius */
+  margin-top: 5px;
+  font-family: sans-serif;
+  font-size: 14px;
 }
 
 .slider:hover {
@@ -261,20 +275,38 @@ function strand(str) {
     container2.innerText = ""
     let arr = str.split(" ")
     arr.forEach((e,i)=>{
+
+      let sep = e.split("/")
+
+      let name = sep[1]
+
+      e = sep[0]
+
+      let clickable;
+
       if(e[0]==="d"){
         let num = parseFloat(e.slice(1))
-        createD(i,num).command = e
+        clickable = createD(i,num)
       } else if(e[0] === "n"){
         let str = e.slice(1)
-        createN(i,...str.split(",")).command = e
+        clickable = createN(i,...str.split(","))
       } else if(e === "reload"){
         location.reload()
       } else if(e.slice(0,3)==="sin"){
         let str = e.slice(3)
-        createSin(i,...str.split(",")).command = e
+        clickable = createSin(i,...str.split(","))
       } else if(e.slice(0,11)==="latePenalty"){
-        clickables.push({ticked:()=>{},clicked:()=>{return(Date.now()-startTime>90000?-parseFloat(e.slice(11)):0)},command:e,nodisp:true})
+        clickable = {ticked:()=>{},clicked:()=>{return(Date.now()-startTime>90000?-parseFloat(e.slice(11)):0)},nodisp:true}
+        clickables.push(clickable)
+      }else if(e==="adv"||e==="advantage"||e==="advantaged"){
+        clickable = {ticked:()=>{},clicked:()=>{return(3.325)},name:"advantaged"}
+        clickables.push(clickable)
+      }else if(e==="dis"||e==="disadvantage"||e==="disadvantaged"){
+        clickable = {ticked:()=>{},clicked:()=>{return(-3.325)},name:"disadvantaged"}
+        clickables.push(clickable)
       }
+      clickable.command = e
+      clickable.name = name
     })
   }
 
@@ -305,10 +337,13 @@ function strand(str) {
 
     function createSin(id,min=-1,max=1,speed=1){
     let clickable = {}
+    min = parseFloat(min)
+    max = parseFloat(max)
     clickable.min = min
     clickable.max = max
-    clickable.mid = (max-min)/2
+    clickable.mid = (max+min)/2
     clickable.mag = max-clickable.mid
+    clickable.range = max-min
     clickable.speed = 1000*speed
     clickable.id = id
     clickable.clicked = (e)=>{return(e.value)}
@@ -327,14 +362,28 @@ function strand(str) {
     range.max = max
     clickable.ticked = (e,d)=>{
 
-      e.value = Math.sin(d/clickable.speed*Math.PI*2)*clickable.mag+clickable.mid
-      range.value = e.value
+      e.value = clickable.max-Math.abs(Math.sin(d/clickable.speed*Math.PI*2))*clickable.range
+      range.value = Math.sin(d/clickable.speed*Math.PI*2)*clickable.mag+clickable.mid
+      // console.log(range.value,clickable.mid)
     }
     clickable.elm = par
 
     clickables.push(clickable)
 
     par.appendChild(range)
+
+    let nod = document.createElement("div")
+    nod.classList.add("slider-labels")
+
+    let labarr = [min,max,min]
+    labarr.forEach((e)=>{
+      let s = document.createElement("span")
+      s.innerText = e
+      nod.appendChild(s)
+    })
+
+
+    par.appendChild(nod)
     container2.appendChild(par)
     return(clickable)
   }
@@ -421,16 +470,26 @@ function strand(str) {
 
   }
 
+  let spammable = 10;
+
 
   document.addEventListener("click",(e)=>{
-    // if(e.key!=="Enter"){return}
+    spammable -=1
+    if(spammable > 0){return}
+    if(!clickable){return}
     let res = clicked()
     socket.emit("underling",name+","+res)
   })
 
+    document.addEventListener("keydown",(e)=>{
+    if(e.key!=="Enter"){return}
+    if(!clickable){return}
+    let res = clicked()
+    socket.emit("underling",name+","+res)
+  })
 
   function clicked(){
-    if(!clickable){return}
+    spammable = 10
       clickable=false
     let sum = 0
     let arr = []
@@ -453,13 +512,16 @@ function strand(str) {
     arr.forEach((e,i)=>{
       let d = document.createElement("div")
       let str = clickables[i].command
+      if(clickables[i].name){
+        str = clickables[i].name.replaceAll("_"," ")
+      }
       while(str.length<15){str += " "}
-      d.innerText = str+(parseFloat(e)<0?" ":" +")+e
+      d.innerText = str+(parseFloat(e)<0?" ":" +")+(+e.toFixed(4))
       d.style.whiteSpace = "pre"
       elmarr.push(d)
     })
     let d = document.createElement("div")
-    d.innerText = "FINAL SUM:  "+sum
+    d.innerText = "FINAL SUM:  "+ (+sum.toFixed(4))
     d.style.whiteSpace = "pre"
             d.style.fontSize = "1.4em"
     elmarr.push(d)
@@ -497,6 +559,7 @@ function strand(str) {
   },35)
 
 // myParse("d-20 d10 d10 d4 n40,5 sin0,5,2 sin0,5,3 sin0,15,2.2 latePenalty5")
+  myParse("sin-5,0,3")
 </script>
 </body>
 </html>
