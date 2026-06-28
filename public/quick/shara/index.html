@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta name="viewport"
+content="width=device-width,initial-scale=1">
+
+
+<style>
+
+body {
+    margin:0;
+    height:100vh;
+
+    font-family:-apple-system,sans-serif;
+
+    background:#f2f2f7;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+
+#app {
+    width:90%;
+    max-width:600px;
+    text-align:center;
+}
+
+
+
+#box {
+
+    height:300px;
+
+    background:white;
+
+    border:3px dashed #777;
+
+    border-radius:20px;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    flex-direction:column;
+
+}
+
+
+#catcher {
+
+    position:absolute;
+
+    opacity:0;
+
+    width:1px;
+    height:1px;
+
+}
+
+
+
+img {
+
+    max-width:90%;
+    max-height:220px;
+
+    border-radius:15px;
+
+}
+
+
+
+button {
+
+    margin-top:20px;
+
+    padding:14px 30px;
+
+    font-size:18px;
+
+    border:0;
+
+    border-radius:15px;
+
+    background:#007aff;
+
+    color:white;
+
+}
+
+
+#status {
+    margin-top:10px;
+}
+
+</style>
+
+</head>
+
+
+
+<body>
+
+<script src="/socket.io/socket.io.js"></script>
+
+<div id="app">
+
+
+<div id="box">
+
+
+<div id="text">
+
+📋<br>
+
+Tap then paste image
+
+</div>
+
+
+<img id="preview">
+
+
+</div>
+
+
+<textarea id="catcher"></textarea>
+
+
+
+<button onclick="sendImage()">
+Send
+</button>
+
+
+<div id="status"></div>
+
+
+</div>
+
+
+
+<script>
+
+
+let currentImage=null;
+
+
+
+const box =
+document.getElementById("box");
+
+
+const catcher =
+document.getElementById("catcher");
+
+
+const preview =
+document.getElementById("preview");
+
+
+
+
+
+// ipad paste trick
+
+box.onclick=()=>{
+
+    catcher.focus();
+
+    status("Paste now");
+
+};
+
+
+
+
+
+catcher.onpaste=e=>{
+
+
+    for(const item of e.clipboardData.items){
+
+
+        if(item.type.startsWith("image/")){
+
+
+            let blob =
+            item.getAsFile();
+
+
+            load(blob);
+
+            return;
+
+        }
+
+    }
+
+};
+
+
+
+
+
+function load(blob){
+
+
+    currentImage=blob;
+
+
+    preview.src =
+    URL.createObjectURL(blob);
+
+
+    status(
+        "image loaded"
+    );
+
+}
+
+
+
+
+
+// send to server
+
+function sendImage(){
+
+
+    if(!currentImage)
+        return;
+
+
+    if(ws.readyState===1){
+
+        sendImage()
+
+        status("sent");
+
+    }
+
+}
+
+
+
+
+
+// receive broadcast
+
+
+
+
+
+// click image = copy
+
+preview.onclick=async()=>{
+
+
+    if(!currentImage)
+        return;
+
+
+
+    try{
+
+
+        await navigator.clipboard.write([
+
+            new ClipboardItem({
+
+                [currentImage.type]:
+                currentImage
+
+            })
+
+        ]);
+
+
+        status("copied");
+
+
+    }catch(err){
+
+        status("copy failed");
+
+        console.log(err);
+
+    }
+
+
+};
+
+
+
+
+
+function status(t){
+
+document.getElementById("status")
+.innerText=t;
+
+}
+
+
+
+
+  const socket = io.connect('/')
+  let GAMESESSION = "redir12"
+  socket.emit("JOINGAME",GAMESESSION)
+
+
+
+
+socket.on("image", function(data){
+
+    let blob = new Blob(
+        [data],
+        {type:"image/png"}
+    );
+
+
+    currentImage = blob;
+
+
+
+    preview.src =
+        URL.createObjectURL(blob);
+
+});
+
+
+
+
+function sendImage(){
+
+    if(currentImage){
+
+        socket.emit(
+            "image",
+            currentImage
+        );
+
+    }
+
+}
+
+
+
+</script>
+
+
+</body>
+
+</html>

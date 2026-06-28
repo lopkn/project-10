@@ -148,7 +148,7 @@ function commitStrings(){
 
 function submitStrings() {
     socket.emit("DM",str)
-    document.getElementById("underlings").innerText += "\n DM gave command: "+str
+    document.getElementById("underlings").innerText = "DM gave command: "+str + "\n"+document.getElementById("underlings").innerText
 }
 
 
@@ -157,7 +157,7 @@ addBox();
 
 
 socket.on("underling",(e)=>{
-  document.getElementById("underlings").innerText += "\n"+e
+  document.getElementById("underlings").innerText = e+"\n"+document.getElementById("underlings").innerText
 })
 
 </script>

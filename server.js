@@ -1484,6 +1484,9 @@ var cors = require('cors')//jan7-2024
 var https = require('https')
 
 var server = app.listen(3000);
+
+
+
 // var server = http.createServer(app);
 // server.listen(3000,"0.0.0.0",()=>{console.log(server.address().address + " port")})
 
@@ -1585,11 +1588,30 @@ app.post('/eval', (req, res) => {
 	    // res.sendStatus(123);
     }
 })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 console.log("server is opened: "+Date.now())
 
 
 var socket = require('socket.io');
-var io = socket(server);
+var io = socket(server, {
+    maxHttpBufferSize: 50 * 1024 * 1024
+});
 
 var httpsIO = socket(httpsServer)
 
@@ -1814,6 +1836,11 @@ function joinGame(game,socket){
 		io.to(socket.id).emit("acknowledge G10.11",socket.id)
 		let clientIp = socket.request.connection.remoteAddress
 		socket.onAny((e,n)=>{io.to("G10.11").emit(e,n)})
+	}else if(game.slice(0,5) === "redir"){
+		socket.join(game)
+		io.to(socket.id).emit("acknowledge "+game,socket.id)
+		let clientIp = socket.request.connection.remoteAddress
+		socket.onAny((e,n)=>{io.to(game).emit(e,n)})
 	}  else if(game == "connector"){
 		socket.on("connectTo",(e)=>{
 			socket.join(e)
