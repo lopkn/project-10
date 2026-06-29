@@ -1093,6 +1093,7 @@ class ball{
     
     gameWorld.TO(1000,(e)=>{
       this.tags.delete("isDead")
+      this.tags.delete("nodraw")
       this.tags.delete("noCollideWall")
       this.tags.delete("noCollideBall")
       this.hp = this.maxHp

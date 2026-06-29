@@ -4,7 +4,7 @@
 <link rel="icon" href="../../images/psim2.png">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable = no, maximum-scale=1, minimum-scale=1">
-  <title>LTPT</title>
+  <title>Roller</title>
 
 </head>
 <body style="padding:0;margin:0;background-color: black;">
@@ -75,6 +75,17 @@ div {
 }
 
 
+.tabinfo{
+  position: fixed;
+  top:0px;
+  left:0px;
+  width: 100vw;
+  height:100vw;
+  background-color: rgba(0,0,0,0.9);
+  color: lime;
+  z-index: 5;
+}
+
 .highlight {
   color:lime;
   background-color: #000060;
@@ -134,6 +145,7 @@ div {
 
 .slidecontainer {
   width: 40vw;
+  margin-top: 6px;
 }
 
 .slider {
@@ -151,7 +163,7 @@ div {
   display: flex;
   justify-content: space-between;
   padding: 0 5px; /* Adjusts for the slider thumb radius */
-  margin-top: 5px;
+  margin-top: 0px;
   font-family: sans-serif;
   font-size: 14px;
 }
@@ -176,7 +188,42 @@ div {
   cursor: pointer;
 }
 
+.jit.slider::-webkit-slider-thumb  {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 25px;
+  height: 25px;
+  background: #04AAAA;
+  cursor: pointer;
+}
+
+.jit.slider::-moz-range-thumb  {
+  width: 25px;
+  height: 25px;
+  background: #04AAAA;
+  cursor: pointer;
+}
+
+.jiv.slider::-webkit-slider-thumb  {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 25px;
+  height: 25px;
+  background: #AAAA04;
+  cursor: pointer;
+}
+
+.jiv.slider::-moz-range-thumb  {
+  width: 25px;
+  height: 25px;
+  background: #AAAA04;
+  cursor: pointer;
+}
+
+
 </style>
+
+<div class="tabinfo" id="tabinfo" style="visibility: hidden"></div>
 
 <div id="titl" class="fancy-title-bar title-text">
   skilled gambling
@@ -197,6 +244,8 @@ function normalRandom(mean, stderr, y,id) {
     const z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
     return z0 * stderr + mean;
 }
+
+var skillSpeed = 2;
 
 
   var rand = (x,y,id)=>{
@@ -239,6 +288,7 @@ function strand(str) {
   socket.on("acknowledge G10.11",acknowledge)
 
   let name = prompt("Whats your name?")
+    socket.emit("underling",name+" has joined\n")
   // let name = "test"
   document.getElementById("titl").innerText = "Skilled gambling: "+name
 
@@ -295,6 +345,12 @@ function strand(str) {
       } else if(e.slice(0,3)==="sin"){
         let str = e.slice(3)
         clickable = createSin(i,...str.split(","))
+      } else if(e.slice(0,3)==="jit"){
+        let str = e.slice(3)
+        clickable = createJit(i,...str.split(","))
+      } else if(e.slice(0,3)==="jiv"){
+        let str = e.slice(3)
+        clickable = createJiv(i,...str.split(","))
       } else if(e.slice(0,11)==="latePenalty"){
         clickable = {ticked:()=>{},clicked:()=>{return(Date.now()-startTime>90000?-parseFloat(e.slice(11)):0)},nodisp:true}
         clickables.push(clickable)
@@ -304,9 +360,18 @@ function strand(str) {
       }else if(e==="dis"||e==="disadvantage"||e==="disadvantaged"){
         clickable = {ticked:()=>{},clicked:()=>{return(-3.325)},name:"disadvantaged"}
         clickables.push(clickable)
+      }else if(e[0]==="+" || e[0] === "-"){
+        clickable = {ticked:()=>{},clicked:()=>{return(parseFloat(e))}}
+        clickables.push(clickable)
+
+      } else if(e.slice(0,5)==="skill"){
+        skillSpeed = parseInt(e.slice(5))
+        return
       }
-      clickable.command = e
-      clickable.name = name
+      if(clickable){
+        clickable.command = e
+        clickable.name = name
+      }
     })
   }
 
@@ -389,6 +454,130 @@ function strand(str) {
   }
 
 
+      function createJiv(id,min=-1,max=1,speed=1,maxSpeed=1){
+    let clickable = {}
+    min = parseFloat(min)
+    max = parseFloat(max)
+    clickable.min = min
+    clickable.max = max
+    clickable.mid = (max+min)/2
+    clickable.mag = max-clickable.mid
+    clickable.range = max-min
+    clickable.speed = speed/30
+    clickable.id = id
+    clickable.ticker = 0
+    clickable.v = 0
+    clickable.maxSpeed = maxSpeed*0.05
+    clickable.clicked = (e)=>{return(e.value)}
+
+    clickable.evaluate = (x)=>{
+      return((x-clickable.mid)/clickable.mag)
+    }
+
+    let par = document.createElement("div")
+    par.classList.add("slidecontainer")
+    let range = document.createElement("input")
+    range.classList.add("slider")
+    range.classList.add("jiv")
+    range.type="range"
+    range.step = "any"
+    range.min = min
+    range.max = max
+    clickable.ticked = (e,d)=>{
+
+      e.v += rand(-e.speed,d,e.id)
+      e.v = Math.min(e.maxSpeed,Math.max(-e.maxSpeed,e.v))
+      e.ticker += e.v
+      let orig = e.ticker
+      e.ticker = Math.min(1,Math.max(-1,e.ticker))
+      if(e.ticker != orig){
+        e.v *= -1
+      }
+      e.value = clickable.max-Math.abs(e.ticker)*clickable.range
+      range.value = e.ticker*clickable.mag+clickable.mid
+      // console.log(range.value,clickable.mid)
+    }
+    clickable.elm = par
+
+    clickables.push(clickable)
+
+    par.appendChild(range)
+
+    let nod = document.createElement("div")
+    nod.classList.add("slider-labels")
+
+    let labarr = [min,max,min]
+    labarr.forEach((e)=>{
+      let s = document.createElement("span")
+      s.innerText = e
+      nod.appendChild(s)
+    })
+
+
+    par.appendChild(nod)
+    container2.appendChild(par)
+    return(clickable)
+  }
+
+
+    function createJit(id,min=-1,max=1,speed=1){
+    let clickable = {}
+    min = parseFloat(min)
+    max = parseFloat(max)
+    clickable.min = min
+    clickable.max = max
+    clickable.mid = (max+min)/2
+    clickable.mag = max-clickable.mid
+    clickable.range = max-min
+    clickable.speed = speed/10
+    clickable.id = id
+    clickable.ticker = 0
+    clickable.clicked = (e)=>{return(e.value)}
+
+    clickable.evaluate = (x)=>{
+      return((x-clickable.mid)/clickable.mag)
+    }
+
+    let par = document.createElement("div")
+    par.classList.add("slidecontainer")
+    let range = document.createElement("input")
+    range.classList.add("slider")
+    range.classList.add("jit")
+    range.type="range"
+    range.step = "any"
+    range.min = min
+    range.max = max
+    clickable.ticked = (e,d)=>{
+
+      e.ticker += rand(-e.speed,d,e.id)
+      e.ticker = Math.min(1,Math.max(-1,e.ticker))
+      e.value = clickable.max-Math.abs(e.ticker)*clickable.range
+      range.value = e.ticker*clickable.mag+clickable.mid
+      // console.log(range.value,clickable.mid)
+    }
+    clickable.elm = par
+
+    clickables.push(clickable)
+
+    par.appendChild(range)
+
+    let nod = document.createElement("div")
+    nod.classList.add("slider-labels")
+
+    let labarr = [min,max,min]
+    labarr.forEach((e)=>{
+      let s = document.createElement("span")
+      s.innerText = e
+      nod.appendChild(s)
+    })
+
+
+    par.appendChild(nod)
+    container2.appendChild(par)
+    return(clickable)
+  }
+
+
 
   function createD(id,n){
     let clickable = {}
@@ -408,7 +597,7 @@ function strand(str) {
     let par = document.createElement("div")
     par.classList.add("column")
     clickable.ticked = (e,d)=>{
-      if(tickcounter%2===0){return}
+      if(tickcounter%skillSpeed!==0){return}
 
       e.value = floor(rand(e.num,d,e.id))+1
       let chi = document.createElement("div")
@@ -446,7 +635,7 @@ function strand(str) {
     let par = document.createElement("div")
     par.classList.add("column")
     clickable.ticked = (e,d)=>{
-      if(tickcounter%2===0){return}
+      if(tickcounter%skillSpeed!==0){return}
       e.value = round(normalRandom(m,s,d,e.id))
       let chi = document.createElement("div")
       chi.innerText = e.value
@@ -478,14 +667,27 @@ function strand(str) {
     if(spammable > 0){return}
     if(!clickable){return}
     let res = clicked()
-    socket.emit("underling",name+","+res)
+    socket.emit("underling",name+" rolled "+res)
   })
 
     document.addEventListener("keydown",(e)=>{
+
+    if(e.key==="Tab"){
+      e.preventDefault()
+      document.getElementById("tabinfo").style.visibility = "visible"
+    }
+
     if(e.key!=="Enter"){return}
     if(!clickable){return}
     let res = clicked()
-    socket.emit("underling",name+","+res)
+    socket.emit("underling",name+" rolled "+res)
+  })
+
+document.addEventListener("keyup",(e)=>{
+
+    if(e.key==="Tab"){
+      document.getElementById("tabinfo").style.visibility = "hidden"
+    }
   })
 
   function clicked(){
@@ -558,8 +760,12 @@ function strand(str) {
 
   },35)
 
+  socket.on("underling",(e)=>{
+    document.getElementById("tabinfo").innerText = e+"\n"+document.getElementById("tabinfo").textContent
+  })
+
 // myParse("d-20 d10 d10 d4 n40,5 sin0,5,2 sin0,5,3 sin0,15,2.2 latePenalty5")
-  myParse("sin-5,0,3")
+  // myParse("sin-5,0,1 jit-5,0,1 jiv-5,0,1 jiv-5,0,3,0.5 jiv-5,0,1,3")
 </script>
 </body>
 </html>

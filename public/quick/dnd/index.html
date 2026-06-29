@@ -30,7 +30,7 @@
 
 <body>
 
-<h2>String List</h2>
+<a href="../cdnd" target="_blank"><h2>Go to dice</h2></a>
 
 <div id="container"></div>
 
@@ -43,7 +43,7 @@
 
 
 <div id="underlings"></div>
-<button onclick="load()" style="margin-top:300px">LOAD</button>
+<button onclick="load()" style="margin-top:10px">LOAD</button>
 <button onclick="save()">SAVE</button>
 
 
@@ -97,7 +97,7 @@ function load() {
 }
 
 
-function addBox(checked=false,txt="") {
+function addBox(checked=false,txt="",put=true) {
     const row = document.createElement("div");
     row.className = "string-box";
 
@@ -112,10 +112,25 @@ function addBox(checked=false,txt="") {
     text.placeholder = "Enter string...";
     text.value = txt
 
+    const but = document.createElement("button")
+    but.innerText = "add"
+    but.onclick = ()=>{
+        addBoxAfter(row)
+    }
+
     row.appendChild(checkbox);
     row.appendChild(text);
+    row.appendChild(but);
 
-    container.appendChild(row);
+    if(put){
+        container.appendChild(row);
+    }
+    return(row)
+}
+
+function addBoxAfter(elm){
+    let b = addBox(undefined,undefined,false)
+    elm.after(b)
 }
 
 var rand = (x)=>{
