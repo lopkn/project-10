@@ -976,6 +976,29 @@ function AIlos(x,y,ox,oy,ball){
 
 ////////// end game engine functions
 
+class Acceleration{
+  constructor(){
+    this.dict = {}
+    this.sum = {x:0,y:0}
+    this.set(0,gameWorld.gravity,"gravity")
+  }
+
+  set(x,y,name){
+    // if(this.dict[name] === undefined){this.dict[name] = {x:0,y:0} }
+    this.dict[name] = {x,y}
+    this.recalculate()
+  }
+
+  recalculate(){
+    this.sum = {x:0,y:0}
+    Object.values(this.dict).forEach((e)=>{
+      this.sum.x += e.x
+      this.sum.y += e.y;
+    })
+  }
+}
+
+
 
 class ball{
   constructor(x,y,r,ctx,AI=true){
@@ -1050,6 +1073,8 @@ class ball{
     this.friction = 1
     this.bounce = 1
     this.elasticity = 0.9
+
+    this.accel = new Acceleration()
 
 
     grid.addPt(this.x,this.y,()=>{this.activate()},grid.activationGrid)
@@ -1372,7 +1397,9 @@ class ball{
 
     this.damageMultiplier += Math.min((1-this.damageMultiplier)*0.002,0.0001)*dt
 
-    this.vy += gameWorld.gravity*dt
+    // this.vy += gameWorld.gravity*dt
+    this.vx += this.accel.sum.x*dt
+    this.vy += this.accel.sum.y*dt
 
     // this.vx += this.ax*dt
     // this.vy += this.ay*dt
