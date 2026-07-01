@@ -979,13 +979,19 @@ function AIlos(x,y,ox,oy,ball){
 class Acceleration{
   constructor(){
     this.dict = {}
+    this.dynamics = new Set()
     this.sum = {x:0,y:0}
     this.set(0,gameWorld.gravity,"gravity")
   }
 
-  set(x,y,name){
+  set(x,y,name,options={}){
     // if(this.dict[name] === undefined){this.dict[name] = {x:0,y:0} }
     this.dict[name] = {x,y}
+
+    if(options.dynamic){
+      this.dynamics.add(options.dynamic)
+    }
+
     this.recalculate()
   }
 
@@ -1397,12 +1403,11 @@ class ball{
 
     this.damageMultiplier += Math.min((1-this.damageMultiplier)*0.002,0.0001)*dt
 
-    // this.vy += gameWorld.gravity*dt
+
+
     this.vx += this.accel.sum.x*dt
     this.vy += this.accel.sum.y*dt
 
-    // this.vx += this.ax*dt
-    // this.vy += this.ay*dt
 
 
     this.movement()
@@ -4635,7 +4640,7 @@ document.addEventListener("keydown",(e)=>{
     test.toGen()
   }
 
-  if(e.key == "r"){
+  if(e.key === "r" && debug){
     player.x = 0
     player.y = 400
     player.vx = 3
@@ -5211,6 +5216,7 @@ function generateLevels(x,y){
 // trace through one side walls //
 // effects (1 - brute boxes) //
 // scrolling background (1 - doesnt work, dizzy) //
+// acceleration update //
 
 
 
@@ -5220,7 +5226,6 @@ function generateLevels(x,y){
 // sounds
 // mob mechanics (ball remembers when it was hit by what, so no invulnerability in mobs)
 // AI movement
-// acceleration update
 // enerjitsu temple
 // rotatable buildings
 // zombie endless
@@ -5228,4 +5233,5 @@ function generateLevels(x,y){
 // teleport
 // ball sweep physics
 // wall sweep physics fix 2
-// fix notifications
+// notifications update
+// phone screen bar fix
