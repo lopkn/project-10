@@ -20,6 +20,10 @@ var rand = (x)=>{
   return(Math.random()*x)
 }
 
+function ranarr(arr){
+  return(arr[Math.floor(Math.random()*arr.length)])
+}
+
 
 let mouseX = 0
 let mouseY = 0

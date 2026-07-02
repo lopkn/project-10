@@ -33,6 +33,11 @@ var rand = (x)=>{
   return(Math.random()*x)
 }
 
+function ranarr(arr){
+  return(arr[Math.floor(Math.random()*arr.length)])
+}
+
+
 
 let mouseX = 0
 let mouseY = 0
@@ -3055,7 +3060,16 @@ class test{
 
 
 
-
+class mobileDebug{
+  static active = true
+  static logStr = ""
+  static reset(){
+    this.logStr=""
+  }
+  static log(x){
+    this.logStr += ", "+x
+  }
+}
 
 
 
@@ -3778,7 +3792,27 @@ class structureGenerator{
     // let glasses = []
     // walls.forEach((e)=>{if(e.name === "glass"){e.collateral = glasses; glasses.push(e)}})    
   }
-}
+},
+  "container2":{
+    arr:[
+        { x1: 120, y1: 140, x2: 120, y2: 220, type: 'glass', mirrored: false },
+        { x1: 120, y1: 220, x2: 160, y2: 260, type: 'wood', mirrored: false },
+        { x1: 180, y1: 260, x2: 220, y2: 220, type: 'wood', mirrored: false },
+        { x1: 220, y1: 220, x2: 220, y2: 140, type: 'glass', mirrored: false },
+        { x1: 220, y1: 140, x2: 200, y2: 120, type: 'glass', mirrored: false },
+        { x1: 200, y1: 120, x2: 140, y2: 120, type: 'glass', mirrored: false },
+        { x1: 140, y1: 120, x2: 120, y2: 140, type: 'glass', mirrored: false },
+        { x1: 120, y1: 220, x2: 220, y2: 220, type: 'wood', mirrored: false },
+        { x1: 160, y1: 260, x2: 180, y2: 260, type: 'wood', mirrored: false },
+        { x1: 140, y1: 240, x2: 140, y2: 280, type: 'wood', mirrored: false },
+        { x1: 200, y1: 240, x2: 200, y2: 280, type: 'wood', mirrored: false },
+        { x1: 220, y1: 220, x2: 220, y2: 280, type: 'wood', mirrored: false },
+        { x1: 120, y1: 220, x2: 120, y2: 280, type: 'wood', mirrored: false },
+        { x1: 140, y1: 260, x2: 200, y2: 260, type: 'wood', mirrored: false },
+        // { x1: 120, y1: 280, x2: 140, y2: 280, type: 'wood', mirrored: false },
+        // { x1: 200, y1: 280, x2: 220, y2: 280, type: 'wood', mirrored: false }
+      ],off:{x:-170,y:-281}, scale:1.5, boundingBox:[120,120,220,280] 
+    }
   }
 
   static boundingBox(struct,x,y,scale){
@@ -4227,6 +4261,14 @@ setTimeout(()=>{
   test.perf = (performance.now()-pn2) * 0.1 + test.perf*0.9
 
   let tmp = `${entityList.activatedBalls.size }-${entityList.activatedWalls.size}-${particles.list.length}`
+  if(mobileDebug.active){
+
+    mobileDebug.log(JSON.stringify(settings.insets))
+
+    tmp += mobileDebug.logStr
+    mobileDebug.reset()
+  }
+
 
   can.ctx.fillStyle = dt>18?"red":"green"
   can.ctx.font = `bold ${Math.floor(48* settings.relativeSize )}px arial`
@@ -4617,6 +4659,9 @@ window.addEventListener("resize",(e)=>{
   if(settings.mobile){
     settings.relativeSize*=1.2
   }
+
+
+  settings.insets=getSafeAreaInsets()
 
 })
 
