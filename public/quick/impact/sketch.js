@@ -33,7 +33,8 @@ var rand = (x)=>{
   return(Math.random()*x)
 }
 
-function ranarr(arr){
+function ranarr(...args){
+  const arr = (args.length === 1 && Array.isArray(args[0])) ? args[0] : args;
   return(arr[Math.floor(Math.random()*arr.length)])
 }
 
@@ -984,20 +985,18 @@ function AIlos(x,y,ox,oy,ball){
 class Acceleration{
   constructor(){
     this.dict = {}
-    this.dynamics = new Set()
+    this.dynamicDict = new Map()
     this.sum = {x:0,y:0}
-    this.set(0,gameWorld.gravity,"gravity")
   }
 
-  set(x,y,name,options={}){
-    // if(this.dict[name] === undefined){this.dict[name] = {x:0,y:0} }
+  set(x,y,name){
     this.dict[name] = {x,y}
-
-    if(options.dynamic){
-      this.dynamics.add(options.dynamic)
-    }
-
     this.recalculate()
+    return(this)
+  }
+
+  setDynamic(f,name){
+    this.dynamicDict.set(name,f)
   }
 
   recalculate(){
@@ -1007,7 +1006,19 @@ class Acceleration{
       this.sum.y += e.y;
     })
   }
+
+  getSum(){
+    let out = {...this.sum}
+    this.dynamicDict.forEach((e)=>{
+      let tmp = e();
+      out.x += tmp.x
+      out.y += tmp.y
+    })
+    return(out)
+  }
 }
+
+
 
 
 
@@ -1086,7 +1097,10 @@ class ball{
     this.elasticity = 0.9
 
     this.accel = new Acceleration()
+    this.accel.set(0,gameWorld.gravity,"gravity")
 
+    this.decel = new Acceleration()
+    this.decel.set(gameWorld.airFriction,gameWorld.airFriction,"air friction")
 
     grid.addPt(this.x,this.y,()=>{this.activate()},grid.activationGrid)
 
@@ -1409,9 +1423,9 @@ class ball{
     this.damageMultiplier += Math.min((1-this.damageMultiplier)*0.002,0.0001)*dt
 
 
-
-    this.vx += this.accel.sum.x*dt
-    this.vy += this.accel.sum.y*dt
+    let accel = this.accel.getSum()
+    this.vx += accel.x*dt
+    this.vy += accel.y*dt
 
 
 
@@ -1480,8 +1494,9 @@ class ball{
     } /// BALL MOVING TOO FAST!!!!!! FIX
 
 
-    this.vx *= (1-gameWorld.airFriction*speed)**dt
-    this.vy *= (1-gameWorld.airFriction*speed)**dt
+    let decel = this.decel.getSum()
+    this.vx *= (1-decel.x*speed)**dt
+    this.vy *= (1-decel.y*speed)**dt
 
 
 
@@ -3061,7 +3076,7 @@ class test{
 
 
 class mobileDebug{
-  static active = true
+  static active = false
   static logStr = ""
   static reset(){
     this.logStr=""
@@ -5053,7 +5068,7 @@ function generateLevels(x,y){
     if(Math.random()>0.5){ // spawn rate
       summon("normal",start+floorX*0.5,floor-60,{brute:rand(0.03)})
     } else if(rand(0.6) && Math.abs(floorX) > 200){
-      structureGenerator.build(rand(0.5)?"container":"vase",start+floorX*rand()*0.9,floor)
+      structureGenerator.build(ranarr("container","vase"),start+floorX*rand()*0.9,floor)
     }
 
 
@@ -5140,7 +5155,7 @@ function generateLevels(x,y){
       if(rand(0.3)){options.grunt=true}
       summon(rand(0.6)?"normal":"apprentice",mx,h-60,options)
     } else if(rand(0.3)){
-      structureGenerator.build(rand(0.6)?"bottle":"vase",mx,h)
+      structureGenerator.build(ranarr("bottle","vase","container2"),mx,h)
     }
   }
 
