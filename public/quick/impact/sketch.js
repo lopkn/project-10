@@ -1074,7 +1074,8 @@ class ball{
 
     this.wallJumpEnergy = 5
 
-    this.jumpForceMultiplier = 1
+    this.jumpForceMultiplier = 1 // this uses energy
+    this.jumpPower = 1 // this is a multiplier, does not use energy
 
     this.lastJumpTime = 0
     this.lastCollideWallTime = 0
@@ -1096,16 +1097,20 @@ class ball{
     this.bounce = 1
     this.elasticity = 0.9
 
-    this.accel = new Acceleration()
-    this.accel.set(0,gameWorld.gravity,"gravity")
-
-    this.decel = new Acceleration()
-    this.decel.set(gameWorld.airFriction,gameWorld.airFriction,"air friction")
+    this.resetAccelerations()
 
     grid.addPt(this.x,this.y,()=>{this.activate()},grid.activationGrid)
 
   }
 
+
+  resetAccelerations(){
+    this.accel = new Acceleration()
+    this.accel.set(0,gameWorld.gravity,"gravity")
+
+    this.decel = new Acceleration()
+    this.decel.set(gameWorld.airFriction,gameWorld.airFriction,"air friction")
+  }
 
 
   initPath(){
@@ -1200,6 +1205,7 @@ class ball{
       }
     }
 
+    mag *= this.jumpPower
 
     this.force(vx,vy,mag)
     this.lastJumpTime = gameWorld.lastTime
@@ -1325,6 +1331,7 @@ class ball{
 
   die(){
     this.tags.add("isDead")
+    this.resetAccelerations()
 
     gameWorld.TO(300,(e)=>{ // might cause some issues
       this.tags.add("noCollideWall")
@@ -3317,6 +3324,35 @@ class mobileDebug{
               b.AInextUpdateTime = rand(1000)+950
               b.jump(b.target.x-b.x,b.target.y-b.y-rand(200)-60,0.003)
             }
+          }
+        }
+      },
+      "dasher":()=>{
+        b.damageMultiplier = 0.7
+        b.color = [340,62,41]
+
+        b.accel.set(0,0,"gravity")
+        trailify(b,15,9)
+
+        b.energenin = 0.01
+        b.jumpPower = 2
+
+        b.AICustomUpdate = (b,dt)=>{
+          let los = AIlos(b.x,b.y,p.x,p.y,b)
+          
+          if(los){
+            b.target = p
+          }
+          let target = b.target?b.target:b.home
+
+          if(b.energy > 30 ){
+            // jump towards player
+            b.AInextUpdateTime = rand(1000)+1550
+            b.jump(target.x-b.x,target.y-b.y,0.003)
+
+            let startTime = gameWorld.lastTime
+            b.decel.setDynamic(()=>{let z=Math.min(0.01,0.00001*(gameWorld.lastTime-startTime));return({x:z,y:z})},"decel")
+
           }
         }
       },
