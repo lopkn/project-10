@@ -38,6 +38,16 @@ function ranarr(...args){
   return(arr[Math.floor(Math.random()*arr.length)])
 }
 
+function ranRadius(r){
+  let rr = r*2
+  let out = {x:Math.random()*rr-r,y:Math.random()*rr-r}
+  let r2 = r*r
+  while(distanceSq(out.x,out.y) > r2){
+    out = {x:Math.random()*rr-r,y:Math.random()*rr-r}
+  }
+  return(out)
+}
+
 
 
 let mouseX = 0
@@ -1801,18 +1811,25 @@ class wall{
 
     this.ctx.lineWidth = this.size?this.size:Math.min(Math.max(this.hp**0.5,5),10)
     this.ctx.strokeStyle = this.color
+    this.ctx.save()
     this.ctx.beginPath()
     this.ctx.moveTo(this.x,this.y)
     this.ctx.lineTo(this.x2,this.y2)
 
+    if(this.lineDash){
+      this.ctx.setLineDash(this.lineDash.sep)
+      this.ctx.lineDashOffset = gameWorld.lastTime * this.lineDash.speed
+    }
+
+
     if(this.tags.has("sided")){
-      this.ctx.save()
 
       this.ctx.shadowOffsetX = this.normal.x*-1
       this.ctx.shadowOffsetY = this.normal.y*-1
       // this.ctx.shadowColor = `color-mix(in srgb, ${this.ctx.strokeStyle}, white 50%)`
       this.ctx.shadowColor = `hsl(from ${this.ctx.strokeStyle} h s calc(100 - l))`
       // this.ctx.shadowColor = `rgb(255,25,0)`
+
       this.ctx.stroke() // matching stroke here
 
       this.ctx.lineWidth = 1
@@ -1821,10 +1838,10 @@ class wall{
       this.ctx.lineTo(this.midpoint.x+this.normal.x*10,this.midpoint.y+this.normal.y*10)
       this.ctx.stroke()
 
-      this.ctx.restore()
     } else {
       this.ctx.stroke() // matching stroke here
     }
+    this.ctx.restore()
 
   }
 }
@@ -2424,7 +2441,7 @@ function shatterWall(wall,by,impactPt){
 class shatteredWallParticle{
   constructor(wall,x1,y1,x2,y2,vx,vy,impactPt,lengthPers,life=4000){
     this.z = 1
-
+    this.wall = wall
     this.x = (x1+x2)/2
     this.y = (y1+y2)/2
     this.dx = (x2-this.x)
@@ -2489,11 +2506,18 @@ class shatteredWallParticle{
 
     let dx = this.dx*mult
     let dy = this.dy*mult
-    
+    this.ctx.save()
+
+    if(this.wall.lineDash){
+      this.ctx.setLineDash(this.wall.lineDash.sep)
+      this.ctx.lineDashOffset = 0
+    }
+
     this.ctx.beginPath()
     this.ctx.moveTo(this.x-dx,this.y-dy)
     this.ctx.lineTo(this.x+dx,this.y+dy)
     this.ctx.stroke()
+    this.ctx.restore()
   }
 }
 
@@ -3105,11 +3129,17 @@ class mobileDebug{
 
     let out = []
 
-    if(!options.reverse){
+    let dir = 1
+    if(options.reverse){dir*=-1}
+    if(options.mirroredReverse && options.alreadyMirrored){dir*=-1}
+
+    if(dir===1){
       w = newWall(x,y,x1,y1,options.ctx)
      } else {
       w = newWall(x1,y1,x,y,options.ctx)
      }
+
+
     w.name = type
     out.push(w)
     if(options.mirrorX !== undefined && !options.alreadyMirrored){
@@ -3126,6 +3156,11 @@ class mobileDebug{
       },
       "wood":()=>{
         makeWooden(w)
+      },
+      "accelerator":()=>{
+        w.color = "rgba(50,160,240,0.8)"
+        w.lineDash = {sep:[25,15],speed:0.4}
+        w.events.onCollide.push((w,d,mult,b,impactPt)=>{b.force(w.normalized.x,w.normalized.y,-1.3)})
       },
       "glass":()=>{
         w.color = "rgba(40,140,220,0.6)"
@@ -3863,6 +3898,12 @@ class structureGenerator{
         // { x1: 120, y1: 280, x2: 140, y2: 280, type: 'wood', mirrored: false },
         // { x1: 200, y1: 280, x2: 220, y2: 280, type: 'wood', mirrored: false }
       ],off:{x:-170,y:-281}, scale:1.5, boundingBox:[120,120,220,280] 
+    },
+    "acceleration triangle":{
+      arr:[
+        { x1: 40, y1: 300, x2: 0, y2: 400, type: 'accelerator', mirrored: false },
+        { x1: 40, y1: 300, x2: 80, y2: 400, type: 'accelerator', mirrored: false }
+      ], off:{x:-40,y:-401}, scale:1, boundingBox:[0,300,80,400]
     }
   }
 
@@ -3876,6 +3917,12 @@ class structureGenerator{
     let d = this.dict[struct]
     if(scale===undefined){scale=d.scale}
       return({w:(d.boundingBox[2]-d.boundingBox[0])*scale, h:(d.boundingBox[3]-d.boundingBox[1])*scale })
+  }
+
+  static dbg(struct){
+    this.build(struct,0,-1)
+    let scale = this.dict[struct].scale
+    particles.push(new rectParticle(...this.boundingBox(struct,0,-1,scale)))
   }
 
 
@@ -3962,7 +4009,7 @@ class structureGenerator{
 
 
 
-    //@gentest @starter room
+    //@gentest @starter room @starter box
     // structureGenerator.build("vase",0,0)
 
 
@@ -3970,7 +4017,7 @@ class structureGenerator{
     newWall(-200,0,-200,600,can.ctx)
     makeWooden(newWall(800,0,800,600,can.ctx))
 
-    // build(400,0,400,600,"normal",{sided:1})
+    // build(400,0,400,600,"accelerator")
 
 
     entityList.walls.push(new wall(-200,600,800,600,can.ctx)) // floor
@@ -5166,14 +5213,14 @@ function generateLevels(x,y){
 
 
   build(midX-fat,height,midX,height-250,"wood",{splitting:{minLength:50,breakLength:500},mirrorX:midX,sided:1}) // roof triangle
-  build(midX-fat,height,midX-fat-400,height-450,"normal",{splitting:{minLength:50,breakLength:100},mirrorX:midX})
+  build(midX-fat,height,midX-fat-400,height-450,"accelerator",{splitting:{minLength:50,breakLength:100},mirrorX:midX,reverse:true,mirroredReverse:true})
   fat += 400
   height -= 450
-  build(midX-fat,height,midX-fat-900,height-250,"normal",{splitting:{minLength:50,breakLength:100},mirrorX:midX})
+  build(midX-fat,height,midX-fat-900,height-250,"accelerator",{splitting:{minLength:50,breakLength:100},mirrorX:midX,reverse:true,mirroredReverse:true})
   fat += 900
   height -= 250
 
-  build(midX-fat,height,midX-fat-600,height-1250,"normal",{splitting:{minLength:50,breakLength:100,breakVariability:()=>{return(rand(3))}},mirrorX:midX})
+  build(midX-fat,height,midX-fat-600,height-1250,"accelerator",{splitting:{minLength:50,breakLength:100,breakVariability:()=>{return(rand(3))}},mirrorX:midX,reverse:true,mirroredReverse:true})
   height -= 1250
   fat+=600
 
@@ -5190,7 +5237,7 @@ function generateLevels(x,y){
       let options = {}
       if(rand(0.3)){options.grunt=true}
       summon(rand(0.6)?"normal":"apprentice",mx,h-60,options)
-    } else if(rand(0.3)){
+    } else if(rand(0.7)){
       structureGenerator.build(ranarr("bottle","vase","container2"),mx,h)
     }
   }
@@ -5313,7 +5360,7 @@ function generateLevels(x,y){
 // effects (1 - brute boxes) //
 // scrolling background (1 - doesnt work, dizzy) //
 // acceleration update //
-
+// phone screen bar fix //
 
 
 // rain and particles
@@ -5330,4 +5377,4 @@ function generateLevels(x,y){
 // ball sweep physics
 // wall sweep physics fix 2
 // notifications update
-// phone screen bar fix
+// blood splatter ellipse
