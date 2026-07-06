@@ -3984,7 +3984,9 @@ class structureGenerator{
         { x1: 140, y1: 200, x2: 100, y2: 280, type: 'wood', mirrored: false },
         { x1: 200, y1: 200, x2: 240, y2: 280, type: 'wood', mirrored: false }
       ], off:{x:-170,y:-281}, scale:1, boundingBox:[100,200,240,280] ,genFunc:(x,y,options)=>{
-        summon("enerjitsuist",x,y-options.scale*120)
+        if(rand(0.3)){
+          summon("enerjitsuist",x,y-options.scale*120)
+        }
       }
     }
   }
@@ -5233,7 +5235,11 @@ function generateLevels(x,y){
     if(Math.random()>0.5){ // spawn rate
       summon("normal",start+floorX*0.5,floor-60,{brute:rand(0.03)})
     } else if(rand(0.6) && Math.abs(floorX) > 200){
-      structureGenerator.build(ranarr("container","vase","podium","container","vase"),start+floorX*rand()*0.9,floor)
+      let res = structureGenerator.build(ranarr("container","vase","podium","container","vase"),start+floorX*rand()*0.9,floor)
+      if(rand(0.4)){
+      while(rand(0.9) && res !== false){
+        res = structureGenerator.build("vase",start+floorX*rand()*0.9,floor)
+      }}
     }
 
 
