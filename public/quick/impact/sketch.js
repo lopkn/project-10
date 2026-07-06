@@ -3408,6 +3408,11 @@ class mobileDebug{
 
           b.energenin = 0.01
 
+          b.onDeath.push(()=>{
+            if(b.tags.has("clone")){return}
+            particleFuncs.circle(b.x,b.y,undefined,13,b.r*1.3)
+          })
+
           b.AICustomUpdate = (b,dt)=>{
             let los = AIlos(b.x,b.y,p.x,p.y,b)
             
@@ -3685,13 +3690,35 @@ class mobileDebug{
         p.size = b.r+2
         p.noFill = 1
         particles.push(p)
+      },
+    "generic line":(x,y,x2,y2)=>{
+      let p = new lineyParticle(x,y,400,colorFuncs["generic white"])
+      p.vx = (x2-x)/3
+      p.vy = (y2-y)/3
+      p.speed = 3
+      particles.push(p)
+      p.updateStall = 30
+      p.tailLength = 30
+      return(p)
+    },
+    "circle":(x=0,y=0,type="generic line",divisions=10,radius=50)=>{
+      let r = 0
+      let arcLength = Math.PI*2/divisions
+      let p1 = {x:Math.cos(r)*radius,y:Math.sin(r)*radius}
+      for(let i = 0; i < divisions; i++){
+        r += arcLength
+        let p2 = {x:Math.cos(r)*radius,y:Math.sin(r)*radius}
+        particleFuncs[type](p1.x+x,p1.y+y,p2.x+x,p2.y+y)
+        p1 = p2
       }
+    }
   }
 
   var colorFuncs = {
     "explosion":(t)=>{let x=rand(255);return("rgba(255,"+x+",0,"+t*2+")")},
     "bloody explosion":(t)=>{let x=rand(255);return("rgba(95,0,0,"+t+")")},
     "hp":(l)=>{return(`rgba(255,40,40,${1-l})`)},
+    "generic white":(l)=>{return(`rgba(255,255,255,${1-l})`)},
     "cheater":(l)=>{return(`rgba(0,${rand(40)+40},0,${1-l})`)},
     "respawn":(b)=>{return(`hsl(${b.color[0]},50%,60%)`)}
   }
@@ -5214,7 +5241,6 @@ function generateLevels(x,y){
   }
 
   /// boss level
-
 
   // newWallTo(wallX.a,height,200-floorWidth,-300)
   // newWallTo(wallX.b,height,-(200-floorWidth),-300)
