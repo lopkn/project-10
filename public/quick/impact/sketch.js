@@ -1149,6 +1149,13 @@ class ball{
     }
   }
 
+  shadow(ball){
+    let traits = ["x","y","vx","vy","r","color","colorDest"] // theres a problem with inheriance here
+    traits.forEach((e)=>{
+      this[e] = ball[e]
+    })
+  }
+
 
   respawn(check){
 
@@ -3363,33 +3370,72 @@ class mobileDebug{
         }
       },
       "dasher":()=>{
-        b.damageMultiplier = 0.7
-        b.color = [340,62,41]
+          b.damageMultiplier = 0.7
+          b.color = [340,62,41]
 
-        b.accel.set(0,0,"gravity")
-        trailify(b,15,9)
+          b.accel.set(0,0,"gravity")
+          trailify(b,15,9)
 
-        b.energenin = 0.01
-        b.jumpPower = 2
+          b.energenin = 0.01
+          b.jumpPower = 2
 
-        b.AICustomUpdate = (b,dt)=>{
-          let los = AIlos(b.x,b.y,p.x,p.y,b)
-          
-          if(los){
-            b.target = p
+          b.AICustomUpdate = (b,dt)=>{
+            let los = AIlos(b.x,b.y,p.x,p.y,b)
+            
+            if(los){
+              b.target = p
+            }
+            let target = b.target?b.target:b.home
+
+            if(b.energy > 30 ){
+              // jump towards player
+              b.AInextUpdateTime = rand(1000)+1550
+              b.jump(target.x-b.x,target.y-b.y,0.003)
+
+              let startTime = gameWorld.lastTime
+              b.decel.setDynamic(()=>{let z=Math.min(0.01,0.00001*(gameWorld.lastTime-startTime));return({x:z,y:z})},"decel")
+
+            }
           }
-          let target = b.target?b.target:b.home
+      },
+      "divider":()=>{
+          b.damageMultiplier = 0.7
+          b.color = [340,62,41]
 
-          if(b.energy > 30 ){
-            // jump towards player
-            b.AInextUpdateTime = rand(1000)+1550
-            b.jump(target.x-b.x,target.y-b.y,0.003)
+          b.accel.set(0,0,"gravity")
+          b.tags.add("noDefaultArc")
+          trailify(b,15,9)
 
-            let startTime = gameWorld.lastTime
-            b.decel.setDynamic(()=>{let z=Math.min(0.01,0.00001*(gameWorld.lastTime-startTime));return({x:z,y:z})},"decel")
+          b.energenin = 0.01
 
+          b.AICustomUpdate = (b,dt)=>{
+            let los = AIlos(b.x,b.y,p.x,p.y,b)
+            
+            if(los){
+              b.target = p
+            }
+            let target = b.target?b.target:b.home
+
+            if(b.energy > 30 ){
+              // jump towards player
+              b.AInextUpdateTime = rand(1000)+1550
+              b.jump(target.x-b.x,target.y-b.y,0.003)
+
+              let startTime = gameWorld.lastTime
+              b.decel.setDynamic(()=>{let z=Math.min(0.01,0.000001*(gameWorld.lastTime-startTime));return({x:z,y:z})},"decel")
+
+              if(rand()>0.5 && !b.tags.has("clone")){
+                let nb = summon("divider")
+                nb.hp = b.hp
+                nb.mass = b.mass * 0.8
+                nb.damageMultiplier = b.damageMultiplier * 0.2
+                nb.hpRegen = -0.004
+                nb.tags.add("clone")
+                nb.shadow(b)
+              }
+
+            }
           }
-        }
       },
       "zombie":()=>{
         b.damageMultiplier = 0.2
@@ -3904,6 +3950,15 @@ class structureGenerator{
         { x1: 40, y1: 300, x2: 0, y2: 400, type: 'accelerator', mirrored: false },
         { x1: 40, y1: 300, x2: 80, y2: 400, type: 'accelerator', mirrored: false }
       ], off:{x:-40,y:-401}, scale:1, boundingBox:[0,300,80,400]
+    },
+    "podium":{
+      arr:[
+        { x1: 100, y1: 200, x2: 240, y2: 200, type: 'wood', mirrored: false },
+        { x1: 140, y1: 200, x2: 100, y2: 280, type: 'wood', mirrored: false },
+        { x1: 200, y1: 200, x2: 240, y2: 280, type: 'wood', mirrored: false }
+      ], off:{x:-170,y:-281}, scale:1, boundingBox:[100,200,240,280] ,genFunc:(x,y,options)=>{
+        summon("enerjitsuist",x,y-options.scale*120)
+      }
     }
   }
 
@@ -5151,7 +5206,7 @@ function generateLevels(x,y){
     if(Math.random()>0.5){ // spawn rate
       summon("normal",start+floorX*0.5,floor-60,{brute:rand(0.03)})
     } else if(rand(0.6) && Math.abs(floorX) > 200){
-      structureGenerator.build(ranarr("container","vase"),start+floorX*rand()*0.9,floor)
+      structureGenerator.build(ranarr("container","vase","podium","container","vase"),start+floorX*rand()*0.9,floor)
     }
 
 
@@ -5364,6 +5419,7 @@ function generateLevels(x,y){
 
 
 // rain and particles
+// explosions break walls
 // explosives
 // onebody objects / decorators
 // sounds
