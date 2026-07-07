@@ -2790,6 +2790,76 @@ class particles{
   }
 }
 
+
+class pauseMenu{
+
+
+
+  static init(){
+
+
+
+
+    //     <button id="muteButton">
+    //         Sound: ON
+    //     </button>
+
+    //     <button class="exit" id="exitButton">
+    //         Exit Menu
+    //     </button>
+
+
+  this.menu = document.createElement("div")
+  this.menu.id = "pauseMenu"
+  document.body.appendChild(this.menu)
+  this.card = document.createElement("div")
+  this.card.classList.add("pause-card")
+  this.menu.appendChild(this.card)
+
+  let title = document.createElement("h1")
+  title.innerText = "Paused"
+  this.card.appendChild(title)
+
+  this.makeSlider("test")
+
+
+  }
+
+  static makeSlider(name){
+    let sel = document.createElement("div")
+    sel.classList.add("selection")
+    let lab = document.createElement("label")
+    lab.appendChild(document.createTextNode(name+": "))
+    let span = document.createElement('span');
+    span.id = name+'Label';
+    span.textContent = '50%';
+    lab.appendChild(span)
+    sel.appendChild(lab)
+
+    let inp = Object.assign(document.createElement("input"),{
+      type:"range",
+      id:name+"Slider",
+      min:0,
+      max:100,
+      value:50
+    })
+    sel.appendChild(inp)
+
+    this.card.appendChild(sel)
+
+  }
+
+  static open(){
+    this.menu.classList.add("open");
+  }
+
+  static close(){
+    this.menu.classList.remove("open");
+  }
+}
+
+pauseMenu.init()
+
 class gameWorld{
     static gravity = 0.001
     static airFriction = 0.0003
@@ -2803,6 +2873,7 @@ class gameWorld{
     static viewAABB = [0,0,Width,Height]
 
     static timeOuts = []
+    static paused = false
 
     static TO(time,func){
       time = this.lastTime + time
@@ -2830,6 +2901,25 @@ class gameWorld{
         }
       }
     }
+
+  static togglePause(){
+    if(this.paused){
+      this.unpause()
+    } else {
+      this.pause()
+    }
+  }
+
+  static pause(){
+    this.timeWarp = 0
+    this.paused = true
+    pauseMenu.open()
+  }
+
+  static unpause(){
+    this.paused = false
+    pauseMenu.close()
+  }
 
 }
 
@@ -4350,6 +4440,7 @@ function dualMainStart(){
 setTimeout(()=>{
   frameFuncs.push((time,dt,date)=>{
   
+  if(gameWorld.paused){return}
   let pn2 = performance.now()
     let pn = performance.now()
     if(test.dtLock){
@@ -4945,6 +5036,12 @@ window.addEventListener("resize",(e)=>{
 
 document.addEventListener("keydown",(e)=>{
   controller.keys[e.key.toLowerCase()]=true
+
+
+  if(e.key === "Escape"){
+    gameWorld.togglePause()
+  }
+
 
   if(e.key === "T"){
     player.movementSpeed = 0.05
