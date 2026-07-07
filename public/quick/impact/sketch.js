@@ -8,6 +8,8 @@ let  Height = document.documentElement.clientHeight
 let WidthM = Width/2
 let HeightM = Height/2
 
+const TAU = Math.PI*2
+
 // let myCanvas = document.getElementById("myCanvas")
 
 //   myCanvas.width = Math.floor(Width)
@@ -234,7 +236,7 @@ function normalRandom(mean, stderr) {
     const u1 = Math.random();
     const u2 = Math.random();
 
-    const z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
+    const z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(TAU * u2);
     return z0 * stderr + mean;
 }
 
@@ -1292,7 +1294,7 @@ class ball{
     for(let i = 0; i < bloody; i++){
       let rnd = rand(1.1)
       setTimeout(()=>{
-        particles.push(new particle(options.contact.x,options.contact.y,this.vx*rnd*(1+rand(spread))+rand(spread2),this.vy*rnd*(1+rand(spread))+rand(spread2)))
+        new particle(options.contact.x,options.contact.y,this.vx*rnd*(1+rand(spread))+rand(spread2),this.vy*rnd*(1+rand(spread))+rand(spread2))
       },rand(100))
     }
 
@@ -1307,7 +1309,7 @@ class ball{
           if(Math.random()>(ratio**6)*0.9+0.1){return}
 
         let rnd = rand(1.1)
-        particles.push(new particle(this.x,this.y,this.vx*rnd+rand(-0.3*ratio),this.vy*rnd+rand(-0.3*ratio)))
+        new particle(this.x,this.y,this.vx*rnd+rand(-0.3*ratio),this.vy*rnd+rand(-0.3*ratio))
 
         if(rand(0.5) && splatter){
           particleFuncs["bloody explosion"](this.x+rand(-80),this.y+rand(-80),1,rand(500)+1000)
@@ -1322,11 +1324,11 @@ class ball{
           let ratio = timeLeft/300
 
         for(let i = 0; i < 3; i++){
-          let ang = rand(Math.PI*2)
+          let ang = rand(TAU)
           let r = Lrotate(contactV.x,contactV.y,ang)
           let d = Math.cos(ang)+1.3
-          // particles.push(new particle(options.contact.x + r.x*(1-ratio)*250,options.contact.y + r.y*(1-ratio)*250,r.x/4,r.y/4))
-          particles.push(new particle(options.contact.x +contactV.x*(1-ratio),options.contact.y+contactV.y*(1-ratio),r.x*ratio/3*d,r.y*ratio/3*d))
+          // new particle(options.contact.x + r.x*(1-ratio)*250,options.contact.y + r.y*(1-ratio)*250,r.x/4,r.y/4)
+          new particle(options.contact.x +contactV.x*(1-ratio),options.contact.y+contactV.y*(1-ratio),r.x*ratio/3*d,r.y*ratio/3*d)
         }
 
 
@@ -1481,7 +1483,7 @@ class ball{
       let pseudovx = this.x-lastX
       let pseudovy = this.y-lastY
       if(debug){
-        particles.push(new lineParticle(this.x,this.y,lastX,lastY))
+        new lineParticle(this.x,this.y,lastX,lastY)
       }
       let collisionData = {"collided":false,"minDist":Infinity}
 
@@ -1608,7 +1610,7 @@ class ball{
     }
     this.ctx.fillStyle = col
     this.ctx.beginPath()
-    this.ctx.arc(this.x,this.y,this.r,0,Math.PI*2)
+    this.ctx.arc(this.x,this.y,this.r,0,TAU)
     this.ctx.fill()
     if(!this.tags.has("noDefaultArc")){
       this.ctx.stroke()
@@ -1816,37 +1818,47 @@ class wall{
   draw(){
 
 
+    if(this.tags.has("oneBody") && !this.tags.has("oneBodyRepresentor")){return}
     this.ctx.lineWidth = this.size?this.size:Math.min(Math.max(this.hp**0.5,5),10)
     this.ctx.strokeStyle = this.color
     this.ctx.save()
-    this.ctx.beginPath()
-    this.ctx.moveTo(this.x,this.y)
-    this.ctx.lineTo(this.x2,this.y2)
-
     if(this.lineDash){
       this.ctx.setLineDash(this.lineDash.sep)
       this.ctx.lineDashOffset = gameWorld.lastTime * this.lineDash.speed
     }
 
 
-    if(this.tags.has("sided")){
 
-      this.ctx.shadowOffsetX = this.normal.x*-1
-      this.ctx.shadowOffsetY = this.normal.y*-1
-      // this.ctx.shadowColor = `color-mix(in srgb, ${this.ctx.strokeStyle}, white 50%)`
-      this.ctx.shadowColor = `hsl(from ${this.ctx.strokeStyle} h s calc(100 - l))`
-      // this.ctx.shadowColor = `rgb(255,25,0)`
 
-      this.ctx.stroke() // matching stroke here
 
-      this.ctx.lineWidth = 1
-      this.ctx.beginPath()
-      this.ctx.moveTo(this.midpoint.x,this.midpoint.y)
-      this.ctx.lineTo(this.midpoint.x+this.normal.x*10,this.midpoint.y+this.normal.y*10)
-      this.ctx.stroke()
+
+    if(this.tags.has("oneBodyRepresentor")){
+      let path = this.oneBodyPath
+      this.ctx.stroke(path)
 
     } else {
-      this.ctx.stroke() // matching stroke here
+      this.ctx.beginPath()
+      this.ctx.moveTo(this.x,this.y)
+      this.ctx.lineTo(this.x2,this.y2)
+      if(this.tags.has("sided")){
+
+        this.ctx.shadowOffsetX = this.normal.x*-1
+        this.ctx.shadowOffsetY = this.normal.y*-1
+        // this.ctx.shadowColor = `color-mix(in srgb, ${this.ctx.strokeStyle}, white 50%)`
+        this.ctx.shadowColor = `hsl(from ${this.ctx.strokeStyle} h s calc(100 - l))`
+        // this.ctx.shadowColor = `rgb(255,25,0)`
+
+        this.ctx.stroke() // matching stroke here
+
+        this.ctx.lineWidth = 1
+        this.ctx.beginPath()
+        this.ctx.moveTo(this.midpoint.x,this.midpoint.y)
+        this.ctx.lineTo(this.midpoint.x+this.normal.x*10,this.midpoint.y+this.normal.y*10)
+        this.ctx.stroke()
+
+      } else {
+        this.ctx.stroke() // matching stroke here
+      }
     }
     this.ctx.restore()
 
@@ -1933,17 +1945,14 @@ function wall_collision_handler(ball,collisionData,dt,type="normal"){
     if(debug){
         let lp = new lineParticle(ball.x,ball.y,ball.x+ball.vx*200,ball.y+ball.vy*200)
         lp.color = [255,0,255]
-        particles.push(lp)
         crossParticle(p.x,p.y)
         crossParticle(closest.x,closest.y,[255,255,0])
 
         lp = new lineParticle(p.x,p.y,p.x-reflectionVector.x*200,p.y-reflectionVector.y*200)
         lp.color = [255,255,0]
-        particles.push(lp)
 
         lp = new lineParticle(p.x,p.y,p.x-old.vx*200,p.y-old.vy*200)
         lp.color = [0,255,0]
-        particles.push(lp)
         if(test.expect(distance(reflectionVector.x,reflectionVector.y),1)){debugger}
       }
 
@@ -2126,7 +2135,7 @@ class item{
       f(by)
     })
     if(!nodraw){
-      particles.push(new itemShellParticle(this))
+      new itemShellParticle(this)
     }
     this.remove()
   }
@@ -2188,7 +2197,7 @@ class orb{
   draw(dt){
     this.ctx.fillStyle = this.color
     this.ctx.beginPath()
-    this.ctx.arc(this.x,this.y+Math.sin(gameWorld.lastTime/200)*12,10,0,Math.PI*2)
+    this.ctx.arc(this.x,this.y+Math.sin(gameWorld.lastTime/200)*12,10,0,TAU)
     this.ctx.fill()
   }
 }
@@ -2197,35 +2206,50 @@ class orb{
 
 
 
-
-class explosionParticle{
-  constructor(x,y,size=()=>{return(25)},width=()=>{return(2)},color=()=>{return("rgb(255,0,255")},life=1000){
-
-    this.z=1
-
-    this.x = x
-    this.y = y
-    this.color = color
-    this.size = size
-    this.width = width
+class particleInstance{
+  constructor(life=1000){
     this.life = life
-    this.maxLife = this.life
-    this.ctx = can.ctx
-    this.noFill = true
-
+    particles.push(this)
   }
+
   update(dt){
     this.life -= dt
     if(this.life <= 0){
       return("del")
     }
   }
+
+  get lifeSetter(){
+    return(this.life)
+  }
+  set lifeSetter(x){
+    this.life = x
+    this.maxLife = Math.max(this.life,this.maxLife)
+  }
+}
+
+
+class explosionParticle extends particleInstance{
+  constructor(x,y,size=()=>{return(25)},width=()=>{return(2)},color=()=>{return("rgb(255,0,255")},life=1000){
+    super(life)
+    this.z=1
+    this.x = x
+    this.y = y
+    this.color = color
+    this.size = size
+    this.width = width
+    this.maxLife = this.life
+    this.ctx = can.ctx
+    this.noFill = true
+
+  }
+
   draw(){
     let lifePers = this.life/this.maxLife
     this.ctx.strokeStyle = this.color(lifePers,this)
     this.ctx.lineWidth = this.width(lifePers,this)
     this.ctx.beginPath()
-    this.ctx.arc(this.x,this.y,this.size(lifePers,this),0,Math.PI*2)
+    this.ctx.arc(this.x,this.y,this.size(lifePers,this),0,TAU)
     this.ctx.stroke()
     if(this.fill){
       this.ctx.fillStyle = this.fill(lifePers,this)
@@ -2237,8 +2261,9 @@ class explosionParticle{
 
 
 
-class particle{
+class particle extends particleInstance{
   constructor(x,y,vx,vy,life=1000){
+    super(life)
 
     this.z=1
 
@@ -2270,7 +2295,7 @@ class particle{
   draw(){
     this.ctx.fillStyle = "rgba("+this.color[0]+","+this.color[1]+","+this.color[2]+","+(this.life/this.maxLife)+")"
     this.ctx.beginPath()
-    this.ctx.arc(this.x,this.y,this.size,0,Math.PI*2)
+    this.ctx.arc(this.x,this.y,this.size,0,TAU)
     if(!this.noFill){
       this.ctx.fill()
     } else{
@@ -2281,19 +2306,15 @@ class particle{
   }
 }
 
-class crazyParticle{
+class crazyParticle extends particleInstance{
       constructor(x,y,life=25000){
+    super()
 
     this.z = 1
     this.life = life
     this.ctx = can.ctx
   }
-  update(dt){
-    this.life -= dt
-    if(this.life <= 0){
-      return("del")
-    }
-  }
+
   draw(){
     let aabb = gameWorld.viewAABB
 
@@ -2304,7 +2325,7 @@ class crazyParticle{
       // pos.x -= (pos.x%150)
       // pos.y -= (pos.y%150)
       this.ctx.translate(pos.x,pos.y)
-      this.ctx.rotate(rand(Math.PI*2))
+      this.ctx.rotate(rand(TAU))
       this.ctx.fillStyle = `rgba(${Math.floor(d/15)},0,0,${Math.min(0.2,this.life/50000)})`
 
       this.ctx.fillRect(0,0,200+rand(350),200+rand(350))
@@ -2316,8 +2337,9 @@ class crazyParticle{
 }
 
 
-class sparkParticle{
+class sparkParticle extends particleInstance{
     constructor(x,y,corners=10,life=1500){
+    super()
 
     this.z = 1
 
@@ -2334,11 +2356,11 @@ class sparkParticle{
 
     this.star = []
     for(let i = 0; i < corners-1; i++){
-      this.star.push(rand()*Math.PI*2)
+      this.star.push(rand()*TAU)
     }
     //sort
     this.star.sort((a,b)=>{return a-b})
-    // let ratio = Math.PI*2/this.star[this.star.length-1]
+    // let ratio = TAU/this.star[this.star.length-1]
     this.star.forEach((e,i)=>{
       this.star[i] = {ang:e,len:this.radius+rand(this.radius*3)}
     })
@@ -2369,7 +2391,7 @@ class sparkParticle{
       ang=s.ang
     }
     let s = this.star[this.star.length-1]
-    let wid = Math.max(Math.PI*2-s.ang,1)
+    let wid = Math.max(TAU-s.ang,1)
     let rot = Lrotate(0,-this.radius-s.len*wid,(s.ang)/2+Math.PI)
     this.ctx.lineTo(rot.x,rot.y)
 
@@ -2381,8 +2403,9 @@ class sparkParticle{
   }
 }
 
-class sparkleParticle{
+class sparkleParticle extends particleInstance{
   constructor(x,y,life=1000){
+    super()
 
     this.z = 2
 
@@ -2438,15 +2461,16 @@ function shatterWall(wall,by,impactPt){
     let seg = 0
     let nextSeg = Math.random()*0.2
     while(nextSeg < 1){
-      particles.push(new shatteredWallParticle(wall,wall.x+dx*seg,wall.y+dy*seg,wall.x+dx*nextSeg,wall.y+dy*nextSeg,by.vx,by.vy,impactPt,nextSeg-seg))
+      new shatteredWallParticle(wall,wall.x+dx*seg,wall.y+dy*seg,wall.x+dx*nextSeg,wall.y+dy*nextSeg,by.vx,by.vy,impactPt,nextSeg-seg)
       seg = nextSeg
       nextSeg = seg + Math.random()*0.2
     }
-    particles.push(new shatteredWallParticle(wall,wall.x+dx*seg,wall.y+dy*seg,wall.x2,wall.y2,by.vx,by.vy,impactPt,1-seg))
+    new shatteredWallParticle(wall,wall.x+dx*seg,wall.y+dy*seg,wall.x2,wall.y2,by.vx,by.vy,impactPt,1-seg)
 }
 
-class shatteredWallParticle{
+class shatteredWallParticle extends particleInstance{
   constructor(wall,x1,y1,x2,y2,vx,vy,impactPt,lengthPers,life=4000){
+    super()
     this.z = 1
     this.wall = wall
     this.x = (x1+x2)/2
@@ -2528,8 +2552,9 @@ class shatteredWallParticle{
   }
 }
 
-class itemShellParticle{
+class itemShellParticle extends particleInstance{
   constructor(item,life=4000){
+    super()
     this.z = 1
     this.item = item
     this.life = life
@@ -2539,12 +2564,6 @@ class itemShellParticle{
 
     this.item.y = this.item.y + Math.sin(gameWorld.lastTime/400)*5
     this.ctx = this.item.ctx
-  }
-  update(dt){
-    this.life -= dt
-    if(this.life <= 0){
-      return("del")
-    }
   }
   draw(){
     this.ctx.lineWidth = this.lineWidth
@@ -2563,8 +2582,9 @@ class itemShellParticle{
   }
 }
 
-class lineyParticle{
+class lineyParticle extends particleInstance{
   constructor(x,y,life=1000,colorFunc=(l)=>{return(`rgb(0,${255*l},${255*l})`)},ctx=can.ctx){
+    super()
     this.x = x; this.y = y;
     this.vx = this.vy = 0;
     this.life = life
@@ -2572,9 +2592,7 @@ class lineyParticle{
     this.tailLength = 200
 
     this.colorFunc = colorFunc
-
     this.ctx = ctx
-
     this.size = 4
 
     this.updateStall = 0
@@ -2635,8 +2653,9 @@ class lineyParticle{
 
 
 
-class rectParticle{
+class rectParticle extends particleInstance{
   constructor(x,y,x2,y2,life=5000){
+    super()
     this.z = 2
 
     // if(x===undefined){
@@ -2654,20 +2673,57 @@ class rectParticle{
     this.life = life
     this.maxLife = life
   }
-  update(dt){
-    this.life -= dt
-    if(this.life <= 0){
-      return("del")
-    }
-  }
+
   draw(){
     this.ctx.fillStyle = "rgba("+this.color[0]+","+this.color[1]+","+this.color[2]+","+(this.life/this.maxLife)+")"
     this.ctx.fillRect(this.x,this.y,this.w,this.h)
   }
 }
 
-class lineParticle{
+class lineToParticle extends particleInstance{
   constructor(x,y,x2,y2,life=1000){
+    super()
+    this.z = 1
+
+    this.x = x
+    this.y = y
+    // this.x2 = x2
+    // this.y2 = y2
+
+    // this.vx = this.x2-this.x
+    // this.vy = this.y2-this.y
+    this.vx = x2
+    this.vy = y2
+
+    this.color = [255,255,255]
+    this.lineWidth = 6
+
+    this.ctx = can.ctx
+    this.life = life
+    this.maxLife = life
+  }
+
+  ratio(x){
+    return([Math.min(x*3,1),x**6])
+  }
+
+  draw(){
+    this.ctx.lineWidth = this.lineWidth
+    let lifePers = this.life/this.maxLife
+    this.ctx.strokeStyle = "rgba("+this.color[0]+","+this.color[1]+","+this.color[2]+","+0.5+")"
+    let [r1,r2] = this.ratio(1-lifePers)
+    this.ctx.beginPath()
+    this.ctx.moveTo(this.x+this.vx*r1,this.y+this.vy*r1)
+    this.ctx.lineTo(this.x+this.vx*r2,this.y+this.vy*r2)
+    this.ctx.stroke()
+
+  }
+}
+
+
+class lineParticle extends particleInstance{
+  constructor(x,y,x2,y2,life=1000){
+    super()
     this.z = 2
 
     this.x = x
@@ -2681,12 +2737,6 @@ class lineParticle{
     this.ctx = can.ctx
     this.life = life
     this.maxLife = life
-  }
-  update(dt){
-    this.life -= dt
-    if(this.life <= 0){
-      return("del")
-    }
   }
   draw(){
     this.ctx.lineWidth = this.lineWidth
@@ -2704,8 +2754,6 @@ function crossParticle(x,y,color = [255,0,0]){
   let lp1 = new lineParticle(x+25,y+25,x-25,y-25)
   let lp2 = new lineParticle(x+25,y-25,x-25,y+25)
   lp1.color = lp2.color = color
-  particles.push(lp1)
-  particles.push(lp2)
 }
 
 
@@ -2995,7 +3043,6 @@ function allBallsCollide(time,i,ballList){
           p.ay = 0
           p.size = b.r+2
           p.noFill = 1
-          particles.push(p)
 
           p = new particle(a.x,a.y,0,0)
           p.life = 15*dmgA
@@ -3003,7 +3050,6 @@ function allBallsCollide(time,i,ballList){
           p.ay = 0
           p.size = a.r+2
           p.noFill = 1
-          particles.push(p)
           
           
 
@@ -3095,7 +3141,6 @@ class test{
   static particles(){
     setInterval((e)=>{
       let p = new particle(player.x,player.y-200,1,0)
-      particles.push(p)
       p.life *= 5
     },200)
   }
@@ -3379,6 +3424,12 @@ class mobileDebug{
           b.energenin = 0.01
           b.jumpPower = 2
 
+          b.updateFuncs.push((b)=>{
+            if(rand(0.1)){
+              particleFuncs.radiance(b.x,b.y)
+            }
+          })
+
           b.AICustomUpdate = (b,dt)=>{
             let los = AIlos(b.x,b.y,p.x,p.y,b)
             
@@ -3528,7 +3579,6 @@ class mobileDebug{
           spark.color = [0,125,240]
           spark.size = 25
           spark.z = 1
-          particles.push(spark)
           by.effects.addEffect("energenerative",{duration:5000})
         })
         i.color = "rgb(0,125,240)"
@@ -3540,7 +3590,6 @@ class mobileDebug{
           spark.color = [240,50,40]
           spark.size = 25
           spark.z = 1
-          particles.push(spark)
           particleFuncs["hp particles"](x,y)
           by.effects.addEffect("regenerative",{duration:12000})
         })
@@ -3579,7 +3628,7 @@ class mobileDebug{
         "armor+":()=>{
           i.onPickup.push((by)=>{
             by.armor = {hp:80,protection:0.8,maxHp:80}
-            // particles.push(new sparkParticle(by.x,by.y,15))
+            // new sparkParticle(by.x,by.y,15)
             by===entityList.player?notify(options.msg?options.msg:"picked up armor: +80 armor hp"):0
           })
         },
@@ -3666,18 +3715,18 @@ class mobileDebug{
   }
 
   var particleFuncs = {
-    "explosion":(x,y,s=1,l=1000)=>{particles.push(new explosionParticle(x,y,(t)=>{return((1-t)*315*s)},(t)=>{return(t*75*s)},colorFuncs.explosion,l))},
+    "explosion":(x,y,s=1,l=1000)=>{new explosionParticle(x,y,(t)=>{return((1-t)*315*s)},(t)=>{return(t*75*s)},colorFuncs.explosion,l)},
     "explosion2":(x,y,s=1)=>{for(let i =0; i < 5; i++){particleFuncs.explosion(x,y,s,3000/(i**1.5))}},
-    "bloody explosion":(x,y,s=1,l=1000)=>{particles.push(new explosionParticle(x,y,(t)=>{return((1-t)*35*s)},(t)=>{return(t*15*s)},colorFuncs["bloody explosion"],l))},
+    "bloody explosion":(x,y,s=1,l=1000)=>{new explosionParticle(x,y,(t)=>{return((1-t)*35*s)},(t)=>{return(t*15*s)},colorFuncs["bloody explosion"],l)},
     "bloody explosion2":(x,y,r=80,n=3)=>{for(let i =0; i < n; i++){gameWorld.TO(rand(250),()=>{particleFuncs["bloody explosion"](x+rand(-r),y+rand(-r),rand()+2,rand(400)+800)} )}},
-    "rect":(x,y,x2,y2)=>{particles.push(new rectParticle(x,y,x2,y2))},
-    "hp particle":(x,y)=>{let p = new lineyParticle(x,y,80+rand(80),colorFuncs.hp); p.speed = 3; particles.push(p)},
-    "cheating particle":(x,y)=>{let p = new lineyParticle(x,y,280+rand(2380),colorFuncs.cheater); p.speed = 30; p.updateStall = 300; p.tailLength = 20; particles.push(p)},
+    "rect":(x,y,x2,y2)=>{new rectParticle(x,y,x2,y2)},
+    "hp particle":(x,y)=>{let p = new lineyParticle(x,y,80+rand(80),colorFuncs.hp); p.speed = 3; },
+    "cheating particle":(x,y)=>{let p = new lineyParticle(x,y,280+rand(2380),colorFuncs.cheater); p.speed = 30; p.updateStall = 300; p.tailLength = 20;},
     "hp particles":(x,y,n=5)=>{for(let i =0; i < n; i++){particleFuncs["hp particle"](x,y)}},
 
     "respawn":(x,y,b)=>{
       for(let i = 0; i < 5; i++){
-        particles.push(new explosionParticle(x,y,(t)=>{return((t**0.4)*315)},(t)=>{return(4)},()=>{return(colorFuncs.respawn(b))},1000+200*i))
+        new explosionParticle(x,y,(t)=>{return((t**0.4)*315)},(t)=>{return(4)},()=>{return(colorFuncs.respawn(b))},1000+200*i)
       }
     },
 
@@ -3689,21 +3738,19 @@ class mobileDebug{
         p.ay = 0
         p.size = b.r+2
         p.noFill = 1
-        particles.push(p)
       },
     "generic line":(x,y,x2,y2)=>{
       let p = new lineyParticle(x,y,400,colorFuncs["generic white"])
       p.vx = (x2-x)/3
       p.vy = (y2-y)/3
       p.speed = 3
-      particles.push(p)
       p.updateStall = 30
       p.tailLength = 30
       return(p)
     },
     "circle":(x=0,y=0,type="generic line",divisions=10,radius=50)=>{
       let r = 0
-      let arcLength = Math.PI*2/divisions
+      let arcLength = TAU/divisions
       let p1 = {x:Math.cos(r)*radius,y:Math.sin(r)*radius}
       for(let i = 0; i < divisions; i++){
         r += arcLength
@@ -3711,6 +3758,11 @@ class mobileDebug{
         particleFuncs[type](p1.x+x,p1.y+y,p2.x+x,p2.y+y)
         p1 = p2
       }
+    },
+    "radiance":(x=0,y=0,r=500)=>{
+      let angle = Math.random()*TAU
+      let dest = Lrotate(0,500,angle)
+      let p = new lineToParticle(x,y,dest.x,dest.y)
     }
   }
 
@@ -3733,7 +3785,7 @@ class mobileDebug{
     p.trail.forEach((e,i)=>{
       p.ctx.fillStyle = "hsla("+(p.color[0])+ "," + s + "%," + l + "%,"+Math.min(0.5,0.01*i*e[2] - 0.5)+")"
       p.ctx.beginPath()
-      p.ctx.arc(e[0],e[1],p.r*0.97,0,Math.PI*2)
+      p.ctx.arc(e[0],e[1],p.r*0.97,0,TAU)
       p.ctx.fill()
     })
 
@@ -3865,7 +3917,7 @@ class mobileDebug{
   //     p.trail.forEach((e,i)=>{
   //       p.ctx.fillStyle = "hsla("+(p.color[0])+ "," + s + "%," + l + "%,"+Math.min(0.5,0.01*i*e[2] - 0.5)+")"
   //       p.ctx.beginPath()
-  //       p.ctx.arc(e[0],e[1],p.r*0.97,0,Math.PI*2)
+  //       p.ctx.arc(e[0],e[1],p.r*0.97,0,TAU)
   //       p.ctx.fill()
   //     })
   //     if(p.trail.length>50){
@@ -3930,6 +3982,13 @@ class structureGenerator{
   { x1: 40, y1: 340, x2: 40, y2: 400, type: 'wood', mirrored: false, tags:["breakable","AIdamage"],hpMult:0.2 },
   { x1: 0, y1: 340, x2: 80, y2: 340, type: 'wood', mirrored: false, tags:["breakable","AIdamage"],hpMult:0.2}
   ],off:{x:-20,y:-401}, scale:1.2, boundingBox:[0,340,80,400], },
+  "table2":{
+    arr:[
+      { x1: 80, y1: 180, x2: 260, y2: 180, type: 'wood', mirrored: false },
+      { x1: 100, y1: 180, x2: 100, y2: 220, type: 'wood', mirrored: false },
+      { x1: 240, y1: 180, x2: 240, y2: 220, type: 'wood', mirrored: false }
+    ], off:{x:-170,y:-221}, scale:1, boundingBox:[80,180,260,220] 
+  },
 
     "bottle":{arr:[
   { x1: 160, y1: 60, x2: 160, y2: 180, type: 'sturdy glass', mirrored: false },
@@ -3988,6 +4047,36 @@ class structureGenerator{
           summon("enerjitsuist",x,y-options.scale*120)
         }
       }
+    },
+    "flask1":{
+      arr:[
+        { x1: 160, y1: 120, x2: 160, y2: 180, type: 'glass', mirrored: false },
+        { x1: 160, y1: 180, x2: 140, y2: 200, type: 'glass', mirrored: false },
+        { x1: 140, y1: 200, x2: 140, y2: 220, type: 'glass', mirrored: false },
+        { x1: 140, y1: 220, x2: 160, y2: 240, type: 'glass', mirrored: false },
+        { x1: 160, y1: 240, x2: 180, y2: 240, type: 'glass', mirrored: false },
+        { x1: 180, y1: 240, x2: 200, y2: 220, type: 'glass', mirrored: false },
+        { x1: 200, y1: 220, x2: 200, y2: 200, type: 'glass', mirrored: false },
+        { x1: 200, y1: 200, x2: 180, y2: 180, type: 'glass', mirrored: false },
+        { x1: 180, y1: 180, x2: 180, y2: 120, type: 'glass', mirrored: false }
+      ], off:{x:-170,y:-245}, scale:1, boundingBox:[140,120,200,240], oneBody:true 
+    },
+    "flask2":{
+      arr:[
+        { x1: 160, y1: 100, x2: 160, y2: 200, type: 'glass', mirrored: false },
+        { x1: 160, y1: 200, x2: 120, y2: 220, type: 'glass', mirrored: false },
+        { x1: 120, y1: 220, x2: 100, y2: 260, type: 'glass', mirrored: false },
+        { x1: 100, y1: 260, x2: 100, y2: 300, type: 'glass', mirrored: false },
+        { x1: 100, y1: 300, x2: 120, y2: 340, type: 'glass', mirrored: false },
+        { x1: 120, y1: 340, x2: 160, y2: 360, type: 'glass', mirrored: false },
+        { x1: 160, y1: 360, x2: 200, y2: 360, type: 'glass', mirrored: false },
+        { x1: 200, y1: 360, x2: 240, y2: 340, type: 'glass', mirrored: false },
+        { x1: 240, y1: 340, x2: 260, y2: 300, type: 'glass', mirrored: false },
+        { x1: 260, y1: 300, x2: 260, y2: 260, type: 'glass', mirrored: false },
+        { x1: 260, y1: 260, x2: 240, y2: 220, type: 'glass', mirrored: false },
+        { x1: 240, y1: 220, x2: 200, y2: 200, type: 'glass', mirrored: false },
+        { x1: 200, y1: 200, x2: 200, y2: 100, type: 'glass', mirrored: false }
+      ], off:{x:-180,y:-365}, scale:1, boundingBox:[100,100,260,360] , oneBody:true 
     }
   }
 
@@ -4006,7 +4095,7 @@ class structureGenerator{
   static dbg(struct){
     this.build(struct,0,-1)
     let scale = this.dict[struct].scale
-    particles.push(new rectParticle(...this.boundingBox(struct,0,-1,scale)))
+    new rectParticle(...this.boundingBox(struct,0,-1,scale))
   }
 
 
@@ -4032,7 +4121,7 @@ class structureGenerator{
         if(intersected){return(false)}
 
         //debug 
-        // particles.push(new rectParticle(...this.boundingBox(struct,x,y,options.scale)))
+        // new rectParticle(...this.boundingBox(struct,x,y,options.scale))
 
       }
 
@@ -4055,7 +4144,12 @@ class structureGenerator{
       if(d.oneBody){
         // let breakAll = (a,b,c)=>{out.forEach((e)=>{e.break(b,c)})}
         // out.forEach((e)=>{e.events.onBreak.push(breakAll)})
-        out.forEach((e)=>{e.collateral = out})
+        let oneBody = new Path2D()
+        oneBody.moveTo(out[0].x,out[0].y)
+        out.forEach((e)=>{oneBody.lineTo(e.x2,e.y2)})
+        out.forEach((e,i)=>{e.collateral = out; e.tags.add("oneBody")
+          if(i===0){e.oneBodyPath = oneBody; e.tags.add("oneBodyRepresentor")}
+        })
       }
 
       if(d.genFunc){
@@ -4624,7 +4718,7 @@ function drawShootAngle(date){
 
     if(!controller.mouseDownPos.charged && date-controller.mouseDownPos.time>700){
       controller.mouseDownPos.charged = true
-      particles.push(new sparkleParticle(entityList.player.x,entityList.player.y))
+      new sparkleParticle(entityList.player.x,entityList.player.y)
       entityList.player.damageMultiplier = 2
     }
 
@@ -4692,7 +4786,7 @@ function drawPlayerGUI(){
 
       can.ctx.lineWidth = 1 
       can.ctx.beginPath()
-      can.ctx.arc(controller.movement.x,controller.movement.y,100,0,Math.PI*2)
+      can.ctx.arc(controller.movement.x,controller.movement.y,100,0,TAU)
       can.ctx.stroke()
     }
   }
@@ -5238,7 +5332,7 @@ function generateLevels(x,y){
       let res = structureGenerator.build(ranarr("container","vase","podium","container","vase"),start+floorX*rand()*0.9,floor)
       if(rand(0.4)){
       while(rand(0.9) && res !== false){
-        res = structureGenerator.build("vase",start+floorX*rand()*0.9,floor)
+        res = structureGenerator.build(ranarr("vase","flask1","flask2"),start+floorX*rand()*0.9,floor)
       }}
     }
 
@@ -5314,20 +5408,7 @@ function generateLevels(x,y){
   let aheight = 11250
   build(midX-fat,height,midX-fat-100,height-aheight,"normal",{splitting:{minLength:50,breakLength:100,breakVariability:()=>{return(rand(3))}},mirrorX:midX})
 
-  for(let i = aheight-100; i > 0; i-=rand(300)+100){
-    let l = rand(600)+600
-    let f = rand(fat*2-l)
-    let h = height-i
-    build(midX-fat+f,h,midX-fat+f+l,h,"brick",{sided:true,splitting:{minLength:50,breakLength:100,breakVariability:()=>{return(rand(3))}}})
-    let mx = midX-fat+f+l/2
-    if(rand(0.6)){
-      let options = {}
-      if(rand(0.3)){options.grunt=true}
-      summon(rand(0.6)?"normal":"apprentice",mx,h-60,options)
-    } else if(rand(0.7)){
-      structureGenerator.build(ranarr("bottle","vase","container2"),mx,h)
-    }
-  }
+
 
 
   for(let i = 0; i < 5; i++){
@@ -5350,6 +5431,21 @@ function generateLevels(x,y){
   for(let i = -2; i < 7; i++){
     let h = height-i*250
     build(midX-fat+500,h,midX-fat+700,h,"normal",{sided:true,splitting:{minLength:50,breakLength:100,breakVariability:()=>{return(rand(3))}},mirrorX:midX})
+  }
+
+    for(let i = aheight-100; i > 0; i-=rand(300)+100){
+    let l = rand(600)+600
+    let f = rand(fat*2-l)
+    let h = height-i
+    build(midX-fat+f,h,midX-fat+f+l,h,"brick",{sided:true,splitting:{minLength:50,breakLength:100,breakVariability:()=>{return(rand(3))}}})
+    let mx = midX-fat+f+l/2
+    if(rand(0.6)){
+      let options = {}
+      if(rand(0.3)){options.grunt=true}
+      summon(rand(0.6)?"normal":"apprentice",mx,h-60,options)
+    } else if(rand(0.7)){
+      structureGenerator.build(ranarr("bottle","vase","container2"),mx,h)
+    }
   }
 
   height-=aheight
@@ -5448,21 +5544,47 @@ function generateLevels(x,y){
 // scrolling background (1 - doesnt work, dizzy) //
 // acceleration update //
 // phone screen bar fix //
+// onebody objects //
+// lineto particles //
 
 
+
+
+//// USAGE
+// dividers
+// dashers
+// flash particles
+
+//// BEAUTY / UI
 // rain and particles
+// sounds
+// decorators
+// effects ui update
+// effect icons
+// blood splatter ellipse
+// sparkle effect
+// notifications update
+// escape menu
+
+//// GAME / BUILDINGS
 // explosions break walls
 // explosives
-// onebody objects / decorators
-// sounds
-// mob mechanics (ball remembers when it was hit by what, so no invulnerability in mobs)
-// AI movement
+// teleport
 // enerjitsu temple
 // rotatable buildings
 // zombie endless
-// effects ui update
-// teleport
+// wall breaking dependencies
+
+/// NEW / IDEAS
+// lore droplets
+
+//// AI / MOBS
+// mob mechanics (ball remembers when it was hit by what, so no invulnerability in mobs)
+// AI movement
+
+//// BUGS / DEBUGGING
 // ball sweep physics
 // wall sweep physics fix 2
-// notifications update
-// blood splatter ellipse
+// acceleration triangle fix
+// double wall penetration
+// performance measuring
