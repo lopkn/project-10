@@ -2794,6 +2794,7 @@ class particles{
 class pauseMenu{
 
 
+  static sliderValues = {}
 
   static init(){
 
@@ -2820,32 +2821,47 @@ class pauseMenu{
   title.innerText = "Paused"
   this.card.appendChild(title)
 
-  this.makeSlider("test")
-
+  this.makeSlider("sensitivity",(x)=>{
+    entityList.player.jumpForceMultiplier = x/25
+  },{
+    value:25
+  }
+  )
 
   }
 
-  static makeSlider(name){
+  static makeSlider(name,f,init={}){
     let sel = document.createElement("div")
     sel.classList.add("selection")
     let lab = document.createElement("label")
     lab.appendChild(document.createTextNode(name+": "))
     let span = document.createElement('span');
     span.id = name+'Label';
-    span.textContent = '50%';
     lab.appendChild(span)
     sel.appendChild(lab)
 
-    let inp = Object.assign(document.createElement("input"),{
+
+    let d = Object.assign({
       type:"range",
       id:name+"Slider",
       min:0,
       max:100,
       value:50
-    })
+    },init)
+    span.textContent = d.value;
+    console.log(d)
+    let inp = Object.assign(document.createElement("input"),d)
     sel.appendChild(inp)
 
     this.card.appendChild(sel)
+
+    inp.addEventListener("input",()=>{
+
+        this.sliderValues[name] = Number(inp.value);
+        f(this.sliderValues[name])
+        span.textContent = this.sliderValues[name];
+
+    });
 
   }
 
@@ -5643,7 +5659,7 @@ function generateLevels(x,y){
 // phone screen bar fix //
 // onebody objects //
 // lineto particles //
-
+// escape menu //
 
 
 
@@ -5661,7 +5677,7 @@ function generateLevels(x,y){
 // blood splatter ellipse
 // sparkle effect
 // notifications update
-// escape menu
+// escape menu buttons
 
 //// GAME / BUILDINGS
 // explosions break walls
