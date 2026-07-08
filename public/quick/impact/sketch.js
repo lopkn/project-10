@@ -2810,6 +2810,30 @@ class pauseMenu{
     //     </button>
 
 
+  this.pauseButton = document.createElement("button")
+  this.pauseButton.onclick = ()=>{
+    if(gameWorld.paused){
+      gameWorld.unpause()
+    } else {
+      gameWorld.pause()
+    }
+  }
+  this.pauseButton.innerText = "⏸"
+  Object.assign(this.pauseButton.style,{
+    width:"30px",
+    height:"30px",
+    borderRadius:"5px",
+    position:"absolute",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent:"center",
+    top:"0px",
+    right:"0px"
+  })
+
+  document.body.appendChild(this.pauseButton)
+
+
   this.menu = document.createElement("div")
   this.menu.id = "pauseMenu"
   document.body.appendChild(this.menu)
@@ -2862,6 +2886,13 @@ class pauseMenu{
         span.textContent = this.sliderValues[name];
 
     });
+
+    let ex = document.createElement("button")
+    ex.classList.add("exit")
+    ex.id = "exitButton"
+    ex.innerText = "Unpause"
+    ex.onclick = ()=>{gameWorld.unpause()}
+    this.card.appendChild(ex)
 
   }
 
@@ -5683,10 +5714,12 @@ function generateLevels(x,y){
 // explosions break walls
 // explosives
 // teleport
+// cheating buffs room
 // enerjitsu temple
 // rotatable buildings
 // zombie endless
 // wall breaking dependencies
+
 
 /// NEW / IDEAS
 // lore droplets
