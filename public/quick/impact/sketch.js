@@ -556,6 +556,52 @@ function check_collision_AABB_line(x1, y1, x2, y2, x3, y3, x4, y4) {
     // a collision occurs within the segment length.
     return t0 <= t1;
 }
+
+function check_rotated_AABB_line(x1, y1, x2, y2, x3, y3, x4, y4, rx, ry, ang){
+  let p1 = Lrotate(x3-rx,y3-ry,ang)
+  p1.x+=rx; p1.y += ry
+  let p2 = Lrotate(x4-rx,y4-ry,ang)
+  p2.x+=rx; p2.y += ry
+
+  // new lineParticle(p1.x,p1.y,p2.x,p2.y)
+  // new rectParticle(x1,y1,x2,y2)
+
+  return(check_collision_AABB_line(x1,y1,x2,y2,p1.x,p1.y,p2.x,p2.y))
+}
+
+function get_rotated_AABB(x1, y1, x2, y2, rx, ry, rotationRadians) {
+    // 1. Calculate the original center and positive half-extents
+    const cx = (x1 + x2) / 2;
+    const cy = (y1 + y2) / 2;
+    const hx = Math.abs(x2 - x1) / 2;
+    const hy = Math.abs(y2 - y1) / 2;
+
+    // 2. Rotate the center point around the pivot (rx, ry)
+    const cosA = Math.cos(rotationRadians);
+    const sinA = Math.sin(rotationRadians);
+    
+    const dx = cx - rx;
+    const dy = cy - ry;
+    
+    const rotatedCx = rx + (dx * cosA - dy * sinA);
+    const rotatedCy = ry + (dx * sinA + dy * cosA);
+
+    // 3. Project the half-extents onto the axes (always uses absolute trig values)
+    const absCos = Math.abs(cosA);
+    const absSin = Math.abs(sinA);
+
+    const hxNew = hx * absCos + hy * absSin;
+    const hyNew = hx * absSin + hy * absCos;
+
+    // 4. Return the new AABB centered at the rotated position
+    return [
+        rotatedCx - hxNew,
+        rotatedCy - hyNew,
+        rotatedCx + hxNew,
+        rotatedCy + hyNew
+    ];
+}
+
 function point_on_line(x, y, x1, y1, x2, y2) {
 // returns the closest point on the line segment to (x, y) and the t value along the segment (0 at start, 1 at end)
     const abx = x2 - x1;
@@ -4294,11 +4340,23 @@ class structureGenerator{
         options.rotation = 0
       }
       if(!options.noIntersectionCheck){
-        let otherWalls = grid.query(...this.boundingBox(struct,x,y,options.scale))
+        let otherWalls
+        if(options.rotation === 0){
+          otherWalls = grid.query(...this.boundingBox(struct,x,y,options.scale))
+        } else {
+          otherWalls = grid.query( ...get_rotated_AABB(...this.boundingBox(struct,x,y,options.scale),x,y,options.rotation))
+          // new rectParticle(...get_rotated_AABB(...this.boundingBox(struct,x,y,options.scale),x,y,options.rotation))
+        }
         let intersected = false;
         otherWalls.forEach((w)=>{
-          if(check_collision_AABB_line(...this.boundingBox(struct,x,y,options.scale),w.x,w.y,w.x2,w.y2)){
-            intersected = true
+          if(options.rotation === 0){
+            if(check_collision_AABB_line(...this.boundingBox(struct,x,y,options.scale),w.x,w.y,w.x2,w.y2)){
+              intersected = true
+            }
+          } else {
+            if(check_rotated_AABB_line(...this.boundingBox(struct,x,y,options.scale),w.x,w.y,w.x2,w.y2,x,y,-options.rotation)){
+              intersected = true
+            }
           }
         })
         if(intersected){return(false)}
@@ -5751,6 +5809,7 @@ function generateLevels(x,y){
 // lineto particles //
 // escape menu //
 // cheating buffs room //
+// teleport function //
 
 
 
@@ -5773,7 +5832,7 @@ function generateLevels(x,y){
 //// GAME / BUILDINGS
 // explosions break walls
 // explosives
-// teleport
+// teleportal
 // enerjitsu temple
 // rotatable buildings
 // zombie endless
