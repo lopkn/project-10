@@ -3290,6 +3290,15 @@ class test{
       camera.pos.y = entityList.player.y
       entityList.player.movementScalar *= 10
   }
+
+  static otherBall(){
+    let arr = Array.from(entityList.activatedBalls)
+    let x;
+    arr.forEach((e)=>{
+      if(e !== entityList.player){x=e}
+    })
+    return(x)
+  }
 }
 
 
@@ -3842,7 +3851,6 @@ class mobileDebug{
         if(los){
           // let dist = Math.max(50,distance(x,y,e.x,e.y))
           let dist = Math.max(distance(x,y,e.x,e.y),4)
-          console.log(dist)
           if(dist<400){
             console.log(dist)
             let dv = {vx:(e.x-x)/(dist**1.6)*15,vy:(e.y-y)/(dist**1.6)*15}
@@ -3854,6 +3862,32 @@ class mobileDebug{
           }
         }
       })
+    },
+    "teleportFragment":(x,y,entity,d={})=>{
+      particleFuncs.teleport(x,y)
+      gameWorld.TO(1000,(e)=>{
+        entity.x = x; entity.y = y
+        entity.tags.delete("noCollideBall");
+        entity.tags.delete("teleporting")
+        e.done=true
+        d.done=true
+      })
+    },
+    "teleport":(x,y,entity=entityList.player)=>{
+      if(entity.tags.has("teleporting")){return}
+      entity.tags.add("noCollideBall")
+      entity.tags.add("teleporting")
+
+      if(entity === entityList.player){
+        let dest = camera.addDestination(x,y,30)
+        dest.arrive.push( ()=>{
+          d = camera.addDestination(x,y,0)
+          gameFuncs.teleportFragment(x,y,entity,d)
+        })
+      } else {
+          gameFuncs.teleportFragment(x,y,entity)
+      }
+
     }
   }
 
@@ -3870,6 +3904,11 @@ class mobileDebug{
     "respawn":(x,y,b)=>{
       for(let i = 0; i < 5; i++){
         new explosionParticle(x,y,(t)=>{return((t**0.4)*315)},(t)=>{return(4)},()=>{return(colorFuncs.respawn(b))},1000+200*i)
+      }
+    },
+    "teleport":(x,y,b)=>{
+      for(let i = 0; i < 5; i++){
+        new explosionParticle(x,y,(t)=>{return((t**0.4)*315)},(t)=>{return(4)},()=>{return(colorFuncs.teleport(b))},1000+200*i)
       }
     },
 
@@ -3915,7 +3954,8 @@ class mobileDebug{
     "hp":(l)=>{return(`rgba(255,40,40,${1-l})`)},
     "generic white":(l)=>{return(`rgba(255,255,255,${1-l})`)},
     "cheater":(l)=>{return(`rgba(0,${rand(40)+40},0,${1-l})`)},
-    "respawn":(b)=>{return(`hsl(${b.color[0]},50%,60%)`)}
+    "respawn":(b)=>{return(`hsl(${b.color[0]},50%,60%)`)},
+    "teleport":(b)=>{return(`hsl(${267},50%,60%)`)},
   }
 
   function trailify(ball,leng=50,mult=1){
@@ -4872,6 +4912,7 @@ function drawShootAngle(date){
 
 function drawPlayerGUI(){
 
+
   if(controller.mouseIsDown && false){ // turn off for now
   can.ctx.strokeStyle = "rgba(255,255,0,0.8)"
   can.ctx.lineWidth = 1
@@ -4975,8 +5016,9 @@ function drawPlayerGUI(){
       effectY += effectSize + padding
     if(effectOptions.sprite){
       can.ctx.save()
+      can.ctx.lineWidth = 3
       can.ctx.strokeStyle = effectOptions.sprite.color
-      can.ctx.translate(effectX,effectY)
+      can.ctx.translate(effectX+effectSize/2,effectY-effectSize/2)
       can.ctx.stroke(effectOptions.sprite.path)
       can.ctx.restore()
     }
@@ -5537,7 +5579,7 @@ function generateLevels(x,y){
 
   let itemArr = ["enerjitsu","moverSummon","dmg+","hp+","armor+","energetic","energenin","momentum profligacy","checkpoint"]
 
-  for(let i = 0; i < 5; i+=2){
+  for(let i = 0; i < 10; i+=2){
     let theight = cheatHeight-i*150-400
     build(-300,theight,-100,theight,"normal",{mirrorX:0})
     dropItem(itemArr[i],-200,theight)
@@ -5708,6 +5750,7 @@ function generateLevels(x,y){
 // onebody objects //
 // lineto particles //
 // escape menu //
+// cheating buffs room //
 
 
 
@@ -5731,7 +5774,6 @@ function generateLevels(x,y){
 // explosions break walls
 // explosives
 // teleport
-// cheating buffs room
 // enerjitsu temple
 // rotatable buildings
 // zombie endless
@@ -5751,3 +5793,24 @@ function generateLevels(x,y){
 // acceleration triangle fix
 // double wall penetration
 // performance measuring
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
