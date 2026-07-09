@@ -4948,12 +4948,12 @@ function drawPlayerGUI(){
   }
 
 
-  //draw status effects on top right of screen
+  //draw status effects on top right of screen @draw effect
 
   let effectSize = 50
 
   let effectX = Width - padding - settings.insets.right - effectSize
-  let effectY = padding + settings.insets.top
+  let effectY = padding + settings.insets.top + 30
   
   //@draw effect
   can.ctx.save()
