@@ -3738,6 +3738,10 @@ class mobileDebug{
     if(dict[type]){dict[type]()}
   }
 
+  function itemPickupMsg(str,by,options){
+    by===entityList.player?notify(options.msg?options.msg:str):0
+  }
+
   function dropItem(type,x=entityList.player.x,y=(entityList.player.y),options={}){
     y -= 50
     let i = new item(x,y,type,can.ctx)
@@ -3746,7 +3750,7 @@ class mobileDebug{
           i.dash = {ld:[20,20],offset:1}
           i.onPickup.push((by)=>{
             by.maxHp *= 8
-            by===entityList.player?notify("picked up cheats\npussy/nevaeh mode: x800% hp"):0
+            itemPickupMsg("picked up cheats\npussy/nevaeh mode: x800% hp",by,options)
           })
         },
 
@@ -3759,38 +3763,39 @@ class mobileDebug{
         "dmg+":()=>{
           i.onPickup.push((by)=>{
             by.permanentDamageMultiplier += 0.05
-            by===entityList.player?notify(options.msg?options.msg:"your patience is rewarded: +5% damage"):0
+            itemPickupMsg("your patience is rewarded: +5% damage",by,options)
           })
         },
         "armor+":()=>{
           i.onPickup.push((by)=>{
             by.armor = {hp:80,protection:0.8,maxHp:80}
             // new sparkParticle(by.x,by.y,15)
-            by===entityList.player?notify(options.msg?options.msg:"picked up armor: +80 armor hp"):0
+            itemPickupMsg("picked up armor: +80 armor hp",by,options)
           })
         },
         "hp+":()=>{
           i.onPickup.push((by)=>{
             by.maxHp += 40
-            by===entityList.player?notify(options.msg?options.msg:"Buffed: +40 max hp"):0
+            itemPickupMsg("Buffed: +40 max hp",by,options)
             particleFuncs["hp particles"](by.x,by.y,9)
           })
         },
         "energetic":()=>{
           i.onPickup.push((by)=>{
             by.maxEnergy += 20
-            by===entityList.player?notify(options.msg?options.msg:"energetic: +20 max energy"):0
+            itemPickupMsg("energetic: +20 max energy",by,options)
           })
         },
         "energenin":()=>{
           i.onPickup.push((by)=>{
             by.energenin += 0.002
-            by===entityList.player?notify(options.msg?options.msg:"picked up energenin\n slow energy regen midair"):0
+            itemPickupMsg("picked up energenin\n slow energy regen midair",by,options)
           })
         },
         "momentum profligacy":()=>{
           i.onPickup.push((by)=>{
             by.tags.add("momentum profligacy")
+            itemPickupMsg("learnt momentum profligacy\n momentum cancelling creates explosions",by,options)
             by.onJump.push((b,nrg,v)=>{
               if(Math.sqrt(v)-b.speed() > 0.15){
                 gameFuncs.explosion(b.x,b.y,b)
@@ -3801,6 +3806,7 @@ class mobileDebug{
         "enerjitsu":()=>{
           i.onPickup.push((by)=>{
             by.tags.add("enerjitsu")
+            itemPickupMsg("learnt enerjitsu\n momentum is now canceled freely",by,options)
           })
         },
         "checkpoint":()=>{
@@ -3814,7 +3820,7 @@ class mobileDebug{
             for(let i = 0; i<50;i++){
               by.effects.addEffect("checkpoint", {x:by.x,y:by.y})
             }
-            by===entityList.player?notify("picked up cheats\npussy/nevaeh mode: +50 checkpoints"):0
+            itemPickupMsg("picked up cheats\npussy/nevaeh mode: +50 checkpoints",by,options)
             gameWorld.TIL(0,()=>{if(rand(0.003)){particleFuncs["cheating particle"](by.x,by.y,1)}})
           })
         },
@@ -4953,7 +4959,7 @@ function drawPlayerGUI(){
   let effectSize = 50
 
   let effectX = Width - padding - settings.insets.right - effectSize
-  let effectY = padding + settings.insets.top + 30
+  let effectY = padding + settings.insets.top + 30 // (30 is for pause button)
   
   //@draw effect
   can.ctx.save()
@@ -5527,6 +5533,17 @@ function generateLevels(x,y){
   let cheatHeight = -500
   dropItem("endless",0,cheatHeight)
   build(-100,cheatHeight,100,cheatHeight)
+
+
+  let itemArr = ["enerjitsu","moverSummon","dmg+","hp+","armor+","energetic","energenin","momentum profligacy","checkpoint"]
+
+  for(let i = 0; i < 5; i+=2){
+    let theight = cheatHeight-i*150-400
+    build(-300,theight,-100,theight,"normal",{mirrorX:0})
+    dropItem(itemArr[i],-200,theight)
+    dropItem(itemArr[i+1],200,theight)
+  }
+
 
   let starterDmg = dropItem("dmg+",-150,0)
   starterDmg.pickupSpeed *= 4
