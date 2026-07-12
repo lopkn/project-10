@@ -569,7 +569,7 @@ function check_rotated_AABB_line(x1, y1, x2, y2, x3, y3, x4, y4, rx, ry, ang){
   return(check_collision_AABB_line(x1,y1,x2,y2,p1.x,p1.y,p2.x,p2.y))
 }
 
-function get_rotated_AABB(x1, y1, x2, y2, rx, ry, rotationRadians) {
+function get_rotated_AABB(x1, y1, x2, y2, rx, ry, rotationRadians) { // unchecked
     // 1. Calculate the original center and positive half-extents
     const cx = (x1 + x2) / 2;
     const cy = (y1 + y2) / 2;
@@ -600,6 +600,11 @@ function get_rotated_AABB(x1, y1, x2, y2, rx, ry, rotationRadians) {
         rotatedCx + hxNew,
         rotatedCy + hyNew
     ];
+}
+
+function getClockwiseAngle(x, y) { // unchecked but decent
+    let angle = Math.atan2(x, y);
+    return angle < 0 ? angle + 2 * Math.PI : angle;
 }
 
 function point_on_line(x, y, x1, y1, x2, y2) {
@@ -4400,6 +4405,11 @@ class structureGenerator{
     }
     return(false)
   }
+
+  static buildOnWall(wall,struct,d=0.5,options={}){
+    let p = pointOnWall(wall,d,0)
+    this.build(struct,p.x,p.y,options)
+  }
 }
 
 
@@ -5810,6 +5820,7 @@ function generateLevels(x,y){
 // escape menu //
 // cheating buffs room //
 // teleport function //
+// rotatable buildings // 
 
 
 
@@ -5834,9 +5845,9 @@ function generateLevels(x,y){
 // explosives
 // teleportal
 // enerjitsu temple
-// rotatable buildings
 // zombie endless
 // wall breaking dependencies
+// rotated wall generation
 
 
 /// NEW / IDEAS
