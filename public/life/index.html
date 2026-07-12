@@ -271,6 +271,11 @@ const data = [
     defaultSpendable:100,
     years:0,
     children:[]
+},{
+    name:"People",
+    defaultSpendable:100,
+    years:0,
+    children:[]
 }
 ];
 
@@ -392,6 +397,16 @@ var descriptionFuncs = {
         if(years === 4){return("pretty good")}
         if(years < 8){return("Fluent")}
         return("Linguistic virtuoso")
+    },
+    "dating":(node)=>{
+        let years = node.years;
+        if(years === 0){return("No bitches")}
+        if(years === 1){return("ugly fuck")}
+        if(years === 2){return("like a 6")}
+        if(years < 5){return("nice partner")}
+        return("soulmate")
+
+
     }
 }
 
@@ -419,7 +434,7 @@ t=t.addChild("Music").addChild("Piano","Guitar","Singing","Composing").describe(
 t.addChild("performing","composing")
 t = attemptGet("interests/careers").addChild("Programming").addChild("Web","Mobile","Game","AI");
 t.addChild("Build projects","Contribute to open source","Lead a team","Start a company")
-t = attemptGet("interests/careers").addChild("Sports").addChild("Basketball","Soccer","Tennis","baseball").describe(descriptionFuncs["general skill"]);
+t = attemptGet("interests/careers").addChild("Sports").addChild("Basketball","Soccer","Tennis","baseball","shuttle COCK").describe(descriptionFuncs["general skill"]);
 t = attemptGet("interests/careers").addChild("Cooking").addChild("Baking","Grilling","Gourmet").describe(descriptionFuncs["general skill"]);
 
 
@@ -447,10 +462,14 @@ mode = "unshift";
 t = attemptGet("interests/careers").addChild("Languages").addChild("Spanish","French","Mandarin","Japanese").describe(descriptionFuncs["language"]).maxRange(14);
 t = attemptGet("interests/careers").addChild("Fun & entertainment")
 mode = "push";
-t.addChild("Video Games","Movies/TV","Books","Paintball","Airsoft","Trampolines","Tabletop games","Gambling")
+t.addChild("Video Games","Movies/TV","Books","Paintball","Airsoft","Trampolines","Tabletop games","Gambling","Gardening")
 
 
 t = attemptGet("interests/careers").addChild("Research & knowledge").addChild("Biology","Physics","Math","Agriculture","Tech")
+
+t = attemptGet("people").addChild("Family","Friends","Co workers").addChild("spending quality time")
+t = attemptGet("family").addChild("find a partner","dating","kids")
+attemptGet("find a partner").describe(descriptionFuncs["dating"])
 
 class game{
     static locked = false;
