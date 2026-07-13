@@ -4549,7 +4549,7 @@ class structureGenerator{
 
     //@gentest @starter room @starter box
     // structureGenerator.build("vase",0,0)
-    structureGenerator.build("debug1",0,0)
+    // structureGenerator.build("debug1",0,0)
 
 
     let firstWall = newWall(-200,0,800,0,can.ctx)
@@ -5976,6 +5976,7 @@ function generateLevels(x,y){
 // mob mechanics (ball remembers when it was hit by what, so no invulnerability in mobs)
 // AI movement
 // energy regeneration on hit
+// player event migration to events dict
 
 //// BUGS / DEBUGGING
 // ball sweep physics
