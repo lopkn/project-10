@@ -509,8 +509,20 @@ function check_collision_ball_line(x, y, r, x1, y1, x2, y2) {
     return distSq <= r * r;
 }
 
-function check_collision_AABB_line(x1, y1, x2, y2, x3, y3, x4, y4) {
+function check_collision_AABB_line(x1, y1, x2, y2, x3, y3, x4, y4, rx, ry, ang=0) {
     // Ensure AABB coordinates are properly ordered as min/max
+
+    if(ang!==0){
+      ang = -ang
+      let p1 = Lrotate(x3-rx,y3-ry,ang)
+      p1.x+=rx; p1.y += ry
+      let p2 = Lrotate(x4-rx,y4-ry,ang)
+      p2.x+=rx; p2.y += ry
+      x3 = p1.x; y3 = p1.y
+      x4 = p2.x; y4 = p2.y
+      // new lineParticle(x3,y3,x4,y4,50000)
+    }
+
     const minX = Math.min(x1, x2);
     const maxX = Math.max(x1, x2);
     const minY = Math.min(y1, y2);
@@ -557,17 +569,15 @@ function check_collision_AABB_line(x1, y1, x2, y2, x3, y3, x4, y4) {
     return t0 <= t1;
 }
 
-function check_rotated_AABB_line(x1, y1, x2, y2, x3, y3, x4, y4, rx, ry, ang){
-  let p1 = Lrotate(x3-rx,y3-ry,ang)
-  p1.x+=rx; p1.y += ry
-  let p2 = Lrotate(x4-rx,y4-ry,ang)
-  p2.x+=rx; p2.y += ry
+// function check_rotated_AABB_line(x1, y1, x2, y2, x3, y3, x4, y4, rx, ry, ang){
+//   let p1 = Lrotate(x3-rx,y3-ry,ang)
+//   p1.x+=rx; p1.y += ry
+//   let p2 = Lrotate(x4-rx,y4-ry,ang)
+//   p2.x+=rx; p2.y += ry
 
-  // new lineParticle(p1.x,p1.y,p2.x,p2.y)
-  // new rectParticle(x1,y1,x2,y2)
 
-  return(check_collision_AABB_line(x1,y1,x2,y2,p1.x,p1.y,p2.x,p2.y))
-}
+//   return(check_collision_AABB_line(x1,y1,x2,y2,p1.x,p1.y,p2.x,p2.y))
+// }
 
 function get_rotated_AABB(x1, y1, x2, y2, rx, ry, rotationRadians) { // unchecked
     // 1. Calculate the original center and positive half-extents
@@ -600,6 +610,31 @@ function get_rotated_AABB(x1, y1, x2, y2, rx, ry, rotationRadians) { // unchecke
         rotatedCx + hxNew,
         rotatedCy + hyNew
     ];
+}
+
+
+function check_collision_AABB_ball(x1, y1, x2, y2, x, y, r,rx,ry,ang=0) { // generated
+    // Find the closest point on the AABB to the circle center
+
+    if(ang!==0){
+      ang = -ang
+      let p = Lrotate(x-rx,y-ry,ang)
+      p.x+=rx; p.y += ry
+      x=p.x; y = p.y
+    }
+
+    const closestX = Math.max(x1, Math.min(x, x2));
+    const closestY = Math.max(y1, Math.min(y, y2));
+
+    // Calculate the distance vector components
+    const distanceX = closestX - x;
+    const distanceY = closestY - y;
+
+    // Calculate the squared distance
+    const distanceSquared = (distanceX * distanceX) + (distanceY * distanceY);
+
+    // Check if the squared distance is less than or equal to the squared radius
+    return distanceSquared <= (r * r);
 }
 
 function getClockwiseAngle(x, y) { // unchecked but decent
@@ -813,6 +848,7 @@ class id{
 class grid{ //Spatial Hash Grid
   static size = 2400
   static grid = {}
+  static entityGrid = {}
   static activationGrid = {}
   static miscGrid = {}
 
@@ -915,21 +951,7 @@ class grid{ //Spatial Hash Grid
   }
 
   static add(x1,y1,x2,y2,entity){
-    // let cell1 = grid.findCell(x1,y1)
-    // let cell2 = grid.findCell(x2,y2)
-    // let results = []
-    // let items = new Set()
-    // for(let i = cell1[0]; i <= cell2[0]; i++){
-    //   for(let j = cell1[1]; j <= cell2[1]; j++){
-    //     let key = grid.keyify(i,j)
-    //     if(this.grid[key]===undefined){
-    //       this.grid[key] = new Set()
-    //     }
-    //     this.grid[key].add(entity)
-    //     results.push(this.grid[key])
-    //   }
-    // }
-    // return(results)
+
 
     let results = []
     let arr = this.traceLineCells(x1,y1,x2,y2)
@@ -942,6 +964,24 @@ class grid{ //Spatial Hash Grid
       results.push(this.grid[key])
     }
 
+    return(results)
+  }
+
+  static addChunk(x1,y1,x2,y2,entity,grid=this.grid){
+    let cell1 = this.findCell(x1,y1)
+    let cell2 = this.findCell(x2,y2)
+    let results = []
+    let items = new Set()
+    for(let i = cell1[0]; i <= cell2[0]; i++){
+      for(let j = cell1[1]; j <= cell2[1]; j++){
+        let key = this.keyify(i,j)
+        if(grid[key]===undefined){
+          grid[key] = new Set()
+        }
+        grid[key].add(entity)
+        results.push(grid[key])
+      }
+    }
     return(results)
   }
 
@@ -1142,6 +1182,8 @@ class ball{
 
     this.lastJumpTime = 0
     this.lastCollideWallTime = 0
+    this.lastCollideBallTime = 0
+    this.lastCollideTime = 0
 
     this.losDistanceSq = 1400**2
 
@@ -1163,6 +1205,7 @@ class ball{
     this.resetAccelerations()
 
     grid.addPt(this.x,this.y,()=>{this.activate()},grid.activationGrid)
+    grid.addChunk(this.x-r,this.y-r,this.x+r,this.y+r,this,grid.entityGrid)
 
   }
 
@@ -3406,6 +3449,17 @@ class mobileDebug{
       "wood":()=>{
         makeWooden(w)
       },
+      "crate wood":()=>{
+        w.color = "#bd8620"
+        w.size = 10
+        w.tags.add("breakable")
+        w.tags.add("wooden")
+        w.damageThreshold *= 0.1
+        w.brokenVelocityMult = {vx:0.87,vy:0.87}
+        // w.shatterDistanceMultiplier = 0.05
+        w.shatteringDistanceCap = 70
+
+      },
       "accelerator":()=>{
         w.color = "rgba(50,160,240,0.8)"
         w.lineDash = {sep:[25,15],speed:0.4}
@@ -4311,6 +4365,29 @@ class structureGenerator{
         { x1: 240, y1: 220, x2: 200, y2: 200, type: 'glass', mirrored: false },
         { x1: 200, y1: 200, x2: 200, y2: 100, type: 'glass', mirrored: false }
       ], off:{x:-180,y:-365}, scale:1, boundingBox:[100,100,260,360] , oneBody:true 
+    },
+    "crate1":{
+      arr:[
+        { x1: 80, y1: 120, x2: 80, y2: 220, type: 'crate wood',  },
+        { x1: 80, y1: 220, x2: 240, y2: 220, type: 'crate wood',  },
+        { x1: 240, y1: 220, x2: 240, y2: 120, type: 'crate wood',  },
+        { x1: 240, y1: 120, x2: 80, y2: 120, type: 'crate wood', oneBody:{closer:1} },
+        { x1: 240, y1: 220, x2: 80, y2: 120, type: 'crate wood',  },
+        { x1: 240, y1: 120, x2: 80, y2: 220, type: 'crate wood',  }
+      ], off:{x:-160,y:-228}, scale:1, boundingBox:[80,120,240,220], oneBody:true
+    },
+    "debug1":{
+      arr:[
+        { x1: 100, y1: 120, x2: 100, y2: 200, type: 'crate wood',  },
+        { x1: 100, y1: 200, x2: 220, y2: 200, type: 'crate wood',  },
+        { x1: 280, y1: 260, x2: 200, y2: 260, type: 'crate wood',  },
+        { x1: 200, y1: 320, x2: 280, y2: 260, type: 'crate wood',  },
+        { x1: 280, y1: 320, x2: 200, y2: 260, type: 'crate wood',  },
+        { x1: 200, y1: 100, x2: 340, y2: 100, type: 'crate wood',  },
+        { x1: 340, y1: 100, x2: 200, y2: 120, type: 'crate wood',  },
+        { x1: 200, y1: 120, x2: 200, y2: 160, type: 'crate wood',  },
+        { x1: 200, y1: 160, x2: 340, y2: 160, type: 'crate wood',  }
+      ], off:{x:-220,y:-321}, scale:1, boundingBox:[100,100,340,320] , oneBody:true
     }
   }
 
@@ -4345,31 +4422,33 @@ class structureGenerator{
         options.rotation = 0
       }
       if(!options.noIntersectionCheck){
-        let otherWalls
-        if(options.rotation === 0){
-          otherWalls = grid.query(...this.boundingBox(struct,x,y,options.scale))
-        } else {
-          otherWalls = grid.query( ...get_rotated_AABB(...this.boundingBox(struct,x,y,options.scale),x,y,options.rotation))
-          // new rectParticle(...get_rotated_AABB(...this.boundingBox(struct,x,y,options.scale),x,y,options.rotation))
-        }
+
+        let myAABB = options.rotation===0?this.boundingBox(struct,x,y,options.scale):get_rotated_AABB(...this.boundingBox(struct,x,y,options.scale),x,y,options.rotation)
+        let otherWalls = grid.query(...myAABB)
+        
         let intersected = false;
         otherWalls.forEach((w)=>{
-          if(options.rotation === 0){
-            if(check_collision_AABB_line(...this.boundingBox(struct,x,y,options.scale),w.x,w.y,w.x2,w.y2)){
+            if(check_collision_AABB_line(...this.boundingBox(struct,x,y,options.scale),w.x,w.y,w.x2,w.y2,x,y,options.rotation)){
               intersected = true
             }
-          } else {
-            if(check_rotated_AABB_line(...this.boundingBox(struct,x,y,options.scale),w.x,w.y,w.x2,w.y2,x,y,-options.rotation)){
-              intersected = true
-            }
+        })
+
+        if(intersected){return(false)}
+
+        //debug 
+
+
+        let otherBalls = grid.query(...myAABB,grid.entityGrid)
+        otherBalls.forEach((e)=>{
+          if(check_collision_AABB_ball(...this.boundingBox(struct,x,y,options.scale),e.x,e.y,e.r,x,y,options.rotation)){
+            intersected = true
+            console.log("intersected entity")
           }
         })
         if(intersected){return(false)}
 
-        //debug 
-        // new rectParticle(...this.boundingBox(struct,x,y,options.scale))
-
       }
+
 
       let out = []
 
@@ -4392,7 +4471,24 @@ class structureGenerator{
         // out.forEach((e)=>{e.events.onBreak.push(breakAll)})
         let oneBody = new Path2D()
         oneBody.moveTo(out[0].x,out[0].y)
-        out.forEach((e)=>{oneBody.lineTo(e.x2,e.y2)})
+        let last = out[0]
+        out.forEach((e,i)=>{
+
+
+          if(this.dict[struct].arr[i].oneBody){
+            let oneBodyInfo = this.dict[struct].arr[i].oneBody
+            if(oneBodyInfo.closer){
+              oneBody.closePath()
+              return;
+            }
+          }
+
+          if(e.x !== last.x2 || e.y !== last.y2){
+            oneBody.moveTo(e.x,e.y)
+          }
+          oneBody.lineTo(e.x2,e.y2)
+          last = e
+        })
         out.forEach((e,i)=>{e.collateral = out; e.tags.add("oneBody")
           if(i===0){e.oneBodyPath = oneBody; e.tags.add("oneBodyRepresentor")}
         })
@@ -4406,9 +4502,22 @@ class structureGenerator{
     return(false)
   }
 
-  static buildOnWall(wall,struct,d=0.5,options={}){
-    let p = pointOnWall(wall,d,0)
-    this.build(struct,p.x,p.y,options)
+  static buildOnWall(wall,struct,pos=0.5,options={}){
+
+    let d = this.dict[struct]
+    let width = d.boundingBox[2]-d.boundingBox[0]
+    let edge = width/wall.length/2
+    let range = 1-(width/wall.length)
+    pos = edge + pos*range
+
+    let p = pointOnWall(wall,pos,0)
+    if(options.rotation===undefined){
+      options.rotation = 0
+    }
+    options.rotation -= getClockwiseAngle(wall.normal.x,wall.normal.y)
+    let ret = this.build(struct,p.x,p.y,options)
+
+    return(ret)
   }
 }
 
@@ -4440,9 +4549,13 @@ class structureGenerator{
 
     //@gentest @starter room @starter box
     // structureGenerator.build("vase",0,0)
+    structureGenerator.build("debug1",0,0)
 
 
-    newWall(-200,0,800,0,can.ctx)
+    let firstWall = newWall(-200,0,800,0,can.ctx)
+
+    // structureGenerator.buildOnWall(firstWall,"vase")
+    // structureGenerator.buildOnWall(newWall(800,0,-200,0,can.ctx),"vase")
     newWall(-200,0,-200,600,can.ctx)
     makeWooden(newWall(800,0,800,600,can.ctx))
 
@@ -5481,6 +5594,11 @@ function generateFloor(x,y){
     }
   }
 
+  let res = structureGenerator.buildOnWall(wall,ranarr("vase","flask1","flask2","crate1"),rand())
+  while( res){
+    res = structureGenerator.buildOnWall(wall,ranarr("vase","flask1","flask2","crate1"),rand())
+  }
+
   grid.addPt(x+rx,y+ry,()=>{generateFloor(x+rx,y+ry)},grid.activationGrid)
 }
 
@@ -5821,7 +5939,7 @@ function generateLevels(x,y){
 // cheating buffs room //
 // teleport function //
 // rotatable buildings // 
-
+// rotated wall generation //
 
 
 //// USAGE
@@ -5847,7 +5965,8 @@ function generateLevels(x,y){
 // enerjitsu temple
 // zombie endless
 // wall breaking dependencies
-// rotated wall generation
+// side chambers
+// crate and shattering mechanics 2
 
 
 /// NEW / IDEAS
@@ -5856,6 +5975,7 @@ function generateLevels(x,y){
 //// AI / MOBS
 // mob mechanics (ball remembers when it was hit by what, so no invulnerability in mobs)
 // AI movement
+// energy regeneration on hit
 
 //// BUGS / DEBUGGING
 // ball sweep physics
