@@ -2553,7 +2553,15 @@ function shatterWall(wall,by,impactPt){
     let dx = wall.x2 - wall.x
     let dy = wall.y2 - wall.y
     let seg = 0
-    let nextSeg = Math.random()*0.2
+    ///
+    let shatterProb = 0.2
+    if(wall.shattering !== undefined){
+      if(wall.shattering.type === "perLength"){
+        shatterProb = wall.shattering.length/wall.length
+      }
+    }
+
+    let nextSeg = Math.random()*shatterProb
     while(nextSeg < 1){
       new shatteredWallParticle(wall,wall.x+dx*seg,wall.y+dy*seg,wall.x+dx*nextSeg,wall.y+dy*nextSeg,by.vx,by.vy,impactPt,nextSeg-seg)
       seg = nextSeg
@@ -2922,7 +2930,7 @@ class pauseMenu{
     alignItems: "center",
     justifyContent:"center",
     top:"0px",
-    right:"0px"
+    right:"var(--safe-right)"
   })
 
   document.body.appendChild(this.pauseButton)
@@ -3454,6 +3462,7 @@ class mobileDebug{
         w.size = 10
         w.tags.add("breakable")
         w.tags.add("wooden")
+        w.shattering = {type:"perLength",length:240}
         w.damageThreshold *= 0.1
         w.brokenVelocityMult = {vx:0.87,vy:0.87}
         // w.shatterDistanceMultiplier = 0.05
@@ -4229,25 +4238,25 @@ class mobileDebug{
 class structureGenerator{
   static dict={
     "zento":{arr:[
-      { x1: 40, y1: 300, x2: 360, y2: 300, type: 'normal', mirrored: false },
+      { x1: 40, y1: 300, x2: 360, y2: 300, type: 'normal',  },
       { x1: 20, y1: 80, x2: 60, y2: 120, type: 'normal', mirrored: true },
-      { x1: 60, y1: 120, x2: 340, y2: 120, type: 'normal', mirrored: false },
+      { x1: 60, y1: 120, x2: 340, y2: 120, type: 'normal',  },
       { x1: 80, y1: 120, x2: 80, y2: 300, type: 'wood', mirrored: true},
       { x1: 160, y1: 300, x2: 180, y2: 260, type: 'wood', mirrored: true },
-      { x1: 160, y1: 260, x2: 240, y2: 260, type: 'wood', mirrored: false }
+      { x1: 160, y1: 260, x2: 240, y2: 260, type: 'wood',  }
     ],off:{x:-200,y:-300},scale:3,boundingBox:[20,80,380,300],genFunc:(x,y,options)=>{
       summon("mover",x,y-options.scale*60)
       }
     },
     "container":{arr:[
-      { x1: 60, y1: 360, x2: 60, y2: 280, type: 'glass', mirrored: false },
-      { x1: 60, y1: 280, x2: 0, y2: 280, type: 'glass', mirrored: false },
-      { x1: 0, y1: 280, x2: 0, y2: 360, type: 'glass', mirrored: false },
-      { x1: 0, y1: 360, x2: 60, y2: 360, type: 'glass', mirrored: false },
-      { x1: 0, y1: 360, x2: 0, y2: 400, type: 'wood', mirrored: false },
-      { x1: 0, y1: 400, x2: 60, y2: 360, type: 'wood', mirrored: false },
-      { x1: 60, y1: 400, x2: 0, y2: 360, type: 'wood', mirrored: false },
-      { x1: 60, y1: 360, x2: 60, y2: 400, type: 'wood', mirrored: false }
+      { x1: 60, y1: 360, x2: 60, y2: 280, type: 'glass',  },
+      { x1: 60, y1: 280, x2: 0, y2: 280, type: 'glass',  },
+      { x1: 0, y1: 280, x2: 0, y2: 360, type: 'glass',  },
+      { x1: 0, y1: 360, x2: 60, y2: 360, type: 'glass',  },
+      { x1: 0, y1: 360, x2: 0, y2: 400, type: 'wood',  },
+      { x1: 0, y1: 400, x2: 60, y2: 360, type: 'wood',  },
+      { x1: 60, y1: 400, x2: 0, y2: 360, type: 'wood',  },
+      { x1: 60, y1: 360, x2: 60, y2: 400, type: 'wood',  }
       ],off:{x:-30,y:-401},scale:1.3,boundingBox:[0,280,60,400],genFunc:(x,y,options,walls)=>{
         walls[0].collateral = walls[2].collateral = [walls[1]]
         if(rand(0.5)){
@@ -4258,42 +4267,42 @@ class structureGenerator{
       }
     },
     "vase":{arr:[
-  { x1: 40, y1: 300, x2: 40, y2: 320, type: 'glass', mirrored: false },
-  { x1: 40, y1: 320, x2: 20, y2: 380, type: 'glass', mirrored: false },
-  { x1: 20, y1: 380, x2: 40, y2: 400, type: 'glass', mirrored: false },
-  { x1: 40, y1: 400, x2: 60, y2: 400, type: 'glass', mirrored: false },
-  { x1: 60, y1: 400, x2: 80, y2: 380, type: 'glass', mirrored: false },
-  { x1: 80, y1: 380, x2: 60, y2: 320, type: 'glass', mirrored: false },
-  { x1: 60, y1: 320, x2: 60, y2: 300, type: 'glass', mirrored: false }
+  { x1: 40, y1: 300, x2: 40, y2: 320, type: 'glass',  },
+  { x1: 40, y1: 320, x2: 20, y2: 380, type: 'glass',  },
+  { x1: 20, y1: 380, x2: 40, y2: 400, type: 'glass',  },
+  { x1: 40, y1: 400, x2: 60, y2: 400, type: 'glass',  },
+  { x1: 60, y1: 400, x2: 80, y2: 380, type: 'glass',  },
+  { x1: 80, y1: 380, x2: 60, y2: 320, type: 'glass',  },
+  { x1: 60, y1: 320, x2: 60, y2: 300, type: 'glass',  }
 ],off:{x:-50,y:-405}, scale:1.4, boundingBox:[20,300,80,400], oneBody:true},
     "table":{arr:[
-  { x1: 40, y1: 340, x2: 40, y2: 400, type: 'wood', mirrored: false, tags:["breakable","AIdamage"],hpMult:0.2 },
-  { x1: 0, y1: 340, x2: 80, y2: 340, type: 'wood', mirrored: false, tags:["breakable","AIdamage"],hpMult:0.2}
+  { x1: 40, y1: 340, x2: 40, y2: 400, type: 'wood' , tags:["breakable","AIdamage"],hpMult:0.2 },
+  { x1: 0, y1: 340, x2: 80, y2: 340, type: 'wood' , tags:["breakable","AIdamage"],hpMult:0.2}
   ],off:{x:-20,y:-401}, scale:1.2, boundingBox:[0,340,80,400], },
   "table2":{
     arr:[
-      { x1: 80, y1: 180, x2: 260, y2: 180, type: 'wood', mirrored: false },
-      { x1: 100, y1: 180, x2: 100, y2: 220, type: 'wood', mirrored: false },
-      { x1: 240, y1: 180, x2: 240, y2: 220, type: 'wood', mirrored: false }
+      { x1: 80, y1: 180, x2: 260, y2: 180, type: 'wood',  },
+      { x1: 100, y1: 180, x2: 100, y2: 220, type: 'wood',  },
+      { x1: 240, y1: 180, x2: 240, y2: 220, type: 'wood',  }
     ], off:{x:-170,y:-221}, scale:1, boundingBox:[80,180,260,220] 
   },
 
     "bottle":{arr:[
-  { x1: 160, y1: 60, x2: 160, y2: 180, type: 'sturdy glass', mirrored: false },
-  { x1: 160, y1: 180, x2: 120, y2: 200, type: 'sturdy glass', mirrored: false },
-  { x1: 120, y1: 200, x2: 100, y2: 240, type: 'sturdy glass', mirrored: false },
-  { x1: 100, y1: 240, x2: 100, y2: 280, type: 'sturdy glass', mirrored: false },
-  { x1: 100, y1: 280, x2: 120, y2: 320, type: 'sturdy glass', mirrored: false },
-  { x1: 120, y1: 320, x2: 160, y2: 340, type: 'sturdy glass', mirrored: false },
-  { x1: 160, y1: 340, x2: 200, y2: 340, type: 'sturdy glass', mirrored: false },
-  { x1: 200, y1: 340, x2: 240, y2: 320, type: 'sturdy glass', mirrored: false },
-  { x1: 240, y1: 320, x2: 260, y2: 280, type: 'sturdy glass', mirrored: false },
-  { x1: 260, y1: 280, x2: 260, y2: 240, type: 'sturdy glass', mirrored: false },
-  { x1: 260, y1: 240, x2: 240, y2: 200, type: 'sturdy glass', mirrored: false },
-  { x1: 240, y1: 200, x2: 200, y2: 180, type: 'sturdy glass', mirrored: false },
-  { x1: 200, y1: 180, x2: 200, y2: 60, type: 'sturdy glass', mirrored: false },
-  { x1: 110, y1: 300, x2: 80, y2: 345, type: 'wood', mirrored: false },
-  { x1: 250, y1: 300, x2: 280, y2: 345, type: 'wood', mirrored: false }
+  { x1: 160, y1: 60, x2: 160, y2: 180, type: 'sturdy glass',  },
+  { x1: 160, y1: 180, x2: 120, y2: 200, type: 'sturdy glass',  },
+  { x1: 120, y1: 200, x2: 100, y2: 240, type: 'sturdy glass',  },
+  { x1: 100, y1: 240, x2: 100, y2: 280, type: 'sturdy glass',  },
+  { x1: 100, y1: 280, x2: 120, y2: 320, type: 'sturdy glass',  },
+  { x1: 120, y1: 320, x2: 160, y2: 340, type: 'sturdy glass',  },
+  { x1: 160, y1: 340, x2: 200, y2: 340, type: 'sturdy glass',  },
+  { x1: 200, y1: 340, x2: 240, y2: 320, type: 'sturdy glass',  },
+  { x1: 240, y1: 320, x2: 260, y2: 280, type: 'sturdy glass',  },
+  { x1: 260, y1: 280, x2: 260, y2: 240, type: 'sturdy glass',  },
+  { x1: 260, y1: 240, x2: 240, y2: 200, type: 'sturdy glass',  },
+  { x1: 240, y1: 200, x2: 200, y2: 180, type: 'sturdy glass',  },
+  { x1: 200, y1: 180, x2: 200, y2: 60, type: 'sturdy glass',  },
+  { x1: 110, y1: 300, x2: 80, y2: 345, type: 'wood',  },
+  { x1: 250, y1: 300, x2: 280, y2: 345, type: 'wood',  }
 ],off:{x:-180,y:-346}, scale:1, boundingBox:[80,60,280,345], genFunc:(x,y,options,walls)=>{
     // let glasses = []
     // walls.forEach((e)=>{if(e.name === "glass"){e.collateral = glasses; glasses.push(e)}})    
@@ -4301,35 +4310,35 @@ class structureGenerator{
 },
   "container2":{
     arr:[
-        { x1: 120, y1: 140, x2: 120, y2: 220, type: 'glass', mirrored: false },
-        { x1: 120, y1: 220, x2: 160, y2: 260, type: 'wood', mirrored: false },
-        { x1: 180, y1: 260, x2: 220, y2: 220, type: 'wood', mirrored: false },
-        { x1: 220, y1: 220, x2: 220, y2: 140, type: 'glass', mirrored: false },
-        { x1: 220, y1: 140, x2: 200, y2: 120, type: 'glass', mirrored: false },
-        { x1: 200, y1: 120, x2: 140, y2: 120, type: 'glass', mirrored: false },
-        { x1: 140, y1: 120, x2: 120, y2: 140, type: 'glass', mirrored: false },
-        { x1: 120, y1: 220, x2: 220, y2: 220, type: 'wood', mirrored: false },
-        { x1: 160, y1: 260, x2: 180, y2: 260, type: 'wood', mirrored: false },
-        { x1: 140, y1: 240, x2: 140, y2: 280, type: 'wood', mirrored: false },
-        { x1: 200, y1: 240, x2: 200, y2: 280, type: 'wood', mirrored: false },
-        { x1: 220, y1: 220, x2: 220, y2: 280, type: 'wood', mirrored: false },
-        { x1: 120, y1: 220, x2: 120, y2: 280, type: 'wood', mirrored: false },
-        { x1: 140, y1: 260, x2: 200, y2: 260, type: 'wood', mirrored: false },
-        // { x1: 120, y1: 280, x2: 140, y2: 280, type: 'wood', mirrored: false },
-        // { x1: 200, y1: 280, x2: 220, y2: 280, type: 'wood', mirrored: false }
+        { x1: 120, y1: 140, x2: 120, y2: 220, type: 'glass',  },
+        { x1: 120, y1: 220, x2: 160, y2: 260, type: 'wood',  },
+        { x1: 180, y1: 260, x2: 220, y2: 220, type: 'wood',  },
+        { x1: 220, y1: 220, x2: 220, y2: 140, type: 'glass',  },
+        { x1: 220, y1: 140, x2: 200, y2: 120, type: 'glass',  },
+        { x1: 200, y1: 120, x2: 140, y2: 120, type: 'glass',  },
+        { x1: 140, y1: 120, x2: 120, y2: 140, type: 'glass',  },
+        { x1: 120, y1: 220, x2: 220, y2: 220, type: 'wood',  },
+        { x1: 160, y1: 260, x2: 180, y2: 260, type: 'wood',  },
+        { x1: 140, y1: 240, x2: 140, y2: 280, type: 'wood',  },
+        { x1: 200, y1: 240, x2: 200, y2: 280, type: 'wood',  },
+        { x1: 220, y1: 220, x2: 220, y2: 280, type: 'wood',  },
+        { x1: 120, y1: 220, x2: 120, y2: 280, type: 'wood',  },
+        { x1: 140, y1: 260, x2: 200, y2: 260, type: 'wood',  },
+        // { x1: 120, y1: 280, x2: 140, y2: 280, type: 'wood',  },
+        // { x1: 200, y1: 280, x2: 220, y2: 280, type: 'wood',  }
       ],off:{x:-170,y:-281}, scale:1.5, boundingBox:[120,120,220,280] 
     },
     "acceleration triangle":{
       arr:[
-        { x1: 40, y1: 300, x2: 0, y2: 400, type: 'accelerator', mirrored: false },
-        { x1: 40, y1: 300, x2: 80, y2: 400, type: 'accelerator', mirrored: false }
+        { x1: 40, y1: 300, x2: 0, y2: 400, type: 'accelerator',  },
+        { x1: 40, y1: 300, x2: 80, y2: 400, type: 'accelerator',  }
       ], off:{x:-40,y:-401}, scale:1, boundingBox:[0,300,80,400]
     },
     "podium":{
       arr:[
-        { x1: 100, y1: 200, x2: 240, y2: 200, type: 'wood', mirrored: false },
-        { x1: 140, y1: 200, x2: 100, y2: 280, type: 'wood', mirrored: false },
-        { x1: 200, y1: 200, x2: 240, y2: 280, type: 'wood', mirrored: false }
+        { x1: 100, y1: 200, x2: 240, y2: 200, type: 'wood',  },
+        { x1: 140, y1: 200, x2: 100, y2: 280, type: 'wood',  },
+        { x1: 200, y1: 200, x2: 240, y2: 280, type: 'wood',  }
       ], off:{x:-170,y:-281}, scale:1, boundingBox:[100,200,240,280] ,genFunc:(x,y,options)=>{
         if(rand(0.3)){
           summon("enerjitsuist",x,y-options.scale*120)
@@ -4338,32 +4347,32 @@ class structureGenerator{
     },
     "flask1":{
       arr:[
-        { x1: 160, y1: 120, x2: 160, y2: 180, type: 'glass', mirrored: false },
-        { x1: 160, y1: 180, x2: 140, y2: 200, type: 'glass', mirrored: false },
-        { x1: 140, y1: 200, x2: 140, y2: 220, type: 'glass', mirrored: false },
-        { x1: 140, y1: 220, x2: 160, y2: 240, type: 'glass', mirrored: false },
-        { x1: 160, y1: 240, x2: 180, y2: 240, type: 'glass', mirrored: false },
-        { x1: 180, y1: 240, x2: 200, y2: 220, type: 'glass', mirrored: false },
-        { x1: 200, y1: 220, x2: 200, y2: 200, type: 'glass', mirrored: false },
-        { x1: 200, y1: 200, x2: 180, y2: 180, type: 'glass', mirrored: false },
-        { x1: 180, y1: 180, x2: 180, y2: 120, type: 'glass', mirrored: false }
+        { x1: 160, y1: 120, x2: 160, y2: 180, type: 'glass',  },
+        { x1: 160, y1: 180, x2: 140, y2: 200, type: 'glass',  },
+        { x1: 140, y1: 200, x2: 140, y2: 220, type: 'glass',  },
+        { x1: 140, y1: 220, x2: 160, y2: 240, type: 'glass',  },
+        { x1: 160, y1: 240, x2: 180, y2: 240, type: 'glass',  },
+        { x1: 180, y1: 240, x2: 200, y2: 220, type: 'glass',  },
+        { x1: 200, y1: 220, x2: 200, y2: 200, type: 'glass',  },
+        { x1: 200, y1: 200, x2: 180, y2: 180, type: 'glass',  },
+        { x1: 180, y1: 180, x2: 180, y2: 120, type: 'glass',  }
       ], off:{x:-170,y:-245}, scale:1, boundingBox:[140,120,200,240], oneBody:true 
     },
     "flask2":{
       arr:[
-        { x1: 160, y1: 100, x2: 160, y2: 200, type: 'glass', mirrored: false },
-        { x1: 160, y1: 200, x2: 120, y2: 220, type: 'glass', mirrored: false },
-        { x1: 120, y1: 220, x2: 100, y2: 260, type: 'glass', mirrored: false },
-        { x1: 100, y1: 260, x2: 100, y2: 300, type: 'glass', mirrored: false },
-        { x1: 100, y1: 300, x2: 120, y2: 340, type: 'glass', mirrored: false },
-        { x1: 120, y1: 340, x2: 160, y2: 360, type: 'glass', mirrored: false },
-        { x1: 160, y1: 360, x2: 200, y2: 360, type: 'glass', mirrored: false },
-        { x1: 200, y1: 360, x2: 240, y2: 340, type: 'glass', mirrored: false },
-        { x1: 240, y1: 340, x2: 260, y2: 300, type: 'glass', mirrored: false },
-        { x1: 260, y1: 300, x2: 260, y2: 260, type: 'glass', mirrored: false },
-        { x1: 260, y1: 260, x2: 240, y2: 220, type: 'glass', mirrored: false },
-        { x1: 240, y1: 220, x2: 200, y2: 200, type: 'glass', mirrored: false },
-        { x1: 200, y1: 200, x2: 200, y2: 100, type: 'glass', mirrored: false }
+        { x1: 160, y1: 100, x2: 160, y2: 200, type: 'glass',  },
+        { x1: 160, y1: 200, x2: 120, y2: 220, type: 'glass',  },
+        { x1: 120, y1: 220, x2: 100, y2: 260, type: 'glass',  },
+        { x1: 100, y1: 260, x2: 100, y2: 300, type: 'glass',  },
+        { x1: 100, y1: 300, x2: 120, y2: 340, type: 'glass',  },
+        { x1: 120, y1: 340, x2: 160, y2: 360, type: 'glass',  },
+        { x1: 160, y1: 360, x2: 200, y2: 360, type: 'glass',  },
+        { x1: 200, y1: 360, x2: 240, y2: 340, type: 'glass',  },
+        { x1: 240, y1: 340, x2: 260, y2: 300, type: 'glass',  },
+        { x1: 260, y1: 300, x2: 260, y2: 260, type: 'glass',  },
+        { x1: 260, y1: 260, x2: 240, y2: 220, type: 'glass',  },
+        { x1: 240, y1: 220, x2: 200, y2: 200, type: 'glass',  },
+        { x1: 200, y1: 200, x2: 200, y2: 100, type: 'glass',  }
       ], off:{x:-180,y:-365}, scale:1, boundingBox:[100,100,260,360] , oneBody:true 
     },
     "crate1":{
@@ -4549,7 +4558,7 @@ class structureGenerator{
 
     //@gentest @starter room @starter box
     // structureGenerator.build("vase",0,0)
-    // structureGenerator.build("debug1",0,0)
+    structureGenerator.build("debug1",0,0)
 
 
     let firstWall = newWall(-200,0,800,0,can.ctx)
@@ -5967,6 +5976,7 @@ function generateLevels(x,y){
 // wall breaking dependencies
 // side chambers
 // crate and shattering mechanics 2
+// nested building generation
 
 
 /// NEW / IDEAS
