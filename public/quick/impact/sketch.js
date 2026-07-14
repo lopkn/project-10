@@ -1161,9 +1161,7 @@ class ball{
     this.permanentDamageMultiplier = 1
     this.maxTakenDamagePercentage = 1.1 // so that overkills are allowed
 
-    this.lastCollideTime = 0
-    this.collideTime = 0
-    this.damageTime = 0
+
 
     this.collisionInitiative = 1500
 
@@ -1183,7 +1181,9 @@ class ball{
     this.lastJumpTime = 0
     this.lastCollideWallTime = 0
     this.lastCollideBallTime = 0
-    this.lastCollideTime = 0
+
+    this.collideBallTime = 0
+    this.damageTime = 0
 
     this.losDistanceSq = 1400**2
 
@@ -1347,9 +1347,9 @@ class ball{
 
   //@damage ball
   damage(dmg,options={}){
-    let lastCollideTime = gameWorld.lastTime==this.collideTime?this.lastCollideTime:this.collideTime
+    let lastCollideBallTime = gameWorld.lastTime==this.collideBallTime?this.lastCollideBallTime:this.collideBallTime
 
-    let damagePercentage = Math.min((gameWorld.lastTime-lastCollideTime)/this.collisionInitiative,1)
+    let damagePercentage = Math.min((gameWorld.lastTime-lastCollideBallTime)/this.collisionInitiative,1)
 
     dmg *= damagePercentage
     dmg = Math.min(dmg*damagePercentage,this.maxHp*this.maxTakenDamagePercentage)
@@ -1460,8 +1460,8 @@ class ball{
 
   collided(time,by){
     if(time != this.collideTime){
-      this.lastCollideTime = this.collideTime;
-      this.collideTime = time
+      this.lastCollideBallTime = this.collideBallTime;
+      this.collideBallTime = time
     }
   }
 
