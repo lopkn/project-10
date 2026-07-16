@@ -5893,6 +5893,7 @@ function generateLevels(x,y){
     floorHeight -= 10
   }
 
+      summon("divider",midX,height-60)
     // @generate
 
   test.generateEnd = {x:midX,y:height-60}
