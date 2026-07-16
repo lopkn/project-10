@@ -4558,7 +4558,7 @@ class structureGenerator{
 
     //@gentest @starter room @starter box
     // structureGenerator.build("vase",0,0)
-    structureGenerator.build("debug1",0,0)
+    // structureGenerator.build("debug1",0,0)
 
 
     let firstWall = newWall(-200,0,800,0,can.ctx)
@@ -5352,6 +5352,10 @@ document.addEventListener("keydown",(e)=>{
     // test.dtLock = 30
 
     summon("normal",400,370)
+  }
+
+  if(e.key === "0"){
+    structureGenerator.build(prompt("structure?"),0,0)
   }
 
   // e.preventDefault()
