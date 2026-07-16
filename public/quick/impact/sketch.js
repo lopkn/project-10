@@ -2949,12 +2949,26 @@ class pauseMenu{
 
   this.makeSlider("sensitivity",(x)=>{
     entityList.player.jumpForceMultiplier = x/25
-  },{
-    value:25
-  }
-  )
+      },{
+        value:25
+      })
+  this.makeSlider("warpSpeed",(x)=>{
+    gameWorld.warpSpeed = 0.9*x/50
+      },{
+        value:50
+      })
+  
+
+    let ex = document.createElement("button")
+    ex.classList.add("exit")
+    ex.id = "exitButton"
+    ex.innerText = "Unpause"
+    ex.onclick = ()=>{gameWorld.unpause()}
+    this.card.appendChild(ex)
 
   }
+
+
 
   static makeSlider(name,f,init={}){
     let sel = document.createElement("div")
@@ -2989,12 +3003,6 @@ class pauseMenu{
 
     });
 
-    let ex = document.createElement("button")
-    ex.classList.add("exit")
-    ex.id = "exitButton"
-    ex.innerText = "Unpause"
-    ex.onclick = ()=>{gameWorld.unpause()}
-    this.card.appendChild(ex)
 
   }
 
@@ -3018,6 +3026,8 @@ class gameWorld{
 
     static timeWarp = 1
     static frame = 0
+
+    static warpSpeed = 0.9
 
     static viewAABB = [0,0,Width,Height]
 
@@ -3485,6 +3495,7 @@ class mobileDebug{
         w.shatteringDistanceCap = 19
         w.bounce = 0.2
         w.friction = 1
+        w.tags.add("AIdamage")
         w.shatteringFunc = (part)=>{let r = rand();part.vx+=rand(-0.5);part.vy+=rand(-0.5);part.vx *= r; part.vy *= r}
       },
       "sturdy glass":()=>{
@@ -4903,7 +4914,7 @@ setTimeout(()=>{
 
   gameWorld.timeWarp += (1-gameWorld.timeWarp)*0.1
   camera.shake += (0-camera.shake)*0.05
-  if(controller.mouseIsDown){gameWorld.timeWarp*=0.90}
+  if(controller.mouseIsDown){gameWorld.timeWarp*= gameWorld.warpSpeed }
 
 
   can.ctx.restore()
