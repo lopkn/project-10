@@ -2953,9 +2953,9 @@ class pauseMenu{
         value:25
       })
   this.makeSlider("warpSpeed",(x)=>{
-    gameWorld.warpSpeed = 0.9*x/50
+    gameWorld.warpSpeed = x/100
       },{
-        value:50
+        value:90
       })
   
 
