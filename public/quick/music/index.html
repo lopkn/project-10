@@ -275,9 +275,10 @@ function ranarr(...args){
       start(Tone.now())
     }
     if(e.key==="e"){
-      let c = chordGen(10+ranarr([0,1,2,3,4,5,6,7,8,9,10,11]),15)
+      let c = chordGen(10+ranarr([0,1,2,3,4,5,6,7,8,9,10,11]),collider.length)
       play(c)
       console.log(detect(c))
+      document.getElementById("log").innerText += "\n"+JSON.stringify(c) + "DETECTOR:------>"+detect(c)
       // startInfinite(chord(20,20))
     }
   })
@@ -331,10 +332,15 @@ function ranarr(...args){
       let z = zzc != zz
       if(z){
         console.log(arr,l,zza,zzb)
-        debugger
+        // debugger
       }
 
+
+
       if(collideArr(l,arr,collide_AI)){j++;continue}
+      if(l>80){
+        l -= 48  
+      }
       tarr.push(l-arr[arr.length-1])
       arr.push(l)
       i++
