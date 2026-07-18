@@ -5993,6 +5993,7 @@ function generateLevels(x,y){
 // side chambers
 // crate and shattering mechanics 2
 // nested building generation
+// tower bottle collision bug
 
 
 /// NEW / IDEAS
@@ -6004,7 +6005,7 @@ function generateLevels(x,y){
 // energy regeneration on hit
 // player event migration to events dict
 
-//// BUGS / DEBUGGING
+//// BUGS / DEBUGGING / PHYSICS
 // ball sweep physics
 // wall sweep physics fix 2
 // acceleration triangle fix

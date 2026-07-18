@@ -140,7 +140,7 @@ function ranarr(...args){
   function start(now){
     // bell.triggerAttackRelease(mtn(60), 1.7, now);
     // chord(20,20)
-    startInfinite(chord(20,20))
+    // startInfinite([20,24,27,32,36,39,44])
   }
 
   function play(arr){
@@ -156,9 +156,29 @@ function ranarr(...args){
     chance:[1,1,0,0],
     length:12,
     attempts:50,
-    sort:false
+    sort:false,
+    falloff:20
   }
-  function collide_AI(x, y, arr=collider.chance) {
+
+  function fallOff(x,z=collider.falloff){
+    // return(z/(z+x))
+    return(1)
+  }
+
+  function collide_old(note,arr,dist=1){
+
+    let mod = note%12
+    for(let i = 0; i < arr.length; i++){
+      let resd = Math.abs(arr[i]-mod)%12
+      if(resd == dist || resd == 12-dist){
+        return(true)
+      }
+    }
+    return(false)
+  }
+
+  function collide_AI(x, y, arr=collider.chance, fallOff=1) {
+
 
     if(Math.abs(x-y) > collider.dist){return(false)}
 
@@ -175,9 +195,13 @@ function ranarr(...args){
     }
     
     // The array is 0-indexed, so distance 1 maps to index 0, distance 2 to index 1, etc.
-    const probability = arr[distance - 1];
+    const probability = arr[distance - 1] * fallOff;
     
+    if(probability === 1){return true}
+  if(probability === 0){return false}
+
     return Math.random()<probability;
+    // return probability
 }
 
 
@@ -196,10 +220,11 @@ function ranarr(...args){
     return(false)
   }
 
-  function collideArr(x,arr,f=collide){
+  function collideArr(x,arr,f=collide_AI){
+
     let collided = false
-    arr.forEach((e)=>{
-      collided |= f(x,e)
+    arr.forEach((e,i)=>{
+      collided = collided || f(x,e,collider.chance, fallOff(i))
     })
     return(collided)
   }
@@ -250,7 +275,10 @@ function ranarr(...args){
       start(Tone.now())
     }
     if(e.key==="e"){
-      startInfinite(chord(20,20))
+      let c = chordGen(10+ranarr([0,1,2,3,4,5,6,7,8,9,10,11]),15)
+      play(c)
+      console.log(detect(c))
+      // startInfinite(chord(20,20))
     }
   })
 
@@ -279,6 +307,44 @@ function ranarr(...args){
 
   let marr;
 
+  function chordGen(x,n){
+    let arr = [x]
+    let tarr = []
+    let i = 0;
+    let j = 0
+    while(i<n && j < collider.attempts*3){
+      
+      let l = arr[arr.length-1]
+      if(rand(0.1)){
+
+        l += 4
+
+      } else if(rand(0.8)){
+        l += 5
+      } else {
+        l += Math.floor(1+rand()*8)
+      }
+      let zza = collide_old(l,arr)
+      let zzb = collide_old(l,arr,2)
+      let zz = (zza || zzb)
+      let zzc = collideArr(l,arr,collide_AI)
+      let z = zzc != zz
+      if(z){
+        console.log(arr,l,zza,zzb)
+        debugger
+      }
+
+      if(collideArr(l,arr,collide_AI)){j++;continue}
+      tarr.push(l-arr[arr.length-1])
+      arr.push(l)
+      i++
+
+    }
+    console.log(tarr)
+    if(j==collider.attempts*3){console.log("hit")}
+    return(arr)
+  }
+
   function startInfinite(arr){
     // setInterval(()=>{
     //   arr.sort()
@@ -305,7 +371,7 @@ function ranarr(...args){
 
       play([note])
 
-      const detectedChords = Tonal.Chord.detect(arr.map(midiToNote));
+      const detectedChords = detect(arr);
 
       let ttarr = [...arr]
       if(collider.sort){
@@ -332,7 +398,9 @@ function ranarr(...args){
 
 
 
-
+function detect(x){
+  return(Tonal.Chord.detect(x.map(midiToNote)))
+}
 
 
 
@@ -347,6 +415,7 @@ gui.add(collider,"sort").name("sort")
 gui.add(collider,"dist",0,90,1).name("distance of strikedown")
 gui.add(collider,"attempts",5,200,1).name("gen attempts/conformity")
 gui.add(collider,"length",5,20,1).name("memory")
+gui.add(collider,"falloff",0.3,100,0.1).name("collision falloff")
 gui.add(collider.chance,"0",0,1,0.01).name("strikedown chance 1 step collision")
 gui.add(collider.chance,"1",0,1,0.01).name("strikedown chance 2 step collision")
 gui.add(collider.chance,"2",0,1,0.01).name("strikedown chance 3 step collision")

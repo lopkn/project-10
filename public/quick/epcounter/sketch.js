@@ -302,6 +302,7 @@ class music{
 					dell += del
 					notes.push(note)
 				}
+				console.log(note)
 			}
 		let shuffledNotes = notes.sort((a,b)=>{return(0.5-trand())})
 		let delran = 0
@@ -326,6 +327,7 @@ class music{
 		this.noteProcessing(notes)
 
 		console.log(JSON.stringify(notelog))
+		console.log(notes)
 		return(notes)
 	}
 
