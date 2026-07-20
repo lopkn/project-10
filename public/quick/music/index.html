@@ -275,7 +275,7 @@ function ranarr(...args){
       start(Tone.now())
     }
     if(e.key==="e"){
-      let c = chordGen(20+ranarr([0,1,2,3,4,5,6,7,8,9,10,11]),collider.length)
+      let c = chordGen(20+ranarr([0,1,2,3,4,5,6,7,8,9,10,11]))
       play(c)
       console.log(detect(c))
       document.getElementById("log").innerText += "\n"+JSON.stringify(c) + "DETECTOR:------>"+detect(c)
@@ -308,12 +308,12 @@ function ranarr(...args){
 
   let marr;
 
-  function chordGen(x,n){
+  function chordGen(x,top=80,bottom=20){
     let arr = [x]
     let tarr = []
     let i = 0;
     let j = 0
-    while(i<n && j < collider.attempts*3){
+    while(arr[arr.length-1] < top && j < collider.attempts*30){
       
       let l = arr[arr.length-1]
       if(rand(0.1)){
@@ -331,22 +331,44 @@ function ranarr(...args){
       let zzc = collideArr(l,arr,collide_AI)
       let z = zzc != zz
       if(z){
-        console.log(arr,l,zza,zzb)
+        // console.log(arr,l,zza,zzb)
         // debugger
       }
 
 
 
       if(collideArr(l,arr,collide_AI)){j++;continue}
-      if(l>80){
-        l -= 48  
-      }
-      tarr.push(l-arr[arr.length-1])
       arr.push(l)
       i++
-
     }
-    console.log(tarr)
+
+    while(arr[0] > bottom && j < collider.attempts*30){
+      
+      let l = arr[0]
+      if(rand(0.1)){
+
+        l -= 4
+
+      } else if(rand(0.8)){
+        l -= 5
+      } else {
+        l -= Math.floor(1+rand()*8)
+      }
+      let zza = collide_old(l,arr)
+      let zzb = collide_old(l,arr,2)
+      let zz = (zza || zzb)
+      let zzc = collideArr(l,arr,collide_AI)
+      let z = zzc != zz
+      if(z){
+        // console.log(arr,l,zza,zzb)
+      }
+
+
+
+      if(collideArr(l,arr,collide_AI)){j++;continue}
+      arr.unshift(l)
+      i++
+    }
     if(j==collider.attempts*3){console.log("hit")}
     return(arr)
   }
