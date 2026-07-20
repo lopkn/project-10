@@ -270,6 +270,13 @@ function ranarr(...args){
     return(arr)
   }
 
+  document.addEventListener("click",(e)=>{
+      let c = chordGen(20+ranarr([0,1,2,3,4,5,6,7,8,9,10,11]))
+      play(c)
+      console.log(detect(c))
+      document.getElementById("log").innerText += "\n"+JSON.stringify(c) + "DETECTOR:------>"+detect(c)
+  })
+
   document.addEventListener("keydown",(e)=>{
     if(e.key==="r"){
       start(Tone.now())
