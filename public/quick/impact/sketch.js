@@ -1663,7 +1663,7 @@ class ball{
 
 
     this.energy += (this.energenin + this.effects.getValue("energenerative",0))*dt
-    if(this.lastJumpTime < this.lastCollideWallTime){
+    if(this.lastJumpTime < this.lastCollideWallTime || this.lastJumpTime < this.collideBallTime){
       this.energy += this.energyRegen*dt
     }
     if(this.energy > this.maxEnergy){
