@@ -6,9 +6,13 @@ join the discord server with link https://discord.gg/RtP4GnM8
 This is the central repository where I make random stuff
 Many fun projects are here, ran by one central server.js file
 
+run via `node -e "$(cat server.js)" -i`
+
 visit the join link with suffixes for fun stuff:
 
 - https://game.lopkn.dev/quick/quantum game based multiplayer bell inequality violation demonstrator
+
+- https://game.lopkn.dev/quick/impact bonk mobile game with destruction physics
 
 - https://game.lopkn.dev/quick/fighter 3d flight simulator with crazy good dynamic AI
 
@@ -34,9 +38,9 @@ visit the join link with suffixes for fun stuff:
 
 - https://game.lopkn.dev/quick/flashing exploit your friends epilepsy to a whole new level
 
-- https://game.lopkn.dev/quick/truemirror an ad-less simple site for a true mirror
+- https://game.lopkn.dev/quick/trueMirror an ad-less simple site for a true mirror
 
-- https://game.lopkn.dev/quick/timer test how wrong your internal clock is (10s)
+- https://game.lopkn.dev/timer test how wrong your internal clock is (10s)
 
 - https://game.lopkn.dev/quick/bsmeter Bullsh\*t meter that uses your mic somehow
 
