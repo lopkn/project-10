@@ -49,6 +49,13 @@ class ericBlast{
 	static wrong = 0;
 	static turnPlayer;
 	static gamemode = "turns"
+	/*
+		Documentation:
+		change gamemode between "ffa" and "turns"
+
+		in "turns": player must type start to start the game
+		in "ffa": game is always already started
+	*/
 	static corrects = 0;
 
 	static setio(i,m,v,v2){
