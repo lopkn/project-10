@@ -433,7 +433,6 @@ function wglInit(){
             uniform mat4 u_transformMatrix;
             
             uniform float u_currentTime;
-            // uniform float u_lifetime;
             float u_lifetime = 10.0;
 
             varying vec4 v_color;
@@ -449,6 +448,7 @@ function wglInit(){
 
                 // 1. Interpolate along length (a_quadCorner.x is 0.0 at start, 1.0 at end)
                 vec2 currentPos = mix(a_startPos, a_endPos, a_quadCorner.x);
+                currentPos[0] += sin(u_currentTime/500.0) * 500.0;
 
                 // 2. Compute direction and perpendicular normal vector
                 vec2 delta = a_endPos - a_startPos;
@@ -460,7 +460,7 @@ function wglInit(){
                 vec2 finalPos = currentPos + offset;
 
                 // 4. Fade over time
-                float lifeProgress = age / u_lifetime;
+                float lifeProgress = mod(age,500.0)/500.0;
                 float alphaFade = 1.0 - lifeProgress;
 
                 gl_Position = u_projectionMatrix * u_transformMatrix * vec4(finalPos, 0.0, 1.0);
@@ -543,9 +543,9 @@ function wglInit(){
   wglCan.vertexShader = compileShader(gl, gl.VERTEX_SHADER, wglCan.vsSource);
   wglCan.fragmentShader = compileShader(gl, gl.FRAGMENT_SHADER, wglCan.fsSource);
   wglCan.program = gl.createProgram();
-  gl.attachShader(wglCan.program, wglCan.vertexShader);
-  gl.attachShader(wglCan.program, wglCan.fragmentShader);
-  gl.linkProgram(wglCan.program);
+  // gl.attachShader(wglCan.program, wglCan.vertexShader);
+  // gl.attachShader(wglCan.program, wglCan.fragmentShader);
+  // gl.linkProgram(wglCan.program);
   gl.useProgram(lineProgram);
 
         const numLines = 100; 
@@ -569,7 +569,7 @@ function wglInit(){
             vertexData[offset + 5] = (i+1)%2; // G
             vertexData[offset + 6] = 0*Math.random(); // B
             vertexData[offset + 7] = Math.random() * 0.5 + 0.1; // A (slight transparency)
-            vertexData[offset + 8] = Date.now()
+            vertexData[offset + 8] = Math.random()*500
             vertexData[offset + 9] = 5 + rand()*8
         }
 
@@ -578,19 +578,19 @@ function wglInit(){
         gl.bufferData(gl.ARRAY_BUFFER, vertexData, gl.DYNAMIC_DRAW);
 
         // --- 3. Attributes & Uniforms Setup ---
-        const positionLoc = gl.getAttribLocation(wglCan.program, 'a_position');
-        const colorLoc = gl.getAttribLocation(wglCan.program, 'a_color');
+        // const positionLoc = gl.getAttribLocation(wglCan.program, 'a_position');
+        // const colorLoc = gl.getAttribLocation(wglCan.program, 'a_color');
         
         const projectionLoc = gl.getUniformLocation(lineProgram, 'u_projectionMatrix');
         const transformLoc = gl.getUniformLocation(lineProgram, 'u_transformMatrix');
 
         const stride = floatsPerVertex * 4; // 4 bytes per float
 
-        gl.enableVertexAttribArray(positionLoc);
-        gl.vertexAttribPointer(positionLoc, 2, gl.FLOAT, false, stride, 0);
+        // gl.enableVertexAttribArray(positionLoc);
+        // gl.vertexAttribPointer(positionLoc, 2, gl.FLOAT, false, stride, 0);
 
-        gl.enableVertexAttribArray(colorLoc);
-        gl.vertexAttribPointer(colorLoc, 4, gl.FLOAT, false, stride, 2 * 4); // Offset by 2 floats
+        // gl.enableVertexAttribArray(colorLoc);
+        // gl.vertexAttribPointer(colorLoc, 4, gl.FLOAT, false, stride, 2 * 4); // Offset by 2 floats
 
         // --- 4. Projection Matrix ---
         // Converts 2D pixel coordinates (top-left origin) to WebGL clip space (-1 to 1)
@@ -648,7 +648,7 @@ function wglInit(){
             const fadePosLoc = gl.getAttribLocation(fadeProgram, 'a_position');
             gl.enableVertexAttribArray(fadePosLoc);
             gl.vertexAttribPointer(fadePosLoc, 2, gl.FLOAT, false, 0, 0);
-            gl.uniform4f(gl.getUniformLocation(fadeProgram, 'u_fadeColor'), 0.0, 0.0, 0.0, 0.1); 
+            gl.uniform4f(gl.getUniformLocation(fadeProgram, 'u_fadeColor'), 0.0, 0.0, 0.0, 0.5); 
             gl.drawArrays(gl.TRIANGLES, 0, 6);
 
             // 2. Render Instanced Lines
@@ -660,7 +660,6 @@ function wglInit(){
             gl.uniform1f(gl.getUniformLocation(lineProgram, 'u_currentTime'), gameWorld.lastTime);
 
             // gl.uniformMatrix4fv(gl.getUniformLocation(lineProgram, 'u_projectionMatrix'), false, projMatrix);
-            gl.uniform1f(gl.getUniformLocation(lineProgram, 'u_currentTime'), gameWorld.lastTime);
 
 
 
