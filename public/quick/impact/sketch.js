@@ -428,19 +428,20 @@ function wglInit(){
             attribute vec4 a_color;
             attribute float a_birthTime;
             attribute float a_thickness;
+            attribute float a_lifeTime;
 
             uniform mat4 u_projectionMatrix;
             uniform mat4 u_transformMatrix;
             
             uniform float u_currentTime;
-            float u_lifetime = 10.0;
 
             varying vec4 v_color;
 
             void main() {
                 float age = u_currentTime - a_birthTime;
+                float completion = (u_currentTime - a_birthTime) / a_lifeTime;
 
-                // if (a_birthTime < 0.0 || age > u_lifetime || age < 0.0) {
+                // if (a_birthTime < 0.0 || age > a_lifetime || age < 0.0) {
                 //     gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
                 //     v_color = vec4(0.0);
                 //     return;
@@ -448,7 +449,10 @@ function wglInit(){
 
                 // 1. Interpolate along length (a_quadCorner.x is 0.0 at start, 1.0 at end)
                 vec2 currentPos = mix(a_startPos, a_endPos, a_quadCorner.x);
-                currentPos[0] += sin(u_currentTime/500.0) * 500.0;
+
+
+                // here is where to EDIT the POSITION
+                currentPos[0] += sin(u_currentTime/500.0) * 0.0;
 
                 // 2. Compute direction and perpendicular normal vector
                 vec2 delta = a_endPos - a_startPos;
@@ -460,8 +464,8 @@ function wglInit(){
                 vec2 finalPos = currentPos + offset;
 
                 // 4. Fade over time
-                float lifeProgress = mod(age,500.0)/500.0;
-                float alphaFade = 1.0 - lifeProgress;
+                // float alphaFade = completion;
+                float alphaFade = 1.0 - completion;
 
                 gl_Position = u_projectionMatrix * u_transformMatrix * vec4(finalPos, 0.0, 1.0);
                 v_color = vec4(a_color.rgb, a_color.a * alphaFade);
@@ -514,63 +518,65 @@ function wglInit(){
         ]), gl.STATIC_DRAW);
 
 
-  wglCan.vsSource = `
-      attribute vec2 a_position;
-      attribute vec4 a_color;
-
-      uniform mat4 u_projectionMatrix;
-      uniform mat4 u_transformMatrix;
-
-      varying vec4 v_color;
-
-      void main() {
-          // Apply the DOMMatrix transform, then project to clip space
-          gl_Position = u_projectionMatrix * u_transformMatrix * vec4(a_position, 0.0, 1.0);
-          v_color = a_color;
-      }
-  `;
-
-  // Fragment Shader: Passes the color through
-  wglCan.fsSource = `
-      precision mediump float;
-      varying vec4 v_color;
-
-      void main() {
-          gl_FragColor = v_color;
-      }
-  `;
-
-  wglCan.vertexShader = compileShader(gl, gl.VERTEX_SHADER, wglCan.vsSource);
-  wglCan.fragmentShader = compileShader(gl, gl.FRAGMENT_SHADER, wglCan.fsSource);
-  wglCan.program = gl.createProgram();
-  // gl.attachShader(wglCan.program, wglCan.vertexShader);
-  // gl.attachShader(wglCan.program, wglCan.fragmentShader);
-  // gl.linkProgram(wglCan.program);
   gl.useProgram(lineProgram);
 
-        const numLines = 100; 
-        const vertexCount = numLines;
-        const floatsPerVertex = 10; // x, y, x2, y2, r, g, b, a, spawnTime, thickness
+        const MAX_LINES = 100000; 
+        const vertexCount = MAX_LINES;
+        const floatsPerVertex = 11; // x, y, x2, y2, r, g, b, a, spawnTime, thickness, lifeTime
         const vertexData = new Float32Array(vertexCount * floatsPerVertex);
 
         // Generate random lines spread across a 2000x2000 logical area
-        for (let i = 0; i < vertexCount; i++) {
-            const offset = i * floatsPerVertex;
-            
-            // Position (X, Y)
-            vertexData[offset + 0] = (Math.random() - 0.5) * 4000; 
-            vertexData[offset + 1] = (Math.random() - 0.5) * 4000;
 
-            vertexData[offset + 2] = (Math.random() - 0.5) * 4000; 
-            vertexData[offset + 3] = (Math.random() - 0.5) * 4000; 
+        var activeCount = 0
+
+        function spawnLine(x1, y1, x2, y2, r, g, b, a, birthTime, thickness, lifetime, end) {
+            if (activeCount >= MAX_LINES) return; // Buffer full
+
+
+            const offset = activeCount * floatsPerVertex;
+            vertexData[offset + 0] = x1;
+            vertexData[offset + 1] = y1;
+            vertexData[offset + 2] = x2;
+            vertexData[offset + 3] = y2;
+            vertexData[offset + 4] = r;
+            vertexData[offset + 5] = g;
+            vertexData[offset + 6] = b;
+            vertexData[offset + 7] = a;
+            vertexData[offset + 8] = birthTime;
+            vertexData[offset + 9] = thickness;
+            vertexData[offset + 10] = lifetime;
+            activeCount++;
+
+            if(end){
+              gl.bufferSubData(gl.ARRAY_BUFFER, 0, vertexData.subarray(0, activeCount * floatsPerVertex));
+            }
+        }
+        wglCan.spawnLine = spawnLine
+
+
+        for (let i = 0; i < vertexCount; i++) {
+          let offset = 0
+            let td = []
+            td[0] = (Math.random() - 0.5) * 4000; 
+            td[1] = (Math.random() - 0.5) * 4000;
+
+            td[2] = (Math.random() - 0.5) * 4000; 
+            td[3] = (Math.random() - 0.5) * 4000; 
+
+            td[0] = i
+            td[1] = 0
+            td[2] = i
+            td[3] = Height
 
             // Color (R, G, B, A)
-            vertexData[offset + 4] = i%2; // R
-            vertexData[offset + 5] = (i+1)%2; // G
-            vertexData[offset + 6] = 0*Math.random(); // B
-            vertexData[offset + 7] = Math.random() * 0.5 + 0.1; // A (slight transparency)
-            vertexData[offset + 8] = Math.random()*500
-            vertexData[offset + 9] = 5 + rand()*8
+            td[offset + 4] = i%2; // R
+            td[offset + 5] = (i+1)%2; // G
+            td[offset + 6] = 0*Math.random(); // B
+            td[offset + 7] = Math.random() * 0.5 + 0.1; // A (slight transparency)
+            td[offset + 8] = 0
+            td[offset + 9] = 5 + rand()*8
+            td[offset + 10] = Math.random()*2500+500
+            spawnLine(...td)
         }
 
         const buffer = gl.createBuffer();
@@ -578,19 +584,13 @@ function wglInit(){
         gl.bufferData(gl.ARRAY_BUFFER, vertexData, gl.DYNAMIC_DRAW);
 
         // --- 3. Attributes & Uniforms Setup ---
-        // const positionLoc = gl.getAttribLocation(wglCan.program, 'a_position');
-        // const colorLoc = gl.getAttribLocation(wglCan.program, 'a_color');
         
         const projectionLoc = gl.getUniformLocation(lineProgram, 'u_projectionMatrix');
         const transformLoc = gl.getUniformLocation(lineProgram, 'u_transformMatrix');
 
-        const stride = floatsPerVertex * 4; // 4 bytes per float
+        const stride = floatsPerVertex * 4; // 4 bytes per float{ name: 'a_birthTime',size: 1, offset: 8 },
 
-        // gl.enableVertexAttribArray(positionLoc);
-        // gl.vertexAttribPointer(positionLoc, 2, gl.FLOAT, false, stride, 0);
 
-        // gl.enableVertexAttribArray(colorLoc);
-        // gl.vertexAttribPointer(colorLoc, 4, gl.FLOAT, false, stride, 2 * 4); // Offset by 2 floats
 
         // --- 4. Projection Matrix ---
         // Converts 2D pixel coordinates (top-left origin) to WebGL clip space (-1 to 1)
@@ -616,27 +616,6 @@ function wglInit(){
 
 
         wglCan.render = (t=2)=>{
-            // // --- STEP 1: Draw the semi-transparent fade overlay ---
-            // gl.enable(gl.BLEND);
-            // gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-
-            // gl.useProgram(fadeProgram);
-            // gl.uniform4f(fadeColorLoc, 0.0, 0.0, 0.0, 1.0); // (Set alpha around 0.01-0.1 for trails)
-
-            // gl.bindBuffer(gl.ARRAY_BUFFER, quadBuffer);
-            // gl.enableVertexAttribArray(fadePosLoc);
-            // gl.vertexAttribPointer(fadePosLoc, 2, gl.FLOAT, false, 0, 0);
-            
-            // gl.drawArrays(gl.TRIANGLES, 0, 6);
-
-            // // --- STEP 2: Draw your lines ---
-            // // MUST switch back to the line shader program before setting transformLoc!
-            // // gl.useProgram(wglCan.program); 
-            // gl.useProgram(lineProgram); 
-            // gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
-            
-
-
 
 
             // 1. Dark Fade Overlay
@@ -651,6 +630,35 @@ function wglInit(){
             gl.uniform4f(gl.getUniformLocation(fadeProgram, 'u_fadeColor'), 0.0, 0.0, 0.0, 0.5); 
             gl.drawArrays(gl.TRIANGLES, 0, 6);
 
+
+            for (let i = activeCount - 1; i >= 0; i--) {
+            const birthOffset = i * floatsPerVertex + 8;
+            const lifeOffset = i * floatsPerVertex + 10;
+            const age = gameWorld.lastTime - vertexData[birthOffset];
+
+            const LIFETIME = vertexData[lifeOffset]
+
+            if (age >= LIFETIME) {
+                  // Particle is dead! Swap it with the LAST active particle
+                  const lastIndex = activeCount - 1;
+
+                  if (i !== lastIndex) {
+                      const deadOffset = i * floatsPerVertex;
+                      const lastOffset = lastIndex * floatsPerVertex;
+
+                      // Overwrite dead slot with the last active instance's data
+                      for (let k = 0; k < floatsPerVertex; k++) {
+                          vertexData[deadOffset + k] = vertexData[lastOffset + k];
+                      }
+                  }
+
+                  // Decrement count (drops the last item off the active list)
+                  activeCount--;
+              }
+            }
+
+
+
             // 2. Render Instanced Lines
             gl.useProgram(lineProgram);
             gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
@@ -661,12 +669,7 @@ function wglInit(){
 
             // gl.uniformMatrix4fv(gl.getUniformLocation(lineProgram, 'u_projectionMatrix'), false, projMatrix);
 
-
-
-
-
-
-                        // A. Bind Base Quad Template
+            // A. Bind Base Quad Template
             gl.bindBuffer(gl.ARRAY_BUFFER, quadTemplateBuffer);
             const quadCornerLoc = gl.getAttribLocation(lineProgram, 'a_quadCorner');
             gl.enableVertexAttribArray(quadCornerLoc);
@@ -676,60 +679,28 @@ function wglInit(){
             // B. Bind Instance Buffer
             gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
 
-            const startPosLoc = gl.getAttribLocation(lineProgram, 'a_startPos');
-            const endPosLoc   = gl.getAttribLocation(lineProgram, 'a_endPos');
-            const colLoc      = gl.getAttribLocation(lineProgram, 'a_color');
-            const birthLoc    = gl.getAttribLocation(lineProgram, 'a_birthTime');
-            const thickLoc    = gl.getAttribLocation(lineProgram, 'a_thickness');
+            const attribs = [
+                { name: 'a_startPos', size: 2, offset: 0 },
+                { name: 'a_endPos',   size: 2, offset: 2 },
+                { name: 'a_color',    size: 4, offset: 4 },
+                { name: 'a_birthTime',size: 1, offset: 8 },
+                { name: 'a_thickness',size: 1, offset: 9 },
+                { name: 'a_lifeTime', size: 1, offset: 10 },
+            ];
 
-            gl.enableVertexAttribArray(startPosLoc);
-            gl.vertexAttribPointer(startPosLoc, 2, gl.FLOAT, false, stride, 0);
-            gl.vertexAttribDivisor(startPosLoc, 1); // Advance once PER INSTANCE (1)
-
-            gl.enableVertexAttribArray(endPosLoc);
-            gl.vertexAttribPointer(endPosLoc, 2, gl.FLOAT, false, stride, 2 * 4);
-            gl.vertexAttribDivisor(endPosLoc, 1);
-
-            gl.enableVertexAttribArray(colLoc);
-            gl.vertexAttribPointer(colLoc, 4, gl.FLOAT, false, stride, 4 * 4);
-            gl.vertexAttribDivisor(colLoc, 1);
-
-            gl.enableVertexAttribArray(birthLoc);
-            gl.vertexAttribPointer(birthLoc, 1, gl.FLOAT, false, stride, 8 * 4);
-            gl.vertexAttribDivisor(birthLoc, 1);
-
-            gl.enableVertexAttribArray(thickLoc);
-            gl.vertexAttribPointer(thickLoc, 1, gl.FLOAT, false, stride, 9 * 4);
-            gl.vertexAttribDivisor(thickLoc, 1);
+            for (const attr of attribs) {
+                const loc = gl.getAttribLocation(lineProgram, attr.name);
+                gl.enableVertexAttribArray(loc);
+                gl.vertexAttribPointer(loc, attr.size, gl.FLOAT, false, stride, attr.offset * 4);
+                gl.vertexAttribDivisor(loc, 1);
+            }
 
             // Draw 6 vertices (1 quad template) INSTANCED MAX_LINES times!
-            gl.drawArraysInstanced(gl.TRIANGLES, 0, 6, numLines);
+            gl.drawArraysInstanced(gl.TRIANGLES, 0, 6, activeCount);
 
 
 
 
-
-
-
-
-
-
-            // // Re-bind line vertex attributes for this shader program
-            // gl.bindBuffer(gl.ARRAY_BUFFER, buffer); // Your line buffer
-            
-            // const stride = floatsPerVertex * 4;
-            // gl.enableVertexAttribArray(positionLoc);
-            // gl.vertexAttribPointer(positionLoc, 2, gl.FLOAT, false, stride, 0);
-
-            // gl.enableVertexAttribArray(colorLoc);
-            // gl.vertexAttribPointer(colorLoc, 4, gl.FLOAT, false, stride, 2 * 4);
-
-            // // Enable additive blending for glowing trails
-            // gl.enable(gl.BLEND);
-            // gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
-
-            // // Draw all lines
-            // gl.drawArrays(gl.LINES, 0, vertexCount);
 
         }
 
