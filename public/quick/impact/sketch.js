@@ -530,7 +530,10 @@ function wglInit(){
         var activeCount = 0
 
         function spawnLine(x1, y1, x2, y2, r, g, b, a, birthTime, thickness, lifetime, end) {
-            if (activeCount >= MAX_LINES) return; // Buffer full
+            if (activeCount >= MAX_LINES) {
+              gl.bufferSubData(gl.ARRAY_BUFFER, 0, vertexData.subarray(0, activeCount * floatsPerVertex));
+              return false
+            }; // Buffer full
 
 
             const offset = activeCount * floatsPerVertex;
@@ -554,30 +557,30 @@ function wglInit(){
         wglCan.spawnLine = spawnLine
 
 
-        for (let i = 0; i < vertexCount; i++) {
-          let offset = 0
-            let td = []
-            td[0] = (Math.random() - 0.5) * 4000; 
-            td[1] = (Math.random() - 0.5) * 4000;
+        // for (let i = 0; i < vertexCount; i++) {
+        //   let offset = 0
+        //     let td = []
+        //     td[0] = (Math.random() - 0.5) * 4000; 
+        //     td[1] = (Math.random() - 0.5) * 4000;
 
-            td[2] = (Math.random() - 0.5) * 4000; 
-            td[3] = (Math.random() - 0.5) * 4000; 
+        //     td[2] = (Math.random() - 0.5) * 4000; 
+        //     td[3] = (Math.random() - 0.5) * 4000; 
 
-            td[0] = i
-            td[1] = 0
-            td[2] = i
-            td[3] = Height
+        //     td[0] = i
+        //     td[1] = 0
+        //     td[2] = i
+        //     td[3] = Height
 
-            // Color (R, G, B, A)
-            td[offset + 4] = i%2; // R
-            td[offset + 5] = (i+1)%2; // G
-            td[offset + 6] = 0*Math.random(); // B
-            td[offset + 7] = Math.random() * 0.5 + 0.1; // A (slight transparency)
-            td[offset + 8] = 0
-            td[offset + 9] = 5 + rand()*8
-            td[offset + 10] = Math.random()*2500+500
-            spawnLine(...td)
-        }
+        //     // Color (R, G, B, A)
+        //     td[offset + 4] = i%2; // R
+        //     td[offset + 5] = (i+1)%2; // G
+        //     td[offset + 6] = 0*Math.random(); // B
+        //     td[offset + 7] = Math.random() * 0.5 + 0.1; // A (slight transparency)
+        //     td[offset + 8] = 0
+        //     td[offset + 9] = 5 + rand()*8
+        //     td[offset + 10] = Math.random()*2500+500
+        //     spawnLine(...td)
+        // }
 
         const buffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
