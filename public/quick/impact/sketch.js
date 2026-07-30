@@ -3248,7 +3248,7 @@ class pauseMenu{
 
 
   this.pauseButton = document.createElement("button")
-  this.pauseButton.addEventListener("mouseup",()=>{
+  this.pauseButton.addEventListener("touchend",()=>{
     if(gameWorld.paused){
       gameWorld.unpause()
     } else {
@@ -3298,7 +3298,7 @@ class pauseMenu{
     ex.classList.add("exit")
     ex.id = "exitButton"
     ex.innerText = "Unpause"
-    ex.addEventListener("mouseup",()=>{gameWorld.unpause()})
+    ex.addEventListener("touchend",()=>{gameWorld.unpause()})
     this.card.appendChild(ex)
 
   }
