@@ -417,10 +417,15 @@ function createProgram(gl, vs, fs) {
 
 
 function wglInit() {
+    // Helper to get native WebGL2 or WebGL1 extension for VAOs
+    const vaoExt = gl.createVertexArray ? gl : gl.getExtension("OES_vertex_array_object");
+    const createVAO = () => vaoExt.createVertexArray ? vaoExt.createVertexArray() : vaoExt.createVertexArrayOES();
+    const bindVAO = (vao) => vaoExt.bindVertexArray ? vaoExt.bindVertexArray(vao) : vaoExt.bindVertexArrayOES(vao);
+
     // -----------------------------------------------------------------
     // 1. SHADER SOURCES & PROGRAMS
     // -----------------------------------------------------------------
-    const vsSource2 = `
+    const vsSourceLines = `
         attribute vec2 a_quadCorner;
         attribute vec2 a_startPos;
         attribute vec2 a_endPos;
@@ -439,6 +444,12 @@ function wglInit() {
             float age = u_currentTime - a_birthTime;
             float completion = age / a_lifeTime;
 
+            if (a_birthTime < 0.0 || age > a_lifeTime || age < 0.0) {
+                gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
+                v_color = vec4(0.0);
+                return;
+            }
+
             vec2 currentPos = mix(a_startPos, a_endPos, a_quadCorner.x);
             vec2 delta = a_endPos - a_startPos;
             vec2 dir = normalize(delta);
@@ -448,24 +459,27 @@ function wglInit() {
             vec2 finalPos = currentPos + offset;
 
             float alphaFade = 1.0 - completion;
+
             gl_Position = u_projectionMatrix * u_transformMatrix * vec4(finalPos, 0.0, 1.0);
             v_color = vec4(a_color.rgb, a_color.a * alphaFade);
         }
     `;
 
-    const fsSource2 = `
+    const fsSourceLines = `
         precision mediump float;
         varying vec4 v_color;
         void main() { gl_FragColor = v_color; }
     `;
 
-    const vsCircles = `
+    const vsSourceCircles = `
         attribute vec2 a_quadCorner;
         attribute vec2 a_position;
         attribute float a_radius;
         attribute vec4 a_color;
         attribute float a_birthTime;
         attribute float a_lifeTime;
+        attribute vec2 a_vel;
+        attribute vec2 a_accel;
 
         uniform mat4 u_projectionMatrix;
         uniform mat4 u_transformMatrix;
@@ -490,11 +504,12 @@ function wglInit() {
 
             v_antiAliasDelta = 1.0 / (a_radius * 2.0);
             vec2 worldPos = a_position + (a_quadCorner * a_radius * 2.0);
+            worldPos = worldPos + a_vel * age + 0.5 * a_accel * age * age;
             gl_Position = u_projectionMatrix * u_transformMatrix * vec4(worldPos, 0.0, 1.0);
         }
     `;
 
-    const fsCricles = `
+    const fsSourceCircles = `
         precision highp float;
         varying vec2 v_UV;
         varying vec4 v_color;
@@ -513,14 +528,9 @@ function wglInit() {
     const fadeVsSource = `attribute vec2 a_position; void main() { gl_Position = vec4(a_position, 0.0, 1.0); }`;
     const fadeFsSource = `precision mediump float; uniform vec4 u_fadeColor; void main() { gl_FragColor = u_fadeColor; }`;
 
-    const lineProgram = createProgram(gl, vsSource2, fsSource2);
-    const circleProgram = createProgram(gl, vsCircles, fsCricles);
+    const lineProgram = createProgram(gl, vsSourceLines, fsSourceLines);
+    const circleProgram = createProgram(gl, vsSourceCircles, fsSourceCircles);
     const fadeProgram = createProgram(gl, fadeVsSource, fadeFsSource);
-
-    // Get extension or native WebGL2 VAO methods
-    const vaoExt = gl.createVertexArray ? gl : gl.getExtension("OES_vertex_array_object");
-    const createVAO = () => vaoExt.createVertexArray ? vaoExt.createVertexArray() : vaoExt.createVertexArrayOES();
-    const bindVAO = (vao) => vaoExt.bindVertexArray ? vaoExt.bindVertexArray(vao) : vaoExt.bindVertexArrayOES(vao);
 
     // -----------------------------------------------------------------
     // 2. FADE OVERLAY SETUP
@@ -537,96 +547,122 @@ function wglInit() {
     bindVAO(null);
 
     // -----------------------------------------------------------------
-    // 3. LINES SETUP
+    // 3. LINES OBJECT (Structured Object Pattern)
     // -----------------------------------------------------------------
     const quadTemplateBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, quadTemplateBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0.0, -0.5, 1.0, -0.5, 0.0, 0.5, 0.0, 0.5, 1.0, -0.5, 1.0, 0.5]), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+        0.0, -0.5,
+        1.0, -0.5,
+        0.0,  0.5,
+        0.0,  0.5,
+        1.0, -0.5,
+        1.0,  0.5
+    ]), gl.STATIC_DRAW);
 
-    const MAX_LINES = 10000;
-    const lineFloatsPerVertex = 11;
-    const lineStride = lineFloatsPerVertex * 4;
-    const lineVertexData = new Float32Array(MAX_LINES * lineFloatsPerVertex);
-    let lineActiveCount = 0;
+    const lines = {
+        program: lineProgram,
+        MAX: 10000,
+        template: quadTemplateBuffer,
+        floatsPerVertex: 11,
+        activeCount: 0,
+        projectionLoc: gl.getUniformLocation(lineProgram, 'u_projectionMatrix'),
+        transformLoc: gl.getUniformLocation(lineProgram, 'u_transformMatrix'),
+        timeLoc: gl.getUniformLocation(lineProgram, 'u_currentTime'),
+        quadCornerLoc: gl.getAttribLocation(lineProgram, 'a_quadCorner'),
+        update: false,
+        buffer: gl.createBuffer(),
+        attribs: [
+            { name: 'a_startPos',  size: 2, offset: 0 },
+            { name: 'a_endPos',    size: 2, offset: 2 },
+            { name: 'a_color',     size: 4, offset: 4 },
+            { name: 'a_birthTime', size: 1, offset: 8 },
+            { name: 'a_thickness', size: 1, offset: 9 },
+            { name: 'a_lifeTime',  size: 1, offset: 10 }
+        ]
+    };
+    wglCan.lines = lines
+    lines.stride = lines.floatsPerVertex * 4;
+    lines.vertexData = new Float32Array(lines.floatsPerVertex * lines.MAX);
 
-    const lineBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, lineBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, lineVertexData, gl.DYNAMIC_DRAW);
+    gl.bindBuffer(gl.ARRAY_BUFFER, lines.buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, lines.vertexData, gl.DYNAMIC_DRAW);
 
-    const lineAttribs = [
-        { name: 'a_startPos',  size: 2, offset: 0 },
-        { name: 'a_endPos',    size: 2, offset: 2 },
-        { name: 'a_color',     size: 4, offset: 4 },
-        { name: 'a_birthTime', size: 1, offset: 8 },
-        { name: 'a_thickness', size: 1, offset: 9 },
-        { name: 'a_lifeTime',  size: 1, offset: 10 },
-    ];
+    // Build Lines VAO
+    lines.vao = createVAO();
+    bindVAO(lines.vao);
 
-    const lineVAO = createVAO();
-    bindVAO(lineVAO);
+    gl.bindBuffer(gl.ARRAY_BUFFER, lines.template);
+    gl.enableVertexAttribArray(lines.quadCornerLoc);
+    gl.vertexAttribPointer(lines.quadCornerLoc, 2, gl.FLOAT, false, 0, 0);
+    gl.vertexAttribDivisor(lines.quadCornerLoc, 0);
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, quadTemplateBuffer);
-    const lineQuadCornerLoc = gl.getAttribLocation(lineProgram, 'a_quadCorner');
-    gl.enableVertexAttribArray(lineQuadCornerLoc);
-    gl.vertexAttribPointer(lineQuadCornerLoc, 2, gl.FLOAT, false, 0, 0);
-    gl.vertexAttribDivisor(lineQuadCornerLoc, 0);
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, lineBuffer);
-    for (const attr of lineAttribs) {
-        const loc = gl.getAttribLocation(lineProgram, attr.name);
+    gl.bindBuffer(gl.ARRAY_BUFFER, lines.buffer);
+    for (const attr of lines.attribs) {
+        const loc = gl.getAttribLocation(lines.program, attr.name);
         if (loc !== -1) {
             gl.enableVertexAttribArray(loc);
-            gl.vertexAttribPointer(loc, attr.size, gl.FLOAT, false, lineStride, attr.offset * 4);
+            gl.vertexAttribPointer(loc, attr.size, gl.FLOAT, false, lines.stride, attr.offset * 4);
             gl.vertexAttribDivisor(loc, 1);
         }
     }
     bindVAO(null);
 
     // -----------------------------------------------------------------
-    // 4. CIRCLES SETUP
+    // 4. CIRCLES OBJECT (Structured Object Pattern)
     // -----------------------------------------------------------------
     const quadCircleBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, quadCircleBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-0.5, -0.5, 0.5, -0.5, -0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5]), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+        -0.5, -0.5,
+         0.5, -0.5,
+        -0.5,  0.5,
+        -0.5,  0.5,
+         0.5, -0.5,
+         0.5,  0.5
+    ]), gl.STATIC_DRAW);
 
     const circles = {
         program: circleProgram,
         MAX: 10000,
         template: quadCircleBuffer,
-        floatsPerVertex: 9,
+        floatsPerVertex: 13,
         activeCount: 0,
         projectionLoc: gl.getUniformLocation(circleProgram, 'u_projectionMatrix'),
         transformLoc: gl.getUniformLocation(circleProgram, 'u_transformMatrix'),
         timeLoc: gl.getUniformLocation(circleProgram, 'u_currentTime'),
+        quadCornerLoc: gl.getAttribLocation(circleProgram, 'a_quadCorner'),
         update: false,
         buffer: gl.createBuffer(),
+        attribs: [
+            { name: 'a_position',  size: 2, offset: 0 },
+            { name: 'a_radius',    size: 1, offset: 2 },
+            { name: 'a_color',     size: 4, offset: 3 },
+            { name: 'a_birthTime', size: 1, offset: 7 },
+            { name: 'a_lifeTime',  size: 1, offset: 8 },
+            { name: 'a_vel',  size: 2, offset: 9 },
+            { name: 'a_accel',  size: 2, offset: 11 },
+        ]
     };
+    wglCan.circles = circles
     circles.stride = circles.floatsPerVertex * 4;
     circles.vertexData = new Float32Array(circles.floatsPerVertex * circles.MAX);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, circles.buffer);
     gl.bufferData(gl.ARRAY_BUFFER, circles.vertexData, gl.DYNAMIC_DRAW);
 
-    const circleAttribs = [
-        { name: 'a_position',  size: 2, offset: 0 },
-        { name: 'a_radius',    size: 1, offset: 2 },
-        { name: 'a_color',     size: 4, offset: 3 },
-        { name: 'a_birthTime', size: 1, offset: 7 },
-        { name: 'a_lifeTime',  size: 1, offset: 8 },
-    ];
-
-    const circleVAO = createVAO();
-    bindVAO(circleVAO);
+    // Build Circles VAO
+    circles.vao = createVAO();
+    bindVAO(circles.vao);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, circles.template);
-    const circleQuadCornerLoc = gl.getAttribLocation(circleProgram, 'a_quadCorner');
-    gl.enableVertexAttribArray(circleQuadCornerLoc);
-    gl.vertexAttribPointer(circleQuadCornerLoc, 2, gl.FLOAT, false, 0, 0);
-    gl.vertexAttribDivisor(circleQuadCornerLoc, 0);
+    gl.enableVertexAttribArray(circles.quadCornerLoc);
+    gl.vertexAttribPointer(circles.quadCornerLoc, 2, gl.FLOAT, false, 0, 0);
+    gl.vertexAttribDivisor(circles.quadCornerLoc, 0);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, circles.buffer);
-    for (const attr of circleAttribs) {
-        const loc = gl.getAttribLocation(circleProgram, attr.name);
+    for (const attr of circles.attribs) {
+        const loc = gl.getAttribLocation(circles.program, attr.name);
         if (loc !== -1) {
             gl.enableVertexAttribArray(loc);
             gl.vertexAttribPointer(loc, attr.size, gl.FLOAT, false, circles.stride, attr.offset * 4);
@@ -636,40 +672,43 @@ function wglInit() {
     bindVAO(null);
 
     // -----------------------------------------------------------------
-    // 5. SPAWN FUNCTIONS & GLOBALS
+    // 5. UNIFIED SPAWN FUNCTION
     // -----------------------------------------------------------------
-    let shaderUpdates = { line: false };
+    function spawn(system, arrf, count) {
+        if (count === undefined) return spawn(system, () => arrf, 1);
 
-    wglCan.spawnLine = (arrf, count) => {
-        if (count === undefined) return wglCan.spawnLine(() => arrf, 1);
         for (let i = 0; i < count; i++) {
-            if (lineActiveCount >= MAX_LINES) lineActiveCount = 0;
+            if (system.activeCount >= system.MAX) {
+                system.activeCount = 0;
+            }
             const arr = arrf(i);
-            const offset = lineActiveCount * lineFloatsPerVertex;
-            for (let f = 0; f < lineFloatsPerVertex; f++) lineVertexData[offset + f] = arr[f];
-            lineActiveCount++;
-        }
-        shaderUpdates.line = true;
-    };
+            const offset = system.activeCount * system.floatsPerVertex;
 
-    function spawn(type, arrf, count) {
-        if (count === undefined) return spawn(type, () => arrf, 1);
-        for (let i = 0; i < count; i++) {
-            if (type.activeCount >= type.MAX) type.activeCount = 0;
-            const arr = arrf(i);
-            const offset = type.activeCount * type.floatsPerVertex;
-            for (let f = 0; f < type.floatsPerVertex; f++) type.vertexData[offset + f] = arr[f];
-            type.activeCount++;
+            for (let f = 0; f < system.floatsPerVertex; f++) {
+                system.vertexData[offset + f] = arr[f];
+            }
+            system.activeCount++;
         }
-        type.update = true;
+        system.update = true;
     }
 
-    wglCan.spawnLine((i) => [i, 0, i, Height, i % 2, (i + 1) % 2, 0, rand() * 0.5 + 0.1, gameWorld.lastTime, rand(8) + 5, rand(2500) + 500], 100);
-    spawn(circles, (i) => [rand(-400), rand(-400), 40, 1, 1, 1, 1, gameWorld.lastTime, rand(2555) + 555], 5000);
+    // Expose alias if you still use wglCan.spawnLine
+    wglCan.spawn = spawn
+    wglCan.spawnLine = (arrf, count) => spawn(lines, arrf, count);
+    wglCan.spawnCircle = (arrf, count) => spawn(circles, arrf, count);
 
-    const projectionLoc = gl.getUniformLocation(lineProgram, 'u_projectionMatrix');
-    const transformLoc = gl.getUniformLocation(lineProgram, 'u_transformMatrix');
+    // Initial Spawns
+    spawn(lines, (i) => [
+        rand(-2400),rand(-2400), rand(-2400), rand(-2400),i%2,(i+1)%2, 0, rand() * 0.5 + 0.1, gameWorld.lastTime, rand(8) + 5, rand(8500) + 1500 + Math.abs(normalRandom(0,2500))
+    ], 100);
 
+    spawn(circles, (i) => [
+        rand(-2400), rand(-2400), 40 + Math.abs(normalRandom(3,50)), rand(), rand(), rand(), rand() * 0.5 + 0.1, gameWorld.lastTime, Math.abs(normalRandom(0,2500)), rand(-2), rand(-2), rand(-0.001), rand(-0.001)
+    ], 10000);
+
+    // -----------------------------------------------------------------
+    // 6. RESIZE & PROJECTION MATRIX
+    // -----------------------------------------------------------------
     function createOrthographicProjection(width, height) {
         return new Float32Array([
             2 / width,           0,  0, 0,
@@ -685,19 +724,21 @@ function wglInit() {
         gl.viewport(0, 0, w, h);
 
         const projMatrix = createOrthographicProjection(w, h);
-        gl.useProgram(lineProgram);
-        gl.uniformMatrix4fv(projectionLoc, false, projMatrix);
-        gl.useProgram(circleProgram);
+
+        gl.useProgram(lines.program);
+        gl.uniformMatrix4fv(lines.projectionLoc, false, projMatrix);
+
+        gl.useProgram(circles.program);
         gl.uniformMatrix4fv(circles.projectionLoc, false, projMatrix);
     };
 
     wglCan.resize(Width, Height);
 
     // -----------------------------------------------------------------
-    // 6. CLEAN RENDER LOOP
+    // 7. CLEAN RENDER LOOP
     // -----------------------------------------------------------------
     wglCan.render = (t = 2) => {
-        // 1. Dark Fade Overlay
+        // A. Dark Fade Overlay Pass
         gl.enable(gl.BLEND);
         gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
         gl.useProgram(fadeProgram);
@@ -705,23 +746,24 @@ function wglInit() {
         gl.uniform4f(gl.getUniformLocation(fadeProgram, 'u_fadeColor'), 0.0, 0.0, 0.0, 0.5);
         gl.drawArrays(gl.TRIANGLES, 0, 6);
 
-        // 2. Render Lines
-        gl.useProgram(lineProgram);
-        gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
         const matrix_arr = can.transform.toFloat32Array();
-        gl.uniformMatrix4fv(transformLoc, false, matrix_arr);
-        gl.uniform1f(gl.getUniformLocation(lineProgram, 'u_currentTime'), gameWorld.lastTime);
 
-        if (shaderUpdates.line) {
-            gl.bindBuffer(gl.ARRAY_BUFFER, lineBuffer);
-            gl.bufferSubData(gl.ARRAY_BUFFER, 0, lineVertexData);
-            shaderUpdates.line = false;
+        // B. Render Instanced Lines
+        gl.useProgram(lines.program);
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+        gl.uniformMatrix4fv(lines.transformLoc, false, matrix_arr);
+        gl.uniform1f(lines.timeLoc, gameWorld.lastTime);
+
+        if (lines.update) {
+            gl.bindBuffer(gl.ARRAY_BUFFER, lines.buffer);
+            gl.bufferSubData(gl.ARRAY_BUFFER, 0, lines.vertexData);
+            lines.update = false;
         }
 
-        bindVAO(lineVAO);
-        gl.drawArraysInstanced(gl.TRIANGLES, 0, 6, MAX_LINES);
+        bindVAO(lines.vao);
+        gl.drawArraysInstanced(gl.TRIANGLES, 0, 6, lines.MAX);
 
-        // 3. Render Circles
+        // C. Render Instanced Circles
         gl.useProgram(circles.program);
         gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
         gl.uniformMatrix4fv(circles.transformLoc, false, matrix_arr);
@@ -733,10 +775,10 @@ function wglInit() {
             circles.update = false;
         }
 
-        bindVAO(circleVAO);
+        bindVAO(circles.vao);
         gl.drawArraysInstanced(gl.TRIANGLES, 0, 6, circles.MAX);
 
-        bindVAO(null);
+        bindVAO(null); // Clean unbind
     };
 }
 
@@ -1755,6 +1797,21 @@ class ball{
         new particle(options.contact.x,options.contact.y,this.vx*rnd*(1+rand(spread))+rand(spread2),this.vy*rnd*(1+rand(spread))+rand(spread2))
       },rand(100))
     }
+
+
+
+
+    setTimeout(()=>{
+    let velgl = {vx:this.vx,vy:this.vy}
+      wglCan.spawn(wglCan.circles,()=>{
+        let rnd = rand(1.1)
+        return([
+        options.contact.x,options.contact.y, 10,
+        0.6+rand()*0.1,0,0,rand()*0.2+0.5,
+        gameWorld.lastTime, 2000 + rand(4000),
+        velgl.vx*rnd*(1+rand(spread))+rand(spread2),velgl.vy*rnd*(1+rand(spread))+rand(spread2), 0, gameWorld.gravity
+      ])},mult*dmg) 
+    },20)
 
     if(this.hp<0){ // blood spews ONLY on overkill (which is almost always)
       bloody = mult*dmg*100
