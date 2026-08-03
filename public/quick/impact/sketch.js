@@ -1828,7 +1828,7 @@ class ball{
         0.3+rand()*0.4,0,0,rand()*0.2+0.5,
         gameWorld.lastTime, 2000 + rand(4000),
         velgl.vx*rnd*(1+rand(spread))+rand(spread2),velgl.vy*rnd*(1+rand(spread))+rand(spread2), 0, gameWorld.gravity/3, 0.001
-      ])},mult*dmg*100) 
+      ])},mult*dmg) 
     },20)
 
     if(this.hp<0){ // blood spews ONLY on overkill (which is almost always)
@@ -6467,7 +6467,7 @@ function generateLevels(x,y){
 // performance measuring
 // mobile button fix
 //  Blood damage seperation
-
+//  frame stutter lead: garbage collection
 
 
 
