@@ -480,6 +480,7 @@ function wglInit() {
         attribute float a_lifeTime;
         attribute vec2 a_vel;
         attribute vec2 a_accel;
+        attribute float a_friction;
 
         uniform mat4 u_projectionMatrix;
         uniform mat4 u_transformMatrix;
@@ -504,7 +505,23 @@ function wglInit() {
 
             v_antiAliasDelta = 1.0 / (a_radius * 2.0);
             vec2 worldPos = a_position + (a_quadCorner * a_radius * 2.0);
-            worldPos = worldPos + a_vel * age + 0.5 * a_accel * age * age;
+
+                float k = max(a_friction, 0.00001); // Avoid div-by-zero
+                float inv_k = 1.0 / k;
+                float expFactor = 1.0 - exp(-k * age);
+
+                // Damped trajectory
+                vec2 dampedPos = (a_vel * expFactor + a_accel * (age - inv_k * expFactor)) * inv_k;
+
+                // Frictionless trajectory
+                vec2 freePos = a_vel * age + 0.5 * a_accel * (age * age);
+
+                // Branchless select: uses freePos if a_friction <= 0.0001, else dampedPos
+                float useDamping = step(0.0001, a_friction);
+                worldPos += mix(freePos, dampedPos, useDamping);
+            
+
+            //worldPos += (a_vel / a_friction) * expFactor + (a_accel / a_friction) * (age - (expFactor / a_friction));
             gl_Position = u_projectionMatrix * u_transformMatrix * vec4(worldPos, 0.0, 1.0);
         }
     `;
@@ -626,7 +643,7 @@ function wglInit() {
         program: circleProgram,
         MAX: 10000,
         template: quadCircleBuffer,
-        floatsPerVertex: 13,
+        floatsPerVertex: 14,
         activeCount: 0,
         projectionLoc: gl.getUniformLocation(circleProgram, 'u_projectionMatrix'),
         transformLoc: gl.getUniformLocation(circleProgram, 'u_transformMatrix'),
@@ -642,6 +659,7 @@ function wglInit() {
             { name: 'a_lifeTime',  size: 1, offset: 8 },
             { name: 'a_vel',  size: 2, offset: 9 },
             { name: 'a_accel',  size: 2, offset: 11 },
+            { name: 'a_friction',  size: 1, offset: 13 },
         ]
     };
     wglCan.circles = circles
@@ -703,7 +721,7 @@ function wglInit() {
     ], 100);
 
     spawn(circles, (i) => [
-        rand(-2400), rand(-2400), 40 + Math.abs(normalRandom(3,50)), rand(), rand(), rand(), rand() * 0.5 + 0.1, gameWorld.lastTime, Math.abs(normalRandom(0,2500)), rand(-2), rand(-2), rand(-0.001), rand(-0.001)
+        rand(-2400), rand(-2400), 40 + Math.abs(normalRandom(3,50)), rand(), rand(), rand(), rand() * 0.5 + 0.1, gameWorld.lastTime, Math.abs(normalRandom(0,2500)), rand(-2), rand(-2), rand(-0.001), rand(-0.001),  0
     ], 10000);
 
     // -----------------------------------------------------------------
@@ -1806,11 +1824,11 @@ class ball{
       wglCan.spawn(wglCan.circles,()=>{
         let rnd = rand(1.1)
         return([
-        options.contact.x,options.contact.y, 10,
-        0.6+rand()*0.1,0,0,rand()*0.2+0.5,
+        options.contact.x,options.contact.y, 10+rand(10),
+        0.3+rand()*0.4,0,0,rand()*0.2+0.5,
         gameWorld.lastTime, 2000 + rand(4000),
-        velgl.vx*rnd*(1+rand(spread))+rand(spread2),velgl.vy*rnd*(1+rand(spread))+rand(spread2), 0, gameWorld.gravity
-      ])},mult*dmg) 
+        velgl.vx*rnd*(1+rand(spread))+rand(spread2),velgl.vy*rnd*(1+rand(spread))+rand(spread2), 0, gameWorld.gravity/3, 0.001
+      ])},mult*dmg*100) 
     },20)
 
     if(this.hp<0){ // blood spews ONLY on overkill (which is almost always)
@@ -6399,6 +6417,7 @@ function generateLevels(x,y){
 // teleport function //
 // rotatable buildings // 
 // rotated wall generation //
+// webgl
 
 
 //// USAGE
@@ -6447,7 +6466,7 @@ function generateLevels(x,y){
 // double wall penetration
 // performance measuring
 // mobile button fix
-
+//  Blood damage seperation
 
 
 
