@@ -1,14 +1,8 @@
-// const observer = new PerformanceObserver((list) => {
-//   for (const entry of list.getEntries()) {
-//     console.warn('Long animation frame detected (Frame drop risk):', entry);
-//   }
-// });
 
-// // Observe long frames (supported in Chrome/Edge/Opera)
-// observer.observe({ type: "long-animation-frame", buffered: true });
+let debug = 0
 
+// debug = 1
 
-let debug = 0;
 // let Width = window.innerWidth
 // let Height = window.innerHeight
 let  Width = document.documentElement.clientWidth
@@ -18,20 +12,6 @@ let WidthM = Width/2
 let HeightM = Height/2
 
 const TAU = Math.PI*2
-
-const SCRATCH = {
-  acceleration: {
-    sum: { x: 0, y: 0 }
-  },
-  ballUpdate: {
-    sweepCollisionData: { collided: false, minDist: Infinity },
-    collisionData: { collided: false, minDist: Infinity },
-    oldVelocity: { vx: 0, vy: 0 },
-    normalizedDirectionToWall: { x: 0, y: 0 },
-    normalizedDirectionToWall90d: { x: 0, y: 0 },
-    push: { x: 0, y: 0 }
-  }
-}
 
 // let myCanvas = document.getElementById("myCanvas")
 
@@ -1164,7 +1144,7 @@ function line_to_line_collision_pt(a,b,c,d,p,q,r,s) {
   return false
 };
 
-function swept_ball_to_line_collision(bx1, by1, vx, vy, r, x1, y1, x2, y2) { // assume dt = 1
+function swept_ball_to_line_collision(bx1, by1, vx, vy, r, x1, y1, x2, y2, line_normal) { // assume dt = 1
     // We can treat the ball's movement as a capsule from (x, y) to (x + vx, y + vy) with radius r
     // Check if this capsule intersects the line segment from (x1, y1) to (x2, y2)
     // 1. Check if the line segment intersects the capsule's central line (ignoring radius)
@@ -1193,7 +1173,9 @@ function swept_ball_to_line_collision(bx1, by1, vx, vy, r, x1, y1, x2, y2) { // 
     }
 
 
-    // 3. Check if distance from endpoints of line segment to the capsule's path is less than r (for cases where line is short and ball passes over it)
+
+
+    // Check if distance from endpoints of line segment to the capsule's path is less than r (for cases where line is short and ball passes over it)
     if (point_to_line_distance(x1, y1, bx1, by1, bx2, by2) <= r && dot(vx,vy,bx1-x1,by1-y1) < 0) {
 
 
@@ -1207,7 +1189,7 @@ function swept_ball_to_line_collision(bx1, by1, vx, vy, r, x1, y1, x2, y2) { // 
         collision = {p:p,closest:res,dist:dist,type:4}
       }
     }
-    if (point_to_line_distance(x2, y2, bx1, by1, bx2, by2) <= r && dot(vx,vy,bx1-x1,by1-y1) < 0) { // if the end of wall PT is overlapping the sweeping ball
+    if (point_to_line_distance(x2, y2, bx1, by1, bx2, by2) <= r && dot(vx,vy,bx1-x2,by1-y2) < 0) { // if the end of wall PT is overlapping the sweeping ball
       let d = point_to_infinite_line_distance(x2, y2, bx1, by1, bx2, by2)
       let pol = point_on_infinite_line(x2, y2, bx1, by1, bx2, by2)
       let res = {x:x2, y:y2}
@@ -1221,16 +1203,6 @@ function swept_ball_to_line_collision(bx1, by1, vx, vy, r, x1, y1, x2, y2) { // 
     }
 
     
-
-
-
-        // 2. Check if the distance from the line segment to either endpoint of the capsule is less than r
-    // if (point_to_line_distance(bx1, by1, x1, y1, x2, y2) <= r) {
-    //   // the start of the capsule collided
-    //   return(2);
-    // } // dont need this yet
-
-
     if (point_to_line_distance(bx2, by2, x1, y1, x2, y2) <= r) { // the ball's end point overlaps the wall
       let pol = point_on_line(bx2, by2, x1, y1, x2, y2)
       let p = {x:bx2,y:by2}
@@ -1238,7 +1210,36 @@ function swept_ball_to_line_collision(bx1, by1, vx, vy, r, x1, y1, x2, y2) { // 
       if(!collision || dist <= collision.dist){
         collision = {p:p,closest:pol,dist:dist,passDist:distance(bx2,by2,pol.x,pol.y),type:3}
       }
-    } 
+    } // the reason type 3 is last is to give presedence to flat walls (so you dont trip over a ledge when flat/wall climbing) 3 is for climbing.
+
+
+    ////// prototype type 3 collision
+    // if (point_to_line_distance(bx2, by2, x1, y1, x2, y2) <= r && !collision) { // the ball's end point overlaps the wall
+    //   let normal_v = normalize(vx,vy)
+    //   let collisionPoint = line_to_line_collision_pt(bx1,by1,bx1+normal_v.x*3,by1+normal_v.y*3, x1,y1,x2,y2)
+    //   if(collisionPoint!==false){ // no collision point: parallel travel: handle by 4,5
+
+    //     if(line_normal === undefined){debugger//FIX}
+
+    //     let pushAmt = Math.abs(1/dot(normal_v.x,normal_v.y,line_normal.x,line_normal.y))
+    //     let p = {x:collisionPoint.x-normal_v.x*pushAmt, y:collisionPoint.y-normal_v.y*pushAmt}
+    //     let dist = distance(bx1,by1,collisionPoint.x,collisionPoint.y) // probably wrong
+        
+    //     collision = {p:p,closest:pol,dist:dist,type:3}
+    //   }
+    // }
+
+
+
+
+        // Check if the distance from the line segment to either endpoint of the capsule is less than r
+    // if (point_to_line_distance(bx1, by1, x1, y1, x2, y2) <= r) {
+    //   // the start of the capsule collided
+    //   return(2);
+    // } // dont need this yet
+
+
+
     return(collision)
 
 }
@@ -1558,11 +1559,9 @@ class Acceleration{
   }
 
   getSum(){
-    const out = SCRATCH.acceleration.sum
-    out.x = this.sum.x
-    out.y = this.sum.y
+    let out = {...this.sum}
     this.dynamicDict.forEach((e)=>{
-      const tmp = e();
+      let tmp = e();
       out.x += tmp.x
       out.y += tmp.y
     })
@@ -2025,8 +2024,7 @@ class ball{
     // if(distance(this.push.x,this.push.y)>this.r){
     //   console.log("what?")
     // }
-    this.push.x = 0
-    this.push.y = 0
+    this.push = {x:0,y:0}
 
     let speed = this.speed()
     let dleng = distance(lastX,lastY,this.x,this.y)
@@ -2044,14 +2042,9 @@ class ball{
       if(debug){
         new lineParticle(this.x,this.y,lastX,lastY)
       }
-      const collisionData = SCRATCH.ballUpdate.sweepCollisionData
-      collisionData.collided = false
-      collisionData.minDist = Infinity
-      collisionData.closest = undefined
-      collisionData.awaySide = undefined
-      collisionData.p = undefined
-      collisionData.sweepType = undefined
-      collisionData.sweepResponse = undefined
+      let collisionData = {"collided":false,"minDist":Infinity}
+
+
 
       collidableWalls.forEach((w)=>{
 
@@ -2076,7 +2069,6 @@ class ball{
       })
       if(collisionData.collided){
         if(debug){console.log('too fast wall collision '+collisionData.sweepType)}
-          console.log(collisionData)
         collisionData.sweepDist = collisionData.minDist
         collisionData.minDist = collisionData.sweepType===3?collisionData.sweepResponse.passDist:this.r
         wall_collision_handler(this,collisionData,dt,collisionData.sweepType==3?"swept normal":"swept")
@@ -2096,14 +2088,7 @@ class ball{
     //check wall collisions collide wall
     if(!this.tags.has("noCollideWall")){
 
-      const collisionData = SCRATCH.ballUpdate.collisionData
-      collisionData.collided = false
-      collisionData.minDist = Infinity
-      collisionData.closest = undefined
-      collisionData.awaySide = undefined
-      collisionData.p = undefined
-      collisionData.sweepType = undefined
-      collisionData.sweepResponse = undefined
+      let collisionData = {"collided":false,"minDist":Infinity}
 
       collidableWalls.forEach((w)=>{
 
@@ -2132,7 +2117,6 @@ class ball{
       // after finding the wall that collides
 
       if(collisionData.collided){
-        // console.log("collide normal")
         collisionData.p = {x:this.x,y:this.y}
         wall_collision_handler(this,collisionData,dt)
       }
@@ -2452,23 +2436,19 @@ function wall_collision_handler(ball,collisionData,dt,type="normal"){
   let w = collisionData.collided // the wall collided on
   let p = collisionData.p // the position of the ball when it hit the wall
 
-  const old = SCRATCH.ballUpdate.oldVelocity
-  old.vx = ball.vx
-  old.vy = ball.vy
+  let old = {vx:ball.vx,vy:ball.vy} // not needed, debug only.
 
     let fellback = false
 
-    const normalizedDirectionToWall = SCRATCH.ballUpdate.normalizedDirectionToWall
+    let normalizedDirectionToWall;
     if(dist!==0){
-      normalizedDirectionToWall.x = (closest.x-p.x)/dist
-      normalizedDirectionToWall.y = (closest.y-p.y)/dist // the normalized vector from the wall to the ball's position when colliding
+      normalizedDirectionToWall = {x:(closest.x-p.x)/dist,y:(closest.y-p.y)/dist} // the normalized vector from the wall to the ball's position when colliding
     } else {
       // fallback to last position if ball center is exactly on the wall, not perfect but should work in most cases and prevents NaN errors
       fellback = true;
       console.log("fellback")
       dist = distance(ball.lastX,ball.lastY,closest.x,closest.y)
-      normalizedDirectionToWall.x = (closest.x-ball.lastX)/dist
-      normalizedDirectionToWall.y = (closest.y-ball.lastY)/dist
+      normalizedDirectionToWall = {x:(closest.x-ball.lastX)/dist,y:(closest.y-ball.lastY)/dist}
     }
 
 
@@ -2486,9 +2466,7 @@ function wall_collision_handler(ball,collisionData,dt,type="normal"){
     // ball.vx = reflection.x * w.bounce
     // ball.vy = reflection.y * w.bounce
 
-    const normalizedDirectionToWall90d = SCRATCH.ballUpdate.normalizedDirectionToWall90d
-    normalizedDirectionToWall90d.x = normalizedDirectionToWall.y
-    normalizedDirectionToWall90d.y = -normalizedDirectionToWall.x
+    let normalizedDirectionToWall90d = {x:normalizedDirectionToWall.y,y:-normalizedDirectionToWall.x}
 
     // let refBounce = dot(reflection.x,reflection.y,w.normal.x,w.normal.y) * w.bounce
     // let refFriction = dot(reflection.x,reflection.y,w.normalized.x,w.normalized.y) * w.friction
@@ -2508,7 +2486,7 @@ function wall_collision_handler(ball,collisionData,dt,type="normal"){
 
     //push ball out of wall (good enough for now, fix later, bleeding E)
 
-    if(type === "swept" && collisionData.sweepResponse.type===1){
+    if(type === "swept" && (collisionData.sweepResponse.type===1 || collisionData.sweepResponse.type===5 || collisionData.sweepResponse.type===4)){
       ball.x = collisionData.p.x
       ball.y = collisionData.p.y
 
@@ -3351,8 +3329,6 @@ class entityList{
   static activatedBalls = new Set()
   static activatedWalls = new Set()
 
-  static activatedBallsArr = []
-
 }
 
 class particles{
@@ -3674,13 +3650,13 @@ function makeAIbreakable(wall){
 }
 
 
-function allBallsCollide(time,i,activatedBallsArr=entityList.activatedBallsArr){
+function allBallsCollide(time,i,ballList){
 
 
     for(let j = i-1; j > -1; j--){
 
-        let a = activatedBallsArr[i]
-        let b = activatedBallsArr[j]
+        let a = ballList[i]
+        let b = ballList[j]
 
         if(a.tags.has("noCollideBall") || b.tags.has("noCollideBall") || b.team==a.team){continue}
 
@@ -3855,8 +3831,11 @@ class test{
   static debug(){
     newWall(-100,890,100,4190);
     
-    newWall(-200,490,800,490);
-    newWall(1800,490-80,1000,490-130);
+    // newWall(-200,490,800,490);
+    newWall(1800,490-130,1000,490-130);
+    // newWall(1000,490-130,1800,490-80);
+
+
     newWall(-140,490,-140,0);
 
     newWall(-140,0,240,0);
@@ -5374,21 +5353,19 @@ setTimeout(()=>{
 
 
   // we already activate everything around the player. but we should also activate around camera
-  // this is needed because camera might not be looking at player so it needs to be seperate
+    grid.activate(camera.pos.x,camera.pos.y)
 
-  grid.activate(camera.pos.x,camera.pos.y)
+  let ballList = [...entityList.activatedBalls]
 
-  entityList.activatedBallsArr = [...entityList.activatedBalls]
-
-  for(let i = entityList.activatedBallsArr.length-1; i>-1; i--){
-    let e = entityList.activatedBallsArr[i]
+  for(let i = ballList.length-1; i>-1; i--){
+    let e = ballList[i]
     if(e.tags.has("isDead") && date-e.deathTime > 5000 && e !== entityList.player){
       entityList.activatedBalls.delete(e)
       entityList.balls.delete(e)
       continue;
     }
 
-    allBallsCollide(time,i,entityList.activatedBallsArr)
+    allBallsCollide(time,i,ballList)
     e.update(dt*gameWorld.timeWarp)
     e.draw()
   }
@@ -5469,17 +5446,17 @@ function gamePhysicsUpdate(time,dt,date){
   })
 
 
-  entityList.activatedBallsArr = [...entityList.activatedBalls]
+  let ballList = [...entityList.activatedBalls]
 
-  for(let i = entityList.activatedBallsArr.length-1; i>-1; i--){
-    let e = entityList.activatedBallsArr[i]
+  for(let i = ballList.length-1; i>-1; i--){
+    let e = ballList[i]
     if(e.tags.has("isDead") && date-e.deathTime > 5000 && e !== entityList.player){
       entityList.activatedBalls.delete(e)
       entityList.balls.delete(e)
       continue;
     }
 
-    allBallsCollide(time,i,entityList.activatedBallsArr)
+    allBallsCollide(time,i,ballList)
     e.update(dt*gameWorld.timeWarp)
   }
 
@@ -5524,10 +5501,10 @@ function gameDraw(time,dt,date){
 
   let pn2 = performance.now()
 
-  entityList.activatedBallsArr = [...entityList.activatedBalls]
+  let ballList = [...entityList.activatedBalls]
 
-  for(let i = entityList.activatedBallsArr.length-1; i>-1; i--){
-    let e = entityList.activatedBallsArr[i]
+  for(let i = ballList.length-1; i>-1; i--){
+    let e = ballList[i]
     e.draw()
   }
   test.perf = (performance.now()-pn2) * 0.1 + test.perf*0.9
@@ -5855,14 +5832,21 @@ document.addEventListener("keydown",(e)=>{
   } else if(e.key==="E"){
     test.toGen()
   }
+  if(e.key === "f" && debug){
+    requestAnimationFrame = ()=>{}
+    mainLoop()
+  }
 
   if(e.key === "r" && debug){
-    player.x = 400
-    player.y = 400
-    player.vx = 3
-    player.vy = -0.3
+    player.x = 600
+    // let rd = rand(-30)
+    // player.y = 410 + rd
+    // console.log(player.y)
+    player.y = 406.61112009227026
+    player.vx = 2
+    player.vy = -0.5
     player.damageMultiplier = 0.1
-    test.dtLock = 16.7
+    test.dtLock = 3
 
     // summon("normal",400,370)
   }
@@ -6467,7 +6451,7 @@ function generateLevels(x,y){
 // teleport function //
 // rotatable buildings // 
 // rotated wall generation //
-// webgl //
+// webgl
 
 
 //// USAGE
@@ -6519,22 +6503,4 @@ function generateLevels(x,y){
 //  Blood damage seperation
 //  frame stutter lead: garbage collection
 //  ball frozen collision easy check
-//  cache (grid)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+//  cache (grid) // 
