@@ -1484,6 +1484,16 @@ class grid{ //Spatial Hash Grid
   }
 
 
+  // static cached = {}
+
+  // static cache(str,obj,storage=this.cached,leng){
+  //   storage.
+  // }
+
+
+
+
+
   static draw(){
     let k = 0
     for(let i = -10; i < 10; i++){
@@ -5224,7 +5234,7 @@ setTimeout(()=>{
     // entityList.player.y = -500 + Math.sin(gameWorld.frame/60)*700
     // entityList.player.x = -500 
 
-
+  performance.mark('cam-start')
   can.ctx.clearRect(0,0,can.canvas.width,can.canvas.height)
   // can.ctx.fillStyle = "rgba(0,0,0,0.01)"
   // can.ctx.fillRect(0,0,can.canvas.width,can.canvas.height)
@@ -5324,10 +5334,13 @@ setTimeout(()=>{
   let maxY = Math.max(topLeft.y, topRight.y, bottomLeft.y, bottomRight.y);
 
   gameWorld.viewAABB = [minX,minY,maxX,maxY]
+  performance.mark('cam-end')
+  performance.mark('particle-start')
 
 
   particles.update(dt)
   particles.draw(1)
+  performance.mark('particle-end')
 
 
   // update game TOs
@@ -5337,6 +5350,7 @@ setTimeout(()=>{
 
   //draw items
 
+  performance.mark('item-start')
   let items = grid.getNearby(camera.pos.x,camera.pos.y,1,grid.miscGrid)
   items.forEach((e)=>{
     e.draw(dt)
@@ -5350,9 +5364,11 @@ setTimeout(()=>{
       }
     }
   })
+  performance.mark('item-end')
 
 
   // we already activate everything around the player. but we should also activate around camera
+  performance.mark('ball-start')
     grid.activate(camera.pos.x,camera.pos.y)
 
   let ballList = [...entityList.activatedBalls]
@@ -5370,6 +5386,8 @@ setTimeout(()=>{
     e.draw()
   }
 
+  performance.mark('ball-end')
+  performance.mark('wall-start')
 
 
   let walls = grid.getNearby(camera.pos.x,camera.pos.y,2,grid.grid)
@@ -5377,10 +5395,14 @@ setTimeout(()=>{
   walls.forEach((e)=>{
     e.draw()
   })
+  performance.mark('wall-end')
 
 
+  performance.mark('particle2-start')
   particles.draw(2)
 
+  performance.mark('particle2-end')
+  performance.mark('ui-start')
 
 
   drawShootAngle(date)
@@ -5414,9 +5436,27 @@ setTimeout(()=>{
     can.ctx.fillText("OFFLINE. SERVED OFFLINE. DEBUG NOT WORK BECAUSE OFFLINE",100,120)
   }
 
+  performance.mark('ui-end')
+  let x = ["cam","particle","ball","wall","particle2","ui"].map((e)=>{
+    performance.measure(e, e+'-start', e+'-end');
+  })
+
   })
 },400) // wait for website to stabalize
 
+}
+
+function report(){
+  const r = ["cam","particle","ball","wall","particle2","ui"].map(name => {
+  const entries = performance.getEntriesByName(name);
+  const total = entries.reduce((sum, entry) => sum + entry.duration, 0);
+  return {
+      "Function": name,
+      "Total Time (ms)": total.toFixed(2),
+      "Avg Time (ms)": (total / entries.length).toFixed(4)
+    };
+  });
+  return(r)
 }
 
 
