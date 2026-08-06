@@ -2594,6 +2594,9 @@ class effects{
         return 0.0001*(timeLeft**0.5)
       }
     },
+    sparkle:{
+      "backgroundColor":"#A0A0A0"
+    }
   }
 
   constructor(entity){
@@ -5619,6 +5622,7 @@ function drawShootAngle(date){
     if(!controller.mouseDownPos.charged && date-controller.mouseDownPos.time>700){
       controller.mouseDownPos.charged = true
       new sparkleParticle(entityList.player.x,entityList.player.y)
+      grantEffect("sparkle",entityList.player,{duration:3000})
       entityList.player.damageMultiplier = 2
     }
 
