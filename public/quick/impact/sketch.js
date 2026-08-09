@@ -1163,13 +1163,13 @@ function swept_ball_to_line_collision(bx1, by1, vx, vy, r, x1, y1, x2, y2, line_
 
     let collision = false
   
-    let temp1 = line_to_line_collision_pt(bx1, by1, bx2, by2, x1, y1, x2, y2)
+    let temp1 = line_to_line_collision_pt(bx1, by1, bx2, by2 , x1, y1, x2, y2)
     if (temp1) {
       let res = temp1
       let d = Math.abs(dot(n.x,n.y,nvx,nvy))
       let p = {x:res.x-r/d*nvx,y:res.y-r/d*nvy}
       // collision = {p:p,res:res,dist:distance(res.x,res.y,bx1,by1),type:1} // wrong!
-      collision = {p:p,closest:point_on_line(p.x,p.y,x1,y1,x2,y2),dist:distance(res.x,res.y,bx1,by1),type:1}
+      collision = {p:p,closest:point_on_line(p.x,p.y,x1,y1,x2,y2),t:distance(p.x,p.y,bx1,bx2),dist:distance(res.x,res.y,bx1,by1),type:1}
     }
 
 
@@ -1186,7 +1186,7 @@ function swept_ball_to_line_collision(bx1, by1, vx, vy, r, x1, y1, x2, y2, line_
       let p = {x:pol.x-nvx*d,y:pol.y-nvy*d}
       let dist = distance(res.x,res.y,bx1,by1)
       if(!collision || dist <= collision.dist){
-        collision = {p:p,closest:res,dist:dist,type:4}
+        collision = {p:p,closest:res,t:distance(p.x,p.y,bx1,bx2),dist:dist,type:4}
       }
     }
     if (point_to_line_distance(x2, y2, bx1, by1, bx2, by2) <= r && dot(vx,vy,bx1-x2,by1-y2) < 0) { // if the end of wall PT is overlapping the sweeping ball
@@ -1198,7 +1198,7 @@ function swept_ball_to_line_collision(bx1, by1, vx, vy, r, x1, y1, x2, y2, line_
       let dist = distance(res.x,res.y,bx1,by1)
       if(test.expect(distance(p.x,p.y,res.x,res.y),r)){if(!settings.mobile){debugger}} // energen
       if(!collision || dist <= collision.dist){
-        collision = {p:p,closest:res,dist:dist,type:5} // p = the pos of ball when collide, closest = the point of collision
+        collision = {p:p,closest:res,t:distance(p.x,p.y,bx1,bx2),dist:dist,type:5} // p = the pos of ball when collide, closest = the point of collision
       }
     }
 
@@ -1213,20 +1213,27 @@ function swept_ball_to_line_collision(bx1, by1, vx, vy, r, x1, y1, x2, y2, line_
     } // the reason type 3 is last is to give presedence to flat walls (so you dont trip over a ledge when flat/wall climbing) 3 is for climbing.
 
 
-    ////// prototype type 3 collision
-    // if (point_to_line_distance(bx2, by2, x1, y1, x2, y2) <= r && !collision) { // the ball's end point overlaps the wall
+    //// prototype type 3 collision
+    // let ball_end_to_line = point_on_line(bx2, by2, x1, y1, x2, y2)
+    // ball_end_to_line.dist = distance(bx2, by2, ball_end_to_line.x, ball_end_to_line.y)
+    // if (ball_end_to_line.dist < r ) { // the ball's end point overlaps the wall, and the ball is not approaching from sides, and its only the end cap
     //   let normal_v = normalize(vx,vy)
-    //   let collisionPoint = line_to_line_collision_pt(bx1,by1,bx1+normal_v.x*3,by1+normal_v.y*3, x1,y1,x2,y2)
-    //   if(collisionPoint!==false){ // no collision point: parallel travel: handle by 4,5
 
-    //     if(line_normal === undefined){debugger//FIX}
+    //   // let collisionPoint = line_to_line_collision_pt(bx1,by1,bx1+normal_v.x*3,by1+normal_v.y*3, x1,y1,x2,y2)
+
+    //     if(line_normal === undefined){debugger}//FIX
 
     //     let pushAmt = Math.abs(1/dot(normal_v.x,normal_v.y,line_normal.x,line_normal.y))
-    //     let p = {x:collisionPoint.x-normal_v.x*pushAmt, y:collisionPoint.y-normal_v.y*pushAmt}
-    //     let dist = distance(bx1,by1,collisionPoint.x,collisionPoint.y) // probably wrong
+    //     let inAmt = ball_end_to_line.dist / r
+
+    //     let p = {x:bx2-normal_v.x*pushAmt*inAmt, y:by2-normal_v.y*pushAmt*inAmt}
+    //     let dist = distance(bx1,by1,p.x,p.y) // probably wrong
+
+    //     let pol = point_on_line(p.x,p.y,x1,y1,x2,y2)
+
+    //     console.log(p,dist,pol)
         
-    //     collision = {p:p,closest:pol,dist:dist,type:3}
-    //   }
+    //     collision = {p:p,t:distance(p.x,p.y,bx1,by1),closest:pol,dist:dist,type:3}
     // }
 
 
@@ -2061,12 +2068,12 @@ class ball{
 
         let awaySide = dot(pseudovx,pseudovy,w.normal.x,w.normal.y) < 0
 
-        let sweep = swept_ball_to_line_collision(lastX,lastY,pseudovx,pseudovy,this.r, w.x,w.y,w.x2,w.y2)
+        let sweep = swept_ball_to_line_collision(lastX,lastY,pseudovx,pseudovy,this.r, w.x,w.y,w.x2,w.y2,w.normal)
         if(sweep){
         if(w.tags.has("sided") && (awaySide || this.sidedWallEntryFrame[w.id] === gameWorld.frame-1 )){return} // comment out to test
-          if(sweep.dist < collisionData.minDist){
+          if(sweep.t < collisionData.minDist){
             collisionData.collided = w
-            collisionData.minDist = sweep.dist
+            collisionData.minDist = sweep.t
             collisionData.closest = sweep.closest
             collisionData.awaySide = awaySide
             collisionData.p = sweep.p
