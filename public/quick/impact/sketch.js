@@ -1110,7 +1110,7 @@ function point_on_infinite_line(x, y, x1, y1, x2, y2) {
     let t = (acx * abx + acy * aby) / ab2;
     // Find the closest point
 
-    return({x: x1 + t * abx, y: y1 + t * aby})
+    return({x: x1 + t * abx, y: y1 + t * aby, t:t})
 
 }
 
@@ -1169,7 +1169,11 @@ function swept_ball_to_line_collision(bx1, by1, vx, vy, r, x1, y1, x2, y2, line_
       let d = Math.abs(dot(n.x,n.y,nvx,nvy))
       let p = {x:res.x-r/d*nvx,y:res.y-r/d*nvy}
       // collision = {p:p,res:res,dist:distance(res.x,res.y,bx1,by1),type:1} // wrong!
-      collision = {p:p,closest:point_on_line(p.x,p.y,x1,y1,x2,y2),t:distance(p.x,p.y,bx1,bx2),dist:distance(res.x,res.y,bx1,by1),type:1}
+      let projP = point_on_infinite_line(p.x,p.y,x1,y1,x2,y2)
+      if(projP.t >= 0 && projP.t <= 1){ // so that super shallow slants dont kick back to infinity
+        let t = distance(p.x,p.y,bx1,bx2)
+        collision = {p:p,closest:point_on_line(p.x,p.y,x1,y1,x2,y2),t:t,dist:distance(res.x,res.y,bx1,by1),type:1}
+      }
     }
 
 
@@ -1185,8 +1189,9 @@ function swept_ball_to_line_collision(bx1, by1, vx, vy, r, x1, y1, x2, y2, line_
       d=Math.sqrt(r*r-d*d)
       let p = {x:pol.x-nvx*d,y:pol.y-nvy*d}
       let dist = distance(res.x,res.y,bx1,by1)
-      if(!collision || dist <= collision.dist){
-        collision = {p:p,closest:res,t:distance(p.x,p.y,bx1,bx2),dist:dist,type:4}
+      let t = distance(p.x,p.y,bx1,bx2)
+      if(!collision || t <= collision.t){
+        collision = {p:p,closest:res,t:t,dist:dist,type:4}
       }
     }
     if (point_to_line_distance(x2, y2, bx1, by1, bx2, by2) <= r && dot(vx,vy,bx1-x2,by1-y2) < 0) { // if the end of wall PT is overlapping the sweeping ball
@@ -1197,8 +1202,10 @@ function swept_ball_to_line_collision(bx1, by1, vx, vy, r, x1, y1, x2, y2, line_
       let p = {x:pol.x-nvx*d,y:pol.y-nvy*d}
       let dist = distance(res.x,res.y,bx1,by1)
       if(test.expect(distance(p.x,p.y,res.x,res.y),r)){if(!settings.mobile){debugger}} // energen
-      if(!collision || dist <= collision.dist){
-        collision = {p:p,closest:res,t:distance(p.x,p.y,bx1,bx2),dist:dist,type:5} // p = the pos of ball when collide, closest = the point of collision
+
+      let t = distance(p.x,p.y,bx1,bx2)
+      if(!collision || t <= collision.t){
+        collision = {p:p,closest:res,t:t,dist:dist,type:5} // p = the pos of ball when collide, closest = the point of collision
       }
     }
 
@@ -1227,6 +1234,8 @@ function swept_ball_to_line_collision(bx1, by1, vx, vy, r, x1, y1, x2, y2, line_
     //     let inAmt = ball_end_to_line.dist / r
 
     //     let p = {x:bx2-normal_v.x*pushAmt*inAmt, y:by2-normal_v.y*pushAmt*inAmt}
+          // let projP = point_on_infinite_line(p.x,p.y,x1,y1,x2,y2)
+      // if(projP.t >= 0 && projP.t <= 1){ // so that super shallow slants dont kick back to infinity
     //     let dist = distance(bx1,by1,p.x,p.y) // probably wrong
 
     //     let pol = point_on_line(p.x,p.y,x1,y1,x2,y2)
@@ -1234,6 +1243,7 @@ function swept_ball_to_line_collision(bx1, by1, vx, vy, r, x1, y1, x2, y2, line_
     //     console.log(p,dist,pol)
         
     //     collision = {p:p,t:distance(p.x,p.y,bx1,by1),closest:pol,dist:dist,type:3}
+      // }
     // }
 
 
