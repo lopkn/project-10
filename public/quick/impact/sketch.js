@@ -1,5 +1,5 @@
 
-let debug = 0
+let debug = 1
 
 // debug = 1
 
@@ -1210,41 +1210,41 @@ function swept_ball_to_line_collision(bx1, by1, vx, vy, r, x1, y1, x2, y2, line_
     }
 
     
-    if (point_to_line_distance(bx2, by2, x1, y1, x2, y2) <= r) { // the ball's end point overlaps the wall
-      let pol = point_on_line(bx2, by2, x1, y1, x2, y2)
-      let p = {x:bx2,y:by2}
-      let dist = distance(bx1,by1,pol.x,pol.y)
-      if(!collision || dist <= collision.dist){
-        collision = {p:p,closest:pol,dist:dist,passDist:distance(bx2,by2,pol.x,pol.y),type:3}
+    // if (point_to_line_distance(bx2, by2, x1, y1, x2, y2) <= r) { // the ball's end point overlaps the wall
+    //   let pol = point_on_line(bx2, by2, x1, y1, x2, y2)
+    //   let p = {x:bx2,y:by2}
+    //   let dist = distance(bx1,by1,pol.x,pol.y)
+    //   if(!collision || dist <= collision.dist){
+    //     collision = {p:p,closest:pol,dist:dist,passDist:distance(bx2,by2,pol.x,pol.y),type:3}
+    //   }
+    // } // the reason type 3 is last is to give presedence to flat walls (so you dont trip over a ledge when flat/wall climbing) 3 is for climbing.
+
+
+    // prototype type 3 collision
+    let ball_end_to_line = point_on_line(bx2, by2, x1, y1, x2, y2)
+    ball_end_to_line.dist = distance(bx2, by2, ball_end_to_line.x, ball_end_to_line.y)
+    if (ball_end_to_line.dist < r ) { // the ball's end point overlaps the wall, and the ball is not approaching from sides, and its only the end cap
+      let normal_v = normalize(vx,vy)
+
+      // let collisionPoint = line_to_line_collision_pt(bx1,by1,bx1+normal_v.x*3,by1+normal_v.y*3, x1,y1,x2,y2)
+
+        if(line_normal === undefined){debugger}//FIX
+
+        let pushAmt = Math.abs(1/dot(normal_v.x,normal_v.y,line_normal.x,line_normal.y))
+        let inAmt = 1-ball_end_to_line.dist / r
+
+        let p = {x:bx2-normal_v.x*pushAmt*inAmt*r, y:by2-normal_v.y*pushAmt*inAmt*r}
+          let projP = point_on_infinite_line(p.x,p.y,x1,y1,x2,y2)
+      if(projP.t >= 0 && projP.t <= 1){ // so that super shallow slants dont kick back to infinity
+        let dist = distance(bx1,by1,p.x,p.y) // probably wrong
+
+        let pol = point_on_line(p.x,p.y,x1,y1,x2,y2)
+
+
+
+        collision = {p:p,t:distance(p.x,p.y,bx1,by1),closest:pol,dist:dist,type:3}
       }
-    } // the reason type 3 is last is to give presedence to flat walls (so you dont trip over a ledge when flat/wall climbing) 3 is for climbing.
-
-
-    //// prototype type 3 collision
-    // let ball_end_to_line = point_on_line(bx2, by2, x1, y1, x2, y2)
-    // ball_end_to_line.dist = distance(bx2, by2, ball_end_to_line.x, ball_end_to_line.y)
-    // if (ball_end_to_line.dist < r ) { // the ball's end point overlaps the wall, and the ball is not approaching from sides, and its only the end cap
-    //   let normal_v = normalize(vx,vy)
-
-    //   // let collisionPoint = line_to_line_collision_pt(bx1,by1,bx1+normal_v.x*3,by1+normal_v.y*3, x1,y1,x2,y2)
-
-    //     if(line_normal === undefined){debugger}//FIX
-
-    //     let pushAmt = Math.abs(1/dot(normal_v.x,normal_v.y,line_normal.x,line_normal.y))
-    //     let inAmt = ball_end_to_line.dist / r
-
-    //     let p = {x:bx2-normal_v.x*pushAmt*inAmt, y:by2-normal_v.y*pushAmt*inAmt}
-          // let projP = point_on_infinite_line(p.x,p.y,x1,y1,x2,y2)
-      // if(projP.t >= 0 && projP.t <= 1){ // so that super shallow slants dont kick back to infinity
-    //     let dist = distance(bx1,by1,p.x,p.y) // probably wrong
-
-    //     let pol = point_on_line(p.x,p.y,x1,y1,x2,y2)
-
-    //     console.log(p,dist,pol)
-        
-    //     collision = {p:p,t:distance(p.x,p.y,bx1,by1),closest:pol,dist:dist,type:3}
-      // }
-    // }
+    }
 
 
 
@@ -2097,8 +2097,10 @@ class ball{
       if(collisionData.collided){
         if(debug){console.log('too fast wall collision '+collisionData.sweepType)}
         collisionData.sweepDist = collisionData.minDist
-        collisionData.minDist = collisionData.sweepType===3?collisionData.sweepResponse.passDist:this.r
-        wall_collision_handler(this,collisionData,dt,collisionData.sweepType==3?"swept normal":"swept")
+        // collisionData.minDist = collisionData.sweepType===3?collisionData.sweepResponse.passDist:this.r
+        // wall_collision_handler(this,collisionData,dt,collisionData.sweepType==3?"swept normal":"swept")
+        collisionData.minDist = this.r
+        wall_collision_handler(this,collisionData,dt,"swept")
         sweptWallHit = collisionData.collided
       }
     } /// BALL MOVING TOO FAST!!!!!! FIX
@@ -2463,6 +2465,7 @@ function wall_collision_handler(ball,collisionData,dt,type="normal"){
   let w = collisionData.collided // the wall collided on
   let p = collisionData.p // the position of the ball when it hit the wall
 
+
   let old = {vx:ball.vx,vy:ball.vy} // not needed, debug only.
 
     let fellback = false
@@ -2513,7 +2516,7 @@ function wall_collision_handler(ball,collisionData,dt,type="normal"){
 
     //push ball out of wall (good enough for now, fix later, bleeding E)
 
-    if(type === "swept" && (collisionData.sweepResponse.type===1 || collisionData.sweepResponse.type===5 || collisionData.sweepResponse.type===4)){
+    if(type === "swept" && (collisionData.sweepResponse.type===1 || collisionData.sweepResponse.type===5 || collisionData.sweepResponse.type===4|| collisionData.sweepResponse.type===3)){
       ball.x = collisionData.p.x
       ball.y = collisionData.p.y
 
@@ -5907,7 +5910,7 @@ document.addEventListener("keydown",(e)=>{
     player.vx = 2
     player.vy = -0.5
     player.damageMultiplier = 0.1
-    test.dtLock = 3
+    test.dtLock = 30
 
     // summon("normal",400,370)
   }
