@@ -1,5 +1,5 @@
 
-let debug = 1
+let debug = 0
 
 // debug = 1
 
@@ -1144,7 +1144,9 @@ function line_to_line_collision_pt(a,b,c,d,p,q,r,s) {
   return false
 };
 
-function swept_ball_to_line_collision(bx1, by1, vx, vy, r, x1, y1, x2, y2, line_normal) { // assume dt = 1
+function swept_ball_to_line_collision(...inarr) { // assume dt = 1
+
+    let [bx1, by1, vx, vy, r, x1, y1, x2, y2, line_normal] = inarr
     // We can treat the ball's movement as a capsule from (x, y) to (x + vx, y + vy) with radius r
     // Check if this capsule intersects the line segment from (x1, y1) to (x2, y2)
     // 1. Check if the line segment intersects the capsule's central line (ignoring radius)
@@ -1240,9 +1242,11 @@ function swept_ball_to_line_collision(bx1, by1, vx, vy, r, x1, y1, x2, y2, line_
 
         let pol = point_on_line(p.x,p.y,x1,y1,x2,y2)
 
+      let t = distance(p.x,p.y,bx1,bx2)
 
-
-        collision = {p:p,t:distance(p.x,p.y,bx1,by1),closest:pol,dist:dist,type:3}
+      if(!collision || t <= collision.t){
+        collision = {p:p,t:distance(p.x,p.y,bx1,by1),closest:pol,dist:dist,type:3, info:inarr}
+      }
       }
     }
 
