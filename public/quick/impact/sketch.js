@@ -1261,6 +1261,10 @@ function swept_ball_to_line_collision(...inarr) { // assume dt = 1
 
 
 
+    if(collision){
+      collision.timeTaken = t/distance(vx,vy)
+    }
+
     return(collision)
 
 }
