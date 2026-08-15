@@ -1244,8 +1244,11 @@ function swept_ball_to_line_collision(...inarr) { // assume dt = 1
 
       let t = distance(p.x,p.y,bx1,bx2)
 
+      let towards = Math.sign(dot(vx,vy,line_normal.x,line_normal.y))
+      let to = {x:bx2-towards*inAmt*r*line_normal.x,y:by2-towards*inAmt*r*line_normal.y}
+
       if(!collision || t <= collision.t){
-        collision = {p:p,t:distance(p.x,p.y,bx1,by1),closest:pol,dist:dist,type:3, info:inarr}
+        collision = {p:p,t:distance(p.x,p.y,bx1,by1),closest:pol,dist:dist,type:3, info:inarr, to:to}
       }
       }
     }
