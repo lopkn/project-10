@@ -1265,7 +1265,7 @@ function swept_ball_to_line_collision(...inarr) { // assume dt = 1
 
 
     if(collision){
-      collision.timeTaken = t/distance(vx,vy)
+      collision.timeTaken = collision.t/distance(vx,vy)
     }
 
     return(collision)
@@ -2530,6 +2530,10 @@ function wall_collision_handler(ball,collisionData,dt,type="normal"){
     if(type === "swept" && (collisionData.sweepResponse.type===1 || collisionData.sweepResponse.type===5 || collisionData.sweepResponse.type===4|| collisionData.sweepResponse.type===3)){
       ball.x = collisionData.p.x
       ball.y = collisionData.p.y
+      if(collisionData.sweepResponse.to){
+        ball.x = collisionData.sweepResponse.to.x
+        ball.y = collisionData.sweepResponse.to.y
+      }
 
     } else { // normal
       let overlap = ball.r - dist + 0.000005 // brute fix // refer to note about collision types 3
