@@ -1971,6 +1971,9 @@ class ball{
     if(!this.tags.has("moves") || this.tags.has("isDead")){return}
 
     let ml = distance(this.movementVector.x,this.movementVector.y)
+
+    ml += + this.effects.getValue("rage",0)
+
     if(ml===0){return}
     this.vx += this.movementVector.x/ml*this.movementSpeed*this.movementScalar
     this.vy += this.movementVector.y/ml*this.movementSpeed*this.movementScalar
@@ -2619,6 +2622,12 @@ class effects{
     energenerative:{
       "backgroundColor":"#4090A0",
       "sprite":{path:iconDrawer.getPath("energenin"),color:"blue"},
+      "timeToValue":(timeLeft)=>{
+        return 0.00001*timeLeft
+      }
+    },
+    rage:{
+      "backgroundColor":"#602020",
       "timeToValue":(timeLeft)=>{
         return 0.00001*timeLeft
       }
