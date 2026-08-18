@@ -1693,6 +1693,10 @@ class ball{
     grid.addPt(this.x,this.y,()=>{this.activate()},grid.activationGrid)
     grid.addChunk(this.x-r,this.y-r,this.x+r,this.y+r,this,grid.entityGrid)
 
+    this.events = {
+      "onKill":[]
+    }
+
   }
 
 
@@ -1972,11 +1976,11 @@ class ball{
 
     let ml = distance(this.movementVector.x,this.movementVector.y)
 
-    ml += + this.effects.getValue("rage",0)
+    let movementMult = this.effects.getValue("rage",0)
 
     if(ml===0){return}
-    this.vx += this.movementVector.x/ml*this.movementSpeed*this.movementScalar
-    this.vy += this.movementVector.y/ml*this.movementSpeed*this.movementScalar
+    this.vx += this.movementVector.x/ml*this.movementSpeed*this.movementScalar * movementMult
+    this.vy += this.movementVector.y/ml*this.movementSpeed*this.movementScalar * movementMult
   }
 
 
@@ -2629,7 +2633,7 @@ class effects{
     rage:{
       "backgroundColor":"#602020",
       "timeToValue":(timeLeft)=>{
-        return 0.00001*timeLeft
+        return 0.002*timeLeft
       }
     },
     regenerative:{
@@ -3790,6 +3794,12 @@ function allBallsCollide(time,i,ballList){
             b.forceM(normalizedVectorTo.x,normalizedVectorTo.y,forceMultiplier)
           } else { // only one ball died
             let dead = killed_a?a:b
+            let alive = killed_a?b:a
+
+            alive.events.onKill.forEach((f)=>{
+              f(alive,dead)
+            })
+
             if(killed==="normal"){
               a.forceM(normalizedVectorTo.x,normalizedVectorTo.y,-forceMultiplier)
               b.forceM(normalizedVectorTo.x,normalizedVectorTo.y,forceMultiplier)
@@ -4694,6 +4704,10 @@ class mobileDebug{
         document.addEventListener("click",()=>{location.reload()})
       },2000)
 
+  })
+
+  entityList.player.events.onKill.push((b,k)=>{
+    grantEffect("rage",entityList.player,{duration:2000})
   })
 
   trailify(entityList.player)
