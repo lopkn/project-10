@@ -1976,7 +1976,7 @@ class ball{
 
     let ml = distance(this.movementVector.x,this.movementVector.y)
 
-    let movementMult = this.effects.getValue("rage",0)
+    let movementMult = 1+this.effects.getValue("rage",0)
 
     if(ml===0){return}
     this.vx += this.movementVector.x/ml*this.movementSpeed*this.movementScalar * movementMult
