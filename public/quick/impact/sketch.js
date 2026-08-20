@@ -2633,7 +2633,7 @@ class effects{
     rage:{
       "backgroundColor":"#602020",
       "timeToValue":(timeLeft)=>{
-        return 0.002*timeLeft
+        return 0.001*timeLeft
       }
     },
     regenerative:{
@@ -4707,7 +4707,7 @@ class mobileDebug{
   })
 
   entityList.player.events.onKill.push((b,k)=>{
-    grantEffect("rage",entityList.player,{duration:2000})
+    grantEffect("rage",entityList.player,{duration:3000})
   })
 
   trailify(entityList.player)
