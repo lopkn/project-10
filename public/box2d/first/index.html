@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Box2D / Planck.js - High-Precision Elastic Simulation</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #0f1012;
+      color: #eaeaea;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      overflow: hidden;
+      user-select: none;
+    }
+    #canvas-container {
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    canvas {
+      background-color: #16171b;
+      display: block;
+      cursor: crosshair;
+    }
+    .controls {
+      margin-top: 15px;
+      display: flex;
+      gap: 15px;
+      font-size: 14px;
+      color: #888;
+    }
+    .badge {
+      background: #23252b;
+      padding: 4px 10px;
+      border-radius: 4px;
+      color: #00e699;
+      font-weight: 500;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/planck-js@0.3.27/dist/planck.min.js"></script>
+</head>
+<body>
+
+  <div id="canvas-container">
+    <canvas id="canvas" width="800" height="600"></canvas>
+  </div>
+
+  <div class="controls">
+    <span>Left Click: <span class="badge">Spawn Perfectly Elastic Box</span></span>
+    <span>Right Click: <span class="badge">Spawn Perfectly Elastic Ball</span></span>
+  </div>
+
+  <script>
+    const pl = planck;
+    const Vec2 = pl.Vec2;
+
+    const SCALE = 30;
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    const w = canvas.width;
+    const h = canvas.height;
+
+    // 1. Initialize World with standard gravity and zero damping globally
+    const world = pl.World({
+      gravity: Vec2(0, 10),
+      allowSleep: false // Prevent bodies from sleeping/freezing momentum
+    });
+
+    // Zero-dissipation fixture defaults:
+    // Friction = 0.0 (prevents kinetic energy lost to tangential rubbing)
+    // Restitution = 1.0 (perfectly elastic collision)
+    const ELASTIC_RESTITUTION = 1.0;
+    const ZERO_FRICTION = 1.0;
+
+    // 2. Helpers to create precision bodies
+    function createStaticBox(x, y, width, height, angle = 0) {
+      const ground = world.createBody({
+        position: Vec2(x / SCALE, y / SCALE),
+        angle: angle
+      });
+      ground.createFixture({
+        shape: pl.Box((width / 2) / SCALE, (height / 2) / SCALE),
+        friction: ZERO_FRICTION,
+        restitution: ELASTIC_RESTITUTION
+      });
+      return ground;
+    }
+
+    function createDynamicBox(x, y, width, height) {
+      const body = world.createDynamicBody({
+        position: Vec2(x / SCALE, y / SCALE),
+        bullet: true,              // Enable Continuous Collision Detection (CCD) to stop tunneling
+        linearDamping: 0.0,        // Zero air resistance
+        angularDamping: 0.0,       // Zero rotational decay
+        allowSleep: false
+      });
+      body.createFixture({
+        shape: pl.Box((width / 2) / SCALE, (height / 2) / SCALE),
+        density: 1.0,
+        friction: ZERO_FRICTION,
+        restitution: ELASTIC_RESTITUTION
+      });
+    }
+
+    function createDynamicCircle(x, y, radius) {
+      const body = world.createDynamicBody({
+        position: Vec2(x / SCALE, y / SCALE),
+        bullet: true,              // Enable Continuous Collision Detection (CCD)
+        linearDamping: 0.0,
+        angularDamping: 0.0,
+        allowSleep: false
+      });
+      body.createFixture({
+        shape: pl.Circle(radius / SCALE),
+        density: 1.0,
+        friction: ZERO_FRICTION,
+        restitution: ELASTIC_RESTITUTION
+      });
+    }
+
+    // 3. Create Scene Boundaries & Slopes
+    createStaticBox(w / 2, h - 10, w, 20);      // Floor
+    createStaticBox(10, h / 2, 20, h);          // Left Wall
+    createStaticBox(w - 10, h / 2, 20, h);      // Right Wall
+    createStaticBox(w / 2, 10, w, 20);          // Ceiling (enclosed container)
+
+    // Angled ramps
+    createStaticBox(240, 200, 320, 15, Math.PI / 10);
+    createStaticBox(560, 360, 320, 15, -Math.PI / 10);
+    createStaticBox(300, 500, 200, 15, Math.PI / 16);
+
+    // Initial dynamic stack
+    for (let i = 0; i < 4; i++) {
+      for (let j = 0; j < 3; j++) {
+        createDynamicBox(460 + j * 32, 100 + i * 32, 28, 28);
+      }
+    }
+
+    // 4. Mouse Input
+    canvas.addEventListener("mousedown", (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+
+      if (e.button === 0) {
+        const size = 20 + Math.random() * 25;
+        createDynamicBox(mouseX, mouseY, size, size);
+      } else if (e.button === 2) {
+        const radius = 10 + Math.random() * 15;
+        createDynamicCircle(mouseX, mouseY, radius);
+      }
+    });
+
+    canvas.addEventListener("contextmenu", (e) => e.preventDefault());
+
+    // 5. Canvas Renderer
+    function render() {
+      ctx.clearRect(0, 0, w, h);
+
+      for (let body = world.getBodyList(); body; body = body.getNext()) {
+        const pos = body.getPosition();
+        const angle = body.getAngle();
+
+        ctx.save();
+        ctx.translate(pos.x * SCALE, pos.y * SCALE);
+        ctx.rotate(angle);
+
+        const isDynamic = body.isDynamic();
+        ctx.fillStyle = isDynamic ? "#00e699" : "#2e3440";
+        ctx.strokeStyle = isDynamic ? "#ffffff" : "#434c5e";
+        ctx.lineWidth = 1.5;
+
+        for (let fixture = body.getFixtureList(); fixture; fixture = fixture.getNext()) {
+          const shape = fixture.getShape();
+          const type = shape.getType();
+
+          if (type === "polygon") {
+            const vertices = shape.m_vertices;
+            ctx.beginPath();
+            ctx.moveTo(vertices[0].x * SCALE, vertices[0].y * SCALE);
+            for (let i = 1; i < vertices.length; i++) {
+              ctx.lineTo(vertices[i].x * SCALE, vertices[i].y * SCALE);
+            }
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+          } else if (type === "circle") {
+            const r = shape.getRadius() * SCALE;
+            ctx.beginPath();
+            ctx.arc(0, 0, r, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(r, 0);
+            ctx.strokeStyle = "#16171b";
+            ctx.stroke();
+          }
+        }
+
+        ctx.restore();
+      }
+    }
+
+    // 6. High-Precision Substepping Physics Loop
+    // Sub-stepping slices a 1/60s frame into 10 discrete solver steps (600 Hz physics rate)
+    const SUB_STEPS = 10;
+    const FRAME_DT = 1 / 60;
+    const SUB_DT = FRAME_DT / SUB_STEPS;
+    
+    // High iteration count per sub-step to eliminate constraint drift and position overlap
+    const VELOCITY_ITERATIONS = 20;
+    const POSITION_ITERATIONS = 12;
+
+    function loop() {
+      for (let i = 0; i < SUB_STEPS; i++) {
+        world.step(SUB_DT, VELOCITY_ITERATIONS, POSITION_ITERATIONS);
+      }
+      render();
+      requestAnimationFrame(loop);
+    }
+
+    requestAnimationFrame(loop);
+  </script>
+</body>
+</html>
