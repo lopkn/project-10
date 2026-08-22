@@ -12,7 +12,15 @@ let WidthM = Width/2
 let HeightM = Height/2
 
 const TAU = Math.PI*2
+    const pl = planck;
+    const Vec2 = pl.Vec2;
+pl.Settings.maxTranslation = Infinity;
+pl.Settings.lengthUnitsPerMeter = 60
 
+const world = pl.World({
+gravity: Vec2(0, 1149.8),
+allowSleep: false // Prevent bodies from sleeping/freezing momentum
+});
 // let myCanvas = document.getElementById("myCanvas")
 
 //   myCanvas.width = Math.floor(Width)
@@ -1697,6 +1705,18 @@ class ball{
       "onKill":[]
     }
 
+
+
+
+    /// PLANCK
+
+    this.phys = world.createDynamicBody(Vec2(this.x, this.y));
+    this.phys.createFixture(planck.Circle(r), {
+      density: 1.0,
+      restitution: this.bounce, // bounciness (0 = no bounce, 1 = elastic)
+      friction: this.friction,
+    });
+
   }
 
 
@@ -2216,6 +2236,13 @@ class ball{
     this.ctx.beginPath()
     this.ctx.arc(this.x,this.y,this.r,0,TAU)
     this.ctx.fill()
+
+
+    this.ctx.beginPath()
+    let physpos = this.phys.getPosition()
+    this.ctx.arc(physpos.x,physpos.y,this.r,0,TAU)
+    this.ctx.fill()
+
     if(!this.tags.has("noDefaultArc")){
       this.ctx.stroke()
     }
@@ -5291,10 +5318,6 @@ setTimeout(()=>{
 
   //move camera
 
-
-    // entityList.player.y = -500 + Math.sin(gameWorld.frame/60)*700
-    // entityList.player.x = -500 
-
   performance.mark('cam-start')
   can.ctx.clearRect(0,0,can.canvas.width,can.canvas.height)
   // can.ctx.fillStyle = "rgba(0,0,0,0.01)"
@@ -5313,8 +5336,6 @@ setTimeout(()=>{
   let camDy = (camera.destination.y-camera.pos.y)*(0.03*dt/16)
   camera.pos.x += camDx
   camera.pos.y += camDy
-
-
 
 
 
@@ -5446,6 +5467,7 @@ setTimeout(()=>{
     e.update(dt*gameWorld.timeWarp)
     e.draw()
   }
+  planckUpdate(dt*gameWorld.timeWarp)
 
   performance.mark('ball-end')
   performance.mark('wall-start')
@@ -5520,6 +5542,13 @@ function report(){
   return(r)
 }
 
+
+function planckUpdate(dt){
+
+
+  // 2. Step the simulation
+  world.step(dt/1000,8,8);
+}
 
 function gamePhysicsUpdate(time,dt,date){
 

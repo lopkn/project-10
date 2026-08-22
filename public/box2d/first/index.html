@@ -3,7 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Box2D / Planck.js - High-Precision Elastic Simulation</title>
+  <title>BREAKING NEWS</title>
+
+      <meta property="og:title" content="BREAKING NEWS" />
+      <meta property="og:description" content="Rio crowed the king of schewpid" />
+      <meta property="og:type" content="website" />
   <style>
     body {
       margin: 0;
@@ -70,14 +74,14 @@
     // 1. Initialize World with standard gravity and zero damping globally
     const world = pl.World({
       gravity: Vec2(0, 10),
-      allowSleep: false // Prevent bodies from sleeping/freezing momentum
+      allowSleep: true // Prevent bodies from sleeping/freezing momentum
     });
 
     // Zero-dissipation fixture defaults:
     // Friction = 0.0 (prevents kinetic energy lost to tangential rubbing)
     // Restitution = 1.0 (perfectly elastic collision)
     const ELASTIC_RESTITUTION = 1.0;
-    const ZERO_FRICTION = 1.0;
+    const ZERO_FRICTION = 0.0;
 
     // 2. Helpers to create precision bodies
     function createStaticBox(x, y, width, height, angle = 0) {
@@ -99,7 +103,7 @@
         bullet: true,              // Enable Continuous Collision Detection (CCD) to stop tunneling
         linearDamping: 0.0,        // Zero air resistance
         angularDamping: 0.0,       // Zero rotational decay
-        allowSleep: false
+        allowSleep: true
       });
       body.createFixture({
         shape: pl.Box((width / 2) / SCALE, (height / 2) / SCALE),
@@ -115,7 +119,7 @@
         bullet: true,              // Enable Continuous Collision Detection (CCD)
         linearDamping: 0.0,
         angularDamping: 0.0,
-        allowSleep: false
+        allowSleep: true
       });
       body.createFixture({
         shape: pl.Circle(radius / SCALE),
@@ -173,8 +177,9 @@
         ctx.rotate(angle);
 
         const isDynamic = body.isDynamic();
-        ctx.fillStyle = isDynamic ? "#00e699" : "#2e3440";
-        ctx.strokeStyle = isDynamic ? "#ffffff" : "#434c5e";
+        const isAwake = body.isAwake();
+        ctx.fillStyle = isDynamic ? (isAwake ? "#00e699" : "#ff4d4d") : "#2e3440";
+        ctx.strokeStyle = isDynamic ? (isAwake ? "#ffffff" : "#ffd1d1") : "#434c5e";
         ctx.lineWidth = 1.5;
 
         for (let fixture = body.getFixtureList(); fixture; fixture = fixture.getNext()) {
@@ -212,13 +217,13 @@
 
     // 6. High-Precision Substepping Physics Loop
     // Sub-stepping slices a 1/60s frame into 10 discrete solver steps (600 Hz physics rate)
-    const SUB_STEPS = 10;
+    const SUB_STEPS = 1;
     const FRAME_DT = 1 / 60;
     const SUB_DT = FRAME_DT / SUB_STEPS;
     
     // High iteration count per sub-step to eliminate constraint drift and position overlap
-    const VELOCITY_ITERATIONS = 20;
-    const POSITION_ITERATIONS = 12;
+    const VELOCITY_ITERATIONS = 1 //20;
+    const POSITION_ITERATIONS = 1 //12;
 
     function loop() {
       for (let i = 0; i < SUB_STEPS; i++) {
