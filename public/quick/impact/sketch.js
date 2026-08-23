@@ -1710,8 +1710,8 @@ class ball{
 
     /// PLANCK
 
-    this.phys = world.createDynamicBody(Vec2(this.x, this.y));
-    this.phys.createFixture(planck.Circle(r), {
+    this.phys = world.createBody({type:'dynamic',bullet:true,position:Vec2(this.x, this.y)});
+    this.phys.createFixture(planck.Circle(this.r), {
       density: 1.0,
       restitution: this.bounce, // bounciness (0 = no bounce, 1 = elastic)
       friction: this.friction,
@@ -1841,11 +1841,16 @@ class ball{
   force(x,y,mag){
     this.vx += x * mag
     this.vy += y * mag
+    // this.phys.applyLinearImpulse(Vec2(x*mag*2000,y*mag), this.phys.getWorldCenter(), true)
+    let curvel = this.phys.getLinearVelocity()
+    this.phys.setLinearVelocity(Vec2(curvel.x+x*mag*1000,curvel.y+y*mag*1000))
   }
   forceM(x,y,mag){
     mag /= this.mass
     this.vx += x * mag
     this.vy += y * mag
+
+    this.phys.applyLinearImpulse(Vec2(x*mag,y*mag), this.phys.getWorldCenter(), true)
   }
 
   speed(){
@@ -2453,6 +2458,8 @@ class wall{
     this.gridPos.forEach((cell)=>{
       cell.delete(this)
     })
+
+    world.destroyBody(this.phys)
   }
 
   draw(){
@@ -5469,6 +5476,8 @@ setTimeout(()=>{
     if(e.tags.has("isDead") && date-e.deathTime > 5000 && e !== entityList.player){
       entityList.activatedBalls.delete(e)
       entityList.balls.delete(e)
+
+      world.destroyBody(e.phys)
       continue;
     }
 
@@ -5551,6 +5560,22 @@ function report(){
   return(r)
 }
 
+
+function planckInit(){
+  console.log("planck initted")
+  world.on('pre-solve', (contact) => {
+  const fixA = contact.getFixtureA();
+  const fixB = contact.getFixtureB();
+  
+  const a = fixA.getRestitution();
+  const b = fixB.getRestitution();
+  
+  // Override default mixing (Math.max) with multiplication
+  contact.setRestitution(a * b);
+  });
+}
+
+planckInit()
 
 function planckUpdate(dt){
 
