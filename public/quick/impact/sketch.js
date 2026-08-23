@@ -2314,6 +2314,15 @@ class wall{
       "onBreak":[],
       "onCollide":[],
     }
+
+    // planck
+    this.phys = world.createBody();
+    this.phys.createFixture(pl.Edge(Vec2(this.x,this.y),Vec2(this.x2,this.y2)), {
+      density: 1.0,
+      restitution: this.bounce, // bounciness (0 = no bounce, 1 = elastic)
+      friction: this.friction,
+    });
+
   }
 
   setPos(x1,y1,x2,y2,move=false){
