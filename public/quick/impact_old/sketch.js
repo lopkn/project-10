@@ -18,7 +18,7 @@ pl.Settings.maxTranslation = Infinity;
 pl.Settings.lengthUnitsPerMeter = 60
 
 const world = pl.World({
-gravity: Vec2(0, 1169.8),
+gravity: Vec2(0, 1149.8),
 allowSleep: false // Prevent bodies from sleeping/freezing momentum
 });
 // let myCanvas = document.getElementById("myCanvas")
@@ -1621,9 +1621,6 @@ class Acceleration{
 
 class ball{
   constructor(x,y,r,ctx,AI=true){
-
-    this.physics = "ball"
-
     this.x = x
     this.y = y
 
@@ -1713,23 +1710,12 @@ class ball{
 
     /// PLANCK
 
-    this.phys = world.createBody({
-      type:'dynamic',bullet:true,
-      position:Vec2(this.x, this.y),
-      linearDamping: 0.1,
-      userData: this
-    });
+    this.phys = world.createBody({type:'dynamic',bullet:true,position:Vec2(this.x, this.y)});
     this.phys.createFixture(planck.Circle(this.r), {
       density: 1.0,
       restitution: this.bounce, // bounciness (0 = no bounce, 1 = elastic)
       friction: this.friction,
-      fixedRotation: true
     });
-    this.phys.setMassData({
-      mass:this.mass,
-      center: pl.Vec2(0.0, 0.0),   // Center of mass (local coordinates)
-      I: 2.5,
-    })
 
   }
 
@@ -1877,6 +1863,7 @@ class ball{
   //@damage ball
   damage(dmg,options={}){
     let lastCollideBallTime = gameWorld.lastTime==this.collideBallTime?this.lastCollideBallTime:this.collideBallTime
+
     let damagePercentage = Math.min((gameWorld.lastTime-lastCollideBallTime)/this.collisionInitiative,1)
 
     dmg *= damagePercentage
@@ -2168,7 +2155,6 @@ class ball{
 
 
 
-
     this.wallBreakMultiplier -= (this.wallBreakMultiplier-0.1)*0.0009*dt
 
     //check wall collisions collide wall
@@ -2293,9 +2279,6 @@ function copyWall(w,w2){
 
 class wall{
   constructor(x1,y1,x2,y2,ctx){
-
-    this.physics = "wall"
-
     this.x = x1
     this.y = y1
     this.x2 = x2
@@ -2339,7 +2322,6 @@ class wall{
 
     // planck
     this.phys = world.createBody();
-    this.phys.setUserData(this)
     this.phys.createFixture(pl.Edge(Vec2(this.x,this.y),Vec2(this.x2,this.y2)), {
       density: 1.0,
       restitution: this.bounce, // bounciness (0 = no bounce, 1 = elastic)
@@ -4726,7 +4708,7 @@ class mobileDebug{
 
 //initialize player @ip @player
 
-  entityList.player = new ball(-100,100,50,can.ctx,false)
+  entityList.player = new ball(-100,400,50,can.ctx,false)
   entityList.player.team = "player"
   entityList.player.mass = 1.2
   entityList.player.color = [129,62,41] //129 62 41
@@ -5584,44 +5566,12 @@ function planckInit(){
   world.on('pre-solve', (contact) => {
   const fixA = contact.getFixtureA();
   const fixB = contact.getFixtureB();
-
-  const bodyA = fixA.getBody()
-  const bodyB = fixB.getBody()
   
   const a = fixA.getRestitution();
   const b = fixB.getRestitution();
-    // Override default mixing (Math.max) with multiplication
+  
+  // Override default mixing (Math.max) with multiplication
   contact.setRestitution(a * b);
-
-
-
-  if((bodyA.getUserData().physics === "ball" && bodyB.getUserData().physics === "wall")||(bodyA.getUserData().physics === "wall" && bodyB.getUserData().physics === "ball")){
-    const b = bodyA.getUserData().physics==="ball"?bodyA.getUserData():bodyB.getUserData()
-    const w = bodyA.getUserData().physics==="wall"?bodyA.getUserData():bodyB.getUserData()
-
-    // ball to wall collision
-      if(w.tags.has("sided") && Vec2.dot(b.phys.getLinearVelocity(),(w.normal)) < 0){ // passthrough walls
-        contact.setEnabled(false)
-      }
-  }
-
-
-
-
-  const relVel = Vec2.sub(bodyA.getLinearVelocity(), bodyB.getLinearVelocity());
-
-  const worldManifold = contact.getWorldManifold(null);
-  const normal = worldManifold.normal;
-
-  const normalVel = Vec2.dot(relVel, normal);
-
-  // if(fixA.getBody() == player.phys || fixB.getBody() == player.phys){
-  //   console.log(normalVel)
-  // }
-
-  if (normalVel < 140) {
-    contact.setRestitution(a*b*0.5);
-  }
   });
 }
 

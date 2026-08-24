@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pause Menu Boilerplate</title>
+
+<style>
+:root{
+    --bg: rgba(0,0,0,.75);
+    --panel: #20242b;
+    --panel-light: #2a3038;
+    --accent: #4aa3ff;
+    --text: white;
+    --radius: 18px;
+}
+
+body{
+    margin:0;
+    font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    background:#444;
+}
+
+/* Pause Overlay */
+
+#pauseMenu{
+    position:fixed;
+    inset:0;
+    z-index:100;
+    display:none;
+
+    justify-content:center;
+    align-items:center;
+
+    background:var(--bg);
+    backdrop-filter:blur(6px);
+}
+
+#pauseMenu.open{
+    display:flex;
+}
+
+.pause-card{
+    width:min(92vw,420px);
+    background:var(--panel);
+    color:var(--text);
+
+    border-radius:var(--radius);
+
+    padding:28px;
+
+    display:flex;
+    flex-direction:column;
+    gap:22px;
+
+    box-shadow:
+        0 20px 50px rgba(0,0,0,.35);
+}
+
+.pause-card h1{
+    margin:0;
+    text-align:center;
+    font-size:clamp(1.6rem,4vw,2.2rem);
+}
+
+.section{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+
+label{
+    font-size:.95rem;
+    opacity:.9;
+}
+
+input[type=range]{
+    width:100%;
+}
+
+button{
+    border:none;
+    background:var(--panel-light);
+    color:white;
+    padding:14px;
+
+    border-radius:12px;
+
+    cursor:pointer;
+
+    font-size:1rem;
+
+    transition:.2s;
+}
+
+button:hover{
+    background:#3b4350;
+}
+
+button:active{
+    transform:scale(.98);
+}
+
+.exit{
+    background:var(--accent);
+}
+
+.exit:hover{
+    background:#67b6ff;
+}
+
+@media (max-width:600px){
+
+.pause-card{
+    width:90vw;
+    padding:24px;
+}
+
+button{
+    padding:18px;
+    font-size:1.05rem;
+}
+
+}
+</style>
+</head>
+<body>
+
+<button onclick="openPauseMenu()" style="margin:30px;">
+Open Pause Menu
+</button>
+
+<div id="pauseMenu">
+
+    <div class="pause-card">
+
+        <h1>Paused</h1>
+
+        <div class="section">
+
+            <label>
+                Volume:
+                <span id="volumeLabel">50%</span>
+            </label>
+
+            <input
+                id="volumeSlider"
+                type="range"
+                min="0"
+                max="100"
+                value="50"
+            >
+
+        </div>
+
+        <button id="muteButton">
+            Sound: ON
+        </button>
+
+        <button class="exit" id="exitButton">
+            Exit Menu
+        </button>
+
+    </div>
+
+</div>
+
+<script>
+// -----------------------------
+// Dummy State
+// -----------------------------
+
+let menuOpen = false;
+let volume = 50;
+let muted = false;
+
+// -----------------------------
+// Elements
+// -----------------------------
+
+const pauseMenu = document.getElementById("pauseMenu");
+const slider = document.getElementById("volumeSlider");
+const volumeLabel = document.getElementById("volumeLabel");
+const muteButton = document.getElementById("muteButton");
+const exitButton = document.getElementById("exitButton");
+
+// -----------------------------
+// Central API
+// -----------------------------
+
+function openPauseMenu(){
+
+    menuOpen = true;
+
+    pauseMenu.classList.add("open");
+
+}
+
+function closePauseMenu(){
+
+    menuOpen = false;
+
+    pauseMenu.classList.remove("open");
+
+}
+
+// -----------------------------
+// Dummy Controls
+// -----------------------------
+
+slider.addEventListener("input",()=>{
+
+    volume = Number(slider.value);
+
+    volumeLabel.textContent = volume + "%";
+
+});
+
+muteButton.addEventListener("click",()=>{
+
+    muted = !muted;
+
+    muteButton.textContent = muted
+        ? "Sound: OFF"
+        : "Sound: ON";
+
+});
+
+exitButton.addEventListener("click",()=>{
+
+    closePauseMenu();
+
+});
+
+// Optional Escape support
+document.addEventListener("keydown",(e)=>{
+
+    if(e.key==="Escape"){
+
+        if(menuOpen)
+            closePauseMenu();
+        else
+            openPauseMenu();
+
+    }
+
+});
+</script>
+
+</body>
+</html>
