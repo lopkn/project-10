@@ -19,7 +19,8 @@ pl.Settings.lengthUnitsPerMeter = 60
 const PFT = 1000 // planck translation factor
 
 const world = pl.World({
-  gravity: Vec2(0, 1169.8),
+  gravity: Vec2(0, 0),
+  // gravity: Vec2(0, 1169.8),
   allowSleep: false // Prevent bodies from sleeping/freezing momentum
 });
 
@@ -1836,6 +1837,7 @@ class ball{
     traits.forEach((e)=>{
       this[e] = ball[e]
     })
+    this.physSave(ball.x,ball.y,ball.vx,ball.vy)
   }
 
 
@@ -2146,9 +2148,9 @@ class ball{
     this.damageMultiplier += Math.min((1-this.damageMultiplier)*0.002,0.0001)*dt
 
 
-    // let accel = this.accel.getSum()
-    // this.vx += accel.x*dt
-    // this.vy += accel.y*dt
+    let accel = this.accel.getSum()
+    this.vx += accel.x*dt
+    this.vy += accel.y*dt
 
 
 
@@ -2318,10 +2320,10 @@ class ball{
     this.ctx.fill()
 
 
-    this.ctx.beginPath()
-    let physpos = this.phys.getPosition()
-    this.ctx.arc(physpos.x,physpos.y,this.r,0,TAU)
-    this.ctx.fill()
+    // this.ctx.beginPath()
+    // let physpos = this.phys.getPosition()
+    // this.ctx.arc(physpos.x,physpos.y,this.r,0,TAU)
+    // this.ctx.stroke()
 
     if(!this.tags.has("noDefaultArc")){
       this.ctx.stroke()
@@ -4199,9 +4201,10 @@ class test{
 
     
     build(-2200,500,1200,500,"brick",{splitting:{minLength:50,breakLength:100}})
-    build(-2200,0,1200,0,"brick",{splitting:{minLength:50,breakLength:100}})
+    build(2200,450,1200,450,"brick",{splitting:{minLength:50,breakLength:100}})
+    build(-1200,450,1200,450,"brick",{sided:1,splitting:{minLength:50,breakLength:100}})
 
-    summon("zombie",0,-60)
+    // summon("divider",0,-60)
 
     // newWall(-200,0*400,800,0*400).tags.add("sided");
     // newWall(1200,490,800,790);
@@ -4580,7 +4583,7 @@ class mobileDebug{
             }
             let target = b.target?b.target:b.home
 
-            if(b.energy > 30 ){
+            if( b.energy > 30 ){
               // jump towards player
               b.AInextUpdateTime = rand(1000)+1550
               b.jump(target.x-b.x,target.y-b.y,0.003)
@@ -4596,6 +4599,8 @@ class mobileDebug{
                 nb.hpRegen = -0.004
                 nb.tags.add("clone")
                 nb.shadow(b)
+                console.log(nb.x==b.x, b.phys==nb.phys)
+
               }
 
             }
@@ -5866,7 +5871,7 @@ function planckInit(){
         return
       }
 
-      if(w.tags.has("sided") && ((dot(b.x-w.midpoint.x,b.y-w.midpoint.y, w.normal.x, w.normal.y) > 0 && Vec2.dot(b.phys.getLinearVelocity(),(w.normal)) < 0) || b.sidedWallEntryFrame[w.id] === gameWorld.frame-1 )){ // passthrough walls
+      if(w.tags.has("sided") && ((dot(b.x-w.midpoint.x,b.y-w.midpoint.y, w.normal.x, w.normal.y) >= 0 && Vec2.dot(b.phys.getLinearVelocity(),(w.normal)) < 0) || b.sidedWallEntryFrame[w.id] >= gameWorld.frame-1 )){ // passthrough walls
         // to make walls that you can go down by staying still, change -0.1 to 0.1
         b.sidedWallEntryFrame[w.id] = gameWorld.frame
         contact.setEnabled(false)
@@ -5877,6 +5882,9 @@ function planckInit(){
     if(entityA == player || entityB == player){
       if(debug){
         crossParticle(worldManifold.points[0].x,worldManifold.points[0].y)
+        if(worldManifold.points[0].y < 445){
+          debugger
+        }
       }
     }
 
