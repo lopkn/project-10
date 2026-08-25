@@ -1782,7 +1782,7 @@ class ball{
     b.phys.createFixture(planck.Circle(b.r), {
       density: 1.0,
       restitution: b.bounce, // bounciness (0 = no bounce, 1 = elastic)
-      friction: b.friction,
+      friction: -1000* Math.log(b.friction),
       fixedRotation: true
     });
     b.phys.setMassData({
@@ -1790,6 +1790,7 @@ class ball{
       center: pl.Vec2(0.0, 0.0),   // Center of mass (local coordinates)
       I: 0,
     })
+    b.phys.setFixedRotation(true)
   }
 
   resetAccelerations(){
@@ -2639,8 +2640,18 @@ function wall_collision_event(ball,w,contact,oldManifold,manifold){
   if(wallBroken){
     contact.setEnabled(false);
     ball.vx*=w.brokenVelocityMult.vx;ball.vy*=w.brokenVelocityMult.vy;ball.lastCollideWallTime = gameWorld.lastTime
+  } else {
+    // stupid linear friction??
+    const component = dot(ball.vx,ball.vy,w.normalized.x,w.normalized.y)
+
+    const frictionReduction = component * (1-ball.friction * w.friction)
+    ball.vx = ball.vx - w.normalized.x * frictionReduction
+    // ball.vy -= w.normalized.y * frictionReduction
   }
   ball.lastCollideWallTime = gameWorld.lastTime
+
+
+
 }
 
 function wall_collision_handler(ball,collisionData,dt,type="normal"){
@@ -4180,7 +4191,7 @@ class test{
     // newWall(-140,0,240,0);
 
     
-    build(-2200,500,1200,500,"normal",{splitting:{minLength:50,breakLength:100}})
+    build(-2200,500,1200,500,"brick",{splitting:{minLength:50,breakLength:100}})
 
     // newWall(-200,0*400,800,0*400).tags.add("sided");
     // newWall(1200,490,800,790);
@@ -5804,12 +5815,15 @@ function planckInit(){
   const a = fixA.getRestitution();
   const b = fixB.getRestitution();
     // Override default mixing (Math.max) with multiplication
+
+  let entityA = bodyA.getUserData()
+  let entityB = bodyB.getUserData()
+
+
   contact.setRestitution(a * b);
 
   const worldManifold = contact.getWorldManifold(null);
 
-  let entityA = bodyA.getUserData()
-  let entityB = bodyB.getUserData()
 
 
   if(entityA.physics === "ball" && entityB.physics === "ball"){
@@ -5838,6 +5852,11 @@ function planckInit(){
         contact.setEnabled(false)
         return
       }
+    contact.setFriction(0) // 
+    if(entityA == player || entityB == player){
+
+    }
+
 
     wall_collision_event(b,w,contact,oldManifold,worldManifold)
   }
