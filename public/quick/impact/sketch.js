@@ -19,19 +19,9 @@ pl.Settings.lengthUnitsPerMeter = 60
 const PFT = 1000 // planck translation factor
 
 const world = pl.World({
-gravity: Vec2(0, 1169.8),
-allowSleep: false // Prevent bodies from sleeping/freezing momentum
+  gravity: Vec2(0, 1169.8),
+  allowSleep: false // Prevent bodies from sleeping/freezing momentum
 });
-// let myCanvas = document.getElementById("myCanvas")
-
-//   myCanvas.width = Math.floor(Width)
-//   myCanvas.height = Math.floor(Height)
-//   myCanvas.style.width = Math.floor(Width)+"px"
-//   myCanvas.style.height = Math.floor(Height)+"px"
-//   myCanvas.style.top = "0px"
-//   myCanvas.style.left = "0px"
-
-// let ctx = document.getElementById("myCanvas").getContext("2d")
 
 function DCC(el,par){
   el = document.createElement(el)
@@ -1575,6 +1565,19 @@ function AIlos(x,y,ox,oy,ball){
   return(los)
 }
 
+function LOS(x,y,ox,oy){
+  let l = true
+    entityList.activatedWalls.forEach((w)=>{
+    if(w.tags.has("sided")){
+      let vx = ox-x
+      let vy = oy-y
+      if(dot(w.normal.x,w.normal.y,vx,vy)<0){return}
+    }
+    let not_blocked = line_to_line_collision_pt(x,y,ox,oy,w.x,w.y,w.x2,w.y2)
+    if(not_blocked!==false){l=false}
+  })
+  return(l)
+}
 
 
 
@@ -1770,7 +1773,7 @@ class ball{
       return;
     }
     if(b.phys){
-      world.destroyBody(b)
+      world.destroyBody(b.phys)
     }
 
     b.phys = world.createBody({
@@ -2283,12 +2286,16 @@ class ball{
   activate(){
     entityList.activatedBalls.add(this)
     this.tags.add("activated")
+    this.physInit(this)
   }
 
   deactivate(){
     entityList.activatedBalls.delete(this)
     this.tags.delete("activated")
     grid.addPt(this.x,this.y,()=>{this.activate()},grid.activationGrid)
+    
+    this.physSave(this.x,this.y,this.vx,this.vy)
+    world.destroyBody(this.phys)
   }
 
   draw(){ // @ball draw ball
@@ -2559,7 +2566,7 @@ class wall{
 
   draw(){
 
-    this.ctx.lineWidth = 25; this.ctx.strokeStyle = "red"
+    // this.ctx.lineWidth = 25; this.ctx.strokeStyle = "red"
 
     // if(this.phys){ // debug collisions
     //   this.ctx.beginPath()
@@ -4192,6 +4199,9 @@ class test{
 
     
     build(-2200,500,1200,500,"brick",{splitting:{minLength:50,breakLength:100}})
+    build(-2200,0,1200,0,"brick",{splitting:{minLength:50,breakLength:100}})
+
+    summon("zombie",0,-60)
 
     // newWall(-200,0*400,800,0*400).tags.add("sided");
     // newWall(1200,490,800,790);
@@ -5825,13 +5835,23 @@ function planckInit(){
   const worldManifold = contact.getWorldManifold(null);
 
 
-
   if(entityA.physics === "ball" && entityB.physics === "ball"){
     // BALL TO BALL
 
     if(entityA.tags.has("noCollideBall") || entityB.tags.has("noCollideBall") || entityA.team === entityB.team){
       contact.setEnabled(false)
       return
+    }
+
+    if(!LOS(entityA.x,entityA.y,entityB.x,entityB.y)){
+      contact.setEnabled(false)
+      return
+    }
+
+    if(entityA == player || entityB == player){
+      if(debug){
+        crossParticle(worldManifold.points[0].x,worldManifold.points[0].y,[255,255,0])
+      }
     }
 
     balls_collision_event(entityA,entityB,contact,oldManifold,worldManifold)
@@ -5853,8 +5873,11 @@ function planckInit(){
         return
       }
     contact.setFriction(0) // 
-    if(entityA == player || entityB == player){
 
+    if(entityA == player || entityB == player){
+      if(debug){
+        crossParticle(worldManifold.points[0].x,worldManifold.points[0].y)
+      }
     }
 
 
@@ -6682,7 +6705,7 @@ function generateLevels(x,y){
 
 
     if(Math.random()>0.5){ // spawn rate
-      summon("normal",start+floorX*0.5,floor-60,{brute:rand(0.03)})
+      summon("normal",start+floorX*0.5,floor-65,{brute:rand(0.03)})
     } else if(rand(0.6) && Math.abs(floorX) > 200){
       let res = structureGenerator.build(ranarr("container","vase","podium","container","vase"),start+floorX*rand()*0.9,floor)
       if(rand(0.4)){
