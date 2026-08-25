@@ -16,6 +16,7 @@ const TAU = Math.PI*2
     const Vec2 = pl.Vec2;
 pl.Settings.maxTranslation = Infinity;
 pl.Settings.lengthUnitsPerMeter = 60
+const PFT = 1000 // planck translation factor
 
 const world = pl.World({
 gravity: Vec2(0, 1169.8),
@@ -1623,9 +1624,12 @@ class ball{
   constructor(x,y,r,ctx,AI=true){
 
     this.physics = "ball"
+        /// PLANCK
 
-    this.x = x
-    this.y = y
+
+
+    // this.x = x
+    // this.y = y
 
     // this.ax = 0
     // this.ay = 0
@@ -1635,8 +1639,8 @@ class ball{
     this.team = "enemy"
 
     this.r = r/1.25
-    this.vx = 0
-    this.vy = 0
+    // this.vx = 0
+    // this.vy = 0
     this.push = {x:0,y:0}
 
     this.color = [0,62,41] // 0 62 41
@@ -1684,9 +1688,6 @@ class ball{
 
     this.losDistanceSq = 1400**2
 
-    if(AI){
-      this.AIinit()
-    }
 
     this.sidedWallEntryFrame = {}
 
@@ -1701,22 +1702,11 @@ class ball{
 
     this.resetAccelerations()
 
-    grid.addPt(this.x,this.y,()=>{this.activate()},grid.activationGrid)
-    grid.addChunk(this.x-r,this.y-r,this.x+r,this.y+r,this,grid.entityGrid)
-
-    this.events = {
-      "onKill":[]
-    }
-
-
-
-
-    /// PLANCK
 
     this.phys = world.createBody({
       type:'dynamic',bullet:true,
-      position:Vec2(this.x, this.y),
-      linearDamping: 0.1,
+      position:Vec2(x, y),
+      // linearDamping: 0.1,
       userData: this
     });
     this.phys.createFixture(planck.Circle(this.r), {
@@ -1731,8 +1721,55 @@ class ball{
       I: 2.5,
     })
 
+
+    if(AI){
+      this.AIinit()
+    }
+
+    grid.addPt(this.x,this.y,()=>{this.activate()},grid.activationGrid)
+    grid.addChunk(this.x-r,this.y-r,this.x+r,this.y+r,this,grid.entityGrid)
+
+    this.events = {
+      "onKill":[]
+    }
+
+
+
+
+
+
   }
 
+  get x() {
+    return this.phys.getPosition().x;
+  }
+  
+  get y() {
+    return this.phys.getPosition().y;
+  }
+
+  set x(z) {
+    if(isNaN(z)){debugger}
+    this.phys.setPosition({ x: z, y: this.phys.getPosition().y });
+  }
+  
+  set y(z) {
+    this.phys.setPosition({ x: this.phys.getPosition().x, y: z });
+  }
+
+  get vx(){
+    return this.phys.getLinearVelocity().x/PFT
+  }
+  get vy(){
+    return this.phys.getLinearVelocity().y/PFT
+  }
+
+  set vx(z){
+    this.phys.setLinearVelocity({x:z*PFT,y:this.phys.getLinearVelocity().y})
+  }
+  set vy(z){
+    this.phys.setLinearVelocity({x:this.phys.getLinearVelocity().x,y:z*PFT})
+  }
 
   resetAccelerations(){
     this.accel = new Acceleration()
@@ -1856,15 +1893,12 @@ class ball{
     this.vx += x * mag
     this.vy += y * mag
     // this.phys.applyLinearImpulse(Vec2(x*mag*2000,y*mag), this.phys.getWorldCenter(), true)
-    let curvel = this.phys.getLinearVelocity()
-    this.phys.setLinearVelocity(Vec2(curvel.x+x*mag*1000,curvel.y+y*mag*1000))
   }
   forceM(x,y,mag){
     mag /= this.mass
     this.vx += x * mag
     this.vy += y * mag
 
-    this.phys.applyLinearImpulse(Vec2(x*mag,y*mag), this.phys.getWorldCenter(), true)
   }
 
   speed(){
@@ -2061,9 +2095,7 @@ class ball{
     this.tags.add("AI")
   }
 
-
   update(dt){
-
     if(this.tags.has("AI") && !this.tags.has("isDead")){
       this.AIupdate(dt)
     }
@@ -2089,9 +2121,9 @@ class ball{
     this.damageMultiplier += Math.min((1-this.damageMultiplier)*0.002,0.0001)*dt
 
 
-    let accel = this.accel.getSum()
-    this.vx += accel.x*dt
-    this.vy += accel.y*dt
+    // let accel = this.accel.getSum()
+    // this.vx += accel.x*dt
+    // this.vy += accel.y*dt
 
 
 
@@ -2101,8 +2133,8 @@ class ball{
     let lastY = this.y
     
 
-    this.x += this.vx*dt + this.push.x
-    this.y += this.vy*dt + this.push.y
+    // this.x += this.vx*dt + this.push.x
+    // this.y += this.vy*dt + this.push.y
 
     // if(distance(this.push.x,this.push.y)>this.r){
     //   console.log("what?")
@@ -2112,54 +2144,54 @@ class ball{
     let speed = this.speed()
     let dleng = distance(lastX,lastY,this.x,this.y)
 
-    let sweptWallHit = false
+    // let sweptWallHit = false
 
-    let collidableWalls;
-    if(!this.tags.has("noCollideWall")){
-      collidableWalls = grid.query(this.x-3000,this.y-3000,this.x+3000,this.y+3000)
-    }
+    // let collidableWalls;
+    // if(!this.tags.has("noCollideWall")){
+    //   collidableWalls = grid.query(this.x-3000,this.y-3000,this.x+3000,this.y+3000)
+    // }
 
-    if(dleng > this.r/2 && !this.tags.has("noCollideWall") ){
-      let pseudovx = this.x-lastX
-      let pseudovy = this.y-lastY
-      if(debug){
-        new lineParticle(this.x,this.y,lastX,lastY)
-      }
-      let collisionData = {"collided":false,"minDist":Infinity}
-
-
-
-      collidableWalls.forEach((w)=>{
+    // if(dleng > this.r/2 && !this.tags.has("noCollideWall") ){
+    //   let pseudovx = this.x-lastX
+    //   let pseudovy = this.y-lastY
+    //   if(debug){
+    //     new lineParticle(this.x,this.y,lastX,lastY)
+    //   }
+    //   let collisionData = {"collided":false,"minDist":Infinity}
 
 
-        let awaySide = dot(pseudovx,pseudovy,w.normal.x,w.normal.y) < 0
 
-        let sweep = swept_ball_to_line_collision(lastX,lastY,pseudovx,pseudovy,this.r, w.x,w.y,w.x2,w.y2,w.normal)
-        if(sweep){
-        if(w.tags.has("sided") && (awaySide || this.sidedWallEntryFrame[w.id] === gameWorld.frame-1 )){return} // comment out to test
-          if(sweep.t < collisionData.minDist){
-            collisionData.collided = w
-            collisionData.minDist = sweep.t
-            collisionData.closest = sweep.closest
-            collisionData.awaySide = awaySide
-            collisionData.p = sweep.p
-            collisionData.sweepType = sweep.type
-            collisionData.sweepResponse = sweep
+    //   collidableWalls.forEach((w)=>{
 
-            if(sweep.type!==3&&Math.abs(distance(collisionData.closest.x,collisionData.closest.y,sweep.p.x,sweep.p.y)-this.r)>0.1){console.log("energen "+sweep.type)}
-          }
-        }
-      })
-      if(collisionData.collided){
-        if(debug){console.log('too fast wall collision '+collisionData.sweepType)}
-        collisionData.sweepDist = collisionData.minDist
-        // collisionData.minDist = collisionData.sweepType===3?collisionData.sweepResponse.passDist:this.r
-        // wall_collision_handler(this,collisionData,dt,collisionData.sweepType==3?"swept normal":"swept")
-        collisionData.minDist = this.r
-        wall_collision_handler(this,collisionData,dt,"swept")
-        sweptWallHit = collisionData.collided
-      }
-    } /// BALL MOVING TOO FAST!!!!!! FIX
+
+    //     let awaySide = dot(pseudovx,pseudovy,w.normal.x,w.normal.y) < 0
+
+    //     let sweep = swept_ball_to_line_collision(lastX,lastY,pseudovx,pseudovy,this.r, w.x,w.y,w.x2,w.y2,w.normal)
+    //     if(sweep){
+    //     if(w.tags.has("sided") && (awaySide || this.sidedWallEntryFrame[w.id] === gameWorld.frame-1 )){return} // comment out to test
+    //       if(sweep.t < collisionData.minDist){
+    //         collisionData.collided = w
+    //         collisionData.minDist = sweep.t
+    //         collisionData.closest = sweep.closest
+    //         collisionData.awaySide = awaySide
+    //         collisionData.p = sweep.p
+    //         collisionData.sweepType = sweep.type
+    //         collisionData.sweepResponse = sweep
+
+    //         if(sweep.type!==3&&Math.abs(distance(collisionData.closest.x,collisionData.closest.y,sweep.p.x,sweep.p.y)-this.r)>0.1){console.log("energen "+sweep.type)}
+    //       }
+    //     }
+    //   })
+    //   if(collisionData.collided){
+    //     if(debug){console.log('too fast wall collision '+collisionData.sweepType)}
+    //     collisionData.sweepDist = collisionData.minDist
+    //     // collisionData.minDist = collisionData.sweepType===3?collisionData.sweepResponse.passDist:this.r
+    //     // wall_collision_handler(this,collisionData,dt,collisionData.sweepType==3?"swept normal":"swept")
+    //     collisionData.minDist = this.r
+    //     wall_collision_handler(this,collisionData,dt,"swept")
+    //     sweptWallHit = collisionData.collided
+    //   }
+    // } /// BALL MOVING TOO FAST!!!!!! FIX
 
 
     let decel = this.decel.getSum()
@@ -2172,42 +2204,42 @@ class ball{
     this.wallBreakMultiplier -= (this.wallBreakMultiplier-0.1)*0.0009*dt
 
     //check wall collisions collide wall
-    if(!this.tags.has("noCollideWall")){
+    // if(!this.tags.has("noCollideWall")){
 
-      let collisionData = {"collided":false,"minDist":Infinity}
+    //   let collisionData = {"collided":false,"minDist":Infinity}
 
-      collidableWalls.forEach((w)=>{
+    //   collidableWalls.forEach((w)=>{
 
-        if(w === sweptWallHit){return}
+    //     if(w === sweptWallHit){return}
 
-        let awaySide = dot(this.vx,this.vy,w.normal.x,w.normal.y) < 0
+    //     let awaySide = dot(this.vx,this.vy,w.normal.x,w.normal.y) < 0
 
-        if(check_collision_ball_line(this.x,this.y,this.r,w.x,w.y,w.x2,w.y2)){
-        if(w.tags.has("sided") && (awaySide || this.sidedWallEntryFrame[w.id] === gameWorld.frame-1 )){this.sidedWallEntryFrame[w.id] = gameWorld.frame;return}
-
-
-          let closest = point_on_line(this.x,this.y,w.x,w.y,w.x2,w.y2)
-          let dist = distance(this.x,this.y,closest.x,closest.y)
-          if(dist<collisionData.minDist){
-            collisionData.collided = w
-            collisionData.minDist = dist
-            collisionData.closest=closest
-            collisionData.awaySide=awaySide
-          } else {return}
+    //     if(check_collision_ball_line(this.x,this.y,this.r,w.x,w.y,w.x2,w.y2)){
+    //     if(w.tags.has("sided") && (awaySide || this.sidedWallEntryFrame[w.id] === gameWorld.frame-1 )){this.sidedWallEntryFrame[w.id] = gameWorld.frame;return}
 
 
-        }
-      })
+    //       let closest = point_on_line(this.x,this.y,w.x,w.y,w.x2,w.y2)
+    //       let dist = distance(this.x,this.y,closest.x,closest.y)
+    //       if(dist<collisionData.minDist){
+    //         collisionData.collided = w
+    //         collisionData.minDist = dist
+    //         collisionData.closest=closest
+    //         collisionData.awaySide=awaySide
+    //       } else {return}
 
 
-      // after finding the wall that collides
+    //     }
+    //   })
 
-      if(collisionData.collided){
-        collisionData.p = {x:this.x,y:this.y}
-        wall_collision_handler(this,collisionData,dt)
-      }
 
-    }
+    //   // after finding the wall that collides
+
+    //   if(collisionData.collided){
+    //     collisionData.p = {x:this.x,y:this.y}
+    //     wall_collision_handler(this,collisionData,dt)
+    //   }
+
+    // }
 
 
 
@@ -2281,7 +2313,7 @@ class ball{
 
 //@wall
 
-var wallDontCopy = new Set(["id","tags","events"])
+var wallDontCopy = new Set(["id","tags","events","phys"])
 function copyWall(w,w2){
   Object.keys(w).forEach((e)=>{
       if(wallDontCopy.has(e)){return}
@@ -2337,15 +2369,29 @@ class wall{
       "onCollide":[],
     }
 
-    // planck
-    this.phys = world.createBody();
-    this.phys.setUserData(this)
-    this.phys.createFixture(pl.Edge(Vec2(this.x,this.y),Vec2(this.x2,this.y2)), {
-      density: 1.0,
-      restitution: this.bounce, // bounciness (0 = no bounce, 1 = elastic)
-      friction: this.friction,
-    });
+    this.physInit(this)
 
+  }
+
+  physInit(w){
+    // planck
+
+    if(world.isLocked()){
+      entityList.wallDefer.push(w); return
+    } 
+
+    if(w.phys){
+      world.destroyBody(w.phys)
+    }
+
+    w.phys = world.createBody();
+    if(!w.phys){debugger}
+    w.phys.setUserData(w)
+    w.phys.createFixture(pl.Edge(Vec2(w.x,w.y),Vec2(w.x2,w.y2)), {
+      density: 1.0,
+      restitution: w.bounce, // bounciness (0 = no bounce, 1 = elastic)
+      friction: w.friction,
+    });
   }
 
   setPos(x1,y1,x2,y2,move=false){
@@ -2366,6 +2412,7 @@ class wall{
       })
       this.gridPos = grid.addWall(this)
     }
+    this.physInit(this)
   }
 
   split(s1,s2,by,impactPt){
@@ -2389,6 +2436,10 @@ class wall{
 
     this.setPos(w1.x2,w1.y2,w2.x,w2.y,true)
     shatterWall(this,by,impactPt)
+    
+    w1.physInit(this)
+    w2.physInit(this)
+
     this.remove()
 
   }
@@ -2407,6 +2458,9 @@ class wall{
     copyWall(this,w2)
     w2.setPos(this.x+maxT*this.dir.x,this.y+maxT*this.dir.y,this.x2,this.y2)
     this.setPos(this.x,this.y,this.x+minT*this.dir.x,this.y+minT*this.dir.y,true)
+
+    this.physInit(this)
+    w2.physInit(this)
 
     return(w2)
   }
@@ -2476,11 +2530,22 @@ class wall{
     this.gridPos.forEach((cell)=>{
       cell.delete(this)
     })
+    entityList.activatedWalls.delete(this)
 
-    world.destroyBody(this.phys)
+    entityList.destroyBody.push(this)
   }
 
   draw(){
+
+    this.ctx.lineWidth = 25; this.ctx.strokeStyle = "red"
+
+    // if(this.phys){ // debug collisions
+    //   this.ctx.beginPath()
+    //   let pts = this.phys.getFixtureList().getShape()
+    //   this.ctx.moveTo(pts.m_vertex1.x,pts.m_vertex1.y)
+    //   this.ctx.lineTo(pts.m_vertex2.x,pts.m_vertex2.y)
+    //   this.ctx.stroke()
+    // }
 
 
     if(this.tags.has("oneBody") && !this.tags.has("oneBodyRepresentor")){return}
@@ -2491,6 +2556,8 @@ class wall{
       this.ctx.setLineDash(this.lineDash.sep)
       this.ctx.lineDashOffset = gameWorld.lastTime * this.lineDash.speed
     }
+
+
 
 
 
@@ -2535,6 +2602,26 @@ function pointOnWall(w,percentage=0.5,off=0){
 }
 
 //@col handler
+
+function wall_collision_event(ball,w,contact,oldManifold,manifold){
+
+  ball.energy += ball.wallJumpEnergy
+
+  let point = manifold.points[0]
+
+
+  const forceToWall = Math.abs(dot(ball.vx,ball.vy,manifold.normal.x,manifold.normal.y))
+  let mult;
+  if(ball.tags.has("AI")){mult = w.tags.has("AIdamage")?3:0.2} else {mult = ball.wallBreakMultiplier}
+  let wallBroken = w.damage(forceToWall,mult, ball, point)
+
+  if(wallBroken){
+    contact.setEnabled(false);
+    ball.vx*=w.brokenVelocityMult.vx;ball.vy*=w.brokenVelocityMult.vy;ball.lastCollideWallTime = gameWorld.lastTime
+  }
+  ball.lastCollideWallTime = gameWorld.lastTime
+}
+
 function wall_collision_handler(ball,collisionData,dt,type="normal"){
 
   ball.energy += ball.wallJumpEnergy
@@ -3451,6 +3538,21 @@ class entityList{
   static activatedBalls = new Set()
   static activatedWalls = new Set()
 
+  static destroyBody = []
+  static destroy(){
+    for(let i = 0; i < this.destroyBody.length; i++){
+      world.destroyBody(this.destroyBody[i].phys)
+    }
+    this.destroyBody = []
+  }
+
+  static wallDefer = []
+  static buildWalls(){
+    for(let i = 0; i < this.wallDefer.length; i++){
+      this.wallDefer[i].physInit(this.wallDefer[i])
+    }
+    this.wallDefer = []
+  }
 }
 
 class particles{
@@ -3772,6 +3874,96 @@ function makeAIbreakable(wall){
 }
 
 
+function balls_collision_event(a,b,contact,oldManifold,manifold){
+  const massRatio = 2/(1/a.mass+1/b.mass)
+  const normalizedVectorTo = manifold.normal
+  const contactPoint = manifold.points[0]
+
+  let dmgA = dot(a.vx,a.vy,manifold.normal.x,manifold.normal.y) * massRatio
+  let dmgB = - dot(b.vx,b.vy,manifold.normal.x,manifold.normal.y) * massRatio
+
+  dmgA = Math.max(dmgA*50,0) 
+  dmgB = Math.max(dmgB*50,0) 
+
+  let initiator;
+  if(dmgA>dmgB){
+    dmgB*=0.5
+    initiator = a
+  } else {
+    dmgA*=0.5
+    initiator = b
+  }
+  dmgA *= a.damageMultiplier * a.permanentDamageMultiplier
+  dmgB *= b.damageMultiplier * b.permanentDamageMultiplier
+            let spread = -0.6
+          let spread2 = -0.3
+          let mult = 0.25
+
+          let forceMultiplier = dot(a.vx,a.vy,normalizedVectorTo.x,normalizedVectorTo.y) * massRatio - dot(b.vx,b.vy,normalizedVectorTo.x,normalizedVectorTo.y)* massRatio
+          forceMultiplier *= initiator.elasticity
+          let forceTo = {x:forceMultiplier * normalizedVectorTo.x,y:forceMultiplier * normalizedVectorTo.y}
+         
+          let killed_b = b.damage(dmgA,{contact:contactPoint,vel:a})
+          let killed_a = a.damage(dmgB,{contact:contactPoint,vel:b}) // super skeptical if blood is effected by order of forceM and damage
+
+
+
+
+          let killed = killed_a||killed_b
+
+          if(!killed || killed_a && killed_b){
+            a.forceM(normalizedVectorTo.x,normalizedVectorTo.y,-forceMultiplier)
+            b.forceM(normalizedVectorTo.x,normalizedVectorTo.y,forceMultiplier)
+          } else { // only one ball died
+            let dead = killed_a?a:b
+            let alive = killed_a?b:a
+
+            alive.events.onKill.forEach((f)=>{
+              f(alive,dead)
+            })
+
+            if(killed==="normal"){
+              a.forceM(normalizedVectorTo.x,normalizedVectorTo.y,-forceMultiplier)
+              b.forceM(normalizedVectorTo.x,normalizedVectorTo.y,forceMultiplier)
+              dead.vx *= 0.7
+              dead.vy *= 0.7
+            }else{
+              if(killed_a){
+                a.forceM(normalizedVectorTo.x,normalizedVectorTo.y,-forceMultiplier * 0.7)
+                // b.forceM(normalizedVectorTo.x,normalizedVectorTo.y,forceMultiplier/1.5)
+                b.vx *= 1/(1+forceMultiplier/1.6) // higher num = less friction
+                b.vy *= 1/(1+forceMultiplier/1.6)
+              }
+              if(killed_b){
+                // a.forceM(normalizedVectorTo.x,normalizedVectorTo.y,-forceMultiplier/1.5)
+                b.forceM(normalizedVectorTo.x,normalizedVectorTo.y,forceMultiplier * 0.7)
+                a.vx *= 1/(1+forceMultiplier/1.5)
+                a.vy *= 1/(1+forceMultiplier/1.5)
+              }
+            }
+          }
+
+          let p = new particle(b.x,b.y,0,0)
+          p.life = 15*dmgB
+          p.color = [255,10,12]
+          p.ay = 0
+          p.size = b.r+2
+          p.noFill = 1
+
+          p = new particle(a.x,a.y,0,0)
+          p.life = 15*dmgA
+          p.color = [255,10,12]
+          p.ay = 0
+          p.size = a.r+2
+          p.noFill = 1
+          
+          
+
+          a.collided(gameWorld.lastTime,b)
+          b.collided(gameWorld.lastTime,a)
+
+}
+
 function allBallsCollide(time,i,ballList){
 
 
@@ -3957,18 +4149,18 @@ class test{
   }
 
   static debug(){
-    newWall(-100,890,100,4190);
+    // newWall(-100,890,100,4190);
     
-    // newWall(-200,490,800,490);
-    newWall(1800,490-130,1000,490-130);
-    // newWall(1000,490-130,1800,490-80);
+    // newWall(1800,490-130,1000,490-130);
 
 
-    newWall(-140,490,-140,0);
+    // newWall(-140,490,-140,0);
 
-    newWall(-140,0,240,0);
+    // newWall(-140,0,240,0);
 
     
+    build(-2200,500,1200,500,"normal",{splitting:{minLength:50,breakLength:100}})
+
     // newWall(-200,0*400,800,0*400).tags.add("sided");
     // newWall(1200,490,800,790);
     // newWall(1200,490,800,790);
@@ -4726,7 +4918,7 @@ class mobileDebug{
 
 //initialize player @ip @player
 
-  entityList.player = new ball(-100,100,50,can.ctx,false)
+  entityList.player = new ball(-100,400,50,can.ctx,false)
   entityList.player.team = "player"
   entityList.player.mass = 1.2
   entityList.player.color = [129,62,41] //129 62 41
@@ -5186,6 +5378,7 @@ class structureGenerator{
     makeWooden(newWall(800,0,800,600,can.ctx))
 
     // build(400,0,400,600,"accelerator")
+    // build(0,300,400,300,"normal",{sided:1})
 
 
     entityList.walls.push(new wall(-200,600,800,600,can.ctx)) // floor
@@ -5489,6 +5682,7 @@ setTimeout(()=>{
 
   let ballList = [...entityList.activatedBalls]
 
+  planckUpdate(dt*gameWorld.timeWarp)
   for(let i = ballList.length-1; i>-1; i--){
     let e = ballList[i]
     if(e.tags.has("isDead") && date-e.deathTime > 5000 && e !== entityList.player){
@@ -5499,11 +5693,10 @@ setTimeout(()=>{
       continue;
     }
 
-    allBallsCollide(time,i,ballList)
+    // allBallsCollide(time,i,ballList)
     e.update(dt*gameWorld.timeWarp)
     e.draw()
   }
-  planckUpdate(dt*gameWorld.timeWarp)
 
   performance.mark('ball-end')
   performance.mark('wall-start')
@@ -5581,7 +5774,11 @@ function report(){
 
 function planckInit(){
   console.log("planck initted")
-  world.on('pre-solve', (contact) => {
+  world.on('pre-solve', (contact,oldManifold) => {
+
+    if (!contact.isTouching()) return; 
+
+
   const fixA = contact.getFixtureA();
   const fixB = contact.getFixtureB();
 
@@ -5593,16 +5790,40 @@ function planckInit(){
     // Override default mixing (Math.max) with multiplication
   contact.setRestitution(a * b);
 
+  const worldManifold = contact.getWorldManifold(null);
+
+  let entityA = bodyA.getUserData()
+  let entityB = bodyB.getUserData()
 
 
-  if((bodyA.getUserData().physics === "ball" && bodyB.getUserData().physics === "wall")||(bodyA.getUserData().physics === "wall" && bodyB.getUserData().physics === "ball")){
-    const b = bodyA.getUserData().physics==="ball"?bodyA.getUserData():bodyB.getUserData()
-    const w = bodyA.getUserData().physics==="wall"?bodyA.getUserData():bodyB.getUserData()
+  if(entityA.physics === "ball" && entityB.physics === "ball"){
+    // BALL TO BALL
 
-    // ball to wall collision
-      if(w.tags.has("sided") && Vec2.dot(b.phys.getLinearVelocity(),(w.normal)) < 0){ // passthrough walls
+    if(entityA.tags.has("noCollideBall") || entityB.tags.has("noCollideBall") || entityA.team === entityB.team){
+      contact.setEnabled(false)
+      return
+    }
+
+    balls_collision_event(entityA,entityB,contact,oldManifold,worldManifold)
+  }
+  else if((entityA.physics === "ball" && entityB.physics === "wall")||(entityA.physics === "wall" && entityB.physics === "ball")){
+    // BALL TO WALL
+    const b = entityA.physics==="ball"?entityA:entityB
+    const w = entityA.physics==="wall"?entityA:entityB
+
+      if(b.tags.has("noCollideWall")){ 
         contact.setEnabled(false)
+        return
       }
+
+      if(w.tags.has("sided") && (Vec2.dot(b.phys.getLinearVelocity(),(w.normal)) < -0.1 || b.sidedWallEntryFrame[w.id] === gameWorld.frame-1 )){ // passthrough walls
+        // to make walls that you can go down by staying still, change -0.1 to 0.1
+        b.sidedWallEntryFrame[w.id] = gameWorld.frame
+        contact.setEnabled(false)
+        return
+      }
+
+    wall_collision_event(b,w,contact,oldManifold,worldManifold)
   }
 
 
@@ -5610,8 +5831,8 @@ function planckInit(){
 
   const relVel = Vec2.sub(bodyA.getLinearVelocity(), bodyB.getLinearVelocity());
 
-  const worldManifold = contact.getWorldManifold(null);
-  const normal = worldManifold.normal;
+
+  const normal = worldManifold.normal; // points body A to body B
 
   const normalVel = Vec2.dot(relVel, normal);
 
@@ -5629,9 +5850,9 @@ planckInit()
 
 function planckUpdate(dt){
 
-
-  // 2. Step the simulation
+  entityList.destroy()
   world.step(dt/1000,8,8);
+  entityList.buildWalls()
 }
 
 function gamePhysicsUpdate(time,dt,date){
@@ -5670,7 +5891,7 @@ function gamePhysicsUpdate(time,dt,date){
       continue;
     }
 
-    allBallsCollide(time,i,ballList)
+    // allBallsCollide(time,i,ballList)
     e.update(dt*gameWorld.timeWarp)
   }
 
