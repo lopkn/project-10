@@ -1638,7 +1638,9 @@ class ball{
 
     this.team = "enemy"
 
-    this.r = r/1.25
+    r = r/1.25
+
+    this.r = r
     // this.vx = 0
     // this.vy = 0
     this.push = {x:0,y:0}
@@ -1703,37 +1705,22 @@ class ball{
     this.resetAccelerations()
 
 
-    this.phys = world.createBody({
-      type:'dynamic',bullet:true,
-      position:Vec2(x, y),
-      // linearDamping: 0.1,
-      userData: this
-    });
-    this.phys.createFixture(planck.Circle(this.r), {
-      density: 1.0,
-      restitution: this.bounce, // bounciness (0 = no bounce, 1 = elastic)
-      friction: this.friction,
-      fixedRotation: true
-    });
-    this.phys.setMassData({
-      mass:this.mass,
-      center: pl.Vec2(0.0, 0.0),   // Center of mass (local coordinates)
-      I: 2.5,
-    })
 
 
     if(AI){
-      this.AIinit()
+      this.AIinit(x,y)
     }
 
-    grid.addPt(this.x,this.y,()=>{this.activate()},grid.activationGrid)
-    grid.addChunk(this.x-r,this.y-r,this.x+r,this.y+r,this,grid.entityGrid)
+    grid.addPt(x,y,()=>{this.activate()},grid.activationGrid)
+    grid.addChunk(x-r,y-r,x+r,y+r,this,grid.entityGrid)
 
     this.events = {
       "onKill":[]
     }
 
+    this.physSave(x,y,0,0)
 
+    this.physInit(this)
 
 
 
@@ -1769,6 +1756,40 @@ class ball{
   }
   set vy(z){
     this.phys.setLinearVelocity({x:this.phys.getLinearVelocity().x,y:z*PFT})
+  }
+
+  physSave(x,y,vx,vy){
+    this.physSaveState = {x,y,vx,vy}
+  }
+
+  physInit(b){
+
+
+    if(world.isLocked()){
+      entityList.physDefer.push(b)
+      return;
+    }
+    if(b.phys){
+      world.destroyBody(b)
+    }
+
+    b.phys = world.createBody({
+      type:'dynamic',bullet:true,
+      position:Vec2(b.physSaveState.x, b.physSaveState.y),
+      // linearDamping: 0.1,
+      userData: b
+    });
+    b.phys.createFixture(planck.Circle(b.r), {
+      density: 1.0,
+      restitution: b.bounce, // bounciness (0 = no bounce, 1 = elastic)
+      friction: b.friction,
+      fixedRotation: true
+    });
+    b.phys.setMassData({
+      mass:b.mass,
+      center: pl.Vec2(0.0, 0.0),   // Center of mass (local coordinates)
+      I: 0,
+    })
   }
 
   resetAccelerations(){
@@ -2088,10 +2109,10 @@ class ball{
 
 
 
-  AIinit(){
+  AIinit(x,y){
     this.AIlastUpdate = 0
     this.AInextUpdateTime = 4000 + rand(1000)
-    this.home = {x:this.x,y:this.y}
+    this.home = {x:x,y:y}
     this.tags.add("AI")
   }
 
@@ -2377,7 +2398,7 @@ class wall{
     // planck
 
     if(world.isLocked()){
-      entityList.wallDefer.push(w); return
+      entityList.physDefer.push(w); return
     } 
 
     if(w.phys){
@@ -3533,7 +3554,7 @@ function crossParticle(x,y,color = [255,0,0]){
 
 class entityList{
   static balls = new Set()
-  static walls = []
+  // static walls = []
 
   static activatedBalls = new Set()
   static activatedWalls = new Set()
@@ -3546,12 +3567,12 @@ class entityList{
     this.destroyBody = []
   }
 
-  static wallDefer = []
+  static physDefer = []
   static buildWalls(){
-    for(let i = 0; i < this.wallDefer.length; i++){
-      this.wallDefer[i].physInit(this.wallDefer[i])
+    for(let i = 0; i < this.physDefer.length; i++){
+      this.physDefer[i].physInit(this.physDefer[i])
     }
-    this.wallDefer = []
+    this.physDefer = []
   }
 }
 
@@ -4326,7 +4347,8 @@ class mobileDebug{
 
     if(types[type]){types[type]()}
 
-
+    w.physInit(w)
+    
     return(out)
 
   }
@@ -4972,7 +4994,6 @@ class mobileDebug{
 
   function newWall(a,b,c,d,ctx=can.ctx){
     let w = new wall(a,b,c,d,ctx)
-    entityList.walls.push(w)
     return(w)
   }
   function newBall(x,y,r=50,ctx=can.ctx){
@@ -5381,16 +5402,11 @@ class structureGenerator{
     // build(0,300,400,300,"normal",{sided:1})
 
 
-    entityList.walls.push(new wall(-200,600,800,600,can.ctx)) // floor
-    // entityList.walls.push(new wall(110,500,110,1600,can.ctx)) // beam
-    // entityList.walls.push(new wall(110,500,150,450,can.ctx)) // beam
-    // entityList.walls.push(new wall(110,500,70,450,can.ctx)) // beam
+    new wall(-200,600,800,600,can.ctx) // floor
 
     let tmp = makeAIbreakable(makeWooden(new wall(50,500,150,500,can.ctx),0.1))
-    entityList.walls.push(tmp)
     let tmp2 = makeAIbreakable(makeWooden(new wall(100,600,100,500,can.ctx),0.1))
     tmp2.events.onBreak.push((a,b,c)=>{tmp.break(b,c)})
-    entityList.walls.push(tmp2) //table
 
 
     // entityList.balls.add(new ball(380,450,50,can.ctx))
@@ -5816,7 +5832,7 @@ function planckInit(){
         return
       }
 
-      if(w.tags.has("sided") && (Vec2.dot(b.phys.getLinearVelocity(),(w.normal)) < -0.1 || b.sidedWallEntryFrame[w.id] === gameWorld.frame-1 )){ // passthrough walls
+      if(w.tags.has("sided") && ((dot(b.x-w.midpoint.x,b.y-w.midpoint.y, w.normal.x, w.normal.y) > 0 && Vec2.dot(b.phys.getLinearVelocity(),(w.normal)) < 0) || b.sidedWallEntryFrame[w.id] === gameWorld.frame-1 )){ // passthrough walls
         // to make walls that you can go down by staying still, change -0.1 to 0.1
         b.sidedWallEntryFrame[w.id] = gameWorld.frame
         contact.setEnabled(false)
@@ -6151,7 +6167,7 @@ function segWalls(x1,y1,x2,y2,div){
   let dx = (x2-x1)/div
   let dy = (y2-y1)/div
   for(let i = 0; i < div; i++){
-    entityList.walls.push(new wall(x1+i*dx,y1+i*dy,x1+i*dx+dx,y1+i*dy+dy,can.ctx))
+    new wall(x1+i*dx,y1+i*dy,x1+i*dx+dx,y1+i*dy+dy,can.ctx)
   }
 }
 
@@ -6551,8 +6567,6 @@ function generateFloor(x,y){
 
 
 function generateLevels(x,y){
-  // entityList.walls.push(new wall(x,y,x+vx,y+vy,can.ctx))
-  // entityList.walls.push( makeAIbreakable(makeWooden(new wall(50,500,150,500,can.ctx),0.1)))
 
 
   /// hell
@@ -6587,12 +6601,11 @@ function generateLevels(x,y){
   tmp.hp*=10
 
   let doorHeight = y-250-rand(150)
-  entityList.walls.push(makeWooden(new wall(wallX.a,y,wallX.a,doorHeight,can.ctx),0.2))
+  makeWooden(new wall(wallX.a,y,wallX.a,doorHeight,can.ctx),0.2)
   let rightWall = newWall(wallX.a,doorHeight,wallX.a,height)
   rightWall.splitting = {minLength:50,breakLength:100,breakVariability:()=>{return(rand(3))}}
   let leftWall = newWall(wallX.b,y,wallX.b,height)
   leftWall.splitting = {minLength:50,breakLength:100,breakVariability:()=>{return(rand(3))}}
-  // entityList.walls.push(new wall(wallX.a,height,wallX.b,height,can.ctx)) // old roof
   mirror(newWall,wallX.a,height,wallX.a+floorWidth/3,height,midX,1).forEach((e)=>{makeWooden(e).tags.add("sided")}) // roof
   newWall(wallX.a+floorWidth/3,height,wallX.b-floorWidth/3,height)
   dropItem("armor+",midX,height)
@@ -6609,7 +6622,7 @@ function generateLevels(x,y){
     let flipped = false
     let flipInt = 1
     if(Math.random()>0.5){floorX*=-1;start=wallX.b;end=wallX.a;flipped=true;flipInt=-1} //left or right
-    entityList.walls.push(new wall(start,floor,start+floorX,floor,can.ctx))
+    new wall(start,floor,start+floorX,floor,can.ctx)
 
 
     if(rand(0.3)){
@@ -6620,7 +6633,6 @@ function generateLevels(x,y){
       }
       floorBoard.tags.add("sided")
       makeWooden(floorBoard)
-      entityList.walls.push(floorBoard)
     }
 
 
