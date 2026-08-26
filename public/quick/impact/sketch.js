@@ -2034,6 +2034,7 @@ class ball{
 
           particleFuncs["bloody explosion2"](this.x,this.y)
           this.tags.add("nodraw")
+          this.tags.delete("permaCorpse")
           camera.shake += 13
         }
     }
@@ -2050,10 +2051,13 @@ class ball{
     this.tags.add("isDead")
     this.resetAccelerations()
 
-    gameWorld.TO(300,(e)=>{ // might cause some issues
-      this.tags.add("noCollideWall")
-      e.done=true})
-    this.tags.add("noCollideBall")
+    if(!this.tags.has("permaCorpse")){
+      gameWorld.TO(300,(e)=>{ // might cause some issues
+        this.tags.add("noCollideWall")
+        e.done=true
+      })
+      this.tags.add("noCollideBall")
+    }
     // this.vx *= 0.7
     // this.vy *= 0.7
     this.deathTime = Date.now()
@@ -3916,6 +3920,13 @@ function makeAIbreakable(wall){
 
 
 function balls_collision_event(a,b,contact,oldManifold,manifold){
+
+  if(a.tags.has("isDead") || b.tags.has("isDead")){
+    a.collided(gameWorld.lastTime,b)
+    b.collided(gameWorld.lastTime,a)
+    return
+  }
+
   const massRatio = 2/(1/a.mass+1/b.mass)
   const normalizedVectorTo = manifold.normal
   const contactPoint = manifold.points[0]
@@ -5727,7 +5738,7 @@ setTimeout(()=>{
   planckUpdate(dt*gameWorld.timeWarp)
   for(let i = ballList.length-1; i>-1; i--){
     let e = ballList[i]
-    if(e.tags.has("isDead") && date-e.deathTime > 5000 && e !== entityList.player){
+    if(e.tags.has("isDead") && !e.tags.has("permaCorpse") && date-e.deathTime > 5000 && e !== entityList.player){
       entityList.activatedBalls.delete(e)
       entityList.balls.delete(e)
 
@@ -6757,6 +6768,7 @@ function generateLevels(x,y){
   boss.mass = 2
   boss.damageMultiplier = 0.7
   boss.onDeath.push(()=>{boss.vx*=0.8;boss.vy*=0.8; dropItem("hp+",boss.x,boss.y)})
+  boss.tags.add("permaCorpse")
 
 
 
