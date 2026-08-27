@@ -2006,8 +2006,19 @@ class ball{
 
     if(options.vel===undefined){options.vel=this}
     if(options.contact===undefined){options.contact={x:this.x,y:this.y}; }
-      
+    let splatter = dmg>this.hp*0.7 && distance(options.vel.vx,options.vel.vy)>2.2
+    this.bloody(dmg,splatter,options)
 
+
+    if(this.hp <= 0){
+      this.die()
+      return(splatter?"splatter":"normal")
+    }
+    return(false)
+  }
+
+
+  bloody(dmg,splatter,options){
     let spread = -0.6
     let spread2 = -0.3
     let mult = 0.25
@@ -2015,7 +2026,6 @@ class ball{
     // // @blood
 
 
-    let splatter = dmg>this.hp*0.7 && distance(options.vel.vx,options.vel.vy)>2.2
 
     let bloody = mult*dmg
     if(this.hp < 0 && splatter){bloody*=3}
@@ -2084,13 +2094,6 @@ class ball{
           camera.shake += 13
         }
     }
-
-
-    if(this.hp <= 0){
-      this.die()
-      return(splatter?"splatter":"normal")
-    }
-    return(false)
   }
 
   die(){
@@ -2208,6 +2211,7 @@ class ball{
 
 
     this.movement()
+
 
     let lastX = this.x
     let lastY = this.y
@@ -2673,7 +2677,6 @@ class wall{
         }
         let s1 = minMax(0,pt-pers1,1)
         let s2 = minMax(0,pt+pers2,1)
-        console.log("broke broke")
         this.multisplitData.push([s1,s2,by,impactPt])
         // this.split(s1,s2,by,impactPt)
         entityList.multisplitData.add(this)
@@ -2800,9 +2803,10 @@ function pointOnWall(w,percentage=0.5,off=0){
 function wall_collision_event(ball,w,contact,oldManifold,manifold){
 
   ball.energy += ball.wallJumpEnergy
-
+  ball.lastCollideWallTime = gameWorld.lastTime
   let point = manifold.points[0]
 
+  if(ball.tags.has("noWallDamage")){return}
 
   const forceToWall = Math.abs(dot(ball.vx,ball.vy,manifold.normal.x,manifold.normal.y))
   let mult;
@@ -2820,7 +2824,6 @@ function wall_collision_event(ball,w,contact,oldManifold,manifold){
     ball.vx = ball.vx - w.normalized.x * frictionReduction
     // ball.vy -= w.normalized.y * frictionReduction
   }
-  ball.lastCollideWallTime = gameWorld.lastTime
 
 
 
@@ -4809,6 +4812,68 @@ class mobileDebug{
             }
           }
       },
+      "slinger":()=>{
+          b.damageMultiplier = 0.7
+          b.color = [240,62,41]
+
+          b.accel.set(0,gameWorld.gravity/2,"gravity")
+          b.tags.add("noDefaultArc")
+          trailify(b,15,9)
+
+          b.energenin = 0.01
+
+          b.onDeath.push(()=>{
+            if(b.tags.has("clone")){return}
+            particleFuncs.circle(b.x,b.y,undefined,13,b.r*1.3)
+          })
+
+
+          if(options.clone){
+            b.tags.add("noWallDamage")
+            b.tags.add("moves")
+            b.movementVector = {x:0,y:0}
+            b.updateFuncs.push((b,dt)=>{
+              b.movementScalar = 5
+              if(b.target){
+                  b.movementVector = {x:b.target.x-b.x,y:Math.min(0,b.target.y-b.y)}
+              }
+            })
+          }
+
+          b.AICustomUpdate = (b,dt)=>{
+            let los = AIlos(b.x,b.y,p.x,p.y,b)
+            
+            if(los){
+              b.target = p
+            }
+            let target = b.target?b.target:b.home
+
+            if( b.energy > 30 ){
+              // jump towards player
+              b.AInextUpdateTime = rand(1000)+1550
+              if(!b.tags.has("clone")){
+                b.jump(target.x-b.x,target.y-b.y,0.003)
+              }
+
+              let startTime = gameWorld.lastTime
+              b.decel.setDynamic(()=>{let z=Math.min(0.01,0.000001*(gameWorld.lastTime-startTime));return({x:z,y:z})},"decel")
+
+              if( !b.tags.has("clone")){
+                let nb = summon("slinger",b.x,b.y,{clone:true})
+                nb.hp = 1
+                nb.mass = b.mass * 0.8
+                nb.damageMultiplier = b.damageMultiplier * 0.2
+                nb.hpRegen = -0.004
+                nb.tags.add("clone")
+                nb.physSave(b.x,b.y,-b.vx,-b.vy)
+                nb.r/=2
+                nb.maxDamage = 10
+
+              }
+
+            }
+          }
+      },
       "zombie":()=>{
         b.damageMultiplier = 0.2
         b.maxHp *= 5
@@ -5001,6 +5066,11 @@ class mobileDebug{
             }
             itemPickupMsg("picked up cheats\npussy/nevaeh mode: +50 checkpoints",by,options)
             gameWorld.TIL(0,()=>{if(rand(0.003)){particleFuncs["cheating particle"](by.x,by.y,1)}})
+          })
+        },"teleport":()=>{
+          i.onPickup.push((by)=>{
+            if(!options.to){options.to = {x:0,y:0}}
+            gameFuncs.teleport(options.to.x,options.to.y,by)
           })
         },
       }
@@ -5452,7 +5522,7 @@ class structureGenerator{
         { x1: 60, y1: 340, x2: 60, y2: 220, type: 'brick',  },
         { x1: 340, y1: 400, x2: 340, y2: 220, type: 'brick',  },
         { x2: 340, y2: 220, x1: 60, y1: 220, type: 'wood', sided:true  }
-      ], off:{x:-200,y:-401}, scale:3, boundingBox:[60,220,340,400] ,genFunc:(x,y,options)=>{
+      ], off:{x:-200,y:-401}, scale:3, boundingBox:[60,220,340,400] ,genFunc:(x,y,options,out)=>{
         let pos = options.Tmatrix.transformPoint(0,-180)
         // options.noIntersectionCheck = 1
         if(rand(0.3)){
@@ -5460,6 +5530,7 @@ class structureGenerator{
         } else {
           structureGenerator.build("basicRoof1",pos.x,pos.y,options)
         }
+        out[3].collateral = structureGenerator.buildOnWall(out[3],"table2",rand())
       }
     },
     "basicRoof1":{
@@ -7009,6 +7080,8 @@ function generateLevels(x,y){
   let floorWidth = wallX.b-wallX.a
   let midX = wallX.a + floorWidth/2
 
+  const towerBase = {x:midX, y:y}
+
 
   tmp = newWall(x,y,x+floorLength,y,can.ctx)//base floor
 
@@ -7120,12 +7193,13 @@ function generateLevels(x,y){
   mirror(newWall,midX-fat,height,midX-700,height,midX).forEach((e)=>{if(rand(0.2)){return};entityList.balls.add(new ball(e.midpoint.x,e.midpoint.y-60,50,can.ctx))})
   height -= 400
   newWall(midX-200,height,midX+200,height)
+  const bossPlatform = {x:midX,y:height-60}
   let boss = newBall(midX,height-60,80,can.ctx)
   boss.hp *= 5
   boss.maxHp *= 5
   boss.mass = 2
   boss.damageMultiplier = 0.7
-  boss.onDeath.push(()=>{boss.vx*=0.8;boss.vy*=0.8; dropItem("hp+",boss.x,boss.y)})
+  boss.onDeath.push(()=>{boss.vx*=0.8;boss.vy*=0.8; dropItem("hp+",boss.x,boss.y); dropItem("teleport",towerBase.x,towerBase.y-30,{to:bossPlatform})})
   boss.tags.add("permaCorpse")
 
 
@@ -7370,7 +7444,8 @@ function generateLevels(x,y){
 //// BUGS / DEBUGGING / PHYSICS
 // acceleration triangle fix
 // performance measuring
-//  Blood damage seperation
+//  Blood damage seperation / no blood on death / blood multiplier (seperate the blood function and damage function)
+//  invis on death
 //  frame stutter lead: garbage collection
 //  cache (grid) // 
 // decel physics fix
