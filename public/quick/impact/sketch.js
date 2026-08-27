@@ -1312,6 +1312,51 @@ function Lrotate(x,y,d){
 }
 
 
+class Transform2D {
+  constructor(tx = 0, ty = 0, rotation = 0, scale = 1) {
+    const cos = Math.cos(rotation);
+    const sin = Math.sin(rotation);
+
+    this.r = rotation
+    this.s = scale
+
+    this.a = scale * cos;
+    this.b = scale * sin;
+    this.c = -scale * sin;
+    this.d = scale * cos;
+    this.tx = tx;
+    this.ty = ty;
+  }
+
+  transformPoint(x, y) {
+    return {
+      x: this.a * x + this.c * y + this.tx,
+      y: this.b * x + this.d * y + this.ty
+    };
+  }
+
+  transformArr_noRotation(arr,off={x:0,y:0}){ // transforms without rotation
+    let out = []
+    for(let i =0; i < arr.length; i+=2){
+      out.push(this.s * (arr[i]+off.x) + this.tx)
+      out.push(this.s * (arr[i+1]+off.y) + this.ty)
+    }
+    return(out)
+  }
+
+  transformArr(arr,off={x:0,y:0}){ 
+    let out = []
+    for(let i =0; i < arr.length; i+=2){
+      out.push(this.a * (arr[i]+off.x) + this.c * (arr[i+1]+off.y) + this.tx)
+      out.push(this.b * (arr[i]+off.x) + this.d * (arr[i+1]+off.y) + this.ty)
+    }
+    return(out)
+  }
+
+
+}
+
+
 class id{
   static count=0;
   static gen(){return(this.count++)}
@@ -2048,6 +2093,9 @@ class ball{
   }
 
   die(){
+
+    if(this.tags.has("isDead")){return}
+
     this.tags.add("isDead")
     this.resetAccelerations()
 
@@ -2307,7 +2355,6 @@ class ball{
   draw(){ // @ball draw ball
     if(this.tags.has("nodraw")){return}
     this.ctx.lineWidth = 7
-    this.ctx.strokeStyle = "rgb("+this.hp/this.maxHp*255+",20,40)"
     let hpPers = Math.min(Math.max(this.hp/this.maxHp,0),1.4)
     // let l = (50+(this.color[2]-50)*hpPers)
     // let s = this.color[1]*(hpPers*0.7+0.3)
@@ -2318,26 +2365,52 @@ class ball{
     if(this.colorFunc){
       col = this.colorFunc(this,this.color,s,l)
     }
+
+
+
     this.ctx.fillStyle = col
     this.ctx.beginPath()
     this.ctx.arc(this.x,this.y,this.r,0,TAU)
     this.ctx.fill()
 
 
-    // this.ctx.beginPath()
-    // let physpos = this.phys.getPosition()
-    // this.ctx.arc(physpos.x,physpos.y,this.r,0,TAU)
-    // this.ctx.stroke()
 
+
+
+    
     if(!this.tags.has("noDefaultArc")){
+      this.ctx.strokeStyle = "rgb("+this.hp/this.maxHp*255+",20,40)"
       this.ctx.stroke()
     }
+
+    if(this.tags.has("energyRing") && !this.tags.has("isDead")){
+      const nrg = this.energy/this.maxEnergy/0.5
+      this.ctx.lineWidth = 5
+      this.ctx.strokeStyle = `rgb(0,255,255,${nrg})`
+      this.ctx.beginPath()
+      this.ctx.arc(this.x,this.y,this.r/2,0,TAU)
+      this.ctx.stroke()
+    }
+
+
+    // if(!this.phys.isAwake()){
+    //   const a = rand(255)
+    //   this.ctx.strokeStyle = `rgb(0,${a},${a})`
+    //   this.ctx.beginPath()
+    //   this.ctx.arc(this.x,this.y,this.r/2,0,TAU)
+    //   this.ctx.stroke()
+    // }
 
     this.drawFuncs.forEach((e)=>{
       e(this,s,l)
     })
 
+
+
+
+
     //debug
+    this.ctx.strokeStyle = "rgb("+this.hp/this.maxHp*255+",20,40)"
     this.ctx.lineWidth = 1
     this.ctx.beginPath()
     this.ctx.moveTo(this.x,this.y)
@@ -4817,126 +4890,127 @@ class mobileDebug{
       return(i)
   }
 
-  var gameFuncs = {
-    "explosion":(x,y,by)=>{
-      particleFuncs.explosion2(x,y)
-      camera.shake += 12
-      entityList.activatedBalls.forEach((e)=>{if(e===by){return};
-        // explosion push
-        let los = true
-        
+var gameFuncs = {
+  "explosion":(x,y,by)=>{
+    particleFuncs.explosion2(x,y)
+    camera.shake += 12
+    entityList.activatedBalls.forEach((e)=>{if(e===by){return};
+      // explosion push
+      let los = true
+      
 
-        if(los){
-          // let dist = Math.max(50,distance(x,y,e.x,e.y))
-          let dist = Math.max(distance(x,y,e.x,e.y),4)
-          if(dist<400){
-            console.log(dist)
-            let dv = {vx:(e.x-x)/(dist**1.6)*15,vy:(e.y-y)/(dist**1.6)*15}
-            e.vx += dv.vx
-            e.vy += dv.vy
-            dv.vx *= 1.2
-            dv.vy *= 1.2
-            e.damage(30000/dist,{vel:dv})
-          }
+      if(los){
+        // let dist = Math.max(50,distance(x,y,e.x,e.y))
+        let dist = Math.max(distance(x,y,e.x,e.y),4)
+        if(dist<400){
+          console.log(dist)
+          let dv = {vx:(e.x-x)/(dist**1.6)*15,vy:(e.y-y)/(dist**1.6)*15}
+          e.vx += dv.vx
+          e.vy += dv.vy
+          dv.vx *= 1.2
+          dv.vy *= 1.2
+          e.damage(30000/dist,{vel:dv})
         }
+      }
+    })
+  },
+  "teleportFragment":(x,y,entity,d={})=>{
+    particleFuncs.teleport(x,y)
+    gameWorld.TO(1000,(e)=>{
+      entity.x = x; entity.y = y
+      entity.tags.delete("noCollideBall");
+      entity.tags.delete("teleporting")
+      e.done=true
+      d.done=true
+    })
+  },
+  "teleport":(x,y,entity=entityList.player)=>{
+    if(entity.tags.has("teleporting")){return}
+    entity.tags.add("noCollideBall")
+    entity.tags.add("teleporting")
+
+    if(entity === entityList.player){
+      let dest = camera.addDestination(x,y,30)
+      dest.arrive.push( ()=>{
+        d = camera.addDestination(x,y,0)
+        gameFuncs.teleportFragment(x,y,entity,d)
       })
-    },
-    "teleportFragment":(x,y,entity,d={})=>{
-      particleFuncs.teleport(x,y)
-      gameWorld.TO(1000,(e)=>{
-        entity.x = x; entity.y = y
-        entity.tags.delete("noCollideBall");
-        entity.tags.delete("teleporting")
-        e.done=true
-        d.done=true
-      })
-    },
-    "teleport":(x,y,entity=entityList.player)=>{
-      if(entity.tags.has("teleporting")){return}
-      entity.tags.add("noCollideBall")
-      entity.tags.add("teleporting")
-
-      if(entity === entityList.player){
-        let dest = camera.addDestination(x,y,30)
-        dest.arrive.push( ()=>{
-          d = camera.addDestination(x,y,0)
-          gameFuncs.teleportFragment(x,y,entity,d)
-        })
-      } else {
-          gameFuncs.teleportFragment(x,y,entity)
-      }
-
+    } else {
+        gameFuncs.teleportFragment(x,y,entity)
     }
+
   }
+}
 
-  var particleFuncs = {
-    "explosion":(x,y,s=1,l=1000)=>{new explosionParticle(x,y,(t)=>{return((1-t)*315*s)},(t)=>{return(t*75*s)},colorFuncs.explosion,l)},
-    "explosion2":(x,y,s=1)=>{for(let i =0; i < 5; i++){particleFuncs.explosion(x,y,s,3000/(i**1.5))}},
-    "bloody explosion":(x,y,s=1,l=1000)=>{new explosionParticle(x,y,(t)=>{return((1-t)*35*s)},(t)=>{return(t*15*s)},colorFuncs["bloody explosion"],l)},
-    "bloody explosion2":(x,y,r=80,n=3)=>{for(let i =0; i < n; i++){gameWorld.TO(rand(250),()=>{particleFuncs["bloody explosion"](x+rand(-r),y+rand(-r),rand()+2,rand(400)+800)} )}},
-    "rect":(x,y,x2,y2)=>{new rectParticle(x,y,x2,y2)},
-    "hp particle":(x,y)=>{let p = new lineyParticle(x,y,80+rand(80),colorFuncs.hp); p.speed = 3; },
-    "cheating particle":(x,y)=>{let p = new lineyParticle(x,y,280+rand(2380),colorFuncs.cheater); p.speed = 30; p.updateStall = 300; p.tailLength = 20;},
-    "hp particles":(x,y,n=5)=>{for(let i =0; i < n; i++){particleFuncs["hp particle"](x,y)}},
 
-    "respawn":(x,y,b)=>{
-      for(let i = 0; i < 5; i++){
-        new explosionParticle(x,y,(t)=>{return((t**0.4)*315)},(t)=>{return(4)},()=>{return(colorFuncs.respawn(b))},1000+200*i)
-      }
-    },
-    "teleport":(x,y,b)=>{
-      for(let i = 0; i < 5; i++){
-        new explosionParticle(x,y,(t)=>{return((t**0.4)*315)},(t)=>{return(4)},()=>{return(colorFuncs.teleport(b))},1000+200*i)
-      }
-    },
+var particleFuncs = {
+  "explosion":(x,y,s=1,l=1000)=>{new explosionParticle(x,y,(t)=>{return((1-t)*315*s)},(t)=>{return(t*75*s)},colorFuncs.explosion,l)},
+  "explosion2":(x,y,s=1)=>{for(let i =0; i < 5; i++){particleFuncs.explosion(x,y,s,3000/(i**1.5))}},
+  "bloody explosion":(x,y,s=1,l=1000)=>{new explosionParticle(x,y,(t)=>{return((1-t)*35*s)},(t)=>{return(t*15*s)},colorFuncs["bloody explosion"],l)},
+  "bloody explosion2":(x,y,r=80,n=3)=>{for(let i =0; i < n; i++){gameWorld.TO(rand(250),()=>{particleFuncs["bloody explosion"](x+rand(-r),y+rand(-r),rand()+2,rand(400)+800)} )}},
+  "rect":(x,y,x2,y2)=>{new rectParticle(x,y,x2,y2)},
+  "hp particle":(x,y)=>{let p = new lineyParticle(x,y,80+rand(80),colorFuncs.hp); p.speed = 3; },
+  "cheating particle":(x,y)=>{let p = new lineyParticle(x,y,280+rand(2380),colorFuncs.cheater); p.speed = 30; p.updateStall = 300; p.tailLength = 20;},
+  "hp particles":(x,y,n=5)=>{for(let i =0; i < n; i++){particleFuncs["hp particle"](x,y)}},
 
-    "jumpIndicator":(b,spentEnergy)=>{
-        let p = new particle(b.x,b.y,0,0)
-        p.maxLife = 1500
-        p.life = 1500/b.maxEnergySpend*spentEnergy
-        p.color = [120,245,230]
-        p.ay = 0
-        p.size = b.r+2
-        p.noFill = 1
-      },
-    "generic line":(x,y,x2,y2)=>{
-      let p = new lineyParticle(x,y,400,colorFuncs["generic white"])
-      p.vx = (x2-x)/3
-      p.vy = (y2-y)/3
-      p.speed = 3
-      p.updateStall = 30
-      p.tailLength = 30
-      return(p)
-    },
-    "circle":(x=0,y=0,type="generic line",divisions=10,radius=50)=>{
-      let r = 0
-      let arcLength = TAU/divisions
-      let p1 = {x:Math.cos(r)*radius,y:Math.sin(r)*radius}
-      for(let i = 0; i < divisions; i++){
-        r += arcLength
-        let p2 = {x:Math.cos(r)*radius,y:Math.sin(r)*radius}
-        particleFuncs[type](p1.x+x,p1.y+y,p2.x+x,p2.y+y)
-        p1 = p2
-      }
-    },
-    "radiance":(x=0,y=0,r=500)=>{
-      let angle = Math.random()*TAU
-      let dest = Lrotate(0,500,angle)
-      let p = new lineToParticle(x,y,dest.x,dest.y)
+  "respawn":(x,y,b)=>{
+    for(let i = 0; i < 5; i++){
+      new explosionParticle(x,y,(t)=>{return((t**0.4)*315)},(t)=>{return(4)},()=>{return(colorFuncs.respawn(b))},1000+200*i)
     }
-  }
+  },
+  "teleport":(x,y,b)=>{
+    for(let i = 0; i < 5; i++){
+      new explosionParticle(x,y,(t)=>{return((t**0.4)*315)},(t)=>{return(4)},()=>{return(colorFuncs.teleport(b))},1000+200*i)
+    }
+  },
 
-  var colorFuncs = {
-    "explosion":(t)=>{let x=rand(255);return("rgba(255,"+x+",0,"+t*2+")")},
-    "bloody explosion":(t)=>{let x=rand(255);return("rgba(95,0,0,"+t+")")},
-    "hp":(l)=>{return(`rgba(255,40,40,${1-l})`)},
-    "generic white":(l)=>{return(`rgba(255,255,255,${1-l})`)},
-    "cheater":(l)=>{return(`rgba(0,${rand(40)+40},0,${1-l})`)},
-    "respawn":(b)=>{return(`hsl(${b.color[0]},50%,60%)`)},
-    "teleport":(b)=>{return(`hsl(${267},50%,60%)`)},
+  "jumpIndicator":(b,spentEnergy)=>{
+      let p = new particle(b.x,b.y,0,0)
+      p.maxLife = 1500
+      p.life = 1500/b.maxEnergySpend*spentEnergy
+      p.color = [120,245,230]
+      p.ay = 0
+      p.size = b.r+2
+      p.noFill = 1
+    },
+  "generic line":(x,y,x2,y2)=>{
+    let p = new lineyParticle(x,y,400,colorFuncs["generic white"])
+    p.vx = (x2-x)/3
+    p.vy = (y2-y)/3
+    p.speed = 3
+    p.updateStall = 30
+    p.tailLength = 30
+    return(p)
+  },
+  "circle":(x=0,y=0,type="generic line",divisions=10,radius=50)=>{
+    let r = 0
+    let arcLength = TAU/divisions
+    let p1 = {x:Math.cos(r)*radius,y:Math.sin(r)*radius}
+    for(let i = 0; i < divisions; i++){
+      r += arcLength
+      let p2 = {x:Math.cos(r)*radius,y:Math.sin(r)*radius}
+      particleFuncs[type](p1.x+x,p1.y+y,p2.x+x,p2.y+y)
+      p1 = p2
+    }
+  },
+  "radiance":(x=0,y=0,r=500)=>{
+    let angle = Math.random()*TAU
+    let dest = Lrotate(0,500,angle)
+    let p = new lineToParticle(x,y,dest.x,dest.y)
   }
+}
 
-  function trailify(ball,leng=50,mult=1){
+var colorFuncs = {
+  "explosion":(t)=>{let x=rand(255);return("rgba(255,"+x+",0,"+t*2+")")},
+  "bloody explosion":(t)=>{let x=rand(255);return("rgba(95,0,0,"+t+")")},
+  "hp":(l)=>{return(`rgba(255,40,40,${1-l})`)},
+  "generic white":(l)=>{return(`rgba(255,255,255,${1-l})`)},
+  "cheater":(l)=>{return(`rgba(0,${rand(40)+40},0,${1-l})`)},
+  "respawn":(b)=>{return(`hsl(${b.color[0]},50%,60%)`)},
+  "teleport":(b)=>{return(`hsl(${267},50%,60%)`)},
+}
+
+function trailify(ball,leng=50,mult=1){
     ball.trail = []
     ball.drawFuncs.push((p,s,l)=>{
 
@@ -4958,7 +5032,7 @@ class mobileDebug{
     p.ctx.restore()
 
   }) 
-  }
+} 
 
 
 
@@ -5252,6 +5326,30 @@ class structureGenerator{
         { x1: 240, y1: 120, x2: 80, y2: 220, type: 'crate wood',  }
       ], off:{x:-160,y:-228}, scale:1, boundingBox:[80,120,240,220], oneBody:true
     },
+
+    "houseBase1":{
+      arr:[
+        { x1: 60, y1: 400, x2: 60, y2: 340, type: 'wood',  },
+        { x1: 60, y1: 340, x2: 60, y2: 220, type: 'brick',  },
+        { x1: 340, y1: 400, x2: 340, y2: 220, type: 'brick',  },
+        { x2: 340, y2: 220, x1: 60, y1: 220, type: 'wood', sided:true  }
+      ], off:{x:-200,y:-401}, scale:3, boundingBox:[60,220,340,400] ,genFunc:(x,y,options)=>{
+        let pos = options.Tmatrix.transformPoint(0,-180)
+        // options.noIntersectionCheck = 1
+        if(rand(0.3)){
+          structureGenerator.build("houseBase1",pos.x,pos.y,options)
+        } else {
+          structureGenerator.build("basicRoof1",pos.x,pos.y,options)
+        }
+      }
+    },
+    "basicRoof1":{
+      arr:[
+        { x1: 0, y1: 260, x2: 200, y2: 120, type: 'brick',  },
+        { x1: 200, y1: 120, x2: 400, y2: 260, type: 'brick',  }
+      ], off:{x:-200,y:-221}, scale:3, boundingBox:[0,120,400,260] 
+},
+
     "debug1":{
       arr:[
         { x1: 100, y1: 120, x2: 100, y2: 200, type: 'crate wood',  },
@@ -5264,7 +5362,25 @@ class structureGenerator{
         { x1: 200, y1: 120, x2: 200, y2: 160, type: 'crate wood',  },
         { x1: 200, y1: 160, x2: 340, y2: 160, type: 'crate wood',  }
       ], off:{x:-220,y:-321}, scale:1, boundingBox:[100,100,340,320] , oneBody:true
-    }
+    },
+    "debug2":{
+      arr:[
+        { x1: 100, y1: 200, x2: 240, y2: 200, type: 'wood',  },
+        { x1: 140, y1: 200, x2: 100, y2: 280, type: 'wood',  },
+        { x1: 200, y1: 200, x2: 240, y2: 280, type: 'wood',  },
+      ], off:{x:-170,y:-281}, scale:1, boundingBox:[100,200,240,280] ,genFunc:(x,y,options)=>{
+        if(rand(0.6)){
+          let sx = x
+          let sy = y-options.scale*120
+          grid.addPt(sx,sy,()=>{
+            structureGenerator.build("debug2",sx,sy,options)
+            structureGenerator.build("debug2",sx+options.scale*220,sy,options)
+          },grid.activationGrid)
+
+          
+        }
+      }
+    },
   }
 
   static boundingBox(struct,x,y,scale){
@@ -5284,8 +5400,6 @@ class structureGenerator{
     let scale = this.dict[struct].scale
     new rectParticle(...this.boundingBox(struct,0,-1,scale))
   }
-
-
   static build(struct,x,y,options={}){
     if(this.dict[struct]){
       let d = this.dict[struct]
@@ -5297,13 +5411,136 @@ class structureGenerator{
       if(!options.rotation){
         options.rotation = 0
       }
+      if(!options.noIntersect){
+        options.noIntersect = new Set()
+      }
+
+      const Tmatrix = new Transform2D(x,y,options.rotation,options.scale)
+      options.Tmatrix = Tmatrix
+
+      const boundingBoxOrig = Tmatrix.transformArr_noRotation(d.boundingBox,d.off) 
+      let myAABB = boundingBoxOrig
+      if(options.rotation!==0){myAABB = get_rotated_AABB(...boundingBoxOrig,x,y,options.rotation)}
+
+        if(isNaN(myAABB[0])){debugger}
+
+
+      if(!options.noIntersectionCheck){ // IF we want to check for intersections
+
+        let otherWalls = grid.query(...myAABB)
+
+        new rectParticle(...myAABB)
+        
+        let intersected = false;
+        otherWalls.forEach((w)=>{ // check intersection of walls (any wall within the box/touching will count)
+
+            if(options.noIntersect.has(w)){return}
+
+            if(check_collision_AABB_line(...boundingBoxOrig,w.x,w.y,w.x2,w.y2,x,y,options.rotation)){
+              intersected = true
+            }
+        })
+
+        if(intersected){return(false)}
+
+
+
+        let otherBalls = grid.query(...myAABB,grid.entityGrid)
+        otherBalls.forEach((e)=>{ // check intersection of balls
+          if(check_collision_AABB_ball(...boundingBoxOrig,e.x,e.y,e.r,x,y,options.rotation)){
+            intersected = true
+            console.log("intersected entity")
+          }
+        })
+        if(intersected){return(false)}
+
+      }
+
+
+      let out = []
+
+      d.arr.forEach((e)=>{
+        if(e.mirrored){e.mirrorX = x}
+
+        let pt1 = Tmatrix.transformPoint(e.x1+d.off.x,e.y1+d.off.y)
+        let pt2 = Tmatrix.transformPoint(e.x2+d.off.x,e.y2+d.off.y)
+
+        let builtWall = build(
+          pt1.x,
+          pt1.y,
+          pt2.x,
+          pt2.y,
+          e.type,{...e})
+        out = out.concat(builtWall)
+        builtWall.forEach((w)=>{
+          options.noIntersect.add(w)
+        })
+      })
+
+
+      if(d.oneBody){
+        // let breakAll = (a,b,c)=>{out.forEach((e)=>{e.break(b,c)})}
+        // out.forEach((e)=>{e.events.onBreak.push(breakAll)})
+        let oneBody = new Path2D()
+        oneBody.moveTo(out[0].x,out[0].y)
+        let last = out[0]
+        out.forEach((e,i)=>{
+
+
+          if(this.dict[struct].arr[i].oneBody){
+            let oneBodyInfo = this.dict[struct].arr[i].oneBody
+            if(oneBodyInfo.closer){
+              oneBody.closePath()
+              return;
+            }
+          }
+
+          if(e.x !== last.x2 || e.y !== last.y2){
+            oneBody.moveTo(e.x,e.y)
+          }
+          oneBody.lineTo(e.x2,e.y2)
+          last = e
+        })
+        out.forEach((e,i)=>{e.collateral = out; e.tags.add("oneBody")
+          if(i===0){e.oneBodyPath = oneBody; e.tags.add("oneBodyRepresentor")}
+        })
+      }
+
+      if(d.genFunc){
+          d.genFunc(x,y,options,out)
+      }
+    return(out)
+    }
+    return(false)
+  }
+
+  static build_old(struct,x,y,options={}){
+    if(this.dict[struct]){
+      let d = this.dict[struct]
+      if(!d.off){d.off={x:0,y:0}}
+
+      if(!options.scale){
+        options.scale = d.scale
+      }
+      if(!options.rotation){
+        options.rotation = 0
+      }
+      if(!options.noIntersect){
+        options.noIntersect = new Set()
+      }
+
       if(!options.noIntersectionCheck){
 
         let myAABB = options.rotation===0?this.boundingBox(struct,x,y,options.scale):get_rotated_AABB(...this.boundingBox(struct,x,y,options.scale),x,y,options.rotation)
         let otherWalls = grid.query(...myAABB)
+
+        new rectParticle(...myAABB)
         
         let intersected = false;
         otherWalls.forEach((w)=>{
+
+            if(options.noIntersect.has(w)){return}
+
             if(check_collision_AABB_line(...this.boundingBox(struct,x,y,options.scale),w.x,w.y,w.x2,w.y2,x,y,options.rotation)){
               intersected = true
             }
@@ -5333,12 +5570,16 @@ class structureGenerator{
 
         let pt1 = Lrotate(options.scale*(e.x1+d.off.x),options.scale*(e.y1+d.off.y),options.rotation)
         let pt2 = Lrotate(options.scale*(e.x2+d.off.x),options.scale*(e.y2+d.off.y),options.rotation)
-        out = out.concat(build(
+        let builtWall = build(
           pt1.x+x,
           pt1.y+y,
           pt2.x+x,
           pt2.y+y,
-          e.type,{...e}))
+          e.type,{...e})
+        out = out.concat(builtWall)
+        builtWall.forEach((w)=>{
+          options.noIntersect.add(w)
+        })
       })
 
 
@@ -5425,7 +5666,7 @@ class structureGenerator{
 
     //@gentest @starter room @starter box
     // structureGenerator.build("vase",0,0)
-    // structureGenerator.build("debug1",0,0)
+    // structureGenerator.build("houseBase1",-800,50,{rotation:-1})
 
 
     let firstWall = newWall(-200,0,800,0,can.ctx)
@@ -5927,9 +6168,13 @@ planckInit()
 
 function planckUpdate(dt){
 
-  entityList.destroy()
-  world.step(dt/1000,8,8);
-  entityList.buildWalls()
+  try{
+    entityList.destroy()
+    world.step(dt/1000,8,8);
+    entityList.buildWalls()
+  } catch(e){
+    debugger
+  }
 }
 
 function gamePhysicsUpdate(time,dt,date){
@@ -6239,18 +6484,6 @@ function segWalls(x1,y1,x2,y2,div){
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 /// main game controls
 
 
@@ -6316,8 +6549,6 @@ window.addEventListener("resize",(e)=>{
 
   settings.insets=getSafeAreaInsets()
 
-
-
 })
 
 
@@ -6375,18 +6606,6 @@ document.addEventListener("keydown",(e)=>{
 document.addEventListener("keyup",(e)=>{
   controller.keys[e.key.toLowerCase()]=false
 })
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -6619,7 +6838,7 @@ function generateFloor(x,y){
 
   let res = structureGenerator.buildOnWall(wall,ranarr("vase","flask1","flask2","crate1"),rand())
   while( res){
-    res = structureGenerator.buildOnWall(wall,ranarr("vase","flask1","flask2","crate1"),rand())
+    res = structureGenerator.buildOnWall(wall,ranarr("vase","flask1","flask2","crate1","houseBase1"),rand())
   }
 
   grid.addPt(x+rx,y+ry,()=>{generateFloor(x+rx,y+ry)},grid.activationGrid)
@@ -6962,55 +7181,56 @@ function generateLevels(x,y){
 // rotatable buildings // 
 // rotated wall generation //
 // webgl
-
+// ball sweep physics
+// wall sweep physics fix 2 // FIXED WITH BOX2d PORT
+//  ball frozen collision easy check
+// mobile button fix
+// double wall penetration
+// energy regeneration on hit
 
 //// USAGE
 // dividers
 // dashers
 // flash particles
+// permaCorpse Tag
 
 //// BEAUTY / UI
-// rain and particles
 // sounds
 // decorators
-// effects ui update
 // effect icons
-// blood splatter ellipse
 // sparkle effect
-// notifications update
+// effects ui update
+// rain and particles
 // escape menu buttons
+// notifications update
 // background decorators
+// blood splatter ellipse
 
 //// GAME / BUILDINGS
-// explosions break walls
 // explosives
 // teleportal
-// enerjitsu temple
-// zombie endless
-// wall breaking dependencies
 // side chambers
-// crate and shattering mechanics 2
+// zombie endless
+// enerjitsu temple
+// explosions break walls
+// wall breaking dependencies
 // nested building generation
 // tower bottle collision bug
+// generation blocks / pieces
+// crate and shattering mechanics 2
 
 
 /// NEW / IDEAS
 // lore droplets
 
 //// AI / MOBS
-// mob mechanics (ball remembers when it was hit by what, so no invulnerability in mobs)
 // AI movement
-// energy regeneration on hit
 // player event migration to events dict
+// mob mechanics (ball remembers when it was hit by what, so no invulnerability in mobs)
 
 //// BUGS / DEBUGGING / PHYSICS
-// ball sweep physics
-// wall sweep physics fix 2
 // acceleration triangle fix
-// double wall penetration
 // performance measuring
-// mobile button fix
 //  Blood damage seperation
 //  frame stutter lead: garbage collection
-//  ball frozen collision easy check
 //  cache (grid) // 
