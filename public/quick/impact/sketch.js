@@ -1,4 +1,3 @@
-
 let debug = 0
 
 // debug = 1
@@ -1710,6 +1709,7 @@ class ball{
     this.maxHp = 100
     this.hpRegen = 0.002
     this.damageMultiplier = 1
+    this.maxDamage = Infinity
     this.permanentDamageMultiplier = 1
     this.maxTakenDamagePercentage = 1.1 // so that overkills are allowed
 
@@ -1785,7 +1785,6 @@ class ball{
   }
 
   set x(z) {
-    if(isNaN(z)){debugger}
     this.phys.setPosition({ x: z, y: this.phys.getPosition().y });
   }
   
@@ -1811,8 +1810,9 @@ class ball{
     this.physSaveState = {x,y,vx,vy}
   }
 
-  physInit(b){
+  physInit(b,reason){
 
+    // console.log("ohysiniting from"+reason)
 
     if(world.isLocked()){
       entityList.physDefer.push(b)
@@ -1840,6 +1840,7 @@ class ball{
       I: 0,
     })
     b.phys.setFixedRotation(true)
+    b.phys.setLinearVelocity(Vec2(b.physSaveState.vx*1000,b.physSaveState.vy*1000))
   }
 
   resetAccelerations(){
@@ -2274,9 +2275,11 @@ class ball{
 
 
     let decel = this.decel.getSum()
-    this.vx *= (1-decel.x*speed)**dt
-    this.vy *= (1-decel.y*speed)**dt
-
+    if(decel.x*speed < 1 && decel.y*speed < 1){
+      this.vx *= (1-decel.x*speed)**dt
+      this.vy *= (1-decel.y*speed)**dt
+    }
+    
 
 
 
@@ -2338,9 +2341,10 @@ class ball{
   }
 
   activate(){
+    if(this.tags.has("activated")){return}
     entityList.activatedBalls.add(this)
     this.tags.add("activated")
-    this.physInit(this)
+    this.physInit(this,"activate")
   }
 
   deactivate(){
@@ -2421,7 +2425,7 @@ class ball{
 
 //@wall
 
-var wallDontCopy = new Set(["id","tags","events","phys"])
+var wallDontCopy = new Set(["id","tags","events","phys","multisplitData"])
 function copyWall(w,w2){
   Object.keys(w).forEach((e)=>{
       if(wallDontCopy.has(e)){return}
@@ -2444,6 +2448,8 @@ class wall{
     this.ctx = ctx
     this.length = distance(x1,y1,x2,y2)
 
+    if(this.length === 0){return}
+
     this.gridPos = grid.addWall(this)
 
     this.id = id.gen()
@@ -2463,6 +2469,7 @@ class wall{
     this.hp = this.hp + this.hp*Math.abs(dot(this.normalized.x,this.normalized.y,1,0)) // floors should have more HP
 
 
+    this.multisplitData = []
     this.damageThreshold = 1
 
     this.bounce = 0.8
@@ -2512,6 +2519,8 @@ class wall{
     this.dir = {y:(y2-y1),x:(x2-x1)}
     this.normalized = {y:(y2-y1)/this.length,x:(x2-x1)/this.length}
     this.midpoint = {x:(x1+x2)/2,y:(y1+y2)/2}
+
+
     if(move){
       this.gridPos.push(...grid.addWall(this))
     } else {
@@ -2523,7 +2532,69 @@ class wall{
     this.physInit(this)
   }
 
+  static multiSplitArr(arr){ // arr of end pairs
+
+    // sort by shatter left
+    arr.sort((a,b)=>{return(a[0]-b[0])})
+
+    const build = []
+    if(arr[0][0]>0){build.push(0,arr[0][0])} //prevent 0 unit or negative length walls
+    const shatter = [arr[0][0]] 
+    let shatterState = arr[0][1]
+
+    for(let i = 1; i < arr.length; i++){
+      if(arr[i][0] <= shatterState){
+        shatterState = Math.max(shatterState,arr[i][1])
+      } else {
+        build.push(shatterState,arr[i][0])
+        shatter.push(shatterState,arr[i][0])
+        shatterState = arr[i][1]
+      }
+    }
+
+    shatter.push(shatterState)
+    if(shatterState < 1){build.push(shatterState,1)}
+
+    return({b:build,s:shatter})
+  }
+
+  multiSplit(){
+
+
+    let ms = wall.multiSplitArr(this.multisplitData)
+
+    const arr = this.multisplitData
+
+    for(let i = 0; i < ms.b.length; i+=2){
+      const pos = [this.x+this.dir.x*ms.b[i],this.y+this.dir.y*ms.b[i],this.x+this.dir.x*ms.b[i+1],this.y+this.dir.y*ms.b[i+1]]
+      const wall = newWall(...pos)
+      copyWall(this,wall)
+      wall.setPos(...pos)
+      wall.hp = 10
+      if(this.splitting.minLength > wall.length){
+        wall.break()
+      }
+      wall.physInit(wall)
+    }
+
+    for(let i = 0; i < ms.s.length; i+=2){
+      const pos = {
+        x:this.x+this.dir.x*ms.s[i],
+        y:this.y+this.dir.y*ms.s[i],
+        x2:this.x+this.dir.x*ms.s[i+1],
+        y2:this.y+this.dir.y*ms.s[i+1]
+      }
+
+      shatterWall(this,pos,arr[i/2][2],arr[i/2][3])
+    }
+
+    this.remove()
+
+  }
+
   split(s1,s2,by,impactPt){
+
+
     let w1 = newWall(this.x,this.y,this.x+s1*this.dir.x,this.y+s1*this.dir.y)
     let w2 = newWall(this.x+s2*this.dir.x,this.y+s2*this.dir.y,this.x2,this.y2) // useless other than not impacting gridpos
 
@@ -2542,7 +2613,7 @@ class wall{
     }
 
 
-    this.setPos(w1.x2,w1.y2,w2.x,w2.y,true)
+    // this.setPos(w1.x2,w1.y2,w2.x,w2.y,true)
     shatterWall(this,by,impactPt)
     
     w1.physInit(this)
@@ -2575,6 +2646,7 @@ class wall{
 
   damage(d,mult,by={vx:0,vy:0},impactPt={x:0,y:0}){
 
+
     this.events.onCollide.forEach((e)=>{
       e(this,d,mult,by,impactPt)
     })
@@ -2601,8 +2673,13 @@ class wall{
         }
         let s1 = minMax(0,pt-pers1,1)
         let s2 = minMax(0,pt+pers2,1)
-        this.split(s1,s2,by,impactPt)
+        console.log("broke broke")
+        this.multisplitData.push([s1,s2,by,impactPt])
+        // this.split(s1,s2,by,impactPt)
+        entityList.multisplitData.add(this)
       } else {
+
+        // fix: can run 2 times i think
         this.break(by,impactPt)
       }
 
@@ -2614,7 +2691,16 @@ class wall{
   break(by={vx:0,vy:0},impactPt={x:0,y:0},collateral){
     if(this.tags.has("isBroken")){return}
     this.tags.add("isBroken")
-    shatterWall(this,by,impactPt)
+
+
+    const pos = {
+        x:this.x,
+        y:this.y,
+        x2:this.x2,
+        y2:this.y2
+      }
+
+    shatterWall(this,pos,by,impactPt)
 
     this.events.onBreak.forEach((e)=>{
       e(this,by,impactPt)
@@ -3338,8 +3424,28 @@ class sparkleParticle extends particleInstance{
   }
 }
 
+function shatterWall(wall,pos,by,impactPt){
+    let dx = pos.x2 - pos.x
+    let dy = pos.y2 - pos.y
+    let seg = 0
+    ///
+    let shatterProb = 0.2
+    if(wall.shattering !== undefined){
+      if(wall.shattering.type === "perLength"){
+        shatterProb = wall.shattering.length/wall.length
+      }
+    }
 
-function shatterWall(wall,by,impactPt){
+    let nextSeg = Math.random()*shatterProb
+    while(nextSeg < 1){
+      new shatteredWallParticle(wall,pos.x+dx*seg,pos.y+dy*seg,pos.x+dx*nextSeg,pos.y+dy*nextSeg,by.vx,by.vy,impactPt,nextSeg-seg)
+      seg = nextSeg
+      nextSeg = seg + Math.random()*0.2
+    }
+    new shatteredWallParticle(wall,pos.x+dx*seg,pos.y+dy*seg,pos.x2,pos.y2,by.vx,by.vy,impactPt,1-seg)
+}
+
+function shatterWall_old(wall,by,impactPt){
     let dx = wall.x2 - wall.x
     let dy = wall.y2 - wall.y
     let seg = 0
@@ -3670,6 +3776,14 @@ class entityList{
       this.physDefer[i].physInit(this.physDefer[i])
     }
     this.physDefer = []
+  }
+
+  static multisplitData = new Set()
+  static multisplitUpdate(){
+    this.multisplitData.forEach((e)=>{
+      e.multiSplit()
+    })
+    this.multisplitData.clear()
   }
 }
 
@@ -4020,7 +4134,12 @@ function balls_collision_event(a,b,contact,oldManifold,manifold){
   }
   dmgA *= a.damageMultiplier * a.permanentDamageMultiplier
   dmgB *= b.damageMultiplier * b.permanentDamageMultiplier
-            let spread = -0.6
+
+
+      dmgA = Math.min(a.maxDamage,dmgA)
+      dmgB = Math.min(b.maxDamage,dmgB)
+
+          let spread = -0.6
           let spread2 = -0.3
           let mult = 0.25
 
@@ -4284,9 +4403,9 @@ class test{
     // newWall(-140,0,240,0);
 
     
-    build(-2200,500,1200,500,"brick",{splitting:{minLength:50,breakLength:100}})
-    build(2200,450,1200,450,"brick",{splitting:{minLength:50,breakLength:100}})
-    build(-1200,450,1200,450,"brick",{sided:1,splitting:{minLength:50,breakLength:100}})
+    window.w = build(-2200,500,1200,500,"brick",{splitting:{minLength:50,breakLength:100},tags:["AIdamage"]})
+    // build(2200,450,1200,450,"brick",{splitting:{minLength:50,breakLength:100}})
+    // build(-1200,450,1200,450,"brick",{sided:1,splitting:{minLength:50,breakLength:100}})
 
     // summon("divider",0,-60)
 
@@ -4683,7 +4802,7 @@ class mobileDebug{
                 nb.hpRegen = -0.004
                 nb.tags.add("clone")
                 nb.shadow(b)
-                console.log(nb.x==b.x, b.phys==nb.phys)
+                nb.maxDamage = 10
 
               }
 
@@ -6168,13 +6287,18 @@ planckInit()
 
 function planckUpdate(dt){
 
-  try{
+  if(isNaN(player.x)){
+    debugger
+  }
+
     entityList.destroy()
+  try{
     world.step(dt/1000,8,8);
-    entityList.buildWalls()
   } catch(e){
     debugger
   }
+    entityList.multisplitUpdate()
+    entityList.buildWalls()
 }
 
 function gamePhysicsUpdate(time,dt,date){
@@ -6594,6 +6718,21 @@ document.addEventListener("keydown",(e)=>{
 
     // summon("normal",400,370)
   }
+
+
+  if(e.key === "t" && debug){
+    let a = summon("normal",0,-200)
+    let b = summon("normal",100,-200)
+    a.activate()
+    // b.activate()
+    window.a = a
+    window.ap = a.phys
+    a.damageMultiplier = b.damageMultiplier = 500000
+    setTimeout(()=>{a.vy = 20; b.vy = 20})
+    // console.log(a)
+    // player.vy = 200000
+  }
+
 
   if(e.key === "0"){
     structureGenerator.build(prompt("structure?"),0,0)
@@ -7234,3 +7373,4 @@ function generateLevels(x,y){
 //  Blood damage seperation
 //  frame stutter lead: garbage collection
 //  cache (grid) // 
+// decel physics fix
