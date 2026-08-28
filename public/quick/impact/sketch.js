@@ -14,11 +14,11 @@ const TAU = Math.PI*2
     const pl = planck;
     const Vec2 = pl.Vec2;
 pl.Settings.maxTranslation = Infinity;
-pl.Settings.lengthUnitsPerMeter = 60
+// pl.Settings.lengthUnitsPerMeter = 60
 const PFT = 1000 // planck translation factor
 
 const world = pl.World({
-  gravity: Vec2(0, 0),
+  gravity:  Vec2(0,0),
   // gravity: Vec2(0, 1169.8),
   allowSleep: false // Prevent bodies from sleeping/freezing momentum
 });
@@ -70,6 +70,63 @@ function readCSV(str,del=","){
     arr[i] = arr[i].split(del)
   }
   return(arr)
+}
+
+function snapshotWorld(world) {
+  const bodiesData = [];
+
+  for (let body = world.getBodyList(); body; body = body.getNext()) {
+    const fixturesData = [];
+
+    for (let fix = body.getFixtureList(); fix; fix = fix.getNext()) {
+      const shape = fix.getShape();
+      const type = shape.getType();
+      let shapeDef = { type };
+
+      if (type === 'polygon') {
+        shapeDef.vertices = shape.m_vertices.map(v => ({ x: v.x, y: v.y }));
+      } else if (type === 'edge') {
+        shapeDef.v1 = { x: shape.m_vertex1.x, y: shape.m_vertex1.y };
+        shapeDef.v2 = { x: shape.m_vertex2.x, y: shape.m_vertex2.y };
+      } else if (type === 'circle') {
+        shapeDef.radius = shape.getRadius();
+        shapeDef.center = { x: shape.m_p.x, y: shape.m_p.y };
+      }
+
+      fixturesData.push({
+        density: fix.getDensity(),
+        friction: fix.getFriction(),
+        restitution: fix.getRestitution(),
+        isSensor: fix.isSensor(),
+        shape: shapeDef
+      });
+    }
+
+    const pos = body.getPosition();
+    const linVel = body.getLinearVelocity();
+
+    bodiesData.push({
+      type: body.getType(), // 'static', 'dynamic', 'kinematic'
+      position: { x: pos.x, y: pos.y },
+      angle: body.getAngle(),
+      linearVelocity: { x: linVel.x, y: linVel.y },
+      angularVelocity: body.getAngularVelocity(),
+      linearDamping: body.getLinearDamping(),
+      angularDamping: body.getAngularDamping(),
+      gravityScale: body.getGravityScale(),
+      // Flags
+      bullet: body.isBullet(),
+      fixedRotation: body.isFixedRotation(),
+      awake: body.isAwake(),
+      active: body.isActive(),
+      fixtures: fixturesData
+    });
+  }
+
+  return {
+    gravity: { x: world.getGravity().x, y: world.getGravity().y },
+    bodies: bodiesData
+  };
 }
 
 
@@ -1668,8 +1725,8 @@ class Acceleration{
 
 
 
-class ball{
-  constructor(x,y,r,ctx,AI=true){
+class entity{
+  constructor(x,y,r,ctx=can.ctx,AI=true){
 
     this.physics = "ball"
 
@@ -1758,9 +1815,6 @@ class ball{
 
     this.physSave(x,y,0,0)
 
-    this.physInit(this)
-
-
 
 
   }
@@ -1812,11 +1866,13 @@ class ball{
     }
 
     b.phys = world.createBody({
-      type:'dynamic',bullet:true,
+      type:'dynamic',
+      bullet:true,
       position:Vec2(b.physSaveState.x, b.physSaveState.y),
       // linearDamping: 0.1,
       userData: b
     });
+    b.phys.setFixedRotation(true)
     b.phys.createFixture(planck.Circle(b.r), {
       density: 1.0,
       restitution: b.bounce, // bounciness (0 = no bounce, 1 = elastic)
@@ -1828,7 +1884,6 @@ class ball{
       center: pl.Vec2(0.0, 0.0),   // Center of mass (local coordinates)
       I: 0,
     })
-    b.phys.setFixedRotation(true)
     b.phys.setLinearVelocity(Vec2(b.physSaveState.vx*1000,b.physSaveState.vy*1000))
   }
 
@@ -2284,48 +2339,7 @@ class ball{
     }
     
 
-
-
     this.wallBreakMultiplier -= (this.wallBreakMultiplier-0.1)*0.0009*dt
-
-    //check wall collisions collide wall
-    // if(!this.tags.has("noCollideWall")){
-
-    //   let collisionData = {"collided":false,"minDist":Infinity}
-
-    //   collidableWalls.forEach((w)=>{
-
-    //     if(w === sweptWallHit){return}
-
-    //     let awaySide = dot(this.vx,this.vy,w.normal.x,w.normal.y) < 0
-
-    //     if(check_collision_ball_line(this.x,this.y,this.r,w.x,w.y,w.x2,w.y2)){
-    //     if(w.tags.has("sided") && (awaySide || this.sidedWallEntryFrame[w.id] === gameWorld.frame-1 )){this.sidedWallEntryFrame[w.id] = gameWorld.frame;return}
-
-
-    //       let closest = point_on_line(this.x,this.y,w.x,w.y,w.x2,w.y2)
-    //       let dist = distance(this.x,this.y,closest.x,closest.y)
-    //       if(dist<collisionData.minDist){
-    //         collisionData.collided = w
-    //         collisionData.minDist = dist
-    //         collisionData.closest=closest
-    //         collisionData.awaySide=awaySide
-    //       } else {return}
-
-
-    //     }
-    //   })
-
-
-    //   // after finding the wall that collides
-
-    //   if(collisionData.collided){
-    //     collisionData.p = {x:this.x,y:this.y}
-    //     wall_collision_handler(this,collisionData,dt)
-    //   }
-
-    // }
-
 
 
     this.energy += (this.energenin + this.effects.getValue("energenerative",0))*dt
@@ -2382,8 +2396,6 @@ class ball{
 
 
 
-
-
     
     if(!this.tags.has("noDefaultArc")){
       this.ctx.strokeStyle = "rgb("+this.hp/this.maxHp*255+",20,40)"
@@ -2425,6 +2437,169 @@ class ball{
     this.ctx.stroke()
   }
 }
+
+
+class ball extends entity{
+  constructor(...orig){
+    super(...orig)
+    this.physInit(this)
+  }
+}
+
+class poly extends entity{
+  constructor(orig, verts, scale){
+    orig[2] = 50
+    orig[4] = false
+    super(...orig)
+    this.scale = scale
+    this.setVerts(verts)
+    this.physInit(this)
+
+  }
+
+  setVerts(verts){
+    this.verts = []
+    let maxR = 0
+    for(let i = 0; i < verts.length; i+=2){
+      this.verts.push(Vec2(verts[i]*this.scale,verts[i+1]*this.scale))
+      maxR = Math.max(maxR,distance(verts[i],verts[i+1]))
+    }
+    this.r = maxR * this.scale
+    return(this.verts)
+  }
+
+  physInit(e){
+
+    if(world.isLocked()){
+      entityList.physDefer.push(e)
+      return;
+    }
+
+    if(e.phys){
+      world.destroyBody(e.phys)
+    }
+
+
+    e.phys = world.createBody({
+      type:'dynamic',
+      bullet:true,
+      position:Vec2(e.physSaveState.x, e.physSaveState.y),
+      userData: e
+    });
+
+    e.poly = pl.Polygon(e.verts)
+    e.phys.createFixture(e.poly, {
+      density: 1.0,
+      restitution: e.bounce, // bounciness (0 = no bounce, 1 = elastic)
+      friction: -1000* Math.log(e.friction),
+    });
+
+  const body = e.phys
+  const calculatedMass = body.getMass();
+  const localCenter = body.getLocalCenter();
+  const calculatedInertia = body.getInertia();
+
+  // Prevent issues if the polygon has zero area
+    if (calculatedMass > 0) {
+      // 5. Scale the inertia linearly based on our target mass of 1.0
+      // Formula: New Inertia = Old Inertia * (New Mass / Old Mass)
+      const targetMass = e.mass;
+      const scaledInertia = calculatedInertia * (targetMass / calculatedMass);
+
+      // 6. Overwrite the mass properties while keeping center and scaled inertia intact
+      body.setMassData({
+        mass: targetMass,
+        center: localCenter,
+        I: scaledInertia * 2
+      });
+    }
+
+    e.phys.setLinearVelocity(Vec2(e.physSaveState.vx*1000,e.physSaveState.vy*1000))
+  }
+
+get x() {
+  return this.phys.getWorldCenter().x;
+}
+
+get y() {
+  return this.phys.getWorldCenter().y;
+}
+
+set x(z) {
+  // Get current world position and the rotated local center offset
+  const pos = this.phys.getPosition();
+  const offset = this.phys.getWorldVector(this.phys.getLocalCenter());
+  
+  // Calculate new origin X by subtracting the offset from the target center X
+  this.phys.setPosition({ 
+    x: z - offset.x, 
+    y: pos.y 
+  });
+}
+
+set y(z) {
+
+  // Get current world position and the rotated local center offset
+  const pos = this.phys.getPosition();
+  const offset = this.phys.getWorldVector(this.phys.getLocalCenter());
+  
+  // Calculate new origin Y by subtracting the offset from the target center Y
+  this.phys.setPosition({ 
+    x: pos.x, 
+    y: z - offset.y 
+  });
+}
+  
+
+
+  draw(){
+    const body = this.phys
+    const ctx = this.ctx
+
+    const position = body.getPosition();
+    const angle = body.getAngle();
+
+    ctx.save();
+    // Translate to body position and rotate to match physics engine
+    ctx.translate(position.x, position.y);
+    ctx.rotate(angle);
+
+    ctx.beginPath();
+    let first = true;
+
+    // Iterate fixtures to extract polygon vertices
+    for (let f = body.getFixtureList(); f; f = f.getNext()) {
+      const shape = f.getShape();
+      if (shape.getType() === 'polygon') {
+        const vertices = shape.m_vertices;
+        for (let i = 0; i < vertices.length; i++) {
+          const v = vertices[i];
+          if (first) {
+            ctx.moveTo(v.x, v.y);
+            first = false;
+          } else {
+            ctx.lineTo(v.x, v.y);
+          }
+        }
+      }
+    }
+
+    this.ctx.lineWidth = 5
+    ctx.closePath();
+    ctx.strokeStyle = '#0f0';
+    ctx.fillStyle = '#ff7f50';
+    if(this.tags.has("isDead")){
+      ctx.fillStyle = `#505050`
+      ctx.strokeStyle = "#F00"
+    }
+
+    ctx.stroke();
+    ctx.fill();
+    ctx.restore();
+  }
+}
+
+
 
 //@wall
 
@@ -2825,101 +3000,6 @@ function wall_collision_event(ball,w,contact,oldManifold,manifold){
   }
 
 
-
-}
-
-function wall_collision_handler(ball,collisionData,dt,type="normal"){
-
-  ball.energy += ball.wallJumpEnergy
-  let awaySide = collisionData.awaySide // not used
-  let closest = collisionData.closest // the point of the wall that was hit
-  let dist = collisionData.minDist // the distance from the ball to the point of the wall that was hit
-  let w = collisionData.collided // the wall collided on
-  let p = collisionData.p // the position of the ball when it hit the wall
-
-
-  let old = {vx:ball.vx,vy:ball.vy} // not needed, debug only.
-
-    let fellback = false
-
-    let normalizedDirectionToWall;
-    if(dist!==0){
-      normalizedDirectionToWall = {x:(closest.x-p.x)/dist,y:(closest.y-p.y)/dist} // the normalized vector from the wall to the ball's position when colliding
-    } else {
-      // fallback to last position if ball center is exactly on the wall, not perfect but should work in most cases and prevents NaN errors
-      fellback = true;
-      console.log("fellback")
-      dist = distance(ball.lastX,ball.lastY,closest.x,closest.y)
-      normalizedDirectionToWall = {x:(closest.x-ball.lastX)/dist,y:(closest.y-ball.lastY)/dist}
-    }
-
-
-    // let forceToWall = dot(ball.vx,ball.vy,normalizedDirectionToWall.x,normalizedDirectionToWall.y) // cant be this because then edges deal 0 damage
-    let forceToWall = Math.abs(dot(ball.vx,ball.vy,normalizedDirectionToWall.x,normalizedDirectionToWall.y))
-    let mult;
-    if(ball.tags.has("AI")){mult = w.tags.has("AIdamage")?3:0.2} else {mult = ball.wallBreakMultiplier}
-    let wallBroken = w.damage(forceToWall,mult, ball, closest)
-
-    if(wallBroken){ball.vx*=w.brokenVelocityMult.vx;ball.vy*=w.brokenVelocityMult.vy;ball.lastCollideWallTime = gameWorld.lastTime;return}
-
-    let reflectionVector = normalizedDirectionToWall
-
-    let reflection = reflect(ball.vx,ball.vy,reflectionVector.x,reflectionVector.y)
-    // ball.vx = reflection.x * w.bounce
-    // ball.vy = reflection.y * w.bounce
-
-    let normalizedDirectionToWall90d = {x:normalizedDirectionToWall.y,y:-normalizedDirectionToWall.x}
-
-    // let refBounce = dot(reflection.x,reflection.y,w.normal.x,w.normal.y) * w.bounce
-    // let refFriction = dot(reflection.x,reflection.y,w.normalized.x,w.normalized.y) * w.friction
-
-    // ball.vx = refBounce * ball.bounce * w.normal.x + refFriction * ball.friction * w.normalized.x
-    // ball.vy = refBounce * ball.bounce * w.normal.y + refFriction * ball.friction * w.normalized.y
-
-
-    let refBounce = dot(reflection.x,reflection.y,normalizedDirectionToWall.x,normalizedDirectionToWall.y) * w.bounce
-    let refFriction = dot(reflection.x,reflection.y,normalizedDirectionToWall90d.x,normalizedDirectionToWall90d.y) * w.friction
-
-    ball.vx = refBounce * ball.bounce * normalizedDirectionToWall.x + refFriction * ball.friction * normalizedDirectionToWall90d.x
-    ball.vy = refBounce * ball.bounce * normalizedDirectionToWall.y + refFriction * ball.friction * normalizedDirectionToWall90d.y
-
-
-
-
-    //push ball out of wall (good enough for now, fix later, bleeding E)
-
-    if(type === "swept" && (collisionData.sweepResponse.type===1 || collisionData.sweepResponse.type===5 || collisionData.sweepResponse.type===4|| collisionData.sweepResponse.type===3)){
-      ball.x = collisionData.p.x
-      ball.y = collisionData.p.y
-      if(collisionData.sweepResponse.to){
-        ball.x = collisionData.sweepResponse.to.x
-        ball.y = collisionData.sweepResponse.to.y
-      }
-
-    } else { // normal
-      let overlap = ball.r - dist + 0.000005 // brute fix // refer to note about collision types 3
-      if(overlap > 0){
-        let pushX = -normalizedDirectionToWall.x * overlap
-        let pushY = -normalizedDirectionToWall.y * overlap
-        ball.x += pushX
-        ball.y += pushY
-      }
-    }
-    if(debug){
-        let lp = new lineParticle(ball.x,ball.y,ball.x+ball.vx*200,ball.y+ball.vy*200)
-        lp.color = [255,0,255]
-        crossParticle(p.x,p.y)
-        crossParticle(closest.x,closest.y,[255,255,0])
-
-        lp = new lineParticle(p.x,p.y,p.x-reflectionVector.x*200,p.y-reflectionVector.y*200)
-        lp.color = [255,255,0]
-
-        lp = new lineParticle(p.x,p.y,p.x-old.vx*200,p.y-old.vy*200)
-        lp.color = [0,255,0]
-        if(test.expect(distance(reflectionVector.x,reflectionVector.y),1)){debugger}
-      }
-
-    ball.lastCollideWallTime = gameWorld.lastTime
 
 }
 
@@ -4167,13 +4247,21 @@ function balls_collision_event(a,b,contact,oldManifold,manifold){
 
           let killed = killed_a||killed_b
 
-          if(!killed || killed_a && killed_b){
+          if(!killed ){
             // a.forceM(normalizedVectorTo.x,normalizedVectorTo.y,-forceMultiplier)
             // b.forceM(normalizedVectorTo.x,normalizedVectorTo.y,forceMultiplier)
             // a.vx = 0
             // b.vx = 0
               // world.queueUpdate(()=>{console.log(a.vx,b.vx)})
-          } else { // only one ball died
+
+
+
+            } else if(killed_a && killed_b){
+               world.queueUpdate(()=>{
+                dead.vx *= 0.7
+                dead.vy *= 0.7
+              })
+            } else { // only one ball died
             let dead = killed_a?a:b
             let alive = killed_a?b:a
 
@@ -4583,6 +4671,7 @@ class mobileDebug{
       },
       "brick":()=>{
         w.color = "#f29188"
+        w.hp = 20
         w.bounce = 0.4
         w.friction = 0.94
       }
@@ -5268,7 +5357,8 @@ function trailify(ball,leng=50,mult=1){
 
 //initialize player @ip @player
 
-  entityList.player = new ball(-100,400,50,can.ctx,false)
+  // entityList.player = new ball(-100,400,50,can.ctx,false)
+  entityList.player = new poly([-100,400],[-1, -1, 1, -1, -1, 1],40)
   entityList.player.team = "player"
   entityList.player.mass = 1.2
   entityList.player.color = [129,62,41] //129 62 41
@@ -5732,110 +5822,6 @@ class structureGenerator{
     return(false)
   }
 
-  static build_old(struct,x,y,options={}){
-    if(this.dict[struct]){
-      let d = this.dict[struct]
-      if(!d.off){d.off={x:0,y:0}}
-
-      if(!options.scale){
-        options.scale = d.scale
-      }
-      if(!options.rotation){
-        options.rotation = 0
-      }
-      if(!options.noIntersect){
-        options.noIntersect = new Set()
-      }
-
-      if(!options.noIntersectionCheck){
-
-        let myAABB = options.rotation===0?this.boundingBox(struct,x,y,options.scale):get_rotated_AABB(...this.boundingBox(struct,x,y,options.scale),x,y,options.rotation)
-        let otherWalls = grid.query(...myAABB)
-
-        new rectParticle(...myAABB)
-        
-        let intersected = false;
-        otherWalls.forEach((w)=>{
-
-            if(options.noIntersect.has(w)){return}
-
-            if(check_collision_AABB_line(...this.boundingBox(struct,x,y,options.scale),w.x,w.y,w.x2,w.y2,x,y,options.rotation)){
-              intersected = true
-            }
-        })
-
-        if(intersected){return(false)}
-
-        //debug 
-
-
-        let otherBalls = grid.query(...myAABB,grid.entityGrid)
-        otherBalls.forEach((e)=>{
-          if(check_collision_AABB_ball(...this.boundingBox(struct,x,y,options.scale),e.x,e.y,e.r,x,y,options.rotation)){
-            intersected = true
-            console.log("intersected entity")
-          }
-        })
-        if(intersected){return(false)}
-
-      }
-
-
-      let out = []
-
-      d.arr.forEach((e)=>{
-        if(e.mirrored){e.mirrorX = x}
-
-        let pt1 = Lrotate(options.scale*(e.x1+d.off.x),options.scale*(e.y1+d.off.y),options.rotation)
-        let pt2 = Lrotate(options.scale*(e.x2+d.off.x),options.scale*(e.y2+d.off.y),options.rotation)
-        let builtWall = build(
-          pt1.x+x,
-          pt1.y+y,
-          pt2.x+x,
-          pt2.y+y,
-          e.type,{...e})
-        out = out.concat(builtWall)
-        builtWall.forEach((w)=>{
-          options.noIntersect.add(w)
-        })
-      })
-
-
-      if(d.oneBody){
-        // let breakAll = (a,b,c)=>{out.forEach((e)=>{e.break(b,c)})}
-        // out.forEach((e)=>{e.events.onBreak.push(breakAll)})
-        let oneBody = new Path2D()
-        oneBody.moveTo(out[0].x,out[0].y)
-        let last = out[0]
-        out.forEach((e,i)=>{
-
-
-          if(this.dict[struct].arr[i].oneBody){
-            let oneBodyInfo = this.dict[struct].arr[i].oneBody
-            if(oneBodyInfo.closer){
-              oneBody.closePath()
-              return;
-            }
-          }
-
-          if(e.x !== last.x2 || e.y !== last.y2){
-            oneBody.moveTo(e.x,e.y)
-          }
-          oneBody.lineTo(e.x2,e.y2)
-          last = e
-        })
-        out.forEach((e,i)=>{e.collateral = out; e.tags.add("oneBody")
-          if(i===0){e.oneBodyPath = oneBody; e.tags.add("oneBodyRepresentor")}
-        })
-      }
-
-      if(d.genFunc){
-          d.genFunc(x,y,options,out)
-      }
-    return(out)
-    }
-    return(false)
-  }
 
   static buildOnWall(wall,struct,pos=0.5,options={}){
 
@@ -6299,6 +6285,8 @@ function planckInit(){
   
   const a = fixA.getRestitution();
   const b = fixB.getRestitution();
+
+
     // Override default mixing (Math.max) with multiplication
 
   let entityA = bodyA.getUserData()
@@ -6320,6 +6308,7 @@ function planckInit(){
 
     if(!LOS(entityA.x,entityA.y,entityB.x,entityB.y)){
       contact.setEnabled(false)
+      console.log("NOLOS")
       return
     }
 
@@ -6352,9 +6341,9 @@ function planckInit(){
     if(entityA == player || entityB == player){
       if(debug){
         crossParticle(worldManifold.points[0].x,worldManifold.points[0].y)
-        if(worldManifold.points[0].y < 445){
-          debugger
-        }
+        // if(worldManifold.points[0].y < 445){
+        //   debugger
+        // }
       }
     }
 
@@ -6816,6 +6805,16 @@ document.addEventListener("keydown",(e)=>{
     test.dtLock = 16
 
     summon("normal",400,370)
+  }
+
+  if(e.key === "q" && debug){
+    player.x = 0
+    // let rd = rand(-30)
+    // player.y = 410 + rd
+    // console.log(player.y)
+    player.y = 400
+    test.dtLock = 16
+
   }
 
 
@@ -7396,8 +7395,6 @@ function generateLevels(x,y){
 
 // unbreakable walls //
 // player trail //
-// height advantage
-
 // bounciness for wall //
 // mobile rotation fix //
 // mobile movement fix //
@@ -7428,6 +7425,8 @@ function generateLevels(x,y){
 // mobile button fix
 // double wall penetration
 // energy regeneration on hit
+// sparkle effect
+
 
 //// USAGE
 // dividers
@@ -7439,7 +7438,6 @@ function generateLevels(x,y){
 // sounds
 // decorators
 // effect icons
-// sparkle effect
 // effects ui update
 // rain and particles
 // escape menu buttons
@@ -7468,6 +7466,7 @@ function generateLevels(x,y){
 // AI movement
 // player event migration to events dict
 // mob mechanics (ball remembers when it was hit by what, so no invulnerability in mobs)
+// height advantage
 
 //// BUGS / DEBUGGING / PHYSICS
 // acceleration triangle fix
