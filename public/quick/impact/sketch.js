@@ -1672,15 +1672,6 @@ class ball{
   constructor(x,y,r,ctx,AI=true){
 
     this.physics = "ball"
-        /// PLANCK
-
-
-
-    // this.x = x
-    // this.y = y
-
-    // this.ax = 0
-    // this.ay = 0
 
     this.mass = 1
 
@@ -1689,8 +1680,6 @@ class ball{
     r = r/1.25
 
     this.r = r
-    // this.vx = 0
-    // this.vy = 0
     this.push = {x:0,y:0}
 
     this.color = [0,62,41] // 0 62 41
@@ -1971,7 +1960,6 @@ class ball{
     mag /= this.mass
     this.vx += x * mag
     this.vy += y * mag
-
   }
 
   speed(){
@@ -2022,6 +2010,14 @@ class ball{
     let spread = -0.6
     let spread2 = -0.3
     let mult = 0.25
+
+    if(this.tags.has("noBlood")){return}
+    if(this.tags.has("dissapearOnDeath")){
+      this.tags.add("nodraw")
+      return
+    }
+
+
 
     // // @blood
 
@@ -2101,7 +2097,10 @@ class ball{
     if(this.tags.has("isDead")){return}
 
     this.tags.add("isDead")
-    this.resetAccelerations()
+
+    if(!this.tags.has("noAccelResetOnDeath")){
+      this.resetAccelerations()
+    }
 
     if(!this.tags.has("permaCorpse")){
       gameWorld.TO(300,(e)=>{ // might cause some issues
@@ -3788,6 +3787,16 @@ class entityList{
     })
     this.multisplitData.clear()
   }
+
+
+  // static postPhys = []
+  // static postPhysUpdate(){
+  //   for(let i = 0; i < this.postPhys.length; i++){
+  //     this.postPhys[i]()
+  //   }
+  //   this.postPhys = []
+  // }
+
 }
 
 class particles{
@@ -4159,8 +4168,11 @@ function balls_collision_event(a,b,contact,oldManifold,manifold){
           let killed = killed_a||killed_b
 
           if(!killed || killed_a && killed_b){
-            a.forceM(normalizedVectorTo.x,normalizedVectorTo.y,-forceMultiplier)
-            b.forceM(normalizedVectorTo.x,normalizedVectorTo.y,forceMultiplier)
+            // a.forceM(normalizedVectorTo.x,normalizedVectorTo.y,-forceMultiplier)
+            // b.forceM(normalizedVectorTo.x,normalizedVectorTo.y,forceMultiplier)
+            // a.vx = 0
+            // b.vx = 0
+              // world.queueUpdate(()=>{console.log(a.vx,b.vx)})
           } else { // only one ball died
             let dead = killed_a?a:b
             let alive = killed_a?b:a
@@ -4170,22 +4182,35 @@ function balls_collision_event(a,b,contact,oldManifold,manifold){
             })
 
             if(killed==="normal"){
-              a.forceM(normalizedVectorTo.x,normalizedVectorTo.y,-forceMultiplier)
-              b.forceM(normalizedVectorTo.x,normalizedVectorTo.y,forceMultiplier)
-              dead.vx *= 0.7
-              dead.vy *= 0.7
+              // a.forceM(normalizedVectorTo.x,normalizedVectorTo.y,-forceMultiplier)
+              // b.forceM(normalizedVectorTo.x,normalizedVectorTo.y,forceMultiplier)
+
+              // dead.vx = dead.vx * 0
+              // alive.vx = alive.vx * 0
+              // debugger
+              world.queueUpdate(()=>{
+                dead.vx *= 0.7
+                dead.vy *= 0.7
+              })
+              
             }else{
               if(killed_a){
-                a.forceM(normalizedVectorTo.x,normalizedVectorTo.y,-forceMultiplier * 0.7)
-                // b.forceM(normalizedVectorTo.x,normalizedVectorTo.y,forceMultiplier/1.5)
-                b.vx *= 1/(1+forceMultiplier/1.6) // higher num = less friction
-                b.vy *= 1/(1+forceMultiplier/1.6)
+                  a.forceM(normalizedVectorTo.x,normalizedVectorTo.y,-forceMultiplier * 0.7)
+                world.queueUpdate(()=>{
+                  a.vx *= 0.7
+                  a.vy *= 0.7
+                  b.vx *= 1/(1+forceMultiplier/1.6) // higher num = less friction
+                  b.vy *= 1/(1+forceMultiplier/1.6)
+                })
               }
               if(killed_b){
-                // a.forceM(normalizedVectorTo.x,normalizedVectorTo.y,-forceMultiplier/1.5)
                 b.forceM(normalizedVectorTo.x,normalizedVectorTo.y,forceMultiplier * 0.7)
-                a.vx *= 1/(1+forceMultiplier/1.5)
-                a.vy *= 1/(1+forceMultiplier/1.5)
+                world.queueUpdate(()=>{
+                  b.vx *= 0.7
+                  b.vy *= 0.7
+                a.vx *= 1/(1+forceMultiplier/1.7)
+                a.vy *= 1/(1+forceMultiplier/1.7)
+              })
               }
             }
           }
@@ -4830,6 +4855,8 @@ class mobileDebug{
 
           if(options.clone){
             b.tags.add("noWallDamage")
+            b.tags.add("noAccelResetOnDeath")
+            b.tags.add("noBlood")
             b.tags.add("moves")
             b.movementVector = {x:0,y:0}
             b.updateFuncs.push((b,dt)=>{
@@ -4846,7 +4873,8 @@ class mobileDebug{
             if(los){
               b.target = p
             }
-            let target = b.target?b.target:b.home
+            const targeting = b.target
+            let target = targeting?b.target:b.home
 
             if( b.energy > 30 ){
               // jump towards player
@@ -4858,7 +4886,7 @@ class mobileDebug{
               let startTime = gameWorld.lastTime
               b.decel.setDynamic(()=>{let z=Math.min(0.01,0.000001*(gameWorld.lastTime-startTime));return({x:z,y:z})},"decel")
 
-              if( !b.tags.has("clone")){
+              if( targeting && !b.tags.has("clone")){
                 let nb = summon("slinger",b.x,b.y,{clone:true})
                 nb.hp = 1
                 nb.mass = b.mass * 0.8
@@ -6777,17 +6805,17 @@ document.addEventListener("keydown",(e)=>{
   }
 
   if(e.key === "r" && debug){
-    player.x = 600
+    player.x = 0
     // let rd = rand(-30)
     // player.y = 410 + rd
     // console.log(player.y)
     player.y = 406.61112009227026
-    player.vx = 2
+    player.vx = 3
     player.vy = -0.5
-    player.damageMultiplier = 0.1
-    test.dtLock = 30
+    player.damageMultiplier = 11110.1
+    test.dtLock = 16
 
-    // summon("normal",400,370)
+    summon("normal",400,370)
   }
 
 
