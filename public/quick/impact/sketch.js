@@ -4258,8 +4258,10 @@ function balls_collision_event(a,b,contact,oldManifold,manifold){
 
             } else if(killed_a && killed_b){
                world.queueUpdate(()=>{
-                dead.vx *= 0.7
-                dead.vy *= 0.7
+                a.vx *= 0.7
+                a.vy *= 0.7
+                b.vx *= 0.7
+                b.vy *= 0.7
               })
             } else { // only one ball died
             let dead = killed_a?a:b
