@@ -72,6 +72,85 @@ function readCSV(str,del=","){
   return(arr)
 }
 
+function savePoly(body){
+  const fixData = []
+  for (let fix = body.getFixtureList(); fix; fix = fix.getNext()) {
+    const shape = fix.getShape();
+    const type = shape.getType();
+    let shapeDef = { type };
+    shapeDef.vertices = shape.m_vertices.map(v => ({ x: v.x, y: v.y }));
+    fixData.push({
+        density: fix.getDensity(),
+        friction: fix.getFriction(),
+        restitution: fix.getRestitution(),
+        isSensor: fix.isSensor(),
+        shape: shapeDef
+      });
+  }
+
+    const pos = body.getPosition();
+    const linVel = body.getLinearVelocity();
+
+    return({
+      type: body.getType(), // 'static', 'dynamic', 'kinematic'
+      position: { x: pos.x, y: pos.y },
+      angle: body.getAngle(),
+      linearVelocity: { x: linVel.x, y: linVel.y },
+      angularVelocity: body.getAngularVelocity(),
+      linearDamping: body.getLinearDamping(),
+      angularDamping: body.getAngularDamping(),
+      gravityScale: body.getGravityScale(),
+      bullet: body.isBullet(),
+      fixedRotation: body.isFixedRotation(),
+      awake: body.isAwake(),
+      active: body.isActive(),
+      fixtures: fixData
+    })
+}
+
+
+function loadPoly(bData) {
+
+    const body = world.createBody({
+      type: bData.type,
+      position: Vec2(bData.position.x, bData.position.y),
+      angle: bData.angle,
+      linearVelocity: Vec2(bData.linearVelocity.x, bData.linearVelocity.y),
+      angularVelocity: bData.angularVelocity,
+      linearDamping: bData.linearDamping,
+      angularDamping: bData.angularDamping,
+      gravityScale: bData.gravityScale,
+      bullet: bData.bullet,
+      fixedRotation: bData.fixedRotation,
+      awake: bData.awake,
+      active: bData.active
+    });
+
+    for (const fData of bData.fixtures) {
+      let shape;
+      const s = fData.shape;
+
+      // if (s.type === 'polygon') {
+        shape = pl.Polygon(s.vertices.map(v => Vec2(v.x, v.y)));
+      // } else if (s.type === 'edge') {
+      //   shape = pl.Edge(Vec2(s.v1.x, s.v1.y), Vec2(s.v2.x, s.v2.y));
+      // } else if (s.type === 'circle') {
+      //   shape = pl.Circle(Vec2(s.center.x, s.center.y), s.radius);
+      // }
+
+      if (shape) {
+        body.createFixture({
+          shape: shape,
+          density: fData.density,
+          friction: fData.friction,
+          restitution: fData.restitution,
+          isSensor: fData.isSensor
+        });
+      }
+    }
+    return(body)
+}
+
 function snapshotWorld(world) {
   const bodiesData = [];
 
@@ -2448,8 +2527,8 @@ class ball extends entity{
 
 class poly extends entity{
   constructor(orig, verts, scale){
+    if(orig[2] !== undefined){orig[4] = orig[2]}
     orig[2] = 50
-    orig[4] = false
     super(...orig)
     this.scale = scale
     this.setVerts(verts)
@@ -2515,6 +2594,9 @@ class poly extends entity{
     }
 
     e.phys.setLinearVelocity(Vec2(e.physSaveState.vx*1000,e.physSaveState.vy*1000))
+
+
+    this.physSaveState2 = savePoly(this.phys)
   }
 
 get x() {
@@ -2551,6 +2633,30 @@ set y(z) {
 }
   
 
+  activate(){
+    if(this.tags.has("activated")){return}
+    entityList.activatedBalls.add(this)
+    this.tags.add("activated")
+
+    if(world.isLocked()){debugger}
+
+    if(this.phys){world.destroyBody(this.phys)}
+      // this.physInit(this)
+    this.phys = loadPoly(this.physSaveState2)
+    this.phys.setUserData(this)
+    // debugger
+  }
+
+  deactivate(){
+    entityList.activatedBalls.delete(this)
+    this.tags.delete("activated")
+    grid.addPt(this.x,this.y,()=>{this.activate()},grid.activationGrid)
+    
+    this.physSave(this.x,this.y,this.vx,this.vy)
+    this.physSaveState2 = savePoly(this.phys)
+    if(world.isLocked()){debugger} // !! cannot be locked or else body is not destroyed
+    world.destroyBody(this.phys)
+  }
 
   draw(){
     const body = this.phys
@@ -4857,6 +4963,9 @@ class mobileDebug{
           b.energenin = 0.01
           b.jumpPower = 2
 
+          b.hp *= 3
+          b.maxHp *= 3
+
           b.updateFuncs.push((b)=>{
             if(rand(0.1)){
               particleFuncs.radiance(b.x,b.y)
@@ -5360,7 +5469,7 @@ function trailify(ball,leng=50,mult=1){
 //initialize player @ip @player
 
   // entityList.player = new ball(-100,400,50,can.ctx,false)
-  entityList.player = new poly([-100,400],[-1, -1, 1, -1, -1, 1],40)
+  entityList.player = new poly([-100,400,false],[-1, -1, 1, -1, -1, 1],40)
   entityList.player.team = "player"
   entityList.player.mass = 1.2
   entityList.player.color = [129,62,41] //129 62 41
@@ -5418,6 +5527,7 @@ function trailify(ball,leng=50,mult=1){
   }
   function newBall(x,y,r=50,ctx=can.ctx){
     let b = new ball(x,y,r,ctx)
+    // let b = new poly([x,y],[-1, -1, 1, -1, -1, 1],40)
     entityList.balls.add(b)
     return(b)
   }
@@ -7430,6 +7540,10 @@ function generateLevels(x,y){
 // sparkle effect
 
 
+
+
+
+
 //// USAGE
 // dividers
 // dashers
@@ -7469,6 +7583,9 @@ function generateLevels(x,y){
 // player event migration to events dict
 // mob mechanics (ball remembers when it was hit by what, so no invulnerability in mobs)
 // height advantage
+// polygonal mob save
+// boomeranging
+
 
 //// BUGS / DEBUGGING / PHYSICS
 // acceleration triangle fix
