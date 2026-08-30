@@ -2573,10 +2573,19 @@ class poly extends entity{
       friction: -1000* Math.log(e.friction),
     });
 
-  const body = e.phys
-  const calculatedMass = body.getMass();
-  const localCenter = body.getLocalCenter();
-  const calculatedInertia = body.getInertia();
+    this.setMass(e)
+
+    e.phys.setLinearVelocity(Vec2(e.physSaveState.vx*1000,e.physSaveState.vy*1000))
+
+
+    this.physSaveState2 = savePoly(this.phys)
+  }
+
+  setMass(e){
+      const body = e.phys
+      const calculatedMass = body.getMass();
+      const localCenter = body.getLocalCenter();
+      const calculatedInertia = body.getInertia();
 
   // Prevent issues if the polygon has zero area
     if (calculatedMass > 0) {
@@ -2592,11 +2601,6 @@ class poly extends entity{
         I: scaledInertia * 2
       });
     }
-
-    e.phys.setLinearVelocity(Vec2(e.physSaveState.vx*1000,e.physSaveState.vy*1000))
-
-
-    this.physSaveState2 = savePoly(this.phys)
   }
 
 get x() {
@@ -2643,6 +2647,7 @@ set y(z) {
     if(this.phys){world.destroyBody(this.phys)}
       // this.physInit(this)
     this.phys = loadPoly(this.physSaveState2)
+    this.setMass(this)
     this.phys.setUserData(this)
     // debugger
   }
@@ -4404,8 +4409,8 @@ function balls_collision_event(a,b,contact,oldManifold,manifold){
                 world.queueUpdate(()=>{
                   b.vx *= 0.7
                   b.vy *= 0.7
-                a.vx *= 1/(1+forceMultiplier/1.7)
-                a.vy *= 1/(1+forceMultiplier/1.7)
+                a.vx *= 1/(1+forceMultiplier/1.5)
+                a.vy *= 1/(1+forceMultiplier/1.5)
               })
               }
             }
@@ -7538,6 +7543,7 @@ function generateLevels(x,y){
 // double wall penetration
 // energy regeneration on hit
 // sparkle effect
+// polygonal mob save
 
 
 
@@ -7583,7 +7589,6 @@ function generateLevels(x,y){
 // player event migration to events dict
 // mob mechanics (ball remembers when it was hit by what, so no invulnerability in mobs)
 // height advantage
-// polygonal mob save
 // boomeranging
 
 
@@ -7595,3 +7600,4 @@ function generateLevels(x,y){
 //  frame stutter lead: garbage collection
 //  cache (grid) // 
 // decel physics fix
+// mass loading (load/savePoly)
