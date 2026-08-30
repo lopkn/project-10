@@ -1838,6 +1838,8 @@ class entity{
     this.permanentDamageMultiplier = 1
     this.maxTakenDamagePercentage = 1.1 // so that overkills are allowed
 
+    this.bloodMultiplier = 1
+
 
 
     this.collisionInitiative = 1500
@@ -2143,7 +2145,7 @@ class entity{
   bloody(dmg,splatter,options){
     let spread = -0.6
     let spread2 = -0.3
-    let mult = 0.25
+    let mult = 0.25 * this.bloodMultiplier
 
     if(this.tags.has("noBlood")){return}
     if(this.tags.has("dissapearOnDeath")){
@@ -5125,6 +5127,7 @@ class mobileDebug{
         b.tags.add("noDefaultArc")
         b.bounce = 0.6
         b.friction = 0.95
+        b.bloodMultiplier = 0.3
         // b.onDeath.push((b)=>{
           // gameFuncs.explosion(b.x,b.y,b)
         // })
