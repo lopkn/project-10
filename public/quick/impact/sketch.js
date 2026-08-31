@@ -3269,7 +3269,61 @@ class effects{
   }
 }
 
+class trigger{
+  constructor(x,y){
+    this.x = x
+    this.y = y
+    this.type = "trigger"
+    this.chunk = grid.addPt(x,y,this,grid.miscGrid)
+    this.radius = 80
+    this.activated = false
+    this.oneShot = false
+    this.onEnter = ()=>{}
+    this.onExit = ()=>{}
 
+    // register activation so triggers are created only when nearby
+    grid.addPt(x,y,()=>{this.activate()},grid.activationGrid)
+  }
+
+  physInit(self){
+    // create the sensor body/fixture
+    if(this.phys){return}
+    this.phys = world.createBody({
+      type: 'static',
+      position: Vec2(this.x,this.y),
+      userData: this
+    })
+    this.phys.createFixture(pl.Circle(this.radius), { isSensor: true })
+  }
+
+  activate(){
+    if(this.activated) return
+    this.activated = true
+    if(world.isLocked()){
+      entityList.physDefer.push(this)
+      return
+    }
+    this.physInit(this)
+  }
+
+  remove(){
+    try{
+      if(this.phys){
+        world.destroyBody(this.phys)
+        this.phys = undefined
+      }
+    }catch(e){console.warn(e)}
+    if(this.chunk){ this.chunk.delete(this) }
+  }
+
+  // convenience to set callbacks/options
+  setOptions(opts={}){
+    if(opts.radius!==undefined) this.radius = opts.radius
+    if(opts.onEnter!==undefined) this.onEnter = opts.onEnter
+    if(opts.onExit!==undefined) this.onExit = opts.onExit
+    if(opts.oneShot!==undefined) this.oneShot = !!opts.oneShot
+  }
+}
 
 
 class item{
@@ -6085,7 +6139,11 @@ if(settings.RAF){
 // check cookies - if this is first game notify with help
 let storage = localStorage.getItem("played")
 if(storage){
-  storage = JSON.parse(storage)
+  try{
+    storage = JSON.parse(storage)
+  } catch {
+    setNewStorage() 
+  }
   storage.times++
   if(storage.lastDate > Date.now()+1000*60*60*24){
     starterNotify()
@@ -6093,10 +6151,15 @@ if(storage){
   storage.lastDate = Date.now()
   localStorage.setItem("played",JSON.stringify(storage))
 } else {
+  setNewStorage()
+}
+
+function setNewStorage(){
   starterNotify()
   storage = {times:1,lastDate:Date.now()}
   localStorage.setItem("played",JSON.stringify(storage))
 }
+
 function starterNotify(){
   setTimeout(()=>{
     notify("Jump by dragging in the opposite direction\nrelease mouse/finger to jump\nuse WASD to move slowly without using energy")
@@ -6492,6 +6555,46 @@ function planckInit(){
 }
 
 planckInit()
+
+// Sensor contact handlers for triggers
+world.on('begin-contact', (contact) => {
+  const fixA = contact.getFixtureA();
+  const fixB = contact.getFixtureB();
+  if(!fixA || !fixB) return;
+  try{
+    if(fixA.isSensor() || fixB.isSensor()){
+      const sensorFix = fixA.isSensor()?fixA:fixB
+      const otherFix = sensorFix === fixA?fixB:fixA
+      const sensorBody = sensorFix.getBody()
+      const otherBody = otherFix.getBody()
+      const sensorObj = sensorBody.getUserData()
+      const otherObj = otherBody.getUserData()
+      if(sensorObj && typeof sensorObj.onEnter === 'function'){
+        sensorObj.onEnter(otherObj, contact)
+        if(sensorObj.oneShot){ sensorObj.remove() }
+      }
+    }
+  }catch(e){console.warn(e)}
+})
+
+world.on('end-contact', (contact) => {
+  const fixA = contact.getFixtureA();
+  const fixB = contact.getFixtureB();
+  if(!fixA || !fixB) return;
+  try{
+    if(fixA.isSensor() || fixB.isSensor()){
+      const sensorFix = fixA.isSensor()?fixA:fixB
+      const otherFix = sensorFix === fixA?fixB:fixA
+      const sensorBody = sensorFix.getBody()
+      const otherBody = otherFix.getBody()
+      const sensorObj = sensorBody.getUserData()
+      const otherObj = otherBody.getUserData()
+      if(sensorObj && typeof sensorObj.onExit === 'function'){
+        sensorObj.onExit(otherObj, contact)
+      }
+    }
+  }catch(e){console.warn(e)}
+})
 
 function planckUpdate(dt){
 
