@@ -3274,15 +3274,15 @@ class trigger{
     this.x = x
     this.y = y
     this.type = "trigger"
-    this.chunk = grid.addPt(x,y,this,grid.miscGrid)
+    // this.chunk = grid.addPt(x,y,this,grid.miscGrid)
     this.radius = 80
+    this.chunk = grid.addSq(x-this.radius,y-this.radius,x+this.radius,y+this.radius,miscGrid)
     this.activated = false
     this.oneShot = false
     this.onEnter = ()=>{}
     this.onExit = ()=>{}
 
     // register activation so triggers are created only when nearby
-    grid.addPt(x,y,()=>{this.activate()},grid.activationGrid)
   }
 
   physInit(self){
