@@ -1507,6 +1507,7 @@ class grid{ //Spatial Hash Grid
   static entityGrid = {}
   static activationGrid = {}
   static miscGrid = {}
+  static triggerGrid = {}
 
   static findCell(x,y){
     return([Math.floor(x/this.size),Math.floor(y/this.size)])
@@ -3276,7 +3277,8 @@ class trigger{
     this.type = "trigger"
     // this.chunk = grid.addPt(x,y,this,grid.miscGrid)
     this.radius = 80
-    this.chunk = grid.addSq(x-this.radius,y-this.radius,x+this.radius,y+this.radius,miscGrid)
+    this.chunk = grid.addChunk(x-this.radius,y-this.radius,x+this.radius,y+this.radius,this,grid.triggerGrid)
+
     this.activated = false
     this.oneShot = false
     this.onEnter = ()=>{}
@@ -3306,6 +3308,15 @@ class trigger{
     this.physInit(this)
   }
 
+  deactivate(){
+    if(!this.activated) return
+    this.activated = false
+    if(this.phys){
+      world.destroyBody(this.phys)
+      this.phys = undefined
+    }
+  }
+
   remove(){
     try{
       if(this.phys){
@@ -3313,7 +3324,10 @@ class trigger{
         this.phys = undefined
       }
     }catch(e){console.warn(e)}
-    if(this.chunk){ this.chunk.delete(this) }
+
+    this.chunk.forEach((e)=>{
+      e.delete(this)
+    })
   }
 
   // convenience to set callbacks/options
@@ -3322,6 +3336,12 @@ class trigger{
     if(opts.onEnter!==undefined) this.onEnter = opts.onEnter
     if(opts.onExit!==undefined) this.onExit = opts.onExit
     if(opts.oneShot!==undefined) this.oneShot = !!opts.oneShot
+  }
+
+  draw(){
+    if(this.phys){
+      defaultPlanckDraw(this.phys)
+    }
   }
 }
 
@@ -4010,6 +4030,7 @@ class entityList{
 
   static activatedBalls = new Set()
   static activatedWalls = new Set()
+  static activatedTriggers = new Set()
 
   static destroyBody = []
   static destroy(){
@@ -6338,6 +6359,10 @@ setTimeout(()=>{
   gameWorld.tick()
 
 
+  // draw grid debug
+  // grid.draw()
+
+
   //draw items
 
   performance.mark('item-start')
@@ -6355,6 +6380,22 @@ setTimeout(()=>{
     }
   })
   performance.mark('item-end')
+
+  //draw triggers/trigger functions
+
+  let lastTriggers = entityList.activatedTriggers;
+  entityList.activatedTriggers = grid.getNearby(camera.pos.x,camera.pos.y,1,grid.triggerGrid)
+  entityList.activatedTriggers.forEach((e)=>{
+    if(!lastTriggers.has(e)){e.activate()}
+    e.draw()
+  })
+
+  lastTriggers.difference(entityList.activatedTriggers).forEach((e)=>{
+    e.deactivate()
+    console.log('deactivated')
+  })
+
+
 
 
   // we already activate everything around the player. but we should also activate around camera
@@ -6450,6 +6491,38 @@ function report(){
     };
   });
   return(r)
+}
+
+
+
+function defaultPlanckDraw(body,ctx=can.ctx){
+  // draw each fixture of body
+  for (let fixture = body.getFixtureList(); fixture; fixture = fixture.getNext()) {
+    const shape = fixture.getShape();
+    const type = shape.getType();
+
+    ctx.save();
+    ctx.translate(body.getPosition().x, body.getPosition().y);
+    ctx.rotate(body.getAngle());
+
+    if (type === 'circle') {
+      const radius = shape.getRadius();
+      ctx.beginPath();
+      ctx.arc(0, 0, radius, 0, 2 * Math.PI);
+      ctx.fill();
+    } else if (type === 'polygon') {
+      const vertices = shape.m_vertices;
+      ctx.beginPath();
+      ctx.moveTo(vertices[0].x, vertices[0].y);
+      for (let i = 1; i < vertices.length; i++) {
+        ctx.lineTo(vertices[i].x, vertices[i].y);
+      }
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    ctx.restore();
+  }
 }
 
 
@@ -7650,6 +7723,7 @@ function generateLevels(x,y){
 // energy regeneration on hit
 // sparkle effect
 // polygonal mob save
+// mass loading (load/savePoly)
 
 
 
@@ -7706,4 +7780,4 @@ function generateLevels(x,y){
 //  frame stutter lead: garbage collection
 //  cache (grid) // 
 // decel physics fix
-// mass loading (load/savePoly)
+// safely destroy bodies for triggers (safe destroy function)
