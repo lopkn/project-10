@@ -3271,12 +3271,12 @@ class effects{
 }
 
 class trigger{
-  constructor(x,y){
+  constructor(x,y,r=80){
     this.x = x
     this.y = y
     this.type = "trigger"
     // this.chunk = grid.addPt(x,y,this,grid.miscGrid)
-    this.radius = 80
+    this.radius = r
     this.chunk = grid.addChunk(x-this.radius,y-this.radius,x+this.radius,y+this.radius,this,grid.triggerGrid)
 
     this.activated = false
@@ -5439,7 +5439,13 @@ var gameFuncs = {
         gameFuncs.teleportFragment(x,y,entity)
     }
 
-  }
+  },
+
+
+
+
+  /// TRIGGER FUNCTIONS ///
+
 }
 
 
@@ -6385,6 +6391,7 @@ setTimeout(()=>{
 
   let lastTriggers = entityList.activatedTriggers;
   entityList.activatedTriggers = grid.getNearby(camera.pos.x,camera.pos.y,1,grid.triggerGrid)
+  can.ctx.fillStyle = "rgba(120,160,170,0.3)"
   entityList.activatedTriggers.forEach((e)=>{
     if(!lastTriggers.has(e)){e.activate()}
     e.draw()
@@ -6642,10 +6649,12 @@ world.on('begin-contact', (contact) => {
       const otherBody = otherFix.getBody()
       const sensorObj = sensorBody.getUserData()
       const otherObj = otherBody.getUserData()
+
       if(sensorObj && typeof sensorObj.onEnter === 'function'){
         sensorObj.onEnter(otherObj, contact)
         if(sensorObj.oneShot){ sensorObj.remove() }
       }
+
     }
   }catch(e){console.warn(e)}
 })
