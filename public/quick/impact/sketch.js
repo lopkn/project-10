@@ -52,6 +52,7 @@ function ranRadius(r){
   return(out)
 }
 
+var pnow = performance.now.bind(performance)
 
 
 let mouseX = 0
@@ -290,7 +291,7 @@ function mainLoop(){
   // if(settings.RAF && dt < 14*test.slower){requestAnimationFrame(mainLoop);return}
   gameWorld.frame += 1
   gameWorld.dt = dt
-  let date = Date.now()
+  let date = pnow()
   frameFuncs.forEach((e)=>{
     e(time,dt,date)
   })
@@ -1879,6 +1880,10 @@ class entity{
     this.bounce = 1
     this.elasticity = 0.9
 
+
+    this.contactingTriggers = new Set()
+
+
     this.resetAccelerations()
 
 
@@ -2248,7 +2253,7 @@ class entity{
     }
     // this.vx *= 0.7
     // this.vy *= 0.7
-    this.deathTime = Date.now()
+    this.deathTime = pnow()
     this.onDeath.forEach((f)=>{
       f(this)
     })
@@ -3287,6 +3292,13 @@ class trigger{
     // register activation so triggers are created only when nearby
   }
 
+  entered(x){
+    x.contactingTriggers.add(this)
+  }
+  exited(x){
+    x.contactingTriggers.delete(this)
+  }
+
   physInit(self){
     // create the sensor body/fixture
     if(this.phys){return}
@@ -3297,6 +3309,7 @@ class trigger{
     })
     this.phys.createFixture(pl.Circle(this.radius), { isSensor: true })
   }
+
 
   activate(){
     if(this.activated) return
@@ -4223,6 +4236,114 @@ class pauseMenu{
 }
 
 pauseMenu.init()
+
+
+class FrameQueue { // AI
+  constructor() {
+    this.heap = [];
+    this.currentTime = performance.now();
+  }
+
+  /**
+   * O(log N) insert.
+   * Returns a handle with an O(1) cancel() method.
+   */
+  TIL(delayMs, callback) {
+    const node = {
+      triggerAt: this.currentTime + delayMs,
+      callback,
+      cancelled: false,
+    };
+
+    this._push(node);
+
+    return {
+      cancel: () => {
+        // O(1) lazy cancellation. Zero array splicing.
+        node.cancelled = true;
+        node.callback = null; // Free reference for GC
+      },
+      isPending: () => !node.cancelled,
+    };
+  }
+
+  /**
+   * Synchronously fires due events.
+   * Call inside requestAnimationFrame.
+   */
+  tick(now) {
+    this.currentTime = now;
+
+    while (this.heap.length > 0 && this.heap[0].triggerAt <= now) {
+      const node = this._pop();
+
+      if (!node.cancelled) {
+        try {
+          node.callback(now);
+        } catch (err) {
+          console.error("FrameQueue callback error:", err);
+        }
+      }
+    }
+  }
+
+  // --- Binary Min-Heap Internals ---
+
+  _push(node) {
+    this.heap.push(node);
+    let idx = this.heap.length - 1;
+
+    while (idx > 0) {
+      const parentIdx = (idx - 1) >> 1;
+      const parent = this.heap[parentIdx];
+
+      if (node.triggerAt >= parent.triggerAt) break;
+
+      this.heap[idx] = parent;
+      idx = parentIdx;
+    }
+    this.heap[idx] = node;
+  }
+
+  _pop() {
+    const top = this.heap[0];
+    const bottom = this.heap.pop();
+
+    if (this.heap.length > 0) {
+      this.heap[0] = bottom;
+      this._sinkDown(0);
+    }
+    return top;
+  }
+
+  _sinkDown(idx) {
+    const length = this.heap.length;
+    const element = this.heap[idx];
+    const halfLength = length >> 1;
+
+    // Leaf nodes have index >= halfLength, so we can stop there
+    while (idx < halfLength) {
+      let leftIdx = (idx << 1) + 1;
+      let rightIdx = leftIdx + 1;
+      let swapIdx = leftIdx;
+
+      if (
+        rightIdx < length &&
+        this.heap[rightIdx].triggerAt < this.heap[leftIdx].triggerAt
+      ) {
+        swapIdx = rightIdx;
+      }
+
+      if (this.heap[swapIdx].triggerAt >= element.triggerAt) break;
+
+      this.heap[idx] = this.heap[swapIdx];
+      idx = swapIdx;
+    }
+    this.heap[idx] = element;
+  }
+}
+
+const FQ = new FrameQueue()
 
 class gameWorld{
     static gravity = 0.001
@@ -6233,7 +6354,7 @@ function seperateMainStart(){
     let time = performance.now()-settings.startDate
     let dt= (time-gameWorld.lastTime)
     gameWorld.lastTime = time
-    let date = Date.now()
+    let date = pnow()
     gamePhysicsUpdate(time,dt,date)
     engineComms.resetPhys()
   },16)
@@ -6263,7 +6384,7 @@ setTimeout(()=>{
 
 
   camera.scale += (destScale-camera.scale)*(0.02*dt/16) * (destScale>camera.scale?0.5:1)
-  // camera.scale = 0.9 + Math.sin(Date.now()*0.002) * 0.6
+  // camera.scale = 0.9 + Math.sin(pnow()*0.002) * 0.6
 
   camera.getDestination()
 
@@ -6363,6 +6484,7 @@ setTimeout(()=>{
   // update game TOs
 
   gameWorld.tick()
+  FQ.tick(gameWorld.lastTime)
 
 
   // draw grid debug
@@ -6650,7 +6772,7 @@ world.on('begin-contact', (contact) => {
       const sensorObj = sensorBody.getUserData()
       const otherObj = otherBody.getUserData()
 
-      if(sensorObj && typeof sensorObj.onEnter === 'function'){
+      if(sensorObj?.onEnter){
         sensorObj.onEnter(otherObj, contact)
         if(sensorObj.oneShot){ sensorObj.remove() }
       }
@@ -7030,7 +7152,7 @@ function controlBall(ball){
 }
 
 document.addEventListener("mousedown",(e)=>{
-  controller.mouseDownPos = {x:e.clientX,y:e.clientY,time:Date.now()}
+  controller.mouseDownPos = {x:e.clientX,y:e.clientY,time:pnow()}
   controller.mouseIsDown = true
 })
 
@@ -7203,10 +7325,10 @@ function touchHandler(event)
       let E = touches[touches.length-1]
       if(E.pageX < can.canvas.width/2){
         controller.activeTouches[E.identifier].type = "movement"
-        controller.movement = {down:true,x:E.clientX,y:E.clientY,time:Date.now(),dx:0,dy:0}
+        controller.movement = {down:true,x:E.clientX,y:E.clientY,time:pnow(),dx:0,dy:0}
       } else {
         controller.activeTouches[E.identifier].type = "jump"
-        controller.mouseDownPos = {x:E.clientX,y:E.clientY,time:Date.now()}
+        controller.mouseDownPos = {x:E.clientX,y:E.clientY,time:pnow()}
         controller.updateJump(E.clientX,E.clientY)
         controller.mouseIsDown = true
       }
