@@ -1,6 +1,7 @@
 node_modules/
 process.env
 disc/token.json
+old_stuff/disc/token.json
 errorlog.json
 public/debug/errorlog3.txt
 dynamics/errorlog3.txt
@@ -10,5 +11,7 @@ outputLog.log
 dynamics/outputLog.log
 disc2/config.json
 /disc2/config.json
+/old_stuff/disc2/config.json
+old_stuff/disc2/config.json
 small_servers/t2/data/
 CProject/keyReader/OUT.txt
