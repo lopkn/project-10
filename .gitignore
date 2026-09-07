@@ -15,3 +15,5 @@ disc2/config.json
 old_stuff/disc2/config.json
 small_servers/t2/data/
 CProject/keyReader/OUT.txt
+# macOS
+.DS_Store
