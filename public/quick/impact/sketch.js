@@ -7500,7 +7500,7 @@ function generateFloor(x,y){
     }
   }
 
-  let res = structureGenerator.buildOnWall(wall,ranarr("vase","flask1","flask2","crate1"),rand())
+  let res = structureGenerator.buildOnWall(wall,ranarr("vase","flask1","flask2","crate1"),rand(),{scale:rand()*0.5+0.7})
   while( res){
     res = structureGenerator.buildOnWall(wall,ranarr("vase","flask1","flask2","crate1","houseBase1"),rand())
   }
