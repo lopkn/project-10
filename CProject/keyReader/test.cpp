@@ -38,8 +38,8 @@
 //STUFF
 
 
-int keyboardEventX = 20;
-int mouseEventX = 4;
+int keyboardEventX = 4;
+int mouseEventX = 3;
 
 bool POLYGLOT = true;
 
@@ -349,13 +349,33 @@ void myHeatMap(int narr[scanRes]){
 
 
 void myXset();
+
 XColor * myXscan(int xstart, int ystart, int xwid = 20, int ywid = 20, int xskip = 1, int yskip = 1){
+	return(NULL);
+	// Add bounds checking
+	int screen_width = DisplayWidth(dpy, dfs);
+	int screen_height = DisplayHeight(dpy, dfs);
+	
+	// Clamp coordinates and dimensions
+	if(xstart < 0) xstart = 0;
+	if(ystart < 0) ystart = 0;
+	if(xstart + xwid*xskip > screen_width) xwid = (screen_width - xstart) / xskip;
+	if(ystart + ywid*yskip > screen_height) ywid = (screen_height - ystart) / yskip;
+	
+	if(xwid <= 0 || ywid <= 0) return NULL; // Invalid dimensions
+	
 	const int res = xwid*ywid;
-	XColor scanArr[res+xwid]; /// ??????!!!!!???
+	XColor scanArr[res+xwid];
 	static XColor *scanArrP = scanArr;
 	XImage *image;
-    image = XGetImage (dpy, XRootWindow (dpy, dfs), xstart,ystart, xwid*xskip, ywid*yskip, AllPlanes, XYPixmap);
-
+	
+	// Now safe to call XGetImage
+	image = XGetImage(dpy, XRootWindow(dpy, dfs), xstart, ystart, xwid*xskip, ywid*yskip, AllPlanes, ZPixmap);
+	
+	if(!image) {
+		std::cerr << "XGetImage failed\n";
+		return NULL;
+	}
 	for(int i = 0; i < xwid; i++){
 		for(int j = 0; j < ywid; j++){
 			scanArr[i+j*xwid] = getPix(i*xskip,j*yskip,image);
@@ -367,7 +387,27 @@ XColor * myXscan(int xstart, int ystart, int xwid = 20, int ywid = 20, int xskip
     return(scanArrP);
 }
 
+
+// XColor * myXscan(int xstart, int ystart, int xwid = 20, int ywid = 20, int xskip = 1, int yskip = 1){
+// 	const int res = xwid*ywid;
+// 	XColor scanArr[res+xwid]; /// ??????!!!!!???
+// 	static XColor *scanArrP = scanArr;
+// 	XImage *image;
+//     image = XGetImage (dpy, XRootWindow (dpy, dfs), xstart,ystart, xwid*xskip, ywid*yskip, AllPlanes, XYPixmap);
+
+// 	for(int i = 0; i < xwid; i++){
+// 		for(int j = 0; j < ywid; j++){
+// 			scanArr[i+j*xwid] = getPix(i*xskip,j*yskip,image);
+// 		}
+// 	}
+//     XFree(image);
+
+//     XQueryColors (dpy, XDefaultColormap(dpy, dfs), scanArr, res);
+//     return(scanArrP);
+// }
+
 bool myXscanReload(){
+	return(NULL);
 	const int xskip = 3;
 	const int yskip = 3;
 	// 3460,1930,35*3,20*3
@@ -903,13 +943,18 @@ void myDo(int x,std::string s1){
 
 	downs[x] = true;
 	if(POLYGLOT){
-		if(x == 22 && keyRepeats%3==0){
+
+
+		// if(x == 22 && keyRepeats%3==0){
+		// 	std::cout << "tset" << std::endl;
+		// 	system("tail /home/lopkn/.minecraft/logs/latest.log -n 1 | grep -P \"[^:]*$\" -o > /tmp/latestTxt.txt && cat /tmp/latestTxt.txt | ollama run lopknbot4 | tr \"\n\" \" \" | head -c 256 > OUT.txt && VAR=$(cat OUT.txt) && xdotool type \"$VAR\"");
+		// }
+		if(x == 14 && keyRepeats%10==0){
 			std::cout << "tset" << std::endl;
-			system("tail /home/lopkn/.minecraft/logs/latest.log -n 1 | grep -P \"[^:]*$\" -o > /tmp/latestTxt.txt && cat /tmp/latestTxt.txt | ollama run lopknbot4 | tr \"\n\" \" \" | head -c 256 > OUT.txt && VAR=$(cat OUT.txt) && xdotool type \"$VAR\"");
-		}
-		if(x == 14 && keyRepeats%3==0){
-			std::cout << "tset" << std::endl;
-			system("tail /home/lopkn/.minecraft/logs/latest.log -n 1 | grep -P \"[^:]*$\" -o > /tmp/latestTxt.txt && cat /tmp/latestTxt.txt | ollama run lopknbot3 | tr \"\n\" \" \" | head -c 256 > OUT.txt && VAR=$(cat OUT.txt) && xdotool type \"$VAR\"");
+			// system("tail /home/lopkn/.minecraft/logs/latest.log -n 1 | grep -P \"[^:]*$\" -o | tee /tmp/latestTxt.txt | tee /dev/stderr && cat /tmp/latestTxt.txt | ollama run lopknbot4 | tr \"\n\" \" \" | tee OUT.txt | tee /dev/stderr && VAR=$(cat OUT.txt) && xdotool type \"$VAR\" && echo \"===TYPED: $VAR===\"");
+			system("./mc.sh");
+			keyRepeats += 1;
+			return;
 		}
 		if(x == 36){
 			system("xdotool click 1 & ");
@@ -1101,11 +1146,11 @@ void myDo(int x,std::string s1){
 			keysounds = 0;
 		}
 	} else if(inputMode == 0){ // 13 07 2024
-		if(x == 29){
-			mast.autoReload = true;
-			system("xdotool mousedown 1");
-			myXscanReload();
-		}
+		// if(x == 29){
+		// 	mast.autoReload = true;
+		// 	system("xdotool mousedown 1");
+		// 	myXscanReload();
+		// } // commented 2026
 	}
 
 
@@ -1146,7 +1191,7 @@ void myDo(int x,std::string s1){
 				myPlay("AUDmanual.wav",s1);
 			}
 		} else if (x == 46){
-			scanr();
+			// scanr(); // turned off oct 9 2026
 		} else if(x == 20 && mast.Rjump){
 			
 			system("xdotool click 5 && sleep 0.05 && xdotool click 5 &");
@@ -1407,7 +1452,7 @@ void myScreenThread(){
     cr = cairo_create(surf);
 
     //actual colrender
-    bool confetti = true;
+    bool confetti = false;
     if(confetti){
     for(int i = 0; i < 150; i++){
     	myScreen.drawArr1[i].id = "test";
