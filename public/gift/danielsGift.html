@@ -96,8 +96,9 @@ a{color:#5b5bd6}
 .dbox button.grey{background:#ccc;color:#888;cursor:not-allowed}
 .sent{margin-bottom:12px;font-weight:600;font-size:14px}
 .sent select{display:inline-block;width:auto;margin:0 0 0 6px;padding:6px 8px}
-.nots{position:fixed;inset:0;display:flex;flex-direction:column;overflow:hidden;pointer-events:none;z-index:80;padding:6px}
-.notif{width:min(340px,92vw);background:#fff;border-radius:10px;box-shadow:0 4px 18px rgba(0,0,0,.28);padding:10px 12px;display:flex;gap:10px;align-items:flex-start;margin:4px;pointer-events:auto;animation:ni .25s;flex:none}
+.nots{position:fixed;inset:0;display:flex;justify-content:space-between;align-items:flex-start;overflow:hidden;pointer-events:none;z-index:80;padding:6px}
+.ncol{display:flex;flex-direction:column;width:340px;max-width:100%}
+.notif{width:auto;background:#fff;border-radius:10px;box-shadow:0 4px 18px rgba(0,0,0,.28);padding:10px 12px;display:flex;gap:10px;align-items:flex-start;margin:4px;pointer-events:auto;animation:ni .25s;flex:none}
 @keyframes ni{from{opacity:0;transform:translateY(-24px)}}
 .notif .ni{font-size:22px;line-height:1}
 .notif b{display:block;font-size:13px}
@@ -1049,16 +1050,17 @@ const NOTIFS=[
 ];
 function spam(){
   const box=document.createElement('div');box.className='nots';document.body.append(box);
+  const cols=Array.from({length:Math.max(1,Math.min(3,Math.floor(innerWidth/350)))},()=>{const c=document.createElement('div');c.className='ncol';box.append(c);return c});
   const L=NOTIFS.map(x=>[Math.random(),x]).sort((a,b)=>a[0]-b[0]).map(p=>p[1]).slice(0,40);
   let i=0;
   const id=setInterval(()=>{
     if(i>=L.length)return clearInterval(id);
     const [ic,t,b]=L[i++],n=document.createElement('div');
-    n.className='notif';n.style.alignSelf=['flex-start','center','flex-end'][Math.floor(Math.random()*3)];
+    n.className='notif';
     n.innerHTML='<div class="ni"></div><div><b></b><span></span></div><button class="nx">✕</button>';
     n.querySelector('.ni').textContent=ic;n.querySelector('b').textContent=t;n.querySelector('span').textContent=b;
     n.querySelector('.nx').onclick=()=>n.remove();
-    box.prepend(n);
+    cols[Math.floor(Math.random()*cols.length)].prepend(n);
   },280);
 }
 
