@@ -100,6 +100,8 @@ a{color:#5b5bd6}
 .ncol{display:flex;flex-direction:column;width:340px;max-width:100%}
 .notif{width:auto;background:#fff;border-radius:10px;box-shadow:0 4px 18px rgba(0,0,0,.28);padding:10px 12px;display:flex;gap:10px;align-items:flex-start;margin:4px;pointer-events:auto;animation:ni .25s;flex:none}
 @keyframes ni{from{opacity:0;transform:translateY(-24px)}}
+.cnotif{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:min(420px,88vw);z-index:90;font-size:15px;padding:16px 18px;animation:none}
+.cnotif b{font-size:15px}.cnotif span{font-size:14px}
 .notif .ni{font-size:22px;line-height:1}
 .notif b{display:block;font-size:13px}
 .notif span{font-size:12px;color:#555}
@@ -265,11 +267,14 @@ steps.push(()=>{
   html(`<h1>Choose a username</h1><p>This is how ${esc(NAME)} will be known to ${esc(NAME)}.</p>
   <form><label>Username<input id="f" autocomplete="off"></label><div id="err"></div><button>Continue</button></form>`);
   form(()=>{
-    const v=$('#f').value.trim(),n=tries('user');
+    const v=$('#f').value.trim();
     if(!v)return err('Username cannot be empty. Or full. Just not empty.');
     if(/\s/.test(v))return err('Spaces are reserved for premium members.');
-    if(n<=2)return err(`"${v}" is already taken${v.toLowerCase().includes(NAME.toLowerCase())?' (by you, in a previous life)':''}. Try ${v}_, ${v}1 or ${v}_real.`);
-    if(n<=4)return err(v.length<8?'Username too short (min 8).':'Username too long (max 7).');
+    S.seenU=S.seenU||{};
+    if(S.seenU[v.toLowerCase()])return err(S.seenU[v.toLowerCase()]);
+    const n=tries('user'),rej=m=>{S.seenU[v.toLowerCase()]=m;return err(m)};
+    if(n<=2)return rej(`"${v}" is already taken${v.toLowerCase().includes(NAME.toLowerCase())?' (by you, in a previous life)':''}. Try ${v}_, ${v}1 or ${v}_real.`);
+    if(n<=4)return rej(v.length<8?'Username too short (min 8).':'Username too long (max 7).');
     S.user=v+'_gift';
     toast(`We have decided your username is ${S.user}.`);
     next();
@@ -288,7 +293,7 @@ steps.push(()=>{
     if(!lp||!dom)return err('One of the halves is missing. We are not saying which.');
     if(!PROV.includes(dom))return err(`"${dom}" is not a supported provider. Supported: ${PROV.join(', ')}.`);
     if(!MONTHS.some(m=>lp.includes(m.toLowerCase())))return err('Email must contain the month you were born (3 letters is fine). We will verify this later.');
-    if(!S.dup){S.dup=true;return err(`${v} is already registered to ${NAME}. If this is you, please use a different email.`)}
+    if(v===S.dupMail||!S.dupMail){S.dupMail=v;return err(`${v} is already registered to ${NAME}. If this is you, please use a different email.`)}
     S.email=v;next();
   },1400);
 });
@@ -317,7 +322,7 @@ steps.push(()=>{
     const b=BAN_ORDER[S.bd%BAN_ORDER.length];
     if((d+y).includes(b)){S.bd++;return err(BAN[b]);}
     const yr=+y>26?1900+ +y:2000+ +y,age=new Date().getFullYear()-yr;
-    if(!S.age){S.age=true;maybeClear(inp);return err(`That would make you ${age}. You look ${age+7}. Please recheck your birthday.`)}
+    if(!S.age||S.ageBd===v){S.age=true;S.ageBd=v;maybeClear(inp);return err(`That would make you ${age}. You look ${age+7}. Please recheck your birthday.`)}
     S.b={m,d,y};
     html(`<h1>Confirm date of birth</h1><p>We lost the first one. Please enter it again, in the new format.</p>
     <form><label>Birthday <span class="small">format: YY-MMM-DDDD</span><input id="f" autocomplete="off" placeholder="YY-MMM-DDDD"></label><div id="err"></div><button>Continue</button></form>`);
@@ -333,6 +338,7 @@ steps.push(()=>{
 // ---------- 3b: age verification ----------
 const AGE_EXT=['.jpgx','.pngz','.gifv2','.heicc','.bitmapx','.selfie9000'];
 steps.push(()=>{
+  if(/Android|iPhone|iPad|iPod|Mobi/i.test(navigator.userAgent)||(navigator.maxTouchPoints>1&&matchMedia('(pointer:coarse)').matches&&innerWidth<900)){toast('Mobile detected. Age verification skipped. You look old enough.');return next()}
   let stream=null,rejected=false,ugly=null;
   const stop=()=>{if(stream)stream.getTracks().forEach(t=>t.stop());stream=null};
   S.cleanup=stop;
@@ -422,10 +428,24 @@ function forgot(){
   const clr=()=>{S.timers.forEach(t=>{clearInterval(t);clearTimeout(t)});S.timers=[]};
   const ask=(h,p,label,check,then)=>{
     clr();
-    html(`<h1>${h}</h1><p></p><form><label>${label}<input id="f" autocomplete="off"></label><div id="err"></div><button>Continue</button> <a href="#" id="nm" class="small">Never mind, I remember</a></form>`);
+    html(`<h1>${h}</h1><p></p><form><label>${label}<input id="f" autocomplete="off"></label><div id="err"></div><button>Continue</button> <a href="#" id="nm" class="small">Never mind, I remember</a> <a href="#" id="fg" class="small">I forgot this too</a></form>`);
     card.querySelector('p').textContent=p;
     $('#nm').onclick=e=>{e.preventDefault();go(7)};
+    $('#fg').onclick=e=>{e.preventDefault();lost()};
     form(()=>{const v=$('#f').value.trim(),e=check(v);if(e)return err(e);then(v)},900);
+  };
+  const guestGo=()=>{S.user='guest_'+NAME.toLowerCase();S.pw='guest';S.guest=true;toast('Continuing as guest. Some features are unavailable. All of them.');next()};
+  const lost=()=>{
+    clr();let t=20;
+    html(`<h1>You forgot that too?</h1><p>Impressive. We cannot recover an account from someone who remembers nothing. Please wait while we confirm that you are still a person.</p><div class="inbox" id="ib">Options unlock in <b id="cd">20</b>s…</div>`);
+    const id=setInterval(()=>{
+      t--;$('#cd').textContent=t;
+      if(t>0)return;
+      clearInterval(id);
+      $('#ib').innerHTML=`Nothing left to ask you. <div class="row" style="margin-top:10px"><button type="button" id="gs">Continue as guest</button></div>`;
+      $('#gs').onclick=guestGo;
+    },1000);
+    S.timers.push(id);
   };
   const user=()=>ask('Forgot your password?','Enter your username. We promise not to tell you what it is.','Username',v=>{
     if(v!==S.user)return tries('fu')>1?`No such user. Did you mean "${S.user}"? We are not supposed to say.`:'No such user.';
@@ -459,7 +479,7 @@ function forgot(){
       clearInterval(id);
       $('#ib').innerHTML=`Still nothing? Emails to that address may be delayed, lost, or imaginary.<div class="row" style="margin-top:10px"><button type="button" id="rd">Try a different email</button><button type="button" class="ghost" id="gs">Continue as guest</button></div>`;
       $('#rd').onclick=redo;
-      $('#gs').onclick=()=>{S.user='guest_'+NAME.toLowerCase();S.pw='guest';S.guest=true;toast('Continuing as guest. Some features are unavailable. All of them.');next()};
+      $('#gs').onclick=guestGo;
     },1000);
     S.timers.push(id);
   };
@@ -935,7 +955,7 @@ function donate(){
     $('#cp').onclick=()=>{try{navigator.clipboard.writeText(DONATE_ADDR).then(()=>toast('Address copied.'),()=>toast('Copy failed. Use your eyes.'))}catch(e){toast('Copy failed. Use your eyes.')}};
     $('#dn2').onclick=()=>{
       view('<p>Verifying transaction…</p><div class="throb"></div>');
-      setTimeout(()=>{view('<p>No transaction found. Thank you for the thought anyway. Financially, the thought counts for $0.</p>');closeBtn()},3000);
+      setTimeout(()=>{view('<p>No transaction found. Thank you for the thought anyway. Financially, the thought counts for $0.</p><p class="small">Returning you to the donation page…</p>');setTimeout(()=>{if(m.isConnected)ask()},3500)},3000);
     };
   };
   const ask=()=>{
@@ -1048,6 +1068,22 @@ const NOTIFS=[
  ['🎟️','Mega Millions Official (not fake)','You have been selected to win. Send us your bank details to win.'],
  ['🎁','GiftPortal','Your gift is on its way. Estimated arrival: never.']
 ];
+const CENTER=[
+ ['🌍','Raw Earth Foundation','We are a part of the Raw earth foundation. We believe in the quality of products, and the earth core sure as fuck is not medium rare like we wanted. #RawMyAss'],
+ ['📰','BREAKING NEWS','Local children drowned when attempting dangerous sports such as piano'],
+ ['💬','Mohammad','Mohammad has sent you a message request: Hi'],
+ ['⚔️','Clan Invite','Hitler has invited you to join his clan'],
+ ['🍟','McDonalds#429288 Australia','New prostitution positions available at McDonalds#429288 Australia'],
+ ['🎪','Event','The KKK and Hitler has declared clan wars!'],
+ ['🏦','Your bank','Your account has been sold to a man named Greg. Greg says hi.'],
+ ['🚑','Local hospital','Your kidney is available for pickup. Please stop leaving it in the lobby.'],
+ ['🐔','KFC Rewards','Your 3 free chickens have escaped. Reward points deducted.'],
+ ['🕯️','Unknown number','We know what you did at 3:47am last Tuesday. Reply YES to confirm it was you.'],
+ ['🧾','IRS (probably)','You owe 4 bitcoins and one (1) cousin. Pay within 10 minutes.'],
+ ['👶','Parenting Weekly','Congratulations! You are 9 weeks pregnant. Terms apply.'],
+ ['☠️','Antivirus Plus','Your computer has 14,000 viruses. 13,998 are Mohammad. Click to remove Mohammad.'],
+ ['🙏','The Government','Please stop. Signed, everyone.'],
+];
 function spam(){
   const box=document.createElement('div');box.className='nots';document.body.append(box);
   const cols=Array.from({length:Math.max(1,Math.min(3,Math.floor(innerWidth/350)))},()=>{const c=document.createElement('div');c.className='ncol';box.append(c);return c});
@@ -1061,7 +1097,18 @@ function spam(){
     n.querySelector('.ni').textContent=ic;n.querySelector('b').textContent=t;n.querySelector('span').textContent=b;
     n.querySelector('.nx').onclick=()=>n.remove();
     cols[Math.floor(Math.random()*cols.length)].prepend(n);
-  },280);
+  },140);
+  let k=0;
+  const cid=setInterval(()=>{
+    if(k>=CENTER.length)return clearInterval(cid);
+    const [ic,t,b]=CENTER[k++],n=document.createElement('div');
+    n.className='notif cnotif';
+    n.innerHTML='<div class="ni"></div><div><b></b><span></span></div><button class="nx">✕</button>';
+    n.querySelector('.ni').textContent=ic;n.querySelector('b').textContent=t;n.querySelector('span').textContent=b;
+    n.querySelector('.nx').onclick=()=>n.remove();
+    n.style.marginTop=(k*6)+'px';n.style.marginLeft=(k*6)+'px';
+    document.body.append(n);
+  },210000);
 }
 
 // ---------- TOS comprehension quiz (2 min after the first lootbox roll, repeats until passed) ----------
