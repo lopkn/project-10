@@ -700,7 +700,10 @@ function lootbox(){
       if(!drag)return;
       const {i,g}=drag;drag=null;g.remove();
       const can=$('#can'),r=can&&can.getBoundingClientRect();
-      if(r&&e.clientX>=r.left-6&&e.clientX<=r.right+6&&e.clientY>=r.top-6&&e.clientY<=r.bottom+6){
+      if(!(r&&e.clientX>=r.left-6&&e.clientX<=r.right+6&&e.clientY>=r.top-6&&e.clientY<=r.bottom+6)){
+        card.querySelectorAll('.slot.drag').forEach(x=>x.classList.remove('drag'));return;
+      }
+      {
         const it=inv[i];
         if(it[1]){toast(`"${it[0]}" is bound to your account and cannot be discarded.`);return draw()}
         inv.splice(i,1);discards++;
@@ -714,15 +717,16 @@ function lootbox(){
     const draw=()=>{
       const empties=12-inv.reduce((a,it)=>a+(it.bool?2:1),0);
       const msg=added?'Boolean added to inventory (12/12).':discards===0?'Your inventory is full (12/12). Drag an item into the trash can to make room.':'⚠ Boolean (Yes) is overweight and requires 2 inventory spaces. Discard another item.';
-      html(`<h1>You got: <span style="color:${c}">Boolean</span> <small>(${esc(res.name)}, ${res.rar[0]})</small></h1>
+      card.innerHTML=(`<h1>You got: <span style="color:${c}">Boolean</span> <small>(${esc(res.name)}, ${res.rar[0]})</small></h1>
       <p${discards===1&&!added?' style="color:#c62f3b;font-weight:600"':''}>${msg}</p>
       <div class="invwrap" id="iw"><div class="inv">${inv.map((it,i)=>it.bool?'<div class="slot big new">Boolean<br>(2 spaces)</div>':`<div class="slot" data-i="${i}">${esc(it[0])}</div>`).join('')}${'<div class="slot empty"></div>'.repeat(empties)}</div>${added?'':'<div id="can">🗑️</div>'}</div>
       ${added?'<button id="ct">Continue</button>':''}`);
       if(added)return $('#ct').onclick=()=>{document.removeEventListener('pointermove',mv);document.removeEventListener('pointerup',up);whack()};
       const iw=$('#iw');
       if(!canPos)canPos={x:iw.clientWidth-CS-4,y:iw.clientHeight-CS-4};
-      $('#can').style.transition=discards===0?'left .5s ease,top .5s ease':'left .16s ease-out,top .16s ease-out';
-      setCan();
+      const cn=$('#can');cn.style.transition='none';
+      setCan();void cn.offsetWidth;
+      cn.style.transition=discards===0?'left .5s ease,top .5s ease':'left .16s ease-out,top .16s ease-out';
       card.querySelectorAll('.slot[data-i]').forEach(sl=>sl.onpointerdown=e=>{
         e.preventDefault();
         const i=+sl.dataset.i,g=document.createElement('div');g.className='slot ghost';g.textContent=inv[i][0];document.body.append(g);
@@ -845,7 +849,7 @@ steps.push(()=>{
 // ---------- 9b: delivery date picker ----------
 steps.push(()=>{
   const now=new Date(),Y0=now.getFullYear();
-  const F=[{k:'Year',gen:()=>Y0-3+Math.floor(Math.random()*7)},{k:'Month',gen:()=>1+Math.floor(Math.random()*15)},{k:'Day',gen:()=>1+Math.floor(Math.random()*35)}];
+  const F=[{k:'Year',gen:()=>Y0-3+Math.floor(Math.random()*7)},{k:'Month',gen:()=>1+Math.floor(Math.random()*15)},{k:'Day',gen:()=>-30+Math.floor(Math.random()*71)}];
   const v=[null,null,null];
   html(`<h1>When do you want to receive your gift?</h1><p>Each number must be produced by the random number generator. Manual entry is not supported.</p>
   <div class="dp">${F.map((f,i)=>`<div class="dpc"><div class="small">${f.k}</div><b id="n${i}">—</b><button type="button" data-i="${i}">🎲 Generate</button></div>`).join('')}</div>
@@ -863,6 +867,7 @@ steps.push(()=>{
     if(bl>=0)return err(`${F[bl].k} has not been generated yet. Click the dice.`);
     const [y,m,d]=v,txt=`${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     if(m<1||m>12)return err(`Month ${m} does not exist. There are 12 months. Roll again.`);
+    if(d<1)return err(`Day ${d} does not exist. Days start at 1. Roll again.`);
     const dt=new Date(y,m-1,d);
     if(dt.getMonth()!==m-1)return err(`${txt} is not a real date. Roll again.`);
     if(dt<=new Date(Y0,now.getMonth(),now.getDate()))return err(`${txt} is in the past (or today). Time travel is not supported on your plan.`);
@@ -876,10 +881,10 @@ steps.push(()=>{
   html(`<h1>Creating your account…</h1><p id="msg">Contacting gift server…</p>
   <div class="pbar"><i id="pb"></i></div><div class="small">Position in queue: <span id="q">1284</span></div>`);
   let q=1284;
-  const seq=[[0,8,'Contacting gift server…'],[1500,31,`Asking ${NAME}'s friends if ${NAME} deserves it…`],[3000,64,'Removing 2s from everything…'],[4500,99,'Almost there…'],[7000,99,'Still almost there…'],[9000,12,'Oh no. Starting over…'],[10500,100,'Done!']];
+  const seq=[[0,8,'Contacting gift server…'],[3000,31,`Asking ${NAME}'s friends if ${NAME} deserves it…`],[6000,64,'Removing 2s from everything…'],[9000,99,'Almost there…'],[29000,99,'Still almost there…'],[45000,12,'Oh no. Starting over…'],[54000,100,'Done!']];
   seq.forEach(([ms,p,m])=>later(()=>{$('#pb').style.width=p+'%';$('#msg').textContent=m;if(m.startsWith('Oh'))q=47},ms));
   every(()=>{q=Math.max(0,q-Math.floor(Math.random()*40));$('#q').textContent=q},150);
-  later(()=>{card.insertAdjacentHTML('beforeend','<button id="pc">Continue</button>');$('#pc').onclick=next},11000);
+  later(()=>{card.insertAdjacentHTML('beforeend','<button id="pc">Continue</button>');$('#pc').onclick=next},55000);
 });
 
 // ---------- 11: done ----------
@@ -892,7 +897,46 @@ steps.push(()=>{
     a.href=URL.createObjectURL(new Blob([]));a.download=n;
     document.body.append(a);a.click();a.remove();
   },1500+i*1200));
+  later(fees,Q.has('dev')?15000:600000);
 });
+
+function fees(){
+  const E=n=>'€'+n.toFixed(2);
+  const L=[
+    ['Account creation fee',30,''],
+    ['Gift fee',0,'because we are super generous'],
+    ['Delivery fee',412.5,'includes 3 couriers, 1 camel and an unpaid intern'],
+    ['Non-optional service fee',19.99,''],
+    ['Fee processing fee',4.2,''],
+    ['Fee viewing fee',2,''],
+    ['Paper-free billing fee',3,''],
+    ['Boolean storage fee',8,''],
+    ['Birthday surcharge',25,''],
+    ['Currency conversion fee',6,'EUR to EUR'],
+    ['Inflation adjustment',7.77,''],
+    ['Loyalty fee',5,'for staying on this page for 10 minutes'],
+  ];
+  const sub=L.reduce((a,x)=>a+x[1],0),tax=sub*.23,cp=sub*.5,tot0=sub+tax+cp,fu=tot0*.99,tot=tot0+fu;
+  const rows=[...L,['Tax (23%, on everything)',tax,''],['Coupon: -50% off',cp,''],['First time user discount: -99%',fu,'']];
+  card.innerHTML='<h1>Gift checkout</h1><p>Loading your fees…</p><div id="fl"></div><div class="throb" id="ft" style="margin:16px auto;width:28px;height:28px;border-width:4px"></div>';
+  const fl=$('#fl');let i=0;
+  const id=setInterval(()=>{
+    if(i>=rows.length){
+      clearInterval(id);$('#ft').remove();
+      const d=document.createElement('div');
+      d.innerHTML='<div class="inbox" style="font-size:16px"><b>Total: <span id="tt"></span></b></div><button id="pay">Pay now</button>';
+      card.append(d);$('#tt').textContent=E(tot);
+      $('#pay').onclick=()=>{toast('Payment failed: your euros are not accepted in euros. Please try Bitcoin.');const a=document.createElement('div');a.className='small';a.style.marginTop='10px';a.textContent='Send to: '+DONATE_ADDR;if(!card.querySelector('.addr'))a.className='small addr';d.append(a)};
+      return;
+    }
+    const [n,v,note]=rows[i++],r=document.createElement('div');
+    r.style.cssText='display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid #eee;font-size:14px';
+    const l=document.createElement('span'),m=document.createElement('b');
+    l.textContent=n+(note?' ('+note+')':'');m.textContent=E(v);
+    r.append(l,m);fl.append(r);
+  },1200);
+  S.timers.push(id);
+}
 
 function confetti(){
   const c=$('#cf');c.width=innerWidth;c.height=innerHeight;const x=c.getContext('2d');
@@ -1075,6 +1119,7 @@ const CENTER=[
  ['⚔️','Clan Invite','Hitler has invited you to join his clan'],
  ['🍟','McDonalds#429288 Australia','New prostitution positions available at McDonalds#429288 Australia'],
  ['🎪','Event','The KKK and Hitler has declared clan wars!'],
+ ['🚨','Neighbourhood Alert','Local rapist seeking refuge'],
  ['🏦','Your bank','Your account has been sold to a man named Greg. Greg says hi.'],
  ['🚑','Local hospital','Your kidney is available for pickup. Please stop leaving it in the lobby.'],
  ['🐔','KFC Rewards','Your 3 free chickens have escaped. Reward points deducted.'],
