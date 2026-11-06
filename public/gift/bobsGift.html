@@ -1,0 +1,1207 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gift Portal</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font:15px/1.5 system-ui,sans-serif;background:#f4f5fb;color:#1c1e2b;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding-bottom:90px}
+header,main{width:100%;max-width:520px;padding:16px 16px 0}
+.brand{font-weight:700;font-size:18px;display:flex;justify-content:space-between}
+.bar{height:6px;background:#e1e3f0;border-radius:3px;margin:10px 0 4px;overflow:hidden}
+.bar i{display:block;height:100%;background:#5b5bd6;width:0;transition:width .8s}
+.meta{display:flex;justify-content:space-between;font-size:12px;color:#777}
+#card{background:#fff;border-radius:14px;padding:28px;box-shadow:0 4px 24px rgba(40,40,100,.08)}
+#card.in{animation:fi .25s}
+@keyframes fi{from{opacity:0;transform:translateY(6px)}}
+h1{font-size:22px;margin:0 0 6px}
+p{color:#555;margin:0 0 16px}
+label{display:block;font-weight:600;font-size:13px;margin-bottom:12px}
+input,select{display:block;width:100%;margin-top:4px;padding:10px 12px;border:1px solid #cfd2e6;border-radius:8px;font:inherit}
+input[type=range]{padding:0}
+input:focus,select:focus{outline:2px solid #5b5bd6;border-color:transparent}
+button{background:#5b5bd6;color:#fff;border:0;border-radius:8px;padding:10px 18px;font:inherit;font-weight:600;cursor:pointer}
+button:disabled{opacity:.45;cursor:not-allowed}
+button.ghost{background:#eceefb;color:#333}
+.row{display:flex;gap:10px}
+#err{color:#c62f3b;min-height:20px;font-size:13px;margin:0 0 10px}
+.shake{animation:sh .3s}
+@keyframes sh{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.rules{list-style:none;padding:0;margin:0 0 14px}
+.rules li{padding:8px 10px;border-radius:8px;margin-bottom:6px;font-size:13px;background:#fdecee;color:#8e2430}
+.rules li.ok{background:#e8f6ee;color:#1e6b3c}
+.sub{display:block;font-size:11px;opacity:.75}
+.small{font-size:11px;color:#999;margin-bottom:8px}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px}
+.tile{aspect-ratio:1;display:flex;align-items:center;justify-content:center;text-align:center;font-size:13px;background:#f0f1fa;border:2px solid transparent;border-radius:8px;cursor:pointer;padding:4px;user-select:none}
+.tile.on{border-color:#5b5bd6;background:#e4e4fb}
+.terms{height:130px;overflow:auto;border:1px solid #cfd2e6;border-radius:8px;padding:10px;font-size:11px;color:#666;margin-bottom:8px}
+.terms div{margin-bottom:6px}
+.inbox{border:1px dashed #b9bde0;border-radius:8px;padding:10px;font-size:13px;margin-bottom:12px;background:#fafaff}
+.pbar{height:14px;background:#e1e3f0;border-radius:7px;overflow:hidden;margin:14px 0 8px}
+.pbar i{display:block;height:100%;width:0;background:#5b5bd6;transition:width 1.2s}
+#stars span{font-size:28px;cursor:pointer;color:#e0a800}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;z-index:50}
+.modal .box{background:#fff;border-radius:12px;padding:22px;max-width:340px;width:90%}
+#toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1c1e2b;color:#fff;padding:9px 16px;border-radius:8px;font-size:13px;opacity:0;transition:opacity .25s;pointer-events:none;z-index:60;max-width:90%;text-align:center}
+#toast.on{opacity:1}
+#cookie{position:fixed;bottom:0;left:0;right:0;background:#1c1e2b;color:#fff;padding:12px 16px;display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;font-size:13px;z-index:40}
+#cookie button{padding:6px 12px;font-size:13px}
+#support{position:fixed;right:14px;bottom:70px;z-index:30;border-radius:20px}
+#cf{position:fixed;inset:0;pointer-events:none;z-index:70}
+a{color:#5b5bd6}
+.reelw{position:relative;overflow:hidden;border:1px solid #cfd2e6;border-radius:8px;margin-bottom:14px}
+.reel{display:flex}
+.cell{flex:none;width:110px;height:84px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#f7f8fd;border-right:1px solid #e5e7f3;font-size:14px;text-align:center}
+.cell small{font-size:11px;color:#777}
+.mark{position:absolute;left:50%;top:0;bottom:0;width:2px;background:#c62f3b}
+.inv{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px}
+.slot{min-height:54px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:11px;background:#f0f1fa;border:1px solid #cfd2e6;border-radius:8px;padding:3px;cursor:pointer}
+.slot.new{background:#e8f6ee;border-color:#3aa55d}
+.arena{position:relative;height:300px;border:1px solid #cfd2e6;border-radius:8px;overflow:hidden;background:#f7f8fd;user-select:none}
+.mole{position:absolute;width:64px;height:34px;padding:0;color:#fff;font-weight:700}
+.mole.y{background:#2fa84f}
+.mole.n{background:#c62f3b}
+.mole{transition:opacity .9s,transform .9s}
+.mole.ring{background:transparent;border:3px solid;pointer-events:none;color:transparent;transform:scale(1.1)}
+.mole.y.ring{background:transparent;border-color:#2fa84f}
+.mole.n.ring{background:transparent;border-color:#c62f3b}
+.mole.ring.fade{opacity:0;transform:scale(1.5)}
+.invwrap{position:relative;margin-bottom:12px;padding-bottom:120px}
+.invwrap .inv{margin-bottom:0}
+#can{position:absolute;width:56px;height:56px;font-size:34px;display:flex;align-items:center;justify-content:center;background:#fff;border:2px dashed #cfd2e6;border-radius:12px;user-select:none}
+.slot{touch-action:none;cursor:grab;user-select:none}
+.slot.empty{border-style:dashed;background:transparent;cursor:default}
+.slot.big{grid-column:span 2;cursor:default}
+.slot.drag{opacity:.3}
+.slot.ghost{position:fixed;width:80px;pointer-events:none;z-index:90;background:#e4e4fb;opacity:.9}
+.throb{width:48px;height:48px;margin:40px auto;border:5px solid #e1e3f0;border-top-color:#5b5bd6;border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hexs{font:11px monospace;color:#999;word-break:break-all;height:50px;overflow:hidden;margin-top:8px}
+.don{z-index:100}
+.dbox{background:#fff;max-width:480px;width:92%;border-top:6px solid #c62f3b;border-radius:4px;padding:24px;font:15px/1.55 Georgia,serif;position:relative;max-height:90vh;overflow:auto}
+.dbox h2{font-size:24px;margin:0 0 10px}
+.dbox p{color:#333}
+.dx{position:absolute;right:8px;top:8px;background:none;color:#777;font-size:18px;padding:2px 8px}
+.amts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0}
+.amts button{background:#fff;color:#1c1e2b;border:1px solid #cfd2e6}
+.amts button.sel{background:#fdecee;border-color:#c62f3b;color:#c62f3b}
+.dbox .go{background:#c62f3b}
+.addr{font:13px monospace;word-break:break-all;background:#f4f5fb;border:1px dashed #b9bde0;border-radius:6px;padding:10px;margin:10px 0}
+.roast p{margin:0 0 10px;animation:fi .4s}
+.dbox label{font-weight:400;font-size:14px;margin-bottom:6px;cursor:pointer}
+.dbox input[type=radio]{display:inline;width:auto;margin:0 8px 0 0}
+.dbox .qq{font-weight:700;margin:12px 0 4px}
+.dbox button.grey{background:#ccc;color:#888;cursor:not-allowed}
+.sent{margin-bottom:12px;font-weight:600;font-size:14px}
+.sent select{display:inline-block;width:auto;margin:0 0 0 6px;padding:6px 8px}
+.nots{position:fixed;inset:0;display:flex;justify-content:space-between;align-items:flex-start;overflow:hidden;pointer-events:none;z-index:80;padding:6px}
+.ncol{display:flex;flex-direction:column;width:340px;max-width:100%}
+.notif{width:auto;background:#fff;border-radius:10px;box-shadow:0 4px 18px rgba(0,0,0,.28);padding:10px 12px;display:flex;gap:10px;align-items:flex-start;margin:4px;pointer-events:auto;animation:ni .25s;flex:none}
+@keyframes ni{from{opacity:0;transform:translateY(-24px)}}
+.cnotif{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:min(420px,88vw);z-index:90;font-size:15px;padding:16px 18px;animation:none}
+.cnotif b{font-size:15px}.cnotif span{font-size:14px}
+.notif .ni{font-size:22px;line-height:1}
+.notif b{display:block;font-size:13px}
+.notif span{font-size:12px;color:#555}
+.notif .nx{margin-left:auto;background:none;color:#999;padding:0 4px;font-size:14px}
+.dial{display:flex;gap:4px;justify-content:center;margin:14px 0 6px}
+.dg{display:flex;flex-direction:column;align-items:center;gap:2px}
+.dg button{padding:0 8px;font-size:11px;line-height:18px}
+.dg b{font-size:22px;width:30px;text-align:center;border:1px solid #cfd2e6;border-radius:6px;padding:2px 0}
+.dp{display:flex;gap:10px;margin:14px 0}
+.dpc{flex:1;text-align:center;border:1px solid #cfd2e6;border-radius:10px;padding:10px}
+.dpc b{display:block;font-size:30px;margin:6px 0}
+.dpc button{padding:6px 8px;font-size:13px}
+html.busy,html.busy *{cursor:wait!important}
+html.busy2,html.busy2 *{cursor:progress!important}
+footer{font-size:11px;color:#999;margin-top:16px;text-align:center}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><span id="brand"></span><span style="font-weight:400;font-size:12px;color:#777">Language: English (Pirate)</span></div>
+  <div class="bar"><i id="bar"></i></div>
+  <div class="meta"><span id="step"></span><span id="sess"></span></div>
+</header>
+<main>
+  <div id="card"></div>
+  <footer>© 2003 GiftPortal™ · Best viewed in Netscape Navigator 4 · All rights reserved, some rights lost</footer>
+</main>
+<div id="toast"></div>
+<canvas id="cf"></canvas>
+<button id="support" class="ghost">💬 Support</button>
+<div id="cookie">
+  <span>We use cookies. All of them. Also yours.</span>
+  <button id="ck-a">Accept all (recommended)</button>
+  <button id="ck-r" class="ghost">Reject all</button>
+  <button id="ck-m" class="ghost">Manage</button>
+</div>
+
+<script>
+// ===== CONFIG =====
+const NAME  = "Daniel";                                   // person being gifted
+const GIFT  = "A very real gift. Details to be delivered in person."; // what gets revealed at the end
+const DONATE_ADDR = "1CDdsotnzKvX1W9iKuZ5QL3LN3iJPwYqUr";    // bitcoin address shown in the donation popup
+const GIFT_NOTE = `Happy birthday, ${NAME}!`;               // headline on the reveal
+// ==================
+
+const MONTHS=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+const S={n:{},timers:[],rev:0};
+const $=s=>document.querySelector(s);
+const card=$('#card');
+const steps=[];
+let cur=-1;
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const rev=s=>[...s].reverse().join('');
+const tries=k=>S.n[k]=(S.n[k]||0)+1;
+const every=(fn,ms)=>S.timers.push(setInterval(fn,ms));
+const later=(fn,ms)=>S.timers.push(setTimeout(fn,ms));
+
+document.title=`${NAME}'s Gift Portal`;
+$('#brand').textContent=`🎁 GiftPortal™ — ${NAME} Edition`;
+
+function html(h){card.innerHTML=h;card.classList.remove('in');void card.offsetWidth;card.classList.add('in')}
+function err(m){const e=$('#err');if(!e)return;e.textContent=m;e.classList.remove('shake');void e.offsetWidth;e.classList.add('shake')}
+let tt;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2600)}
+function maybeClear(i){if(Math.random()<.35){i.value='';toast('Field cleared for your safety.')}}
+function form(fn,delay){
+  const f=card.querySelector('form');
+  f.onsubmit=e=>{
+    e.preventDefault();
+    if(!delay)return fn();
+    const b=f.querySelector('button:not([type=button])');const o=b.textContent;
+    b.disabled=true;b.textContent='Checking…';
+    setTimeout(()=>{b.disabled=false;b.textContent=o;fn()},delay);
+  };
+  const i=f.querySelector('input,select');if(i&&i.type!=='range')i.focus();
+}
+function noPaste(i){i.onpaste=e=>{e.preventDefault();err('Pasting is disabled. Trust yourself.')}}
+function modal(q,btns,rich){
+  const m=document.createElement('div');m.className='modal';
+  m.innerHTML=`<div class="box"><p></p><div class="row"></div></div>`;
+  const mp=m.querySelector('p');
+  if(rich){mp.innerHTML=q;const bx=m.querySelector('.box');bx.style.maxWidth='480px';bx.style.maxHeight='85vh';bx.style.overflow='auto'}else mp.textContent=q;
+  btns.forEach(b=>{const x=document.createElement('button');x.textContent=b.label;if(b.ghost)x.className='ghost';x.onclick=()=>{m.remove();b.fn&&b.fn()};m.querySelector('.row').append(x)});
+  document.body.append(m);
+}
+
+const PCT=[2,4,11,17,42,38,45,60,62,63,66,77,58,83,91,94,96,100];
+function hdr(){
+  $('#step').textContent=cur>=17?'Complete (probably)':`Step ${cur+1} of ${cur+2+cur%3} · almost done!`;
+  $('#bar').style.width=PCT[cur]+'%';
+}
+function applyCursor(){const c=document.documentElement.classList;c.toggle('busy',S.cursorWait);c.toggle('busy2',!S.cursorWait)}
+function go(i){if(S.cursorOn){S.cursorWait=!S.cursorWait;applyCursor()}S.cleanup&&S.cleanup();S.cleanup=null;S.timers.forEach(t=>{clearInterval(t);clearTimeout(t)});S.timers=[];cur=i;hdr();steps[i]()}
+const next=()=>go(cur+1);
+
+// session timer that means nothing
+let sess=300;
+setInterval(()=>{
+  if(!S.sessOpen){sess--;if(sess<=0)sessionPopup()}
+  const sv=Math.max(sess,0);
+  $('#sess').textContent=`Session expires in ${String(Math.floor(sv/60)).padStart(2,'0')}:${String(sv%60).padStart(2,'0')}`;
+},1000);
+
+// cookie bar
+$('#ck-a').onclick=()=>$('#cookie').remove();
+$('#ck-r').onclick=()=>toast('"Reject all" is not available in your region (Earth).');
+$('#ck-m').onclick=()=>modal('Manage preferences: Essential ✓, Also essential ✓, Mostly essential ✓, Chocolate chip ✓, Marketing ✓ (cannot be unticked, it is stuck).',[{label:'Close'}]);
+
+// support
+const SUP=['All our agents are currently gift-wrapping.',`Have you tried turning ${NAME} off and on again?`,'Your call is important to a different department.','Estimated wait time: yes.','Support is available Tuesdays, but Tuesday is not available.','Please describe your problem using only the number 1.'];
+let si=0;$('#support').onclick=()=>toast(SUP[si++%SUP.length]);
+
+// ---------- -1: standard forum form ----------
+const fnv=str=>{let h=2166136261;for(const c of str){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0};
+steps.push(()=>{
+  const sel=(id,opts)=>`<select id="${id}"><option value="">Select…</option>${opts.map(o=>`<option>${o}</option>`).join('')}</select>`;
+  html(`<h1>New member registration</h1><p>Please fill in the form below. All fields are required.</p>
+  <form>
+  <div class="sent">My name is ${sel('f1',['in French','in English','in Chinese','in Portuguese','in gibberish'])}</div>
+  <div class="sent">My age is ${sel('f2',['in seconds','in moments','in months','in dozens'])}</div>
+  <div class="sent">Sex: ${sel('f3',['Mail','Free-mail'])}</div>
+  <div class="sent">Body type: ${sel('f4',['ready','in action','not ready'])}</div>
+  <div class="sent">I enjoy: ${sel('f5',['please select options'])}</div>
+  <label>Referral code<input id="ref" autocomplete="off"></label>
+  <label>Coupon code<input id="cpn" autocomplete="off"></label>
+  <div id="err"></div><button>Submit</button></form>`);
+  const NAMES=['','your name','your age','your sex','your body type','what you enjoy'];
+  form(()=>{
+    for(let i=1;i<=5;i++)if(!$('#f'+i).value)return err(`Please select ${NAMES[i]}.`);
+    const chk=(id,salt,pct,label)=>{
+      const v=$(id).value.trim();
+      if(!v)return `${label} cannot be empty.`;
+      if(v.length<=5)return `${label} is too short (it must be longer than 5 characters).`;
+      return fnv(salt+v)%100<pct?null:`${label} is not valid.`;
+    };
+    const e=chk('#ref','ref:',60,'Referral code')||chk('#cpn','cpn:',30,'Coupon code');
+    if(e)return err(e);
+    next();
+  },700);
+});
+
+// ---------- 0: identity ----------
+steps.push(()=>{
+  html(`<h1>Hi! Are you ${esc(NAME)}?</h1><p>This portal lets you claim a birthday gift. Registration is mandatory and takes about 2 minutes.</p>
+  <div class="row"><button id="y">Yes</button><button id="n" class="ghost">No</button></div>`);
+  $('#y').onclick=()=>{
+    html(`<h1>Prove it</h1><p>Type your name backwards.</p>
+    <form><label>Your name, backwards<input id="f" autocomplete="off"></label><div id="err"></div><button>Verify</button></form>`);
+    form(()=>{
+      const v=$('#f').value.trim(),n=tries('id');
+      if(v.toLowerCase()===rev(NAME).toLowerCase())return next();
+      if(v.toLowerCase()===NAME.toLowerCase())return err('That is forwards. Impressive, but no.');
+      err(n>1?`Hint: it starts with "${rev(NAME)[0]}". We are being generous.`:`"${v}" is not ${NAME} backwards.`);
+    });
+  };
+  $('#n').onclick=()=>{
+    html(`<h1>Then please fetch ${esc(NAME)}</h1><p>We'll wait. Do not touch anything.</p><button id="b">${esc(NAME)} is here now</button>`);
+    $('#b').onclick=()=>go(1);
+  };
+});
+
+// ---------- 1: username ----------
+steps.push(()=>{
+  html(`<h1>Choose a username</h1><p>This is how ${esc(NAME)} will be known to ${esc(NAME)}.</p>
+  <form><label>Username<input id="f" autocomplete="off"></label><div id="err"></div><button>Continue</button></form>`);
+  form(()=>{
+    const v=$('#f').value.trim();
+    if(!v)return err('Username cannot be empty. Or full. Just not empty.');
+    if(/\s/.test(v))return err('Spaces are reserved for premium members.');
+    S.seenU=S.seenU||{};
+    if(S.seenU[v.toLowerCase()])return err(S.seenU[v.toLowerCase()]);
+    const n=tries('user'),rej=m=>{S.seenU[v.toLowerCase()]=m;return err(m)};
+    if(n<=2)return rej(`"${v}" is already taken${v.toLowerCase().includes(NAME.toLowerCase())?' (by you, in a previous life)':''}. Try ${v}_, ${v}1 or ${v}_real.`);
+    if(n<=4)return rej(v.length<8?'Username too short (min 8).':'Username too long (max 7).');
+    S.user=v+'_gift';
+    toast(`We have decided your username is ${S.user}.`);
+    next();
+  },900);
+});
+
+// ---------- 2: email ----------
+steps.push(()=>{
+  const PROV=['hotmail.com','aol.com','geocities.com','myspace.com','ask.com'];
+  html(`<h1>Email address</h1><p>We promise to only email you about the gift. And the other things.</p>
+  <form><label>Email<input id="f" autocomplete="off"></label><div id="err"></div><button>Continue</button></form>`);
+  form(()=>{
+    const v=$('#f').value.trim().toLowerCase();
+    if(!v.includes('@'))return err('Email must contain an @. It is the only thing we know about email.');
+    const [lp,dom]=v.split('@');
+    if(!lp||!dom)return err('One of the halves is missing. We are not saying which.');
+    if(!PROV.includes(dom))return err(`"${dom}" is not a supported provider. Supported: ${PROV.join(', ')}.`);
+    if(!MONTHS.some(m=>lp.includes(m.toLowerCase())))return err('Email must contain the month you were born (3 letters is fine). We will verify this later.');
+    if(v===S.dupMail||!S.dupMail){S.dupMail=v;return err(`${v} is already registered to ${NAME}. If this is you, please use a different email.`)}
+    S.email=v;next();
+  },1400);
+});
+
+// ---------- 3: birthday ----------
+const BAN={'2':'the number 2 is too weak. you cannot use the number 2 for the date','1':'1 is lonely. we do not let it attend alone.','3':'3 is a crowd. no.','7':'7 is on probation (it ate 9).','5':'5 has a pending lawsuit.','9':'9 is currently being eaten by 7.','4':'4 is a square. we are not hiring squares.','6':'6 is afraid of 7 and has left the country.','8':'8 fell over.'};
+const BAN_ORDER=['2','1','3','7','5','9','4','6','8'];
+steps.push(()=>{
+  S.bd=S.bd||0;
+  html(`<h1>Date of birth</h1><p>Please type it manually. Dropdowns are for quitters.</p>
+  <form><label>Birthday <span class="small">format: MMM/DDDD/YY</span><input id="f" autocomplete="off" placeholder="MMM/DDDD/YY"></label>
+  <div class="small">Rules may change without notice.</div><div id="err"></div><button>Continue</button></form>`);
+  const inp=$('#f');
+  form(()=>{
+    const v=inp.value.trim(),P=v.split('/');
+    if(P.length!==3)return err('Format must be MMM/DDDD/YY. Slashes: exactly two. Not one, not three.');
+    const [m,d,y]=P;
+    if(m.length!==3)return err(`MMM is exactly three letters. You typed ${m.length}.`);
+    if(!/^[A-Za-z]{3}$/.test(m))return err('MMM is a month, not a number. The three-letter kind.');
+    if(m!==m.toUpperCase())return err('MMM means capitals. M, M, M.');
+    if(!MONTHS.includes(m))return err(`"${m}" is not a month. Did you mean MAY?`);
+    if(!/^\d{4}$/.test(d))return err(`DDDD means four digits. You gave ${d.length}. Pad with zeros like it is 1999.`);
+    if(!/^\d{2}$/.test(y))return err('YY is two digits. Not that many. Not that few.');
+    const dn=+d;
+    if(dn<1||dn>31)return err(`Day ${d} does not exist yet. Try again in a future update.`);
+    const b=BAN_ORDER[S.bd%BAN_ORDER.length];
+    if((d+y).includes(b)){S.bd++;return err(BAN[b]);}
+    const yr=+y>26?1900+ +y:2000+ +y,age=new Date().getFullYear()-yr;
+    if(!S.age||S.ageBd===v){S.age=true;S.ageBd=v;maybeClear(inp);return err(`That would make you ${age}. You look ${age+7}. Please recheck your birthday.`)}
+    S.b={m,d,y};
+    html(`<h1>Confirm date of birth</h1><p>We lost the first one. Please enter it again, in the new format.</p>
+    <form><label>Birthday <span class="small">format: YY-MMM-DDDD</span><input id="f" autocomplete="off" placeholder="YY-MMM-DDDD"></label><div id="err"></div><button>Continue</button></form>`);
+    form(()=>{
+      const w=$('#f').value.trim().toUpperCase(),M=w.match(/^(\d{2})-([A-Z]{3})-(\d{4})$/);
+      if(!M)return err('Format is YY-MMM-DDDD. Hyphens this time. We changed our minds.');
+      if(M[1]!==S.b.y||M[2]!==S.b.m||M[3]!==S.b.d)return err('These do not match. Did you change your birthday? That is allowed once a year.');
+      next();
+    });
+  });
+});
+
+// ---------- 3b: age verification ----------
+const AGE_EXT=['.jpgx','.pngz','.gifv2','.heicc','.bitmapx','.selfie9000'];
+steps.push(()=>{
+  if(/Android|iPhone|iPad|iPod|Mobi/i.test(navigator.userAgent)||(navigator.maxTouchPoints>1&&matchMedia('(pointer:coarse)').matches&&innerWidth<900)){toast('Mobile detected. Age verification skipped. You look old enough.');return next()}
+  let stream=null,rejected=false,ugly=null;
+  const stop=()=>{if(stream)stream.getTracks().forEach(t=>t.stop());stream=null};
+  S.cleanup=stop;
+  const hash=async f=>{
+    try{return [...new Uint8Array(await crypto.subtle.digest('SHA-256',await f.arrayBuffer()))].map(b=>b.toString(16).padStart(2,'0')).join('')}
+    catch(e){return f.name+f.size+f.lastModified}
+  };
+  const upload=msg=>{
+    stop();
+    html(`<h1>Age verification</h1><p></p>
+    <form><label>Photo file<input id="fi" type="file"></label><div class="small">Supported formats: ${AGE_EXT.join(' ')}</div><div id="err"></div>
+    <button>Submit</button> <button type="button" class="ghost" id="hp">How do I change my file format?</button></form>`);
+    card.querySelector('p').textContent=msg;
+    $('#hp').onclick=()=>modal(`<b>How to change your file format</b><br>You do not need to convert anything. Just rename the file so its ending (the extension) is one of: <b>${AGE_EXT.join(' ')}</b>. Example: <code>photo.jpg</code> becomes <code>photo.jpgx</code>.
+    <br><br><b>On a Mac</b><ol style="margin:6px 0 0 18px;padding:0"><li>Find the file in Finder and click it once.</li><li>Press <b>Cmd + I</b> (or right-click it and choose <b>Get Info</b>).</li><li>Open the <b>Name &amp; Extension</b> section.</li><li>If it says "Hide extension" and that box is ticked, untick it so you can see the ending.</li><li>Edit the name in the box, changing the part after the last dot to a supported ending. Press Return.</li><li>macOS asks "Are you sure you want to change the extension?" Click <b>Use .jpgx</b> (or whichever ending you chose).</li></ol>
+    <br><b>On Windows</b><ol style="margin:6px 0 0 18px;padding:0"><li>Open File Explorer and go to the file.</li><li>Make endings visible: click <b>View</b>, then (Windows 11) <b>Show</b> &gt; <b>File name extensions</b>, or (Windows 10) tick <b>File name extensions</b>.</li><li>Right-click the file and choose <b>Rename</b> (or select it and press <b>F2</b>).</li><li>Change the part after the last dot to a supported ending and press Enter.</li><li>Windows warns that the file "might become unusable". Click <b>Yes</b>. That is the point.</li></ol>
+    <br>On a phone this is much harder. Use a computer if you can.`,[{label:'Got it'}],true);
+    form(async()=>{
+      const f=$('#fi').files[0];
+      if(!f)return err('No file selected. Selecting nothing does not prove your age.');
+      const ok=AGE_EXT.some(e=>f.name.toLowerCase().endsWith(e));
+      if(!rejected){
+        rejected=true;
+        return err(ok?`"${f.name}" has a supported extension but unsupported contents. Please try again.`:`"${f.name}" is not a supported format. We only support: ${AGE_EXT.join(', ')}.`);
+      }
+      if(!ok)return err(`"${f.name}" is not a supported format. We only support: ${AGE_EXT.join(', ')}. Press the help button if you need help.`);
+      const h=await hash(f);
+      if(!ugly){ugly=h;return err('Photo rejected: too ugly. Please upload a different photo.')}
+      if(h===ugly)return err('This is the same file. It was ugly then and it is ugly now. Please upload a different one.');
+      toast('Age verified. You look 7 years older.');
+      next();
+    },1200);
+  };
+  html(`<h1>Age verification</h1><p>Requesting camera…</p>`);
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)return upload('Camera not available. Please upload a photo file instead.');
+  navigator.mediaDevices.getUserMedia({video:true}).then(st=>{
+    stream=st;
+    html(`<h1>Age verification</h1><p>Look at the camera and take a photo. We will estimate your age from your face.</p>
+    <video id="v" autoplay muted playsinline style="width:100%;border-radius:8px;margin-bottom:12px;background:#000"></video><button id="shot">Take photo</button>`);
+    $('#v').srcObject=st;
+    $('#shot').onclick=()=>{
+      $('#shot').disabled=true;$('#shot').textContent='Analyzing…';
+      later(()=>{rejected=true;upload(`Photo rejected: "camera-capture.png" is not a supported format. We only support ${AGE_EXT.join(', ')}. The camera has been closed. Please upload a file.`)},1500);
+    };
+  }).catch(()=>upload('Camera access was declined. Please upload a photo file manually.'));
+});
+
+// ---------- 4: password ----------
+const COLORS=['red','blue','green','yellow','orange','purple','pink','black','white','brown','grey','gray','teal'];
+const MAXPW=20;
+const mm=()=>String(new Date().getMinutes()).padStart(2,'0');
+const RULES=[
+  {t:()=>`Must include your name (${NAME})`,ok:p=>p.toLowerCase().includes(NAME.toLowerCase())},
+  {t:()=>'Must include a number',ok:p=>/\d/.test(p)},
+  {t:()=>'Must not include the number 2 (too weak, we have discussed this)',ok:p=>!p.includes('2')||mm().includes('2'),s:()=>mm().includes('2')?'Exempt right now: the current minute contains a 2. Do not get used to it.':''},
+  {t:()=>'Must include a capital letter, but not as the first character',ok:p=>p.length>0&&!/[A-Z]/.test(p[0])&&/[A-Z]/.test(p.slice(1))},
+  {t:()=>'Must include a special character, but not an obvious one ( ! @ # $ % ^ & * )',ok:p=>/[^A-Za-z0-9\s]/.test(p)&&!/[!@#$%^&*]/.test(p)},
+  {t:()=>'Must include a color',ok:p=>COLORS.some(c=>p.toLowerCase().includes(c))},
+  {t:()=>'Must not include any ...',s:()=>'(the rest of this rule failed to load)',ok:p=>!p.includes('.')},
+  {t:()=>`Must include the current minute (${mm()})`,ok:p=>p.includes(mm())},
+  {t:()=>'The digits must add up to an odd number',ok:p=>((p.match(/\d/g)||[]).reduce((a,b)=>a+ +b,0))%2===1},
+  {t:()=>'No letter may appear more than 3 times, except E, which may appear 4',ok:p=>{const c={};for(const ch of p.toLowerCase())if(/[a-z]/.test(ch))c[ch]=(c[ch]||0)+1;return Object.entries(c).every(([k,v])=>v<=(k==='e'?4:3))}},
+  {t:p=>`Length must be a multiple of 3`,s:()=>`(currently ${($('#f')||{value:''}).value.length})`,ok:p=>p.length%3===0}
+];
+steps.push(()=>{
+  html(`<h1>Create a password</h1><p>Keep it secret. Keep it safe.</p>
+  <ul class="rules" id="rules"></ul>
+  <form><label>Password<input id="f" autocomplete="off"></label><div class="small" id="str"></div><div id="err"></div><button id="go" disabled>Continue</button></form>`);
+  const paint=()=>{
+    const p=$('#f').value,oks=RULES.map(r=>r.ok(p)),ff=oks.indexOf(false);
+    S.rev=Math.max(S.rev,ff<0?RULES.length:ff+1);
+    const long=p.length>MAXPW,all=ff<0&&!long;
+    let items=[];
+    for(let i=S.rev-1;i>=0;i--){const r=RULES[i],s=r.s?r.s():'';items.push(`<li class="${oks[i]?'ok':''}">${oks[i]?'✓':'✗'} ${esc(r.t())}${s?`<span class="sub">${esc(s)}</span>`:''}</li>`)}
+    $('#rules').innerHTML=(long?`<li>Sorry, the password is too long (max ${MAXPW})</li>`:'')+items.join('');
+    $('#go').disabled=!all;
+    $('#str').textContent=all?'Strength: Weak. Passwords this compliant are easy to guess.':'';
+    return all;
+  };
+  $('#f').oninput=paint;every(paint,1000);paint();
+  form(()=>{if(!paint())return err('Not all rules are satisfied.');S.pw=$('#f').value;next()});
+});
+
+// ---------- forgot password flow (from step 5) ----------
+function forgot(){
+  const used=[S.email.toLowerCase()];
+  const clr=()=>{S.timers.forEach(t=>{clearInterval(t);clearTimeout(t)});S.timers=[]};
+  const ask=(h,p,label,check,then)=>{
+    clr();
+    html(`<h1>${h}</h1><p></p><form><label>${label}<input id="f" autocomplete="off"></label><div id="err"></div><button>Continue</button> <a href="#" id="nm" class="small">Never mind, I remember</a> <a href="#" id="fg" class="small">I forgot this too</a></form>`);
+    card.querySelector('p').textContent=p;
+    $('#nm').onclick=e=>{e.preventDefault();go(7)};
+    $('#fg').onclick=e=>{e.preventDefault();lost()};
+    form(()=>{const v=$('#f').value.trim(),e=check(v);if(e)return err(e);then(v)},900);
+  };
+  const guestGo=()=>{S.user='guest_'+NAME.toLowerCase();S.pw='guest';S.guest=true;toast('Continuing as guest. Some features are unavailable. All of them.');next()};
+  const lost=()=>{
+    clr();let t=20;
+    html(`<h1>You forgot that too?</h1><p>Impressive. We cannot recover an account from someone who remembers nothing. Please wait while we confirm that you are still a person.</p><div class="inbox" id="ib">Options unlock in <b id="cd">20</b>s…</div>`);
+    const id=setInterval(()=>{
+      t--;$('#cd').textContent=t;
+      if(t>0)return;
+      clearInterval(id);
+      $('#ib').innerHTML=`Nothing left to ask you. <div class="row" style="margin-top:10px"><button type="button" id="gs">Continue as guest</button></div>`;
+      $('#gs').onclick=guestGo;
+    },1000);
+    S.timers.push(id);
+  };
+  const user=()=>ask('Forgot your password?','Enter your username. We promise not to tell you what it is.','Username',v=>{
+    if(v!==S.user)return tries('fu')>1?`No such user. Did you mean "${S.user}"? We are not supposed to say.`:'No such user.';
+  },()=>pet());
+  const pet=()=>ask('Security question',`What was the name of your first pet's second cousin?`,'Answer',v=>{
+    if(v.length<3)return 'Too short to be a cousin.';
+    if(tries('fp')===1)return 'Incorrect. (Any answer would have been incorrect. Try again.)';
+  },()=>mail());
+  const mail=()=>ask('Confirm your email','We will send a recovery code to the email on file. Type it so we know you know it.','Email on file',v=>{
+    if(v.toLowerCase()!==S.email)return tries('fm')>1?`That is not the email on file. It starts with "${S.email[0]}". We should not have said that.`:'That is not the email on file.';
+  },()=>sent(S.email));
+  const redo=()=>ask('Try a different email','Enter another email. The previous one will not be accepted.','New email',v=>{
+    if(!v.includes('@'))return 'Email must contain an @.';
+    if(used.includes(v.toLowerCase()))return 'We already tried that email. It did not answer.';
+  },v=>{used.push(v.toLowerCase());sent(v)});
+  const sent=em=>{
+    clr();
+    const msgs=['Invalid code.','Invalid code. Did you check spam?','Invalid code. Did you check spam, trash and the "Social" tab?','That code does not exist.'];let mi=0,t=30;
+    html(`<h1>Check your email</h1><p>We sent a recovery code to <b id="em"></b>. It should arrive within a few moments.</p>
+    <form><label>Recovery code<input id="f" autocomplete="off" inputmode="numeric"></label><div id="err"></div><button>Reset password</button> <button type="button" class="ghost" id="rs">Resend code</button></form>
+    <div class="inbox" id="ib">Other options unlock in <b id="cd">30</b>s…</div>`);
+    $('#em').textContent=em;
+    $('#rs').onclick=()=>toast('Code resent.');
+    form(()=>{
+      if(!$('#f').value.trim())return err('Enter the code we sent you.');
+      err(msgs[mi++%msgs.length]);
+    },700);
+    const id=setInterval(()=>{
+      t--;$('#cd').textContent=t;
+      if(t>0)return;
+      clearInterval(id);
+      $('#ib').innerHTML=`Still nothing? Emails to that address may be delayed, lost, or imaginary.<div class="row" style="margin-top:10px"><button type="button" id="rd">Try a different email</button><button type="button" class="ghost" id="gs">Continue as guest</button></div>`;
+      $('#rd').onclick=redo;
+      $('#gs').onclick=guestGo;
+    },1000);
+    S.timers.push(id);
+  };
+  user();
+}
+
+// ---------- 5: confirm password ----------
+steps.push(()=>{
+  html(`<h1>Confirm password</h1><p>Type your password again to make sure you remember it.</p>
+  <form><label>Password, again<input id="f" autocomplete="off"></label><div id="err"></div><button>Confirm</button> <a href="#" id="fp" class="small">Forgot your password?</a></form>`);
+  noPaste($('#f'));
+  $('#fp').onclick=e=>{e.preventDefault();forgot()};
+  form(()=>{
+    const v=$('#f').value,n=tries('cpw');
+    if(v===rev(S.pw))return next();
+    if(v===S.pw)return err('That is the password. Forwards. We asked for backwards.');
+    err(n===1?'Passwords do not match.':'Type it backwards. Yes, the password. Yes, backwards.');
+  },700);
+});
+
+// ---------- 6a0: phone number ----------
+steps.push(()=>{
+  const shuf=()=>{const a=[0,1,2,3,4,5,6,7,8,9];for(let i=9;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+  const R=Array.from({length:10},()=>({p:shuf(),i:-1}));
+  html(`<h1>Phone number</h1><p>For verification purposes, and also for fun. Use the arrows to dial each digit.</p>
+  <div class="dial">${R.map((_,k)=>`<div class="dg"><button type="button" data-k="${k}" data-d="1">▲</button><b id="d${k}">–</b><button type="button" data-k="${k}" data-d="-1">▼</button></div>`).join('')}</div>
+  <div class="small" id="pv" style="text-align:center"></div>
+  <form><div id="err"></div><button>Continue</button></form>`);
+  const digits=()=>R.map(r=>r.i<0?null:r.p[r.i]);
+  const paint=()=>{
+    const d=digits();
+    d.forEach((x,k)=>$('#d'+k).textContent=x===null?'–':x);
+    const t=d.map(x=>x===null?'_':x).join('');
+    $('#pv').textContent=`+1 (${t.slice(0,3)}) ${t.slice(3,6)}-${t.slice(6)}`;
+  };
+  const reshuffle=()=>R.forEach(r=>{if(r.i<0)r.p=shuf();else{const v=r.p[r.i];r.p=shuf();r.i=r.p.indexOf(v)}});
+  card.querySelectorAll('.dg button').forEach(b=>b.onclick=()=>{
+    const r=R[+b.dataset.k],dir=+b.dataset.d;
+    r.i=r.i<0?(dir>0?0:9):(r.i+dir+10)%10;paint();
+  });
+  paint();
+  form(()=>{
+    const d=digits(),bad=m=>{reshuffle();paint();err(m)};
+    const miss=d.indexOf(null);
+    if(miss>=0)return bad(`Digit ${miss+1} is blank. Phone numbers have 10 digits, not fewer.`);
+    const str=d.join('');
+    if(str.includes('2'))return bad('Phone numbers containing 2 are not supported. Please get a new phone number.');
+    if(d[0]<=1)return bad('Phone numbers cannot start with 0 or 1. Those are for emergencies and lonely people.');
+    if(!S.ph1){S.ph1=str;return bad('That number is already registered to your duct tape. Please enter a different number.')}
+    if(str===S.ph1)return bad(`That is still your duct tape's number. Please enter a different one.`);
+    S.phone=str;next();
+  },900);
+});
+
+// ---------- 6a: security questions ----------
+const FQ=['When will you discover your next girlfriend?',"Your mother's third leg's length in jaccobian yernalds",'What will your first pet say at your funeral?','How many Tuesdays until you become a bird?',"Who will be the 4th removed cousin of the moon's accountant?",'What colour was tomorrow?','In which year will your left shoe rebel?','What is the name of the street you will grow up on?','How heavy will your dream be next Thursday?',"The middle name of your future clone's landlord",'What did your great-grandchild eat for breakfast on the 14th of Never?','What is the airspeed velocity of an unladen regret?',"Your childhood best friend's future pet's blood type (in Wednesdays)",'When will your password remember you?'];
+const fl=s=>((s||'').match(/[a-z]/i)||[''])[0].toLowerCase();
+const AR=[
+  {t:()=>'Must be exactly 2 words',ok:a=>a.trim().split(/\s+/).filter(Boolean).length===2},
+  {t:()=>'Must be at least 9 characters long',ok:a=>a.length>=9},
+  {t:()=>'Must not contain the letter "e" (it is overused)',ok:a=>!/e/i.test(a)},
+  {t:()=>'Must contain exactly one capital letter, and it must not be the first character',ok:a=>(a.match(/[A-Z]/g)||[]).length===1&&!/^[A-Z]/.test(a)},
+  {t:()=>'Must contain a digit, but not 2 (too weak)',ok:a=>/\d/.test(a)&&!a.includes('2')},
+  {t:()=>'Must end with a semicolon or a tilde',ok:a=>/[;~]$/.test(a)},
+  {t:i=>i===0?'First letter must come alphabetically after "g"':`First letter must come alphabetically after the first letter of answer ${i}`,ok:(a,i,all)=>fl(a)!==''&&(i===0?fl(a)>'g':fl(a)>fl(all[i-1]))},
+  {t:()=>'Must not reuse any word (4+ letters) from the question',ok:(a,i,all,q)=>!((q||'').toLowerCase().match(/[a-z]{4,}/g)||[]).some(w=>a.toLowerCase().includes(w))}
+];
+steps.push(()=>{
+  html(`<h1>Security questions</h1><p>Choose 4 security questions and answer them. Custom questions are not supported, for security.</p>
+  <form>${[0,1,2,3].map(i=>`<label>Question ${i+1}<select class="qs"><option value="">Select a question…</option>${FQ.map((q,j)=>`<option value="${j}">${esc(q)}</option>`).join('')}</select><input class="an" autocomplete="off" placeholder="Answer ${i+1}"></label>`).join('')}
+  <ul class="rules" id="rl"></ul><div id="err"></div><button>Continue</button></form>`);
+  const qs=[...card.querySelectorAll('.qs')],an=[...card.querySelectorAll('.an')];let foc=0;
+  const ans=()=>an.map(a=>a.value);
+  const qOf=i=>qs[i].value===''?'':FQ[+qs[i].value];
+  const paint=()=>{
+    const all=ans();
+    $('#rl').innerHTML=`<li style="background:none;color:#555;padding:0">Rules for answer ${foc+1}:</li>`+AR.map(r=>{const ok=r.ok(all[foc],foc,all,qOf(foc));return `<li class="${ok?'ok':''}">${ok?'✓':'✗'} ${esc(r.t(foc))}</li>`}).join('');
+  };
+  an.forEach((a,i)=>{noPaste(a);a.onfocus=()=>{foc=i;paint()};a.oninput=paint});
+  qs.forEach((q,i)=>q.onchange=()=>{foc=i;paint()});
+  paint();
+  form(()=>{
+    const all=ans();
+    for(let i=0;i<4;i++)if(qs[i].value==='')return err(`Question ${i+1} is not selected. Please select a future.`);
+    for(let i=0;i<4;i++)for(let j=i+1;j<4;j++)if(qs[i].value===qs[j].value)return err(`Questions ${i+1} and ${j+1} are the same. Futures cannot be reused.`);
+    for(let i=0;i<4;i++)for(const r of AR)if(!r.ok(all[i],i,all,qOf(i))){foc=i;paint();err(`Answer ${i+1}: ${r.t(i)}`);return maybeClear(an[i])}
+    next();
+  },900);
+});
+
+// ---------- 6b: wallet entropy ----------
+steps.push(()=>{
+  const NEED=1600,MIN=12,AL='123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+  let pool=[],lx=null,ly=null,done=false;
+  html(`<h1>Generating your profile</h1><p>To create your deposit wallet we need randomness. Move your mouse around randomly in this window.</p>
+  <div class="pbar"><i id="eb" style="transition:width .1s"></i></div><div class="small" id="ep">Entropy: 0%</div><div class="hexs" id="hx"></div>`);
+  const wallet=()=>{
+    S.cursorOn=true;S.cursorWait=true;applyCursor();
+    const addr='D'+Array.from({length:33},(_,i)=>AL[(pool[i*12]^pool[i*12+5])%AL.length]).join('');
+    html(`<h1>Dogecoin deposit wallet connected</h1><div class="throb"></div><div class="small" style="text-align:center"></div>`);
+    card.querySelector('.small').textContent=addr;
+    later(()=>{
+      html(`<p style="color:#c62f3b;font-weight:600">Error: robux cannot be transferred because account is not linked</p><button id="c">Continue</button>`);
+      $('#c').onclick=next;
+    },10000);
+  };
+  const mv=e=>{
+    if(done)return;
+    if(lx!==null&&Math.hypot(e.clientX-lx,e.clientY-ly)<MIN)return;
+    lx=e.clientX;ly=e.clientY;
+    pool.push((e.clientX*31+e.clientY*17+Math.floor(performance.now()*1000))&255);
+    const pc=Math.min(100,Math.floor(pool.length/NEED*100));
+    $('#eb').style.width=pc+'%';$('#ep').textContent=`Entropy: ${pc}%`;
+    $('#hx').textContent=pool.slice(-64).map(b=>b.toString(16).padStart(2,'0')).join(' ');
+    if(pool.length>=NEED){done=true;document.removeEventListener('pointermove',mv);$('#ep').textContent='Generating wallet…';later(wallet,1200)}
+  };
+  document.addEventListener('pointermove',mv);
+  S.cleanup=()=>document.removeEventListener('pointermove',mv);
+});
+
+// ---------- 6: unnecessary details ----------
+function roman(s){const m={I:1,V:5,X:10,L:50,C:100,D:500,M:1000};let t=0;for(let i=0;i<s.length;i++){const a=m[s[i]],b=m[s[i+1]]||0;t+=a<b?-a:a}return t}
+steps.push(()=>{
+  html(`<h1>A few quick details</h1><p>Totally unrelated to the gift. For our records.</p>
+  <form>
+  <label>Favorite number<input id="fav" autocomplete="off"></label>
+  <label>Shoe size (Roman numerals)<input id="shoe" autocomplete="off"></label>
+  <label>Your left-hand mice's 3rd-removed uncle's maiden name<input id="cat" autocomplete="off"></label>
+  <label>How are you feeling?<select id="mood"><option>Select…</option><option>Yes</option><option>No</option><option>Mostly Wednesday</option><option>Bees</option></select></label>
+  <label>How many fingers are you holding up right now? <b id="fv">5</b><input id="fin" type="range" min="0" max="11" value="5"></label>
+  <div id="err"></div><button>Continue</button></form>`);
+  $('#fin').oninput=e=>$('#fv').textContent=e.target.value;
+  form(()=>{
+    const fav=$('#fav'),shoe=$('#shoe'),cat=$('#cat'),mood=$('#mood').value,fin=+$('#fin').value;
+    const f=fav.value.trim(),x=parseFloat(f);
+    if(!/^\d+(\.\d+)?$/.test(f)||!(x>3&&x<3.5))return err('Favorite number must be between 3 and 3.5. This is the only range of favorites we support.'),maybeClear(fav);
+    if(x===3.14)return err('3.14 is too obvious. Be braver.'),maybeClear(fav);
+    if(f.includes('2'))return err('Your favorite number contains a 2. Too weak to be a favorite.'),maybeClear(fav);
+    const s=shoe.value.trim();
+    if(/\d/.test(s))return err('Arabic numerals are not accepted in this section.'),maybeClear(shoe);
+    if(!/^[IVXLCDM]+$/.test(s))return err('Roman numerals only. Capital letters. Like a statue would write it.'),maybeClear(shoe);
+    const r=roman(s);
+    if(r<5||r>15)return err(`Size ${s} is not a shoe. That is a ${r>15?'boat':'sock for a mouse'}.`),maybeClear(shoe);
+    const c=cat.value.trim();
+    if(/^(none|no|n\/a|idk|)$/i.test(c))return err('Please borrow a left-hand mouse from a neighbour and try again.');
+    if(c.length<3)return err('Too short. 3rd-removed uncles have long maiden names.'),maybeClear(cat);
+    if(mood==='Select…')return err('Please select a mood. Selecting nothing is not a mood.');
+    if(mood==='Yes')return err('"Yes" is not a mood. It is an answer to a different question.');
+    if(mood==='No')return err('A negative mood has been logged. Please choose a positive one, or Bees.');
+    if(fin!==11)return err('Please hold up exactly 11 fingers. We are watching.');
+    next();
+  },800);
+});
+
+// ---------- 7: captcha ----------
+steps.push(()=>{
+  const T=[['🚲',0],['tue',1],['a chair',0],['mardi',1],['the color of Tuesday',1],['🕳️',0],['Wednesday (but sad)',0],['Tuesday?',1],['🐝',0]];
+  html(`<h1>Are you human?</h1><p>Select all squares containing Tuesday.</p>
+  <div class="tiles">${T.map((t,i)=>`<div class="tile" data-i="${i}">${t[0]}</div>`).join('')}</div>
+  <form><div id="err"></div><button>Verify</button></form>`);
+  card.querySelectorAll('.tile').forEach(t=>t.onclick=()=>t.classList.toggle('on'));
+  form(()=>{
+    const on=[...card.querySelectorAll('.tile.on')].map(t=>+t.dataset.i);
+    const missed=T.some((t,i)=>t[1]&&!on.includes(i)),wrong=on.filter(i=>!T[i][1]).length;
+    if(missed)return err('Tuesday remains at large. Look again.');
+    if(wrong===0)return err('Perfect score. Humans are not perfect. Please make 1 or 2 mistakes.');
+    if(wrong>2)return err('Too many mistakes. You are either a bot or a Monday.');
+    next();
+  },1000);
+});
+
+// ---------- consent lootbox ----------
+const RAR=[['Common','#9aa0b5',50],['Uncommon','#3aa55d',25],['Rare','#3b82f6',14],['Epic','#a855f7',7],['Legendary','#f59e0b',3],['Mythic','#ef4444',1]];
+const NOS=['No','Nope','Absolutely Not','No Thank You','Nein','Negative','Hard No','Not Today'];
+const YESS=['Yes','Yeah','Affirmative','Ja','Sure, Why Not'];
+const INV0=[['A Tuesday',0],['Left sock',0],['The number 2',0],['Receipt (2003)',0],['Rejected cookie',0],['Loose bees',0],['3.14 (too obvious)',0],['Shoe, size XLII',0],['Borrowed duct tape',0],['Unread terms',1],['Left-hand mouse',0],['Empty box',0]];
+function rollItem(forceNo){
+  const yes=!forceNo&&Math.random()<.3;
+  let x=Math.random()*100,rar=RAR[0];
+  for(const r of RAR){if((x-=r[2])<0){rar=r;break}}
+  const L=yes?YESS:NOS;
+  return {yes,rar,name:L[Math.floor(Math.random()*L.length)]};
+}
+function lootbox(){
+  const n=S.rolls=(S.rolls||0)+1,res=rollItem(n===1),W=110,T=24;
+  armQuiz();
+  const cell=it=>`<div class="cell" style="border-bottom:4px solid ${it.rar[1]}"><b>${it.name}</b><small>${it.rar[0]}</small></div>`;
+  html(`<h1>📦 Consent Crate #${n}</h1><p>Your acceptance is being determined by chance, as is tradition.</p>
+  <div class="reelw"><div class="reel" id="reel">${Array.from({length:30},(_,i)=>cell(i===T?res:rollItem(false))).join('')}</div><div class="mark"></div></div>`);
+  const reel=$('#reel');void reel.offsetWidth;
+  reel.style.transition='transform 4s cubic-bezier(.1,.7,.1,1)';
+  reel.style.transform=`translateX(${-(T*W+W/2-card.querySelector('.reelw').clientWidth/2)}px)`;
+  later(()=>{
+    const c=res.rar[1];
+    if(!res.yes){
+      html(`<h1>You got: <span style="color:${c}"></span></h1><p>Rarity: ${res.rar[0]}. This item is bound to your account and cannot be declined.</p><button id="ac">Accept the NO item</button>`);
+      card.querySelector('h1 span').textContent=res.name;
+      $('#ac').onclick=()=>{toast('Item accepted. You have been returned to the Terms for re-reading.');go(13)};
+      return;
+    }
+    let inv=INV0.slice(),discards=0,added=false,canPos=null,dodged=false,drag=null;
+    const R=100,CS=56,bool={bool:1};
+    const ghost=e=>{drag.g.style.left=(e.clientX-40)+'px';drag.g.style.top=(e.clientY-27)+'px'};
+    const setCan=()=>{const can=$('#can');can.style.left=canPos.x+'px';can.style.top=canPos.y+'px'};
+    const flee=(px,py)=>{
+      const iw=$('#iw'),wr=iw.getBoundingClientRect();
+      const cx=wr.left+canPos.x+CS/2,cy=wr.top+canPos.y+CS/2;
+      let dx=cx-px,dy=cy-py,d=Math.hypot(dx,dy);
+      if(d>=R)return;
+      if(discards===0){if(dodged)return;dodged=true}   // first time: hop away once, then stay put
+      if(d<1){const t=Math.random()*6.28;dx=Math.cos(t);dy=Math.sin(t);d=1}
+      const dist=discards===0?130:R*.9;                  // later: keep staying just ahead of the mouse
+      canPos={x:Math.max(0,Math.min(iw.clientWidth-CS,px+dx/d*dist-wr.left-CS/2)),y:Math.max(0,Math.min(iw.clientHeight-CS,py+dy/d*dist-wr.top-CS/2))};
+      setCan();
+    };
+    const mv=e=>{if(drag)ghost(e);if($('#can'))flee(e.clientX,e.clientY)};
+    const up=e=>{
+      if(!drag)return;
+      const {i,g}=drag;drag=null;g.remove();
+      const can=$('#can'),r=can&&can.getBoundingClientRect();
+      if(!(r&&e.clientX>=r.left-6&&e.clientX<=r.right+6&&e.clientY>=r.top-6&&e.clientY<=r.bottom+6)){
+        card.querySelectorAll('.slot.drag').forEach(x=>x.classList.remove('drag'));return;
+      }
+      {
+        const it=inv[i];
+        if(it[1]){toast(`"${it[0]}" is bound to your account and cannot be discarded.`);return draw()}
+        inv.splice(i,1);discards++;
+        if(discards===1)toast('⚠ Boolean (Yes) is overweight and requires 2 inventory spaces.');
+        else toast(`Discarded: ${it[0]}.`);
+        if(discards===2){inv.push(bool);added=true}
+      }
+      draw();
+    };
+    document.addEventListener('pointermove',mv);document.addEventListener('pointerup',up);
+    const draw=()=>{
+      const empties=12-inv.reduce((a,it)=>a+(it.bool?2:1),0);
+      const msg=added?'Boolean added to inventory (12/12).':discards===0?'Your inventory is full (12/12). Drag an item into the trash can to make room.':'⚠ Boolean (Yes) is overweight and requires 2 inventory spaces. Discard another item.';
+      card.innerHTML=(`<h1>You got: <span style="color:${c}">Boolean</span> <small>(${esc(res.name)}, ${res.rar[0]})</small></h1>
+      <p${discards===1&&!added?' style="color:#c62f3b;font-weight:600"':''}>${msg}</p>
+      <div class="invwrap" id="iw"><div class="inv">${inv.map((it,i)=>it.bool?'<div class="slot big new">Boolean<br>(2 spaces)</div>':`<div class="slot" data-i="${i}">${esc(it[0])}</div>`).join('')}${'<div class="slot empty"></div>'.repeat(empties)}</div>${added?'':'<div id="can">🗑️</div>'}</div>
+      ${added?'<button id="ct">Continue</button>':''}`);
+      if(added)return $('#ct').onclick=()=>{document.removeEventListener('pointermove',mv);document.removeEventListener('pointerup',up);whack()};
+      const iw=$('#iw');
+      if(!canPos)canPos={x:iw.clientWidth-CS-4,y:iw.clientHeight-CS-4};
+      const cn=$('#can');cn.style.transition='none';
+      setCan();void cn.offsetWidth;
+      cn.style.transition=discards===0?'left .5s ease,top .5s ease':'left .16s ease-out,top .16s ease-out';
+      card.querySelectorAll('.slot[data-i]').forEach(sl=>sl.onpointerdown=e=>{
+        e.preventDefault();
+        const i=+sl.dataset.i,g=document.createElement('div');g.className='slot ghost';g.textContent=inv[i][0];document.body.append(g);
+        sl.classList.add('drag');drag={i,g};ghost(e);
+      });
+    };
+    draw();
+  },4400);
+}
+
+// ---------- whack-a-yes ----------
+function whack(){
+  html(`<h1>Yes Collection</h1><p>Your Yes must be collected manually. Click every Yes before it disappears.</p>
+  <div class="small" id="hud"></div><div class="arena" id="ar"></div>`);
+  const ar=$('#ar'),NEED=40;let h=0,miss=0,phase='main',tm=[];
+  const hud=t=>$('#hud').textContent=t;
+  const upd=()=>hud(`Yeses collected: ${h}/${NEED} · escaped: ${miss}`);
+  const sched=(fn,ms)=>{const t=setTimeout(fn,ms);tm.push(t);S.timers.push(t);return t};
+  const clr=()=>{tm.forEach(clearTimeout);tm=[];ar.innerHTML=''};
+  const spawn=(yes,life,x,y,z,onClick,onExpire)=>{
+    const b=document.createElement('button');b.type='button';b.className='mole '+(yes?'y':'n');b.textContent=yes?'Yes':'No';
+    b.style.left=(x==null?Math.random()*(ar.clientWidth-64):x)+'px';
+    b.style.top=(y==null?Math.random()*(ar.clientHeight-34):y)+'px';
+    if(z)b.style.zIndex=z;
+    b.onclick=()=>{
+      if(!b.isConnected||b.dataset.done)return;
+      b.dataset.done=1;b.classList.add('ring');
+      requestAnimationFrame(()=>requestAnimationFrame(()=>b.classList.add('fade')));
+      sched(()=>b.remove(),950);
+      onClick();
+    };
+    ar.append(b);
+    sched(()=>{if(b.isConnected&&!b.dataset.done){b.remove();onExpire&&onExpire()}},life);
+  };
+  const main=()=>{
+    if(phase!=='main')return;
+    const c=h<10?{iv:800-h*30,life:1400,n:1}:h<25?{iv:320,life:1000,n:1}:{iv:110,life:750,n:2};
+    for(let i=0;i<c.n;i++)spawn(true,c.life,null,null,0,()=>{
+      h++;upd();
+      if(h>=NEED&&phase==='main'){phase='stack';clr();toast('Almost done. Probably.');sched(stack,800)}
+    },()=>{miss++;upd()});
+    sched(main,c.iv);
+  };
+  const stack=()=>{
+    clr();phase='stack';let left=10,nos=0;hud('Final Yes: 10 remaining');
+    const x=ar.clientWidth/2-32,y=ar.clientHeight/2-17;
+    const restart=m=>{toast(m);clr();sched(stack,600)};
+    for(let j=0;j<8;j++)spawn(false,1e9,x,y,1+j,()=>{
+      nos++;toast('That was a No.');
+      if(nos>=3&&phase==='stack')restart('Three Nos. The stack starts over.');
+    });
+    for(let i=0;i<10;i++)spawn(true,9000,x,y,20+i,()=>{
+      left--;hud(`Final Yes: ${left} remaining`);
+      if(left===0){hud('Final Yes collected. Please wait.');sched(()=>{clr();frenzy()},3500)}
+    },()=>{if(phase==='stack'&&left>0)restart('Too slow. The stack starts over.')});
+  };
+  const frenzy=()=>{
+    clr();phase='frenzy';let left=10;hud('FRENZY: 10 remaining');
+    const restart=m=>{toast(m);clr();sched(frenzy,800)};
+    for(let i=0;i<10;i++)spawn(true,8000,null,null,0,()=>{
+      left--;hud(`FRENZY: ${left} remaining`);
+      if(left===0){phase='done';clr();hud('All Yes collected.');toast('All Yes collected. Thank you for your Yes.');const bt=document.createElement('button');bt.textContent='Continue';bt.onclick=next;card.append(bt)}
+    },()=>{if(phase==='frenzy')restart('A Yes escaped. The frenzy restarts.')});
+    for(let i=0;i<5;i++)sched(()=>spawn(false,1400,null,null,20,()=>restart('You clicked a No. The frenzy restarts.')),300+Math.random()*3700);
+  };
+  upd();sched(main,500);
+}
+
+function tosBody(){
+  const C=[`The user, hereafter "${NAME}", agrees to be ${NAME}.`,`${NAME} shall not be held responsible for ${NAME}.`,'The gift may be larger or smaller than expected, depending on expectations.','All gifts are non-refundable, non-returnable and non-negotiable, but negotiable.','GiftPortal reserves the right to change these terms while you are reading them.','The number 2 is not recognised in any capacity within this agreement. Please use 1+1.',`${NAME} agrees to receive the gift with visible enthusiasm within 3 to 5 business smiles.`,'Any cake involved is considered a legally binding cake.','By clicking Accept you consent to being sung to, in any key.','GiftPortal is not affiliated with gifts.','Tuesday is not a valid reason.','If the gift is a surprise, it is no longer a surprise, because you registered for it.','This agreement is governed by the laws of whichever country is closest.',`${NAME} may not use this gift to build a smaller gift portal.`,'Cookies (the edible kind) are exempt from the cookie policy.','These terms were last updated: just now.',"You agree that you have read these terms. You haven't.",'Section deleted at the request of the section after it.','Sorry, this clause is too long. Please shorten it.'];
+  const nums=[];for(let i=1;nums.length<C.length*2+1;i++)if(!String(i).includes('2'))nums.push(i);
+  const body=[...C,...C].map((c,i)=>`<div>§${nums[i]}. ${esc(c)}</div>`).join('')+`<div>§${nums[C.length*2]}. By reaching this clause you agree to scroll back to the top, then to the bottom again, five times in total. Do not ask why.</div>`;
+  return body;
+}
+
+// ---------- 8: terms ----------
+steps.push(()=>{
+  const body=tosBody();
+  html(`<h1>Terms &amp; Conditions</h1><p>Please read carefully. There will be a quiz (there will not).</p>
+  <div class="terms" id="t">${body}</div><div class="small" id="ts">Scroll to the bottom to continue.</div>
+  <form><div id="err"></div><button id="acc" disabled>Accept</button></form>`);
+  const t=$('#t'),LAPS=5,AGAIN=['Thank you. Please read it again, more carefully.','Your reading speed was suspicious. Again.','Better. Once more, with feeling.','Almost convinced. Again.'];let laps=0,down=true;
+  t.onscroll=()=>{
+    if(down&&t.scrollTop+t.clientHeight>=t.scrollHeight-4){down=false;$('#ts').textContent='Almost. Now go back up.'}
+    else if(!down&&t.scrollTop<=2){
+      down=true;laps++;
+      if(laps>=LAPS){$('#ts').textContent='Thank you for reading.';$('#acc').disabled=false}
+      else $('#ts').textContent=AGAIN[laps-1]
+    }
+  };
+  form(()=>{
+    modal('Do you accept the terms and conditions?',[{label:'Yes',fn:()=>modal('Are you absolutely sure? (Buttons have been rearranged.)',[{label:'No',ghost:true,fn:()=>toast('Good. Asking again later.')},{label:'Yes',fn:lootbox}])},{label:'No',ghost:true,fn:()=>toast('Noted. Please try yes.')}]);
+  });
+});
+
+// ---------- 9: email verification ----------
+steps.push(()=>{
+  html(`<h1>Verify your email</h1><p>We sent a 6-digit code to <b id="em"></b>. It may take up to 3 business days (or 4 seconds).</p>
+  <div id="ib" class="inbox">Checking inbox…</div>
+  <form><label>Code<input id="f" autocomplete="off" inputmode="numeric"></label><div id="err"></div><button>Verify</button></form>`);
+  $('#em').textContent=S.email;
+  const gen=()=>String(Math.floor(Math.random()*1e6)).padStart(6,'0').replace(/2/g,'1');
+  let code=null,left=0;const old=[];
+  const draw=()=>{$('#ib').innerHTML=`<b>From:</b> GiftPortal<br><b>Your code:</b> <span style="font-size:20px;letter-spacing:2px">${code}</span><br><span class="small">Do not share this code with anyone, including yourself. Expires in ${left}s.</span>`};
+  later(()=>{
+    code=gen();left=15;draw();
+    every(()=>{left--;if(left<=0){old.push(code);code=gen();left=15;toast('Code expired. A new one was issued.')}draw()},1000);
+  },4000);
+  form(()=>{
+    const v=$('#f').value.trim();
+    if(!code)return err('No code has arrived yet. Be patient. Be better.');
+    if(v===code){
+      if(!S.c1){S.c1=true;return err('Correct! Unfortunately codes are only valid when entered twice.')}
+      return next();
+    }
+    err(old.includes(v)?'That code expired. It had a good life.':'Incorrect code.');
+  });
+});
+
+// ---------- 9b: delivery date picker ----------
+steps.push(()=>{
+  const now=new Date(),Y0=now.getFullYear();
+  const F=[{k:'Year',gen:()=>Y0-3+Math.floor(Math.random()*7)},{k:'Month',gen:()=>1+Math.floor(Math.random()*15)},{k:'Day',gen:()=>-30+Math.floor(Math.random()*71)}];
+  const v=[null,null,null];
+  html(`<h1>When do you want to receive your gift?</h1><p>Each number must be produced by the random number generator. Manual entry is not supported.</p>
+  <div class="dp">${F.map((f,i)=>`<div class="dpc"><div class="small">${f.k}</div><b id="n${i}">—</b><button type="button" data-i="${i}">🎲 Generate</button></div>`).join('')}</div>
+  <form><div id="err"></div><button>Schedule delivery</button></form>`);
+  card.querySelectorAll('.dpc button').forEach(b=>b.onclick=()=>{
+    const i=+b.dataset.i;let n=0;b.disabled=true;v[i]=null;
+    const id=setInterval(()=>{
+      const x=F[i].gen();$('#n'+i).textContent=x;
+      if(++n>=14){clearInterval(id);v[i]=x;b.disabled=false}
+    },60);
+    S.timers.push(id);
+  });
+  form(()=>{
+    const bl=v.indexOf(null);
+    if(bl>=0)return err(`${F[bl].k} has not been generated yet. Click the dice.`);
+    const [y,m,d]=v,txt=`${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    if(m<1||m>12)return err(`Month ${m} does not exist. There are 12 months. Roll again.`);
+    if(d<1)return err(`Day ${d} does not exist. Days start at 1. Roll again.`);
+    const dt=new Date(y,m-1,d);
+    if(dt.getMonth()!==m-1)return err(`${txt} is not a real date. Roll again.`);
+    if(dt<=new Date(Y0,now.getMonth(),now.getDate()))return err(`${txt} is in the past (or today). Time travel is not supported on your plan.`);
+    toast(`Gift scheduled for ${txt}. This cannot be changed.`);
+    next();
+  });
+});
+
+// ---------- 10: processing ----------
+steps.push(()=>{
+  html(`<h1>Creating your account…</h1><p id="msg">Contacting gift server…</p>
+  <div class="pbar"><i id="pb"></i></div><div class="small">Position in queue: <span id="q">1284</span></div>`);
+  let q=1284;
+  const seq=[[0,8,'Contacting gift server…'],[3000,31,`Asking ${NAME}'s friends if ${NAME} deserves it…`],[6000,64,'Removing 2s from everything…'],[9000,99,'Almost there…'],[29000,99,'Still almost there…'],[45000,12,'Oh no. Starting over…'],[54000,100,'Done!']];
+  seq.forEach(([ms,p,m])=>later(()=>{$('#pb').style.width=p+'%';$('#msg').textContent=m;if(m.startsWith('Oh'))q=47},ms));
+  every(()=>{q=Math.max(0,q-Math.floor(Math.random()*40));$('#q').textContent=q},150);
+  later(()=>{card.insertAdjacentHTML('beforeend','<button id="pc">Continue</button>');$('#pc').onclick=next},55000);
+});
+
+// ---------- 11: done ----------
+steps.push(()=>{
+  html(`<div class="throb"></div>`);
+  confetti();
+  later(spam,2500);
+  ['Coping_with_small_penis.pdf','Mohammad Antivirus.exe'].forEach((n,i)=>setTimeout(()=>{
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(new Blob([]));a.download=n;
+    document.body.append(a);a.click();a.remove();
+  },1500+i*1200));
+  later(fees,Q.has('dev')?15000:600000);
+});
+
+function fees(){
+  const E=n=>'€'+n.toFixed(2);
+  const L=[
+    ['Account creation fee',30,''],
+    ['Gift fee',0,'because we are super generous'],
+    ['Delivery fee',412.5,'includes 3 couriers, 1 camel and an unpaid intern'],
+    ['Non-optional service fee',19.99,''],
+    ['Fee processing fee',4.2,''],
+    ['Fee viewing fee',2,''],
+    ['Paper-free billing fee',3,''],
+    ['Boolean storage fee',8,''],
+    ['Birthday surcharge',25,''],
+    ['Currency conversion fee',6,'EUR to EUR'],
+    ['Inflation adjustment',7.77,''],
+    ['Loyalty fee',5,'for staying on this page for 10 minutes'],
+  ];
+  const sub=L.reduce((a,x)=>a+x[1],0),tax=sub*.23,cp=sub*.5,tot0=sub+tax+cp,fu=tot0*.99,tot=tot0+fu;
+  const rows=[...L,['Tax (23%, on everything)',tax,''],['Coupon: -50% off',cp,''],['First time user discount: -99%',fu,'']];
+  card.innerHTML='<h1>Gift checkout</h1><p>Loading your fees…</p><div id="fl"></div><div class="throb" id="ft" style="margin:16px auto;width:28px;height:28px;border-width:4px"></div>';
+  const fl=$('#fl');let i=0;
+  const id=setInterval(()=>{
+    if(i>=rows.length){
+      clearInterval(id);$('#ft').remove();
+      const d=document.createElement('div');
+      d.innerHTML='<div class="inbox" style="font-size:16px"><b>Total: <span id="tt"></span></b></div><button id="pay">Pay now</button>';
+      card.append(d);$('#tt').textContent=E(tot);
+      $('#pay').onclick=()=>{toast('Payment failed: your euros are not accepted in euros. Please try Bitcoin.');const a=document.createElement('div');a.className='small';a.style.marginTop='10px';a.textContent='Send to: '+DONATE_ADDR;if(!card.querySelector('.addr'))a.className='small addr';d.append(a)};
+      return;
+    }
+    const [n,v,note]=rows[i++],r=document.createElement('div');
+    r.style.cssText='display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid #eee;font-size:14px';
+    const l=document.createElement('span'),m=document.createElement('b');
+    l.textContent=n+(note?' ('+note+')':'');m.textContent=E(v);
+    r.append(l,m);fl.append(r);
+  },1200);
+  S.timers.push(id);
+}
+
+function confetti(){
+  const c=$('#cf');c.width=innerWidth;c.height=innerHeight;const x=c.getContext('2d');
+  const P=Array.from({length:180},()=>({x:Math.random()*c.width,y:-Math.random()*c.height,r:4+Math.random()*5,vy:2+Math.random()*4,vx:Math.random()*2-1,h:Math.random()*360}));
+  let f=0;(function t(){x.clearRect(0,0,c.width,c.height);P.forEach(p=>{p.x+=p.vx;p.y+=p.vy;x.fillStyle=`hsl(${p.h},80%,60%)`;x.fillRect(p.x,p.y,p.r,p.r*1.6)});if(++f<420)requestAnimationFrame(t);else x.clearRect(0,0,c.width,c.height)})();
+}
+
+// dev mode: open with ?dev (or ?step=N) to get a page skipper
+const Q=new URLSearchParams(location.search);
+if(Q.has('dev')||Q.has('step')){
+  const d=document.createElement('div');
+  d.style.cssText='position:fixed;top:6px;left:6px;z-index:99;background:#1c1e2b;color:#fff;padding:6px 8px;border-radius:8px;font-size:12px;display:flex;gap:6px;align-items:center';
+  d.innerHTML=`DEV <button class="ghost" id="dp" style="padding:2px 8px">◀</button><select id="ds" style="width:auto;margin:0;padding:2px">${steps.map((_,i)=>`<option value="${i}">${i}</option>`).join('')}</select><button class="ghost" id="dn" style="padding:2px 8px">▶</button>`;
+  document.body.append(d);
+  const jump=i=>{
+    i=Math.max(0,Math.min(steps.length-1,i));
+    Object.assign(S,{user:S.user||'dev_user',email:S.email||'dev@aol.com',pw:S.pw||'dev',b:S.b||{m:'MAY',d:'0001',y:'00'}});
+    $('#ds').value=i;go(i);
+  };
+  $('#dp').onclick=()=>jump(cur-1);$('#dn').onclick=()=>jump(cur+1);$('#ds').onchange=e=>jump(+e.target.value);
+  document.addEventListener('keydown',e=>{if(e.altKey&&e.key==='ArrowRight')jump(cur+1);if(e.altKey&&e.key==='ArrowLeft')jump(cur-1)});
+  $('#cookie')&&$('#cookie').remove();
+  jump(+Q.get('step')||0);
+}else go(0);
+
+// ---------- session expiry popup ----------
+function sessionPopup(){
+  if(S.sessOpen)return;
+  S.sessOpen=true;
+  const show=()=>{
+    if(document.querySelector('.don')){setTimeout(show,2000);return}
+    const m=document.createElement('div');m.className='modal don';
+    m.innerHTML=`<div class="dbox"><div id="dc"><h2>Your session has expired</h2><p>For your security, we ended your session. Are you still there?</p>
+    <div class="row"><button class="go" id="sy">I'm still here (extend session)</button><button class="ghost" id="sn">Log out</button></div></div></div>`;
+    document.body.append(m);
+    m.querySelector('#sy').onclick=()=>{m.remove();sess=300;S.sessOpen=false;toast('Session extended by 5 minutes.')};
+    m.querySelector('#sn').onclick=()=>{
+      m.querySelector('#dc').innerHTML='<h2>You have been logged out.</h2><p>Returning you to the start…</p><div class="throb"></div>';
+      S.leaving=true;setTimeout(()=>location.reload(),2500);
+    };
+  };
+  show();
+}
+
+// ---------- donation popup (2 minutes in) ----------
+function donate(){
+  if(document.querySelector('.don')){setTimeout(donate,5000);return}
+  S.donN=(S.donN||0)+1;setTimeout(donate,240000);
+  const m=document.createElement('div');m.className='modal don';
+  m.innerHTML='<div class="dbox"><button class="dx" id="dx">✕</button><div id="dc"></div></div>';
+  document.body.append(m);
+  const dc=m.querySelector('#dc'),view=h=>dc.innerHTML=h,close=()=>m.remove();
+  const AM=S.donN>1?['$10','$25','$50','$100','$250','$500']:['$3','$5','$10','$25','$50','$100'];
+  let amt=AM[0];
+  const closeBtn=()=>{const b=document.createElement('button');b.textContent='Close';b.onclick=close;dc.append(b)};
+  const pay=()=>{
+    view(`<h2>Thank you.</h2><p>To donate <b>${amt}</b> worth of Bitcoin, please send it to the following address:</p><div class="addr" id="ad"></div>
+    <button id="cp" class="go">Copy address</button> <button id="dn2" class="ghost">I have donated</button>`);
+    $('#ad').textContent=DONATE_ADDR;
+    $('#cp').onclick=()=>{try{navigator.clipboard.writeText(DONATE_ADDR).then(()=>toast('Address copied.'),()=>toast('Copy failed. Use your eyes.'))}catch(e){toast('Copy failed. Use your eyes.')}};
+    $('#dn2').onclick=()=>{
+      view('<p>Verifying transaction…</p><div class="throb"></div>');
+      setTimeout(()=>{view('<p>No transaction found. Thank you for the thought anyway. Financially, the thought counts for $0.</p><p class="small">Returning you to the donation page…</p>');setTimeout(()=>{if(m.isConnected)ask()},3500)},3000);
+    };
+  };
+  const ask=()=>{
+    view(`<h2>${S.donN>1?"You're back. Still not donating?":"Please don't scroll past this."}</h2>${S.donN>1?`<p><b>${(S.donN*1284).toLocaleString()} people donated while you were away.</b></p>`:''}
+    <p>A personal appeal from the GiftPortal team: we are a non-profit run on one laptop and a lot of hope. Only 2% of our readers give. If everyone reading this donated just $3, we would be done fundraising in an hour.</p>
+    <p>Please help keep ${esc(NAME)}'s gift portal free, ad-free and mildly broken.</p>
+    <div class="amts">${AM.map(a=>`<button type="button" class="${a===amt?'sel':''}">${a}</button>`).join('')}</div>
+    <button id="dd" class="go">Donate ${amt}</button> <a href="#" id="dm" class="small">Maybe later</a>`);
+    dc.querySelectorAll('.amts button').forEach(b=>b.onclick=()=>{amt=b.textContent;ask()});
+    $('#dd').onclick=pay;
+    $('#dm').onclick=e=>{e.preventDefault();reject()};
+  };
+  const species=()=>{
+    view(`<h2>Not human, then.</h2><p>Please input your animal species:</p><form><input id="sp" autocomplete="off"><div id="err"></div><button class="go">Submit</button></form>`);
+    const f=dc.querySelector('form');$('#sp').focus();
+    f.onsubmit=e=>{
+      e.preventDefault();
+      const sp=$('#sp').value.trim().toLowerCase();
+      const er=t=>dc.querySelector('#err').textContent=t;
+      if(!sp)return er('A species is required. Even a slug has one.');
+      if(/^(a\s+|an\s+)?(human|person|man|woman|people|homo sapiens?)s?$/.test(sp))return er('Nice try. Humans are the other option.');
+      const L=[`A ${sp}. Fascinating. Even a ${sp} would have chipped in $3, and ${sp}s can't even hold a wallet.`,
+        `Your entire species is useless, ${NAME}. Evolution looked at the ${sp} and said "that'll do, I guess."`,
+        `This whole website was built for you by someone who loves you, and you chose to identify as a ${sp} instead of donating $3. Ungrateful, scavenging ${sp}.`,
+        `The ${sp} has never contributed anything to the world except being mildly in the way. You are very consistent.`];
+      view('<div class="roast"></div>');
+      L.forEach(t=>{const p=document.createElement('p');p.textContent=t;dc.firstChild.append(p)});
+      closeBtn();
+    };
+  };
+  const horrible=()=>{
+    const L=[`${NAME}. This ENTIRE website exists because someone loves you, and you could not spare $3.`,
+      'You greedy, selfish, blubbery piece of shit.',
+      'Every dollar you refused to donate went straight into snacks, and it shows on your gut.',
+      'Your wallet has cobwebs. The spiders unionised and are also disappointed in you.',
+      'Even the Bitcoin address is embarrassed to know you.',
+      'Congratulations: you are officially a horrible human being. This has been added to your permanent record, which is this page.'];
+    view('<h2>Wow.</h2><div class="roast"></div>');
+    const box=dc.querySelector('.roast');
+    L.forEach((t,i)=>setTimeout(()=>{const p=document.createElement('p');p.textContent=t;box.append(p);if(i===L.length-1)closeBtn()},900+i*1500));
+  };
+  const reject=()=>{
+    view(`<h2>Before you go…</h2><p>Declining is allowed, but we need to know who we are dealing with. Which of these describes you?</p>
+    <div class="row"><button id="r1" class="ghost">I am not a human</button><button id="r2" class="ghost">I am a horrible human being</button></div>
+    <p style="margin-top:14px"><a href="#" id="rb" class="small">Actually, I'll donate</a></p>`);
+    $('#r1').onclick=species;$('#r2').onclick=horrible;
+    $('#rb').onclick=e=>{e.preventDefault();pay()};
+  };
+  $('#dx').onclick=reject;
+  ask();
+}
+if(Q.has('donate'))donate();else setTimeout(donate,120000);
+
+// ---------- end-screen notification spam ----------
+const NOTIFS=[
+ ['🔥','Local aged women in your area!','Act now before it\'s too late'],
+ ['⬇️','Download Manager Pro','Congratulations, only 2 more steps to download'],
+ ['💬','Jasmine','You look really cute... wanna come over?'],
+ ['🦠','Your computer has 47 viruses','Click here to remove them. Do not close this window.'],
+ ['🏆','WINNER!!!','You are the 1,000,000th visitor. Claim your free fridge.'],
+ ['💘','Hot singles 0.3 miles away','One of them is a bot. Find out which.'],
+ ['👵','Doctors hate this one weird trick','Local grandma discovers how to lose belly fat'],
+ ['₿','Your Bitcoin wallet','Someone sent you 0.00000001 BTC. Click to claim.'],
+ ['📦','Delivery update','Your parcel is stuck at the border of Tuesday. Pay $1.99 to release it.'],
+ ['👑','Prince of Nigeria (verified)','I have urgent business proposition. Reply ASAP'],
+ ['🏋️','Brad from the gym','saw your profile, we need to talk'],
+ ['🛡️','Antivirus Pro Max','Your antivirus is out of date. Your antivirus is also a virus.'],
+ ['📱','FREE iPhone 17 (not clickbait)','3 left in stock!!! 2 people are viewing this'],
+ ['🎤','Brittany','sent you a voice message (0:04)'],
+ ['🎰','Casino Royale Online','You have 50 free spins and 1 unpaid debt'],
+ ['🔒','Suspicious login','Someone logged in from Moscow, Idaho. Was this you?'],
+ ['💸','Tax refund','You are owed $4,832.17. Verify your SSN, favourite colour and mother\'s maiden name.'],
+ ['🔔','Notification Settings','You have 2,904 unread notifications. Turn off notifications?'],
+ ['🛋️','Man finds crypto in couch','Banks hate him. Click to see how.'],
+ ['😘','Chloe','r u up'],
+ ['⛅','Weather alert','It is currently weather. Stay tuned.'],
+ ['🧠','System','Your RAM is lonely. Download more RAM now.'],
+ ['🎮','Free Robux','Your Robux generator is ready! Complete 5 surveys to continue.'],
+ ['💻','Windows needs your attention','Your PC is running too fast. Install SlowDown 3000.'],
+ ['🎁',`${NAME}, you've been selected!`,'Claim your prize before the timer hits zero.'],
+ ['💊','Cheap meds','No prescription. No questions. No refunds.'],
+ ['🧺','Mystery shopper wanted','Earn $5000/week folding towels from home!'],
+ ['⚖️','Have you been in an accident?','You may be entitled to compensation, even if you don\'t remember it.'],
+ ['🤖','Verify you are human','Please verify you are human by sending $5 to a stranger.'],
+ ['🖱️','ALERT','Your mouse cursor has been detected. Please surrender it.'],
+ ['🐕','Crypto King','DOGE is up 4000% in the last 4 seconds. Buy now.'],
+ ['😢','Tiffany','im lonely and my webcam is broken, pls help'],
+ ['🍪','Cookie Clicker Premium','Your cookies are expiring. Renew for $29.99/mo.'],
+ ['📰','Scientists baffled','This man is not using our sponsor. Click to find out why.'],
+ ['🎡','Lucky Spin','You\'ve won a free spin! (You haven\'t. Spin anyway.)'],
+ ['📶','Wifi Booster','Boost your wifi by 900% using this one weird router.'],
+ ['🌭','Hot dogs near you','Sausage deals in your area. Act now!'],
+ ['🚗','FINAL NOTICE','Your car\'s extended warranty has expired. Which car? Yes.'],
+ ['💰','Pharmacy Pete','Your discount has been loaded: save 90% on regret.'],
+ ['👤','1 new friend request','From a man named "Definitely Not A Scammer".'],
+ ['⭐','App Store','Rate us 5 stars to unlock the next notification.'],
+ ['📁','Download complete','Setup.exe.exe.exe.zip.apk (4 GB)'],
+ ['🔥','Jennifer','wanna see something crazy? (link expires in 0:03)'],
+ ['🦊','Silver foxes over 50','Waiting in your area. Don\'t be shy.'],
+ ['🚔','Government Agency','You are under arrest. Please pay in gift cards. Thank you.'],
+ ['🎉','Congrats!','You won a free "Congrats!"'],
+ ['🌐','Your browser is outdated','By 14 years. Update now.'],
+ ['🏦','PayPai','Your account has been limited. Please click the suspicious link below.'],
+ ['🥟','Hot Pocket Rewards','You have 1,284 unredeemed Hot Pockets.'],
+ ['💪','Lose 40 lbs by tomorrow','One tiny pill. (Minor lawsuit not included.)'],
+ ['☎️','Mike (Windows Technical Support)','I am calling about your computer\'s problem. Please pick up.'],
+ ['🍍','LOL','Click to see what this man did with a pineapple'],
+ ['🔮','Your horoscope','A stranger will message you. Do not reply. Reply.'],
+ ['🐸','Free ringtone!!!','Your free ringtone "Crazy Frog" is ready.'],
+ ['🎟️','Mega Millions Official (not fake)','You have been selected to win. Send us your bank details to win.'],
+ ['🎁','GiftPortal','Your gift is on its way. Estimated arrival: never.']
+];
+const CENTER=[
+ ['🌍','Raw Earth Foundation','We are a part of the Raw earth foundation. We believe in the quality of products, and the earth core sure as fuck is not medium rare like we wanted. #RawMyAss'],
+ ['📰','BREAKING NEWS','Local children drowned when attempting dangerous sports such as piano'],
+ ['💬','Mohammad','Mohammad has sent you a message request: Hi'],
+ ['⚔️','Clan Invite','Hitler has invited you to join his clan'],
+ ['🍟','McDonalds#429288 Australia','New prostitution positions available at McDonalds#429288 Australia'],
+ ['🎪','Event','The KKK and Hitler has declared clan wars!'],
+ ['🚨','Neighbourhood Alert','Local rapist seeking refuge'],
+ ['🏦','Your bank','Your account has been sold to a man named Greg. Greg says hi.'],
+ ['🚑','Local hospital','Your kidney is available for pickup. Please stop leaving it in the lobby.'],
+ ['🐔','KFC Rewards','Your 3 free chickens have escaped. Reward points deducted.'],
+ ['🕯️','Unknown number','We know what you did at 3:47am last Tuesday. Reply YES to confirm it was you.'],
+ ['🧾','IRS (probably)','You owe 4 bitcoins and one (1) cousin. Pay within 10 minutes.'],
+ ['👶','Parenting Weekly','Congratulations! You are 9 weeks pregnant. Terms apply.'],
+ ['☠️','Antivirus Plus','Your computer has 14,000 viruses. 13,998 are Mohammad. Click to remove Mohammad.'],
+ ['🙏','The Government','Please stop. Signed, everyone.'],
+];
+function spam(){
+  const box=document.createElement('div');box.className='nots';document.body.append(box);
+  const cols=Array.from({length:Math.max(1,Math.min(3,Math.floor(innerWidth/350)))},()=>{const c=document.createElement('div');c.className='ncol';box.append(c);return c});
+  const L=NOTIFS.map(x=>[Math.random(),x]).sort((a,b)=>a[0]-b[0]).map(p=>p[1]).slice(0,40);
+  let i=0;
+  const id=setInterval(()=>{
+    if(i>=L.length)return clearInterval(id);
+    const [ic,t,b]=L[i++],n=document.createElement('div');
+    n.className='notif';
+    n.innerHTML='<div class="ni"></div><div><b></b><span></span></div><button class="nx">✕</button>';
+    n.querySelector('.ni').textContent=ic;n.querySelector('b').textContent=t;n.querySelector('span').textContent=b;
+    n.querySelector('.nx').onclick=()=>n.remove();
+    cols[Math.floor(Math.random()*cols.length)].prepend(n);
+  },140);
+  let k=0;
+  const cid=setInterval(()=>{
+    if(k>=CENTER.length)return clearInterval(cid);
+    const [ic,t,b]=CENTER[k++],n=document.createElement('div');
+    n.className='notif cnotif';
+    n.innerHTML='<div class="ni"></div><div><b></b><span></span></div><button class="nx">✕</button>';
+    n.querySelector('.ni').textContent=ic;n.querySelector('b').textContent=t;n.querySelector('span').textContent=b;
+    n.querySelector('.nx').onclick=()=>n.remove();
+    n.style.marginTop=(k*6)+'px';n.style.marginLeft=(k*6)+'px';
+    document.body.append(n);
+  },210000);
+}
+
+// ---------- TOS comprehension quiz (2 min after the first lootbox roll, repeats until passed) ----------
+function armQuiz(){if(S.quizArmed)return;S.quizArmed=true;setTimeout(quizPopup,120000)}
+function quizPopup(){
+  if(S.quizDone)return;
+  if(document.querySelector('.don')){setTimeout(quizPopup,3000);return}
+  const m=document.createElement('div');m.className='modal don';
+  m.innerHTML='<div class="dbox"><div id="dc"></div></div>';
+  document.body.append(m);
+  const dc=m.querySelector('#dc'),view=h=>dc.innerHTML=h;
+  const shuffle=a=>a.map(x=>[Math.random(),x]).sort((p,q)=>p[0]-q[0]).map(p=>p[1]);
+  const QS=[
+    {q:`Who shall not be held responsible for ${NAME}?`,a:NAME,o:['GiftPortal','The cake','Tuesday']},
+    {q:'According to the terms, which cake is legally binding?',a:'Any cake involved',o:['Only chocolate cake','Only birthday cake','No cake']},
+    {q:'Which number is not recognised in any capacity?',a:'2',o:['1','3','7']},
+    {q:'The gift must be received with enthusiasm within how many business smiles?',a:'3 to 5',o:['1 to 2','6 to 9','Between Tuesdays']},
+    {q:'GiftPortal is not affiliated with what?',a:'Gifts',o:['Cake','Cookies','Smiles']},
+    {q:'What is exempt from the cookie policy?',a:'Cookies (the edible kind)',o:['Cookies (the digital kind)','All cookies','Only Tuesday cookies']}
+  ];
+  const run=()=>{
+    const qs=shuffle(QS).slice(0,4).map(x=>({q:x.q,c:x.a,o:shuffle([x.a,...x.o])}));
+    view(`<h2>Terms comprehension check</h2><p>Please answer every question about the terms you accepted. You may not continue using this site until you pass.</p>
+    <form>${qs.map((x,i)=>`<div class="qq">${i+1}. ${esc(x.q)}</div>${x.o.map(o=>`<label><input type="radio" name="q${i}" value="${esc(o)}">${esc(o)}</label>`).join('')}`).join('')}
+    <div id="qerr" style="color:#c62f3b;font-size:13px;margin:8px 0"></div><button class="go">Submit answers</button></form>`);
+    dc.querySelector('form').onsubmit=e=>{
+      e.preventDefault();
+      const got=qs.map((x,i)=>{const r=dc.querySelector(`input[name=q${i}]:checked`);return r&&r.value});
+      if(got.some(g=>!g))return dc.querySelector('#qerr').textContent='Please answer every question. Unanswered questions are wrong.';
+      const score=got.filter((g,i)=>g===qs[i].c).length;
+      if(score===qs.length){S.quizDone=true;m.remove();toast('Comprehension verified. You may now ignore the terms again.');return}
+      revise(score,qs.length);
+    };
+  };
+  const revise=(sc,n)=>{
+    view(`<h2>You failed (${sc}/${n})</h2><p>Clearly you have not read the terms. Please revise them. The button unlocks in <b id="cd">30</b> seconds.</p>
+    <div class="terms" style="height:220px">${tosBody()}</div><button id="rd" class="grey" disabled>I have actually read it</button>`);
+    let t=30;
+    const id=setInterval(()=>{
+      t--;dc.querySelector('#cd').textContent=t;
+      if(t<=0){clearInterval(id);const b=dc.querySelector('#rd');b.disabled=false;b.classList.remove('grey');b.classList.add('go')}
+    },1000);
+    dc.querySelector('#rd').onclick=()=>{m.remove();setTimeout(quizPopup,120000);toast('See you in 2 minutes.')};
+  };
+  run();
+}
+if(Q.has('quiz'))quizPopup();
+if(!(Q.has('dev')||Q.has('step')))window.addEventListener('beforeunload',e=>{if(S.leaving)return;e.preventDefault();e.returnValue=''});
+</script>
+</body>
+</html>
