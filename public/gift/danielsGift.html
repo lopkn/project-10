@@ -141,7 +141,13 @@ footer{font-size:11px;color:#999;margin-top:16px;text-align:center}
 
 <script>
 // ===== CONFIG =====
-const NAME  = "Daniel";                                   // person being gifted
+const NAME  = (()=>{                                      // person being gifted; ?n=<base64 of name> overrides the default
+  try{
+    const n=new URLSearchParams(location.search).get('n');
+    if(n){const b=atob(n.replace(/ /g,'+').replace(/-/g,'+').replace(/_/g,'/'));const t=new TextDecoder().decode(Uint8Array.from(b,c=>c.charCodeAt(0))).trim();if(t)return t.slice(0,40)}
+  }catch(e){}
+  return "Daniel";
+})();
 const GIFT  = "A very real gift. Details to be delivered in person."; // what gets revealed at the end
 const DONATE_ADDR = "1CDdsotnzKvX1W9iKuZ5QL3LN3iJPwYqUr";    // bitcoin address shown in the donation popup
 const GIFT_NOTE = `Happy birthday, ${NAME}!`;               // headline on the reveal
