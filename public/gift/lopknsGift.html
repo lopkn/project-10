@@ -221,6 +221,22 @@ let si=0;$('#support').onclick=()=>toast(SUP[si++%SUP.length]);
 
 // ---------- -1: standard forum form ----------
 const fnv=str=>{let h=2166136261;for(const c of str){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0};
+const BADCODE={
+ 'ref:':[
+  '{l} is not valid.',
+  '"{v}" is not a valid referral code. There are 14 million billion valid ones and you could not even guess one.',
+  'Wrong again. Statistically you were due a correct one by now. Keep guessing.',
+  'Most referral codes work. That one just sucked.',
+  'That must be a typo.',
+  'Try again.'],
+ 'cpn:':[
+  '{l} is not valid.',
+  '"{v}" is not a valid coupon. There are 82 million billion valid combinations and you could not even guess one.',
+  'Guess better stupid.',
+  'That coupon expired before it was invented. Try another one.',
+  'It\'s just a bloody coupon code you idiot.',
+  'A baby could have guessed a better coupon code.']
+};
 steps.push(()=>{
   const sel=(id,opts)=>`<select id="${id}"><option value="">Select…</option>${opts.map(o=>`<option>${o}</option>`).join('')}</select>`;
   html(`<h1>New member registration</h1><p>Please fill in the form below. All fields are required.</p>
@@ -240,7 +256,9 @@ steps.push(()=>{
       const v=$(id).value.trim();
       if(!v)return `${label} cannot be empty.`;
       if(v.length<=5)return `${label} is too short (it must be longer than 5 characters).`;
-      return fnv(salt+v)%100<pct?null:`${label} is not valid.`;
+      if(fnv(salt+v)%100<pct)return null;
+      const L=BADCODE[salt],n=tries('bad'+salt);
+      return L[Math.min(n-1,L.length-1)||0].replace(/\{l\}/g,label).replace(/\{v\}/g,v)||`${label} is not valid.`;
     };
     const e=chk('#ref','ref:',60,'Referral code')||chk('#cpn','cpn:',30,'Coupon code');
     if(e)return err(e);
