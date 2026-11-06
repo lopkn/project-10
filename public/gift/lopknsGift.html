@@ -316,7 +316,7 @@ steps.push(()=>{
 
 // ---------- 2: email ----------
 steps.push(()=>{
-  const PROV=['hotmail.com','aol.com','geocities.com','myspace.com','ask.com'];
+  const PROV=['hotmail.com','aol.com','geocities.com','myspace.com','ask.com','gay.wtf'];
   html(`<h1>Email address</h1><p>We promise to only email you about the gift. And the other things.</p>
   <form><label>Email<input id="f" autocomplete="off"></label><div id="err"></div><button>Continue</button></form>`);
   form(()=>{
@@ -633,6 +633,48 @@ steps.push(()=>{
   S.cleanup=()=>document.removeEventListener('pointermove',mv);
 });
 
+// ---------- orientation wheel ----------
+const ORI=[['Heterosexual',0],['Homosexual',0],['Bisexual',0],['Pansexual',0],['Asexual',0],['Demisexual',0],['Polysexual',0],['Omnisexual',0],['Queer',0],['Questioning',0],['Tuesday-sexual',0],['Duct tape',0],['Vending machines',0],['Bees',0],['Potsexual',0],['Non-binary',0],['Non-hexadecimal',0],['Pedophilic',0],['Greg',0],['Non-binary',0],['Non-hexadecimal',0],['Helicopter',1],['All of the above',10]];
+let wheelRot=0,wheelN=0;const WFORCE=['Homosexual','Non-binary','Non-hexadecimal','Pedophilic'];   // the first spins are scripted
+function wheel(done){
+  const n=ORI.length,A=360/n,SZ=280;
+  const m=document.createElement('div');m.className='modal';
+  m.innerHTML=`<div class="box" style="text-align:center;max-width:360px"><b>Select your sexual orientation</b><p class="small">Spin the wheel to find out.</p>
+  <div style="position:relative;width:${SZ}px;height:${SZ}px;margin:10px auto"><canvas id="wc" width="${SZ}" height="${SZ}" style="border-radius:50%;box-shadow:0 2px 10px rgba(0,0,0,.3)"></canvas>
+  <div style="position:absolute;top:50%;right:-10px;transform:translateY(-50%);width:0;height:0;border-top:11px solid transparent;border-bottom:11px solid transparent;border-right:22px solid #c62f3b"></div></div>
+  <div id="wr" style="min-height:24px;font-weight:700;margin-bottom:8px"></div>
+  <div class="row" style="justify-content:center"><button type="button" id="sp">Spin</button><button type="button" id="ok" class="ghost" disabled>Accept</button></div></div>`;
+  document.body.append(m);
+  S.cleanup=()=>m.remove();
+  const cv=m.querySelector('#wc'),x=cv.getContext('2d'),c=SZ/2;
+  const COL=ORI.map((_,i)=>i===n-2?'#222':i===n-1?'#f5d90a':`hsl(${Math.round(i*360/(n-2))},55%,45%)`);
+  ORI.forEach((o,i)=>{
+    const a0=(i*A-A/2-90)*Math.PI/180,a1=a0+A*Math.PI/180;
+    x.beginPath();x.moveTo(c,c);x.arc(c,c,c,a0,a1);x.closePath();x.fillStyle=COL[i];x.fill();
+    x.save();x.translate(c,c);x.rotate((i*A-90)*Math.PI/180);x.fillStyle=i===n-1?'#000':'#fff';x.font='bold 11px system-ui,sans-serif';x.textAlign='right';x.fillText(o[0],c-10,4);x.restore();
+  });
+  let busy=false,res=null,tm=null;
+  m.querySelector('#sp').onclick=()=>{
+    if(busy)return;busy=true;m.querySelector('#ok').disabled=true;m.querySelector('#wr').textContent='';
+    // weights: Heterosexual never; Helicopter 1%; All of the above 20%; the rest share what is left
+    const rest=ORI.map((o,i)=>i).filter(i=>ORI[i][1]===0&&i!==0),per=(100-21)/rest.length;
+    let t=Math.random()*100,idx;
+    if(t<1)idx=n-2;else if(t<21)idx=n-1;else idx=rest[Math.min(rest.length-1,Math.floor((t-21)/per))];
+    if(wheelN<WFORCE.length)idx=ORI.findIndex(o=>o[0]===WFORCE[wheelN]);
+    wheelN++;
+    res=ORI[idx][0];
+    const target=90-(idx*A)+(Math.random()-.5)*A*.7;
+    const cur=((wheelRot%360)+360)%360;
+    wheelRot+=360*5+((((target-cur)%360)+360)%360);
+    cv.style.transition='transform 4s cubic-bezier(.12,.6,.1,1)';
+    cv.style.transform=`rotate(${wheelRot}deg)`;
+    tm=setTimeout(()=>{busy=false;m.querySelector('#wr').textContent=res;m.querySelector('#ok').disabled=false;m.querySelector('#sp').textContent='Spin again'},4200);
+    S.timers.push(tm);
+  };
+  cv.style.transform=`rotate(${wheelRot}deg)`;
+  m.querySelector('#ok').onclick=()=>{if(busy||!res)return;m.remove();S.cleanup=null;done(res)};
+}
+
 // ---------- 6: unnecessary details ----------
 function roman(s){const m={I:1,V:5,X:10,L:50,C:100,D:500,M:1000};let t=0;for(let i=0;i<s.length;i++){const a=m[s[i]],b=m[s[i+1]]||0;t+=a<b?-a:a}return t}
 steps.push(()=>{
@@ -642,9 +684,12 @@ steps.push(()=>{
   <label>Shoe size (Roman numerals)<input id="shoe" autocomplete="off"></label>
   <label>Your left-hand mice's 3rd-removed uncle's maiden name<input id="cat" autocomplete="off"></label>
   <label>How are you feeling?<select id="mood"><option>Select…</option><option>Yes</option><option>No</option><option>Mostly Wednesday</option><option>Bees</option></select></label>
+  <label>Sexual orientation<button type="button" id="ori" class="ghost" style="width:100%;text-align:left">Select…</button></label>
   <label>How many fingers are you holding up right now? <b id="fv">5</b><input id="fin" type="range" min="0" max="11" value="5"></label>
   <div id="err"></div><button>Continue</button></form>`);
   $('#fin').oninput=e=>$('#fv').textContent=e.target.value;
+  let ori=null;
+  $('#ori').onclick=()=>wheel(v=>{ori=v;$('#ori').textContent=v});
   form(()=>{
     const fav=$('#fav'),shoe=$('#shoe'),cat=$('#cat'),mood=$('#mood').value,fin=+$('#fin').value;
     const f=fav.value.trim(),x=parseFloat(f);
@@ -662,6 +707,7 @@ steps.push(()=>{
     if(mood==='Select…')return err('Please select a mood. Selecting nothing is not a mood.');
     if(mood==='Yes')return err('"Yes" is not a mood. It is an answer to a different question.');
     if(mood==='No')return err('A negative mood has been logged. Please choose a positive one, or Bees.');
+    if(!ori)return err('Please spin the wheel to select your sexual orientation.');
     if(fin!==11)return err('Please hold up exactly 11 fingers. We are watching.');
     next();
   },800);
